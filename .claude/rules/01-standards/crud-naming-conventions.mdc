@@ -1,0 +1,47 @@
+---
+description: Establishes consistent CRUD naming conventions for all functions, methods, and files across the entire codebase including proper verb usage, resource naming patterns, single list entrypoints, and reserved prefixes to ensure predictable and maintainable code structure regardless of programming language or framework
+globs: **/*.{ts,tsx,js,jsx,py,go,rs,java,php,rb,cs}
+alwaysApply: true
+---
+
+CRUD Verbs:
+
+- Use `get...` for reading operations
+- Use `create...` for creating resources
+- Use `update...` for modifying resources
+- Use `delete...` for removing resources
+- Use `count...` for counting operations
+- Reserve `fetch...` for external APIs only
+- Reserve `load...` for file/data loading
+
+Resource Naming:
+
+- Use `singular+ById` for single items
+- Use `plural` for collections
+- Follow `getUserById` pattern for singles
+- Follow `getUsers` pattern for collections
+- Match function names to file names
+
+Collection Operations:
+
+- Use single list entrypoint pattern
+- Use `getUsers(opts?: ListOptions)`
+- Consolidate filtering/pagination/sorting in an `opts` object—no separate `getAllUsers`, `listUsers`, `getPaginatedUsers`, etc.
+
+ListOptions pattern:
+
+```ts
+interface ListOptions {
+  filter?: {...}
+  sort?: { field: keyof T; dir: 'asc'|'desc' }
+  page?: { skip: number; take: number }
+}
+```
+
+File Naming:
+
+- Use kebab-case for file names
+- Match CRUD verb in file name
+- Use `get-user-by-id.ts` for single operations
+- Use `get-users.ts` for collection operations
+- Prefix external operations with `fetch-`

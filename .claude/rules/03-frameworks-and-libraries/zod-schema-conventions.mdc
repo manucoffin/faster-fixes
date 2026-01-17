@@ -1,0 +1,40 @@
+---
+description: Guidelines for creating, naming, and structuring Zod schemas with proper type extraction and Prisma enum integration
+globs: *.ts, *.store.ts
+alwaysApply: false
+---
+
+File Structure:
+
+- One schema per file
+- Each file should export a schema and the corresponding inferred type
+
+Schema Naming:
+
+- Start with uppercase letter
+- Suffix with `Schema`
+- Use descriptive prefix (Create, Update)
+
+Type Extraction:
+
+- Use `z.infer<typeof SchemaName>`
+- Suffix type name with `Type`
+- Export as `NameOfSchemaType`
+
+Prisma Integration:
+
+- Use `z.nativeEnum()` for Prisma enums
+- Import enum from `@prisma/client`
+- Maintain type consistency
+
+Example of a good schema file:
+
+```ts
+export UpdateUserSchema = z.object({
+    id: z.string(),
+    name: z.string.optionnal(),
+    // other properties...
+})
+
+export type UpdateUserSchemaType = z.infer<typeof UpdateUserSchema>;
+```

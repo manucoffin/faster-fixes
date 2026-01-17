@@ -1,0 +1,18 @@
+---
+description: Guidelines for TailwindCSS styling conventions including spacing, opacity, and semantic theme variable usage over hardcoded values
+globs: *.tsx, *.css, *.scss
+alwaysApply: false
+---
+
+Spacing and Layout:
+- Use `flex gap-n` over `space-y-n`
+- Combine with `flex-col` for vertical spacing
+
+Opacity Syntax:
+- Use `bg-white/50` over `bg-white bg-opacity-50`
+- Apply shorthand opacity syntax consistently
+
+Theme Variables:
+- Use semantic theme variables over hardcoded colors
+- Prefer `text-muted-foreground` over `text-gray-500`
+- Follow design system color tokens

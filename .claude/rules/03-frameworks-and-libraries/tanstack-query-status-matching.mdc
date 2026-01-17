@@ -1,0 +1,42 @@
+---
+description: Enforces use of matchQueryStatus utility for handling TanStack Query states in React client components to replace imperative loading/error/empty/success logic with declarative pattern for improved readability and maintainability
+globs: **/*.tsx
+alwaysApply: false
+---
+
+Query Status Handling:
+- Use `matchQueryStatus` utility for query states
+- Replace imperative if/else status logic
+- Handle Loading, Errored, Empty, Success states
+- Keep components declarative and clean
+- Maintain consistent query handling patterns
+
+Anti-patterns:
+- Avoid multiple return statements for status
+- Avoid imperative `isLoading`/`isError` checks
+- Don't repeat layout wrapper components
+- Never use cluttered conditional rendering
+
+Example:
+```tsx
+export function PostsList() {
+  const postsQuery = usePostsListQuery();
+
+  return (
+    <PostsListLayout>
+      {matchQueryStatus(postsQuery, {
+        Loading: <LoadingSpinner />,
+        Errored: (error) => <ErrorMessage error={error.message} />,
+        Empty: <EmptyMessage message="No posts found." />,
+        Success: ({ data }) => (
+          <ul>
+            {data.map((post) => (
+              <li key={post.id}>{post.title}</li>
+            ))}
+          </ul>
+        ),
+      })}
+    </PostsListLayout>
+  );
+}
+```

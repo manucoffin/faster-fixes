@@ -1,0 +1,29 @@
+---
+description: Enforces consistent React component creation patterns using named exports with explicit props typing and destructured parameters to ensure maintainable and predictable component interfaces across the codebase
+globs: **/*.tsx
+alwaysApply: false
+---
+
+Export Pattern:
+- Always use `export function` syntax
+- Never use default exports
+- Use named exports consistently
+
+Props Pattern:
+- Use props object as first parameter
+- Add type directly in destructuring
+- Define separate props type interface
+- Destructure props in parameter list
+
+Example:
+```tsx
+type MyComponentProps = {
+  prop1: string;
+  prop2: number;
+  prop3: number;
+};
+
+export function MyComponent({ prop1, prop2, prop3 }: MyComponentProps) {
+  return <div>{prop1}</div>;
+}
+```

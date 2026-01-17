@@ -1,0 +1,62 @@
+---
+description: Defines standardized folder structure for Next.js pages with co-located components, tRPC routers, mutations, queries, schemas, and constants to ensure consistent organization and maintainability while promoting feature isolation and shared code placement in _features directory
+globs: src/app/**/*
+alwaysApply: true
+---
+
+Page Structure:
+
+- Use `page.tsx` for main page component
+- Create `_components/` for page-specific components
+- Create `_trpc/` for tRPC routers and queries
+- Create `_server/` for non-tRPC server code
+  - `_queries/` for direct server queries
+  - `_mutations/` for server actions
+- Create `_schemas/` for validation schemas
+- Create `_constants/` for page constants
+- Use `[id]/` for dynamic route segments
+
+Code Isolation:
+
+- Keep page-specific code within page folder
+- Co-locate related functionality together
+- Use underscore prefix for implementation folders
+- Group all page logic in single directory
+
+Shared Resources:
+
+- Place shared code in `src/app/_features/`
+- Use feature-based organization for shared logic
+- Move reusable components to `_features/`
+- Share common utilities across features
+
+Example Structure:
+
+```
+src/app/admin/reviews/
+├── page.tsx
+├── _components/
+│   ├── reviews-table.tsx
+│   └── reviews-table-action-dropdown.tsx
+├── _trpc/
+│   ├── router.ts
+│   └── _queries/
+│       └── get-paginated-reviews.ts
+│   └── _mutations/
+│       └── update-review.ts
+├── _server/
+│   └── _queries/
+│       └── retrieve-review.ts
+│   └── _mutations_/
+│       └── create-review.ts
+├── _constants/
+│   └── cache-tags.ts
+└── [id]/
+    ├── page.tsx
+    ├── _components/
+    ├── _server/
+    │   └── _mutations/
+    │       └── delete-review.ts
+    └── _schemas/
+        └── delete-review.ts
+```

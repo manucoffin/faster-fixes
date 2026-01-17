@@ -1,0 +1,84 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(src/**)",
+      "Edit(src/**)",
+
+      "Bash(git:*)",
+      "Bash(pnpm:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm type:check)",
+      "Bash(gh:*)",
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(node:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "mcp__shadcn__get_component",
+      "mcp__shadcn__list_components"
+    ],
+    "ask": [],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rmdir:*)",
+
+      "Bash(npm run:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm db:seed)",
+      "Bash(pnpm db:pull)",
+      "Bash(pnpm migrate:dev)",
+      "Bash(pnpm migrate:prod)",
+      "Bash(pnpm migrate:createonly)",
+      "Bash(pnpm migrate:reset)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit:*.ts|Edit:*.tsx",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm type:check"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm lint"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay .claude/sounds/need-human.mp3"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay .claude/sounds/finish.mp3"
+          }
+        ]
+      }
+    ]
+  }
+}

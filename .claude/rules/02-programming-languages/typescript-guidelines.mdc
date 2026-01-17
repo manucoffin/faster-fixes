@@ -1,0 +1,17 @@
+---
+description: TypeScript coding standards for type definitions and inference patterns, focusing on using types over interfaces and maximizing type inference to reduce explicit annotations while maintaining code clarity and type safety
+globs: **/*.ts,**/*.tsx
+alwaysApply: true
+---
+
+Type Definition:
+- Use `type` over `interface` for object shapes
+- Use `interface` only for extensible contracts  
+- Prefer union types over enum when possible
+- Use `const` assertions for literal types
+
+Type Inference:
+- Omit function return type annotations
+- Omit variable type when obvious
+- Let generics infer from usage
+- Avoid redundant type annotations

@@ -1,0 +1,13 @@
+---
+description: Guidelines for creating and implementing React client components in Next.js 15 with proper browser API handling, state management, and hydration error prevention
+globs: *.tsx, *.ts
+alwaysApply: false
+---
+
+Client Component Creation:
+- Start with `'use client'` directive
+- Use `useState` and React hooks
+- Handle browser APIs with hydration safety
+- Check `typeof window` for browser-only code
+- Use `@use-is-client.ts` hook pattern
+- Prevent hydration errors with proper checks
