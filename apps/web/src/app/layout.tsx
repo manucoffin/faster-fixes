@@ -3,6 +3,7 @@ import "@workspace/ui/globals.css";
 import { ThemeProvider } from "next-themes";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
+import { Header } from "./_features/core/header/header.server";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -26,8 +27,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCProvider>
-            {/* <NuqsAdapter>
-              <Header /> */}
+            {/* <NuqsAdapter> */}
+            <Header />
+
             {children}
 
             <Toaster />
