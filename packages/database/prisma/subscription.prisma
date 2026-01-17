@@ -1,0 +1,19 @@
+model Subscription {
+    id                   String    @id
+    plan                 String
+    referenceId          String
+    stripeCustomerId     String?
+    stripeSubscriptionId String?
+    status               String?   @default("incomplete")
+    periodStart          DateTime?
+    periodEnd            DateTime?
+    trialStart           DateTime?
+    trialEnd             DateTime?
+    cancelAtPeriodEnd    Boolean?  @default(false)
+    cancelAt             DateTime?
+    canceledAt           DateTime?
+    endedAt              DateTime?
+    seats                Int?
+
+    @@map("subscription")
+}
