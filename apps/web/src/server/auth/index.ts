@@ -3,6 +3,9 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin, lastLoginMethod } from "better-auth/plugins";
+import { databaseHooks } from "./config/database-hooks";
+import { emailAndPassword } from "./config/email-and-password";
+import { emailVerification } from "./config/email-verification";
 import { customSessionPlugin } from "./plugins/custom-session";
 import { organizationPlugin } from "./plugins/organization";
 import { stripePlugin } from "./plugins/stripe";
@@ -12,9 +15,9 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   trustedOrigins: ["https://www.tobalgo.com", "https://tobalgo.com"],
-  // emailAndPassword,
-  // emailVerification,
-  // databaseHooks,
+  emailAndPassword,
+  emailVerification,
+  databaseHooks,
   session: {
     // Cache the session value for 5 minutes
     // This avoid making database calls everytime we get the session

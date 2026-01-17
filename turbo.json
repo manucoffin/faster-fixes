@@ -15,7 +15,17 @@
         "!.next/cache/**"
       ],
       "env": [
-        "DATABASE_URL"
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SIGNING_SECRET",
+        "BASIC_MONTHLY_PRICE_ID",
+        "BASIC_YEARLY_PRICE_ID",
+        "PREMIUM_MONTHLY_PRICE_ID",
+        "PREMIUM_YEARLY_PRICE_ID",
+        "PLUNK_SECRET_KEY"
       ]
     },
     "lint": {

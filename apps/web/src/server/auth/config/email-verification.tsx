@@ -1,7 +1,10 @@
-import { TEST_RECIPIENT_EMAIL } from "@/app/_constants/emails";
 import { mailer } from "@/lib/mailer/client";
+import { SENDER_EMAIL, TEST_RECIPIENT_EMAIL } from "@/lib/mailer/constants";
+import { VerifyEmail } from "@/lib/mailer/templates/verify-email";
 import { prisma } from "@workspace/db";
 import type { BetterAuthOptions } from "better-auth";
+// import { render } from "@react-email/components";
+import { render } from "@react-email/components";
 
 export const emailVerification: NonNullable<
   BetterAuthOptions["emailVerification"]
@@ -15,7 +18,6 @@ export const emailVerification: NonNullable<
   sendVerificationEmail: async ({ user, url }, ctx) => {
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { type: true },
     });
 
     if (!dbUser) {
@@ -23,20 +25,18 @@ export const emailVerification: NonNullable<
     }
 
     const normalizedEmail = user.email.toLowerCase().trim();
-    const from = process.env.SENDER_EMAIL;
+    const from = SENDER_EMAIL;
     const to =
       process.env.NODE_ENV === "production"
         ? normalizedEmail
         : TEST_RECIPIENT_EMAIL;
-
-    if (!from) {
-      throw new Error("No sender email configured");
-    }
+    const body = await render(<VerifyEmail verificationLink={url} />);
 
     await mailer.emails.send({
       from,
       to,
       subject: "Plus qu'une patte à franchir !",
+      body,
       params: {
         verificationLink: url,
       },

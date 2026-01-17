@@ -9,7 +9,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
 
         if (marketingConsent) {
           // Create marketing preferences record
-          await prisma.userMarketingPreferences.create({
+          await prisma.marketingPreferences.create({
             data: {
               userId: user.id,
               acceptsNewsletter: marketingConsent,
