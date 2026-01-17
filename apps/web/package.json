@@ -15,6 +15,11 @@
     "@better-auth/stripe": "^1.4.14",
     "@react-email/components": "^1.0.4",
     "@react-email/render": "^2.0.2",
+    "@tanstack/react-query": "^5.90.18",
+    "@trpc/client": "^11.8.1",
+    "@trpc/react-query": "^11.8.1",
+    "@trpc/server": "^11.8.1",
+    "@trpc/tanstack-react-query": "^11.8.1",
     "@workspace/db": "workspace:*",
     "@workspace/ui": "workspace:*",
     "better-auth": "^1.4.14",
@@ -24,10 +29,14 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-email": "^5.2.5",
-    "stripe": "^20.2.0"
+    "sonner": "^2.0.7",
+    "stripe": "^20.2.0",
+    "superjson": "^2.2.6",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
+    "@tanstack/eslint-plugin-query": "^5.91.2",
     "@types/node": "^20.19.25",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

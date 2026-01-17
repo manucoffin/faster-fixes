@@ -1,10 +1,9 @@
 import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL, TEST_RECIPIENT_EMAIL } from "@/lib/mailer/constants";
 import { VerifyEmail } from "@/lib/mailer/templates/verify-email";
+import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";
 import type { BetterAuthOptions } from "better-auth";
-// import { render } from "@react-email/components";
-import { render } from "@react-email/components";
 
 export const emailVerification: NonNullable<
   BetterAuthOptions["emailVerification"]
