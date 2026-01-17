@@ -1,0 +1,27 @@
+{
+    "name": "@workspace/db",
+    "version": "0.0.0",
+    "scripts": {
+        "db:gen": "prisma generate",
+        "db:seed": "dotenv -e .env.local -- npx prisma db seed",
+        "db:pull": "dotenv -e .env.local -- npx prisma db pull",
+        "migrate:dev": "npx prisma migrate dev",
+        "migrate:reset": "dotenv -e .env.local -- npx prisma migrate reset",
+        "migrate:prod": "dotenv -e .env.local -- npx prisma migrate deploy",
+        "migrate:createonly": "dotenv -e .env.local -- npx prisma migrate dev --create-only"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.9",
+        "@types/pg": "^8.16.0",
+        "prisma": "^7.2.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@prisma/adapter-neon": "^7.2.0",
+        "@prisma/adapter-pg": "^7.2.0",
+        "@prisma/client": "^7.2.0",
+        "dotenv": "^17.2.3",
+        "pg": "^8.17.1"
+    }
+}
