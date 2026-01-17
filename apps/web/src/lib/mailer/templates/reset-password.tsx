@@ -12,48 +12,32 @@ import {
   Text,
 } from "@react-email/components";
 
-interface ResetPasswordEmailProps {
+interface ResetPasswordProps {
   resetPasswordLink?: string;
 }
 
 const baseUrl = getAppUrl();
 
-export const ResetPasswordEmail = ({
+export const ResetPassword = ({
   resetPasswordLink,
-}: ResetPasswordEmailProps) => {
+}: ResetPasswordProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Réinitialisez votre mot de passe Tobalgo</Preview>
+      <Preview>Réinitialisez votre mot de passe</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Img
-            src={`${baseUrl}/static/logo.png`}
-            width="40"
-            height="33"
-            alt="Logo"
-          />
           <Section>
             <Text style={text}>Bonjour,</Text>
             <Text style={text}>
-              Nous avons reçu une demande de réinitialisation de votre mot de
-              passe Tobalgo. Cliquez sur le bouton ci-dessous pour choisir un
-              nouveau mot de passe :
+              Cliquez sur le bouton ci-dessous pour réinitialiser votre mot de passe :
             </Text>
             <Button style={button} href={resetPasswordLink}>
               Réinitialiser le mot de passe
             </Button>
             <Text style={text}>
-              Si vous n&apos;avez pas demandé cette réinitialisation de mot de
-              passe, vous pouvez ignorer cet email en toute sécurité. Votre mot
-              de passe restera inchangé.
+              Si vous n&apos;avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail. Votre mot de passe restera inchangé.
             </Text>
-            <Text style={text}>
-              Pour des raisons de sécurité, veuillez ne pas transférer cet email
-              à quiconque.
-            </Text>
-            <Text style={text}>Cordialement,</Text>
-            <Text style={text}>L&apos;équipe Tobalgo</Text>
           </Section>
         </Container>
       </Body>
@@ -62,10 +46,9 @@ export const ResetPasswordEmail = ({
 };
 
 
-ResetPasswordEmail.PreviewProps = {
-  userFirstname: "Manuel",
+ResetPassword.PreviewProps = {
   resetPasswordLink: `${baseUrl}/${resetPasswordUrl}`,
-} as ResetPasswordEmailProps;
+} as ResetPasswordProps;
 
 const main = {
   backgroundColor: "#f6f9fc",

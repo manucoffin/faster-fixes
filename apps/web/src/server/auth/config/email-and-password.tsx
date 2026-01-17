@@ -1,6 +1,6 @@
 import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL, TEST_RECIPIENT_EMAIL } from "@/lib/mailer/constants";
-import { ResetPasswordEmail } from "@/lib/mailer/templates/reset-password";
+import { ResetPassword } from "@/lib/mailer/templates/reset-password";
 import { render } from "@react-email/components";
 import { BetterAuthOptions } from "better-auth";
 
@@ -17,7 +17,7 @@ export const emailAndPassword: NonNullable<
         process.env.NODE_ENV === "production"
           ? normalizedEmail
           : TEST_RECIPIENT_EMAIL;
-      const body = await render(<ResetPasswordEmail resetPasswordLink={url} />);
+      const body = await render(<ResetPassword resetPasswordLink={url} />);
 
       await mailer.emails.send({
         from,

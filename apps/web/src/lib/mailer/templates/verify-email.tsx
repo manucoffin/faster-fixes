@@ -22,34 +22,20 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Vérifiez votre adresse e-mail Tobalgo</Preview>
+      <Preview>Vérifiez votre adresse e-mail</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Img
-            src={`${baseUrl}/static/tobalgo-logo.png`}
-            width="40"
-            height="33"
-            alt="Tobalgo"
-          />
           <Section>
             <Text style={text}>Bonjour,</Text>
             <Text style={text}>
-              Merci de vous être inscrit à Tobalgo ! Veuillez vérifier votre
-              adresse e-mail en cliquant sur le bouton ci-dessous :
+              Veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :
             </Text>
             <Button style={button} href={verificationLink}>
               Vérifier l&apos;adresse e-mail
             </Button>
             <Text style={text}>
-              Si vous n&apos;avez pas créé de compte Tobalgo, vous pouvez
-              ignorer e-mail en toute sécurité.
+              Si vous n&apos;avez pas créé ce compte, vous pouvez ignorer cet e-mail.
             </Text>
-            <Text style={text}>
-              Pour des raisons de sécurité, veuillez ne pas transférer cet
-              e-mail à qui que ce soit.
-            </Text>
-            <Text style={text}>Cordialement,</Text>
-            <Text style={text}>L&apos;équipe Tobalgo</Text>
           </Section>
         </Container>
       </Body>
