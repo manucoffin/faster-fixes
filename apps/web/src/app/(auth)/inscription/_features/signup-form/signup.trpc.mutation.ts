@@ -30,6 +30,8 @@ export const signupMutation = publicProcedure
         });
       }
     } catch (error) {
+      console.error(error);
+
       if (error instanceof TRPCError) {
         throw error;
       }

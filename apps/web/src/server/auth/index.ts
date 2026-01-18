@@ -14,7 +14,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: ["https://www.tobalgo.com", "https://tobalgo.com"],
+  // trustedOrigins: ["https://www.domain.com", "https://domain.com"],
   emailAndPassword,
   emailVerification,
   databaseHooks,
