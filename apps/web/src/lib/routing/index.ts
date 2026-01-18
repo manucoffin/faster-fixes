@@ -2,7 +2,7 @@ export const rootUrl = "/";
 export const loginUrl = "/connexion";
 export const signupUrl = "/inscription";
 export const forgotPasswordUrl = "/mot-de-passe-oublie";
-export const resetPasswordUrl = "/reinitialisation-mot-de-passe";
+export const resetPasswordUrl = "/reinitialiser-mot-de-passe";
 export const onboardingUrl = "/premiers-pas";
 export const billingUrl = "/mon-compte/facturation";
 

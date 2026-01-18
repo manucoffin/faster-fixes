@@ -5,10 +5,9 @@ import {
   Container,
   Head,
   Html,
-  Img,
   Preview,
   Section,
-  Text,
+  Text
 } from "@react-email/components";
 
 interface VerifyEmailProps {
