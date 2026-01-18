@@ -7,7 +7,7 @@ export const onboardingUrl = "/premiers-pas";
 export const billingUrl = "/mon-compte/facturation";
 
 // Redirects
-export const defaultRedirect = "/";
+export const defaultRedirect = "/mon-compte";
 
 // Utils Routes
 export const unauthorizedUrl = "/unauthorized";

@@ -1,3 +1,4 @@
+import { loginUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { getInitials } from "@/utils/text/get-initials";
 import {
@@ -70,6 +71,7 @@ export async function Header() {
         <div className="flex items-center gap-2 shrink-0">
           <ThemeToggle size="icon" variant="ghost" />
 
+
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -114,20 +116,9 @@ export async function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-md hover:bg-accent/90 transition-colors"
-              >
-                Inscription
-              </Link>
-            </div>
+            <Button asChild variant="outline">
+              <Link href={loginUrl}>Connexion</Link>
+            </Button>
           )}
         </div>
       </div>
