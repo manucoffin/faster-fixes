@@ -2,6 +2,7 @@ import { TRPCProvider } from "@/lib/trpc/trpc-provider";
 import "@workspace/ui/globals.css";
 import { ThemeProvider } from "next-themes";
 import { Outfit } from "next/font/google";
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Toaster } from "sonner";
 
 const fontSans = Outfit({
@@ -26,13 +27,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCProvider>
-            {/* <NuqsAdapter> */}
+            <NuqsAdapter>
+              {children}
 
-
-            {children}
-
-            <Toaster />
-            {/* </NuqsAdapter> */}
+              <Toaster />
+            </NuqsAdapter>
           </TRPCProvider>
         </ThemeProvider>
       </body>

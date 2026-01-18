@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
+import { AlertCircleIcon, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { ForgotPasswordInputs, ForgotPasswordSchema } from "./forgot-password.schema";
@@ -65,7 +65,7 @@ export function ForgotPasswordForm() {
         {/* Success Message */}
         {isSuccess && (
           <Alert variant="success" >
-            <CheckCircleIcon />
+            <CheckCircle2 />
             <AlertTitle >Succès</AlertTitle>
             <AlertDescription>
               <p>Un email de réinitialisation a été envoyé à votre adresse email.</p>
