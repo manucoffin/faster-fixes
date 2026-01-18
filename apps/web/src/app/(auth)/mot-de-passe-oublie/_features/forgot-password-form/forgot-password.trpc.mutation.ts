@@ -3,7 +3,6 @@
 import { resetPasswordUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
-import { getAppUrl } from "@/utils/url/get-app-url";
 import { TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { ForgotPasswordSchema } from "./forgot-password.schema";
@@ -18,7 +17,7 @@ export const forgotPasswordMutation = publicProcedure
       const response = await auth.api.requestPasswordReset({
         body: {
           email: normalizedEmail,
-          redirectTo: `${getAppUrl()}${resetPasswordUrl}`,
+          redirectTo: resetPasswordUrl,
         },
         headers: await headers(),
       });

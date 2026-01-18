@@ -14,23 +14,26 @@ export default async function ResetPasswordPage(props: PageParams) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {success === "true" ? (
-          <>
-            <p className="text-secondary mb-4 flex items-center text-2xl font-bold">
-              <CheckCircle2 className="text-secondary mr-2 h-5 w-5" />
-              Mot de passe réinitialisé !
-            </p>
+          <div className="space-y-6">
+            <div className="space-y-2 text-center">
+              <h1 className="text-2xl font-bold flex gap-2 items-center justify-center">
+                <CheckCircle2 className="size-5" />
+                <span>Mot de passe réinitialisé !</span>
+              </h1>
+              <p className="text-muted-foreground">
+                Votre mot de passe a été réinitialisé avec succès. Vous pouvez
+                maintenant vous connecter avec votre nouveau mot de passe.
+              </p>
+            </div>
 
-            <p className="text-muted-foreground mb-6">
-              Votre mot de passe a été réinitialisé avec succès. Vous pouvez
-              maintenant vous connecter avec votre nouveau mot de passe.
-            </p>
-
-            <div className="flex justify-start">
+            <div className="flex justify-center">
               <Button variant="default" className="" asChild>
                 <Link href={loginUrl}>Se connecter</Link>
               </Button>
             </div>
-          </>
+          </div>
+
+
         ) : error === "INVALID_TOKEN" ? (
           <>
             <Alert variant="destructive" className="mb-6">
