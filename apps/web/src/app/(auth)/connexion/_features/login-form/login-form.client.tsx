@@ -1,5 +1,6 @@
 "use client";
 
+import { defaultRedirect } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -19,10 +20,15 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { LoginInputs, LoginSchema } from "./login.schema";
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("nextUrl");
+
   const form = useForm<LoginInputs>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -36,6 +42,9 @@ export function LoginForm() {
       const message = error.message || "Échec de la connexion. Veuillez réessayer.";
       form.setError("root", { message });
     },
+    onSuccess: (() => {
+      router.push(nextUrl || defaultRedirect);
+    })
   });
 
   const onSubmit = async (data: { email: string; password: string }) => {

@@ -1,10 +1,8 @@
 "use server";
 
-import { defaultRedirect } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
-import { redirect } from "next/navigation";
 import { SignupSchema } from "./signup.schema";
 
 export const signupMutation = publicProcedure
@@ -29,6 +27,8 @@ export const signupMutation = publicProcedure
           message: "Échec de la création du compte",
         });
       }
+
+      return data.user;
     } catch (error) {
       console.error(error);
 
@@ -49,7 +49,4 @@ export const signupMutation = publicProcedure
         message: "Échec de la création du compte. Veuillez réessayer.",
       });
     }
-
-    // Redirect to exercises page after successful signup
-    redirect(defaultRedirect);
   });

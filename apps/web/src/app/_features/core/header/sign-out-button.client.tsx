@@ -1,10 +1,20 @@
 "use client";
 
-import { DropdownMenuItem } from "@workspace/ui/components/dropdown-menu";
 import { trpc } from "@/lib/trpc/trpc-client";
+import { DropdownMenuItem } from "@workspace/ui/components/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export function SignOutButton() {
-  const { mutate, isPending } = trpc.auth.signout.useMutation();
+  const router = useRouter();
+
+
+  const { mutate, isPending } = trpc.auth.signout.useMutation(
+    {
+      onSuccess: () => {
+        router.push('')
+      }
+    }
+  );
 
   const handleSignOut = () => {
     mutate();

@@ -1,10 +1,8 @@
 "use server";
 
-import { defaultRedirect } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
-import { redirect } from "next/navigation";
 import { LoginSchema } from "./login.schema";
 
 export const loginMutation = publicProcedure
@@ -21,12 +19,7 @@ export const loginMutation = publicProcedure
         },
       });
 
-      if (!data) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Email ou mot de passe invalide",
-        });
-      }
+      return data.user;
     } catch (error) {
       if (error instanceof TRPCError) {
         throw error;
@@ -50,7 +43,4 @@ export const loginMutation = publicProcedure
         message: "Échec de la connexion. Veuillez réessayer.",
       });
     }
-
-    // Redirect to exercises page after successful login
-    redirect(defaultRedirect);
   });

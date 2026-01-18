@@ -4,19 +4,15 @@ import type { BetterAuthOptions } from "better-auth";
 export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
   user: {
     create: {
-      after: async (user, ctx) => {
-        const marketingConsent = ctx?.query.marketingConsent;
-
-        if (marketingConsent) {
-          // Create marketing preferences record
-          await prisma.marketingPreferences.create({
-            data: {
-              userId: user.id,
-              acceptsNewsletter: marketingConsent,
-              acceptsMarketing: marketingConsent,
-            },
-          });
-        }
+      after: async (user) => {
+        // Create marketing preferences record
+        await prisma.marketingPreferences.create({
+          data: {
+            userId: user.id,
+            acceptsNewsletter: false,
+            acceptsMarketing: false,
+          },
+        });
       },
     },
   },
@@ -48,7 +44,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         } catch (error) {
           console.error(
             "Error setting default organization for user session:",
-            error,
+            error
           );
 
           // Return session without active organization on error

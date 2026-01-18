@@ -31,6 +31,7 @@ export async function Header() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
   return (
     <header className="border-b border-border bg-background sticky top-0 z-40">
       <div className="flex items-center justify-between px-4 h-16 max-w-7xl mx-auto gap-4">

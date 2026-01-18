@@ -1,5 +1,6 @@
 "use client";
 
+import { defaultRedirect } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -19,11 +20,16 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { SignupInputs, SignupSchema } from "./signup.schema";
 
 
 export function SignupForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("nextUrl");
+
   const form = useForm<SignupInputs>({
     resolver: zodResolver(SignupSchema),
     defaultValues: {
@@ -39,6 +45,9 @@ export function SignupForm() {
         error.message || "Échec de la création du compte. Veuillez réessayer.";
       form.setError("root", { message });
     },
+    onSuccess: (() => {
+      router.push(nextUrl || defaultRedirect);
+    })
   });
 
   const onSubmit = async (data: SignupInputs) => {

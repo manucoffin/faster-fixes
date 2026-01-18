@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const SignupSchema = z
   .object({
-    email: z.email("Invalid email address"),
+    email: z.email("Adresse email invalide"),
     password: PasswordSchema,
     confirmPassword: z.string(),
   })

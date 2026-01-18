@@ -34,11 +34,8 @@ export const emailVerification: NonNullable<
     await mailer.emails.send({
       from,
       to,
-      subject: "Plus qu'une patte à franchir !",
+      subject: "Vérifiez votre email",
       body,
-      params: {
-        verificationLink: url,
-      },
     });
   },
 };
