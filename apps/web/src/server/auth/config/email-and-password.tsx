@@ -9,6 +9,8 @@ export const emailAndPassword: NonNullable<
 > = {
   enabled: true,
   requireEmailVerification: true,
+  autoSignIn: false,
+
   sendResetPassword: async ({ user, url, token }, request) => {
     try {
       const normalizedEmail = user.email.toLowerCase().trim();

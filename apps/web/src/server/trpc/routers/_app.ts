@@ -2,7 +2,6 @@ import { loginMutation } from "@/app/(auth)/connexion/_features/login-form/login
 import { signupMutation } from "@/app/(auth)/inscription/_features/signup-form/signup.trpc.mutation";
 import { forgotPasswordMutation } from "@/app/(auth)/mot-de-passe-oublie/_features/forgot-password-form/forgot-password.trpc.mutation";
 import { resetPasswordMutation } from "@/app/(auth)/reinitialiser-mot-de-passe/_features/reset-password-form/reset-password.trpc.mutation";
-import { signOutMutation } from "@/app/_features/core/header/sign-out.trpc.mutation";
 import { publicProcedure, router } from "../trpc";
 
 export const appRouter = router({
@@ -11,7 +10,6 @@ export const appRouter = router({
     signup: signupMutation,
     forgotPassword: forgotPasswordMutation,
     resetPassword: resetPasswordMutation,
-    signout: signOutMutation,
   }),
   admin: router({
     test: publicProcedure.query(() => {

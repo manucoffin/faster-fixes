@@ -3,6 +3,10 @@ const nextConfig = {
   transpilePackages: ["@workspace/ui"],
   typedRoutes: true,
 
+  experimental: {
+    authInterrupts: true,
+  },
+
   // async rewrites() {
   //   return [
   //     {
