@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { LoginInputs, LoginSchema } from "./login.schema";
@@ -84,8 +85,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Mot de passe</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
+                <PasswordInput
                   placeholder="••••••••"
                   {...field}
                   disabled={loginMutation.isPending}

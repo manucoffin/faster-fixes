@@ -15,7 +15,6 @@ export default function LoginPage() {
         <div className="space-y-6">
           <div className="space-y-2 text-center">
             <h1 className="text-2xl font-bold">Connectez-vous à votre compte</h1>
-
           </div>
 
           <LoginForm />
