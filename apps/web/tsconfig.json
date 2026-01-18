@@ -5,7 +5,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@workspace/db/*": ["../../packages/database/*"]
+      "@workspace/db/*": ["../../packages/database/*"],
+      "@public/*": ["./public/*"],
+      "@private/*": ["./private/*"]
     },
     "plugins": [
       {
