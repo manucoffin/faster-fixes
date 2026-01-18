@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultRedirect } from "@/lib/routing";
+import { defaultRedirect, forgotPasswordUrl } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,6 +20,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { LoginInputs, LoginSchema } from "./login.schema";
@@ -92,7 +93,15 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Mot de passe</FormLabel>
+                <Link
+                  href={forgotPasswordUrl}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Oublié ?
+                </Link>
+              </div>
               <FormControl>
                 <PasswordInput
                   placeholder="••••••••"

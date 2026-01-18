@@ -18,14 +18,14 @@ export const auth = betterAuth({
   emailAndPassword,
   emailVerification,
   databaseHooks,
-  session: {
-    // Cache the session value for 5 minutes
-    // This avoid making database calls everytime we get the session
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // Cache duration in seconds
-    },
-  },
+  // session: {
+  //   // Cache the session value for 5 minutes
+  //   // This avoid making database calls everytime we get the session
+  //   cookieCache: {
+  //     enabled: true,
+  //     maxAge: 5 * 60, // Cache duration in seconds
+  //   },
+  // },
   user: {
     deleteUser: {
       enabled: true,
