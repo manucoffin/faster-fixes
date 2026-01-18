@@ -1,7 +1,12 @@
 "use client";
 
+import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -12,36 +17,46 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useRouter } from "next/navigation";
-import { signupAction } from "./signup.action";
-import { SignupSchema } from "./signup.schema";
+import { AlertCircleIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { SignupInputs, SignupSchema } from "./signup.schema";
 
-type SignupFormProps = Record<string, never>;
 
-export function SignupForm({ }: SignupFormProps) {
-  const router = useRouter();
+export function SignupForm() {
+  const form = useForm<SignupInputs>({
+    resolver: zodResolver(SignupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const { form, action, handleSubmitWithAction } = useHookFormAction(
-    signupAction,
-    zodResolver(SignupSchema),
-    {
-      actionProps: {
-        onError: (error) => {
-          console.error("Signup error:", error);
-        },
-      },
-      formProps: {
-        defaultValues: {
-          email: "",
-          password: "",
-        },
-      },
-    }
-  );
+  const signupMutation = trpc.auth.signup.useMutation({
+    onError: (error) => {
+      const message =
+        error.message || "Échec de la création du compte. Veuillez réessayer.";
+      form.setError("root", { message });
+    },
+  });
+
+  const onSubmit = async (data: SignupInputs) => {
+    signupMutation.mutate(data);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmitWithAction} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Server Error */}
+        {form.formState.errors.root && (
+          <Alert variant="destructive">
+            <AlertCircleIcon />
+            <AlertTitle>Erreur</AlertTitle>
+            <AlertDescription>
+              <p>{form.formState.errors.root.message}</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Email Field */}
         <FormField
           control={form.control}
@@ -52,9 +67,9 @@ export function SignupForm({ }: SignupFormProps) {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="john@example.com"
+                  placeholder="jean@exemple.com"
                   {...field}
-                  disabled={action.isPending}
+                  disabled={signupMutation.isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -68,13 +83,13 @@ export function SignupForm({ }: SignupFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Mot de passe</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   placeholder="••••••••"
                   {...field}
-                  disabled={action.isPending}
+                  disabled={signupMutation.isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -82,23 +97,14 @@ export function SignupForm({ }: SignupFormProps) {
           )}
         />
 
-        {/* Server Error */}
-        {form.formState.errors.root && (
-          <div className="rounded-md bg-destructive/10 p-3">
-            <p className="text-sm text-destructive">
-              {form.formState.errors.root.message}
-            </p>
-          </div>
-        )}
-
         {/* Submit Button */}
         <Button
           type="submit"
           className="w-full"
-          disabled={action.isPending}
+          disabled={signupMutation.isPending}
           size="lg"
         >
-          {action.isPending ? "Creating account..." : "Sign Up"}
+          {signupMutation.isPending ? "Création du compte..." : "S'inscrire"}
         </Button>
       </form>
     </Form>
