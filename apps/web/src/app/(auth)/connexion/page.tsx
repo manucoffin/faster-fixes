@@ -1,36 +1,34 @@
-import { PageParams } from "@/types/next";
+import { signupUrl } from "@/lib/routing";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LoginForm } from "./_features/login-form/login-form.client.js";
+import { LoginForm } from "./_features/login-form/login-form.client";
 
 export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Sign in to your account and start training",
+  title: "Connexion",
+  description: "Connectez-vous à votre compte.",
 };
 
-export default function LoginPage({ }: PageParams) {
+export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="space-y-6">
           <div className="space-y-2 text-center">
-            <h1 className="text-2xl font-bold">Sign in to your account</h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back to your training dashboard
-            </p>
+            <h1 className="text-2xl font-bold">Connectez-vous à votre compte</h1>
+
           </div>
 
           <LoginForm />
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              Vous n&apos;avez pas de compte ?{" "}
             </span>
             <Link
-              href="/signup"
+              href={signupUrl}
               className="font-medium text-primary hover:underline"
             >
-              Sign Up
+              S&apos;inscrire
             </Link>
           </div>
         </div>

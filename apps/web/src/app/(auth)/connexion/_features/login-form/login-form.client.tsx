@@ -19,7 +19,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { LoginInputs, LoginSchema } from "./login.schema.js";
+import { LoginInputs, LoginSchema } from "./login.schema";
 
 export function LoginForm() {
   const form = useForm<LoginInputs>({
@@ -32,7 +32,7 @@ export function LoginForm() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onError: (error) => {
-      const message = error.message || "Failed to sign in. Please try again.";
+      const message = error.message || "Échec de la connexion. Veuillez réessayer.";
       form.setError("root", { message });
     },
   });
@@ -48,7 +48,7 @@ export function LoginForm() {
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
-            <AlertTitle>Une erreur est survenue.</AlertTitle>
+            <AlertTitle>Erreur</AlertTitle>
             <AlertDescription>
               <p>{form.formState.errors.root.message}</p>
             </AlertDescription>
@@ -66,7 +66,7 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="john@example.com"
+                  placeholder="jean@exemple.com"
                   {...field}
                   disabled={loginMutation.isPending}
                 />
@@ -82,7 +82,7 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Mot de passe</FormLabel>
               <FormControl>
                 <Input
                   type="password"
@@ -105,7 +105,7 @@ export function LoginForm() {
           disabled={loginMutation.isPending}
           size="lg"
         >
-          {loginMutation.isPending ? "Signing in..." : "Sign In"}
+          {loginMutation.isPending ? "Connexion en cours..." : "Se connecter"}
         </Button>
       </form>
     </Form>

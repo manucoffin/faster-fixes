@@ -5,7 +5,7 @@ import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { redirect } from "next/navigation";
-import { LoginSchema } from "./login.schema.js";
+import { LoginSchema } from "./login.schema";
 
 export const loginMutation = publicProcedure
   .input(LoginSchema)
@@ -24,7 +24,7 @@ export const loginMutation = publicProcedure
       if (!data) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "Invalid email or password",
+          message: "Email ou mot de passe invalide",
         });
       }
     } catch (error) {
@@ -40,14 +40,14 @@ export const loginMutation = publicProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Invalid email or password",
+            message: "Email ou mot de passe invalide",
           });
         }
       }
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to sign in. Please try again.",
+        message: "Échec de la connexion. Veuillez réessayer.",
       });
     }
 
