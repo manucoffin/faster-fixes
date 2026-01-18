@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ManageSubscriptionButton } from "./manage-subscription/manage-subscription-button.client";
 
 export function SidebarUserDropdownLoading() {
   return (
@@ -138,6 +139,10 @@ export function SidebarUserDropdown() {
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Facturation</span>
                 </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <ManageSubscriptionButton className="w-full" />
               </DropdownMenuItem>
             </DropdownMenuGroup>
 
