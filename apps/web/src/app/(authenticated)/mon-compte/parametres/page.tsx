@@ -1,4 +1,7 @@
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import { AlertTriangleIcon } from "lucide-react";
+import { AccountDeletionButton } from "./_features/account-deletion/account-deletion-button.client";
 import { EmailForm } from "./_features/email/email-form.client";
 import { PasswordForm } from "./_features/password/password-form.client";
 import { ProfileForm } from "./_features/profile/profile-form.client";
@@ -28,6 +31,22 @@ export default function ParametersPage() {
         cardTitle="Sécurité du compte"
       >
         <PasswordForm />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Supprimer le compte"
+        description="Supprimez définitivement votre compte et toutes vos données"
+        cardTitle="Zone de danger"
+      >
+        <div className="flex flex-col gap-4">
+          <Alert variant="destructive" className="max-w-sm">
+            <AlertTriangleIcon />
+            <AlertDescription>
+              Attention : la suppression de votre compte est irréversible. Toutes vos données seront supprimées de manière définitive et ne pourront pas être récupérées.
+            </AlertDescription>
+          </Alert>
+          <AccountDeletionButton />
+        </div>
       </DashboardSection>
     </div>
   );
