@@ -72,7 +72,7 @@ export function ProfileForm() {
           control={form.control}
           name="firstName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="max-w-sm">
               <FormLabel>Prénom</FormLabel>
               <FormControl>
                 <Input placeholder="Entrez votre prénom" {...field} />
@@ -86,7 +86,7 @@ export function ProfileForm() {
           control={form.control}
           name="lastName"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="max-w-sm">
               <FormLabel>Nom</FormLabel>
               <FormControl>
                 <Input placeholder="Entrez votre nom" {...field} />
@@ -99,7 +99,7 @@ export function ProfileForm() {
         <Button
           type="submit"
           disabled={updateProfileMutation.isPending}
-          className="self-end"
+          className="self-start"
         >
           {updateProfileMutation.isPending
             ? "Mise à jour en cours..."
