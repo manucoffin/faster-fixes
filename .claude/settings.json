@@ -4,7 +4,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "./scripts/statusline.sh"
+    "command": "./.claude/scripts/statusline.sh"
   },
   "permissions": {
     "allow": [
