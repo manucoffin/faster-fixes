@@ -2,6 +2,7 @@
 
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -12,33 +13,37 @@ import {
   FormMessage
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { AlertCircleIcon } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { UpdateProfileInputs, UpdateProfileSchema } from "./update-profile.schema";
 
-interface ProfileFormProps {
-  initialFirstName?: string | null;
-  initialLastName?: string | null;
-}
+export function ProfileForm() {
 
-export function ProfileForm({
-  initialFirstName,
-  initialLastName,
-}: ProfileFormProps) {
-  const [isSuccess, setIsSuccess] = React.useState(false);
+  const getProfileQuery = trpc.authenticated.account.settings.getProfile.useQuery();
 
   const form = useForm<UpdateProfileInputs>({
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
-      firstName: initialFirstName ?? "",
-      lastName: initialLastName ?? "",
+      firstName: "",
+      lastName: "",
     },
   });
 
+  // Reset form when user data is available
+  React.useEffect(() => {
+    if (getProfileQuery.data) {
+      form.reset({
+        firstName: getProfileQuery.data.firstName ?? "",
+        lastName: getProfileQuery.data.lastName ?? "",
+      });
+    }
+  }, [getProfileQuery.data, form]);
+
   const updateProfileMutation = trpc.authenticated.account.settings.updateProfile.useMutation({
     onSuccess: () => {
-      setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 3000);
+      toast.success("Profil mis à jour avec succès")
     },
     onError: (error) => {
       const message = error.message || "Une erreur s'est produite.";
@@ -53,16 +58,14 @@ export function ProfileForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        {isSuccess && (
-          <div className="rounded-lg bg-green-50 p-4 text-green-800">
-            Profil mis à jour avec succès
-          </div>
-        )}
-
         {form.formState.errors.root && (
-          <div className="rounded-lg bg-red-50 p-4 text-red-800">
-            {form.formState.errors.root.message}
-          </div>
+          <Alert variant="destructive">
+            <AlertCircleIcon />
+            <AlertTitle>Erreur</AlertTitle>
+            <AlertDescription>
+              <p>{form.formState.errors.root.message}</p>
+            </AlertDescription>
+          </Alert>
         )}
 
         <FormField
