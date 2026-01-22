@@ -6,17 +6,15 @@ import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { UpdateProfileInputs, UpdateProfileSchema } from "./update-profile.schema";
-
 
 interface ProfileFormProps {
   initialFirstName?: string | null;
@@ -54,7 +52,7 @@ export function ProfileForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {isSuccess && (
           <div className="rounded-lg bg-green-50 p-4 text-green-800">
             Profil mis à jour avec succès
@@ -76,9 +74,6 @@ export function ProfileForm({
               <FormControl>
                 <Input placeholder="Entrez votre prénom" {...field} />
               </FormControl>
-              <FormDescription>
-                Votre prénom tel qu'il apparaîtra dans votre profil
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -93,9 +88,6 @@ export function ProfileForm({
               <FormControl>
                 <Input placeholder="Entrez votre nom" {...field} />
               </FormControl>
-              <FormDescription>
-                Votre nom tel qu'il apparaîtra dans votre profil
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -104,7 +96,7 @@ export function ProfileForm({
         <Button
           type="submit"
           disabled={updateProfileMutation.isPending}
-          className="w-full"
+          className="self-end"
         >
           {updateProfileMutation.isPending
             ? "Mise à jour en cours..."

@@ -1,7 +1,7 @@
 import { auth } from "@/server/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { headers } from "next/headers";
-import { ProfileForm } from "./_features/profile-form";
+import { ProfileForm } from "./_features/profile-form.client";
 
 export default async function ParametersPage() {
   const session = await auth.api.getSession({
@@ -16,7 +16,7 @@ export default async function ParametersPage() {
       {/* Left Column - Section Info */}
       <div className="col-span-1">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Profil Utilisateur</h1>
+          <h2 className="text-2xl font-bold text-foreground">Profil Utilisateur</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Mettez à jour vos informations personnelles
           </p>
@@ -26,7 +26,7 @@ export default async function ParametersPage() {
       {/* Right Columns - Form Card */}
       <div className="col-span-2">
         <Card>
-          <CardHeader>
+          <CardHeader className="sr-only">
             <CardTitle>Informations Personnelles</CardTitle>
           </CardHeader>
           <CardContent>
