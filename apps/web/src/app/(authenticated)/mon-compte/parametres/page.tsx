@@ -1,5 +1,6 @@
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
 import { EmailForm } from "./_features/email/email-form.client";
+import { PasswordForm } from "./_features/password/password-form.client";
 import { ProfileForm } from "./_features/profile/profile-form.client";
 
 export default function ParametersPage() {
@@ -19,6 +20,14 @@ export default function ParametersPage() {
         cardTitle="Email de connexion"
       >
         <EmailForm />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Mot de Passe"
+        description="Modifiez votre mot de passe pour sécuriser votre compte"
+        cardTitle="Sécurité du compte"
+      >
+        <PasswordForm />
       </DashboardSection>
     </div>
   );

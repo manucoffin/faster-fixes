@@ -1,4 +1,11 @@
 {
+  "env": {
+    "ENABLE_TOOL_SEARCH": "true"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "./scripts/statusline.sh"
+  },
   "permissions": {
     "allow": [
       "Write(src/**)",
@@ -36,10 +43,6 @@
       "Bash(pnpm migrate:createonly)",
       "Bash(pnpm migrate:reset)"
     ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "./scripts/context-bar.sh"
   },
   "hooks": {
     "PostToolUse": [
