@@ -37,6 +37,10 @@
       "Bash(pnpm migrate:reset)"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "./scripts/context-bar.sh"
+  },
   "hooks": {
     "PostToolUse": [
       {

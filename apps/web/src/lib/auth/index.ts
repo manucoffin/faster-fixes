@@ -22,6 +22,7 @@ export const {
   organization,
   getLastUsedLoginMethod,
   isLastUsedLoginMethod,
+  changeEmail,
 } = createAuthClient({
   plugins: [
     inferAdditionalFields<typeof auth>(),
