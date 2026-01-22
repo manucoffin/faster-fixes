@@ -1,6 +1,5 @@
 "use client";
 
-import { defaultRedirect } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -19,16 +18,14 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
-import { AlertCircleIcon } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { SignupInputs, SignupSchema } from "./signup.schema";
 
 
 export function SignupForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("nextUrl");
+  const [success, setSuccess] = useState(false);
 
   const form = useForm<SignupInputs>({
     resolver: zodResolver(SignupSchema),
@@ -46,7 +43,7 @@ export function SignupForm() {
       form.setError("root", { message });
     },
     onSuccess: (() => {
-      router.push(nextUrl || defaultRedirect);
+      setSuccess(true);
     })
   });
 
@@ -57,6 +54,17 @@ export function SignupForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Success Message */}
+        {success && (
+          <Alert variant="success">
+            <CheckCircleIcon />
+            <AlertTitle>Succès</AlertTitle>
+            <AlertDescription>
+              <p>Un email de confirmation a été envoyé à votre adresse.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Server Error */}
         {form.formState.errors.root && (
           <Alert variant="destructive">

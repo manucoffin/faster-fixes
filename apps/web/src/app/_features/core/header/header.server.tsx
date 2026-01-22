@@ -101,6 +101,12 @@ export async function Header() {
                   </div>
                 </div>
 
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                  <Link href="/mon-compte">Mon compte</Link>
+                </DropdownMenuItem>
+
                 {session.user.role === "admin" && (
                   <>
                     <DropdownMenuSeparator />

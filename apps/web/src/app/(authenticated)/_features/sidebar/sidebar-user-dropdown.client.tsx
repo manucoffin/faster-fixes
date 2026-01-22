@@ -27,10 +27,9 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   ChevronsUpDown,
-  CreditCard,
   LayoutDashboard,
   LogOut,
-  UserCircle,
+  UserCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -127,17 +126,6 @@ export function SidebarUserDropdown() {
                 >
                   <UserCircle className="mr-2 h-4 w-4" />
                   <span>Paramètres</span>
-                </Link>
-              </DropdownMenuItem>
-
-
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/mon-compte/facturation"
-                  className="flex items-center"
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Facturation</span>
                 </Link>
               </DropdownMenuItem>
 
