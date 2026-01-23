@@ -1,0 +1,16 @@
+import { router } from "@/server/trpc/trpc";
+import { getActiveSubscriptions } from "../(dashboard)/_features/active-subscriptions-card/get-active-subscriptions.trpc.query";
+import { getMrr } from "../(dashboard)/_features/mrr-card/get-mrr.trpc.query";
+import { getVerifiedProfessionals } from "../(dashboard)/_features/professionals-verified-card/get-verified-professionals.trpc.query";
+import { getMonthlyStats } from "../(dashboard)/_features/subscriptions-chart/get-monthly-stats.trpc.query";
+import { getUsersOverview } from "../(dashboard)/_features/users-overview-card/get-users-overview.trpc.query";
+
+export const adminRouter = router({
+  dashboard: {
+    getUsersOverview,
+    getActiveSubscriptions,
+    getMrr,
+    getMonthlyStats,
+    getVerifiedProfessionals,
+  },
+});
