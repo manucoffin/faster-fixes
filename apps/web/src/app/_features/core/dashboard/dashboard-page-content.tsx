@@ -16,7 +16,7 @@ export function DashboardPageContent({
   breadcrumbs,
 }: DashboardPageContentProps) {
   return (
-    <div className="py-4">
+    <div className="">
       <PageBreadcrumbs items={breadcrumbs} />
 
       {title && <DashboardPageHeader title={title} actions={actions} />}

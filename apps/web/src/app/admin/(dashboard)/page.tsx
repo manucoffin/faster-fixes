@@ -7,7 +7,7 @@ import { UsersOverviewCard } from "./_features/users-overview-card/users-overvie
 export default async function AdminDashboardPage() {
   return (
     <DashboardPageContent
-      title="Tableau de bord"
+      // title="Tableau de bord"
       breadcrumbs={[{ label: "Tableau de bord", link: "/admin" }]}
     >
       <div className="space-y-6">
