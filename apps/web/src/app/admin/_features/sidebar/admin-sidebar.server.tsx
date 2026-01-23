@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@workspace/ui/components/sidebar";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Users } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
@@ -37,8 +37,14 @@ export const AdminSidebar = async ({
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-
-
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Utilisateurs">
+                <Link href="/admin/utilisateurs">
+                  <Users />
+                  <span>Utilisateurs</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

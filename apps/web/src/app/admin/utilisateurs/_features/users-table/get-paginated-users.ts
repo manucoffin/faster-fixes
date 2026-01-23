@@ -76,11 +76,11 @@ export const getPaginatedUsers = adminProcedure
               organization: {
                 select: {
                   name: true,
-                  // subscription: {
-                  //   select: {
-                  //     plan: true,
-                  //   },
-                  // },
+                  subscription: {
+                    select: {
+                      plan: true,
+                    },
+                  },
                 },
               },
             },

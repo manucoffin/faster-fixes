@@ -3,6 +3,7 @@ import { getActiveSubscriptions } from "../(dashboard)/_features/active-subscrip
 import { getMrr } from "../(dashboard)/_features/mrr-card/get-mrr.trpc.query";
 import { getMonthlyStats } from "../(dashboard)/_features/subscriptions-chart/get-monthly-stats.trpc.query";
 import { getUsersOverview } from "../(dashboard)/_features/users-overview-card/get-users-overview.trpc.query";
+import { getAllUsersForExport } from "../utilisateurs/_features/users-table/get-all-users-for-export";
 import { getPaginatedUsers } from "../utilisateurs/_features/users-table/get-paginated-users";
 
 export const adminRouter = router({
@@ -14,5 +15,6 @@ export const adminRouter = router({
   },
   users: {
     getPaginatedUsers: getPaginatedUsers,
+    getAllUsersForExport: getAllUsersForExport,
   },
 });

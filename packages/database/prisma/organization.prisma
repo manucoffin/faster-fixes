@@ -9,6 +9,8 @@ model Organization {
     members     Member[]
     invitations Invitation[]
 
+    subscription Subscription?
+
     @@unique([slug])
     @@map("organization")
 }

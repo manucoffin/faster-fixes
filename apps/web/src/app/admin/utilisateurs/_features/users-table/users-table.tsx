@@ -6,21 +6,11 @@ import { trpc } from "@/lib/trpc/trpc-client";
 import { SubscriptionPlanName } from "@/server/auth/config/subscription-plans";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
-import { Label } from "@workspace/ui/components/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
-import { RadioGroup, RadioGroupItem } from "@workspace/ui/components/radio-group";
-import { Filter } from "lucide-react";
 import Link from "next/link";
 import {
   parseAsInteger,
   parseAsString,
-  parseAsStringEnum,
-  useQueryState,
+  useQueryState
 } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 import { GetPaginatedUsersOutput } from "./get-paginated-users";
@@ -47,7 +37,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
               {subscriptionPlan && (
                 <Badge
                   variant={
-                    subscriptionPlan === SubscriptionPlanName.Balto
+                    subscriptionPlan === SubscriptionPlanName.Basic
                       ? "default"
                       : "secondary"
                   }
@@ -106,10 +96,6 @@ export const UsersTable = () => {
     "page",
     parseAsInteger.withDefault(1),
   );
-  const [typeFilter, setTypeFilter] = useQueryState(
-    "type",
-    parseAsStringEnum<UserType>(Object.values(UserType)),
-  );
 
   // Initialize searchInput from the 'search' query parameter
   const [searchInput, setSearchInput] = useState(search);
@@ -152,11 +138,6 @@ export const UsersTable = () => {
     }
   }, [search, setCurrentPage]);
 
-  // Reset to first page when role filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [typeFilter, setCurrentPage]);
-
   // Get sorting state from URL or use default
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
@@ -172,7 +153,6 @@ export const UsersTable = () => {
       search,
       page: currentPage,
       pageSize,
-      type: typeFilter || undefined,
       sortBy: (sortBy as "name" | "email" | "createdAt") || undefined,
       sortOrder: (sortOrder as "asc" | "desc") || undefined,
     });
@@ -180,18 +160,10 @@ export const UsersTable = () => {
   // Fetch export data separately (will be fetched on demand by the export button)
   const { data: exportData } = trpc.admin.users.getAllUsersForExport.useQuery({
     search,
-    type: typeFilter || undefined,
   });
 
   // Calculate total pages
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
-
-  // Type filter values
-  const typeOptions = [
-    { value: "all", label: "Tous les types" },
-    { value: UserType.PetParent, label: "Pet Parent" },
-    { value: UserType.Professional, label: "Professionnel" },
-  ];
 
   // Handle sorting changes
   const handleSortingChange = (
@@ -202,8 +174,8 @@ export const UsersTable = () => {
       setSortOrder("");
     } else {
       const sort = newSorting[0];
-      setSortBy(sort.id);
-      setSortOrder(sort.desc ? "desc" : "asc");
+      setSortBy(sort?.id || null);
+      setSortOrder(sort?.desc ? "desc" : "asc");
       // Reset to first page when sorting changes
       setCurrentPage(1);
     }
@@ -228,61 +200,6 @@ export const UsersTable = () => {
         filename: `utilisateurs-${new Date().toISOString().split("T")[0]}.csv`,
         data: exportData || [],
       }}
-      filterComponents={
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filtres
-              {typeFilter && (
-                <Badge variant="secondary" className="ml-1">
-                  1
-                </Badge>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64" align="start">
-            <div className="space-y-4">
-              <div>
-                <p className="mb-3 text-sm font-medium">
-                  Type d&apos;utilisateur
-                </p>
-                <RadioGroup
-                  value={typeFilter || "all"}
-                  onValueChange={(value) =>
-                    setTypeFilter(value === "all" ? null : (value as UserType))
-                  }
-                >
-                  {typeOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      className="flex items-center space-x-2"
-                    >
-                      <RadioGroupItem value={option.value} id={option.value} />
-                      <Label
-                        htmlFor={option.value}
-                        className="cursor-pointer font-normal"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-              {typeFilter && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTypeFilter(null)}
-                  className="w-full"
-                >
-                  Réinitialiser les filtres
-                </Button>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
-      }
     />
   );
 };
