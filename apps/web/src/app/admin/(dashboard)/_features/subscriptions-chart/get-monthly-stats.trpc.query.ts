@@ -3,15 +3,10 @@ import { adminProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { prisma } from "@workspace/db";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { z } from "zod";
-
-const getMonthlyStatsInputSchema = z.object({
-  from: z.date().optional(),
-  to: z.date().optional(),
-});
+import { GetMonthlyStatsSchema } from "./get-monthly-stats.schema";
 
 export const getMonthlyStats = adminProcedure
-  .input(getMonthlyStatsInputSchema)
+  .input(GetMonthlyStatsSchema)
   .query(async ({ input }) => {
     try {
       const today = new Date();

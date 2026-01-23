@@ -14,8 +14,8 @@ export type PeriodSelectorParsers = inferParserType<
   typeof periodSelectorParsers
 >;
 
-export const analyticsPageSearchParamsCache = createSearchParamsCache(
-  periodSelectorParsers,
+export const periodSelectorSearchParamsCache = createSearchParamsCache(
+  periodSelectorParsers
 );
 
 export const loadSearchParams = createLoader(periodSelectorParsers);

@@ -1,6 +1,7 @@
 "use client";
 
 import { PeriodSelector } from "@/app/_features/core/dashboard/period-selector/period-selector.client";
+import { periodSelectorParsers } from "@/app/_features/core/dashboard/period-selector/search-params";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import {
@@ -11,7 +12,7 @@ import {
 } from "@workspace/ui/components/card";
 import { ChartContainer, ChartTooltip } from "@workspace/ui/components/chart";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { Area, Bar, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 type MonthData = {
@@ -23,15 +24,14 @@ type MonthData = {
 };
 
 export function SubscriptionsChart() {
-  const [fromParam] = useQueryState("from");
-  const [toParam] = useQueryState("to");
+  const [period] = useQueryStates(periodSelectorParsers);
 
-  const query = trpc.admin.dashboard.getMonthlyStats.useQuery({
-    from: fromParam || undefined,
-    to: toParam || undefined,
+  const getMonthlyStatsQuery = trpc.admin.dashboard.getMonthlyStats.useQuery({
+    from: period.from ? new Date(period.from) : undefined,
+    to: period.to ? new Date(period.to) : undefined,
   });
 
-  return matchQueryStatus(query, {
+  return matchQueryStatus(getMonthlyStatsQuery, {
     Loading: <SubscriptionsChartLoading />,
     Errored: <SubscriptionsChartError />,
     Success: ({ data }) => (
@@ -142,7 +142,7 @@ export function SubscriptionsChart() {
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
 
-                  const data = payload[0].payload as MonthData;
+                  const data = payload[0]!.payload as MonthData;
                   return (
                     <div className="bg-background rounded-lg border p-3 shadow-md">
                       <div className="font-medium">{data.fullLabel}</div>
