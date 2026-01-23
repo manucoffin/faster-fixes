@@ -7,6 +7,11 @@ COLOR="blue"
 C_RESET='\033[0m'
 C_GRAY='\033[38;5;245m'
 C_BAR_EMPTY='\033[38;5;238m'
+C_GREEN='\033[38;5;71m'
+C_YELLOW='\033[38;5;220m'
+C_ORANGE='\033[38;5;208m'
+C_RED='\033[38;5;167m'
+
 case "$COLOR" in
     orange)   C_ACCENT='\033[38;5;173m' ;;
     blue)     C_ACCENT='\033[38;5;74m' ;;
@@ -19,6 +24,54 @@ case "$COLOR" in
     cyan)     C_ACCENT='\033[38;5;37m' ;;
     *)        C_ACCENT="$C_GRAY" ;;
 esac
+
+# Function to get color based on usage percentage
+get_usage_color() {
+    local pct="$1"
+    pct="${pct%\%}"  # Remove % if present
+    if [[ ! "$pct" =~ ^[0-9]+$ ]]; then
+        return
+    fi
+    if [[ $pct -lt 25 ]]; then
+        COLOR_RESULT="$C_GREEN"
+    elif [[ $pct -lt 50 ]]; then
+        COLOR_RESULT="$C_YELLOW"
+    elif [[ $pct -lt 75 ]]; then
+        COLOR_RESULT="$C_ORANGE"
+    else
+        COLOR_RESULT="$C_RED"
+    fi
+}
+
+# Function to create a progress bar
+create_progress_bar() {
+    local pct="$1"
+    local color="$2"
+    local width=20
+
+    pct="${pct%\%}"  # Remove % if present
+    if [[ ! "$pct" =~ ^[0-9]+$ ]]; then
+        pct=0
+    fi
+
+    local filled=$((pct * width / 100))
+    local empty=$((width - filled))
+
+    BAR_RESULT=""
+    if [[ $filled -gt 0 ]]; then
+        BAR_RESULT+="$color"
+        for ((i=0; i<filled; i++)); do
+            BAR_RESULT+="█"
+        done
+    fi
+    if [[ $empty -gt 0 ]]; then
+        BAR_RESULT+="$C_BAR_EMPTY"
+        for ((i=0; i<empty; i++)); do
+            BAR_RESULT+="░"
+        done
+    fi
+    BAR_RESULT+="$C_RESET"
+}
 
 input=$(cat)
 
@@ -155,10 +208,44 @@ if [[ "$session_usage" == "?" ]]; then
     fi
 fi
 
-# Build output
+# Build output - Line 1: model, branch, context
 output="${C_ACCENT}${model}${C_GRAY}"
 [[ -n "$branch" ]] && output+=" | ${branch}"
-output+=" | 📊 ${context_pct}"
-output+=" | ${session_usage} reset ${session_reset} | ${weekly_usage} reset ${weekly_reset}${C_RESET}"
+output+=" | ctx ${context_pct}${C_RESET}"
 
 printf '%b\n' "$output"
+
+# Line 2: 5-hour window with progress bar
+if [[ "$session_usage" != "?" ]]; then
+    usage_num="${session_usage%\%}"
+
+    # Get color for this usage level
+    COLOR_RESULT="$C_GRAY"
+    get_usage_color "$usage_num"
+    usage_color="$COLOR_RESULT"
+
+    # Create progress bar
+    BAR_RESULT=""
+    create_progress_bar "$usage_num" "$usage_color"
+    progress_bar="$BAR_RESULT"
+
+    line_5h="${C_GRAY}5h: ${progress_bar} ${usage_color}${session_usage}${C_GRAY}"
+    [[ "$session_reset" != "?" ]] && line_5h+=" (${session_reset})"
+    line_5h+="${C_RESET}"
+    printf '%b\n' "$line_5h"
+fi
+
+# Line 3: 7-day window without progress bar
+if [[ "$weekly_usage" != "?" ]]; then
+    usage_num="${weekly_usage%\%}"
+
+    # Get color for this usage level
+    COLOR_RESULT="$C_GRAY"
+    get_usage_color "$usage_num"
+    usage_color="$COLOR_RESULT"
+
+    line_7d="${C_GRAY}7d: ${usage_color}${weekly_usage}${C_GRAY}"
+    [[ "$weekly_reset" != "?" ]] && line_7d+=" (${weekly_reset})"
+    line_7d+="${C_RESET}"
+    printf '%b\n' "$line_7d"
+fi
