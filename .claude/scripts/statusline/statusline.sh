@@ -183,7 +183,9 @@ if [[ "$session_usage" == "?" ]]; then
                     if [[ $diff -gt 0 ]]; then
                         hours=$((diff / 3600))
                         minutes=$(((diff % 3600) / 60))
-                        session_reset="in ${hours}h"
+                        # Get reset time in 12-hour format (e.g., 3pm)
+                        reset_time=$(date -j -f "%s" "$reset_epoch" "+%-I%p" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+                        session_reset="${reset_time} (in ${hours}h)"
                     fi
                 fi
             fi
@@ -230,12 +232,12 @@ if [[ "$session_usage" != "?" ]]; then
     progress_bar="$BAR_RESULT"
 
     line_5h="${C_GRAY}5h: ${progress_bar} ${usage_color}${session_usage}${C_GRAY}"
-    [[ "$session_reset" != "?" ]] && line_5h+=" (${session_reset})"
+    [[ "$session_reset" != "?" ]] && line_5h+=" ${session_reset}"
     line_5h+="${C_RESET}"
     printf '%s\n' "$line_5h"
 fi
 
-# Line 3: 7-day window without progress bar
+# Line 3: 7-day window with progress bar
 if [[ "$weekly_usage" != "?" ]]; then
     usage_num="${weekly_usage%"%"}"
 
@@ -244,7 +246,12 @@ if [[ "$weekly_usage" != "?" ]]; then
     get_usage_color "$usage_num"
     usage_color="$COLOR_RESULT"
 
-    line_7d="${C_GRAY}7d: ${usage_color}${weekly_usage}${C_GRAY}"
+    # Create progress bar
+    BAR_RESULT=""
+    create_progress_bar "$usage_num" "$usage_color"
+    progress_bar="$BAR_RESULT"
+
+    line_7d="${C_GRAY}7d: ${progress_bar} ${usage_color}${weekly_usage}${C_GRAY}"
     [[ "$weekly_reset" != "?" ]] && line_7d+=" (${weekly_reset})"
     line_7d+="${C_RESET}"
     printf '%s\n' "$line_7d"

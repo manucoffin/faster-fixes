@@ -5,14 +5,31 @@ Displays your Claude Code session status in a clean, minimal format.
 ## Output Format
 
 ```
-Claude 3.5 Sonnet | 🔀main | 📊35% | 📈 5h: 28% in 4h | 7d: 52% in 3d
+Claude Haiku | main | ctx ~10%
+5h: ████████░░░░░░░░░░░░ 42.0% (12pm (in 2h))
+7d: ███████████░░░░░░░ 57.0% (in 1d)
 ```
 
+**Line 1:**
 - **Model**: Current Claude model
-- **🔀Branch**: Git branch name (only shown if in a repo)
-- **📊Context**: Current context window usage percentage
-- **📈 5h**: 5-hour rolling window usage % + hours until reset
-- **7d**: 7-day window usage % + days until reset
+- **Branch**: Git branch name (only shown if in a repo)
+- **Context**: Current context window usage percentage
+
+**Line 2 (5-hour window):**
+- **Progress bar**: Visual representation of usage (fills based on percentage)
+- **Usage %**: 5-hour rolling window usage percentage with color-coded indicator
+- **Reset time**: Exact reset time (e.g., 12pm) and relative time (e.g., in 2h)
+
+**Line 3 (7-day window):**
+- **Progress bar**: Visual representation of usage (fills based on percentage)
+- **Usage %**: 7-day rolling window usage percentage with color-coded indicator
+- **Reset time**: Days until reset (e.g., in 1d)
+
+**Color coding:**
+- 🟢 Green: 0-25% usage
+- 🟡 Yellow: 25-50% usage
+- 🟠 Orange: 50-75% usage
+- 🔴 Red: 75-100% usage
 
 ## How It Works
 
