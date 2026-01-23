@@ -6,8 +6,8 @@ import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
 const getMonthlyStatsInputSchema = z.object({
-  from: z.string().date().optional(),
-  to: z.string().date().optional(),
+  from: z.date().optional(),
+  to: z.date().optional(),
 });
 
 export const getMonthlyStats = adminProcedure

@@ -3,22 +3,24 @@ import { inferProcedureOutput } from "@trpc/server";
 import { prisma } from "@workspace/db";
 
 export const getUsersOverview = adminProcedure.query(async () => {
-  const [totalCount, petParentCount, professionalCount] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { type: UserType.PetParent } }),
-    prisma.user.count({ where: { type: UserType.Professional } }),
-  ]);
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const calculatePercentage = (count: number) => {
-    return totalCount === 0 ? 0 : Math.round((count / totalCount) * 100);
-  };
+  const [totalCount, newUsersThisMonth] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({
+      where: {
+        createdAt: {
+          gte: monthStart,
+          lt: now,
+        },
+      },
+    }),
+  ]);
 
   return {
     totalCount,
-    petParentCount,
-    petParentPercentage: calculatePercentage(petParentCount),
-    professionalCount,
-    professionalPercentage: calculatePercentage(professionalCount),
+    newUsersThisMonth,
   };
 });
 

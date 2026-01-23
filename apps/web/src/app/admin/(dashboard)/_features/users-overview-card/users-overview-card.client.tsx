@@ -4,7 +4,6 @@ import { trpc } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Building2, HeartHandshake } from "lucide-react";
 
 export function UsersOverviewCard() {
   const query = trpc.admin.dashboard.getUsersOverview.useQuery();
@@ -17,42 +16,18 @@ export function UsersOverviewCard() {
         <CardContent>
           <div className="text-2xl font-bold">{data?.totalCount}</div>
           <p className="text-muted-foreground mb-4 text-xs">
-            Utilisateurs inscrits
+            Total utilisateurs
           </p>
 
-          {/* Breakdown section */}
+          {/* New users this month section */}
           <div className="space-y-3 border-t pt-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <HeartHandshake className="text-muted-foreground h-4 w-4" />
-                <span className="text-muted-foreground text-xs">
-                  Pet Parents
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
-                  {data?.petParentCount}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  ({data?.petParentPercentage}%)
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="text-muted-foreground h-4 w-4" />
-                <span className="text-muted-foreground text-xs">
-                  Professionnels
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
-                  {data?.professionalCount}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  ({data?.professionalPercentage}%)
-                </span>
-              </div>
+              <span className="text-muted-foreground text-xs">
+                Nouveaux ce mois
+              </span>
+              <span className="text-sm font-semibold">
+                {data?.newUsersThisMonth}
+              </span>
             </div>
           </div>
         </CardContent>
@@ -69,32 +44,14 @@ function UsersOverviewCardLoading() {
           <Skeleton className="h-8 w-24" />
         </div>
         <p className="text-muted-foreground mb-4 text-xs">
-          Utilisateurs inscrits
+          Total utilisateurs
         </p>
 
-        {/* Breakdown section skeleton */}
+        {/* New users section skeleton */}
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <HeartHandshake className="text-muted-foreground h-4 w-4" />
-              <span className="text-muted-foreground text-xs">Pet Parents</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-8" />
-              <Skeleton className="h-5 w-12" />
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Building2 className="text-muted-foreground h-4 w-4" />
-              <span className="text-muted-foreground text-xs">
-                Professionnels
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-8" />
-              <Skeleton className="h-5 w-12" />
-            </div>
+            <span className="text-muted-foreground text-xs">Nouveaux ce mois</span>
+            <Skeleton className="h-5 w-8" />
           </div>
         </div>
       </CardContent>
