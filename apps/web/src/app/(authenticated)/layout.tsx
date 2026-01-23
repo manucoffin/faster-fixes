@@ -1,8 +1,9 @@
+import { loginUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { headers } from "next/headers";
-import { unauthorized } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
 import { AuthenticatedSidebar } from "./_features/sidebar/authenticated-sidebar.server";
 
@@ -12,8 +13,9 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
   });
 
   if (!session) {
-    unauthorized()
+    redirect(loginUrl);
   }
+
 
   return <SidebarProvider>
     <AuthenticatedSidebar />
