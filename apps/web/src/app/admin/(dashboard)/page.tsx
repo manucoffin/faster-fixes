@@ -7,11 +7,10 @@ import { UsersOverviewCard } from "./_features/users-overview-card/users-overvie
 export default async function AdminDashboardPage() {
   return (
     <DashboardPageContent
-      // title="Tableau de bord"
+      title="Tableau de bord"
       breadcrumbs={[{ label: "Tableau de bord", link: "/admin" }]}
     >
       <div className="space-y-6">
-        {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <UsersOverviewCard />
           <ActiveSubscriptionsCard />
