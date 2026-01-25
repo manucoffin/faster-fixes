@@ -1,5 +1,6 @@
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { PageParams } from "@/types/next";
+import { prisma } from "@workspace/db/index";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AccountCardLoading } from "./_features/account/account-card-loading.server";
@@ -17,13 +18,22 @@ export default async function AdminUserDetailsPage(props: PageParams) {
     return notFound();
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      name: true,
+    },
+  });
+
+  const pageTitle = user ? `Détails de ${user.name}` : "Utilisateur";
+
   return (
     <DashboardPageContent
-      title="Utilisateur"
+      title={pageTitle}
       breadcrumbs={[
         { label: "Tableau de bord", link: "/admin" },
         { label: "Utilisateurs", link: "/admin/utilisateurs" },
-        { label: "Détails", },
+        { label: pageTitle, },
       ]}
     >
       <div className="grid gap-4 lg:grid-cols-3">
