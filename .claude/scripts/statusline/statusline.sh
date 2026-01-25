@@ -198,7 +198,10 @@ if [[ "$session_usage" == "?" ]]; then
                     diff=$((reset_epoch - now))
                     if [[ $diff -gt 0 ]]; then
                         days=$((diff / 86400))
-                        weekly_reset="in ${days}d"
+                        # Get day name (lowercase) and day of month
+                        day_name=$(date -j -f "%s" "$reset_epoch" "+%A" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+                        day_num=$(date -j -f "%s" "$reset_epoch" "+%-d" 2>/dev/null)
+                        weekly_reset="${day_name} ${day_num} (in ${days}d)"
                     fi
                 fi
             fi
@@ -252,7 +255,7 @@ if [[ "$weekly_usage" != "?" ]]; then
     progress_bar="$BAR_RESULT"
 
     line_7d="${C_GRAY}7d: ${progress_bar} ${usage_color}${weekly_usage}${C_GRAY}"
-    [[ "$weekly_reset" != "?" ]] && line_7d+=" (${weekly_reset})"
+    [[ "$weekly_reset" != "?" ]] && line_7d+=" ${weekly_reset}"
     line_7d+="${C_RESET}"
     printf '%s\n' "$line_7d"
 fi
