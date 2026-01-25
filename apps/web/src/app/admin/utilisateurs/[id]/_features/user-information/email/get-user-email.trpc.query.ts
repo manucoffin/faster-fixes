@@ -6,7 +6,7 @@ export const getUserEmail = adminProcedure
   .input(
     z.object({
       userId: z.string().min(1),
-    }),
+    })
   )
   .query(async ({ input, ctx }) => {
     const user = await ctx.prisma.user.findUnique({
@@ -21,6 +21,4 @@ export const getUserEmail = adminProcedure
     return user;
   });
 
-export type AdminUsersGetUserEmail = inferProcedureOutput<
-  typeof getUserEmail
->;
+export type GetUserEmailOutput = inferProcedureOutput<typeof getUserEmail>;

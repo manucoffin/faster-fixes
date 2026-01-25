@@ -4,6 +4,6 @@ export const RequestPasswordResetSchema = z.object({
   userId: z.string(),
 });
 
-export type RequestPasswordResetInput = z.infer<
+export type RequestPasswordResetInputs = z.infer<
   typeof RequestPasswordResetSchema
 >;

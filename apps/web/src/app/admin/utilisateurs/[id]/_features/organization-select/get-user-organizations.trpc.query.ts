@@ -6,7 +6,7 @@ export const getUserOrganizations = adminProcedure
   .input(
     z.object({
       userId: z.string().min(1),
-    }),
+    })
   )
   .query(async ({ input, ctx }) => {
     const organizations = await ctx.prisma.member.findMany({
@@ -31,6 +31,6 @@ export const getUserOrganizations = adminProcedure
     }));
   });
 
-export type AdminUsersGetUserOrganizations = inferProcedureOutput<
+export type GetUserOrganizationsOutput = inferProcedureOutput<
   typeof getUserOrganizations
 >;

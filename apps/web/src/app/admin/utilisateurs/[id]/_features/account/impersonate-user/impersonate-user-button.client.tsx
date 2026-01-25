@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/lib/auth/client";
+import { useSession } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
 import {
   AlertDialog,
@@ -30,7 +30,7 @@ export const ImpersonateUserButton = ({
   const { refetch: refetchSession } = useSession();
 
   const impersonateUserMutation =
-    trpc.admin.users.detailsPage.impersonateUser.useMutation({
+    trpc.admin.users.details.impersonateUser.useMutation({
       onSuccess: async () => {
         toast.success("Succès", {
           description: `Vous êtes maintenant connecté en tant que ${userEmail}`,

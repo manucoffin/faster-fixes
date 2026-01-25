@@ -33,6 +33,6 @@ export async function getUserInformation(userId: string) {
   });
 }
 
-export type UserInformationOutput = Awaited<
+export type GetUserInformationOutput = Awaited<
   ReturnType<typeof getUserInformation>
 >;
