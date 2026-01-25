@@ -10,7 +10,7 @@ export default function AdminUsersPage() {
       title="Utilisateurs"
       actions={
         <Button asChild variant="outline">
-          <Link href="/admin/users/new">
+          <Link href="/admin/utilisateurs/new">
             <Plus />
             Ajouter un utilisateur
           </Link>
@@ -18,7 +18,7 @@ export default function AdminUsersPage() {
       }
       breadcrumbs={[
         { label: "Tableau de bord", link: "/admin" },
-        { label: "Utilisateurs", link: "/admin/users" },
+        { label: "Utilisateurs", link: "/admin/utilisateurs" },
       ]}
     >
       <Suspense>

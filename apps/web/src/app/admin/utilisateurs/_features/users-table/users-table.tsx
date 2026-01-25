@@ -31,7 +31,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
 
       return (
         <div className="flex flex-col gap-1">
-          <Link href={`/admin/users/${row.original.id}`}>
+          <Link href={`/admin/utilisateurs/${row.original.id}`}>
             <div className="flex items-center gap-2">
               <span>{name || "—"}</span>
               {subscriptionPlan && (

@@ -27,7 +27,7 @@ export function DashboardPageHeader({
     >
       <div className="space-y-1">
         {backLink && <div className="mb-2">{backLink}</div>}
-        <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">
+        <h1 className="text-xl font-medium text-primary md:text-3xl">
           {title}
         </h1>
         {description && <p className="text-muted-foreground">{description}</p>}
