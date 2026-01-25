@@ -1,6 +1,6 @@
 "use client";
 
-import { SubscriptionStatusTranslation } from "@/app/_constants/domain/subscription-status";
+import { SubscriptionStatusTranslation } from "@/app/_features/subscription/_constants/translations";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { Badge } from "@workspace/ui/components/badge";
 import {
@@ -22,7 +22,7 @@ interface SubscriptionCardProps {
 
 export function SubscriptionCard({ userId }: SubscriptionCardProps) {
   const { data: subscription, isLoading } =
-    trpc.admin.users.detailsPage.getSubscription.useQuery(
+    trpc.admin.users.details.getSubscription.useQuery(
       { userId },
       {
         enabled: !!userId,

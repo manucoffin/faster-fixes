@@ -6,8 +6,8 @@ import { z } from "zod";
 
 export const SubscriptionSchema = z.object({
   organizationId: z.string().min(1),
-  plan: z.nativeEnum(SubscriptionPlanName),
-  status: z.nativeEnum(SubscriptionStatus),
+  plan: z.enum(SubscriptionPlanName),
+  status: z.enum(SubscriptionStatus),
   periodStart: z.date().optional(),
   periodEnd: z.date().optional(),
   cancelAtPeriodEnd: z.boolean().optional(),

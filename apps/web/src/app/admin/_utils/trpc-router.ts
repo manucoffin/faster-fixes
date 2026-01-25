@@ -7,6 +7,7 @@ import { deleteUser } from "../utilisateurs/[id]/_features/account/delete-user/d
 import { impersonateUser } from "../utilisateurs/[id]/_features/account/impersonate-user/impersonate-user.trpc.mutation";
 import { requestPasswordReset } from "../utilisateurs/[id]/_features/account/request-password-reset/request-password-reset.trpc.mutation";
 import { revokeUserSessions } from "../utilisateurs/[id]/_features/account/revoke-user-sessions/revoke-user-sessions.trpc.mutation";
+import { getUserOrganizations } from "../utilisateurs/[id]/_features/organization-select/get-user-organizations.trpc.query";
 import { createSubscription } from "../utilisateurs/[id]/_features/subscription/create-subscription.trpc.mutation";
 import { getSubscription } from "../utilisateurs/[id]/_features/subscription/get-subscription.trpc.query";
 import { updateSubscription } from "../utilisateurs/[id]/_features/subscription/update-subscription.trpc.mutation";
@@ -25,6 +26,8 @@ export const adminRouter = router({
   users: {
     getPaginatedUsers: getPaginatedUsers,
     getAllUsersForExport: getAllUsersForExport,
+    getUserOrganizations: getUserOrganizations,
+
     details: {
       deleteUser: deleteUser,
       impersonateUser: impersonateUser,

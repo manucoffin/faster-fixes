@@ -1,13 +1,11 @@
 "use client";
 
-import { UserOrganizationSelect } from "@/app/admin/users/_features/organization-select/user-organization-select.client";
 import { trpc } from "@/lib/trpc/trpc-client";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionPlanName,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
-import { cn } from "@/utils/styling/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { Button } from "@workspace/ui/components/button";
@@ -28,7 +26,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@workspace/ui/components/form";
 import {
   Popover,
@@ -42,11 +40,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { cn } from "@workspace/ui/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
 import { SubscriptionInputs, SubscriptionSchema } from "./subscription.schema";
 
 interface SubscriptionCreateDialogProps {
@@ -65,12 +65,12 @@ export function SubscriptionCreateDialog({
   const [open, setOpen] = useState(false);
 
   const createMutation =
-    trpc.admin.users.detailsPage.createSubscription.useMutation({
+    trpc.admin.users.details.createSubscription.useMutation({
       onSuccess: () => {
         toast.success("Abonnement créé avec succès");
         setOpen(false);
         // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.detailsPage.getSubscription.invalidate();
+        trpcUtils.admin.users.details.getSubscription.invalidate();
       },
       onError: (error) => {
         toast.error(
@@ -134,65 +134,68 @@ export function SubscriptionCreateDialog({
               )}
             />
 
-            {/* Statut d'abonnement */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Statut</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un statut" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(SubscriptionStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2">
+              {/* Plan */}
+              <FormField
+                control={form.control}
+                name="plan"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Plan</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un plan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subscriptionPlans.map((plan: any) => (
+                          <SelectItem key={plan.name} value={plan.name}>
+                            {plan.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Plan */}
-            <FormField
-              control={form.control}
-              name="plan"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plan</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un plan" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {subscriptionPlans.map((plan: any) => (
-                        <SelectItem key={plan.name} value={plan.name}>
-                          {plan.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+              {/* Statut d'abonnement */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Statut</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un statut" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(SubscriptionStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Annulation à la fin de la période */}
             <FormField

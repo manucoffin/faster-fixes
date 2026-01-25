@@ -1,14 +1,11 @@
 "use client";
 
-import { UserOrganizationSelect } from "@/app/admin/users/_features/organization-select/user-organization-select.client";
 import { trpc } from "@/lib/trpc/trpc-client";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
-import { cn } from "@/utils/styling/cn";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { Button } from "@workspace/ui/components/button";
 import { Calendar } from "@workspace/ui/components/calendar";
@@ -42,11 +39,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { cn } from "@workspace/ui/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
 import {
   UpdateSubscriptionInputs,
   UpdateSubscriptionSchema,
@@ -68,14 +67,13 @@ export function SubscriptionEditDialog({
 
   const trpcUtils = trpc.useUtils();
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
   const updateMutation =
-    trpc.admin.users.detailsPage.updateSubscription.useMutation({
+    trpc.admin.users.details.updateSubscription.useMutation({
       onSuccess: () => {
         toast.success("Abonnement mis à jour avec succès");
         setOpen(false);
         // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.detailsPage.getSubscription.invalidate();
+        trpcUtils.admin.users.details.getSubscription.invalidate();
       },
       onError: (error: any) => {
         toast.error(

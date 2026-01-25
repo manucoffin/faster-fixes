@@ -6,7 +6,7 @@ export const getSubscription = adminProcedure
   .input(
     z.object({
       userId: z.string().min(1),
-    }),
+    })
   )
   .query(async ({ input, ctx }) => {
     const user = await ctx.prisma.user.findUnique({
@@ -47,7 +47,7 @@ export const getSubscription = adminProcedure
       return null;
     }
 
-    const subscription = user.members[0].organization?.subscription;
+    const subscription = user.members[0]?.organization?.subscription;
 
     if (!subscription) {
       return null;

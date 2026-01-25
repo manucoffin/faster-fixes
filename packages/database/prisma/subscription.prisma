@@ -1,5 +1,5 @@
 model Subscription {
-    id                   String    @id
+    id                   String    @id @default(cuid())
     plan                 String
     referenceId          String
     stripeCustomerId     String?

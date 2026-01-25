@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AccountCardLoading } from "./_features/account/account-card-loading.server";
 import { SubscriptionCardLoading } from "./_features/subscription/subscription-card-loading.server";
+import { SubscriptionCard } from "./_features/subscription/subscription-card.client";
 import { UserInformationCardLoading } from "./_features/user-information/user-information-card-loading.server";
 import { UserInformationCard } from "./_features/user-information/user-information-card.server";
 
@@ -31,7 +32,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
           </Suspense>
 
           <Suspense fallback={<SubscriptionCardLoading />}>
-            {/* <SubscriptionCard userId={id} /> */}
+            <SubscriptionCard userId={id} />
           </Suspense>
 
           <Suspense fallback={<AccountCardLoading />}>
