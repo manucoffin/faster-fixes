@@ -20,6 +20,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -44,7 +45,7 @@ export function LoginForm() {
       form.setError("root", { message });
     },
     onSuccess: (() => {
-      router.push(nextUrl || defaultRedirect);
+      router.push((nextUrl || defaultRedirect) as Route);
     })
   });
 
