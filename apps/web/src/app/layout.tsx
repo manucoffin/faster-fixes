@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { Outfit } from "next/font/google";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Toaster } from "sonner";
+import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -29,6 +30,8 @@ export default function RootLayout({
         >
           <TRPCProvider>
             <NuqsAdapter>
+              <StopImpersonateButton />
+
               {children}
 
               <Toaster />
