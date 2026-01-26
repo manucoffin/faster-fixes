@@ -1,1 +1,1 @@
-export * from "@workspace/payload/components/array-row-label";
+export * from "./array-row-label";

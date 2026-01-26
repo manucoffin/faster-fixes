@@ -8,7 +8,7 @@ export const getArrayRowLabel = ({
   itemPlaceholder?: string;
 }): RowLabelComponent => {
   return {
-    path: "@repo/payload/components/array-row-label#ArrayRowLabel",
+    path: "@workspace/payload/components/array-row-label#ArrayRowLabel",
     clientProps: {
       fieldName: fieldName,
       itemPlaceholder: itemPlaceholder,
