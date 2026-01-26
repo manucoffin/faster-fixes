@@ -13,6 +13,7 @@ import { getSubscription } from "../utilisateurs/[id]/_features/subscription/get
 import { updateSubscription } from "../utilisateurs/[id]/_features/subscription/update-subscription.trpc.mutation";
 import { getUserEmail } from "../utilisateurs/[id]/_features/user-information/email/get-user-email.trpc.query";
 import { toggleEmailVerified } from "../utilisateurs/[id]/_features/user-information/email/toggle-email-verified.trpc.mutation";
+import { createUser } from "../utilisateurs/_features/create-user/create-user.trpc.mutation";
 import { getAllUsersForExport } from "../utilisateurs/_features/users-table/get-all-users-for-export";
 import { getPaginatedUsers } from "../utilisateurs/_features/users-table/get-paginated-users";
 
@@ -27,6 +28,7 @@ export const adminRouter = router({
     getPaginatedUsers: getPaginatedUsers,
     getAllUsersForExport: getAllUsersForExport,
     getUserOrganizations: getUserOrganizations,
+    createUser: createUser,
 
     details: {
       deleteUser: deleteUser,
