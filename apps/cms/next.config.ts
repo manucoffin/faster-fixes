@@ -1,7 +1,13 @@
-import type { NextConfig } from "next";
+import { withPayload } from "@payloadcms/next/withPayload";
 
-const config: NextConfig = {
-  transpilePackages: ["@workspace/ui"],
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Your Next.js config here
+  // experimental: {
+  //   reactCompiler: false,
+  // },
 };
 
-export default config;
+// Make sure you wrap your `nextConfig`
+// with the `withPayload` plugin
+export default withPayload(nextConfig);
