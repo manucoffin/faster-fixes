@@ -39,7 +39,7 @@ export const UsersTableActionDropdown = ({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/admin/users/${userId}`}>
+          <Link href={`/admin/utilisateurs/${userId}`}>
             <Eye className="mr-2 w-4" /> Voir les détails
           </Link>
         </DropdownMenuItem>

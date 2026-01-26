@@ -34,3 +34,7 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
