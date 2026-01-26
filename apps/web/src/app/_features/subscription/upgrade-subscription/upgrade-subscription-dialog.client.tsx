@@ -2,6 +2,7 @@
 
 import { trpc } from "@/lib/trpc/trpc-client";
 import {
+  PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
   SUBSCRIPTION_PLANS,
   SubscriptionPlanName,
@@ -86,16 +87,16 @@ export function UpgradeSubscriptionDialog({
       </DialogTrigger>
       <DialogContent className="h-full w-full max-w-full overflow-y-auto sm:max-h-[95svh] sm:max-w-[90svw] md:h-fit xl:max-w-[60svw]">
         <DialogHeader className="h-fit">
-          <DialogTitle>Choisis ton plan</DialogTitle>
+          <DialogTitle>Choisissez votre plan</DialogTitle>
           <DialogDescription>
-            Sélectionnes le plan qui correspond le mieux à tes besoins
+            Sélectionnez le plan qui correspond le mieux à vos besoins
           </DialogDescription>
 
           {today < launchPromotionEndDate ? (
             <div className="rounded-2xl border border-blue-800/20 bg-blue-50 p-3">
-              Pour les fêtes, Tobalgo t&apos;offre un{" "}
+              Pour les fêtes, Tobalgo vous offre un{" "}
               <strong>accès gratuit</strong> à toutes les fonctionnalités,
-              jusqu&apos;au 31 décembre inclus ! 🥳 Prends ton abonnement dès
+              jusqu&apos;au 31 décembre inclus ! 🥳 Prenez votre abonnement dès
               maintenant pour en profiter.
             </div>
           ) : null}
@@ -196,14 +197,12 @@ export function UpgradeSubscriptionDialog({
                       key={plan.name}
                       title={plan.name}
                       description={
-                        plan.name === SubscriptionPlanName.Basic
-                          ? "Description Basic"
-                          : "Description Premium"
+                        PLAN_DESCRIPTIONS[plan.name as SubscriptionPlanName]
                       }
                       price={priceHT}
                       priceTTC={priceTTC}
                       freeTrialDays={freeTrialDays}
-                      badge={isHighlighted ? "La plus populaire" : undefined}
+                      badge={isHighlighted ? "Le plus populaire" : undefined}
                       features={features}
                       variant={isHighlighted ? "highlighted" : "default"}
                       isAnnual={isAnnual}
