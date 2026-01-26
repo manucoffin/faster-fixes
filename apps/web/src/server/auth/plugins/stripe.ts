@@ -1,6 +1,7 @@
 import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { stripeApi } from "@/server/stripe";
 import { stripe } from "@better-auth/stripe";
+import { prisma } from "@workspace/db";
 
 export const stripePlugin = stripe({
   stripeClient: stripeApi,
@@ -18,7 +19,26 @@ export const stripePlugin = stripe({
 
   subscription: {
     enabled: true,
+    authorizeReference: async ({ user, referenceId, action }) => {
+      // Check if the user has permission to manage subscriptions for this reference
+      if (
+        action === "upgrade-subscription" ||
+        action === "cancel-subscription" ||
+        action === "restore-subscription"
+      ) {
+        const org = await prisma.member.findFirst({
+          where: {
+            organizationId: referenceId,
+            userId: user.id,
+          },
+        });
 
+        return org?.role === "owner";
+      }
+
+      // For other actions, authorize
+      return true;
+    },
     plans: SUBSCRIPTION_PLANS,
   },
 });
