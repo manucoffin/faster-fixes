@@ -20,11 +20,11 @@ export function BillingDetailsCard({
   stripeSubscriptionId,
   subscriptionStatus,
 }: BillingDetailsCardProps) {
-  const getStripePricesQuery = trpc.stripe.getPlansPrices.useQuery({
+  const getStripePricesQuery = trpc.subscription.getPlansPrices.useQuery({
     planNames: [planName],
   });
 
-  const getStripeSubscriptionQuery = trpc.stripe.getStripeSubscription.useQuery(
+  const getStripeSubscriptionQuery = trpc.subscription.getStripeSubscription.useQuery(
     {
       stripeSubscriptionId: stripeSubscriptionId!,
     },

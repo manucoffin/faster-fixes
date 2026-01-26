@@ -42,7 +42,7 @@ export function UpgradeSubscriptionDialog({
   const [isAnnual, setIsAnnual] = useState(false);
 
   // Fetch stripe prices for all plans
-  const stripePricesQuery = trpc.stripe.getPlansPrices.useQuery(
+  const stripePricesQuery = trpc.subscription.getPlansPrices.useQuery(
     {
       planNames: SUBSCRIPTION_PLANS.map((p) => p.name),
     },
