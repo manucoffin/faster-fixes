@@ -14,6 +14,7 @@ export const {
   signUp,
   signOut,
   useSession,
+  getSession,
   useListOrganizations,
   useActiveOrganization,
   subscription,

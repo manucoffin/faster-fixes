@@ -1,4 +1,4 @@
-import { getUserDisplayName } from "@/app/_features/users/_utils/get-user-display-name";
+import { getUserDisplayName } from "@/app/_features/user/_utils/get-user-display-name";
 import {
   Card,
   CardHeader,
