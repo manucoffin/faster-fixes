@@ -1,0 +1,48 @@
+{
+  "name": "@workspace/payload",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.73.0",
+    "@payloadcms/next": "3.73.0",
+    "@payloadcms/plugin-seo": "3.73.0",
+    "@payloadcms/richtext-lexical": "3.73.0",
+    "@payloadcms/storage-s3": "3.73.0",
+    "@payloadcms/translations": "3.73.0",
+    "@payloadcms/ui": "3.73.0",
+    "payload": "3.73.0",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    "./*": "./src/*.ts",
+    "./collections/*": "./src/collections/*/index.ts",
+    "./globals/*": "./src/globals/*/index.ts",
+    "./plugins/*": "./src/plugins/*/index.ts",
+    "./blocks/*": "./src/blocks/*/index.ts",
+    "./fields/*": "./src/fields/*/index.ts",
+    "./components/*": "./src/components/*/index.ts",
+    "./payload-types": "./src/payload.types.ts",
+    "./payload-config": "./src/payload.config.ts"
+  },
+  "watch": {
+    "generate:types": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "ts,tsx",
+      "quiet": false
+    }
+  }
+}
