@@ -26,6 +26,7 @@ export const createBillingPortal = protectedProcedure.mutation(
         body: {
           referenceId: activeOrganization.id,
           returnUrl,
+          customerType: "organization",
         },
         headers: await headers(),
       });

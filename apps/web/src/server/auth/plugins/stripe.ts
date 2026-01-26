@@ -36,7 +36,7 @@ export const stripePlugin = stripe({
           id: subscription.id,
         },
         data: {
-          organizationId: subscription.referenceId || undefined,
+          organizationId: subscription.referenceId,
           stripeCustomerId: stripeSubscription.customer as string,
         },
       });
