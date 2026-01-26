@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:types": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
+    "generate:importmap": "pnpm exec payload generate:importmap"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.73.0",
@@ -31,7 +33,9 @@
     "./globals/*": "./src/globals/*/index.ts",
     "./plugins/*": "./src/plugins/*/index.ts",
     "./blocks/*": "./src/blocks/*/index.ts",
+    "./blocks/*/utils": "./src/blocks/*/utils.ts",
     "./fields/*": "./src/fields/*/index.ts",
+    "./fields/utils/*": "./src/fields/utils/*.ts",
     "./components/*": "./src/components/*/index.ts",
     "./payload-types": "./src/payload.types.ts",
     "./payload-config": "./src/payload.config.ts"

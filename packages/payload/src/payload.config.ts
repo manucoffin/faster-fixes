@@ -1,3 +1,3 @@
-import { configurePayload } from "./configure-payload";
+import { configurePayload } from "@workspace/payload/configure-payload";
 
 export default configurePayload();

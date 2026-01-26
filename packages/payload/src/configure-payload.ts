@@ -8,8 +8,8 @@ import {
   RelationshipFeature,
   TextStateFeature,
 } from "@payloadcms/richtext-lexical";
-import { FAQBlock } from "@workspace/payload/blocks/rich-text/faq-block";
-import { YouTubeBlock } from "@workspace/payload/blocks/rich-text/youtube-block";
+import { FAQBlock } from "@workspace/payload/blocks/faqs";
+import { YouTubeBlock } from "@workspace/payload/blocks/youtube-video";
 import { Authors } from "@workspace/payload/collections/authors";
 import { Categories } from "@workspace/payload/collections/categories";
 import { Media } from "@workspace/payload/collections/media";
