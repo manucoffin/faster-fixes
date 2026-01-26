@@ -1,6 +1,7 @@
 import { signupUrl } from "@/lib/routing";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { LoginForm } from "./_features/login-form/login-form.client";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold">Connectez-vous à votre compte</h1>
           </div>
 
-          <LoginForm />
+          <Suspense>
+            <LoginForm />
+          </Suspense>
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">
