@@ -28,7 +28,7 @@ export default async function BillingPage() {
     <DashboardPageContent
       title="Facturation"
       breadcrumbs={[
-        { label: "Accueil", link: "/" },
+        { label: "Mon compte" },
         { label: "Facturation" },
       ]}
     >

@@ -186,7 +186,7 @@ export function UpgradeSubscriptionDialog({
 
                   // Calculate price in euros (Stripe stores in cents)
                   const priceHT = selectedPrice
-                    ? Math.round(selectedPrice.unit_amount! / 100)
+                    ? selectedPrice.unit_amount! / 100
                     : 0;
                   const priceTTC = Math.round(priceHT * 1.2);
 

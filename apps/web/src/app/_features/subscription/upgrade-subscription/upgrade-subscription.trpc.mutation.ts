@@ -32,10 +32,10 @@ export const upgradeSubscription = protectedProcedure
         plan: input.planName,
         referenceId: activeOrganization.id,
         annual: input.annual || false,
-        successUrl: `${appUrl}/espace-pro/mon-compte/facturation?success=true`,
-        cancelUrl: `${appUrl}/espace-pro/mon-compte/facturation?cancelled=true`,
+        successUrl: `${appUrl}/mon-compte/facturation?success=true`,
+        cancelUrl: `${appUrl}/mon-compte/facturation?cancelled=true`,
         disableRedirect: true,
-        returnUrl: `${appUrl}/espace-pro/mon-compte/facturation`,
+        returnUrl: `${appUrl}/mon-compte/facturation`,
       },
       headers: await headers(),
     });

@@ -48,8 +48,7 @@ export function PlanCard({
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between">
             <h3
-              className={`text-3xl font-bold capitalize ${isHighlighted ? "text-primary" : "text-secondary"
-                }`}
+              className="text-3xl font-bold capitalize"
             >
               {title}
             </h3>
