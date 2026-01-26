@@ -3,11 +3,13 @@ model Organization {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    name        String
-    slug        String
-    logo        String?
-    metadata    String?
-    isDefault   Boolean      @default(false)
+    name             String
+    slug             String
+    logo             String?
+    metadata         String?
+    isDefault        Boolean @default(false)
+    stripeCustomerId String?
+
     members     Member[]
     invitations Invitation[]
 

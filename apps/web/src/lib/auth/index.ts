@@ -32,7 +32,7 @@ export const {
     organizationClient(),
     lastLoginMethodClient(),
     stripeClient({
-      subscription: true, //if you want to enable subscription management
+      subscription: true, // Enables subscription management
     }),
   ],
 });

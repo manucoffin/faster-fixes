@@ -55,15 +55,6 @@ export async function Header() {
                   <Link href="/">Accueil</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
-                >
-                  <Link href="/stack-startup-2026">Ressources</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -104,7 +95,7 @@ export async function Header() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                  <Link href="/mon-compte">Mon compte</Link>
+                  <Link href="/mon-compte/parametres">Mon compte</Link>
                 </DropdownMenuItem>
 
                 {session.user.role === "admin" && (

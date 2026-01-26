@@ -18,7 +18,7 @@ export const createBillingPortal = protectedProcedure.mutation(
     }
 
     const appUrl = getAppUrl();
-    const returnUrl = `${appUrl}/mon-compte`;
+    const returnUrl = `${appUrl}/mon-compte/facturation`;
 
     try {
       // Call Better Auth Stripe API to create billing portal session
@@ -35,10 +35,10 @@ export const createBillingPortal = protectedProcedure.mutation(
       console.error(error);
 
       throw new Error(
-        "Une erreur s'est produite lors de l'accès au portail de facturation. Veuillez réessayer."
+        "Une erreur s'est produite lors de l'accès au portail de facturation. Veuillez réessayer.",
       );
     }
-  }
+  },
 );
 
 export type CreateBillingPortalOutput = inferProcedureOutput<

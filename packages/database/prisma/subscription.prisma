@@ -3,8 +3,11 @@ model Subscription {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // The ID this subscription is associated with (organization ID in our case). 
+    // This should NOT be a unique field in your database, as it must allow users to resubscribe after a cancellation.
+    referenceId String
+
     plan                 String
-    referenceId          String
     stripeCustomerId     String?
     stripeSubscriptionId String?
     status               String?   @default("incomplete")

@@ -111,12 +111,12 @@ export const SUBSCRIPTION_PLANS: StripePlan[] = [
       seats: 1,
     },
     group: "",
-    freeTrial: {
-      days: 14,
-      onTrialStart: async (subscription) => {},
-      onTrialEnd: async (data) => {},
-      onTrialExpired: async (subscription) => {},
-    },
+    // freeTrial: {
+    //   days: 0,
+    //   onTrialStart: async (subscription) => {},
+    //   onTrialEnd: async (data) => {},
+    //   onTrialExpired: async (subscription) => {},
+    // },
   },
   {
     name: SubscriptionPlanName.Premium,
@@ -128,11 +128,11 @@ export const SUBSCRIPTION_PLANS: StripePlan[] = [
       seats: 1,
     },
     group: "",
-    freeTrial: {
-      days: 14,
-      onTrialStart: async (subscription) => {},
-      onTrialEnd: async (data) => {},
-      onTrialExpired: async (subscription) => {},
-    },
+    // freeTrial: {
+    //   days: 0,
+    //   onTrialStart: async (subscription) => {},
+    //   onTrialEnd: async (data) => {},
+    //   onTrialExpired: async (subscription) => {},
+    // },
   },
 ];
