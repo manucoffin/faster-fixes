@@ -1,3 +1,4 @@
+import { generateUniqueSlug } from "@/app/_features/organization/_utils/generate-unique-slug";
 import { prisma } from "@workspace/db";
 import type { BetterAuthOptions } from "better-auth";
 
@@ -11,6 +12,26 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
             userId: user.id,
             acceptsNewsletter: false,
             acceptsMarketing: false,
+          },
+        });
+
+        // Generate a unique slug for the default organization
+        const organizationSlug = await generateUniqueSlug("Mon organisation");
+
+        // Create a default organization for every new user
+        await prisma.organization.create({
+          data: {
+            name: "Mon organisation",
+            slug: organizationSlug,
+            isDefault: true,
+            members: {
+              create: [
+                {
+                  userId: user.id,
+                  role: "owner",
+                },
+              ],
+            },
           },
         });
       },
@@ -44,7 +65,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         } catch (error) {
           console.error(
             "Error setting default organization for user session:",
-            error
+            error,
           );
 
           // Return session without active organization on error

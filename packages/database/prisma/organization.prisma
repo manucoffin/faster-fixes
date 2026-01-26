@@ -1,9 +1,11 @@
 model Organization {
-    id          String       @id
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     name        String
     slug        String
     logo        String?
-    createdAt   DateTime
     metadata    String?
     isDefault   Boolean      @default(false)
     members     Member[]
@@ -16,13 +18,15 @@ model Organization {
 }
 
 model Member {
-    id             String       @id
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     organizationId String
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     userId         String
     user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
     role           String       @default("member")
-    createdAt      DateTime
 
     @@index([organizationId])
     @@index([userId])
@@ -30,14 +34,16 @@ model Member {
 }
 
 model Invitation {
-    id             String       @id
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     organizationId String
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     email          String
     role           String?
     status         String       @default("pending")
     expiresAt      DateTime
-    createdAt      DateTime     @default(now())
     inviterId      String
     user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
