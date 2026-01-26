@@ -7,6 +7,9 @@ export const stripePlugin = stripe({
   stripeClient: stripeApi,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SIGNING_SECRET || "",
   createCustomerOnSignUp: true,
+  organization: {
+    enabled: true,
+  },
 
   // Handle custom Stripe events that aren't automatically handled by Better Auth
   onEvent: async (event) => {
@@ -19,6 +22,25 @@ export const stripePlugin = stripe({
 
   subscription: {
     enabled: true,
+    getCheckoutSessionParams: async ({ user }) => {
+      return {
+        params: {
+          customer_email: user.email,
+        },
+      };
+    },
+    onSubscriptionComplete: async ({ subscription, stripeSubscription }) => {
+      // Handle new subscriptions: ensure organizationId and stripeCustomerId are set
+      await prisma.subscription.update({
+        where: {
+          id: subscription.id,
+        },
+        data: {
+          organizationId: subscription.referenceId || undefined,
+          stripeCustomerId: stripeSubscription.customer as string,
+        },
+      });
+    },
     authorizeReference: async ({ user, referenceId, action }) => {
       // Check if the user has permission to manage subscriptions for this reference
       if (

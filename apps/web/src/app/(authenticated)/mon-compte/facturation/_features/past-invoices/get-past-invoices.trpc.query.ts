@@ -1,20 +1,34 @@
+import { auth } from "@/server/auth";
 import { stripeApi } from "@/server/stripe";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { tryCatch } from "@/utils/error/try-catch";
 import { TRPCError } from "@trpc/server";
+import { headers } from "next/headers";
 
 export const getPastInvoices = protectedProcedure.query(async ({ ctx }) => {
   try {
-    const user = await ctx.prisma.user.findUnique({
+    const activeOrganization = await auth.api.getFullOrganization({
+      headers: await headers(),
+    });
+
+    if (!activeOrganization) {
+      return {
+        invoices: [],
+        status: "no_active_organization",
+      };
+    }
+
+    // Fetch the organization's stripeCustomerId from Prisma
+    const organization = await ctx.prisma.organization.findUnique({
       where: {
-        id: ctx.session.user.id,
+        id: activeOrganization.id,
       },
       select: {
         stripeCustomerId: true,
       },
     });
 
-    if (!user?.stripeCustomerId) {
+    if (!organization?.stripeCustomerId) {
       return {
         invoices: [],
         status: "no_stripe_customer",
@@ -23,7 +37,7 @@ export const getPastInvoices = protectedProcedure.query(async ({ ctx }) => {
 
     const { error, data: invoices } = await tryCatch(
       stripeApi.invoices.list({
-        customer: user.stripeCustomerId,
+        customer: organization.stripeCustomerId,
         limit: 100,
         status: "paid",
       }),

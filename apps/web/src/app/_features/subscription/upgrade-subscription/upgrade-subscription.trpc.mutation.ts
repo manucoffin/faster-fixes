@@ -31,6 +31,7 @@ export const upgradeSubscription = protectedProcedure
       body: {
         plan: input.planName,
         referenceId: activeOrganization.id,
+        customerType: "organization",
         annual: input.annual || false,
         successUrl: `${appUrl}/mon-compte/facturation?success=true`,
         cancelUrl: `${appUrl}/mon-compte/facturation?cancelled=true`,
