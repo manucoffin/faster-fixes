@@ -9,15 +9,23 @@ export const stripePlugin = stripe({
   createCustomerOnSignUp: true,
   organization: {
     enabled: true,
-  },
+    getCustomerCreateParams: async (organization) => {
+      const owner = await prisma.member.findFirst({
+        where: { organizationId: organization.id, role: "owner" },
+        select: {
+          user: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      });
 
-  // Handle custom Stripe events that aren't automatically handled by Better Auth
-  onEvent: async (event) => {
-    if (event.type === "subscription_schedule.created") {
-      // do something here (like create a subscription)
-    } else if (event.type === "subscription_schedule.released") {
-      // do something
-    }
+      // Set the organization's billing email to the owner's email
+      return {
+        email: owner?.user.email,
+      };
+    },
   },
 
   subscription: {
@@ -25,7 +33,8 @@ export const stripePlugin = stripe({
     getCheckoutSessionParams: async ({ user }) => {
       return {
         params: {
-          customer_email: user.email,
+          // customer_email: user.email,
+          // customer: user.email,
         },
       };
     },
