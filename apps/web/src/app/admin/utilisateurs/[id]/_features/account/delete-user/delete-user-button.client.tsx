@@ -30,7 +30,7 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
         description: "Utilisateur supprimé avec succès",
       });
       trpcUtils.admin.users.getPaginatedUsers.invalidate();
-      router.push("/admin/users");
+      router.push("/admin/utilisateurs");
     },
     onError: (error) => {
       toast.error("Erreur", {
