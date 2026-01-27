@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@better-auth/stripe": "^1.4.14",
+    "@c15t/nextjs": "^1.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@react-email/components": "^1.0.4",
     "@react-email/render": "^2.0.2",

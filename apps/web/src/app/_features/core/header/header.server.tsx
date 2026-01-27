@@ -34,7 +34,7 @@ export async function Header() {
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-40">
-      <div className="flex items-center justify-between px-4 h-16 max-w-7xl mx-auto gap-4">
+      <div className="flex items-center justify-between px-4 h-16 container mx-auto gap-4">
         {/* Logo - Left */}
         <Link
           href="/"

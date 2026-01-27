@@ -5,6 +5,7 @@ import { Outfit } from "next/font/google";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
+import { ConsentProvider } from "./_features/c15t/consent-provider";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -21,23 +22,25 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} font-sans antialiased `}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
-          <TRPCProvider>
-            <NuqsAdapter>
-              <StopImpersonateButton />
+        <ConsentProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            enableColorScheme
+          >
+            <TRPCProvider>
+              <NuqsAdapter>
+                <StopImpersonateButton />
 
-              {children}
+                {children}
 
-              <Toaster />
-            </NuqsAdapter>
-          </TRPCProvider>
-        </ThemeProvider>
+                <Toaster />
+              </NuqsAdapter>
+            </TRPCProvider>
+          </ThemeProvider>
+        </ConsentProvider>
       </body>
     </html>
   )
