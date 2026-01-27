@@ -72,7 +72,7 @@ export function PlanCard({
             </div>
           </div>
           <p className="text-muted-foreground text-sm">
-            (soit {priceTTC}€ TTC)
+            (soit {priceTTC.toFixed(2)}€ TTC)
           </p>
         </div>
 

@@ -91,8 +91,9 @@ export function BillingDetailsCard({
       }
 
       // Calculate price in euros (Stripe stores in cents)
-      const priceHT = Math.round((price.unit_amount ?? 0) / 100);
-      const priceTTC = Math.round(priceHT * 1.2);
+      const priceValue = ((price.unit_amount ?? 0) / 100)
+      const priceHT = priceValue.toFixed(2);
+      const priceTTC = (priceValue * 1.2).toFixed(2);
       const billingLabel =
         billingPeriod === "annual" ? "Prix annuel" : "Prix mensuel";
 
@@ -113,7 +114,7 @@ export function BillingDetailsCard({
             <div className="flex justify-between">
               <span className="text-muted-foreground text-sm">TVA (20%)</span>
               <span className="text-sm font-medium">
-                {Math.round(priceHT * 0.2)} {price.currency?.toUpperCase()}
+                {(priceValue * 0.2).toFixed(2)} {price.currency?.toUpperCase()}
               </span>
             </div>
 

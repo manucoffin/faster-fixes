@@ -30,14 +30,6 @@ export const stripePlugin = stripe({
 
   subscription: {
     enabled: true,
-    getCheckoutSessionParams: async ({ user }) => {
-      return {
-        params: {
-          // customer_email: user.email,
-          // customer: user.email,
-        },
-      };
-    },
     onSubscriptionComplete: async ({ subscription, stripeSubscription }) => {
       // Handle new subscriptions: ensure organizationId and stripeCustomerId are set
       await prisma.subscription.update({

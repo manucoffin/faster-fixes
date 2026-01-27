@@ -188,7 +188,7 @@ export function UpgradeSubscriptionDialog({
                   const priceHT = selectedPrice
                     ? selectedPrice.unit_amount! / 100
                     : 0;
-                  const priceTTC = Math.round(priceHT * 1.2);
+                  const priceTTC = (priceHT * 1.2);
 
                   const freeTrialDays = plan.freeTrial?.days;
 
