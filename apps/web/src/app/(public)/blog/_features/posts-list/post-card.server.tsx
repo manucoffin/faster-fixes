@@ -1,6 +1,6 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@workspace/ui/components/card";
 import { GetPostsOutput } from "./get-posts.server.query";
 
 interface PostCardProps {
@@ -10,9 +10,9 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const publishedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("fr-FR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
     })
     : "";
 
@@ -20,8 +20,8 @@ export function PostCard({ post }: PostCardProps) {
   const featuredImage = typeof post.featuredImage === "object" ? post.featuredImage : null;
 
   return (
-    <Link href={`/blog/${post.slug}`} className="group block h-full transition-transform hover:scale-105">
-      <Card className="flex h-full flex-col overflow-hidden">
+    <Link href={`/blog/${post.slug}`} className="group block h-full transition-transform">
+      <Card className="flex h-full flex-col pt-0 overflow-hidden">
         {featuredImage && (
           <div className="relative h-48 w-full overflow-hidden bg-muted">
             <Image
@@ -34,26 +34,22 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         )}
 
-        <CardContent className="flex flex-1 flex-col gap-3 pt-4">
-          <h2 className="text-lg font-semibold group-hover:text-primary line-clamp-2">
-            {post.title}
-          </h2>
+        <CardHeader>
+          <CardTitle>{post.title}</CardTitle>
+          <CardDescription className="gap-2 flex items-center">
+            {author && <span>par {author}</span>}
+            {publishedDate && author && <span>•</span>}
+            {publishedDate && <time>le {publishedDate}</time>}
+          </CardDescription>
+        </CardHeader>
 
+        <CardContent className="">
           {post.excerpt && (
             <p className="text-sm text-muted-foreground line-clamp-3">
               {post.excerpt}
             </p>
           )}
         </CardContent>
-
-        <CardFooter className="flex flex-col gap-2 border-t pt-4">
-          {author && (
-            <p className="text-xs text-muted-foreground">{author}</p>
-          )}
-          {publishedDate && (
-            <time className="text-xs text-muted-foreground">{publishedDate}</time>
-          )}
-        </CardFooter>
       </Card>
     </Link>
   );

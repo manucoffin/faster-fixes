@@ -1,6 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
 import { DEFAULT_OG_IMAGE_URL, SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { H1 } from "@workspace/ui/components/headings";
 import { Section } from "@workspace/ui/components/section";
 import { Metadata } from "next";
 import { getPosts } from "./_features/posts-list/get-posts.server.query";
@@ -54,9 +55,8 @@ export default async function BlogPage() {
 
   return (
     <div>
-
-
       <Section>
+        <H1 className="mb-20">Blog</H1>
         <PostsList posts={posts} />
       </Section>
 

@@ -1,5 +1,6 @@
 import type { GetPostsOutput } from "./get-posts.server.query";
 import { PostCard } from "./post-card.server";
+import { Empty, EmptyDescription } from "@workspace/ui/components/empty";
 
 interface PostsListProps {
   posts: GetPostsOutput;
@@ -8,9 +9,9 @@ interface PostsListProps {
 export function PostsList({ posts }: PostsListProps) {
   if (posts.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-muted-foreground">Aucun article disponible.</p>
-      </div>
+      <Empty>
+        <EmptyDescription>Aucun article disponible.</EmptyDescription>
+      </Empty>
     );
   }
 
