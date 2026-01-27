@@ -1,62 +1,177 @@
 ---
-description: Defines standardized folder structure for Next.js pages with co-located components, tRPC routers, mutations, queries, schemas, and constants to ensure consistent organization and maintainability while promoting feature isolation and shared code placement in _features directory
+description: Standardized Next.js page organization with co-located components, features, and server logic for consistent structure and maintainability
 globs: src/app/**/*
 alwaysApply: true
 ---
 
-Page Structure:
+# Page & Feature Folder Structure
 
-- Use `page.tsx` for main page component
-- Create `_components/` for page-specific components
-- Create `_trpc/` for tRPC routers and queries
-- Create `_server/` for non-tRPC server code
-  - `_queries/` for direct server queries
-  - `_mutations/` for server actions
-- Create `_schemas/` for validation schemas
-- Create `_constants/` for page constants
-- Use `[id]/` for dynamic route segments
+Pages and features in `src/app/` use a co-location pattern where related files stay together for maintainability and clarity.
 
-Code Isolation:
+## Route Organization
 
-- Keep page-specific code within page folder
-- Co-locate related functionality together
-- Use underscore prefix for implementation folders
-- Group all page logic in single directory
-
-Shared Resources:
-
-- Place shared code in `src/app/_features/`
-- Use feature-based organization for shared logic
-- Move reusable components to `_features/`
-- Share common utilities across features
-
-Example Structure:
+Use route groups (parentheses) to organize sections with different layouts and access levels:
 
 ```
-src/app/admin/reviews/
-├── page.tsx
-├── _components/
-│   ├── reviews-table.tsx
-│   └── reviews-table-action-dropdown.tsx
-├── _trpc/
-│   ├── router.ts
-│   └── _queries/
-│       └── get-paginated-reviews.ts
+src/app/
+├── layout.tsx                    # Root layout (providers, fonts)
+├── (auth)/                       # Public auth pages
+│   ├── layout.tsx
+│   ├── connexion/
+│   ├── inscription/
+│   └── mot-de-passe-oublie/
+├── (public)/                     # Public content
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── blog/
+│       ├── page.tsx
+│       ├── layout.tsx
+│       └── [slug]/
+│           ├── page.tsx
+│           └── _features/        # Post-specific components
+├── (authenticated)/              # Protected routes (auth guard in layout)
+│   ├── layout.tsx                # Checks session, redirects if missing
+│   ├── mon-compte/
+│   │   ├── page.tsx
+│   │   ├── facturation/
+│   │   │   ├── page.tsx
+│   │   │   └── _features/        # Billing-specific features
+│   │   ├── parametres/
+│   │   │   ├── page.tsx
+│   │   │   └── _features/        # Settings-specific features
+│   │   └── _components/          # Account-level components
+│   └── _features/                # Shared authenticated features
+├── admin/                        # Admin routes (role check in layout)
+│   ├── layout.tsx                # Checks admin role
+│   ├── (dashboard)/
+│   │   ├── page.tsx
+│   │   └── _features/
+│   ├── utilisateurs/
+│   │   ├── page.tsx
+│   │   ├── [id]/
+│   │   │   ├── page.tsx
+│   │   │   └── _features/
+│   │   └── _features/
+│   └── _features/
+└── api/                          # API routes
+```
+
+## Page Structure Pattern
+
+Each page folder follows this pattern:
+
+```
+[page-name]/
+├── page.tsx                      # Page component (server component)
+├── layout.tsx                    # Optional: nested layout
+├── _components/                  # Page-specific components (rarely needed)
+├── _features/                    # Page-specific features
+│   ├── [feature-name]/
+│   │   ├── [feature-name].client.tsx
+│   │   ├── [feature-name].schema.ts
+│   │   ├── [feature-name].trpc.mutation.ts
+│   │   ├── [feature-name].trpc.query.ts
+│   │   └── [helper].ts
+│   └── [another-feature]/
+├── _server/                      # Non-tRPC server code
+│   ├── _queries/
+│   │   └── [query-name].server.query.ts
 │   └── _mutations/
-│       └── update-review.ts
-├── _server/
-│   └── _queries/
-│       └── retrieve-review.ts
-│   └── _mutations_/
-│       └── create-review.ts
-├── _constants/
-│   └── cache-tags.ts
-└── [id]/
-    ├── page.tsx
-    ├── _components/
-    ├── _server/
-    │   └── _mutations/
-    │       └── delete-review.ts
-    └── _schemas/
-        └── delete-review.ts
+│       └── [mutation-name].server.mutation.ts
+├── _schemas/                     # Zod validation schemas
+│   └── [operation].schema.ts
+└── _constants/                   # Page-level constants
+    └── [constant-name].ts
 ```
+
+## File Organization
+
+### Components & Features
+
+Keep components and related logic together in feature folders. Each feature groups:
+
+- **Component file**: `[feature].client.tsx` (client component with "use client")
+- **Schema file**: `[operation].schema.ts` (Zod validation)
+- **Mutation file**: `[operation].trpc.mutation.ts` (server mutation handler)
+- **Query file**: `[operation].trpc.query.ts` (server query handler)
+- **Utilities**: `[helper-name].ts` (helper functions)
+
+### Naming Conventions
+
+| Item | Pattern | Example |
+|------|---------|---------|
+| Client component | `[name].client.tsx` | `profile-form.client.tsx` |
+| Server component | `[name].server.tsx` | `header.server.tsx` |
+| Schema | `[operation].schema.ts` | `update-profile.schema.ts` |
+| tRPC mutation | `[operation].trpc.mutation.ts` | `update-profile.trpc.mutation.ts` |
+| tRPC query | `[operation].trpc.query.ts` | `get-profile.trpc.query.ts` |
+| Server query | `[operation].server.query.ts` | `fetch-user-info.server.query.ts` |
+| Utility | `[action]-[noun].ts` | `generate-slug.ts`, `format-date.ts` |
+
+## Feature File Example
+
+```typescript
+// current-plan-card.client.tsx
+"use client";
+import { trpc } from "@/lib/trpc/trpc-client";
+import { CurrentPlanCardSchema } from "./current-plan-card.schema";
+
+export function CurrentPlanCard({ organizationId }: Props) {
+  const query = trpc.billing.getActiveSubscription.useQuery();
+  return matchQueryStatus(query, {
+    Loading: <Skeleton />,
+    Success: ({ data }) => <Card>{/* ... */}</Card>,
+  });
+}
+
+// current-plan-card.schema.ts
+import { z } from "zod";
+export const CurrentPlanCardSchema = z.object({
+  organizationId: z.string(),
+});
+
+// get-active-subscription.trpc.query.ts
+import { publicProcedure } from "@/server/trpc";
+import { CurrentPlanCardSchema } from "./current-plan-card.schema";
+
+export const getActiveSubscription = publicProcedure
+  .input(CurrentPlanCardSchema)
+  .query(async ({ input }) => {
+    // fetch and return subscription
+  });
+```
+
+## Key Principles
+
+1. **Underscore prefixes** (`_features/`, `_components/`, `_server/`, `_schemas/`) are implementation folders and don't create routes
+2. **Co-locate related code**: Keep component, schema, and server logic together
+3. **Page simplicity**: Pages should be minimal, mostly composing features
+4. **Route groups**: Use `(name)` notation for layout organization
+5. **Shared code**: Move truly reusable code to `src/app/_features/`
+6. **One responsibility**: Each feature has a focused purpose
+
+## Dynamic Routes
+
+For dynamic segments like `[id]/`, follow the same pattern:
+
+```
+[id]/
+├── page.tsx
+├── _features/
+│   ├── delete-item/
+│   │   ├── delete-item-button.client.tsx
+│   │   └── delete-item.trpc.mutation.ts
+│   └── edit-item/
+│       ├── edit-form.client.tsx
+│       ├── edit-item.schema.ts
+│       └── edit-item.trpc.mutation.ts
+└── _server/
+    └── _queries/
+        └── get-item-details.server.query.ts
+```
+
+## When to Use _features/ vs _components/
+
+- **Use `_features/`**: For interactive components that have schemas, server logic (tRPC/mutations), or are feature-complete units
+- **Use `_components/`**: For simple, presentational components with no server logic (rare in this pattern)
+- **Use `src/app/_features/`**: For code reused across multiple pages/routes
