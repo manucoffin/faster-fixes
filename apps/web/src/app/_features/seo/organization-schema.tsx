@@ -1,4 +1,5 @@
 import { CONTACT_EMAIL } from "@/app/_constants/app";
+import { COMPANY_ADDRESS_COUNTRY, COMPANY_ADDRESS_LOCALITY, COMPANY_ADDRESS_REGION, COMPANY_POSTAL_CODE, COMPANY_STREET_ADDRESS, INSTAGRAM_URL, LINKEDIN_URL, TIKTOK_URL, YOUTUBE_URL } from "@/app/_constants/company";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { getAppUrl } from "@/utils/url/get-app-url";
 import { Organization, WithContext } from "schema-dts";
@@ -21,17 +22,17 @@ export function OrganizationSchema() {
     // telephone,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "32 rue de la Claire",
-      addressLocality: "Lyon",
-      addressRegion: "Auvergne Rhône-Alpes",
-      postalCode: "69009",
-      addressCountry: "France",
+      streetAddress: COMPANY_STREET_ADDRESS,
+      addressLocality: COMPANY_ADDRESS_LOCALITY,
+      addressRegion: COMPANY_ADDRESS_REGION,
+      postalCode: COMPANY_POSTAL_CODE,
+      addressCountry: COMPANY_ADDRESS_COUNTRY,
     },
     sameAs: [
-      "https://www.instagram.com/tobalgo",
-      "https://www.linkedin.com/company/tobalgo/",
-      "https://www.youtube.com/channel/UC9lGVh-kRMyYKOxFpkOttsA",
-      "https://www.tiktok.com/@tobalgo",
+      INSTAGRAM_URL,
+      TIKTOK_URL,
+      LINKEDIN_URL,
+      YOUTUBE_URL,
     ],
   };
 

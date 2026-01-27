@@ -1,3 +1,4 @@
+import { INSTAGRAM_URL, LINKEDIN_URL, TIKTOK_URL, YOUTUBE_URL } from "@/app/_constants/company";
 import { ManageConsentButton } from "@/app/_features/c15t/manage-consent-button";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
 import { InstagramIcon } from "@workspace/ui/components/icons/instagram-icon";
@@ -9,10 +10,10 @@ import Link from "next/link";
 import { AppLogo } from "../logo/app-logo";
 
 const data = {
-  instaLink: "https://instagram.com/tobalgo",
-  linkedinLink: "https://linkedin.com/company/tobalgo",
-  youtubeLink: "https://www.youtube.com/channel/UC9lGVh-kRMyYKOxFpkOttsA",
-  tiktokLink: "https://www.tiktok.com/@tobalgo",
+  instaLink: INSTAGRAM_URL,
+  linkedinLink: LINKEDIN_URL,
+  youtubeLink: YOUTUBE_URL,
+  tiktokLink: TIKTOK_URL,
   company: {
     name: "Startup Maker",
     description:
