@@ -1,4 +1,5 @@
 import { RichText } from "@/app/_features/payload/_components/rich-text";
+import { getPayloadClient } from "@/lib/payload/client";
 import { H1 } from "@workspace/ui/components/headings";
 
 export default async function PrivacyPolicyPage() {
