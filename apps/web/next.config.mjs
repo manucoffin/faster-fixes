@@ -40,7 +40,7 @@ const nextConfig = {
       // S3 buckets
       {
         protocol: "https",
-        hostname: "startup-maker-dev.s3.eu-west-3.amazonaws.com",
+        hostname: "readyjs-dev.s3.eu-west-3.amazonaws.com",
       },
 
       // for testing

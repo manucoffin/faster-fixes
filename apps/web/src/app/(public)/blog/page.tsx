@@ -1,6 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
 import { DEFAULT_OG_IMAGE_URL, SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { Section } from "@workspace/ui/components/section";
 import { Metadata } from "next";
 import { getPosts } from "./_features/posts-list/get-posts.server.query";
 import { PostsList } from "./_features/posts-list/posts-list.server";
@@ -52,9 +53,12 @@ export default async function BlogPage() {
   const posts = await getPosts();
 
   return (
-    <div className="space-y-8">
+    <div>
 
-      <PostsList posts={posts} />
+
+      <Section>
+        <PostsList posts={posts} />
+      </Section>
 
       {/* JSON-LD for SEO */}
       <BlogCollectionPageSchema />
