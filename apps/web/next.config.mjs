@@ -7,6 +7,18 @@ const nextConfig = {
     authInterrupts: true,
   },
 
+  // Exclude server-only packages from bundling to prevent Turbopack errors
+  serverExternalPackages: [
+    "@payloadcms/db-postgres",
+    "drizzle-kit",
+    "drizzle-orm",
+    "@libsql/client",
+    "postgres",
+    "pg-native",
+    "esbuild",
+    "esbuild-register",
+  ],
+
   images: {
     // Optimize image formats for better performance
     formats: ["image/avif", "image/webp"],

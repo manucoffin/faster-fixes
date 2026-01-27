@@ -14,7 +14,7 @@ export const Section = ({
     <section className={cn("w-full py-16 md:py-32", className)} {...props}>
       <div
         className={cn(
-          "container flex h-full flex-col items-center",
+          "container mx-auto flex h-full flex-col items-center",
           containerClasseName,
         )}
       >

@@ -73,7 +73,7 @@ export const internalDocToHref = ({
     case "tags":
       return `/blog/tag/${slug}`;
     case "authors":
-      return `/blog/author/${slug}`;
+      return `/blog/auteur/${slug}`;
     default:
       // For any other collection, assume it's a page
       return `/${slug}`;
