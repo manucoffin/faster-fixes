@@ -63,7 +63,7 @@ export function EmailVerifiedToggle({
     });
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center gap-4 justify-between">
       <label className="text-sm font-medium">
         {optimisticState ? "Email vérifié" : "Email non vérifié"}
       </label>

@@ -27,13 +27,6 @@ export const sendVerificationEmail = publicProcedure
         throw new Error("Cet utilisateur n'existe pas.");
       }
 
-      if (
-        error?.message?.includes("already verified") ||
-        error?.message?.includes("already verified")
-      ) {
-        throw new Error("Cet email est déjà vérifié.");
-      }
-
       throw new Error("Erreur lors de l'envoi de l'email. Veuillez réessayer.");
     }
   });

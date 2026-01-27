@@ -1,6 +1,5 @@
 "use client";
 
-import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
@@ -81,13 +80,14 @@ export function EmailInformation({ userId }: EmailInformationProps) {
                   isVerified={emailData.emailVerified}
                 />
 
-                <SendVerificationEmailButton
+                {/* We can send verification email only for currently logged in user, find a workaround */}
+                {/* <SendVerificationEmailButton
                   email={emailData.email}
                   variant="default"
                   size="sm"
                 >
                   Renvoyer l&apos;email de vérification
-                </SendVerificationEmailButton>
+                </SendVerificationEmailButton> */}
               </div>
             </PopoverContent>
           </Popover>
