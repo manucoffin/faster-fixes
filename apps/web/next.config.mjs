@@ -7,7 +7,7 @@ const nextConfig = {
     authInterrupts: true,
   },
 
-  // Exclude server-only packages from bundling to prevent Turbopack errors
+  // // Exclude server-only packages from bundling to prevent Turbopack errors
   serverExternalPackages: [
     "@payloadcms/db-postgres",
     "drizzle-kit",
