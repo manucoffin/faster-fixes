@@ -1,34 +1,34 @@
-import { Badge } from "@/app/_components/ui/badge";
+import { APP_URL } from "@/app/_constants/app";
+import { DEFAULT_OG_IMAGE_URL } from "@/app/_constants/seo";
+import { RichText } from "@/app/_features/payload/_components/rich-text";
+import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { PersonSchema } from "@/app/_features/seo/person-schema";
+import { getPayloadClient } from "@/lib/payload/client";
+import { PageParams } from "@/types/next";
+import { isProduction } from "@/utils/environment/env";
+import type { Author, Category, Media, Tag } from "@workspace/payload/payload-types";
+import { Badge } from "@workspace/ui/components/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList as BreadcrumbListUI,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/app/_components/ui/breadcrumb";
-import { H1 } from "@/app/_components/ui/headings";
-import { Section } from "@/app/_components/ui/section";
-import { APP_URL } from "@/app/_constants/app";
-import { DEFAULT_OG_IMAGE_URL } from "@/app/_constants/seo";
-import { RichText } from "@/app/_features/payload/_components/rich-text";
-import { BreadcrumbSchema } from "@/app/_features/seo/_components/breadcrumb-schema";
-import { PersonSchema } from "@/app/_features/seo/_components/person-schema";
-import { getPayloadClient } from "@/lib/payload/client";
-import { PageParams } from "@/types/next";
-import { isProduction } from "@/utils/environment/is-production";
-import { cn } from "@/utils/styling/cn";
-import type { Author, Category, Media, Tag } from "@repo/payload/payload-types";
+} from "@workspace/ui/components/breadcrumb";
+import { H1 } from "@workspace/ui/components/headings";
+import { Section } from "@workspace/ui/components/section";
+import { cn } from "@workspace/ui/lib/utils";
 import { CalendarIcon, TagIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArticleSchema } from "./_components/article-schema";
-import { AuthorCard } from "./_components/author-card";
-import { ImageObjectSchema } from "./_components/image-object-schema";
-import { RelatedArticles } from "./_components/related-articles";
-import { TableOfContents } from "./_components/table-of-contents";
-import { WebPageSchema } from "./_components/webpage-schema";
-import { getPostBySlug } from "./_queries/get-post-by-slug";
+import { AuthorCard } from "./_features/author-card";
+import { getPostBySlug } from "./_features/post/get-post-by-slug.server.query";
+import { RelatedArticles } from "./_features/related-posts/related-articles";
+import { ArticleSchema } from "./_features/seo/article-schema";
+import { ImageObjectSchema } from "./_features/seo/image-object-schema";
+import { WebPageSchema } from "./_features/seo/webpage-schema";
+import { TableOfContents } from "./_features/table-of-contents";
 
 // Next.js will invalidate the cache when a
 // request comes in, at most once every 60 seconds.
@@ -62,7 +62,7 @@ export default async function BlogPostPage(props: PageParams) {
 
   try {
     // Fetch post by slug
-    const post = await getPostBySlug(params.slug);
+    const post = await getPostBySlug(params.slug as string);
 
     if (!post) {
       notFound();
@@ -140,12 +140,8 @@ export default async function BlogPostPage(props: PageParams) {
               </Breadcrumb>
 
               {/* Category badge */}
-              <Link
-                href={`/blog/categories/${category.slug}`}
-                className="mb-4 inline-block"
-              >
-                <Badge variant="secondary">{category.name}</Badge>
-              </Link>
+              <Badge variant="secondary" className="mb-4">{category.name}</Badge>
+
 
               {/* Article meta */}
               <div className="text-muted-foreground mb-6 flex items-center justify-start gap-6 text-sm">
@@ -206,18 +202,13 @@ export default async function BlogPostPage(props: PageParams) {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
-                    <Link
+                    <Badge
                       key={tag.id}
-                      href={`/blog/tag/${tag.slug}`}
-                      className="transition-transform hover:scale-105"
+                      variant="outline"
+                      className="hover:bg-primary hover:text-primary-foreground"
                     >
-                      <Badge
-                        variant="outline"
-                        className="hover:bg-primary hover:text-primary-foreground"
-                      >
-                        {tag.name}
-                      </Badge>
-                    </Link>
+                      {tag.name}
+                    </Badge>
                   ))}
                 </div>
               </div>

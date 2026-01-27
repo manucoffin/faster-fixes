@@ -1,5 +1,5 @@
 import { APP_URL } from "@/app/_constants/app";
-import type { Post } from "@repo/payload/payload-types";
+import type { Post } from "@workspace/payload/payload-types";
 import { ImageObject, WithContext } from "schema-dts";
 
 interface ImageObjectSchemaProps {

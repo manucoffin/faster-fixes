@@ -1,7 +1,7 @@
-import { getRelatedPosts } from "@/app/(public)/blog/_queries/get-related-posts";
-import { H2 } from "@/app/_components/ui/headings";
-import { Section } from "@/app/_components/ui/section";
-import { BlogPostCard } from "@/app/_features/blog/_components/blog-post-card";
+import { getRelatedPosts } from "@/app/(public)/blog/[slug]/_features/related-posts/get-related-posts.server.query";
+import { H2 } from "@workspace/ui/components/headings";
+import { Section } from "@workspace/ui/components/section";
+import { PostCard } from "../../../_features/posts-list/post-card.server";
 
 interface RelatedArticlesProps {
   currentPostId: number;
@@ -36,7 +36,7 @@ export async function RelatedArticles({
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {relatedPosts.map((post) => (
-            <BlogPostCard
+            <PostCard
               key={post.id}
               post={post}
             />

@@ -1,6 +1,6 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import type { Post } from "@repo/payload/payload-types";
+import type { Post } from "@workspace/payload/payload-types";
 import { WebPage, WithContext } from "schema-dts";
 
 interface WebPageSchemaProps {
@@ -11,8 +11,6 @@ export function WebPageSchema({ post }: WebPageSchemaProps) {
   const author = typeof post.author === "object" ? post.author : undefined;
   const featuredImage =
     typeof post.featuredImage === "object" ? post.featuredImage : undefined;
-  const postCategory =
-    typeof post.category === "object" ? post.category : undefined;
 
   const jsonLd: WithContext<WebPage> = {
     "@context": "https://schema.org",
@@ -68,7 +66,7 @@ export function WebPageSchema({ post }: WebPageSchemaProps) {
       author: {
         "@type": "Person",
         name: author?.name || "Unknown Author",
-        url: `${APP_URL}/blog/author/${author?.slug || ""}`,
+        url: `${APP_URL}/blog/auteur/${author?.slug || ""}`,
       },
       datePublished: post.publishedAt
         ? new Date(post.publishedAt).toISOString()
@@ -77,10 +75,10 @@ export function WebPageSchema({ post }: WebPageSchemaProps) {
     },
     primaryImageOfPage: featuredImage?.url
       ? {
-          "@type": "ImageObject",
-          url: featuredImage.url,
-          caption: featuredImage.alt || post.title,
-        }
+        "@type": "ImageObject",
+        url: featuredImage.url,
+        caption: featuredImage.alt || post.title,
+      }
       : undefined,
     datePublished: post.publishedAt
       ? new Date(post.publishedAt).toISOString()
@@ -89,7 +87,7 @@ export function WebPageSchema({ post }: WebPageSchemaProps) {
     author: {
       "@type": "Person",
       name: author?.name || "Unknown Author",
-      url: `${APP_URL}/blog/author/${author?.slug || ""}`,
+      url: `${APP_URL}/blog/auteur/${author?.slug || ""}`,
     },
     publisher: {
       "@type": "Organization",

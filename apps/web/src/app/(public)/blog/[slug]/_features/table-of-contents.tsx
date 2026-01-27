@@ -1,4 +1,4 @@
-import { Post } from "@repo/payload/payload.types";
+import { Post } from "@workspace/payload/payload.types";
 import Link from "next/link";
 import slugify from "slugify";
 

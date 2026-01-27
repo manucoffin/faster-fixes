@@ -1,6 +1,6 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import type { Post } from "@repo/payload/payload-types";
+import type { Post } from "@workspace/payload/payload-types";
 import { Article, WithContext } from "schema-dts";
 
 interface ArticleSchemaProps {
@@ -43,9 +43,9 @@ export function ArticleSchema({ post }: ArticleSchemaProps) {
     description: post.excerpt || post.meta?.description || "",
     keywords: post.tags?.length
       ? post.tags
-          .map((tag) => (typeof tag === "object" ? tag.name : ""))
-          .filter(Boolean)
-          .join(", ")
+        .map((tag) => (typeof tag === "object" ? tag.name : ""))
+        .filter(Boolean)
+        .join(", ")
       : undefined,
     articleSection: postCategory?.name,
   };
