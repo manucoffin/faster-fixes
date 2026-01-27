@@ -7,26 +7,45 @@ const nextConfig = {
     authInterrupts: true,
   },
 
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: "/login",
-  //       destination: "/connexion",
-  //     },
-  //     {
-  //       source: "/signup",
-  //       destination: "/inscription",
-  //     },
-  //     {
-  //       source: "/forgot-password",
-  //       destination: "/mot-de-passe-oublie",
-  //     },
-  //     {
-  //       source: "/reset-password",
-  //       destination: "/reinitialiser-mot-de-passe",
-  //     },
-  //   ];
-  // },
+  images: {
+    // Optimize image formats for better performance
+    formats: ["image/avif", "image/webp"],
+    // Configure quality levels for different use cases
+    qualities: [25, 50, 75, 90],
+    // Responsive device sizes for srcset generation
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Additional image sizes for smaller images
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Longer cache TTL for production performance
+    minimumCacheTTL: 31536000, // 1 year
+    remotePatterns: [
+      // Google profile pictures
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+
+      // S3 buckets
+      {
+        protocol: "https",
+        hostname: "startup-maker-dev.s3.eu-west-3.amazonaws.com",
+      },
+
+      // for testing
+      {
+        protocol: "https",
+        hostname: "loremflickr.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.jsdelivr.net",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
