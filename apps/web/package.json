@@ -13,9 +13,7 @@
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook"
   },
   "dependencies": {
-    "@better-auth/stripe": "^1.4.14",
-    "@better-upload/client": "^3.0.14",
-    "@better-upload/server": "^3.0.14",
+    "@better-auth/stripe": "^1.5.4",
     "@c15t/nextjs": "^1.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@lexical/code": "^0.39.0",
@@ -33,10 +31,11 @@
     "@trpc/react-query": "^11.8.1",
     "@trpc/server": "^11.8.1",
     "@trpc/tanstack-react-query": "^11.8.1",
+    "@vercel/blob": "^2.3.1",
     "@workspace/db": "workspace:*",
     "@workspace/payload": "workspace:*",
     "@workspace/ui": "workspace:*",
-    "better-auth": "^1.4.14",
+    "better-auth": "^1.5.4",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "facehash": "^0.1.0",
