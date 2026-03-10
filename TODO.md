@@ -1,4 +1,8 @@
 - setup la section organisations
+- [ ] ORG
+  - [ ] Setup le système d’organization (reprendre celui de taff)
+  - [ ] Page pour gérer les organizations
+  - [ ] Quand un user se connecte pour la première fois, faire un setup pour lui permettre de créer son
 - [ ] setup pm skills
 - [ ]
 - [ ] Rédiger une TODO de comment setup stripe
@@ -7,9 +11,7 @@
 - [ ] Setup admin/content avec puck + tiptap
 - [ ] setup un moyen de créer des pages custom avec puck
 - [ ]
-- [ ] Setup Vercel Blob for storage, Clouflare R2 as backup
 - [ ] Setup un moyen de stocker les fichier en db
-- [ ] Setup les organizations proprement
 - [ ]
 - [ ] setup queryclient clear on signout comme dans taff, pour bien invalider toutes les queries on se déconnecte
 - [ ] securiser les urls de fichiers
@@ -18,40 +20,19 @@
 - [ ] Setup un bouton feedback rapide
 - [ ] Setup un onboarding avec driver.js
 - [ ]
-- [ ]
-- [ ] setup **ui-ux-pro-max skill**
-- [ ] ajouter planning with files
-
-npx skills add
-
-[https://github.com/othmanadi/planning-with-files](https://t.co/lyKJdFEJEc)
-
---skill planning-with-files
 
 - [ ] mettre sur plunk manuelcoffin.fr
 - [ ] Setup outil pour commenter les pages pour le client
-- [ ] Upgrade better-auth & better-auth/stripe v1.4.18
-- [ ] Techdebt skill
-- [ ] ajouter un skill security check
-- [ ] Setup git trees
-  - [ ] un pour codeer, un pour review, un pour doc
-- [ ] Setup chrome MCP
 - [ ]
 - [ ] Il faudrait intégrer v0 pour que le client puisse créer ses landing page
-- [ ] Mettre l’emailing dans un package
 - [ ]
 - [ ] Setup kilpi
-- [ ] Setup https://github.com/cossistantcom/cossistant
-- [ ] Setup facehash pour les avatar
 - [ ] Utiliser la nouvelle syntaxe de trpc query
-- [ ] setup email skills https://resend.com/blog/introducing-email-skills
-- [ ] setup next skills
 - [ ] Setup une page dans admin pour gérer les plans stripe
 - [ ] Ajouter un système de notifications (notification center) dans le dashboard authenticated
 - [ ] Setup correctement les trucs de SEO
   - [ ] sitemap, metadata, etc
   - [ ] ajouter les pages auteur sur le blog
-- [ ] setup better upload
 - [ ] Faire des pages exemples
   - [ ] markeplace, etc (demander à chat gpt la liste
 - [ ] Ajouter un adresse selector, avec geocodage api
@@ -62,10 +43,6 @@ npx skills add
 - [ ] optimiser le loading des requetes trpc avec un prefetching dans les pages concernées
 - [ ] Faire un skill startup maker
 - [ ] il faut virer la config chelou dans le next - config pour les external packages
-- [ ] ORG
-  - [ ] Setup le système d’organization (reprendre celui de taff)
-  - [ ] Page pour gérer les organizations
-  - [ ] Quand un user se connecte pour la première fois, faire un setup pour lui permettre de créer son organization
 - [ ] Tester de deployer sur vercel pour voir si ça marche comme il faut
 - [ ] Setup page auth
   - [ ] rajouter une barre pour montrer si c’est secure sous le mot de passe avec un tooltip pour dire les règles
@@ -75,15 +52,6 @@ npx skills add
   - list des user
   - Dashboard avec ARR, MRR, courbes utilisateurs vs abonnements
   - liste des outils avec des liens pour s’y retrouver
-- Application
-  - Auth
-  - Stripe
-  - page facturation
-  - Page d’accueil
-  - Pages légales
-  - https://capjs.js.org/guide/standalone/
-- CMS (payload)
-  - setup le blog avec toutes les features pour le rich text
 - Outil de compta
   - pouvoir faire un prévisionnel que tu montre aux investisseurs
 - Un dokploy pour plein d’outils gratuits faciles à setup
