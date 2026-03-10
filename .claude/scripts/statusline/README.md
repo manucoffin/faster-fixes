@@ -7,7 +7,7 @@ Displays your Claude Code session status in a clean, minimal format.
 ```
 Claude Haiku | main | ctx ~10%
 5h: ████████░░░░░░░░░░░░ 42.0% 12pm (in 2h)
-7d: ███████████░░░░░░░ 57.0% monday 7 (in 1d)
+7d: ███████████░░░░░░░ 57.0% (in 1d)
 ```
 
 **Line 1:**
@@ -26,7 +26,7 @@ Claude Haiku | main | ctx ~10%
 
 - **Progress bar**: Visual representation of usage (fills based on percentage)
 - **Usage %**: 7-day rolling window usage percentage with color-coded indicator
-- **Reset time**: Day of week, day of month, and relative time (e.g., monday 7 (in 1d))
+- **Reset time**: Days until reset (e.g., in 1d)
 
 **Color coding:**
 

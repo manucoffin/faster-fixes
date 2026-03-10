@@ -7,10 +7,15 @@ COLOR="blue"
 C_RESET=$'\033[0m'
 C_GRAY=$'\033[38;5;245m'
 C_BAR_EMPTY=$'\033[38;5;238m'
+# Gradient colors: green -> yellow-green -> yellow -> gold -> orange -> red-orange -> red -> dark red
 C_GREEN=$'\033[38;5;71m'
+C_LIME=$'\033[38;5;107m'
+C_YELLOW_GREEN=$'\033[38;5;143m'
 C_YELLOW=$'\033[38;5;220m'
+C_GOLD=$'\033[38;5;178m'
 C_ORANGE=$'\033[38;5;208m'
-C_RED=$'\033[38;5;167m'
+C_RED_ORANGE=$'\033[38;5;196m'
+C_RED=$'\033[38;5;160m'
 
 case "$COLOR" in
     orange)   C_ACCENT=$'\033[38;5;173m' ;;
@@ -32,12 +37,20 @@ get_usage_color() {
     if [[ ! "$pct" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
         return
     fi
-    if (( $(echo "$pct < 25" | bc -l) )); then
+    if (( $(echo "$pct < 15" | bc -l) )); then
         COLOR_RESULT="$C_GREEN"
+    elif (( $(echo "$pct < 30" | bc -l) )); then
+        COLOR_RESULT="$C_LIME"
+    elif (( $(echo "$pct < 40" | bc -l) )); then
+        COLOR_RESULT="$C_YELLOW_GREEN"
     elif (( $(echo "$pct < 50" | bc -l) )); then
         COLOR_RESULT="$C_YELLOW"
-    elif (( $(echo "$pct < 75" | bc -l) )); then
+    elif (( $(echo "$pct < 60" | bc -l) )); then
+        COLOR_RESULT="$C_GOLD"
+    elif (( $(echo "$pct < 70" | bc -l) )); then
         COLOR_RESULT="$C_ORANGE"
+    elif (( $(echo "$pct < 85" | bc -l) )); then
+        COLOR_RESULT="$C_RED_ORANGE"
     else
         COLOR_RESULT="$C_RED"
     fi
@@ -173,7 +186,7 @@ if [[ "$session_usage" == "?" ]]; then
                 weekly_usage="${seven_day_util}%"
             fi
 
-            # Format reset times
+            # Format reset times (Paris timezone)
             if [[ -n "$five_hour_reset" ]]; then
                 reset_epoch=$(date -f "%Y-%m-%dT%H:%M:%S" -d "${five_hour_reset:0:19}" "+%s" 2>/dev/null || \
                              date -j -f "%Y-%m-%dT%H:%M:%S" "${five_hour_reset:0:19}" "+%s" 2>/dev/null)
@@ -183,9 +196,9 @@ if [[ "$session_usage" == "?" ]]; then
                     if [[ $diff -gt 0 ]]; then
                         hours=$((diff / 3600))
                         minutes=$(((diff % 3600) / 60))
-                        # Get reset time in 12-hour format (e.g., 3pm)
-                        reset_time=$(date -j -f "%s" "$reset_epoch" "+%-I%p" 2>/dev/null | tr '[:upper:]' '[:lower:]')
-                        session_reset="${reset_time} (in ${hours}h)"
+                        # Get reset time in Paris timezone, 24h format (e.g., 15h)
+                        reset_time=$(TZ="Europe/Paris" date -j -f "%s" "$reset_epoch" "+%-Hh%M" 2>/dev/null)
+                        session_reset="${reset_time} (in ${hours}h${minutes})"
                     fi
                 fi
             fi
@@ -198,10 +211,10 @@ if [[ "$session_usage" == "?" ]]; then
                     diff=$((reset_epoch - now))
                     if [[ $diff -gt 0 ]]; then
                         days=$((diff / 86400))
-                        # Get day name (lowercase) and day of month
-                        day_name=$(date -j -f "%s" "$reset_epoch" "+%A" 2>/dev/null | tr '[:upper:]' '[:lower:]')
-                        day_num=$(date -j -f "%s" "$reset_epoch" "+%-d" 2>/dev/null)
-                        weekly_reset="${day_name} ${day_num} (in ${days}d)"
+                        remaining_hours=$(((diff % 86400) / 3600))
+                        # Get reset date in Paris timezone (e.g., 17 feb.)
+                        reset_date=$(TZ="Europe/Paris" date -j -f "%s" "$reset_epoch" "+%-d %b." 2>/dev/null | tr '[:upper:]' '[:lower:]')
+                        weekly_reset="${reset_date} (in ${days}d ${remaining_hours}h)"
                     fi
                 fi
             fi
