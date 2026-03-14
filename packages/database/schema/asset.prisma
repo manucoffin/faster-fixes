@@ -1,0 +1,30 @@
+model Asset {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Storage location
+    key      String @unique // e.g. "profile-image/user-abc/uuid.jpg"
+    bucket   String // S3 bucket name at time of upload
+    provider String // "s3" | "r2" | "minio"
+
+    // File metadata
+    filename String // original filename as uploaded
+    mimeType String // "image/jpeg", "application/pdf", etc.
+    size     Int // bytes
+
+    // Image-specific (null for non-images)
+    width  Int?
+    height Int?
+
+    // Accessibility
+    alt String?
+
+    // Escape hatch for provider-specific or domain-specific extra data
+    metadata Json?
+
+    uploadedById String?
+    uploadedBy   User?   @relation("AssetUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+    @@map("assets")
+}

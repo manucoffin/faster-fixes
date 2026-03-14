@@ -1,5 +1,5 @@
 - faire une seed pour clean la db
-- connecter resend
+- ajouter asset
 - bien renommer les trpc
 - setup la section organisations
 - mon-compte/invitation + organisations

@@ -2,12 +2,6 @@ import { faker } from "@faker-js/faker";
 import { PrismaClient } from "../generated/prisma/client";
 
 export async function seedUsers(prisma: PrismaClient) {
-  // Clean up existing data to avoid duplicates
-  await prisma.member.deleteMany({});
-  await prisma.organization.deleteMany({});
-  await prisma.profile.deleteMany({});
-  await prisma.user.deleteMany({});
-
   const users = [];
 
   // Generate 50 users

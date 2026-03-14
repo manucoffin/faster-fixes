@@ -22,6 +22,9 @@ model User {
     members     Member[]
     invitations Invitation[]
 
+    // Asset relations
+    uploadedAssets Asset[] @relation("AssetUploader")
+
     @@unique([email])
     @@map("user")
 }
