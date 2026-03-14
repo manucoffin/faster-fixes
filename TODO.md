@@ -1,9 +1,13 @@
-- faire une seed pour clean la db
 - ajouter asset
-- bien renommer les trpc
 - setup la section organisations
 - mon-compte/invitation + organisations
 - utiliser better upload pour l'upload de fichier et pas vercel blob
+- ajouter bouton renvoi email
+- empecher d'editer le slug de l'orga
+- empêcher de créer une organization
+- mettre les invit & params dans le dropdown
+- refaire le upload logo proprement
+- faire un component upload button
 
 - Setup asset en db et les composant pour image upload et file upload
   - faire un wrapper si on utilise pas le S3 pour les upload image et upload file components
