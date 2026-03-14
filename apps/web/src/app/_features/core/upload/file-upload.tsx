@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveS3Url } from "@/lib/upload/resolve-s3-url";
+import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { useUploadFile } from "@better-upload/client";
 import { formatBytes } from "@better-upload/client/helpers";
 import { Button } from "@workspace/ui/components/button";

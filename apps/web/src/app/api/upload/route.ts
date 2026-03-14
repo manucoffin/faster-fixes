@@ -1,9 +1,9 @@
+import { s3Client } from "@/server/storage";
 import { route, type Router } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
-import { aws } from "@better-upload/server/clients";
 
 const router: Router = {
-  client: aws(), // or cloudflare(), backblaze(), tigris(), ...
+  client: s3Client,
   bucketName: "my-bucket",
   routes: {
     images: route({
