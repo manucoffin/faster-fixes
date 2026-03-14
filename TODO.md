@@ -1,4 +1,13 @@
+- faire une seed pour clean la db
+- connecter resend
+- bien renommer les trpc
 - setup la section organisations
+- mon-compte/invitation + organisations
+- utiliser better upload pour l'upload de fichier et pas vercel blob
+
+- Setup asset en db et les composant pour image upload et file upload
+  - faire un wrapper si on utilise pas le S3 pour les upload image et upload file components
+- Setup le centre de notifications
 - [ ] ORG
   - [ ] Setup le système d’organization (reprendre celui de taff)
   - [ ] Page pour gérer les organizations
