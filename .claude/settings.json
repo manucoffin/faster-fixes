@@ -64,28 +64,6 @@
           }
         ]
       }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay .claude/sounds/need-human.mp3"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay .claude/sounds/finish.mp3"
-          }
-        ]
-      }
     ]
   }
 }
