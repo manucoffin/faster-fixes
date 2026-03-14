@@ -7,9 +7,12 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"],
       "env": [
+        "DOMAIN_NAME",
         "DATABASE_URL",
+
         "BETTER_AUTH_SECRET",
         "BETTER_AUTH_URL",
+
         "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
         "STRIPE_SECRET_KEY",
         "STRIPE_WEBHOOK_SIGNING_SECRET",
@@ -17,6 +20,7 @@
         "BASIC_YEARLY_PRICE_ID",
         "PREMIUM_MONTHLY_PRICE_ID",
         "PREMIUM_YEARLY_PRICE_ID",
+
         "PLUNK_SECRET_KEY",
         "RESEND_API_KEY",
 
