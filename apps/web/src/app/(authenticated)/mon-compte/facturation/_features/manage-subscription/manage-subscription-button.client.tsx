@@ -20,7 +20,7 @@ export function ManageSubscriptionButton({
   ...props
 }: ManageSubscriptionButtonProps) {
   const createBillingPortalMutation =
-    trpc.authenticated.billing.createBillingPortal.useMutation(
+    trpc.authenticated.account.billing.portal.create.useMutation(
       {
         onSuccess: async (data) => {
           // Redirect to billing portal

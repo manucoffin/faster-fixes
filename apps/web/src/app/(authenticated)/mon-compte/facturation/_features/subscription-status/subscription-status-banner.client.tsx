@@ -7,7 +7,7 @@ import { ManageSubscriptionButton } from "../manage-subscription/manage-subscrip
 
 export const SubscriptionStatusBanner = () => {
   const getSubscriptionStatusQuery =
-    trpc.authenticated.billing.getSubscriptionStatus.useQuery();
+    trpc.authenticated.account.billing.subscription.status.useQuery();
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;

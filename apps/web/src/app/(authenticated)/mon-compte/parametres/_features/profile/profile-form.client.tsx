@@ -21,7 +21,7 @@ import { UpdateProfileInputs, UpdateProfileSchema } from "./update-profile.schem
 
 export function ProfileForm() {
 
-  const getProfileQuery = trpc.authenticated.account.settings.getProfile.useQuery();
+  const getProfileQuery = trpc.authenticated.account.profile.get.useQuery();
 
   const form = useForm<UpdateProfileInputs>({
     resolver: zodResolver(UpdateProfileSchema),
@@ -41,7 +41,7 @@ export function ProfileForm() {
     }
   }, [getProfileQuery.data, form]);
 
-  const updateProfileMutation = trpc.authenticated.account.settings.updateProfile.useMutation({
+  const updateProfileMutation = trpc.authenticated.account.profile.update.useMutation({
     onSuccess: () => {
       toast.success("Profil mis à jour avec succès")
     },

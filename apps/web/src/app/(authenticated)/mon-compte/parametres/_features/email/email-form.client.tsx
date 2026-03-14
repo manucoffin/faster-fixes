@@ -28,7 +28,7 @@ export function EmailForm() {
   const [isPending, setIsPending] = React.useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
 
-  const getCurrentEmailQuery = trpc.authenticated.account.settings.getCurrentEmail.useQuery();
+  const getCurrentEmailQuery = trpc.authenticated.account.email.get.useQuery();
 
   const form = useForm<ChangeEmailInputs>({
     resolver: zodResolver(ChangeEmailSchema),

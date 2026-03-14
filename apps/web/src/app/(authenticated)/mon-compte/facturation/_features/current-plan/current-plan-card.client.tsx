@@ -37,7 +37,7 @@ interface CurrentPlanProps {
 
 export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
   const getActiveSubscriptionQuery =
-    trpc.authenticated.billing.getActiveSubscription.useQuery();
+    trpc.authenticated.account.billing.subscription.get.useQuery();
 
   return matchQueryStatus(getActiveSubscriptionQuery, {
     Loading: (

@@ -49,7 +49,7 @@ function InvoiceLoadingSkeleton() {
 
 export function PastInvoicesCard() {
   const getPastInvoicesQuery =
-    trpc.authenticated.billing.getPastInvoices.useQuery();
+    trpc.authenticated.account.billing.invoices.list.useQuery();
 
   return matchQueryStatus(getPastInvoicesQuery, {
     Loading: (

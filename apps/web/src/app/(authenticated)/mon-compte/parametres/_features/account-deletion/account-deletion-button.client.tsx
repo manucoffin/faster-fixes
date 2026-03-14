@@ -42,7 +42,7 @@ export function AccountDeletionButton() {
     },
   });
 
-  const deleteAccountMutation = trpc.authenticated.account.settings.deleteAccount.useMutation({
+  const deleteAccountMutation = trpc.authenticated.account.delete.useMutation({
     onSuccess: async () => {
       toast.success("Votre compte a été supprimé avec succès");
       setOpen(false);

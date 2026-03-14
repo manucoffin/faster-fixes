@@ -30,7 +30,7 @@ export function PasswordForm() {
     },
   });
 
-  const changePasswordMutation = trpc.authenticated.account.settings.changePassword.useMutation({
+  const changePasswordMutation = trpc.authenticated.account.password.change.useMutation({
     onSuccess: () => {
       toast.success("Mot de passe modifié avec succès")
       form.reset();
