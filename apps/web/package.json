@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@better-auth/stripe": "^1.5.4",
+    "@better-upload/client": "^3.0.14",
+    "@better-upload/server": "^3.0.14",
     "@c15t/nextjs": "^1.8.3",
     "@hookform/resolvers": "^5.2.2",
     "@lexical/code": "^0.39.0",
@@ -48,6 +50,7 @@
     "react": "^19.2.4",
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.2.4",
+    "react-dropzone": "^15.0.0",
     "react-email": "^5.2.5",
     "react-hook-form": "^7.71.1",
     "recharts": "2.15.4",

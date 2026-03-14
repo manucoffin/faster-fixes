@@ -1,12 +1,13 @@
 "use client";
 
-import { cn } from "@/utils/styling/cn";
+import { resolveS3Url } from "@/lib/upload/resolve-s3-url";
 import { useUploadFile } from "@better-upload/client";
 import { formatBytes } from "@better-upload/client/helpers";
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import { File, Loader2, Trash2, Upload } from "lucide-react";
 import { type ReactNode, useCallback, useId, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Button } from "./button";
 
 type UploadedFileInfo = {
   key: string;
@@ -130,7 +131,15 @@ export function FileUpload({
         <FileTypeIcon type={displayValue.type} />
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{displayValue.name}</p>
+          <a
+            href={displayValue.key ? resolveS3Url(displayValue.key) : "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline truncate text-sm font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {displayValue.name}
+          </a>
           <p className="text-muted-foreground text-xs">
             {formatBytes(displayValue.size)}
           </p>

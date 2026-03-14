@@ -1,6 +1,8 @@
 "use client";
 
+import { resolveS3Url } from "@/lib/upload/resolve-s3-url";
 import { useUploadFile } from "@better-upload/client";
+import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Camera, Loader2, X } from "lucide-react";
@@ -12,7 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "./button";
 
 const shapeVariants = cva("overflow-hidden", {
   variants: {
@@ -28,7 +29,7 @@ const shapeVariants = cva("overflow-hidden", {
 });
 
 type ImageUploadProps = {
-  /** Current image URL (full URL for display) or S3 key (for state tracking). */
+  /** Current S3 key or full URL. S3 keys are resolved to URLs automatically. */
   value: string | null;
   onChange: (value: string | null) => void;
   /** better-upload route name */
@@ -59,6 +60,12 @@ type ImageUploadProps = {
   onRemove?: () => void;
   /** Optional element rendered alongside the delete button on hover (e.g. metadata edit dialog trigger). */
   editAction?: ReactNode;
+  /** Called after a successful upload with file metadata. */
+  onUploadComplete?: (metadata: {
+    key: string;
+    size: number;
+    mimeType: string;
+  }) => void;
 };
 
 export function ImageUpload({
@@ -75,6 +82,7 @@ export function ImageUpload({
   isExternalPending = false,
   onRemove,
   editAction,
+  onUploadComplete: onUploadCompleteProp,
 }: ImageUploadProps) {
   const id = useId();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -87,6 +95,11 @@ export function ImageUpload({
       previewUrlRef.current = blobUrl;
       setPreviewUrl(blobUrl);
       onChange(file.objectInfo.key);
+      onUploadCompleteProp?.({
+        key: file.objectInfo.key,
+        size: file.raw.size,
+        mimeType: file.raw.type,
+      });
     },
     onError: onError ? (error) => onError(error) : undefined,
   });
@@ -117,7 +130,7 @@ export function ImageUpload({
     onChange(null);
   }, [onChange, onRemove, revokePreview]);
 
-  const displayUrl = previewUrl ?? (value?.startsWith("http") ? value : null);
+  const displayUrl = previewUrl ?? (value ? resolveS3Url(value) : null);
   const hasImage = !!displayUrl;
   const isUploading = isExternalPending || control.isPending;
   const isDisabled = disabled || isUploading;
