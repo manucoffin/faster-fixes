@@ -1,0 +1,101 @@
+model User {
+    id        String   @id
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name                String
+    email               String
+    emailVerified       Boolean   @default(false)
+    image               String?
+    role                String?
+    banned              Boolean?  @default(false)
+    banReason           String?
+    banExpires          DateTime?
+    stripeCustomerId    String?
+    onboardingCompleted Boolean   @default(false)
+
+    profile              Profile?
+    marketingPreferences MarketingPreferences?
+
+    sessions    Session[]
+    accounts    Account[]
+    members     Member[]
+    invitations Invitation[]
+
+    @@unique([email])
+    @@map("user")
+}
+
+model MarketingPreferences {
+    id Int @id @default(autoincrement())
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    acceptsNewsletter Boolean @default(false)
+    acceptsMarketing  Boolean @default(false)
+
+    @@map("marketing_preferences")
+}
+
+model Profile {
+    id String @id @default(uuid())
+
+    firstName String?
+    lastName  String?
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("profile")
+}
+
+model Session {
+    id                   String   @id
+    expiresAt            DateTime
+    token                String
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @updatedAt
+    ipAddress            String?
+    userAgent            String?
+    userId               String
+    user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    impersonatedBy       String?
+    activeOrganizationId String?
+
+    @@unique([token])
+    @@index([userId])
+    @@map("session")
+}
+
+model Account {
+    id                    String    @id
+    accountId             String
+    providerId            String
+    userId                String
+    user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope                 String?
+    password              String?
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
+
+    @@index([userId])
+    @@map("account")
+}
+
+model Verification {
+    id         String   @id
+    identifier String
+    value      String
+    expiresAt  DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    @@index([identifier])
+    @@map("verification")
+}

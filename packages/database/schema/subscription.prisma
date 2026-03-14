@@ -1,0 +1,31 @@
+model Subscription {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // The ID this subscription is associated with (organization ID in our case). 
+    // This should NOT be a unique field in your database, as it must allow users to resubscribe after a cancellation.
+    referenceId String
+
+    plan                 String
+    stripeCustomerId     String?
+    stripeSubscriptionId String?
+    status               String?   @default("incomplete")
+    periodStart          DateTime?
+    periodEnd            DateTime?
+    trialStart           DateTime?
+    trialEnd             DateTime?
+    cancelAtPeriodEnd    Boolean?  @default(false)
+    cancelAt             DateTime?
+    canceledAt           DateTime?
+    endedAt              DateTime?
+    seats                Int?
+
+    // Optional organizationId, in case someday we want to link subscription directly to a user.
+    // We keep referenceId anyways as main source of truth
+    // But having connection here makes it easier to query organization with an active subscription
+    organizationId String?       @unique
+    organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@map("subscription")
+}
