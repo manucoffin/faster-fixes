@@ -23,7 +23,7 @@ export const RevokeUserSessionsButton = ({
   userId,
 }: RevokeUserSessionsButtonProps) => {
   const revokeSessionsMutation =
-    trpc.admin.users.details.revokeUserSessions.useMutation({
+    trpc.admin.users.sessions.revoke.useMutation({
       onSuccess: () => {
         toast.success("Succès", {
           description: "Toutes les sessions utilisateur ont été révoquées",

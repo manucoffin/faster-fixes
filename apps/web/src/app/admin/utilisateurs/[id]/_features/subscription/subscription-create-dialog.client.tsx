@@ -65,12 +65,12 @@ export function SubscriptionCreateDialog({
   const [open, setOpen] = useState(false);
 
   const createMutation =
-    trpc.admin.users.details.createSubscription.useMutation({
+    trpc.admin.users.subscription.create.useMutation({
       onSuccess: () => {
         toast.success("Abonnement créé avec succès");
         setOpen(false);
         // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.details.getSubscription.invalidate();
+        trpcUtils.admin.users.subscription.get.invalidate();
       },
       onError: (error) => {
         toast.error(

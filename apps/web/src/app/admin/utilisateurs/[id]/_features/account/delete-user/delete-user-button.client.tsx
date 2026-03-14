@@ -24,12 +24,12 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
   const router = useRouter();
   const trpcUtils = trpc.useUtils();
 
-  const deleteUserMutation = trpc.admin.users.details.deleteUser.useMutation({
+  const deleteUserMutation = trpc.admin.users.delete.useMutation({
     onSuccess: () => {
       toast.success("Succès", {
         description: "Utilisateur supprimé avec succès",
       });
-      trpcUtils.admin.users.getPaginatedUsers.invalidate();
+      trpcUtils.admin.users.list.invalidate();
       router.push("/admin/utilisateurs");
     },
     onError: (error) => {

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function UsersOverviewCard() {
-  const query = trpc.admin.dashboard.getUsersOverview.useQuery();
+  const query = trpc.admin.dashboard.users.get.useQuery();
 
   return matchQueryStatus(query, {
     Loading: <UsersOverviewCardLoading />,

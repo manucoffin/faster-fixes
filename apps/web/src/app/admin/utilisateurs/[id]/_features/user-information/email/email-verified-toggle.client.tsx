@@ -19,17 +19,17 @@ export function EmailVerifiedToggle({
   const utils = trpc.useUtils();
 
   const toggleEmailVerifiedMutation =
-    trpc.admin.users.details.toggleEmailVerified.useMutation({
+    trpc.admin.users.email.toggleVerified.useMutation({
       onMutate: async (newData) => {
         // Cancel any outgoing refetches so they don't overwrite our optimistic update
-        await utils.admin.users.details.getUserEmail.cancel({ userId });
+        await utils.admin.users.email.get.cancel({ userId });
 
         // Snapshot the previous value
         const previousData =
-          utils.admin.users.details.getUserEmail.getData({ userId });
+          utils.admin.users.email.get.getData({ userId });
 
         // Optimistically update to the new value
-        utils.admin.users.details.getUserEmail.setData(
+        utils.admin.users.email.get.setData(
           { userId },
           (old) =>
             old
@@ -49,7 +49,7 @@ export function EmailVerifiedToggle({
       // If the mutation fails, roll back to the previous state
       onError: (_err, _newData, context) => {
         if (context?.previousData) {
-          utils.admin.users.details.getUserEmail.setData(
+          utils.admin.users.email.get.setData(
             { userId },
             context.previousData,
           );
@@ -58,7 +58,7 @@ export function EmailVerifiedToggle({
       },
       // Always refetch after error or success to ensure consistency
       onSettled: () => {
-        utils.admin.users.details.getUserEmail.invalidate({ userId });
+        utils.admin.users.email.get.invalidate({ userId });
       },
     });
 

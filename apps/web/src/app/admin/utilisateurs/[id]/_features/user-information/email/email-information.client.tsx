@@ -22,7 +22,7 @@ interface EmailInformationProps {
 }
 
 export function EmailInformation({ userId }: EmailInformationProps) {
-  const emailQuery = trpc.admin.users.details.getUserEmail.useQuery({
+  const emailQuery = trpc.admin.users.email.get.useQuery({
     userId,
   });
 

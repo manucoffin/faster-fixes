@@ -68,12 +68,12 @@ export function SubscriptionEditDialog({
   const trpcUtils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const updateMutation =
-    trpc.admin.users.details.updateSubscription.useMutation({
+    trpc.admin.users.subscription.update.useMutation({
       onSuccess: () => {
         toast.success("Abonnement mis à jour avec succès");
         setOpen(false);
         // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.details.getSubscription.invalidate();
+        trpcUtils.admin.users.subscription.get.invalidate();
       },
       onError: (error: any) => {
         toast.error(

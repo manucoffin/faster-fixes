@@ -24,7 +24,7 @@ export function UserOrganizationSelect({
   onValueChange,
   placeholder = "Select an organization",
 }: UserOrganizationSelectProps) {
-  const organizationsQuery = trpc.admin.users.getUserOrganizations.useQuery({
+  const organizationsQuery = trpc.admin.users.organisations.list.useQuery({
     userId,
   });
 

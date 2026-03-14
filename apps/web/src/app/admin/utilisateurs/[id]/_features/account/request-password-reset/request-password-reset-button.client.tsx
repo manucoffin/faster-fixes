@@ -23,7 +23,7 @@ export const RequestPasswordResetButton = ({
   userId,
 }: RequestPasswordResetButtonProps) => {
   const requestPasswordResetMutation =
-    trpc.admin.users.details.requestPasswordReset.useMutation({
+    trpc.admin.users.password.requestReset.useMutation({
       onSuccess: () => {
         toast.success("Succès", {
           description:

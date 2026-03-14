@@ -149,7 +149,7 @@ export const UsersTable = () => {
   );
 
   const { data, isLoading, isError } =
-    trpc.admin.users.getPaginatedUsers.useQuery({
+    trpc.admin.users.list.useQuery({
       search,
       page: currentPage,
       pageSize,
@@ -158,7 +158,7 @@ export const UsersTable = () => {
     });
 
   // Fetch export data separately (will be fetched on demand by the export button)
-  const { data: exportData } = trpc.admin.users.getAllUsersForExport.useQuery({
+  const { data: exportData } = trpc.admin.users.export.useQuery({
     search,
   });
 

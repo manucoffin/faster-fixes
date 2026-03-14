@@ -26,7 +26,7 @@ type MonthData = {
 export function SubscriptionsChart() {
   const [period] = useQueryStates(periodSelectorParsers);
 
-  const getMonthlyStatsQuery = trpc.admin.dashboard.getMonthlyStats.useQuery({
+  const getMonthlyStatsQuery = trpc.admin.dashboard.stats.get.useQuery({
     from: period.from ? new Date(period.from) : undefined,
     to: period.to ? new Date(period.to) : undefined,
   });

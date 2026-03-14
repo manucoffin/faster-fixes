@@ -6,7 +6,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function ActiveSubscriptionsCard() {
-  const query = trpc.admin.dashboard.getActiveSubscriptions.useQuery();
+  const query = trpc.admin.dashboard.subscriptions.get.useQuery();
 
   return matchQueryStatus(query, {
     Loading: <ActiveSubscriptionsCardLoading />,

@@ -22,7 +22,7 @@ interface SubscriptionCardProps {
 
 export function SubscriptionCard({ userId }: SubscriptionCardProps) {
   const { data: subscription, isLoading } =
-    trpc.admin.users.details.getSubscription.useQuery(
+    trpc.admin.users.subscription.get.useQuery(
       { userId },
       {
         enabled: !!userId,

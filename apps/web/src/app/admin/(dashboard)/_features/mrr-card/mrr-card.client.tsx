@@ -6,7 +6,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function MrrCard() {
-  const query = trpc.admin.dashboard.getMrr.useQuery();
+  const query = trpc.admin.dashboard.mrr.get.useQuery();
 
   return matchQueryStatus(query, {
     Loading: <MrrCardLoading />,

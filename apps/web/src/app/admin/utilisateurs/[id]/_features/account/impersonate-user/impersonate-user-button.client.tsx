@@ -30,7 +30,7 @@ export const ImpersonateUserButton = ({
   const { refetch: refetchSession } = useSession();
 
   const impersonateUserMutation =
-    trpc.admin.users.details.impersonateUser.useMutation({
+    trpc.admin.users.impersonate.useMutation({
       onSuccess: async () => {
         toast.success("Succès", {
           description: `Vous êtes maintenant connecté en tant que ${userEmail}`,

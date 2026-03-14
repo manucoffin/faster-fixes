@@ -32,12 +32,12 @@ export function CreateUserDialog() {
   const [open, setOpen] = useState(false);
   const trpcUtils = trpc.useUtils();
 
-  const createUserMutation = trpc.admin.users.createUser.useMutation({
+  const createUserMutation = trpc.admin.users.create.useMutation({
     onSuccess: () => {
       toast.success("Utilisateur créé avec succès");
       setOpen(false);
       form.reset();
-      trpcUtils.admin.users.getPaginatedUsers.invalidate();
+      trpcUtils.admin.users.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Erreur lors de la création de l'utilisateur");
