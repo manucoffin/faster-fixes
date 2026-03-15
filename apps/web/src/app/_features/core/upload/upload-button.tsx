@@ -18,10 +18,12 @@ type UploadButtonProps = {
   disabled?: boolean;
   /** Client metadata to send with the upload */
   metadata?: Record<string, string>;
-  onUploadComplete?: (file: {
+  onUploadComplete?: (info: {
     key: string;
+    filename: string;
     size: number;
     mimeType: string;
+    raw: File;
   }) => void;
   onError?: (error: { type: string; message: string }) => void;
   /** Icon displayed in the button (default: Upload icon) */
@@ -49,8 +51,10 @@ export function UploadButton({
     onUploadComplete: ({ file }) => {
       onUploadComplete?.({
         key: file.objectInfo.key,
+        filename: file.raw.name,
         size: file.raw.size,
         mimeType: file.raw.type,
+        raw: file.raw,
       });
     },
     onError: onError ? (error) => onError(error) : undefined,

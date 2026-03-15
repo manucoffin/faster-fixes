@@ -6,6 +6,7 @@ import {
   useListOrganizations,
 } from "@/lib/auth";
 import { invitationsUrl } from "@/lib/routing";
+import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { getInitials } from "@/utils/text/get-initials";
 import {
   Avatar,
@@ -77,7 +78,7 @@ export function OrganizationSwitcher() {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  {orgLogo && <AvatarImage src={orgLogo} alt={orgName} />}
+                  {orgLogo && <AvatarImage src={resolveS3Url(orgLogo)} alt={orgName} />}
                   <AvatarFallback className="rounded-lg text-xs">
                     {getInitials(orgName)}
                   </AvatarFallback>
@@ -112,7 +113,7 @@ export function OrganizationSwitcher() {
                     >
                       <Avatar className="h-6 w-6 rounded-md">
                         {logo && (
-                          <AvatarImage src={logo} alt={org.name} />
+                          <AvatarImage src={resolveS3Url(logo)} alt={org.name} />
                         )}
                         <AvatarFallback className="rounded-md text-[10px]">
                           {getInitials(org.name)}
