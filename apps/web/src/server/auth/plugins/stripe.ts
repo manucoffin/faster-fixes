@@ -63,5 +63,16 @@ export const stripePlugin = stripe({
       return true;
     },
     plans: SUBSCRIPTION_PLANS,
+    getCheckoutSessionParams: async ({ plan }) => ({
+      params: {
+        allow_promotion_codes: true,
+        subscription_data: {
+          default_tax_rates: [process.env.STRIPE_DEFAULT_TAX_RATE_ID!],
+          ...(plan.freeTrial?.days && {
+            trial_period_days: plan.freeTrial.days,
+          }),
+        },
+      },
+    }),
   },
 });
