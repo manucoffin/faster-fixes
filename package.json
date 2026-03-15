@@ -6,6 +6,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:agent-rules": "turbo run lint:agent-rules --filter=web",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
