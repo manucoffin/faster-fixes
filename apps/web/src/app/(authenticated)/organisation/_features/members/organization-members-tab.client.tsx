@@ -43,7 +43,8 @@ function getRoleBadgeVariant(role: string) {
 
 export function OrganizationMembersTab() {
   const { data: session } = useSession();
-  const { data: activeOrg } = useActiveOrganization();
+  const { data: activeOrg, refetch: refetchActiveOrg } =
+    useActiveOrganization();
   const { data: memberRoleData } = useActiveMemberRole();
   const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false);
 
@@ -70,7 +71,8 @@ export function OrganizationMembersTab() {
   const invitations = invitationsQuery.data ?? [];
 
   const leaveOrganization = trpc.authenticated.organisation.leave.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refetchActiveOrg();
       toast.success("Vous avez quitté l'organisation");
     },
     onError: (error) => {
@@ -90,7 +92,7 @@ export function OrganizationMembersTab() {
       {canManage && (
         <div className="flex justify-end">
           <Button onClick={() => setInviteDialogOpen(true)}>
-            <Plus className="mr-2 size-4" />
+            <Plus className="size-4" />
             Inviter un membre
           </Button>
         </div>
@@ -194,7 +196,6 @@ export function OrganizationMembersTab() {
               <TableCell>
                 <InvitationActionsDropdown
                   invitationId={invitation.id}
-                  onCancelled={() => invitationsQuery.refetch()}
                 />
               </TableCell>
             </TableRow>
@@ -204,7 +205,7 @@ export function OrganizationMembersTab() {
             <TableRow>
               <TableCell
                 colSpan={5}
-                className="text-muted-foreground text-center py-8"
+                className="text-muted-foreground py-8 text-center"
               >
                 Aucun membre
               </TableCell>
@@ -216,7 +217,6 @@ export function OrganizationMembersTab() {
       <InviteMemberDialog
         open={inviteDialogOpen}
         onOpenChange={setInviteDialogOpen}
-        onInviteSent={() => invitationsQuery.refetch()}
       />
     </div>
   );

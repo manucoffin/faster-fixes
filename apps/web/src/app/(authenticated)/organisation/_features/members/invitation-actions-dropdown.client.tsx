@@ -13,18 +13,18 @@ import { toast } from "sonner";
 
 type InvitationActionsDropdownProps = {
   invitationId: string;
-  onCancelled: () => void;
 };
 
 export function InvitationActionsDropdown({
   invitationId,
-  onCancelled,
 }: InvitationActionsDropdownProps) {
+  const utils = trpc.useUtils();
+
   const cancelInvitation =
     trpc.authenticated.organisation.invitation.delete.useMutation({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await utils.authenticated.organisation.invitation.get.invalidate();
         toast.success("Invitation annulée");
-        onCancelled();
       },
       onError: (error) => {
         toast.error(

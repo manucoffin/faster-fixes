@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveOrganization } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -23,9 +24,12 @@ export function MemberActionsDropdown({
   memberRole,
   isOwner,
 }: MemberActionsDropdownProps) {
+  const { refetch: refetchActiveOrg } = useActiveOrganization();
+
   const updateRole =
     trpc.authenticated.organisation.member.updateRole.useMutation({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await refetchActiveOrg();
         toast.success("Rôle mis à jour avec succès");
       },
       onError: (error) => {
@@ -35,7 +39,8 @@ export function MemberActionsDropdown({
 
   const removeMember =
     trpc.authenticated.organisation.member.delete.useMutation({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await refetchActiveOrg();
         toast.success("Membre retiré avec succès");
       },
       onError: (error) => {

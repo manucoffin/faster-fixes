@@ -34,15 +34,14 @@ type InviteMemberFormInputs = z.infer<typeof InviteMemberFormSchema>;
 type InviteMemberDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInviteSent: () => void;
 };
 
 export function InviteMemberDialog({
   open,
   onOpenChange,
-  onInviteSent,
 }: InviteMemberDialogProps) {
   const { data: activeOrg } = useActiveOrganization();
+  const utils = trpc.useUtils();
 
   const form = useForm<InviteMemberFormInputs>({
     resolver: zodResolver(InviteMemberFormSchema),
@@ -58,10 +57,10 @@ export function InviteMemberDialog({
 
   const createInvitation =
     trpc.authenticated.organisation.invitation.create.useMutation({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await utils.authenticated.organisation.invitation.get.invalidate();
         toast.success("Invitation envoyée avec succès");
         handleOpenChange(false);
-        onInviteSent();
       },
       onError: (error) => {
         form.setError("root", {
