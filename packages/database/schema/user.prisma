@@ -104,11 +104,10 @@ model Verification {
 }
 
 model RateLimit {
-    id        String   @id
-    key       String
-    count     Int
+    id          String @id
+    key         String
+    count       Int
     lastRequest BigInt
-    expiresAt BigInt
 
     @@unique([key])
     @@map("rateLimit")
