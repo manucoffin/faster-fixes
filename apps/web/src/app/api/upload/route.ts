@@ -47,6 +47,27 @@ const router: Router = {
         };
       },
     }),
+    "user-avatar": route({
+      fileTypes: ["image/png", "image/jpeg", "image/webp"],
+      maxFileSize: 2 * 1024 * 1024,
+      onBeforeUpload: async ({ req, file }) => {
+        const session = await auth.api.getSession({
+          headers: req.headers,
+        });
+
+        if (!session) {
+          throw new RejectUpload("Non autorisé");
+        }
+
+        const extension = file.type.split("/")[1] ?? "png";
+
+        return {
+          objectInfo: {
+            key: `user-avatars/${session.user.id}/${Date.now()}.${extension}`,
+          },
+        };
+      },
+    }),
   },
 };
 

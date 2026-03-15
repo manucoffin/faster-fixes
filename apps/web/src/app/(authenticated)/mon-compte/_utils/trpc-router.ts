@@ -7,6 +7,7 @@ import { deleteAccount } from "../parametres/_features/account-deletion/delete-a
 import { getCurrentEmail } from "../parametres/_features/email/get-current-email.trpc.query";
 import { changePassword } from "../parametres/_features/password/change-password.trpc.mutation";
 import { getProfile } from "../parametres/_features/profile/get-profile.trpc.query";
+import { updateAvatar } from "../parametres/_features/profile/update-avatar.trpc.mutation";
 import { updateProfile } from "../parametres/_features/profile/update-profile.trpc.mutation";
 
 export const accountRouter = router({
@@ -14,6 +15,7 @@ export const accountRouter = router({
   profile: router({
     get: getProfile,
     update: updateProfile,
+    updateAvatar: updateAvatar,
   }),
   email: router({
     get: getCurrentEmail,

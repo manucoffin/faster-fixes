@@ -2,9 +2,11 @@ import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dash
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { AlertTriangleIcon } from "lucide-react";
+import { Separator } from "@workspace/ui/components/separator";
 import { AccountDeletionButton } from "./_features/account-deletion/account-deletion-button.client";
 import { EmailForm } from "./_features/email/email-form.client";
 import { PasswordForm } from "./_features/password/password-form.client";
+import { ProfileAvatarUpload } from "./_features/profile/profile-avatar-upload.client";
 import { ProfileForm } from "./_features/profile/profile-form.client";
 
 export default function ParametersPage() {
@@ -21,7 +23,11 @@ export default function ParametersPage() {
           description="Mettez à jour vos informations personnelles"
           cardTitle="Informations Personnelles"
         >
-          <ProfileForm />
+          <div className="flex flex-col gap-6">
+            <ProfileAvatarUpload />
+            <Separator />
+            <ProfileForm />
+          </div>
         </DashboardSection>
 
         <DashboardSection
