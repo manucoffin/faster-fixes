@@ -1,5 +1,6 @@
 import { router } from "@/server/trpc/trpc";
 import { getOrganizationDetails } from "../../organisation/_features/general/get-organization-details.trpc.query";
+import { updateOrganization } from "../../organisation/_features/general/update-organization.trpc.mutation";
 import { updateOrganizationLogo } from "../../organisation/_features/general/update-organization-logo.trpc.mutation";
 import { getActiveSubscription } from "../facturation/_features/current-plan/get-active-subscription.trpc.query";
 import { createBillingPortal } from "../facturation/_features/manage-subscription/create-billing-portal.trpc.mutation";
@@ -25,6 +26,7 @@ export const accountRouter = router({
   }),
   organisation: router({
     get: getOrganizationDetails,
+    update: updateOrganization,
     updateLogo: updateOrganizationLogo,
   }),
   billing: router({
