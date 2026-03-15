@@ -164,7 +164,7 @@ export function SidebarUserDropdown() {
                   },
                 })
               }
-              className="text-red-600"
+              variant="destructive"
             >
               <LogOut className="mr-2 size-4" />
               Me déconnecter
