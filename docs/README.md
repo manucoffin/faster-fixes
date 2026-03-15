@@ -37,6 +37,7 @@ documentation/
 | [payload-cms-migrations.md](guides/payload-cms-migrations.md) | Skip migrations in dev, create one per finalized schema change |
 | [upgrade-packages-versions.md](guides/upgrade-packages-versions.md) | Upgrading Next.js and Payload CMS with version sync rules |
 | [seo-checklist.md](guides/seo-checklist.md) | Pre-production SEO checklist — metadata, sitemaps, structured data, assets |
+| [stripe-dashboard-checklist.md](guides/stripe-dashboard-checklist.md) | Stripe Dashboard pre-production checklist — products, tax, customer portal |
 
 ### `decisions/` — Architecture Decision Records
 
