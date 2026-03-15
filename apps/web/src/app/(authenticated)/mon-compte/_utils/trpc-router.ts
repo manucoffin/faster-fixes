@@ -1,7 +1,8 @@
+import { leaveOrganization } from "@/app/(authenticated)/organisation/_features/leave-organization/leave-organization.trpc.mutation";
 import { router } from "@/server/trpc/trpc";
 import { getOrganizationDetails } from "../../organisation/_features/general/get-organization-details.trpc.query";
-import { updateOrganization } from "../../organisation/_features/general/update-organization.trpc.mutation";
 import { updateOrganizationLogo } from "../../organisation/_features/general/update-organization-logo.trpc.mutation";
+import { updateOrganization } from "../../organisation/_features/general/update-organization.trpc.mutation";
 import { getActiveSubscription } from "../facturation/_features/current-plan/get-active-subscription.trpc.query";
 import { createBillingPortal } from "../facturation/_features/manage-subscription/create-billing-portal.trpc.mutation";
 import { getPastInvoices } from "../facturation/_features/past-invoices/get-past-invoices.trpc.query";
@@ -28,6 +29,7 @@ export const accountRouter = router({
     get: getOrganizationDetails,
     update: updateOrganization,
     updateLogo: updateOrganizationLogo,
+    leave: leaveOrganization,
   }),
   billing: router({
     subscription: router({
