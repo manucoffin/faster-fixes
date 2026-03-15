@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { cn } from "@workspace/ui/lib/utils";
 import { ReactNode } from "react";
 
 interface DashboardSectionProps {
   title: ReactNode;
   description: ReactNode;
   cardTitle?: string;
+  cardClassName?: string;
   children: ReactNode;
 }
 
@@ -12,6 +14,7 @@ export function DashboardSection({
   title,
   description,
   cardTitle,
+  cardClassName,
   children,
 }: DashboardSectionProps) {
   return (
@@ -26,7 +29,7 @@ export function DashboardSection({
 
       {/* Right Columns - Form Card */}
       <div className="col-span-2">
-        <Card>
+        <Card className={cn(cardClassName)}>
           {cardTitle && (
             <CardHeader className="sr-only">
               <CardTitle>{cardTitle}</CardTitle>
