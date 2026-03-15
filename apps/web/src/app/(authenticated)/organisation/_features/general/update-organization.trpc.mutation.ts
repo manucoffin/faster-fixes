@@ -2,7 +2,7 @@
 
 import { generateUniqueSlug } from "@/app/_features/organization/_utils/generate-unique-slug";
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { UpdateOrganizationSchema } from "./update-organization.schema";
 
 export const updateOrganization = protectedProcedure
@@ -42,3 +42,7 @@ export const updateOrganization = protectedProcedure
       slug: org.slug,
     };
   });
+
+export type UpdateOrganizationOutput = inferProcedureOutput<
+  typeof updateOrganization
+>;

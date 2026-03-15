@@ -1,7 +1,7 @@
 "use server";
 
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
 
 export const getOrganizationDetails = protectedProcedure
@@ -42,3 +42,7 @@ export const getOrganizationDetails = protectedProcedure
       isDefault: org.isDefault,
     };
   });
+
+export type GetOrganizationDetailsOutput = inferProcedureOutput<
+  typeof getOrganizationDetails
+>;

@@ -3,7 +3,7 @@
 import { s3Client } from "@/server/storage";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { deleteObject } from "@better-upload/server/helpers";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
 
 const UpdateOrganizationLogoSchema = z.object({
@@ -51,3 +51,7 @@ export const updateOrganizationLogo = protectedProcedure
       }
     }
   });
+
+export type UpdateOrganizationLogoOutput = inferProcedureOutput<
+  typeof updateOrganizationLogo
+>;
