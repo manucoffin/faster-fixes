@@ -22,14 +22,14 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} font-sans antialiased `}
       >
-        <ConsentProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            enableColorScheme
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          enableColorScheme
+        >
+          <ConsentProvider>
             <TRPCProvider>
               <NuqsAdapter>
                 <StopImpersonateButton />
@@ -39,8 +39,8 @@ export default function RootLayout({
                 <Toaster />
               </NuqsAdapter>
             </TRPCProvider>
-          </ThemeProvider>
-        </ConsentProvider>
+          </ConsentProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

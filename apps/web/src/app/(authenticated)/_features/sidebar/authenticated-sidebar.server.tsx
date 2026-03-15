@@ -31,39 +31,39 @@ export const AuthenticatedSidebar = async ({
           <SidebarGroupLabel>Mon compte</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Paramètres">
-                <Link href="/mon-compte/parametres">
+              <Link href="/mon-compte/parametres">
+                <SidebarMenuButton tooltip="Paramètres">
                   <Settings2 />
                   <span>Paramètres</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Organisation">
-                <Link href="/mon-compte/organisation">
+              <Link href="/mon-compte/organisation">
+                <SidebarMenuButton tooltip="Organisation">
                   <Building2 />
                   <span>Organisation</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Invitations">
-                <Link href="/mon-compte/invitations">
+              <Link href="/mon-compte/invitations">
+                <SidebarMenuButton tooltip="Invitations">
                   <Mail />
                   <span>Invitations</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Facturation">
-                <Link href="/mon-compte/facturation">
+              <Link href="/mon-compte/facturation">
+                <SidebarMenuButton tooltip="Facturation">
                   <CreditCard />
                   <span>Facturation</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
