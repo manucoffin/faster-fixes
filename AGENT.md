@@ -10,7 +10,7 @@
 - Never run production database migrations (`pnpm migrate:prod`).
 - Only run development migrations (`pnpm migrate:dev`); production migration execution is user-managed.
 - Code identifiers, comments, filenames, schemas: English only.
-- User-facing UI copy: French, always tutoiement (`tu`), never `vous`.
+- User-facing UI copy: French, always vouvoiement (`vous`), never `tu`.
 - All `unstable_cache` usage must include `cacheTags` from `@/server/cache/cache-tags`.
 
 ## Critical conventions
@@ -38,6 +38,13 @@
 - Reuse existing patterns in touched folders.
 - Keep edits scoped to the task.
 - Prefer enforceable rules in lint/CI/hooks over prompt text.
+
+## Subagent Strategy
+
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
 
 <!-- BEGIN:nextjs-agent-rules -->
 

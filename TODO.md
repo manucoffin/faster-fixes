@@ -1,9 +1,3 @@
-- si je suis membre d'une orga, je ne dois pas avoir accès à la page paramères de l'orga à la place just un bouton pour quitter l'orga
-- mon-compte/invitation + organisations
-- mettre le tableau des membres invités dans la même page que les membres
-- ajouter bouton renvoi email
-- empêcher de créer une organization
-
 - Setup le centre de notifications
 - [ ] ORG
   - [ ] Setup le système d’organization (reprendre celui de taff)
