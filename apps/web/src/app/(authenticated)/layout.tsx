@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
 import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
+import { FeedbackButton } from "./_features/feedback/feedback-button.client";
 import { AuthenticatedSidebar } from "./_features/sidebar/authenticated-sidebar.server";
 
 export const metadata: Metadata = {
@@ -41,7 +42,8 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
               <Breadcrumbs />
             </div>
 
-            <div className="space-x-2">
+            <div className="flex items-center gap-2">
+              <FeedbackButton />
               <ThemeToggle variant="ghost" size="icon" />
             </div>
           </div>
