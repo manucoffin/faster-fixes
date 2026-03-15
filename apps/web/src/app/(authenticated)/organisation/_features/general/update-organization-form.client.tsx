@@ -48,6 +48,9 @@ export function UpdateOrganizationForm() {
       organizationId: "",
       name: "",
     },
+    values: activeOrg
+      ? { organizationId: activeOrg.id, name: activeOrg.name ?? "" }
+      : undefined,
   });
 
   const nameValue = form.watch("name");
@@ -55,15 +58,6 @@ export function UpdateOrganizationForm() {
     () => slugify(nameValue, { lower: true, strict: true }),
     [nameValue],
   );
-
-  React.useEffect(() => {
-    if (activeOrg) {
-      form.reset({
-        organizationId: activeOrg.id,
-        name: activeOrg.name ?? "",
-      });
-    }
-  }, [activeOrg, form]);
 
   const onSubmit = (data: UpdateOrganizationInputs) => {
     updateOrganization.mutate(data);
