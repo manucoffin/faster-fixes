@@ -50,6 +50,7 @@ export function SendVerificationEmailButton({
 
   return (
     <ActionButton
+      type="button"
       variant={variant}
       size={size}
       onClick={handleSendVerificationEmail}
