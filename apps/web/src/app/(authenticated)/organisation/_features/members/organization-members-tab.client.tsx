@@ -7,12 +7,12 @@ import {
   useSession,
 } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
-import { getInitials } from "@/utils/text/get-initials";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
+import { Facehash } from "facehash";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -122,8 +122,8 @@ export function OrganizationMembersTab() {
                       {member.user.image && (
                         <AvatarImage src={member.user.image} alt={memberName} />
                       )}
-                      <AvatarFallback className="text-xs">
-                        {getInitials(memberName)}
+                      <AvatarFallback>
+                        <Facehash name={member.user.email ?? memberName} size={32} />
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{memberName}</span>

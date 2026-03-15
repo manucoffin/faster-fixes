@@ -1,11 +1,11 @@
 import { loginUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
-import { getInitials } from "@/utils/text/get-initials";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
+import { Facehash } from "@/app/_features/core/avatar/facehash-avatar.client";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -76,7 +76,7 @@ export async function Header() {
                       />
                     )}
                     <AvatarFallback>
-                      {getInitials(session.user.name)}
+                      <Facehash name={session.user.email ?? session.user.name ?? "User"} size={32} />
                     </AvatarFallback>
                   </Avatar>
                 </Button>
