@@ -45,6 +45,7 @@ export const loginMutation = publicProcedure
         }
       }
 
+      console.error("[login] Unexpected error:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Échec de la connexion. Veuillez réessayer.",

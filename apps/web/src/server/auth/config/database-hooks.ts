@@ -88,11 +88,9 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
           };
         }
       },
-      after: async ({ data, ctx }) => {
-        const sessionData = data as { userId: string };
-        const request = (ctx as { request?: Request })?.request;
+      after: async (session) => {
         console.log(
-          `[audit] session.created userId=${sessionData.userId} ip=${request?.headers.get("x-forwarded-for")}`,
+          `[audit] session.created userId=${session.userId}`,
         );
       },
     },
