@@ -10,9 +10,9 @@ import { parseAsString, useQueryState } from "nuqs";
 import { ProjectSettingsTab } from "./settings/project-settings-tab.client";
 import { ReviewersTab } from "./reviewers/reviewers-tab.client";
 
-interface ProjectTabsProps {
+type ProjectTabsProps = {
   projectId: string;
-}
+};
 
 export function ProjectTabs({ projectId }: ProjectTabsProps) {
   const [tab, setTab] = useQueryState(

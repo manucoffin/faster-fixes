@@ -4,6 +4,7 @@ import {
   CreateReviewerInputs,
   CreateReviewerSchema,
 } from "@/app/(authenticated)/projets/_features/reviewers/create-reviewer.schema";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -39,9 +40,9 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface ReviewersTabProps {
+type ReviewersTabProps = {
   projectId: string;
-}
+};
 
 export function ReviewersTab({ projectId }: ReviewersTabProps) {
   const trpc = useTRPC();
@@ -51,7 +52,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
   const [newShareUrl, setNewShareUrl] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState<string | null>(null);
 
-  const { data: reviewers, isLoading } = useQuery(
+  const reviewersQuery = useQuery(
     trpc.authenticated.projets.reviewer.list.queryOptions({ projectId }),
   );
 
@@ -103,12 +104,12 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
   return (
     <div className="flex flex-col gap-8">
       {newShareUrl && (
-        <div className="rounded-md border border-green-400 bg-green-50 p-4 dark:bg-green-950">
-          <p className="mb-2 text-sm font-medium text-green-800 dark:text-green-200">
+        <div className="rounded-md border border-success bg-success/10 p-4">
+          <p className="mb-2 text-sm font-medium text-success">
             Relecteur créé ! Partagez ce lien avec votre client :
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 rounded bg-white px-2 py-1 font-mono text-xs break-all dark:bg-black">
+            <code className="flex-1 rounded bg-background px-2 py-1 font-mono text-xs break-all">
               {newShareUrl}
             </code>
             <Button
@@ -117,7 +118,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
               onClick={() => handleCopy(newShareUrl, "new")}
             >
               {copied === "new" ? (
-                <Check className="h-4 w-4 text-green-600" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -182,69 +183,72 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
         </Dialog>
       </div>
 
-      {isLoading ? (
-        <p className="text-muted-foreground text-sm">Chargement...</p>
-      ) : !reviewers?.length ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">
-          Aucun relecteur. Ajoutez votre premier client.
-        </p>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nom</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Retours</TableHead>
-              <TableHead>Lien de partage</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {reviewers.map((reviewer) => (
-              <TableRow key={reviewer.id}>
-                <TableCell className="font-medium">{reviewer.name}</TableCell>
-                <TableCell>
-                  {reviewer.isActive ? (
-                    <Badge variant="default">Actif</Badge>
-                  ) : (
-                    <Badge variant="secondary">Révoqué</Badge>
-                  )}
-                </TableCell>
-                <TableCell>{reviewer.feedbackCount}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopy(reviewer.shareUrl, reviewer.id)}
-                  >
-                    {copied === reviewer.id ? (
-                      <Check className="mr-1 h-3 w-3 text-green-600" />
+      {matchQueryStatus(reviewersQuery, {
+        Loading: <p className="text-muted-foreground text-sm">Chargement...</p>,
+        Errored: <p className="text-destructive text-sm">Erreur lors du chargement des relecteurs.</p>,
+        Empty: (
+          <p className="text-muted-foreground py-8 text-center text-sm">
+            Aucun relecteur. Ajoutez votre premier client.
+          </p>
+        ),
+        Success: ({ data: reviewers }) => (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nom</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Retours</TableHead>
+                <TableHead>Lien de partage</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reviewers.map((reviewer) => (
+                <TableRow key={reviewer.id}>
+                  <TableCell className="font-medium">{reviewer.name}</TableCell>
+                  <TableCell>
+                    {reviewer.isActive ? (
+                      <Badge variant="default">Actif</Badge>
                     ) : (
-                      <Copy className="mr-1 h-3 w-3" />
+                      <Badge variant="secondary">Révoqué</Badge>
                     )}
-                    Copier le lien
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  {reviewer.isActive && (
+                  </TableCell>
+                  <TableCell>{reviewer.feedbackCount}</TableCell>
+                  <TableCell>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      disabled={revokeReviewer.isPending}
-                      onClick={() =>
-                        revokeReviewer.mutate({ reviewerId: reviewer.id })
-                      }
+                      size="sm"
+                      onClick={() => handleCopy(reviewer.shareUrl, reviewer.id)}
                     >
-                      <UserX className="h-4 w-4" />
+                      {copied === reviewer.id ? (
+                        <Check className="mr-1 h-3 w-3 text-success" />
+                      ) : (
+                        <Copy className="mr-1 h-3 w-3" />
+                      )}
+                      Copier le lien
                     </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+                  </TableCell>
+                  <TableCell>
+                    {reviewer.isActive && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        disabled={revokeReviewer.isPending}
+                        onClick={() =>
+                          revokeReviewer.mutate({ reviewerId: reviewer.id })
+                        }
+                      >
+                        <UserX className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ),
+      })}
     </div>
   );
 }

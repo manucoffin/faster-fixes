@@ -40,9 +40,9 @@ import {
   UpdateProjectSchema,
 } from "@/app/(authenticated)/projets/_features/settings/update-project.schema";
 
-interface ProjectSettingsTabProps {
+type ProjectSettingsTabProps = {
   projectId: string;
-}
+};
 
 export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
   const trpc = useTRPC();
@@ -260,8 +260,8 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
           </div>
 
           {newApiKey && (
-            <div className="rounded-md border border-yellow-400 bg-yellow-50 p-3 dark:bg-yellow-950">
-              <p className="mb-2 text-xs font-medium text-yellow-800 dark:text-yellow-200">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+              <p className="mb-2 text-xs font-medium text-destructive">
                 Nouvelle clé — copiez-la maintenant, elle ne sera plus affichée.
               </p>
               <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                 </code>
                 <Button variant="ghost" size="icon" onClick={handleCopyKey}>
                   {keyCopied ? (
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-success" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}

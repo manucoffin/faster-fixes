@@ -2,6 +2,7 @@
 
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -21,19 +22,17 @@ export function ProjectList() {
   const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
 
-  const { data: projects, isLoading } = useQuery(
+  const projectsQuery = useQuery(
     trpc.authenticated.projets.list.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id },
     ),
   );
 
-  if (isLoading) {
-    return <p className="text-muted-foreground text-sm">Chargement...</p>;
-  }
-
-  if (!projects?.length) {
-    return (
+  return matchQueryStatus(projectsQuery, {
+    Loading: <p className="text-muted-foreground text-sm">Chargement...</p>,
+    Errored: <p className="text-destructive text-sm">Erreur lors du chargement des projets.</p>,
+    Empty: (
       <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
         <FolderOpen className="h-12 w-12 text-muted-foreground" />
         <div>
@@ -49,43 +48,37 @@ export function ProjectList() {
           </Link>
         </Button>
       </div>
-    );
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nom</TableHead>
-          <TableHead>URL</TableHead>
-          <TableHead>Retours</TableHead>
-          <TableHead>Créé</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {projects.map((project) => (
-          <TableRow key={project.id}>
-            <TableCell className="font-medium">
-              <Link
-                href={`/projets/${project.id}`}
-                className="hover:underline"
-              >
-                {project.name}
-              </Link>
-            </TableCell>
-            <TableCell className="text-muted-foreground">
-              {project.url}
-            </TableCell>
-            <TableCell>{project.feedbackCount}</TableCell>
-            <TableCell className="text-muted-foreground">
-              {formatDistanceToNow(project.createdAt, {
-                addSuffix: true,
-                locale: fr,
-              })}
-            </TableCell>
+    ),
+    Success: ({ data: projects }) => (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nom</TableHead>
+            <TableHead>URL</TableHead>
+            <TableHead>Retours</TableHead>
+            <TableHead>Créé</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+        </TableHeader>
+        <TableBody>
+          {projects.map((project) => (
+            <TableRow key={project.id}>
+              <TableCell className="font-medium">
+                <Link href={`/projets/${project.id}`} className="hover:underline">
+                  {project.name}
+                </Link>
+              </TableCell>
+              <TableCell className="text-muted-foreground">{project.url}</TableCell>
+              <TableCell>{project.feedbackCount}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {formatDistanceToNow(project.createdAt, {
+                  addSuffix: true,
+                  locale: fr,
+                })}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ),
+  });
 }
