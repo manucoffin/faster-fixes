@@ -19,6 +19,7 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
+import { PasswordStrengthIndicator } from "@workspace/ui/components/password-strength-indicator";
 import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -117,6 +118,7 @@ export function SignupForm() {
                   disabled={signupMutation.isPending}
                 />
               </FormControl>
+              <PasswordStrengthIndicator password={field.value} />
               <FormMessage />
             </FormItem>
           )}
