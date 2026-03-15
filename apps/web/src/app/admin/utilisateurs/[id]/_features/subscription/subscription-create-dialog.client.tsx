@@ -26,7 +26,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@workspace/ui/components/form";
 import {
   Popover,
@@ -64,20 +64,19 @@ export function SubscriptionCreateDialog({
   const trpcUtils = trpc.useUtils();
   const [open, setOpen] = useState(false);
 
-  const createMutation =
-    trpc.admin.users.subscription.create.useMutation({
-      onSuccess: () => {
-        toast.success("Abonnement créé avec succès");
-        setOpen(false);
-        // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.subscription.get.invalidate();
-      },
-      onError: (error) => {
-        toast.error(
-          error.message || "Erreur lors de la création de l'abonnement",
-        );
-      },
-    });
+  const createMutation = trpc.admin.users.subscription.create.useMutation({
+    onSuccess: () => {
+      toast.success("Abonnement créé avec succès");
+      setOpen(false);
+      // Invalidate the subscription query to refetch the data
+      trpcUtils.admin.users.subscription.get.invalidate();
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Erreur lors de la création de l'abonnement",
+      );
+    },
+  });
 
   const form = useForm<SubscriptionInputs>({
     resolver: zodResolver(SubscriptionSchema),
@@ -165,7 +164,6 @@ export function SubscriptionCreateDialog({
                 )}
               />
 
-
               {/* Statut d'abonnement */}
               <FormField
                 control={form.control}
@@ -241,7 +239,7 @@ export function SubscriptionCreateDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -281,7 +279,7 @@ export function SubscriptionCreateDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -324,7 +322,7 @@ export function SubscriptionCreateDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -364,7 +362,7 @@ export function SubscriptionCreateDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>

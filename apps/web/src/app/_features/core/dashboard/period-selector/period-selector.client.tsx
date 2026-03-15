@@ -120,7 +120,7 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" className="gap-2">
-          <CalendarIcon className="h-4 w-4" />
+          <CalendarIcon className="size-4" />
           {formatDateRange(dateRange)}
         </Button>
       </PopoverTrigger>

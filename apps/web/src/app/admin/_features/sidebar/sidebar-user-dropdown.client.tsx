@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import {
   SidebarMenu,
@@ -24,11 +24,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import {
-  ChevronsUpDown,
-  Home,
-  LogOut
-} from "lucide-react";
+import { ChevronsUpDown, Home, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -117,7 +113,7 @@ export function SidebarUserDropdown() {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/" className="flex items-center">
-                <Home className="mr-2 h-4 w-4" />
+                <Home className="mr-2 size-4" />
                 <span>Retour au site</span>
               </Link>
             </DropdownMenuItem>
@@ -136,7 +132,7 @@ export function SidebarUserDropdown() {
               }
               className="text-red-600"
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 size-4" />
               Me déconnecter
             </DropdownMenuItem>
           </DropdownMenuContent>

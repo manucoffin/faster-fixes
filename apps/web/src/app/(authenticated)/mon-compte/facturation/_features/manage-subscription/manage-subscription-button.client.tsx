@@ -7,8 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ManageSubscriptionButtonProps
-  extends React.ComponentProps<"button">,
-  VariantProps<typeof buttonVariants> {
+  extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   onSuccess?: () => void;
   asChild?: boolean;
 }
@@ -20,19 +19,17 @@ export function ManageSubscriptionButton({
   ...props
 }: ManageSubscriptionButtonProps) {
   const createBillingPortalMutation =
-    trpc.authenticated.account.billing.portal.create.useMutation(
-      {
-        onSuccess: async (data) => {
-          // Redirect to billing portal
-          if (data.url) {
-            window.location.href = data.url;
-          }
-        },
-        onError: (error) => {
-          toast.error(error.message);
-        },
+    trpc.authenticated.account.billing.portal.create.useMutation({
+      onSuccess: async (data) => {
+        // Redirect to billing portal
+        if (data.url) {
+          window.location.href = data.url;
+        }
       },
-    );
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
 
   async function handleClick() {
     createBillingPortalMutation.mutate();
@@ -47,7 +44,7 @@ export function ManageSubscriptionButton({
     >
       {createBillingPortalMutation.isPending ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
           Chargement...
         </>
       ) : (

@@ -38,20 +38,17 @@ export function PlanCard({
 
   return (
     <Card
-      className={`w-full ${isHighlighted
-        ? "border-primary border-2 shadow-xl"
-        : "border-muted border-2"
-        }`}
+      className={`w-full ${
+        isHighlighted
+          ? "border-primary border-2 shadow-xl"
+          : "border-muted border-2"
+      }`}
     >
       <CardContent className="flex h-full flex-col">
         {/* Title and Badge */}
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between">
-            <h3
-              className="text-3xl font-bold capitalize"
-            >
-              {title}
-            </h3>
+            <h3 className="text-3xl font-bold capitalize">{title}</h3>
             {badge && (
               <Badge variant="default" className="text-xs">
                 {badge}
@@ -76,10 +73,12 @@ export function PlanCard({
           </p>
         </div>
 
-        {freeTrialDays && <div className="text-muted-foreground mb-6 flex items-center gap-2">
-          <Gift className="size-4" /> {freeTrialDays} jours offerts sans
-          engagement
-        </div>}
+        {freeTrialDays && (
+          <div className="text-muted-foreground mb-6 flex items-center gap-2">
+            <Gift className="size-4" /> {freeTrialDays} jours offerts sans
+            engagement
+          </div>
+        )}
 
         {/* Button */}
         <div className="mb-6 w-full">{children}</div>
@@ -89,12 +88,13 @@ export function PlanCard({
           <div className="space-y-3 text-left">
             {features.map((feature) => (
               <div key={feature.id} className="flex items-start gap-3">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
                 <span
-                  className={`text-sm ${feature.highlighted
-                    ? "text-foreground font-semibold"
-                    : "text-muted-foreground"
-                    }`}
+                  className={`text-sm ${
+                    feature.highlighted
+                      ? "text-foreground font-semibold"
+                      : "text-muted-foreground"
+                  }`}
                 >
                   {feature.label}
                 </span>

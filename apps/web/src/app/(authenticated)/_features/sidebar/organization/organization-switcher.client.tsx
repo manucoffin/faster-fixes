@@ -135,14 +135,14 @@ export function OrganizationSwitcher() {
 
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setCreateDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 size-4" />
                 Créer une organisation
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/organisation" className="flex items-center">
-                  <Settings2 className="mr-2 h-4 w-4" />
+                  <Settings2 className="mr-2 size-4" />
                   Paramètres
                 </Link>
               </DropdownMenuItem>
@@ -151,7 +151,7 @@ export function OrganizationSwitcher() {
                   href="/organisation/invitations"
                   className="flex items-center"
                 >
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="mr-2 size-4" />
                   Mes invitations
                 </Link>
               </DropdownMenuItem>

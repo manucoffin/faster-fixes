@@ -6,7 +6,12 @@ import { PersonSchema } from "@/app/_features/seo/person-schema";
 import { getPayloadClient } from "@/lib/payload/client";
 import { PageParams } from "@/types/next";
 import { isProduction } from "@/utils/environment/env";
-import type { Author, Category, Media, Tag } from "@workspace/payload/payload-types";
+import type {
+  Author,
+  Category,
+  Media,
+  Tag,
+} from "@workspace/payload/payload-types";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Breadcrumb,
@@ -140,13 +145,14 @@ export default async function BlogPostPage(props: PageParams) {
               </Breadcrumb>
 
               {/* Category badge */}
-              <Badge variant="secondary" className="mb-4">{category.name}</Badge>
-
+              <Badge variant="secondary" className="mb-4">
+                {category.name}
+              </Badge>
 
               {/* Article meta */}
               <div className="text-muted-foreground mb-6 flex items-center justify-start gap-6 text-sm">
                 <span className="flex items-center gap-1">
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarIcon className="size-4" />
                   <time dateTime={post.publishedAt || post.createdAt}>
                     {new Date(
                       post.publishedAt || post.createdAt,
@@ -197,7 +203,7 @@ export default async function BlogPostPage(props: PageParams) {
             {tags && tags.length > 0 && (
               <div className="mt-12 border-t pt-8">
                 <h3 className="mb-4 flex items-center gap-2 text-sm font-medium">
-                  <TagIcon className="h-4 w-4" />
+                  <TagIcon className="size-4" />
                   Tags
                 </h3>
                 <div className="flex flex-wrap gap-2">

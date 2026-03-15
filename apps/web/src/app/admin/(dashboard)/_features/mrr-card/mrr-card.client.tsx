@@ -69,8 +69,8 @@ function MrrCardLoading() {
           <Skeleton className="h-8 w-20" />
         </div>
         <div className="space-y-3 border-t pt-4">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-4 w-40" />
+          <Skeleton className="size-40" />
+          <Skeleton className="size-40" />
         </div>
       </CardContent>
     </Card>

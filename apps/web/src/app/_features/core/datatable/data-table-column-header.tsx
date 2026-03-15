@@ -9,8 +9,10 @@ import {
   ArrowUpWideNarrow,
 } from "lucide-react";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<
+  TData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
 }
@@ -34,12 +36,12 @@ export function DataTableColumnHeader<TData, TValue>({
         className=""
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        {column.getIsSorted() === false && <ArrowUpDown className="h-4 w-4" />}
+        {column.getIsSorted() === false && <ArrowUpDown className="size-4" />}
         {column.getIsSorted() === "asc" && (
-          <ArrowUpWideNarrow className="h-4 w-4" />
+          <ArrowUpWideNarrow className="size-4" />
         )}
         {column.getIsSorted() === "desc" && (
-          <ArrowDownWideNarrow className="h-4 w-4" />
+          <ArrowDownWideNarrow className="size-4" />
         )}
       </Button>
     </div>

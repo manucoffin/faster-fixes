@@ -30,7 +30,7 @@ import {
   CreditCard,
   LayoutDashboard,
   LogOut,
-  Settings2
+  Settings2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -124,7 +124,7 @@ export function SidebarUserDropdown() {
                   href="/mon-compte/parametres"
                   className="flex items-center"
                 >
-                  <Settings2 className="mr-2 h-4 w-4" />
+                  <Settings2 className="mr-2 size-4" />
                   <span>Paramètres</span>
                 </Link>
               </DropdownMenuItem>
@@ -134,12 +134,10 @@ export function SidebarUserDropdown() {
                   href="/mon-compte/facturation"
                   className="flex items-center"
                 >
-                  <CreditCard className="mr-2 h-4 w-4" />
+                  <CreditCard className="mr-2 size-4" />
                   <span>Facturation</span>
                 </Link>
               </DropdownMenuItem>
-
-
             </DropdownMenuGroup>
 
             {isAdmin && (
@@ -147,7 +145,7 @@ export function SidebarUserDropdown() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/admin" className="flex items-center">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <LayoutDashboard className="mr-2 size-4" />
                     <span>Dashboard Admin</span>
                   </Link>
                 </DropdownMenuItem>
@@ -168,7 +166,7 @@ export function SidebarUserDropdown() {
               }
               className="text-red-600"
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 size-4" />
               Me déconnecter
             </DropdownMenuItem>
           </DropdownMenuContent>

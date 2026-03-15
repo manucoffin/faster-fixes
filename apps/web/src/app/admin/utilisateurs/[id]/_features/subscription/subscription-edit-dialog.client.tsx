@@ -67,20 +67,19 @@ export function SubscriptionEditDialog({
 
   const trpcUtils = trpc.useUtils();
   const [open, setOpen] = useState(false);
-  const updateMutation =
-    trpc.admin.users.subscription.update.useMutation({
-      onSuccess: () => {
-        toast.success("Abonnement mis à jour avec succès");
-        setOpen(false);
-        // Invalidate the subscription query to refetch the data
-        trpcUtils.admin.users.subscription.get.invalidate();
-      },
-      onError: (error: any) => {
-        toast.error(
-          error.message || "Erreur lors de la mise à jour de l'abonnement",
-        );
-      },
-    });
+  const updateMutation = trpc.admin.users.subscription.update.useMutation({
+    onSuccess: () => {
+      toast.success("Abonnement mis à jour avec succès");
+      setOpen(false);
+      // Invalidate the subscription query to refetch the data
+      trpcUtils.admin.users.subscription.get.invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.message || "Erreur lors de la mise à jour de l'abonnement",
+      );
+    },
+  });
 
   const form = useForm<UpdateSubscriptionInputs>({
     resolver: zodResolver(UpdateSubscriptionSchema),
@@ -257,7 +256,7 @@ export function SubscriptionEditDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -297,7 +296,7 @@ export function SubscriptionEditDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -340,7 +339,7 @@ export function SubscriptionEditDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -380,7 +379,7 @@ export function SubscriptionEditDialog({
                             ) : (
                               <span>Choisir une date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>

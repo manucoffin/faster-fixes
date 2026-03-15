@@ -77,9 +77,10 @@ export const DataTable = <TData, TValue>({
 
   // Handle sorting changes and call the callback
   const handleSortingChange = (updaterOrValue: any) => {
-    const newSorting = typeof updaterOrValue === "function"
-      ? updaterOrValue(sorting)
-      : updaterOrValue;
+    const newSorting =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(sorting)
+        : updaterOrValue;
     setSorting(newSorting);
     if (onSortingChange) {
       onSortingChange(newSorting);
@@ -114,7 +115,7 @@ export const DataTable = <TData, TValue>({
       <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={searchInputPlaceholder}
               value={search}
@@ -144,9 +145,9 @@ export const DataTable = <TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -175,7 +176,7 @@ export const DataTable = <TData, TValue>({
                   className="h-24 text-center"
                 >
                   <div className="text-destructive flex items-center justify-center">
-                    <AlertCircle className="mr-2 h-4 w-4" />
+                    <AlertCircle className="mr-2 size-4" />
                     <span>{errorMessage}</span>
                   </div>
                 </TableCell>

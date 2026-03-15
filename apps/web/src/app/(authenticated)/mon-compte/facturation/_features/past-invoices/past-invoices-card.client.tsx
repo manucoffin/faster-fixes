@@ -38,7 +38,7 @@ function InvoiceLoadingSkeleton() {
         >
           <div className="w-56 space-y-1">
             <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-40" />
+            <Skeleton className="size-40" />
           </div>
           <Skeleton className="h-9 w-24" />
         </div>
@@ -133,7 +133,7 @@ export function PastInvoicesCard() {
                           rel="noopener noreferrer"
                           className="flex items-center gap-2"
                         >
-                          <DownloadIcon className="h-4 w-4" />
+                          <DownloadIcon className="size-4" />
                           Télécharger
                         </a>
                       </Button>

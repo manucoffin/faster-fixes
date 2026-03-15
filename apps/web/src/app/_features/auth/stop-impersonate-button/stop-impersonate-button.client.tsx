@@ -59,7 +59,7 @@ export const StopImpersonateButton = () => {
             disabled={stopImpersonateMutation.isPending}
             title="Arrêter l'emprunt d'identité"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="size-4" />
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>

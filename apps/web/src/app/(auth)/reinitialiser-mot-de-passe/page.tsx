@@ -1,6 +1,10 @@
 import { forgotPasswordUrl, loginUrl } from "@/lib/routing";
 import { PageParams } from "@/types/next";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
@@ -32,12 +36,10 @@ export default async function ResetPasswordPage(props: PageParams) {
               </Button>
             </div>
           </div>
-
-
         ) : error === "INVALID_TOKEN" ? (
           <>
             <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className="size-4" />
               <AlertTitle>Lien invalide ou expiré</AlertTitle>
               <AlertDescription>
                 Le lien de réinitialisation que vous avez utilisé est invalide
@@ -58,7 +60,9 @@ export default async function ResetPasswordPage(props: PageParams) {
         ) : token ? (
           <div className="space-y-6">
             <div className="space-y-2 text-center">
-              <h1 className="text-2xl font-bold">Réinitialiser votre mot de passe</h1>
+              <h1 className="text-2xl font-bold">
+                Réinitialiser votre mot de passe
+              </h1>
               <p className="text-muted-foreground">
                 Entrez votre nouveau mot de passe ci-dessous pour réinitialiser
                 le mot de passe de votre compte.
@@ -70,7 +74,7 @@ export default async function ResetPasswordPage(props: PageParams) {
         ) : (
           <>
             <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className="size-4" />
               <AlertTitle>Paramètre manquant</AlertTitle>
               <AlertDescription>
                 Le token de réinitialisation est manquant. Veuillez utiliser le
