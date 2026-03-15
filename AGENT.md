@@ -10,7 +10,7 @@
 - Never run production database migrations (`pnpm migrate:prod`).
 - Only run development migrations (`pnpm migrate:dev`); production migration execution is user-managed.
 - Code identifiers, comments, filenames, schemas: English only.
-- User-facing UI copy: French, always vouvoiement (`vous`), never `tu`.
+- User-facing UI copy: English only. Professional, clear, and concise — match the tone of serious developer tools (e.g., Vercel, Linear, Stripe). No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated wording.
 - All `unstable_cache` usage must include `cacheTags` from `@/server/cache/cache-tags`.
 
 ## Critical conventions
