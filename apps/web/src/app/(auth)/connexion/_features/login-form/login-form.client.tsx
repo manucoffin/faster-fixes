@@ -2,7 +2,8 @@
 
 import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
 import { defaultRedirect, forgotPasswordUrl } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -29,6 +30,7 @@ import { useForm } from "react-hook-form";
 import { LoginInputs, LoginSchema } from "./login.schema";
 
 export function LoginForm() {
+  const trpc = useTRPC();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("nextUrl");
@@ -42,7 +44,7 @@ export function LoginForm() {
     },
   });
 
-  const loginMutation = trpc.auth.login.useMutation({
+  const loginMutation = useMutation(trpc.auth.login.mutationOptions({
     onError: (error) => {
       if (error.message === "EMAIL_NOT_VERIFIED") {
         setUnverifiedEmail(form.getValues("email"));
@@ -54,7 +56,7 @@ export function LoginForm() {
     onSuccess: (() => {
       router.push((nextUrl || defaultRedirect) as Route);
     })
-  });
+  }));
 
   const onSubmit = async (data: { email: string; password: string }) => {
     setUnverifiedEmail(null);

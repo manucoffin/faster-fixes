@@ -1,12 +1,14 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function ActiveSubscriptionsCard() {
-  const query = trpc.admin.dashboard.subscriptions.get.useQuery();
+  const trpc = useTRPC();
+  const query = useQuery(trpc.admin.dashboard.subscriptions.get.queryOptions());
 
   return matchQueryStatus(query, {
     Loading: <ActiveSubscriptionsCardLoading />,

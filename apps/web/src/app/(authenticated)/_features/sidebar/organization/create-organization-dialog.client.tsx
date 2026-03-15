@@ -1,8 +1,9 @@
 "use client";
 
 import { organization, useListOrganizations } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -37,6 +38,7 @@ export function CreateOrganizationDialog({
   open,
   onOpenChange,
 }: CreateOrganizationDialogProps) {
+  const trpc = useTRPC();
   const { refetch: refetchOrganizations } = useListOrganizations();
 
   const form = useForm<CreateOrganizationInputs>({
@@ -45,7 +47,7 @@ export function CreateOrganizationDialog({
   });
 
   const createOrganization =
-    trpc.organization.create.useMutation({
+    useMutation(trpc.organization.create.mutationOptions({
       onSuccess: async (data) => {
         await organization.setActive({ organizationId: data.id });
         await refetchOrganizations();
@@ -59,7 +61,7 @@ export function CreateOrganizationDialog({
             "Erreur lors de la création de l'organisation.",
         });
       },
-    });
+    }));
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);

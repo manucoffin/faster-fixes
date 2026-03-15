@@ -6,7 +6,8 @@ import {
   useListOrganizations,
 } from "@/lib/auth";
 import { defaultRedirect } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import {
   AlertDialog,
@@ -25,13 +26,14 @@ import * as React from "react";
 import { toast } from "sonner";
 
 export function LeaveOrganizationSection() {
+  const trpc = useTRPC();
   const router = useRouter();
   const { data: activeOrg } = useActiveOrganization();
   const { refetch: refetchOrganizations } = useListOrganizations();
   const [open, setOpen] = React.useState(false);
 
   const leaveOrganization =
-    trpc.authenticated.organisation.leave.useMutation({
+    useMutation(trpc.authenticated.organisation.leave.mutationOptions({
       onSuccess: async () => {
         toast.success("Vous avez quitté l'organisation");
         setOpen(false);
@@ -48,7 +50,7 @@ export function LeaveOrganizationSection() {
           error.message || "Erreur lors de la sortie de l'organisation.",
         );
       },
-    });
+    }));
 
   return (
     <div className="flex flex-col gap-4">

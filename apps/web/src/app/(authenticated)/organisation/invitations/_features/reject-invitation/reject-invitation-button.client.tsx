@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -12,18 +13,19 @@ type RejectInvitationButtonProps = {
 export function RejectInvitationButton({
   invitationId,
 }: RejectInvitationButtonProps) {
-  const utils = trpc.useUtils();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const rejectMutation =
-    trpc.authenticated.organisation.invitation.reject.useMutation({
+    useMutation(trpc.authenticated.organisation.invitation.reject.mutationOptions({
       onSuccess: () => {
         toast.success("Invitation refusée");
-        utils.authenticated.organisation.invitation.getReceived.invalidate();
+        queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.getReceived.queryFilter());
       },
       onError: (error) => {
         toast.error(error.message || "Erreur lors du refus de l'invitation.");
       },
-    });
+    }));
 
   return (
     <Button

@@ -2,7 +2,8 @@
 
 import { getSession } from "@/lib/auth";
 import { loginUrl } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@workspace/ui/components/button";
 import { VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
@@ -24,12 +25,13 @@ export function UpgradeSubscriptionButton({
   isAnnual,
   ...props
 }: UpgradeSubscriptionButtonProps) {
+  const trpc = useTRPC();
   // const { data: session } = useSession()
   const pathname = usePathname()
   const router = useRouter()
 
   const upgradePlanMutation =
-    trpc.subscription.upgrade.useMutation(
+    useMutation(trpc.subscription.upgrade.mutationOptions(
       {
         onSuccess: (data) => {
           // Redirect to Stripe checkout
@@ -42,7 +44,7 @@ export function UpgradeSubscriptionButton({
           toast(error.message);
         },
       },
-    );
+    ));
 
   const handleUpgrade = useCallback(async () => {
     const { data: session } = await getSession()

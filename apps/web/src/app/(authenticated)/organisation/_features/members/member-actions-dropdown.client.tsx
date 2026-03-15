@@ -1,7 +1,8 @@
 "use client";
 
 import { useActiveOrganization } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -24,10 +25,11 @@ export function MemberActionsDropdown({
   memberRole,
   isOwner,
 }: MemberActionsDropdownProps) {
+  const trpc = useTRPC();
   const { refetch: refetchActiveOrg } = useActiveOrganization();
 
   const updateRole =
-    trpc.authenticated.organisation.member.updateRole.useMutation({
+    useMutation(trpc.authenticated.organisation.member.updateRole.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Rôle mis à jour avec succès");
@@ -35,10 +37,10 @@ export function MemberActionsDropdown({
       onError: (error) => {
         toast.error(error.message || "Erreur lors de la modification du rôle.");
       },
-    });
+    }));
 
   const removeMember =
-    trpc.authenticated.organisation.member.delete.useMutation({
+    useMutation(trpc.authenticated.organisation.member.delete.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Membre retiré avec succès");
@@ -46,7 +48,7 @@ export function MemberActionsDropdown({
       onError: (error) => {
         toast.error(error.message || "Erreur lors du retrait du membre.");
       },
-    });
+    }));
 
   const isPending = updateRole.isPending || removeMember.isPending;
 

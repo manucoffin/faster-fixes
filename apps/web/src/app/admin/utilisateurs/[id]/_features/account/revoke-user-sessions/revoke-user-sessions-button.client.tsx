@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +23,9 @@ type RevokeUserSessionsButtonProps = {
 export const RevokeUserSessionsButton = ({
   userId,
 }: RevokeUserSessionsButtonProps) => {
+  const trpc = useTRPC();
   const revokeSessionsMutation =
-    trpc.admin.users.sessions.revoke.useMutation({
+    useMutation(trpc.admin.users.sessions.revoke.mutationOptions({
       onSuccess: () => {
         toast.success("Succès", {
           description: "Toutes les sessions utilisateur ont été révoquées",
@@ -35,7 +37,7 @@ export const RevokeUserSessionsButton = ({
             error.message || "Impossible de révoquer les sessions utilisateur",
         });
       },
-    });
+    }));
 
   const handleRevoke = () => {
     revokeSessionsMutation.mutate({ userId });

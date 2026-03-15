@@ -1,8 +1,9 @@
 "use client";
 
 import { signOut } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
   Alert,
   AlertDescription,
@@ -39,6 +40,7 @@ import {
 } from "./delete-account.schema";
 
 export function AccountDeletionButton() {
+  const trpc = useTRPC();
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
@@ -49,7 +51,7 @@ export function AccountDeletionButton() {
     },
   });
 
-  const deleteAccountMutation = trpc.authenticated.account.delete.useMutation({
+  const deleteAccountMutation = useMutation(trpc.authenticated.account.delete.mutationOptions({
     onSuccess: async () => {
       toast.success("Votre compte a été supprimé avec succès");
       setOpen(false);
@@ -67,7 +69,7 @@ export function AccountDeletionButton() {
       const message = error.message || "Une erreur s'est produite.";
       form.setError("root", { message });
     },
-  });
+  }));
 
   const onSubmit = async (data: DeleteAccountInputs) => {
     deleteAccountMutation.mutate(data);

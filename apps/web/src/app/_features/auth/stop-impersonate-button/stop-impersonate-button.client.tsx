@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,10 +20,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export const StopImpersonateButton = () => {
+  const trpc = useTRPC();
   const router = useRouter();
   const { data: session, refetch: refetchSession } = useSession();
 
-  const stopImpersonateMutation = trpc.auth.stopImpersonate.useMutation({
+  const stopImpersonateMutation = useMutation(trpc.auth.stopImpersonate.mutationOptions({
     onSuccess: async () => {
       toast.success("Succès", {
         description: "Vous êtes revenu à votre compte administrateur",
@@ -36,7 +38,7 @@ export const StopImpersonateButton = () => {
           error.message || "Impossible d'arrêter l'emprunt d'identité",
       });
     },
-  });
+  }));
 
   const handleStopImpersonate = () => {
     stopImpersonateMutation.mutate();

@@ -1,7 +1,8 @@
 "use client";
 
 import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -26,6 +27,7 @@ import { useState } from "react";
 import { SignupInputs, SignupSchema } from "./signup.schema";
 
 export function SignupForm() {
+  const trpc = useTRPC();
   const [success, setSuccess] = useState(false);
 
   const form = useForm<SignupInputs>({
@@ -37,7 +39,7 @@ export function SignupForm() {
     },
   });
 
-  const signupMutation = trpc.auth.signup.useMutation({
+  const signupMutation = useMutation(trpc.auth.signup.mutationOptions({
     onError: (error) => {
       const message =
         error.message || "Échec de la création du compte. Veuillez réessayer.";
@@ -46,7 +48,7 @@ export function SignupForm() {
     onSuccess: (() => {
       setSuccess(true);
     })
-  });
+  }));
 
   const onSubmit = async (data: SignupInputs) => {
     signupMutation.mutate(data);

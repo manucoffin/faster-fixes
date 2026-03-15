@@ -1,7 +1,8 @@
 "use client";
 
 import { loginUrl } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -24,6 +25,7 @@ import { useForm } from "react-hook-form";
 import { ForgotPasswordInputs, ForgotPasswordSchema } from "./forgot-password.schema";
 
 export function ForgotPasswordForm() {
+  const trpc = useTRPC();
   const form = useForm<ForgotPasswordInputs>({
     resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: {
@@ -31,7 +33,7 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const forgotPasswordMutation = trpc.auth.forgotPassword.useMutation({
+  const forgotPasswordMutation = useMutation(trpc.auth.forgotPassword.mutationOptions({
     onError: (error) => {
       const message = error.message || "Impossible d'envoyer l'email de réinitialisation. Veuillez réessayer.";
       form.setError("root", { message });
@@ -40,7 +42,7 @@ export function ForgotPasswordForm() {
       form.reset();
       form.clearErrors();
     },
-  });
+  }));
 
   const onSubmit = async (data: { email: string }) => {
     forgotPasswordMutation.mutate(data);

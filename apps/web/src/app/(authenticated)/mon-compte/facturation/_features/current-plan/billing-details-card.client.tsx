@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionStatus,
@@ -20,18 +21,20 @@ export function BillingDetailsCard({
   stripeSubscriptionId,
   subscriptionStatus,
 }: BillingDetailsCardProps) {
-  const getStripePricesQuery = trpc.subscription.getPlansPrices.useQuery({
-    planNames: [planName],
-  });
+  const trpc = useTRPC();
 
-  const getStripeSubscriptionQuery = trpc.subscription.getStripeSubscription.useQuery(
+  const getStripePricesQuery = useQuery(trpc.subscription.getPlansPrices.queryOptions({
+    planNames: [planName],
+  }));
+
+  const getStripeSubscriptionQuery = useQuery(trpc.subscription.getStripeSubscription.queryOptions(
     {
       stripeSubscriptionId: stripeSubscriptionId!,
     },
     {
       enabled: !!stripeSubscriptionId,
     },
-  );
+  ));
 
   // Determine billing period based on current price ID
   const determineBillingPeriod = () => {

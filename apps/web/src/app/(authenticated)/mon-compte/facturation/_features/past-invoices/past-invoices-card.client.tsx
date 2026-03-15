@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "@/utils/dates/format-date";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
@@ -48,8 +49,10 @@ function InvoiceLoadingSkeleton() {
 }
 
 export function PastInvoicesCard() {
+  const trpc = useTRPC();
+
   const getPastInvoicesQuery =
-    trpc.authenticated.account.billing.invoices.list.useQuery();
+    useQuery(trpc.authenticated.account.billing.invoices.list.queryOptions());
 
   return matchQueryStatus(getPastInvoicesQuery, {
     Loading: (

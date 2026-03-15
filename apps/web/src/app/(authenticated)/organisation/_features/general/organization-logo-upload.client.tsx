@@ -2,7 +2,8 @@
 
 import { UploadButton } from "@/app/_features/core/upload/upload-button";
 import { organization, useActiveOrganization } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { getInitials } from "@/utils/text/get-initials";
 import {
@@ -14,12 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function OrganizationLogoUpload() {
+  const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
   const deleteOldLogo =
-    trpc.authenticated.organisation.updateLogo.useMutation();
+    useMutation(trpc.authenticated.organisation.updateLogo.mutationOptions());
 
   const orgName = activeOrg?.name ?? "Organisation";
   const orgLogo = (activeOrg as Record<string, unknown>)?.logo as

@@ -2,7 +2,8 @@
 
 import { DataTable } from "@/app/_features/core/datatable/data-table";
 import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { SubscriptionPlanName } from "@/server/auth/config/subscription-plans";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
@@ -87,6 +88,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
 ];
 
 export const UsersTable = () => {
+  const trpc = useTRPC();
   // Sync 'search', 'page', and 'role' with URL query parameters
   const [search, setSearch] = useQueryState(
     "search",
@@ -149,18 +151,18 @@ export const UsersTable = () => {
   );
 
   const { data, isLoading, isError } =
-    trpc.admin.users.list.useQuery({
+    useQuery(trpc.admin.users.list.queryOptions({
       search,
       page: currentPage,
       pageSize,
       sortBy: (sortBy as "name" | "email" | "createdAt") || undefined,
       sortOrder: (sortOrder as "asc" | "desc") || undefined,
-    });
+    }));
 
   // Fetch export data separately (will be fetched on demand by the export button)
-  const { data: exportData } = trpc.admin.users.export.useQuery({
+  const { data: exportData } = useQuery(trpc.admin.users.export.queryOptions({
     search,
-  });
+  }));
 
   // Calculate total pages
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;

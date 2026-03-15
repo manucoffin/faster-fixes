@@ -2,7 +2,8 @@
 
 import { organization, useActiveOrganization } from "@/lib/auth";
 import { defaultRedirect } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import {
   AlertDialog,
@@ -21,15 +22,16 @@ import * as React from "react";
 import { toast } from "sonner";
 
 export function DeleteOrganizationSection() {
+  const trpc = useTRPC();
   const router = useRouter();
   const { data: activeOrg } = useActiveOrganization();
   const [open, setOpen] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
-  const orgDetailsQuery = trpc.authenticated.organisation.get.useQuery(
+  const orgDetailsQuery = useQuery(trpc.authenticated.organisation.get.queryOptions(
     { organizationId: activeOrg?.id ?? "" },
     { enabled: !!activeOrg?.id },
-  );
+  ));
 
   const isDefault = orgDetailsQuery.data?.isDefault ?? false;
 

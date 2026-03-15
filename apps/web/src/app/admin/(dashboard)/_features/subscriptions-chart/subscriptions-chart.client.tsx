@@ -2,7 +2,8 @@
 
 import { PeriodSelector } from "@/app/_features/core/dashboard/period-selector/period-selector.client";
 import { periodSelectorParsers } from "@/app/_features/core/dashboard/period-selector/search-params";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import {
   Card,
@@ -24,12 +25,13 @@ type MonthData = {
 };
 
 export function SubscriptionsChart() {
+  const trpc = useTRPC();
   const [period] = useQueryStates(periodSelectorParsers);
 
-  const getMonthlyStatsQuery = trpc.admin.dashboard.stats.get.useQuery({
+  const getMonthlyStatsQuery = useQuery(trpc.admin.dashboard.stats.get.queryOptions({
     from: period.from ? new Date(period.from) : undefined,
     to: period.to ? new Date(period.to) : undefined,
-  });
+  }));
 
   return matchQueryStatus(getMonthlyStatsQuery, {
     Loading: <SubscriptionsChartLoading />,

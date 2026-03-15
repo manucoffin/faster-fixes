@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionPlanName,
@@ -61,22 +62,22 @@ export function SubscriptionCreateDialog({
     name: plan.name,
   }));
 
-  const trpcUtils = trpc.useUtils();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  const createMutation = trpc.admin.users.subscription.create.useMutation({
+  const createMutation = useMutation(trpc.admin.users.subscription.create.mutationOptions({
     onSuccess: () => {
       toast.success("Abonnement créé avec succès");
       setOpen(false);
-      // Invalidate the subscription query to refetch the data
-      trpcUtils.admin.users.subscription.get.invalidate();
+      queryClient.invalidateQueries(trpc.admin.users.subscription.get.queryFilter());
     },
     onError: (error) => {
       toast.error(
         error.message || "Erreur lors de la création de l'abonnement",
       );
     },
-  });
+  }));
 
   const form = useForm<SubscriptionInputs>({
     resolver: zodResolver(SubscriptionSchema),

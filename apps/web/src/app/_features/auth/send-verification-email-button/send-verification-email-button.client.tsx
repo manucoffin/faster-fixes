@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { buttonVariants } from "@workspace/ui/components/button";
 import { VariantProps } from "class-variance-authority";
@@ -21,8 +22,9 @@ export function SendVerificationEmailButton({
   variant = "secondary",
   size,
 }: SendVerificationEmailButtonProps) {
+  const trpc = useTRPC();
   const sendVerificationEmailMutation =
-    trpc.auth.sendVerificationEmail.useMutation();
+    useMutation(trpc.auth.sendVerificationEmail.mutationOptions());
 
   const handleSendVerificationEmail = () => {
     try {

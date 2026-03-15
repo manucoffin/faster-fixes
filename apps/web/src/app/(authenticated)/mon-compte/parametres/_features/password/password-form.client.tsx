@@ -1,7 +1,8 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
   Alert,
   AlertDescription,
@@ -27,6 +28,8 @@ import {
 } from "./change-password.schema";
 
 export function PasswordForm() {
+  const trpc = useTRPC();
+
   const form = useForm<ChangePasswordInputs>({
     resolver: zodResolver(ChangePasswordSchema),
     defaultValues: {
@@ -37,7 +40,7 @@ export function PasswordForm() {
   });
 
   const changePasswordMutation =
-    trpc.authenticated.account.password.change.useMutation({
+    useMutation(trpc.authenticated.account.password.change.mutationOptions({
       onSuccess: () => {
         toast.success("Mot de passe modifié avec succès");
         form.reset();
@@ -46,7 +49,7 @@ export function PasswordForm() {
         const message = error.message || "Une erreur s'est produite.";
         form.setError("root", { message });
       },
-    });
+    }));
 
   const onSubmit = async (data: ChangePasswordInputs) => {
     changePasswordMutation.mutate(data);

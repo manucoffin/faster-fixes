@@ -1,6 +1,6 @@
 import { APP_URL } from "@/app/_constants/app";
 import { DEFAULT_OG_IMAGE_URL, SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
-import { TRPCProvider } from "@/lib/trpc/trpc-provider";
+import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
 import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";

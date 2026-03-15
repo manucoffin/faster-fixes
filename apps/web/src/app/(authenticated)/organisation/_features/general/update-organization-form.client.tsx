@@ -1,7 +1,8 @@
 "use client";
 
 import { useActiveOrganization } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -24,11 +25,12 @@ import {
 } from "./update-organization.schema";
 
 export function UpdateOrganizationForm() {
+  const trpc = useTRPC();
   const { data: activeOrg, refetch: refetchActiveOrg } =
     useActiveOrganization();
 
   const updateOrganization =
-    trpc.authenticated.organisation.update.useMutation({
+    useMutation(trpc.authenticated.organisation.update.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Organisation mise à jour avec succès");
@@ -40,7 +42,7 @@ export function UpdateOrganizationForm() {
             "Erreur lors de la mise à jour de l'organisation.",
         });
       },
-    });
+    }));
 
   const form = useForm<UpdateOrganizationInputs>({
     resolver: zodResolver(UpdateOrganizationSchema),

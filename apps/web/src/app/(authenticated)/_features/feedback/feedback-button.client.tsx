@@ -1,7 +1,8 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Popover,
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import { SendFeedbackInputs, SendFeedbackSchema } from "./send-feedback.schema";
 
 export function FeedbackButton() {
+  const trpc = useTRPC();
   const [open, setOpen] = useState(false);
 
   const form = useForm<SendFeedbackInputs>({
@@ -23,7 +25,7 @@ export function FeedbackButton() {
     defaultValues: { message: "" },
   });
 
-  const sendFeedbackMutation = trpc.authenticated.feedback.send.useMutation({
+  const sendFeedbackMutation = useMutation(trpc.authenticated.feedback.send.mutationOptions({
     onSuccess: () => {
       toast.success("Merci pour votre feedback !");
       form.reset();
@@ -32,7 +34,7 @@ export function FeedbackButton() {
     onError: (error) => {
       toast.error(error.message || "Une erreur s'est produite.");
     },
-  });
+  }));
 
   const onSubmit = (data: SendFeedbackInputs) => {
     sendFeedbackMutation.mutate(data);

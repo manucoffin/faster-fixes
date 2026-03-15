@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { Button } from "@workspace/ui/components/button";
@@ -29,20 +30,21 @@ import { toast } from "sonner";
 import { CreateUserSchema, type CreateUserInputs } from "./create-user.schema";
 
 export function CreateUserDialog() {
+  const trpc = useTRPC();
   const [open, setOpen] = useState(false);
-  const trpcUtils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const createUserMutation = trpc.admin.users.create.useMutation({
+  const createUserMutation = useMutation(trpc.admin.users.create.mutationOptions({
     onSuccess: () => {
       toast.success("Utilisateur créé avec succès");
       setOpen(false);
       form.reset();
-      trpcUtils.admin.users.list.invalidate();
+      queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
     },
     onError: (error) => {
       toast.error(error.message || "Erreur lors de la création de l'utilisateur");
     },
-  });
+  }));
 
   const form = useForm<CreateUserInputs>({
     resolver: zodResolver(CreateUserSchema),

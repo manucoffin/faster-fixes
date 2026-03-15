@@ -1,7 +1,8 @@
 "use client";
 
 import { useActiveOrganization } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -40,8 +41,9 @@ export function InviteMemberDialog({
   open,
   onOpenChange,
 }: InviteMemberDialogProps) {
+  const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const form = useForm<InviteMemberFormInputs>({
     resolver: zodResolver(InviteMemberFormSchema),
@@ -56,9 +58,9 @@ export function InviteMemberDialog({
   };
 
   const createInvitation =
-    trpc.authenticated.organisation.invitation.create.useMutation({
+    useMutation(trpc.authenticated.organisation.invitation.create.mutationOptions({
       onSuccess: async () => {
-        await utils.authenticated.organisation.invitation.get.invalidate();
+        await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
         toast.success("Invitation envoyée avec succès");
         handleOpenChange(false);
       },
@@ -68,7 +70,7 @@ export function InviteMemberDialog({
             error.message || "Erreur lors de l'envoi de l'invitation.",
         });
       },
-    });
+    }));
 
   const onSubmit = (data: InviteMemberFormInputs) => {
     if (!activeOrg) return;

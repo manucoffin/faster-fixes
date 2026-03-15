@@ -1,8 +1,9 @@
 "use client";
 
 import { changeEmail } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   AlertDescription,
@@ -29,10 +30,11 @@ import { toast } from "sonner";
 import { ChangeEmailInputs, ChangeEmailSchema } from "./change-email.schema";
 
 export function EmailForm() {
+  const trpc = useTRPC();
   const [isPending, setIsPending] = React.useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
 
-  const getCurrentEmailQuery = trpc.authenticated.account.email.get.useQuery();
+  const getCurrentEmailQuery = useQuery(trpc.authenticated.account.email.get.queryOptions());
 
   const form = useForm<ChangeEmailInputs>({
     resolver: zodResolver(ChangeEmailSchema),

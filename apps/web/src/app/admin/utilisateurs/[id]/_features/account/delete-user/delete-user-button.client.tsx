@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,15 +22,16 @@ type DeleteUserButtonProps = {
 };
 
 export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
+  const trpc = useTRPC();
   const router = useRouter();
-  const trpcUtils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const deleteUserMutation = trpc.admin.users.delete.useMutation({
+  const deleteUserMutation = useMutation(trpc.admin.users.delete.mutationOptions({
     onSuccess: () => {
       toast.success("Succès", {
         description: "Utilisateur supprimé avec succès",
       });
-      trpcUtils.admin.users.list.invalidate();
+      queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
       router.push("/admin/utilisateurs");
     },
     onError: (error) => {
@@ -37,7 +39,7 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
         description: error.message || "Une erreur est survenue",
       });
     },
-  });
+  }));
 
   const handleDelete = () => {
     deleteUserMutation.mutate({ userId });

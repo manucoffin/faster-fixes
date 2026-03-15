@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
@@ -38,21 +39,22 @@ interface UpgradeSubscriptionDialogProps {
 export function UpgradeSubscriptionDialog({
   trigger,
 }: UpgradeSubscriptionDialogProps) {
+  const trpc = useTRPC();
   const [isOpen, setIsOpen] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
 
   // Fetch stripe prices for all plans
-  const stripePricesQuery = trpc.subscription.getPlansPrices.useQuery(
+  const stripePricesQuery = useQuery(trpc.subscription.getPlansPrices.queryOptions(
     {
       planNames: SUBSCRIPTION_PLANS.map((p) => p.name),
     },
     {
       enabled: isOpen, // Only fetch when dialog is open
     },
-  );
+  ));
 
   const upgradePlanMutation =
-    trpc.subscription.upgrade.useMutation(
+    useMutation(trpc.subscription.upgrade.mutationOptions(
       {
         onSuccess: (data) => {
           // Redirect to Stripe checkout
@@ -65,7 +67,7 @@ export function UpgradeSubscriptionDialog({
           toast(error.message);
         },
       },
-    );
+    ));
 
   const handleUpgrade = useCallback(
     async (planName: string) => {

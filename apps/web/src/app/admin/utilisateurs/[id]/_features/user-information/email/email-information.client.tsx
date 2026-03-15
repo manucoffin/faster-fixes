@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -22,9 +23,10 @@ interface EmailInformationProps {
 }
 
 export function EmailInformation({ userId }: EmailInformationProps) {
-  const emailQuery = trpc.admin.users.email.get.useQuery({
+  const trpc = useTRPC();
+  const emailQuery = useQuery(trpc.admin.users.email.get.queryOptions({
     userId,
-  });
+  }));
 
   return matchQueryStatus(emailQuery, {
     Loading: (

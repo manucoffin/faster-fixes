@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@workspace/ui/components/switch";
 import { useState } from "react";
 
@@ -13,25 +14,23 @@ export function EmailVerifiedToggle({
   userId,
   isVerified,
 }: EmailVerifiedToggleProps) {
+  const trpc = useTRPC();
   const [optimisticState, setOptimisticState] = useState<boolean | null>(
     isVerified,
   );
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const toggleEmailVerifiedMutation =
-    trpc.admin.users.email.toggleVerified.useMutation({
+    useMutation(trpc.admin.users.email.toggleVerified.mutationOptions({
       onMutate: async (newData) => {
-        // Cancel any outgoing refetches so they don't overwrite our optimistic update
-        await utils.admin.users.email.get.cancel({ userId });
+        await queryClient.cancelQueries(trpc.admin.users.email.get.queryFilter({ userId }));
 
-        // Snapshot the previous value
         const previousData =
-          utils.admin.users.email.get.getData({ userId });
+          queryClient.getQueryData(trpc.admin.users.email.get.queryOptions({ userId }).queryKey);
 
-        // Optimistically update to the new value
-        utils.admin.users.email.get.setData(
-          { userId },
-          (old) =>
+        queryClient.setQueryData(
+          trpc.admin.users.email.get.queryOptions({ userId }).queryKey,
+          (old: any) =>
             old
               ? {
                 ...old,
@@ -40,27 +39,23 @@ export function EmailVerifiedToggle({
               : old,
         );
 
-        // Also update local state for immediate UI feedback
         setOptimisticState(newData.emailVerified);
 
-        // Return a context object with the snapshotted value
         return { previousData };
       },
-      // If the mutation fails, roll back to the previous state
       onError: (_err, _newData, context) => {
         if (context?.previousData) {
-          utils.admin.users.email.get.setData(
-            { userId },
+          queryClient.setQueryData(
+            trpc.admin.users.email.get.queryOptions({ userId }).queryKey,
             context.previousData,
           );
           setOptimisticState(context.previousData.emailVerified);
         }
       },
-      // Always refetch after error or success to ensure consistency
       onSettled: () => {
-        utils.admin.users.email.get.invalidate({ userId });
+        queryClient.invalidateQueries(trpc.admin.users.email.get.queryFilter({ userId }));
       },
-    });
+    }));
 
   return (
     <div className="flex items-center gap-4 justify-between">

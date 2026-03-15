@@ -1,7 +1,8 @@
 "use client";
 
 import { resetPasswordUrl } from "@/lib/routing";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Alert,
@@ -28,6 +29,7 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const trpc = useTRPC();
   const router = useRouter();
 
   const form = useForm<ResetPasswordInputs>({
@@ -39,7 +41,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     },
   });
 
-  const resetPasswordMutation = trpc.auth.resetPassword.useMutation({
+  const resetPasswordMutation = useMutation(trpc.auth.resetPassword.mutationOptions({
     onError: (error) => {
       const message =
         error.message || "Échec de la réinitialisation du mot de passe. Veuillez réessayer.";
@@ -48,7 +50,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     onSuccess: () => {
       router.replace(`${resetPasswordUrl}?success=true`);
     },
-  });
+  }));
 
   const onSubmit = async (data: ResetPasswordInputs) => {
     resetPasswordMutation.mutate(data);

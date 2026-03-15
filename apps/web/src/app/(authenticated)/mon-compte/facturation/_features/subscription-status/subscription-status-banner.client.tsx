@@ -1,13 +1,16 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { ManageSubscriptionButton } from "../manage-subscription/manage-subscription-button.client";
 
 export const SubscriptionStatusBanner = () => {
+  const trpc = useTRPC();
+
   const getSubscriptionStatusQuery =
-    trpc.authenticated.account.billing.subscription.status.useQuery();
+    useQuery(trpc.authenticated.account.billing.subscription.status.queryOptions());
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;

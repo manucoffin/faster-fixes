@@ -1,7 +1,8 @@
 "use client";
 
 import { UpgradeSubscriptionDialog } from "@/app/_features/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import {
   PLAN_FEATURES,
   SUBSCRIPTION_PLANS,
@@ -36,8 +37,10 @@ interface CurrentPlanProps {
 }
 
 export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
+  const trpc = useTRPC();
+
   const getActiveSubscriptionQuery =
-    trpc.authenticated.account.billing.subscription.get.useQuery();
+    useQuery(trpc.authenticated.account.billing.subscription.get.queryOptions());
 
   return matchQueryStatus(getActiveSubscriptionQuery, {
     Loading: (

@@ -1,7 +1,8 @@
 "use client";
 
 import { organization, useListOrganizations } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
@@ -15,24 +16,25 @@ export function AcceptInvitationButton({
   invitationId,
   organizationId,
 }: AcceptInvitationButtonProps) {
+  const trpc = useTRPC();
   const { refetch: refetchOrganizations } = useListOrganizations();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const acceptMutation =
-    trpc.authenticated.organisation.invitation.accept.useMutation({
+    useMutation(trpc.authenticated.organisation.invitation.accept.mutationOptions({
       onSuccess: async () => {
         toast.success("Invitation acceptée");
 
         await organization.setActive({ organizationId });
         await refetchOrganizations();
-        utils.authenticated.organisation.invitation.getReceived.invalidate();
+        queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.getReceived.queryFilter());
       },
       onError: (error) => {
         toast.error(
           error.message || "Erreur lors de l'acceptation de l'invitation.",
         );
       },
-    });
+    }));
 
   return (
     <Button

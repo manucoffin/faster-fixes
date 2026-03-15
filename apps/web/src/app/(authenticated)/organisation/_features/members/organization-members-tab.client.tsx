@@ -6,7 +6,8 @@ import {
   useActiveOrganization,
   useSession,
 } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
   Avatar,
@@ -43,6 +44,7 @@ function getRoleBadgeVariant(role: string) {
 }
 
 export function OrganizationMembersTab() {
+  const trpc = useTRPC();
   const { data: session } = useSession();
   const { data: activeOrg, refetch: refetchActiveOrg } =
     useActiveOrganization();
@@ -64,14 +66,14 @@ export function OrganizationMembersTab() {
   const isOwner = currentRole === "owner";
 
   const invitationsQuery =
-    trpc.authenticated.organisation.invitation.get.useQuery(
+    useQuery(trpc.authenticated.organisation.invitation.get.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id && canManage },
-    );
+    ));
 
   const invitations = invitationsQuery.data ?? [];
 
-  const leaveOrganization = trpc.authenticated.organisation.leave.useMutation({
+  const leaveOrganization = useMutation(trpc.authenticated.organisation.leave.mutationOptions({
     onSuccess: async () => {
       await refetchActiveOrg();
       toast.success("Vous avez quitté l'organisation");
@@ -81,7 +83,7 @@ export function OrganizationMembersTab() {
         error.message || "Erreur lors de la sortie de l'organisation.",
       );
     },
-  });
+  }));
 
   const handleLeave = () => {
     if (!activeOrg) return;

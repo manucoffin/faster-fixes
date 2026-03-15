@@ -1,7 +1,8 @@
 "use client";
 
 import { SubscriptionStatusTranslation } from "@/app/_features/subscription/_constants/translations";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Card,
@@ -21,13 +22,14 @@ interface SubscriptionCardProps {
 }
 
 export function SubscriptionCard({ userId }: SubscriptionCardProps) {
+  const trpc = useTRPC();
   const { data: subscription, isLoading } =
-    trpc.admin.users.subscription.get.useQuery(
+    useQuery(trpc.admin.users.subscription.get.queryOptions(
       { userId },
       {
         enabled: !!userId,
       },
-    );
+    ));
 
   if (isLoading) {
     return (

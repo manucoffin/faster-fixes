@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@workspace/ui/components/button";
 import { VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
@@ -18,8 +19,10 @@ export function ManageSubscriptionButton({
   disabled,
   ...props
 }: ManageSubscriptionButtonProps) {
+  const trpc = useTRPC();
+
   const createBillingPortalMutation =
-    trpc.authenticated.account.billing.portal.create.useMutation({
+    useMutation(trpc.authenticated.account.billing.portal.create.mutationOptions({
       onSuccess: async (data) => {
         // Redirect to billing portal
         if (data.url) {
@@ -29,7 +32,7 @@ export function ManageSubscriptionButton({
       onError: (error) => {
         toast.error(error.message);
       },
-    });
+    }));
 
   async function handleClick() {
     createBillingPortalMutation.mutate();

@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -18,12 +19,13 @@ type InvitationActionsDropdownProps = {
 export function InvitationActionsDropdown({
   invitationId,
 }: InvitationActionsDropdownProps) {
-  const utils = trpc.useUtils();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const cancelInvitation =
-    trpc.authenticated.organisation.invitation.delete.useMutation({
+    useMutation(trpc.authenticated.organisation.invitation.delete.mutationOptions({
       onSuccess: async () => {
-        await utils.authenticated.organisation.invitation.get.invalidate();
+        await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
         toast.success("Invitation annulée");
       },
       onError: (error) => {
@@ -31,7 +33,7 @@ export function InvitationActionsDropdown({
           error.message || "Erreur lors de l'annulation de l'invitation.",
         );
       },
-    });
+    }));
 
   return (
     <DropdownMenu>

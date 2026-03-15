@@ -113,11 +113,13 @@ Keep components and related logic together in feature folders. Each feature grou
 ```typescript
 // current-plan-card.client.tsx
 "use client";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { CurrentPlanCardSchema } from "./current-plan-card.schema";
 
 export function CurrentPlanCard({ organizationId }: Props) {
-  const query = trpc.billing.getActiveSubscription.useQuery();
+  const trpc = useTRPC();
+  const query = useQuery(trpc.billing.getActiveSubscription.queryOptions());
   return matchQueryStatus(query, {
     Loading: <Skeleton />,
     Success: ({ data }) => <Card>{/* ... */}</Card>,

@@ -1,7 +1,8 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Alert,
   AlertDescription,
@@ -27,7 +28,9 @@ import {
 } from "./update-profile.schema";
 
 export function ProfileForm() {
-  const getProfileQuery = trpc.authenticated.account.profile.get.useQuery();
+  const trpc = useTRPC();
+
+  const getProfileQuery = useQuery(trpc.authenticated.account.profile.get.queryOptions());
 
   const form = useForm<UpdateProfileInputs>({
     resolver: zodResolver(UpdateProfileSchema),
@@ -48,7 +51,7 @@ export function ProfileForm() {
   }, [getProfileQuery.data, form]);
 
   const updateProfileMutation =
-    trpc.authenticated.account.profile.update.useMutation({
+    useMutation(trpc.authenticated.account.profile.update.mutationOptions({
       onSuccess: () => {
         toast.success("Profil mis à jour avec succès");
       },
@@ -56,7 +59,7 @@ export function ProfileForm() {
         const message = error.message || "Une erreur s'est produite.";
         form.setError("root", { message });
       },
-    });
+    }));
 
   const onSubmit = async (data: UpdateProfileInputs) => {
     updateProfileMutation.mutate(data);

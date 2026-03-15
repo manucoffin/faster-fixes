@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,11 +27,12 @@ export const ImpersonateUserButton = ({
   userId,
   userEmail,
 }: ImpersonateUserButtonProps) => {
+  const trpc = useTRPC();
   const router = useRouter();
   const { refetch: refetchSession } = useSession();
 
   const impersonateUserMutation =
-    trpc.admin.users.impersonate.useMutation({
+    useMutation(trpc.admin.users.impersonate.mutationOptions({
       onSuccess: async () => {
         toast.success("Succès", {
           description: `Vous êtes maintenant connecté en tant que ${userEmail}`,
@@ -45,7 +47,7 @@ export const ImpersonateUserButton = ({
             "Impossible d'emprunter l'identité de cet utilisateur",
         });
       },
-    });
+    }));
 
   const handleImpersonate = () => {
     impersonateUserMutation.mutate({ userId });

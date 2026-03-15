@@ -2,8 +2,9 @@
 
 import { UploadButton } from "@/app/_features/core/upload/upload-button";
 import { updateUser, useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { useMutation } from "@tanstack/react-query";
 import {
   Avatar,
   AvatarFallback,
@@ -14,12 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function ProfileAvatarUpload() {
+  const trpc = useTRPC();
   const { data: session } = useSession();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
   const deleteOldAvatar =
-    trpc.authenticated.account.profile.updateAvatar.useMutation();
+    useMutation(trpc.authenticated.account.profile.updateAvatar.mutationOptions());
 
   const userName = session?.user.name ?? "Utilisateur";
   const userEmail = session?.user.email ?? userName;

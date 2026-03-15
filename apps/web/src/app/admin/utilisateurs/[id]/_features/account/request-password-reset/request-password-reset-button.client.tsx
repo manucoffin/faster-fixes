@@ -1,6 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc/trpc-client";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useMutation } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +23,9 @@ type RequestPasswordResetButtonProps = {
 export const RequestPasswordResetButton = ({
   userId,
 }: RequestPasswordResetButtonProps) => {
+  const trpc = useTRPC();
   const requestPasswordResetMutation =
-    trpc.admin.users.password.requestReset.useMutation({
+    useMutation(trpc.admin.users.password.requestReset.mutationOptions({
       onSuccess: () => {
         toast.success("Succès", {
           description:
@@ -37,7 +39,7 @@ export const RequestPasswordResetButton = ({
             "Impossible d'envoyer le lien de réinitialisation de mot de passe",
         });
       },
-    });
+    }));
 
   const handleRequestReset = () => {
     requestPasswordResetMutation.mutate({ userId });
