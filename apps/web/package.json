@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "portless sm next dev --turbopack",
+    "dev": "portless ff next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
