@@ -19,7 +19,7 @@ export function OrganizationLogoUpload() {
   const previewUrlRef = useRef<string | null>(null);
 
   const deleteOldLogo =
-    trpc.authenticated.account.organisation.updateLogo.useMutation();
+    trpc.authenticated.organisation.updateLogo.useMutation();
 
   const orgName = activeOrg?.name ?? "Organisation";
   const orgLogo = (activeOrg as Record<string, unknown>)?.logo as

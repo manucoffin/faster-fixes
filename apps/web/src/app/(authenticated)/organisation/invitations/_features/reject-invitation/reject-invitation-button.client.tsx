@@ -1,0 +1,40 @@
+"use client";
+
+import { trpc } from "@/lib/trpc/trpc-client";
+import { Button } from "@workspace/ui/components/button";
+import { X } from "lucide-react";
+import { toast } from "sonner";
+
+type RejectInvitationButtonProps = {
+  invitationId: string;
+};
+
+export function RejectInvitationButton({
+  invitationId,
+}: RejectInvitationButtonProps) {
+  const utils = trpc.useUtils();
+
+  const rejectMutation =
+    trpc.authenticated.organisation.invitation.reject.useMutation({
+      onSuccess: () => {
+        toast.success("Invitation refusée");
+        utils.authenticated.organisation.invitation.getReceived.invalidate();
+      },
+      onError: (error) => {
+        toast.error(error.message || "Erreur lors du refus de l'invitation.");
+      },
+    });
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={rejectMutation.isPending}
+      onClick={() => rejectMutation.mutate({ invitationId })}
+      className="flex-1"
+    >
+      <X className="size-4" />
+      Refuser
+    </Button>
+  );
+}

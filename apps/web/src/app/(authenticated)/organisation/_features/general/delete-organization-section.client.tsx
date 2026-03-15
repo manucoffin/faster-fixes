@@ -26,7 +26,7 @@ export function DeleteOrganizationSection() {
   const [open, setOpen] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
-  const orgDetailsQuery = trpc.authenticated.account.organisation.get.useQuery(
+  const orgDetailsQuery = trpc.authenticated.organisation.get.useQuery(
     { organizationId: activeOrg?.id ?? "" },
     { enabled: !!activeOrg?.id },
   );

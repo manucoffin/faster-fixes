@@ -28,7 +28,7 @@ export function UpdateOrganizationForm() {
     useActiveOrganization();
 
   const updateOrganization =
-    trpc.authenticated.account.organisation.update.useMutation({
+    trpc.authenticated.organisation.update.useMutation({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Organisation mise à jour avec succès");

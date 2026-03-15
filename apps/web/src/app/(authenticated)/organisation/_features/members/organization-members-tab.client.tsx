@@ -1,15 +1,12 @@
 "use client";
 
+import { getRoleLabel } from "@/app/_features/organization/_utils/organization-roles";
 import {
-  getRoleLabel,
-  type OrganizationRole,
-} from "@/app/_features/organization/_utils/organization-roles";
-import {
-  organization,
-  useActiveOrganization,
   useActiveMemberRole,
+  useActiveOrganization,
   useSession,
 } from "@/lib/auth";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { getInitials } from "@/utils/text/get-initials";
 import {
   Avatar,
@@ -19,12 +16,6 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import {
   Table,
   TableBody,
   TableCell,
@@ -32,18 +23,12 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  LogOut,
-  Mail,
-  MoreHorizontal,
-  Plus,
-  Shield,
-  UserMinus,
-  X,
-} from "lucide-react";
+import { LogOut, Mail, Plus } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
-import { InviteMemberDialog } from "./invite-member-dialog.client";
+import { InviteMemberDialog } from "./create-invitation/invite-member-dialog.client";
+import { InvitationActionsDropdown } from "./invitation-actions-dropdown.client";
+import { MemberActionsDropdown } from "./member-actions-dropdown.client";
 
 function getRoleBadgeVariant(role: string) {
   switch (role) {
@@ -56,21 +41,11 @@ function getRoleBadgeVariant(role: string) {
   }
 }
 
-type Invitation = {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  expiresAt: Date;
-};
-
 export function OrganizationMembersTab() {
   const { data: session } = useSession();
   const { data: activeOrg } = useActiveOrganization();
   const { data: memberRoleData } = useActiveMemberRole();
-  const [pendingAction, setPendingAction] = React.useState<string | null>(null);
   const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false);
-  const [invitations, setInvitations] = React.useState<Invitation[]>([]);
 
   const currentRole = memberRoleData?.role;
 
@@ -86,122 +61,28 @@ export function OrganizationMembersTab() {
   const canManage = currentRole === "owner" || currentRole === "admin";
   const isOwner = currentRole === "owner";
 
-  const loadInvitations = React.useCallback(async () => {
-    if (!activeOrg?.id || !canManage) return;
-    try {
-      const result = await organization.listInvitations({
-        query: { organizationId: activeOrg.id },
-      });
-      if (result.data) {
-        const pending = (result.data as Invitation[]).filter(
-          (inv) => inv.status === "pending",
-        );
-        setInvitations(pending);
-      }
-    } catch {
-      // Silently fail
-    }
-  }, [activeOrg?.id, canManage]);
+  const invitationsQuery =
+    trpc.authenticated.organisation.invitation.get.useQuery(
+      { organizationId: activeOrg?.id ?? "" },
+      { enabled: !!activeOrg?.id && canManage },
+    );
 
-  React.useEffect(() => {
-    loadInvitations();
-  }, [loadInvitations]);
+  const invitations = invitationsQuery.data ?? [];
 
-  const handleUpdateRole = async (
-    memberId: string,
-    newRole: OrganizationRole,
-  ) => {
-    setPendingAction(memberId);
-    try {
-      const result = await organization.updateMemberRole({
-        memberId,
-        role: newRole,
-      });
-
-      if (result.error) {
-        toast.error(
-          result.error.message || "Erreur lors de la modification du rôle.",
-        );
-        return;
-      }
-
-      toast.success("Rôle mis à jour avec succès");
-    } catch {
-      toast.error("Une erreur inattendue s'est produite.");
-    } finally {
-      setPendingAction(null);
-    }
-  };
-
-  const handleRemoveMember = async (memberId: string) => {
-    setPendingAction(memberId);
-    try {
-      const result = await organization.removeMember({
-        memberIdOrEmail: memberId,
-      });
-
-      if (result.error) {
-        toast.error(
-          result.error.message || "Erreur lors du retrait du membre.",
-        );
-        return;
-      }
-
-      toast.success("Membre retiré avec succès");
-    } catch {
-      toast.error("Une erreur inattendue s'est produite.");
-    } finally {
-      setPendingAction(null);
-    }
-  };
-
-  const handleLeave = async () => {
-    if (!activeOrg) return;
-
-    setPendingAction("leave");
-    try {
-      const result = await organization.leave({
-        organizationId: activeOrg.id,
-      });
-
-      if (result.error) {
-        toast.error(
-          result.error.message ||
-            "Erreur lors de la sortie de l'organisation.",
-        );
-        return;
-      }
-
+  const leaveOrganization = trpc.authenticated.organisation.leave.useMutation({
+    onSuccess: () => {
       toast.success("Vous avez quitté l'organisation");
-    } catch {
-      toast.error("Une erreur inattendue s'est produite.");
-    } finally {
-      setPendingAction(null);
-    }
-  };
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Erreur lors de la sortie de l'organisation.",
+      );
+    },
+  });
 
-  const handleCancelInvitation = async (invitationId: string) => {
-    setPendingAction(invitationId);
-    try {
-      const result = await organization.cancelInvitation({
-        invitationId,
-      });
-
-      if (result.error) {
-        toast.error(
-          result.error.message ||
-            "Erreur lors de l'annulation de l'invitation.",
-        );
-        return;
-      }
-
-      toast.success("Invitation annulée");
-      loadInvitations();
-    } catch {
-      toast.error("Une erreur inattendue s'est produite.");
-    } finally {
-      setPendingAction(null);
-    }
+  const handleLeave = () => {
+    if (!activeOrg) return;
+    leaveOrganization.mutate({ organizationId: activeOrg.id });
   };
 
   return (
@@ -209,7 +90,7 @@ export function OrganizationMembersTab() {
       {canManage && (
         <div className="flex justify-end">
           <Button onClick={() => setInviteDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             Inviter un membre
           </Button>
         </div>
@@ -237,10 +118,7 @@ export function OrganizationMembersTab() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       {member.user.image && (
-                        <AvatarImage
-                          src={member.user.image}
-                          alt={memberName}
-                        />
+                        <AvatarImage src={member.user.image} alt={memberName} />
                       )}
                       <AvatarFallback className="text-xs">
                         {getInitials(memberName)}
@@ -267,54 +145,19 @@ export function OrganizationMembersTab() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={pendingAction === "leave"}
+                      disabled={leaveOrganization.isPending}
                       onClick={handleLeave}
                     >
-                      <LogOut className="mr-1 h-4 w-4" />
+                      <LogOut className="mr-1 size-4" />
                       Quitter
                     </Button>
                   )}
                   {canManage && !isCurrentUser && !isMemberOwner && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={pendingAction === member.id}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {isOwner && member.role !== "admin" && (
-                          <DropdownMenuItem
-                            onSelect={() =>
-                              handleUpdateRole(member.id, "admin")
-                            }
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Promouvoir administrateur
-                          </DropdownMenuItem>
-                        )}
-                        {isOwner && member.role === "admin" && (
-                          <DropdownMenuItem
-                            onSelect={() =>
-                              handleUpdateRole(member.id, "member")
-                            }
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Rétrograder en membre
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onSelect={() => handleRemoveMember(member.id)}
-                          className="text-destructive"
-                        >
-                          <UserMinus className="mr-2 h-4 w-4" />
-                          Retirer le membre
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <MemberActionsDropdown
+                      memberId={member.id}
+                      memberRole={member.role}
+                      isOwner={isOwner}
+                    />
                   )}
                 </TableCell>
               </TableRow>
@@ -327,7 +170,7 @@ export function OrganizationMembersTab() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs">
-                      <Mail className="h-4 w-4" />
+                      <Mail className="size-4" />
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-muted-foreground font-medium">
@@ -339,41 +182,30 @@ export function OrganizationMembersTab() {
                 {invitation.email}
               </TableCell>
               <TableCell>
-                <Badge variant={getRoleBadgeVariant(invitation.role)}>
-                  {getRoleLabel(invitation.role)}
+                <Badge
+                  variant={getRoleBadgeVariant(invitation.role ?? "member")}
+                >
+                  {getRoleLabel(invitation.role ?? "member")}
                 </Badge>
               </TableCell>
               <TableCell>
                 <Badge variant="secondary">En attente</Badge>
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={pendingAction === invitation.id}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onSelect={() => handleCancelInvitation(invitation.id)}
-                      className="text-destructive"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Annuler l&apos;invitation
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <InvitationActionsDropdown
+                  invitationId={invitation.id}
+                  onCancelled={() => invitationsQuery.refetch()}
+                />
               </TableCell>
             </TableRow>
           ))}
 
           {(!members || members.length === 0) && invitations.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-muted-foreground text-center py-8">
+              <TableCell
+                colSpan={5}
+                className="text-muted-foreground text-center py-8"
+              >
                 Aucun membre
               </TableCell>
             </TableRow>
@@ -384,7 +216,7 @@ export function OrganizationMembersTab() {
       <InviteMemberDialog
         open={inviteDialogOpen}
         onOpenChange={setInviteDialogOpen}
-        onInviteSent={loadInvitations}
+        onInviteSent={() => invitationsQuery.refetch()}
       />
     </div>
   );

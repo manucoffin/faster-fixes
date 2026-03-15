@@ -1,6 +1,10 @@
 "use client";
 
-import { useActiveOrganization, useListOrganizations } from "@/lib/auth";
+import {
+  organization,
+  useActiveOrganization,
+  useListOrganizations,
+} from "@/lib/auth";
 import { defaultRedirect } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
@@ -27,11 +31,16 @@ export function LeaveOrganizationSection() {
   const [open, setOpen] = React.useState(false);
 
   const leaveOrganization =
-    trpc.authenticated.account.organisation.leave.useMutation({
+    trpc.authenticated.organisation.leave.useMutation({
       onSuccess: async () => {
         toast.success("Vous avez quitté l'organisation");
         setOpen(false);
         await refetchOrganizations();
+        const { data: orgs } = await organization.list();
+        const firstOrg = orgs?.[0];
+        if (firstOrg) {
+          await organization.setActive({ organizationId: firstOrg.id });
+        }
         router.push(defaultRedirect);
       },
       onError: (error) => {

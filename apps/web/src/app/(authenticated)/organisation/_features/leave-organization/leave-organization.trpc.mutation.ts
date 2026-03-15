@@ -1,7 +1,7 @@
 "use server";
 
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { LeaveOrganizationSchema } from "./leave-organization.schema";
 
 export const leaveOrganization = protectedProcedure
@@ -37,3 +37,7 @@ export const leaveOrganization = protectedProcedure
 
     return { success: true };
   });
+
+export type LeaveOrganizationOutput = inferProcedureOutput<
+  typeof leaveOrganization
+>;

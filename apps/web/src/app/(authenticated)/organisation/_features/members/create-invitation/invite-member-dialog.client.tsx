@@ -1,6 +1,7 @@
 "use client";
 
-import { organization, useActiveOrganization } from "@/lib/auth";
+import { useActiveOrganization } from "@/lib/auth";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -20,16 +21,15 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
-const InviteMemberSchema = z.object({
+const InviteMemberFormSchema = z.object({
   email: z.string().email("Adresse email invalide"),
 });
 
-type InviteMemberInputs = z.infer<typeof InviteMemberSchema>;
+type InviteMemberFormInputs = z.infer<typeof InviteMemberFormSchema>;
 
 type InviteMemberDialogProps = {
   open: boolean;
@@ -43,10 +43,9 @@ export function InviteMemberDialog({
   onInviteSent,
 }: InviteMemberDialogProps) {
   const { data: activeOrg } = useActiveOrganization();
-  const [isPending, setIsPending] = React.useState(false);
 
-  const form = useForm<InviteMemberInputs>({
-    resolver: zodResolver(InviteMemberSchema),
+  const form = useForm<InviteMemberFormInputs>({
+    resolver: zodResolver(InviteMemberFormSchema),
     defaultValues: { email: "" },
   });
 
@@ -57,35 +56,29 @@ export function InviteMemberDialog({
     }
   };
 
-  const onSubmit = async (data: InviteMemberInputs) => {
-    if (!activeOrg) return;
-
-    setIsPending(true);
-    try {
-      const result = await organization.inviteMember({
-        organizationId: activeOrg.id,
-        email: data.email,
-        role: "member",
-      });
-
-      if (result.error) {
+  const createInvitation =
+    trpc.authenticated.organisation.invitation.create.useMutation({
+      onSuccess: () => {
+        toast.success("Invitation envoyée avec succès");
+        handleOpenChange(false);
+        onInviteSent();
+      },
+      onError: (error) => {
         form.setError("root", {
           message:
-            result.error.message || "Erreur lors de l'envoi de l'invitation.",
+            error.message || "Erreur lors de l'envoi de l'invitation.",
         });
-        return;
-      }
+      },
+    });
 
-      toast.success("Invitation envoyée avec succès");
-      handleOpenChange(false);
-      onInviteSent();
-    } catch {
-      form.setError("root", {
-        message: "Une erreur inattendue s'est produite.",
-      });
-    } finally {
-      setIsPending(false);
-    }
+  const onSubmit = (data: InviteMemberFormInputs) => {
+    if (!activeOrg) return;
+
+    createInvitation.mutate({
+      organizationId: activeOrg.id,
+      email: data.email,
+      role: "member",
+    });
   };
 
   return (
@@ -120,7 +113,7 @@ export function InviteMemberDialog({
                     <Input
                       type="email"
                       placeholder="email@exemple.com"
-                      disabled={isPending}
+                      disabled={createInvitation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -134,12 +127,14 @@ export function InviteMemberDialog({
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                disabled={isPending}
+                disabled={createInvitation.isPending}
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Envoi en cours..." : "Envoyer l'invitation"}
+              <Button type="submit" disabled={createInvitation.isPending}>
+                {createInvitation.isPending
+                  ? "Envoi en cours..."
+                  : "Envoyer l'invitation"}
               </Button>
             </DialogFooter>
           </form>
