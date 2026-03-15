@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { CreditCard, Settings2 } from "lucide-react";
+import { CreditCard, FolderOpen, Settings2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { OrganizationSwitcher } from "./organization/organization-switcher.client";
@@ -27,6 +27,20 @@ export const AuthenticatedSidebar = async ({
       </SidebarHeader>
 
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Projets</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/projets">
+                <SidebarMenuButton tooltip="Projets">
+                  <FolderOpen />
+                  <span>Mes projets</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>Mon compte</SidebarGroupLabel>
           <SidebarMenu>
