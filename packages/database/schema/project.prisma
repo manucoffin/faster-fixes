@@ -1,0 +1,86 @@
+model Project {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name            String
+    url             String
+    apiKeyHash      String
+    apiKeyLastFour  String
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    widgetConfig WidgetConfig?
+    reviewers    Reviewer[]
+    feedback     Feedback[]
+
+    @@index([organizationId])
+    @@map("project")
+}
+
+model WidgetConfig {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String  @unique
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    color    String @default("#6366f1")
+    position String @default("bottom-right")
+
+    @@map("widget_config")
+}
+
+model Reviewer {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    name     String
+    token    String  @unique
+    isActive Boolean @default(true)
+
+    feedback Feedback[]
+
+    @@index([projectId])
+    @@map("reviewer")
+}
+
+model Feedback {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId  String
+    project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    reviewerId String
+    reviewer   Reviewer @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+    status  String @default("new")
+    comment String
+    pageUrl String
+
+    clickX   Float?
+    clickY   Float?
+    selector String?
+
+    browserName    String?
+    browserVersion String?
+    os             String?
+    viewportWidth  Int?
+    viewportHeight Int?
+
+    metadata Json?
+
+    screenshotId String?
+    screenshot   Asset?  @relation("FeedbackScreenshot", fields: [screenshotId], references: [id], onDelete: SetNull)
+
+    @@index([projectId])
+    @@index([reviewerId])
+    @@map("feedback")
+}

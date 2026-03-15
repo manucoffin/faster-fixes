@@ -26,5 +26,7 @@ model Asset {
     uploadedById String?
     uploadedBy   User?   @relation("AssetUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
+    feedbackScreenshots Feedback[] @relation("FeedbackScreenshot")
+
     @@map("assets")
 }
