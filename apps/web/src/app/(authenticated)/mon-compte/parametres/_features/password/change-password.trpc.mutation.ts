@@ -11,7 +11,7 @@ export const changePassword = protectedProcedure
     try {
       const { currentPassword, newPassword } = input;
 
-      const result = await auth.api.changePassword({
+      await auth.api.changePassword({
         body: {
           currentPassword,
           newPassword,
