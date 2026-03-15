@@ -117,6 +117,7 @@ export function OrganizationSwitcher() {
                           <AvatarImage
                             src={resolveS3Url(logo)}
                             alt={org.name}
+                            className="object-cover"
                           />
                         )}
                         <AvatarFallback className="rounded-md text-[10px]">

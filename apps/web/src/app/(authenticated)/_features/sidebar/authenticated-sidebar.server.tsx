@@ -13,7 +13,7 @@ import {
 import { CreditCard, Settings2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
-import { OrganizationSwitcher } from "./organization-switcher.client";
+import { OrganizationSwitcher } from "./organization/organization-switcher.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
 export const AuthenticatedSidebar = async ({

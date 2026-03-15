@@ -1,6 +1,7 @@
 "use client";
 
-import { organization } from "@/lib/auth";
+import { organization, useListOrganizations } from "@/lib/auth";
+import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -20,17 +21,12 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import slugify from "slugify";
-import z from "zod";
-
-const CreateOrganizationSchema = z.object({
-  name: z.string().trim().min(1, "Le nom est requis"),
-});
-
-type CreateOrganizationInputs = z.infer<typeof CreateOrganizationSchema>;
+import {
+  CreateOrganizationInputs,
+  CreateOrganizationSchema,
+} from "@/app/_features/organization/create-organization.schema";
 
 type CreateOrganizationDialogProps = {
   open: boolean;
@@ -41,12 +37,29 @@ export function CreateOrganizationDialog({
   open,
   onOpenChange,
 }: CreateOrganizationDialogProps) {
-  const [isPending, setIsPending] = React.useState(false);
+  const { refetch: refetchOrganizations } = useListOrganizations();
 
   const form = useForm<CreateOrganizationInputs>({
     resolver: zodResolver(CreateOrganizationSchema),
     defaultValues: { name: "" },
   });
+
+  const createOrganization =
+    trpc.organization.create.useMutation({
+      onSuccess: async (data) => {
+        await organization.setActive({ organizationId: data.id });
+        await refetchOrganizations();
+        toast.success("Organisation créée avec succès");
+        handleOpenChange(false);
+      },
+      onError: (error) => {
+        form.setError("root", {
+          message:
+            error.message ||
+            "Erreur lors de la création de l'organisation.",
+        });
+      },
+    });
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
@@ -55,37 +68,8 @@ export function CreateOrganizationDialog({
     }
   };
 
-  const onSubmit = async (data: CreateOrganizationInputs) => {
-    setIsPending(true);
-    try {
-      const slug = slugify(data.name, { lower: true, strict: true });
-
-      const result = await organization.create({
-        name: data.name,
-        slug,
-      });
-
-      if (result.error) {
-        form.setError("root", {
-          message:
-            result.error.message || "Erreur lors de la création de l'organisation.",
-        });
-        return;
-      }
-
-      if (result.data) {
-        await organization.setActive({ organizationId: result.data.id });
-      }
-
-      toast.success("Organisation créée avec succès");
-      handleOpenChange(false);
-    } catch {
-      form.setError("root", {
-        message: "Une erreur inattendue s'est produite.",
-      });
-    } finally {
-      setIsPending(false);
-    }
+  const onSubmit = (data: CreateOrganizationInputs) => {
+    createOrganization.mutate(data);
   };
 
   return (
@@ -118,7 +102,7 @@ export function CreateOrganizationDialog({
                   <FormControl>
                     <Input
                       placeholder="Mon organisation"
-                      disabled={isPending}
+                      disabled={createOrganization.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -132,12 +116,14 @@ export function CreateOrganizationDialog({
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                disabled={isPending}
+                disabled={createOrganization.isPending}
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Création en cours..." : "Créer"}
+              <Button type="submit" disabled={createOrganization.isPending}>
+                {createOrganization.isPending
+                  ? "Création en cours..."
+                  : "Créer"}
               </Button>
             </DialogFooter>
           </form>
