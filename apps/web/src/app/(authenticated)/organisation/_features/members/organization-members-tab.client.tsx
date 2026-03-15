@@ -7,6 +7,7 @@ import {
   useSession,
 } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
+import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,
@@ -120,7 +121,10 @@ export function OrganizationMembersTab() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       {member.user.image && (
-                        <AvatarImage src={member.user.image} alt={memberName} />
+                        <AvatarImage
+                          src={member.user.image.startsWith("http") ? member.user.image : resolveS3Url(member.user.image)}
+                          alt={memberName}
+                        />
                       )}
                       <AvatarFallback>
                         <Facehash name={member.user.email ?? memberName} size={32} />

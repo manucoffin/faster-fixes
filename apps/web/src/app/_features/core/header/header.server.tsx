@@ -1,5 +1,6 @@
 import { loginUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
+import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,
@@ -31,6 +32,13 @@ export async function Header() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
+  const userImage = session?.user.image;
+  const profilePicture = userImage
+    ? userImage.startsWith("http")
+      ? userImage
+      : resolveS3Url(userImage)
+    : null;
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-40">
@@ -69,9 +77,9 @@ export async function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Avatar className="size-8">
-                    {session.user.image && (
+                    {profilePicture && (
                       <AvatarImage
-                        src={session.user.image}
+                        src={profilePicture}
                         alt={session.user.name || "User"}
                       />
                     )}

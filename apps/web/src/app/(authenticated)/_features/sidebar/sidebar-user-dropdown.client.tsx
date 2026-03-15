@@ -2,12 +2,12 @@
 
 import { useSession } from "@/lib/auth";
 import { useSignOut } from "@/lib/auth/use-sign-out";
+import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
-import { Facehash } from "facehash";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Facehash } from "facehash";
 import {
   ChevronsUpDown,
   CreditCard,
@@ -60,6 +61,13 @@ export function SidebarUserDropdown() {
       ? `${session?.user.firstName} ${session?.user.lastName}`
       : "Utilisateur";
 
+  const userImage = session?.user.image;
+  const profilePicture = userImage
+    ? userImage.startsWith("http")
+      ? userImage
+      : resolveS3Url(userImage)
+    : null;
+
   if (isPending) {
     return <SidebarUserDropdownLoading />;
   }
@@ -74,8 +82,12 @@ export function SidebarUserDropdown() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                {session?.user.image ? (
-                  <AvatarImage src={session.user.image} alt={userName} />
+                {profilePicture ? (
+                  <AvatarImage
+                    src={profilePicture}
+                    alt={userName}
+                    className="object-cover"
+                  />
                 ) : null}
                 <AvatarFallback className="rounded-lg">
                   <Facehash name={session?.user.email ?? userName} size={32} />
@@ -99,11 +111,14 @@ export function SidebarUserDropdown() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  {session?.user.image ? (
-                    <AvatarImage src={session.user.image} alt={userName} />
+                  {profilePicture ? (
+                    <AvatarImage src={profilePicture} alt={userName} />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
-                    <Facehash name={session?.user.email ?? userName} size={32} />
+                    <Facehash
+                      name={session?.user.email ?? userName}
+                      size={32}
+                    />
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -154,10 +169,7 @@ export function SidebarUserDropdown() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              onSelect={handleSignOut}
-              variant="destructive"
-            >
+            <DropdownMenuItem onSelect={handleSignOut} variant="destructive">
               <LogOut className="mr-2 size-4" />
               Me déconnecter
             </DropdownMenuItem>

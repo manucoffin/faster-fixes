@@ -65,6 +65,12 @@ const nextConfig = {
         hostname: "readyjs-dev.s3.eu-west-3.amazonaws.com",
       },
 
+      // R2 bucket
+      {
+        protocol: "https",
+        hostname: "pub-c5726c6e6e084e2eb959739e0af1646a.r2.dev",
+      },
+
       // for testing
       {
         protocol: "https",
