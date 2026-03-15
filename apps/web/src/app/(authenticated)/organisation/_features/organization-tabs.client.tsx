@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
 import { canManageMembers } from "@/app/_features/organization/_utils/organization-roles";
 import { useActiveMemberRole } from "@/lib/auth";
 import {
@@ -8,42 +9,49 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import { parseAsString, useQueryState } from "nuqs";
 import { OrganizationGeneralTab } from "./general/organization-general-tab.client";
-import { OrganizationInvitationsTab } from "./invitations/organization-invitations-tab.client";
+import { LeaveOrganizationSection } from "./leave-organization/leave-organization-section.client";
 import { OrganizationMembersTab } from "./members/organization-members-tab.client";
 
 export function OrganizationTabs() {
   const { data: memberRole } = useActiveMemberRole();
+  const [tab, setTab] = useQueryState(
+    "tab",
+    parseAsString.withDefault("general"),
+  );
 
   const showManagementTabs = canManageMembers(memberRole?.role ?? "");
 
+  if (!showManagementTabs) {
+    return (
+      <div className="flex flex-col gap-12">
+        <DashboardSection
+          title="Quitter l'organisation"
+          description="Quittez cette organisation si vous ne souhaitez plus en faire partie"
+          cardTitle="Quitter l'organisation"
+          cardClassName="max-w-md"
+        >
+          <LeaveOrganizationSection />
+        </DashboardSection>
+      </div>
+    );
+  }
+
   return (
-    <Tabs defaultValue="general">
+    <Tabs value={tab} onValueChange={setTab}>
       <TabsList>
         <TabsTrigger value="general">Général</TabsTrigger>
-        {showManagementTabs && (
-          <>
-            <TabsTrigger value="members">Membres</TabsTrigger>
-            <TabsTrigger value="invitations">Invitations</TabsTrigger>
-          </>
-        )}
+        <TabsTrigger value="members">Membres</TabsTrigger>
       </TabsList>
 
       <TabsContent value="general" className="mt-6">
         <OrganizationGeneralTab />
       </TabsContent>
 
-      {showManagementTabs && (
-        <>
-          <TabsContent value="members" className="mt-6">
-            <OrganizationMembersTab />
-          </TabsContent>
-
-          <TabsContent value="invitations" className="mt-6">
-            <OrganizationInvitationsTab />
-          </TabsContent>
-        </>
-      )}
+      <TabsContent value="members" className="mt-6">
+        <OrganizationMembersTab />
+      </TabsContent>
     </Tabs>
   );
 }
