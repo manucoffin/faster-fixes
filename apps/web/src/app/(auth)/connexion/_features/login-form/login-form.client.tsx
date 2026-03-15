@@ -1,5 +1,6 @@
 "use client";
 
+import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
 import { defaultRedirect, forgotPasswordUrl } from "@/lib/routing";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,10 +20,11 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, MailIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { LoginInputs, LoginSchema } from "./login.schema";
 
@@ -30,6 +32,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("nextUrl");
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const form = useForm<LoginInputs>({
     resolver: zodResolver(LoginSchema),
@@ -41,6 +44,10 @@ export function LoginForm() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onError: (error) => {
+      if (error.message === "EMAIL_NOT_VERIFIED") {
+        setUnverifiedEmail(form.getValues("email"));
+        return;
+      }
       const message = error.message || "Échec de la connexion. Veuillez réessayer.";
       form.setError("root", { message });
     },
@@ -50,12 +57,33 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: { email: string; password: string }) => {
+    setUnverifiedEmail(null);
     loginMutation.mutate(data);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email Not Verified */}
+        {unverifiedEmail && (
+          <Alert>
+            <MailIcon />
+            <AlertTitle>Email non confirmé</AlertTitle>
+            <AlertDescription>
+              <p>
+                Veuillez confirmer votre adresse email avant de vous connecter.
+              </p>
+              <SendVerificationEmailButton
+                email={unverifiedEmail}
+                size="sm"
+                className="mt-2"
+              >
+                Renvoyer l&apos;email de confirmation
+              </SendVerificationEmailButton>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Server Error */}
         {form.formState.errors.root && (
           <Alert variant="destructive">
@@ -65,7 +93,6 @@ export function LoginForm() {
               <p>{form.formState.errors.root.message}</p>
             </AlertDescription>
           </Alert>
-
         )}
 
         {/* Email Field */}
@@ -114,8 +141,6 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-
-
 
         {/* Submit Button */}
         <Button

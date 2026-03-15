@@ -2,7 +2,7 @@
 
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { SignupSchema } from "./signup.schema";
 
 export const signupMutation = publicProcedure
@@ -50,3 +50,5 @@ export const signupMutation = publicProcedure
       });
     }
   });
+
+export type SignupOutput = inferProcedureOutput<typeof signupMutation>;

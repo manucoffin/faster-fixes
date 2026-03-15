@@ -1,5 +1,6 @@
 "use client";
 
+import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -22,7 +23,6 @@ import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { SignupInputs, SignupSchema } from "./signup.schema";
-
 
 export function SignupForm() {
   const [success, setSuccess] = useState(false);
@@ -61,6 +61,13 @@ export function SignupForm() {
             <AlertTitle>Succès</AlertTitle>
             <AlertDescription>
               <p>Un email de confirmation a été envoyé à votre adresse.</p>
+              <SendVerificationEmailButton
+                email={form.getValues("email")}
+                size="sm"
+                className="mt-2"
+              >
+                Renvoyer l&apos;email de confirmation
+              </SendVerificationEmailButton>
             </AlertDescription>
           </Alert>
         )}

@@ -2,7 +2,7 @@
 
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { LoginSchema } from "./login.schema";
 
 export const loginMutation = publicProcedure
@@ -27,6 +27,13 @@ export const loginMutation = publicProcedure
 
       // Handle authentication errors
       if (error instanceof Error) {
+        if (error.message.includes("Email not verified")) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "EMAIL_NOT_VERIFIED",
+          });
+        }
+
         if (
           error.message.includes("Invalid") ||
           error.message.includes("password")
@@ -44,3 +51,5 @@ export const loginMutation = publicProcedure
       });
     }
   });
+
+export type LoginOutput = inferProcedureOutput<typeof loginMutation>;
