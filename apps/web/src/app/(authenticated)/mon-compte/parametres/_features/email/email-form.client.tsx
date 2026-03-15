@@ -3,7 +3,11 @@
 import { changeEmail } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -11,7 +15,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@workspace/ui/components/form";
 import {
   InputGroup,
@@ -72,7 +76,10 @@ export function EmailForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
+      >
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
@@ -90,8 +97,8 @@ export function EmailForm() {
             <AlertDescription>
               <p>
                 Un email de vérification a été envoyé à votre nouvelle adresse.
-                Veuillez vérifier votre boîte de réception et cliquer sur le lien
-                pour confirmer le changement.
+                Veuillez vérifier votre boîte de réception et cliquer sur le
+                lien pour confirmer le changement.
               </p>
             </AlertDescription>
           </Alert>
@@ -101,10 +108,10 @@ export function EmailForm() {
           control={form.control}
           name="newEmail"
           render={({ field }) => (
-            <FormItem className="max-w-sm">
+            <FormItem>
               <FormLabel>Adresse email</FormLabel>
               <FormControl>
-                <InputGroup >
+                <InputGroup>
                   <InputGroupAddon align="inline-start">
                     <MailIcon />
                   </InputGroupAddon>
@@ -128,7 +135,7 @@ export function EmailForm() {
         <Button
           type="submit"
           disabled={isPending || getCurrentEmailQuery.isLoading}
-          className="self-start"
+          className="self-end"
         >
           {isPending ? "Envoi en cours..." : "Changer l'email"}
         </Button>

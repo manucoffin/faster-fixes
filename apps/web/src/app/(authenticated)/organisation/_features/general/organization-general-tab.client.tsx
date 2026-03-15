@@ -12,7 +12,7 @@ export function OrganizationGeneralTab() {
         title="Logo"
         description="Changez le logo de votre organisation"
         cardTitle="Logo de l'organisation"
-        cardClassName="max-w-md"
+        cardClassName="lg:max-w-md"
       >
         <OrganizationLogoUpload />
       </DashboardSection>
@@ -21,7 +21,7 @@ export function OrganizationGeneralTab() {
         title="Informations générales"
         description="Mettez à jour le nom de votre organisation"
         cardTitle="Informations de l'organisation"
-        cardClassName="max-w-md"
+        cardClassName="lg:max-w-md"
       >
         <UpdateOrganizationForm />
       </DashboardSection>
@@ -30,7 +30,7 @@ export function OrganizationGeneralTab() {
         title="Supprimer l'organisation"
         description="Supprimez définitivement cette organisation et toutes ses données"
         cardTitle="Zone de danger"
-        cardClassName="max-w-md"
+        cardClassName="lg:max-w-md"
       >
         <DeleteOrganizationSection />
       </DashboardSection>

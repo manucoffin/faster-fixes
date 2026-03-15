@@ -30,7 +30,7 @@ export function OrganizationTabs() {
           title="Quitter l'organisation"
           description="Quittez cette organisation si vous ne souhaitez plus en faire partie"
           cardTitle="Quitter l'organisation"
-          cardClassName="max-w-md"
+          cardClassName="lg:max-w-md"
         >
           <LeaveOrganizationSection />
         </DashboardSection>

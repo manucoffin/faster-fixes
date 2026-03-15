@@ -2,7 +2,11 @@
 
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -11,16 +15,18 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@workspace/ui/components/form";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ChangePasswordInputs, ChangePasswordSchema } from "./change-password.schema";
+import {
+  ChangePasswordInputs,
+  ChangePasswordSchema,
+} from "./change-password.schema";
 
 export function PasswordForm() {
-
   const form = useForm<ChangePasswordInputs>({
     resolver: zodResolver(ChangePasswordSchema),
     defaultValues: {
@@ -30,16 +36,17 @@ export function PasswordForm() {
     },
   });
 
-  const changePasswordMutation = trpc.authenticated.account.password.change.useMutation({
-    onSuccess: () => {
-      toast.success("Mot de passe modifié avec succès")
-      form.reset();
-    },
-    onError: (error) => {
-      const message = error.message || "Une erreur s'est produite.";
-      form.setError("root", { message });
-    },
-  });
+  const changePasswordMutation =
+    trpc.authenticated.account.password.change.useMutation({
+      onSuccess: () => {
+        toast.success("Mot de passe modifié avec succès");
+        form.reset();
+      },
+      onError: (error) => {
+        const message = error.message || "Une erreur s'est produite.";
+        form.setError("root", { message });
+      },
+    });
 
   const onSubmit = async (data: ChangePasswordInputs) => {
     changePasswordMutation.mutate(data);
@@ -47,7 +54,10 @@ export function PasswordForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
+      >
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
@@ -62,7 +72,7 @@ export function PasswordForm() {
           control={form.control}
           name="currentPassword"
           render={({ field }) => (
-            <FormItem className="max-w-sm">
+            <FormItem>
               <FormLabel>Mot de passe actuel</FormLabel>
               <FormControl>
                 <PasswordInput
@@ -80,7 +90,7 @@ export function PasswordForm() {
           control={form.control}
           name="newPassword"
           render={({ field }) => (
-            <FormItem className="max-w-sm">
+            <FormItem>
               <FormLabel>Nouveau mot de passe</FormLabel>
               <FormControl>
                 <PasswordInput
@@ -90,7 +100,8 @@ export function PasswordForm() {
                 />
               </FormControl>
               <FormDescription>
-                Minimum 8 caractères, avec au moins une majuscule, une minuscule et un chiffre
+                Minimum 8 caractères, avec au moins une majuscule, une minuscule
+                et un chiffre
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -101,7 +112,7 @@ export function PasswordForm() {
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem className="max-w-sm">
+            <FormItem>
               <FormLabel>Confirmer le mot de passe</FormLabel>
               <FormControl>
                 <PasswordInput
@@ -118,7 +129,7 @@ export function PasswordForm() {
         <Button
           type="submit"
           disabled={changePasswordMutation.isPending}
-          className="self-start"
+          className="self-end"
         >
           {changePasswordMutation.isPending
             ? "Changement en cours..."

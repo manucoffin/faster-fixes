@@ -3,7 +3,11 @@
 import { signOut } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -21,7 +25,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@workspace/ui/components/form";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon, AlertTriangleIcon } from "lucide-react";
@@ -29,7 +33,10 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { DeleteAccountInputs, DeleteAccountSchema } from "./delete-account.schema";
+import {
+  DeleteAccountInputs,
+  DeleteAccountSchema,
+} from "./delete-account.schema";
 
 export function AccountDeletionButton() {
   const router = useRouter();
@@ -77,7 +84,7 @@ export function AccountDeletionButton() {
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-fit">
+        <Button variant="destructive" className="w-fit self-end">
           Supprimer mon compte
         </Button>
       </AlertDialogTrigger>
@@ -85,16 +92,22 @@ export function AccountDeletionButton() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <AlertTriangleIcon className="h-5 w-5 text-destructive" />
-            <AlertDialogTitle>Supprimer définitivement votre compte</AlertDialogTitle>
+            <AlertTriangleIcon className="text-destructive h-5 w-5" />
+            <AlertDialogTitle>
+              Supprimer définitivement votre compte
+            </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="pt-2">
-            Cette action est irréversible. Toutes vos données seront supprimées définitivement et vous ne pourrez pas récupérer votre compte.
+            Cette action est irréversible. Toutes vos données seront supprimées
+            définitivement et vous ne pourrez pas récupérer votre compte.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
             {form.formState.errors.root && (
               <Alert variant="destructive">
                 <AlertCircleIcon />
