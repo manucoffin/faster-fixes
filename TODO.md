@@ -1,4 +1,3 @@
-- ajouter asset
 - setup la section organisations
 - sortir le form de organization tab
 - mon-compte/invitation + organisations
@@ -8,8 +7,6 @@
 - empêcher de créer une organization
 - mettre les invit & params dans le dropdown
 
-- Setup asset en db et les composant pour image upload et file upload
-  - faire un wrapper si on utilise pas le S3 pour les upload image et upload file components
 - Setup le centre de notifications
 - [ ] ORG
   - [ ] Setup le système d’organization (reprendre celui de taff)
