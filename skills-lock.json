@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "5717187bba9c22030c7174c74012f01c359f21e2ce87e0eb80e24244d8b8c915"
     },
+    "planning-with-files": {
+      "source": "othmanadi/planning-with-files",
+      "sourceType": "github",
+      "computedHash": "2f5b1af2dd2de110a292c0999fcad6e262442f09142cd4fecbcd4ab8d97b334b"
+    },
     "react-email": {
       "source": "resend/react-email",
       "sourceType": "github",
