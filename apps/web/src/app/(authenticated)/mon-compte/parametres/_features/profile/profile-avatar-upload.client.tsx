@@ -1,7 +1,7 @@
 "use client";
 
 import { UploadButton } from "@/app/_features/core/upload/upload-button";
-import { useSession } from "@/lib/auth";
+import { updateUser, useSession } from "@/lib/auth";
 import { trpc } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
@@ -18,7 +18,7 @@ export function ProfileAvatarUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
-  const updateAvatarMutation =
+  const deleteOldAvatar =
     trpc.authenticated.account.profile.updateAvatar.useMutation();
 
   const userName = session?.user.name ?? "Utilisateur";
@@ -62,7 +62,7 @@ export function ProfileAvatarUpload() {
         accept="image/png,image/jpeg,image/webp"
         label="Changer l'avatar"
         description="PNG, JPEG ou WebP. 2 Mo maximum."
-        disabled={!session || updateAvatarMutation.isPending}
+        disabled={!session || deleteOldAvatar.isPending}
         onUploadComplete={async ({ key, raw }) => {
           if (!session) return;
 
@@ -75,7 +75,12 @@ export function ProfileAvatarUpload() {
           setPreviewUrl(blobUrl);
 
           try {
-            await updateAvatarMutation.mutateAsync({ imageKey: key });
+            // 1. Delete old avatar object from R2
+            await deleteOldAvatar.mutateAsync();
+
+            // 2. Store key via better-auth (updates DB + syncs session cache)
+            await updateUser({ image: key });
+
             toast.success("Avatar mis à jour avec succès");
           } catch {
             toast.error("Erreur lors de la mise à jour de l'avatar.");
