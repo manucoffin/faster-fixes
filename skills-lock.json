@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "computedHash": "5717187bba9c22030c7174c74012f01c359f21e2ce87e0eb80e24244d8b8c915"
+    },
     "react-email": {
       "source": "resend/react-email",
       "sourceType": "github",
