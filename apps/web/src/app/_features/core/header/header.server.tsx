@@ -60,7 +60,7 @@ export async function Header() {
                   asChild
                   className={cn(navigationMenuTriggerStyle(), "cursor-pointer")}
                 >
-                  <Link href="/">Accueil</Link>
+                  <Link href="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -103,7 +103,7 @@ export async function Header() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                  <Link href="/mon-compte/parametres">Mon compte</Link>
+                  <Link href="/mon-compte/parametres">My Account</Link>
                 </DropdownMenuItem>
 
                 {session.user.role === "admin" && (
@@ -123,7 +123,7 @@ export async function Header() {
             </DropdownMenu>
           ) : (
             <Button asChild variant="outline">
-              <Link href={loginUrl}>Connexion</Link>
+              <Link href={loginUrl}>Sign in</Link>
             </Button>
           )}
         </div>

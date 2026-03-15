@@ -36,7 +36,7 @@ export const forgotPasswordMutation = publicProcedure
         ) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Cet email n'existe pas dans notre système",
+            message: "This email does not exist in our system",
           });
         }
       }
@@ -44,7 +44,7 @@ export const forgotPasswordMutation = publicProcedure
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message:
-          "Impossible d'envoyer l'email de réinitialisation. Veuillez réessayer.",
+          "Unable to send reset email. Please try again.",
       });
     }
   });

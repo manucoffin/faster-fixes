@@ -40,7 +40,7 @@ export const loginMutation = publicProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Email ou mot de passe invalide",
+            message: "Invalid email or password",
           });
         }
       }
@@ -48,7 +48,7 @@ export const loginMutation = publicProcedure
       console.error("[login] Unexpected error:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Échec de la connexion. Veuillez réessayer.",
+        message: "Sign in failed. Please try again.",
       });
     }
   });

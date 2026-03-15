@@ -16,7 +16,7 @@ export const deleteInvitation = protectedProcedure
     if (!invitation) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Invitation introuvable.",
+        message: "Invitation not found.",
       });
     }
 
@@ -32,7 +32,7 @@ export const deleteInvitation = protectedProcedure
       throw new TRPCError({
         code: "FORBIDDEN",
         message:
-          "Vous n'avez pas les permissions pour annuler cette invitation.",
+          "You do not have permission to cancel this invitation.",
       });
     }
 

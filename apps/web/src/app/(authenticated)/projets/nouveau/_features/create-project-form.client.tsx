@@ -48,7 +48,7 @@ export function CreateProjectForm() {
       },
       onError: (error) => {
         form.setError("root", {
-          message: error.message || "Erreur lors de la création du projet.",
+          message: error.message || "Error creating project.",
         });
       },
     }),
@@ -101,10 +101,10 @@ export function CreateProjectForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom du projet</FormLabel>
+                <FormLabel>Project name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Site Client XYZ"
+                    placeholder="Client Site XYZ"
                     disabled={createProject.isPending}
                     {...field}
                   />
@@ -119,7 +119,7 @@ export function CreateProjectForm() {
             name="url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>URL du projet</FormLabel>
+                <FormLabel>Project URL</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="https://client.com"
@@ -129,7 +129,7 @@ export function CreateProjectForm() {
                   />
                 </FormControl>
                 <FormDescription>
-                  L&apos;URL principale du site de votre client.
+                  The main URL of your client&apos;s site.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -142,8 +142,8 @@ export function CreateProjectForm() {
             className="self-end"
           >
             {createProject.isPending
-              ? "Création en cours..."
-              : "Créer le projet"}
+              ? "Creating..."
+              : "Create project"}
           </Button>
         </form>
       </Form>
@@ -151,10 +151,10 @@ export function CreateProjectForm() {
       <Dialog open={!!rawApiKey} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Projet créé !</DialogTitle>
+            <DialogTitle>Project created!</DialogTitle>
             <DialogDescription>
-              Voici votre clé API. Elle ne sera affichée qu&apos;une seule fois.
-              Copiez-la maintenant et conservez-la en lieu sûr.
+              Here is your API key. It will only be shown once. Copy it now and
+              store it in a safe place.
             </DialogDescription>
           </DialogHeader>
 
@@ -172,7 +172,7 @@ export function CreateProjectForm() {
           </div>
 
           <Button onClick={handleDialogClose} className="w-full">
-            J&apos;ai copié ma clé API
+            I&apos;ve copied my API key
           </Button>
         </DialogContent>
       </Dialog>

@@ -35,7 +35,7 @@ export function LeaveOrganizationSection() {
   const leaveOrganization =
     useMutation(trpc.authenticated.organisation.leave.mutationOptions({
       onSuccess: async () => {
-        toast.success("Vous avez quitté l'organisation");
+        toast.success("You have left the organization");
         setOpen(false);
         await refetchOrganizations();
         const { data: orgs } = await organization.list();
@@ -47,7 +47,7 @@ export function LeaveOrganizationSection() {
       },
       onError: (error) => {
         toast.error(
-          error.message || "Erreur lors de la sortie de l'organisation.",
+          error.message || "Error leaving the organization.",
         );
       },
     }));
@@ -57,15 +57,15 @@ export function LeaveOrganizationSection() {
       <Alert variant="destructive" className="max-w-sm">
         <LogOut />
         <AlertDescription>
-          En quittant l&apos;organisation, vous perdrez l&apos;accès à toutes
-          ses ressources et données.
+          By leaving the organization, you will lose access to all its
+          resources and data.
         </AlertDescription>
       </Alert>
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" className="w-fit self-end">
-            Quitter l&apos;organisation
+            Leave organization
           </Button>
         </AlertDialogTrigger>
 
@@ -76,15 +76,15 @@ export function LeaveOrganizationSection() {
               <AlertDialogTitle>Quitter l&apos;organisation</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="pt-2">
-              Vous êtes sur le point de quitter l&apos;organisation{" "}
-              <strong>{activeOrg?.name}</strong>. Vous ne pourrez plus accéder à
-              ses ressources.
+              You are about to leave the organization{" "}
+              <strong>{activeOrg?.name}</strong>. You will no longer have access
+              to its resources.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={leaveOrganization.isPending}>
-              Annuler
+              Cancel
             </AlertDialogCancel>
             <Button
               variant="destructive"
@@ -97,8 +97,8 @@ export function LeaveOrganizationSection() {
               }}
             >
               {leaveOrganization.isPending
-                ? "Sortie en cours..."
-                : "Confirmer la sortie"}
+                ? "Leaving..."
+                : "Confirm leave"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

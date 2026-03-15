@@ -26,11 +26,11 @@ export function InvitationActionsDropdown({
     useMutation(trpc.authenticated.organisation.invitation.delete.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
-        toast.success("Invitation annulée");
+        toast.success("Invitation canceled");
       },
       onError: (error) => {
         toast.error(
-          error.message || "Erreur lors de l'annulation de l'invitation.",
+          error.message || "Error canceling invitation.",
         );
       },
     }));
@@ -52,7 +52,7 @@ export function InvitationActionsDropdown({
           variant="destructive"
         >
           <X className="size-4" />
-          Annuler l&apos;invitation
+          Cancel invitation
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

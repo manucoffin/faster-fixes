@@ -78,7 +78,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
         queryClient.invalidateQueries(
           trpc.authenticated.projets.reviewer.list.queryOptions({ projectId }),
         );
-        toast.success("Relecteur révoqué");
+        toast.success("Reviewer revoked");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -106,7 +106,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
       {newShareUrl && (
         <div className="rounded-md border border-success bg-success/10 p-4">
           <p className="mb-2 text-sm font-medium text-success">
-            Relecteur créé ! Partagez ce lien avec votre client :
+            Reviewer created! Share this link with your client:
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 rounded bg-background px-2 py-1 font-mono text-xs break-all">
@@ -132,15 +132,15 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Ajouter un relecteur
+              Add reviewer
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nouveau relecteur</DialogTitle>
+              <DialogTitle>New reviewer</DialogTitle>
               <DialogDescription>
-                Entrez le nom de votre client. Un lien de partage unique sera
-                généré.
+                Enter your client&apos;s name. A unique share link will be
+                generated.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -158,7 +158,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Marie - CEO"
@@ -175,7 +175,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
                   disabled={createReviewer.isPending}
                   className="self-end"
                 >
-                  {createReviewer.isPending ? "Création..." : "Créer"}
+                  {createReviewer.isPending ? "Creating..." : "Create"}
                 </Button>
               </form>
             </Form>
@@ -184,21 +184,21 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
       </div>
 
       {matchQueryStatus(reviewersQuery, {
-        Loading: <p className="text-muted-foreground text-sm">Chargement...</p>,
-        Errored: <p className="text-destructive text-sm">Erreur lors du chargement des relecteurs.</p>,
+        Loading: <p className="text-muted-foreground text-sm">Loading...</p>,
+        Errored: <p className="text-destructive text-sm">Error loading reviewers.</p>,
         Empty: (
           <p className="text-muted-foreground py-8 text-center text-sm">
-            Aucun relecteur. Ajoutez votre premier client.
+            No reviewers. Add your first client.
           </p>
         ),
         Success: ({ data: reviewers }) => (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Retours</TableHead>
-                <TableHead>Lien de partage</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Feedback</TableHead>
+                <TableHead>Share link</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -208,9 +208,9 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
                   <TableCell className="font-medium">{reviewer.name}</TableCell>
                   <TableCell>
                     {reviewer.isActive ? (
-                      <Badge variant="default">Actif</Badge>
+                      <Badge variant="default">Active</Badge>
                     ) : (
-                      <Badge variant="secondary">Révoqué</Badge>
+                      <Badge variant="secondary">Revoked</Badge>
                     )}
                   </TableCell>
                   <TableCell>{reviewer.feedbackCount}</TableCell>
@@ -225,7 +225,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
                       ) : (
                         <Copy className="mr-1 h-3 w-3" />
                       )}
-                      Copier le lien
+                      Copy link
                     </Button>
                   </TableCell>
                   <TableCell>

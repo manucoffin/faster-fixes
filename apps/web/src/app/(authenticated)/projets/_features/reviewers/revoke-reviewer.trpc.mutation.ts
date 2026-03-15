@@ -15,7 +15,7 @@ export const revokeReviewer = protectedProcedure
     });
 
     if (!reviewer) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Relecteur introuvable." });
+      throw new TRPCError({ code: "NOT_FOUND", message: "Reviewer not found." });
     }
 
     const membership = await prisma.member.findFirst({
@@ -27,7 +27,7 @@ export const revokeReviewer = protectedProcedure
     });
 
     if (!membership) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Accès refusé." });
+      throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
     }
 
     await prisma.reviewer.update({

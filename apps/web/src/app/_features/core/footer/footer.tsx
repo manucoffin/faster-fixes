@@ -17,7 +17,7 @@ const data = {
   company: {
     name: "Startup Maker",
     description:
-      "Alimentez votre parcours entrepreneurial avec notre plateforme complète conçue pour vous aider à construire, développer et faire croître votre entreprise.",
+      "Fuel your entrepreneurial journey with our comprehensive platform designed to help you build, develop, and grow your business.",
   },
 };
 
@@ -30,7 +30,7 @@ const socialLinks = [
 
 const legalLinks = [
   {
-    text: "Politique de confidentialité",
+    text: "Privacy policy",
     href: "/politique-de-confidentialite" as Route,
   },
   { text: "CGU", href: "/cgu" as Route },
@@ -38,16 +38,16 @@ const legalLinks = [
 ];
 
 const aboutLinks = [
-  { text: "À propos", href: "/a-propos" as Route },
+  { text: "About", href: "/a-propos" as Route },
   { text: "Blog", href: "/blog" as Route },
 ];
 
 const helpfulLinks = [
   {
-    text: "Commencer",
+    text: "Get started",
     href: "/getting-started" as Route,
   },
-  { text: "Tarifs", href: "/pricing" as Route },
+  { text: "Pricing", href: "/pricing" as Route },
   { text: "Contact", href: "/contact" as Route },
 ];
 
@@ -89,7 +89,7 @@ export function Footer() {
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:col-span-2">
             <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold">À propos</p>
+              <p className="text-lg font-semibold">About</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {aboutLinks.map(({ text, href }) => (
                   <li key={text}>
@@ -102,7 +102,7 @@ export function Footer() {
             </div>
 
             <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold">Utile</p>
+              <p className="text-lg font-semibold">Useful</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
@@ -115,7 +115,7 @@ export function Footer() {
             </div>
 
             <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold">Légal</p>
+              <p className="text-lg font-semibold">Legal</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {legalLinks.map(({ text, href }) => (
                   <li key={text}>
@@ -126,7 +126,7 @@ export function Footer() {
                 ))}
                 <li>
                   <ManageConsentButton className="px-0 py-0 font-normal h-fit hover:no-underline" >
-                    <AnimatedText >Préférences de confidentialité</AnimatedText>
+                    <AnimatedText >Privacy preferences</AnimatedText>
                   </ManageConsentButton>
                 </li>
               </ul>
@@ -139,7 +139,7 @@ export function Footer() {
         <div className="container mx-auto px-4">
           <div className="text-center sm:flex sm:justify-between sm:text-left">
             <p className="text-sm">
-              <span className="block sm:inline">Tous droits réservés.</span>
+              <span className="block sm:inline">All rights reserved.</span>
             </p>
 
             <p className="mt-4 text-sm sm:order-first sm:mt-0">

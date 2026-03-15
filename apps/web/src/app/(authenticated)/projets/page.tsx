@@ -7,13 +7,13 @@ import { ProjectList } from "./_features/list/project-list.client";
 export default function ProjetsPage() {
   return (
     <DashboardPageContent
-      title="Projets"
-      breadcrumbs={[{ label: "Projets" }]}
+      title="Projects"
+      breadcrumbs={[{ label: "Projects" }]}
       actions={
         <Button asChild>
           <Link href="/projets/nouveau">
             <Plus className="mr-2 h-4 w-4" />
-            Nouveau projet
+            New project
           </Link>
         </Button>
       }

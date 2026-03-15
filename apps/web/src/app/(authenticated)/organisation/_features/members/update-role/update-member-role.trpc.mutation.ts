@@ -16,7 +16,7 @@ export const updateMemberRole = protectedProcedure
     if (!member) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Membre introuvable.",
+        message: "Member not found.",
       });
     }
 
@@ -32,7 +32,7 @@ export const updateMemberRole = protectedProcedure
       throw new TRPCError({
         code: "FORBIDDEN",
         message:
-          "Seul le propriétaire peut modifier les rôles des membres.",
+          "Only the owner can change member roles.",
       });
     }
 

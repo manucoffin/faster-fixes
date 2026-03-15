@@ -14,7 +14,7 @@ export const deleteProject = protectedProcedure
     });
 
     if (!project) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Projet introuvable." });
+      throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
     }
 
     const membership = await prisma.member.findFirst({
@@ -26,7 +26,7 @@ export const deleteProject = protectedProcedure
     });
 
     if (!membership) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Accès refusé." });
+      throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
     }
 
     await prisma.project.delete({ where: { id: input.projectId } });

@@ -27,12 +27,12 @@ export function FeedbackButton() {
 
   const sendFeedbackMutation = useMutation(trpc.authenticated.feedback.send.mutationOptions({
     onSuccess: () => {
-      toast.success("Merci pour votre feedback !");
+      toast.success("Thank you for your feedback!");
       form.reset();
       setOpen(false);
     },
     onError: (error) => {
-      toast.error(error.message || "Une erreur s'est produite.");
+      toast.error(error.message || "An error occurred.");
     },
   }));
 
@@ -53,9 +53,9 @@ export function FeedbackButton() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-3"
         >
-          <p className="text-sm font-medium">Envoyer un feedback</p>
+          <p className="text-sm font-medium">Send feedback</p>
           <Textarea
-            placeholder="Votre feedback..."
+            placeholder="Your feedback..."
             rows={4}
             {...form.register("message")}
           />
@@ -70,7 +70,7 @@ export function FeedbackButton() {
             disabled={sendFeedbackMutation.isPending}
             className="self-end"
           >
-            {sendFeedbackMutation.isPending ? "Envoi..." : "Envoyer"}
+            {sendFeedbackMutation.isPending ? "Sending..." : "Send"}
           </Button>
         </form>
       </PopoverContent>

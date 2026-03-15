@@ -23,14 +23,14 @@ export const sendFeedback = protectedProcedure
     if (adminEmails.length === 0) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Aucun administrateur trouvé pour recevoir le feedback.",
+        message: "No administrator found to receive feedback.",
       });
     }
 
-    const senderEmail = session.user.email ?? "Utilisateur inconnu";
+    const senderEmail = session.user.email ?? "Unknown user";
     const senderName = session.user.name ?? senderEmail;
 
-    const subject = `Feedback de ${senderName}`;
+    const subject = `Feedback from ${senderName}`;
     const body = await render(
       <UserFeedback
         senderName={senderName}

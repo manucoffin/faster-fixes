@@ -19,7 +19,7 @@ export const getOrganizationDetails = protectedProcedure
     if (!membership) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas accès à cette organisation.",
+        message: "You do not have access to this organization.",
       });
     }
 
@@ -30,7 +30,7 @@ export const getOrganizationDetails = protectedProcedure
     if (!org) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Organisation introuvable.",
+        message: "Organization not found.",
       });
     }
 

@@ -18,7 +18,7 @@ type SendVerificationEmailButtonProps = {
 export function SendVerificationEmailButton({
   email,
   className,
-  children = "Envoyer l'email de vérification",
+  children = "Send verification email",
   variant = "secondary",
   size,
 }: SendVerificationEmailButtonProps) {
@@ -33,19 +33,19 @@ export function SendVerificationEmailButton({
 
       sendVerificationEmailMutation.mutate(validatedInput, {
         onSuccess: () => {
-          toast.success("Email de vérification envoyé avec succès");
+          toast.success("Verification email sent successfully");
         },
         onError: (error) => {
           toast.error(
             error?.message ||
-            "Une erreur est survenue lors de l'envoi de l'email",
+            "An error occurred while sending the email",
           );
         },
       });
     } catch (error: any) {
       toast.error(
         error?.message ||
-        "Une erreur est survenue lors de la validation de l'email",
+        "An error occurred while validating the email",
       );
     }
   };

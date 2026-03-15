@@ -3,12 +3,12 @@ import z from "zod";
 
 export const ChangePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Le mot de passe actuel est requis"),
+    currentPassword: z.string().min(1, "Current password is required"),
     newPassword: PasswordSchema,
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 

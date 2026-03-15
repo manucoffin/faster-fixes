@@ -99,7 +99,7 @@ export function OrganizationSwitcher() {
               align="start"
               sideOffset={4}
             >
-              <DropdownMenuLabel>Organisations</DropdownMenuLabel>
+              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
               <DropdownMenuGroup>
                 {organizations?.map((org) => {
                   const orgAny = org as Record<string, unknown>;
@@ -136,14 +136,14 @@ export function OrganizationSwitcher() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setCreateDialogOpen(true)}>
                 <Plus className="mr-2 size-4" />
-                Créer une organisation
+                Create organization
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/organisation" className="flex items-center">
                   <Settings2 className="mr-2 size-4" />
-                  Paramètres
+                  Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -152,7 +152,7 @@ export function OrganizationSwitcher() {
                   className="flex items-center"
                 >
                   <Mail className="mr-2 size-4" />
-                  Mes invitations
+                  My invitations
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

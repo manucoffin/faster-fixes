@@ -10,8 +10,8 @@ export default async function ProjetPage({
   return (
     <DashboardPageContent
       breadcrumbs={[
-        { label: "Projets", link: "/projets" },
-        { label: "Projet" },
+        { label: "Projects", link: "/projets" },
+        { label: "Project" },
       ]}
     >
       <ProjectTabs projectId={projectId} />

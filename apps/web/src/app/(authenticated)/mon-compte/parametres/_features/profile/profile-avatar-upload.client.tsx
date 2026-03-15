@@ -23,7 +23,7 @@ export function ProfileAvatarUpload() {
   const deleteOldAvatar =
     useMutation(trpc.authenticated.account.profile.updateAvatar.mutationOptions());
 
-  const userName = session?.user.name ?? "Utilisateur";
+  const userName = session?.user.name ?? "User";
   const userEmail = session?.user.email ?? userName;
   const userImage = session?.user.image;
 
@@ -62,8 +62,8 @@ export function ProfileAvatarUpload() {
       <UploadButton
         route="user-avatar"
         accept="image/png,image/jpeg,image/webp"
-        label="Changer l'avatar"
-        description="PNG, JPEG ou WebP. 2 Mo maximum."
+        label="Change avatar"
+        description="PNG, JPEG or WebP. 2 MB max."
         disabled={!session || deleteOldAvatar.isPending}
         onUploadComplete={async ({ key, raw }) => {
           if (!session) return;
@@ -83,13 +83,13 @@ export function ProfileAvatarUpload() {
             // 2. Store key via better-auth (updates DB + syncs session cache)
             await updateUser({ image: key });
 
-            toast.success("Avatar mis à jour avec succès");
+            toast.success("Avatar updated successfully");
           } catch {
-            toast.error("Erreur lors de la mise à jour de l'avatar.");
+            toast.error("Error updating avatar.");
           }
         }}
         onError={(error) => {
-          toast.error(error.message || "Erreur lors de l'upload de l'avatar.");
+          toast.error(error.message || "Error uploading avatar.");
         }}
       />
     </div>

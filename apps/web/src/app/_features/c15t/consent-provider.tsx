@@ -19,40 +19,40 @@ export function ConsentProvider({ children }: ConsentProviderProps) {
         mode: "offline",
         consentCategories: ["necessary", "marketing", "measurement"], // Optional: Specify which consent categories to show in the banner.
         translations: {
-          defaultLanguage: "fr",
+          defaultLanguage: "en",
           translations: {
-            fr: {
+            en: {
               common: {
-                acceptAll: "Tout accepter",
-                rejectAll: "Tout refuser",
-                customize: "Personnaliser",
-                save: "Enregistrer",
+                acceptAll: "Accept all",
+                rejectAll: "Reject all",
+                customize: "Customize",
+                save: "Save",
               },
               cookieBanner: {
-                title: "Gestion des cookies",
+                title: "Cookie management",
                 description:
-                  "Nous utilisons des cookies pour améliorer votre expérience sur notre site, analyser le trafic et personnaliser le contenu. Vous pouvez accepter tous les cookies, les refuser ou personnaliser vos préférences.",
+                  "We use cookies to improve your experience on our site, analyze traffic, and personalize content. You can accept all cookies, reject them, or customize your preferences.",
               },
               consentManagerDialog: {
-                title: "Paramètres de confidentialité",
+                title: "Privacy settings",
                 description:
-                  "Gérez vos préférences de cookies et de confidentialité. Vous pouvez modifier ces paramètres à tout moment.",
+                  "Manage your cookie and privacy preferences. You can change these settings at any time.",
               },
               consentTypes: {
                 necessary: {
-                  title: "Cookies nécessaires",
+                  title: "Necessary cookies",
                   description:
-                    "Ces cookies sont indispensables au fonctionnement du site web et ne peuvent pas être désactivés. Ils sont généralement activés en réponse à des actions que vous effectuez et qui constituent une demande de services.",
+                    "These cookies are essential for the website to function and cannot be disabled. They are usually set in response to actions you take that constitute a request for services.",
                 },
                 marketing: {
-                  title: "Cookies marketing",
+                  title: "Marketing cookies",
                   description:
-                    "Ces cookies nous permettent de personnaliser la publicité et de mesurer l'efficacité de nos campagnes marketing. Ils peuvent être définis par nos partenaires publicitaires.",
+                    "These cookies allow us to personalize advertising and measure the effectiveness of our marketing campaigns. They may be set by our advertising partners.",
                 },
                 measurement: {
-                  title: "Cookies de mesure d'audience",
+                  title: "Analytics cookies",
                   description:
-                    "Ces cookies nous aident à analyser l'utilisation du site web, à comprendre comment les visiteurs interagissent avec notre site et à améliorer nos services.",
+                    "These cookies help us analyze website usage, understand how visitors interact with our site, and improve our services.",
                 },
               },
             },

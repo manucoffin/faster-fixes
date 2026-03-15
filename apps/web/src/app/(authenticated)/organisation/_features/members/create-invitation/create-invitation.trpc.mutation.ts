@@ -22,7 +22,7 @@ export const createInvitation = protectedProcedure
       throw new TRPCError({
         code: "FORBIDDEN",
         message:
-          "Vous n'avez pas les permissions pour inviter des membres.",
+          "You do not have permission to invite members.",
       });
     }
 
@@ -46,7 +46,7 @@ export const createInvitation = protectedProcedure
       }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Erreur lors de l'envoi de l'invitation.",
+        message: "Error sending invitation.",
       });
     }
   });

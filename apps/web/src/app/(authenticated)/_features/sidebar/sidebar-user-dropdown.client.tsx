@@ -59,7 +59,7 @@ export function SidebarUserDropdown() {
   const userName =
     session?.user.firstName && session?.user.lastName
       ? `${session?.user.firstName} ${session?.user.lastName}`
-      : "Utilisateur";
+      : "User";
 
   const userImage = session?.user.image;
   const profilePicture = userImage
@@ -140,7 +140,7 @@ export function SidebarUserDropdown() {
                   className="flex items-center"
                 >
                   <Settings2 className="mr-2 size-4" />
-                  <span>Paramètres</span>
+                  <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
 
@@ -150,7 +150,7 @@ export function SidebarUserDropdown() {
                   className="flex items-center"
                 >
                   <CreditCard className="mr-2 size-4" />
-                  <span>Facturation</span>
+                  <span>Billing</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -171,7 +171,7 @@ export function SidebarUserDropdown() {
 
             <DropdownMenuItem onSelect={handleSignOut} variant="destructive">
               <LogOut className="mr-2 size-4" />
-              Me déconnecter
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

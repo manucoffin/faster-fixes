@@ -76,11 +76,11 @@ export function OrganizationMembersTab() {
   const leaveOrganization = useMutation(trpc.authenticated.organisation.leave.mutationOptions({
     onSuccess: async () => {
       await refetchActiveOrg();
-      toast.success("Vous avez quitté l'organisation");
+      toast.success("You have left the organization");
     },
     onError: (error) => {
       toast.error(
-        error.message || "Erreur lors de la sortie de l'organisation.",
+        error.message || "Error leaving the organization.",
       );
     },
   }));
@@ -96,7 +96,7 @@ export function OrganizationMembersTab() {
         <div className="flex justify-end">
           <Button onClick={() => setInviteDialogOpen(true)}>
             <Plus className="size-4" />
-            Inviter un membre
+            Invite member
           </Button>
         </div>
       )}
@@ -104,10 +104,10 @@ export function OrganizationMembersTab() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Membre</TableHead>
+            <TableHead>Member</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Statut</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -145,7 +145,7 @@ export function OrganizationMembersTab() {
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-muted-foreground">
-                    Actif
+                    Active
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -157,7 +157,7 @@ export function OrganizationMembersTab() {
                       onClick={handleLeave}
                     >
                       <LogOut className="mr-1 size-4" />
-                      Quitter
+                      Leave
                     </Button>
                   )}
                   {canManage && !isCurrentUser && !isMemberOwner && (
@@ -197,7 +197,7 @@ export function OrganizationMembersTab() {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary">En attente</Badge>
+                <Badge variant="secondary">Pending</Badge>
               </TableCell>
               <TableCell>
                 <InvitationActionsDropdown
@@ -213,7 +213,7 @@ export function OrganizationMembersTab() {
                 colSpan={5}
                 className="text-muted-foreground py-8 text-center"
               >
-                Aucun membre
+                No members
               </TableCell>
             </TableRow>
           )}

@@ -51,14 +51,14 @@ export function CreateOrganizationDialog({
       onSuccess: async (data) => {
         await organization.setActive({ organizationId: data.id });
         await refetchOrganizations();
-        toast.success("Organisation créée avec succès");
+        toast.success("Organization created successfully");
         handleOpenChange(false);
       },
       onError: (error) => {
         form.setError("root", {
           message:
             error.message ||
-            "Erreur lors de la création de l'organisation.",
+            "Error creating organization.",
         });
       },
     }));
@@ -78,9 +78,9 @@ export function CreateOrganizationDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer une organisation</DialogTitle>
+          <DialogTitle>Create an organization</DialogTitle>
           <DialogDescription>
-            Créez une nouvelle organisation pour collaborer avec votre équipe.
+            Create a new organization to collaborate with your team.
           </DialogDescription>
         </DialogHeader>
 
@@ -100,10 +100,10 @@ export function CreateOrganizationDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom de l&apos;organisation</FormLabel>
+                  <FormLabel>Organization name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Mon organisation"
+                      placeholder="My organization"
                       disabled={createOrganization.isPending}
                       {...field}
                     />
@@ -120,12 +120,12 @@ export function CreateOrganizationDialog({
                 onClick={() => handleOpenChange(false)}
                 disabled={createOrganization.isPending}
               >
-                Annuler
+                Cancel
               </Button>
               <Button type="submit" disabled={createOrganization.isPending}>
                 {createOrganization.isPending
-                  ? "Création en cours..."
-                  : "Créer"}
+                  ? "Creating..."
+                  : "Create"}
               </Button>
             </DialogFooter>
           </form>

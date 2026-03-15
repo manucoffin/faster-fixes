@@ -29,7 +29,7 @@ export const deleteAccount = protectedProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Le mot de passe est incorrect.",
+            message: "Password is incorrect.",
           });
         }
 
@@ -39,7 +39,7 @@ export const deleteAccount = protectedProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Votre session a expiré. Veuillez vous reconnecter.",
+            message: "Your session has expired. Please sign in again.",
           });
         }
 
@@ -49,14 +49,14 @@ export const deleteAccount = protectedProcedure
         ) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Veuillez contacter le support pour supprimer votre compte.",
+            message: "Please contact support to delete your account.",
           });
         }
       }
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Une erreur s'est produite lors de la suppression du compte",
+        message: "An error occurred while deleting the account",
       });
     }
   });

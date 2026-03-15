@@ -11,7 +11,7 @@ export function SignOutButton() {
       onClick={handleSignOut}
       className="cursor-pointer"
     >
-      Déconnexion
+      Sign out
     </DropdownMenuItem>
   );
 }

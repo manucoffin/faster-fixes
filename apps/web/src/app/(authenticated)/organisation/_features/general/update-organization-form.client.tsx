@@ -33,13 +33,13 @@ export function UpdateOrganizationForm() {
     useMutation(trpc.authenticated.organisation.update.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
-        toast.success("Organisation mise à jour avec succès");
+        toast.success("Organization updated successfully");
       },
       onError: (error) => {
         form.setError("root", {
           message:
             error.message ||
-            "Erreur lors de la mise à jour de l'organisation.",
+            "Error updating organization.",
         });
       },
     }));
@@ -82,16 +82,16 @@ export function UpdateOrganizationForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Nom de l'organisation"
+                  placeholder="Organization name"
                   disabled={updateOrganization.isPending}
                   {...field}
                 />
               </FormControl>
               {slugPreview && (
-                <FormDescription>Slug : {slugPreview}</FormDescription>
+                <FormDescription>Slug: {slugPreview}</FormDescription>
               )}
               <FormMessage />
             </FormItem>
@@ -104,8 +104,8 @@ export function UpdateOrganizationForm() {
           className="self-end"
         >
           {updateOrganization.isPending
-            ? "Mise à jour en cours..."
-            : "Mettre à jour"}
+            ? "Updating..."
+            : "Update"}
         </Button>
       </form>
     </Form>

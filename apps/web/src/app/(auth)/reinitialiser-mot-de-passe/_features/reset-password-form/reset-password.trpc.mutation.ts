@@ -15,7 +15,7 @@ export const resetPasswordMutation = publicProcedure
       if (!token) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Token manquant. Lien de réinitialisation invalide.",
+          message: "Missing token. Invalid reset link.",
         });
       }
 
@@ -42,7 +42,7 @@ export const resetPasswordMutation = publicProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Le lien de réinitialisation est invalide ou a expiré.",
+            message: "The reset link is invalid or has expired.",
           });
         }
       }
@@ -50,7 +50,7 @@ export const resetPasswordMutation = publicProcedure
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message:
-          "Échec de la réinitialisation du mot de passe. Veuillez réessayer.",
+          "Password reset failed. Please try again.",
       });
     }
   });

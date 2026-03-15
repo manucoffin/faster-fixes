@@ -44,7 +44,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const resetPasswordMutation = useMutation(trpc.auth.resetPassword.mutationOptions({
     onError: (error) => {
       const message =
-        error.message || "Échec de la réinitialisation du mot de passe. Veuillez réessayer.";
+        error.message || "Password reset failed. Please try again.";
       form.setError("root", { message });
     },
     onSuccess: () => {
@@ -63,7 +63,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
-            <AlertTitle>Erreur</AlertTitle>
+            <AlertTitle>Error</AlertTitle>
             <AlertDescription>
               <p>{form.formState.errors.root.message}</p>
             </AlertDescription>
@@ -76,7 +76,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nouveau mot de passe</FormLabel>
+              <FormLabel>New password</FormLabel>
               <FormControl>
                 <PasswordInput
                   placeholder="••••••••"
@@ -95,7 +95,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmez le mot de passe</FormLabel>
+              <FormLabel>Confirm password</FormLabel>
               <FormControl>
                 <PasswordInput
                   placeholder="••••••••"
@@ -116,8 +116,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           size="lg"
         >
           {resetPasswordMutation.isPending
-            ? "Réinitialisation en cours..."
-            : "Réinitialiser le mot de passe"}
+            ? "Resetting..."
+            : "Reset password"}
         </Button>
       </form>
     </Form>

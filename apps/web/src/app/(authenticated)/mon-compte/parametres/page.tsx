@@ -12,13 +12,13 @@ import { ProfileForm } from "./_features/profile/profile-form.client";
 export default function ParametersPage() {
   return (
     <DashboardPageContent
-      breadcrumbs={[{ label: "Mon compte" }, { label: "Paramètres" }]}
+      breadcrumbs={[{ label: "My Account" }, { label: "Settings" }]}
     >
       <div className="flex flex-col gap-12">
         <DashboardSection
-          title="Profil Utilisateur"
-          description="Mettez à jour vos informations personnelles"
-          cardTitle="Informations Personnelles"
+          title="User Profile"
+          description="Update your personal information"
+          cardTitle="Personal Information"
           cardClassName="lg:max-w-md"
         >
           <div className="flex flex-col gap-6">
@@ -29,36 +29,35 @@ export default function ParametersPage() {
         </DashboardSection>
 
         <DashboardSection
-          title="Adresse Email"
-          description="Changez l'adresse email associée à votre compte"
-          cardTitle="Email de connexion"
+          title="Email Address"
+          description="Change the email address associated with your account"
+          cardTitle="Sign-in email"
           cardClassName="lg:max-w-md"
         >
           <EmailForm />
         </DashboardSection>
 
         <DashboardSection
-          title="Mot de Passe"
-          description="Modifiez votre mot de passe pour sécuriser votre compte"
-          cardTitle="Sécurité du compte"
+          title="Password"
+          description="Change your password to secure your account"
+          cardTitle="Account security"
           cardClassName="lg:max-w-md"
         >
           <PasswordForm />
         </DashboardSection>
 
         <DashboardSection
-          title="Supprimer le compte"
-          description="Supprimez définitivement votre compte et toutes vos données"
-          cardTitle="Zone de danger"
+          title="Delete account"
+          description="Permanently delete your account and all your data"
+          cardTitle="Danger zone"
           cardClassName="lg:max-w-md"
         >
           <div className="flex flex-col gap-4">
             <Alert variant="destructive">
               <AlertTriangleIcon />
               <AlertDescription>
-                Attention : la suppression de votre compte est irréversible.
-                Toutes vos données seront supprimées de manière définitive et ne
-                pourront pas être récupérées.
+                Warning: deleting your account is irreversible. All your data
+                will be permanently deleted and cannot be recovered.
               </AlertDescription>
             </Alert>
             <AccountDeletionButton />

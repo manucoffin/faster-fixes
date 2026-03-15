@@ -23,16 +23,16 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
   return (
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList>
-        <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
-        <TabsTrigger value="settings">Paramètres</TabsTrigger>
-        <TabsTrigger value="reviewers">Relecteurs</TabsTrigger>
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="reviewers">Reviewers</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview" className="mt-6">
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-center text-muted-foreground">
-          <p className="text-lg font-medium">Boîte de retours</p>
+          <p className="text-lg font-medium">Feedback inbox</p>
           <p className="text-sm">
-            La boîte de retours sera disponible dans une prochaine version.
+            The feedback inbox will be available in a future version.
           </p>
         </div>
       </TabsContent>

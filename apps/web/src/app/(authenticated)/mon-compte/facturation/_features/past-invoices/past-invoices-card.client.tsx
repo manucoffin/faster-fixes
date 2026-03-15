@@ -23,7 +23,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { DownloadIcon } from "lucide-react";
 
 function getMonthName(date: Date): string {
-  return date.toLocaleDateString("fr-FR", {
+  return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
@@ -58,7 +58,7 @@ export function PastInvoicesCard() {
     Loading: (
       <Card>
         <CardHeader>
-          <CardTitle>Factures</CardTitle>
+          <CardTitle>Invoices</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="max-h-80 overflow-y-auto pr-1">
@@ -70,9 +70,9 @@ export function PastInvoicesCard() {
     Errored: (
       <Card>
         <CardHeader>
-          <CardTitle>Erreur</CardTitle>
+          <CardTitle>Error</CardTitle>
           <CardDescription>
-            Une erreur est survenue lors du chargement de vos factures
+            An error occurred while loading your invoices
           </CardDescription>
         </CardHeader>
       </Card>
@@ -82,9 +82,9 @@ export function PastInvoicesCard() {
         <CardContent className="pt-6">
           <Empty>
             <EmptyHeader>
-              <EmptyTitle>Aucune facture</EmptyTitle>
+              <EmptyTitle>No invoices</EmptyTitle>
               <EmptyDescription>
-                Vous n&apos;avez pas encore de factures disponibles
+                You don&apos;t have any invoices yet
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -98,7 +98,7 @@ export function PastInvoicesCard() {
       return (
         <Card>
           <CardHeader>
-            <CardTitle>Factures</CardTitle>
+            <CardTitle>Invoices</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="max-h-96 overflow-y-auto pr-1">
@@ -137,7 +137,7 @@ export function PastInvoicesCard() {
                           className="flex items-center gap-2"
                         >
                           <DownloadIcon className="size-4" />
-                          Télécharger
+                          Download
                         </a>
                       </Button>
                     )}

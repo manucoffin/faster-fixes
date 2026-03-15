@@ -30,7 +30,7 @@ export const changePassword = protectedProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Le mot de passe actuel est incorrect.",
+            message: "Current password is incorrect.",
           });
         }
 
@@ -40,14 +40,14 @@ export const changePassword = protectedProcedure
         ) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Vous devez être connecté",
+            message: "You must be signed in",
           });
         }
       }
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Une erreur s'est produite lors du changement de mot de passe",
+        message: "An error occurred while changing password",
       });
     }
   });

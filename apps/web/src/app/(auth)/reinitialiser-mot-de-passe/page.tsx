@@ -22,17 +22,17 @@ export default async function ResetPasswordPage(props: PageParams) {
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-bold flex gap-2 items-center justify-center">
                 <CheckCircle2 className="size-5" />
-                <span>Mot de passe réinitialisé !</span>
+                <span>Password reset!</span>
               </h1>
               <p className="text-muted-foreground">
-                Votre mot de passe a été réinitialisé avec succès. Vous pouvez
-                maintenant vous connecter avec votre nouveau mot de passe.
+                Your password has been reset successfully. You can now sign in
+                with your new password.
               </p>
             </div>
 
             <div className="flex justify-center">
               <Button variant="default" className="" asChild>
-                <Link href={loginUrl}>Se connecter</Link>
+                <Link href={loginUrl}>Sign in</Link>
               </Button>
             </div>
           </div>
@@ -40,11 +40,10 @@ export default async function ResetPasswordPage(props: PageParams) {
           <>
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="size-4" />
-              <AlertTitle>Lien invalide ou expiré</AlertTitle>
+              <AlertTitle>Invalid or expired link</AlertTitle>
               <AlertDescription>
-                Le lien de réinitialisation que vous avez utilisé est invalide
-                ou a expiré. Veuillez demander un nouveau lien de
-                réinitialisation.
+                The reset link you used is invalid or has expired. Please
+                request a new reset link.
               </AlertDescription>
             </Alert>
 
@@ -61,11 +60,10 @@ export default async function ResetPasswordPage(props: PageParams) {
           <div className="space-y-6">
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-bold">
-                Réinitialiser votre mot de passe
+                Reset your password
               </h1>
               <p className="text-muted-foreground">
-                Entrez votre nouveau mot de passe ci-dessous pour réinitialiser
-                le mot de passe de votre compte.
+                Enter your new password below to reset your account password.
               </p>
             </div>
 
@@ -75,19 +73,19 @@ export default async function ResetPasswordPage(props: PageParams) {
           <>
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="size-4" />
-              <AlertTitle>Paramètre manquant</AlertTitle>
+              <AlertTitle>Missing parameter</AlertTitle>
               <AlertDescription>
-                Le token de réinitialisation est manquant. Veuillez utiliser le
-                lien fourni dans votre email ou demander un nouveau lien.
+                The reset token is missing. Please use the link provided in
+                your email or request a new link.
               </AlertDescription>
             </Alert>
 
             <div className="space-y-4">
               <Button className="w-full" asChild>
-                <Link href={forgotPasswordUrl}>Demander un nouveau lien</Link>
+                <Link href={forgotPasswordUrl}>Request a new link</Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
-                <Link href={loginUrl}>Retour à la connexion</Link>
+                <Link href={loginUrl}>Back to sign in</Link>
               </Button>
             </div>
           </>

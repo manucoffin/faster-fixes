@@ -28,7 +28,7 @@ export const createProject = protectedProcedure
     if (!membership) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas les permissions pour créer un projet.",
+        message: "You do not have permission to create a project.",
       });
     }
 
@@ -46,7 +46,7 @@ export const createProject = protectedProcedure
         throw new TRPCError({
           code: "FORBIDDEN",
           message:
-            "Le plan Basic est limité à 1 projet. Passez au plan Premium pour créer des projets illimités.",
+            "The Basic plan is limited to 1 project. Upgrade to the Premium plan to create unlimited projects.",
         });
       }
     }

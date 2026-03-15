@@ -59,11 +59,11 @@ export function EmailForm() {
         callbackURL: "/mon-compte/parametres",
       });
 
-      toast.success("Email de vérification envoyé !");
+      toast.success("Verification email sent!");
       setShowSuccessMessage(true);
       form.reset();
     } catch (error) {
-      let errorMessage = "Impossible de changer l'email. Veuillez réessayer.";
+      let errorMessage = "Unable to change email. Please try again.";
 
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -85,7 +85,7 @@ export function EmailForm() {
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
-            <AlertTitle>Erreur</AlertTitle>
+            <AlertTitle>Error</AlertTitle>
             <AlertDescription>
               <p>{form.formState.errors.root.message}</p>
             </AlertDescription>
@@ -95,12 +95,11 @@ export function EmailForm() {
         {showSuccessMessage && (
           <Alert>
             <InfoIcon />
-            <AlertTitle>Vérification requise</AlertTitle>
+            <AlertTitle>Verification required</AlertTitle>
             <AlertDescription>
               <p>
-                Un email de vérification a été envoyé à votre nouvelle adresse.
-                Veuillez vérifier votre boîte de réception et cliquer sur le
-                lien pour confirmer le changement.
+                A verification email has been sent to your new address. Please
+                check your inbox and click the link to confirm the change.
               </p>
             </AlertDescription>
           </Alert>
@@ -111,7 +110,7 @@ export function EmailForm() {
           name="newEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Adresse email</FormLabel>
+              <FormLabel>Email address</FormLabel>
               <FormControl>
                 <InputGroup>
                   <InputGroupAddon align="inline-start">
@@ -139,7 +138,7 @@ export function EmailForm() {
           disabled={isPending || getCurrentEmailQuery.isLoading}
           className="self-end"
         >
-          {isPending ? "Envoi en cours..." : "Changer l'email"}
+          {isPending ? "Sending..." : "Change email"}
         </Button>
       </form>
     </Form>

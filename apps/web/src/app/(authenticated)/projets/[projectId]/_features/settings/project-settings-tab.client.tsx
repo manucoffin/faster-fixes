@@ -64,7 +64,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         queryClient.invalidateQueries(
           trpc.authenticated.projets.get.queryOptions({ projectId }),
         );
-        toast.success("Projet mis à jour");
+        toast.success("Project updated");
       },
       onError: (error) => {
         form.setError("root", { message: error.message });
@@ -88,7 +88,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
     trpc.authenticated.projets.delete.mutationOptions({
       onSuccess: () => {
         router.push("/projets");
-        toast.success("Projet supprimé");
+        toast.success("Project deleted");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -132,9 +132,9 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
   return (
     <div className="flex flex-col gap-12">
       <DashboardSection
-        title="Informations du projet"
-        description="Modifiez le nom, l'URL et la configuration du widget."
-        cardTitle="Paramètres généraux"
+        title="Project information"
+        description="Edit the name, URL, and widget configuration."
+        cardTitle="General settings"
         cardClassName="lg:max-w-lg"
       >
         <Form {...form}>
@@ -153,7 +153,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom du projet</FormLabel>
+                  <FormLabel>Project name</FormLabel>
                   <FormControl>
                     <Input disabled={updateProject.isPending} {...field} />
                   </FormControl>
@@ -185,7 +185,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
               name="widgetColor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Couleur du widget</FormLabel>
+                  <FormLabel>Widget color</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <input
@@ -212,7 +212,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
               name="widgetPosition"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Position du widget</FormLabel>
+                  <FormLabel>Widget position</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -225,9 +225,9 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="bottom-right">
-                        Bas droite
+                        Bottom right
                       </SelectItem>
-                      <SelectItem value="bottom-left">Bas gauche</SelectItem>
+                      <SelectItem value="bottom-left">Bottom left</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -240,16 +240,16 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
               disabled={updateProject.isPending}
               className="self-end"
             >
-              {updateProject.isPending ? "Mise à jour..." : "Mettre à jour"}
+              {updateProject.isPending ? "Updating..." : "Update"}
             </Button>
           </form>
         </Form>
       </DashboardSection>
 
       <DashboardSection
-        title="Clé API"
-        description="Utilisée par le widget pour soumettre des retours. Seuls les 4 derniers caractères sont affichés."
-        cardTitle="Clé API"
+        title="API Key"
+        description="Used by the widget to submit feedback. Only the last 4 characters are shown."
+        cardTitle="API Key"
         cardClassName="lg:max-w-lg"
       >
         <div className="flex flex-col gap-4">
@@ -262,7 +262,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
           {newApiKey && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
               <p className="mb-2 text-xs font-medium text-destructive">
-                Nouvelle clé — copiez-la maintenant, elle ne sera plus affichée.
+                New key — copy it now, it won&apos;t be shown again.
               </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 break-all font-mono text-sm">
@@ -283,16 +283,16 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
             <DialogTrigger asChild>
               <Button variant="outline" className="self-start">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Régénérer la clé API
+                Regenerate API key
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Régénérer la clé API ?</DialogTitle>
+                <DialogTitle>Regenerate API key?</DialogTitle>
                 <DialogDescription>
-                  L&apos;ancienne clé sera immédiatement invalidée. Le widget
-                  ne pourra plus soumettre de retours jusqu&apos;à ce que la
-                  nouvelle clé soit configurée.
+                  The old key will be immediately invalidated. The widget will
+                  no longer be able to submit feedback until the new key is
+                  configured.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -300,7 +300,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                   variant="outline"
                   onClick={() => setRegenOpen(false)}
                 >
-                  Annuler
+                  Cancel
                 </Button>
                 <Button
                   variant="destructive"
@@ -308,8 +308,8 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                   onClick={() => regenerateApiKey.mutate({ projectId })}
                 >
                   {regenerateApiKey.isPending
-                    ? "Régénération..."
-                    : "Régénérer"}
+                    ? "Regenerating..."
+                    : "Regenerate"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -318,36 +318,36 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
       </DashboardSection>
 
       <DashboardSection
-        title="Zone de danger"
-        description="La suppression est définitive et irréversible."
-        cardTitle="Supprimer le projet"
+        title="Danger zone"
+        description="Deletion is permanent and irreversible."
+        cardTitle="Delete project"
         cardClassName="lg:max-w-lg"
       >
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <DialogTrigger asChild>
             <Button variant="destructive">
               <Trash2 className="mr-2 h-4 w-4" />
-              Supprimer le projet
+              Delete project
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Supprimer le projet ?</DialogTitle>
+              <DialogTitle>Delete project?</DialogTitle>
               <DialogDescription>
-                Cette action est irréversible. Tous les relecteurs, retours et
-                fichiers associés seront définitivement supprimés.
+                This action is irreversible. All reviewers, feedback, and
+                associated files will be permanently deleted.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-                Annuler
+                Cancel
               </Button>
               <Button
                 variant="destructive"
                 disabled={deleteProject.isPending}
                 onClick={() => deleteProject.mutate({ projectId })}
               >
-                {deleteProject.isPending ? "Suppression..." : "Supprimer"}
+                {deleteProject.isPending ? "Deleting..." : "Delete"}
               </Button>
             </DialogFooter>
           </DialogContent>

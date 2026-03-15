@@ -26,10 +26,10 @@ export default async function BillingPage() {
 
   return (
     <DashboardPageContent
-      title="Facturation"
+      title="Billing"
       breadcrumbs={[
-        { label: "Mon compte" },
-        { label: "Facturation" },
+        { label: "My Account" },
+        { label: "Billing" },
       ]}
     >
       <SubscriptionStatusBanner />

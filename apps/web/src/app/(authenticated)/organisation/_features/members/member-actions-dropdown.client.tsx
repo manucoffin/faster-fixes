@@ -32,10 +32,10 @@ export function MemberActionsDropdown({
     useMutation(trpc.authenticated.organisation.member.updateRole.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
-        toast.success("Rôle mis à jour avec succès");
+        toast.success("Role updated successfully");
       },
       onError: (error) => {
-        toast.error(error.message || "Erreur lors de la modification du rôle.");
+        toast.error(error.message || "Error changing role.");
       },
     }));
 
@@ -43,10 +43,10 @@ export function MemberActionsDropdown({
     useMutation(trpc.authenticated.organisation.member.delete.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
-        toast.success("Membre retiré avec succès");
+        toast.success("Member removed successfully");
       },
       onError: (error) => {
-        toast.error(error.message || "Erreur lors du retrait du membre.");
+        toast.error(error.message || "Error removing member.");
       },
     }));
 
@@ -71,18 +71,18 @@ export function MemberActionsDropdown({
         {isOwner && memberRole !== "admin" && (
           <DropdownMenuItem onSelect={() => handleUpdateRole("admin")}>
             <Shield className="size-4" />
-            Promouvoir administrateur
+            Promote to admin
           </DropdownMenuItem>
         )}
         {isOwner && memberRole === "admin" && (
           <DropdownMenuItem onSelect={() => handleUpdateRole("member")}>
             <Shield className="size-4" />
-            Rétrograder en membre
+            Demote to member
           </DropdownMenuItem>
         )}
         <DropdownMenuItem onSelect={handleRemoveMember} variant="destructive">
           <UserMinus className="size-4" />
-          Retirer le membre
+          Remove member
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

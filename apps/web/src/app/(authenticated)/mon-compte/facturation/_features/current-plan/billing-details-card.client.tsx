@@ -65,14 +65,14 @@ export function BillingDetailsCard({
     Errored: (
       <div className="border-destructive/50 bg-destructive/10 rounded-md border p-4">
         <p className="text-destructive text-sm font-medium">
-          Erreur lors du chargement des informations de facturation
+          Error loading billing information
         </p>
       </div>
     ),
     Empty: (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>Aucune information disponible</EmptyTitle>
+          <EmptyTitle>No information available</EmptyTitle>
         </EmptyHeader>
       </Empty>
     ),
@@ -87,7 +87,7 @@ export function BillingDetailsCard({
         return (
           <Empty>
             <EmptyHeader>
-              <EmptyTitle>Prix indisponible</EmptyTitle>
+              <EmptyTitle>Price unavailable</EmptyTitle>
             </EmptyHeader>
           </Empty>
         );
@@ -98,11 +98,11 @@ export function BillingDetailsCard({
       const priceHT = priceValue.toFixed(2);
       const priceTTC = (priceValue * 1.2).toFixed(2);
       const billingLabel =
-        billingPeriod === "annual" ? "Prix annuel" : "Prix mensuel";
+        billingPeriod === "annual" ? "Annual price" : "Monthly price";
 
       return (
         <div className="flex flex-col rounded-md border">
-          <h3 className="p-4 text-lg font-medium">Facturation</h3>
+          <h3 className="p-4 text-lg font-medium">Billing</h3>
 
           <div className="flex flex-col gap-3 p-4">
             <div className="flex justify-between">
@@ -124,7 +124,7 @@ export function BillingDetailsCard({
             {subscriptionStatus === SubscriptionStatus.Trialing && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">
-                  Essai gratuit
+                  Free trial
                 </span>
                 <span className="text-sm font-medium">
                   -{priceTTC} {price.currency?.toUpperCase()}
@@ -134,7 +134,7 @@ export function BillingDetailsCard({
           </div>
 
           <div className="mt-auto flex justify-between border-t p-4">
-            <span className="font-medium">Total TTC</span>
+            <span className="font-medium">Total incl. tax</span>
             <span className="font-semibold">
               {subscriptionStatus === SubscriptionStatus.Trialing ? (
                 <span className="">0 {price.currency?.toUpperCase()}</span>

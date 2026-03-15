@@ -24,7 +24,7 @@ export const signupMutation = publicProcedure
       if (!data) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Échec de la création du compte",
+          message: "Account creation failed",
         });
       }
 
@@ -40,13 +40,13 @@ export const signupMutation = publicProcedure
       if (error instanceof Error && error.message.includes("email")) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Email déjà enregistré",
+          message: "Email already registered",
         });
       }
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Échec de la création du compte. Veuillez réessayer.",
+        message: "Account creation failed. Please try again.",
       });
     }
   });

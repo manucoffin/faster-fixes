@@ -57,8 +57,8 @@ export function OrganizationLogoUpload() {
       <UploadButton
         route="organization-logo"
         accept="image/png,image/jpeg,image/webp"
-        label="Changer le logo"
-        description="PNG, JPEG ou WebP. 2 Mo maximum."
+        label="Change logo"
+        description="PNG, JPEG or WebP. 2 MB max."
         disabled={!activeOrg || deleteOldLogo.isPending}
         metadata={activeOrg ? { organizationId: activeOrg.id } : undefined}
         onUploadComplete={async ({ key, raw }) => {
@@ -84,13 +84,13 @@ export function OrganizationLogoUpload() {
               data: { logo: key },
             });
 
-            toast.success("Logo mis à jour avec succès");
+            toast.success("Logo updated successfully");
           } catch {
-            toast.error("Erreur lors de la mise à jour du logo.");
+            toast.error("Error updating logo.");
           }
         }}
         onError={(error) => {
-          toast.error(error.message || "Erreur lors de l'upload du logo.");
+          toast.error(error.message || "Error uploading logo.");
         }}
       />
     </div>

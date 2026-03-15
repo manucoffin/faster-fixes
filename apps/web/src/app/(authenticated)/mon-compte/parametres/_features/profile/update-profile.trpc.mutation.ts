@@ -11,7 +11,7 @@ export const updateProfile = protectedProcedure
     if (!userId) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "Vous devez être connecté",
+        message: "You must be signed in",
       });
     }
 

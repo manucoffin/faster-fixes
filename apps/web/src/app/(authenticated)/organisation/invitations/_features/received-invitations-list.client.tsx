@@ -55,9 +55,9 @@ export function ReceivedInvitationsList() {
     Errored: (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>Erreur</EmptyTitle>
+          <EmptyTitle>Error</EmptyTitle>
           <EmptyDescription>
-            Impossible de charger les invitations.
+            Unable to load invitations.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -65,9 +65,9 @@ export function ReceivedInvitationsList() {
     Empty: (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>Aucune invitation</EmptyTitle>
+          <EmptyTitle>No invitations</EmptyTitle>
           <EmptyDescription>
-            Vous n&apos;avez aucune invitation en attente.
+            You don&apos;t have any pending invitations.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -84,19 +84,19 @@ export function ReceivedInvitationsList() {
             <CardContent>
               <div className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Organisation :</span>
+                  <span className="text-muted-foreground">Organization:</span>
                   <span>{invitation.organization.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Rôle :</span>
+                  <span className="text-muted-foreground">Role:</span>
                   <Badge variant="outline">
                     {getRoleLabel(invitation.role ?? "member")}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Expire le :</span>
+                  <span className="text-muted-foreground">Expires on:</span>
                   <span>
-                    {new Date(invitation.expiresAt).toLocaleDateString("fr-FR")}
+                    {new Date(invitation.expiresAt).toLocaleDateString("en-US")}
                   </span>
                 </div>
               </div>

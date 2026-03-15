@@ -32,8 +32,8 @@ export function StatusIndicators({ cancelAtPeriodEnd }: StatusIndicatorsProps) {
           }`}
         >
           {isBeingCanceled
-            ? "Annulation à la fin de la période de facturation"
-            : "Renouvellement automatique"}
+            ? "Cancels at end of billing period"
+            : "Auto-renewal"}
         </p>
       </div>
     </div>

@@ -5,16 +5,16 @@ import { CreateProjectForm } from "./_features/create-project-form.client";
 export default function NouveauProjetPage() {
   return (
     <DashboardPageContent
-      title="Nouveau projet"
+      title="New project"
       breadcrumbs={[
-        { label: "Projets", link: "/projets" },
-        { label: "Nouveau" },
+        { label: "Projects", link: "/projets" },
+        { label: "New" },
       ]}
     >
       <DashboardSection
-        title="Créer un projet"
-        description="Un projet correspond à un site client. Chaque projet possède sa propre clé API et ses propres relecteurs."
-        cardTitle="Nouveau projet"
+        title="Create a project"
+        description="A project corresponds to a client site. Each project has its own API key and its own reviewers."
+        cardTitle="New project"
         cardClassName="lg:max-w-lg"
       >
         <CreateProjectForm />

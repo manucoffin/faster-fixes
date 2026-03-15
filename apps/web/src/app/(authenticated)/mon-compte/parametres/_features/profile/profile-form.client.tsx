@@ -53,10 +53,10 @@ export function ProfileForm() {
   const updateProfileMutation =
     useMutation(trpc.authenticated.account.profile.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Profil mis à jour avec succès");
+        toast.success("Profile updated successfully");
       },
       onError: (error) => {
-        const message = error.message || "Une erreur s'est produite.";
+        const message = error.message || "An error occurred.";
         form.setError("root", { message });
       },
     }));
@@ -74,7 +74,7 @@ export function ProfileForm() {
         {form.formState.errors.root && (
           <Alert variant="destructive">
             <AlertCircleIcon />
-            <AlertTitle>Erreur</AlertTitle>
+            <AlertTitle>Error</AlertTitle>
             <AlertDescription>
               <p>{form.formState.errors.root.message}</p>
             </AlertDescription>
@@ -86,9 +86,9 @@ export function ProfileForm() {
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Prénom</FormLabel>
+              <FormLabel>First name</FormLabel>
               <FormControl>
-                <Input placeholder="Entrez votre prénom" {...field} />
+                <Input placeholder="Enter your first name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,9 +100,9 @@ export function ProfileForm() {
           name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>Last name</FormLabel>
               <FormControl>
-                <Input placeholder="Entrez votre nom" {...field} />
+                <Input placeholder="Enter your last name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -115,8 +115,8 @@ export function ProfileForm() {
           className="self-end"
         >
           {updateProfileMutation.isPending
-            ? "Mise à jour en cours..."
-            : "Mettre à jour le profil"}
+            ? "Updating..."
+            : "Update profile"}
         </Button>
       </form>
     </Form>

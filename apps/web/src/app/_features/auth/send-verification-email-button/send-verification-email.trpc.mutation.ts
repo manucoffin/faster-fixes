@@ -19,14 +19,14 @@ export const sendVerificationEmail = publicProcedure
 
       return {
         success: true,
-        message: "Email de vérification envoyé avec succès.",
+        message: "Verification email sent successfully.",
       };
     } catch (error: any) {
       // Handle Better Auth errors
       if (error?.message?.includes("not found") || error?.statusCode === 404) {
-        throw new Error("Cet utilisateur n'existe pas.");
+        throw new Error("This user does not exist.");
       }
 
-      throw new Error("Erreur lors de l'envoi de l'email. Veuillez réessayer.");
+      throw new Error("Error sending email. Please try again.");
     }
   });

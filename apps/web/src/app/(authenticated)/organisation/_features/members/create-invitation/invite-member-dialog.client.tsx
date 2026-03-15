@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 const InviteMemberFormSchema = z.object({
-  email: z.string().email("Adresse email invalide"),
+  email: z.string().email("Invalid email address"),
 });
 
 type InviteMemberFormInputs = z.infer<typeof InviteMemberFormSchema>;
@@ -61,13 +61,13 @@ export function InviteMemberDialog({
     useMutation(trpc.authenticated.organisation.invitation.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
-        toast.success("Invitation envoyée avec succès");
+        toast.success("Invitation sent successfully");
         handleOpenChange(false);
       },
       onError: (error) => {
         form.setError("root", {
           message:
-            error.message || "Erreur lors de l'envoi de l'invitation.",
+            error.message || "Error sending invitation.",
         });
       },
     }));
@@ -86,10 +86,9 @@ export function InviteMemberDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Inviter un membre</DialogTitle>
+          <DialogTitle>Invite a member</DialogTitle>
           <DialogDescription>
-            Envoyez une invitation par email pour ajouter un nouveau membre à
-            votre organisation.
+            Send an email invitation to add a new member to your organization.
           </DialogDescription>
         </DialogHeader>
 
@@ -109,11 +108,11 @@ export function InviteMemberDialog({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse email</FormLabel>
+                  <FormLabel>Email address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="email@exemple.com"
+                      placeholder="email@example.com"
                       disabled={createInvitation.isPending}
                       {...field}
                     />
@@ -130,12 +129,12 @@ export function InviteMemberDialog({
                 onClick={() => handleOpenChange(false)}
                 disabled={createInvitation.isPending}
               >
-                Annuler
+                Cancel
               </Button>
               <Button type="submit" disabled={createInvitation.isPending}>
                 {createInvitation.isPending
-                  ? "Envoi en cours..."
-                  : "Envoyer l'invitation"}
+                  ? "Sending..."
+                  : "Send invitation"}
               </Button>
             </DialogFooter>
           </form>

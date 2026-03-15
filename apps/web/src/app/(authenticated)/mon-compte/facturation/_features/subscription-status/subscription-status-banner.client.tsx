@@ -14,7 +14,7 @@ export const SubscriptionStatusBanner = () => {
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleDateString("fr-FR", {
+    return d.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -37,11 +37,11 @@ export const SubscriptionStatusBanner = () => {
           <div className="rounded-2xl border border-yellow-800/20 bg-yellow-50 p-4">
             <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
               <div>
-                <p className="font-semibold">Abonnement annulé</p>
+                <p className="font-semibold">Subscription canceled</p>
                 <p className="text-sm opacity-90">
-                  Ton abonnement se terminera le{" "}
-                  <strong>{formattedDate}</strong>. Tu perdras l&apos;accès aux
-                  fonctionnalités premium après cette date.
+                  Your subscription will end on{" "}
+                  <strong>{formattedDate}</strong>. You will lose access to
+                  premium features after this date.
                 </p>
               </div>
 
@@ -65,11 +65,11 @@ export const SubscriptionStatusBanner = () => {
           <div className="rounded-2xl border border-blue-800/20 bg-blue-50 p-4">
             <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
               <div>
-                <p className="font-semibold">Période d&apos;essai gratuit</p>
+                <p className="font-semibold">Free trial</p>
                 <p className="text-sm opacity-90">
-                  Ton essai gratuit se termine le{" "}
-                  <strong>{formattedDate}</strong>. Ton abonnement se
-                  renouvellera automatiquement à cette date.
+                  Your free trial ends on{" "}
+                  <strong>{formattedDate}</strong>. Your subscription will
+                  automatically renew on this date.
                 </p>
               </div>
 

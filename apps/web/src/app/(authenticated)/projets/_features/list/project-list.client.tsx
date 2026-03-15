@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { FolderOpen, Plus } from "lucide-react";
 import Link from "next/link";
 
@@ -30,21 +30,21 @@ export function ProjectList() {
   );
 
   return matchQueryStatus(projectsQuery, {
-    Loading: <p className="text-muted-foreground text-sm">Chargement...</p>,
-    Errored: <p className="text-destructive text-sm">Erreur lors du chargement des projets.</p>,
+    Loading: <p className="text-muted-foreground text-sm">Loading...</p>,
+    Errored: <p className="text-destructive text-sm">Error loading projects.</p>,
     Empty: (
       <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
         <FolderOpen className="h-12 w-12 text-muted-foreground" />
         <div>
-          <p className="text-lg font-medium">Aucun projet</p>
+          <p className="text-lg font-medium">No projects</p>
           <p className="text-sm text-muted-foreground">
-            Créez votre premier projet pour commencer à collecter des retours.
+            Create your first project to start collecting feedback.
           </p>
         </div>
         <Button asChild>
           <Link href="/projets/nouveau">
             <Plus className="mr-2 h-4 w-4" />
-            Créer un projet
+            Create project
           </Link>
         </Button>
       </div>
@@ -53,10 +53,10 @@ export function ProjectList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nom</TableHead>
+            <TableHead>Name</TableHead>
             <TableHead>URL</TableHead>
-            <TableHead>Retours</TableHead>
-            <TableHead>Créé</TableHead>
+            <TableHead>Feedback</TableHead>
+            <TableHead>Created</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +72,7 @@ export function ProjectList() {
               <TableCell className="text-muted-foreground">
                 {formatDistanceToNow(project.createdAt, {
                   addSuffix: true,
-                  locale: fr,
+                  locale: enUS,
                 })}
               </TableCell>
             </TableRow>

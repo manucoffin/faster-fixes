@@ -26,7 +26,7 @@ export const rejectInvitation = protectedProcedure
       }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Erreur lors du refus de l'invitation.",
+        message: "Error rejecting invitation.",
       });
     }
   });
