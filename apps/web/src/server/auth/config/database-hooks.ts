@@ -36,6 +36,17 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         });
       },
     },
+    update: {
+      after: async ({ data, oldData }) => {
+        const userData = data as { id: string; email: string };
+        const oldUserData = oldData as { email?: string } | undefined;
+        if (oldUserData?.email !== userData.email) {
+          console.log(
+            `[audit] user.email_changed userId=${userData.id} old=${oldUserData?.email} new=${userData.email}`,
+          );
+        }
+      },
+    },
   },
 
   session: {
@@ -76,6 +87,13 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
             },
           };
         }
+      },
+      after: async ({ data, ctx }) => {
+        const sessionData = data as { userId: string };
+        const request = (ctx as { request?: Request })?.request;
+        console.log(
+          `[audit] session.created userId=${sessionData.userId} ip=${request?.headers.get("x-forwarded-for")}`,
+        );
       },
     },
   },
