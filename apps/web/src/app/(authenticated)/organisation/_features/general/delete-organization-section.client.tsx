@@ -26,11 +26,10 @@ export function DeleteOrganizationSection() {
   const [open, setOpen] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
-  const orgDetailsQuery =
-    trpc.authenticated.account.organisation.get.useQuery(
-      { organizationId: activeOrg?.id ?? "" },
-      { enabled: !!activeOrg?.id },
-    );
+  const orgDetailsQuery = trpc.authenticated.account.organisation.get.useQuery(
+    { organizationId: activeOrg?.id ?? "" },
+    { enabled: !!activeOrg?.id },
+  );
 
   const isDefault = orgDetailsQuery.data?.isDefault ?? false;
 
@@ -74,7 +73,11 @@ export function DeleteOrganizationSection() {
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" className="w-fit" disabled={isDefault}>
+          <Button
+            variant="destructive"
+            className="w-fit self-end"
+            disabled={isDefault}
+          >
             Supprimer l&apos;organisation
           </Button>
         </AlertDialogTrigger>
@@ -83,9 +86,7 @@ export function DeleteOrganizationSection() {
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
               <AlertTriangleIcon className="h-5 w-5 text-destructive" />
-              <AlertDialogTitle>
-                Supprimer l&apos;organisation
-              </AlertDialogTitle>
+              <AlertDialogTitle>Supprimer l&apos;organisation</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="pt-2">
               Cette action est irréversible. Toutes les données de

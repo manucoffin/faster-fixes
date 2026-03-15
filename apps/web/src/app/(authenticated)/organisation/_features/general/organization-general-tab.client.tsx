@@ -16,12 +16,12 @@ import { Input } from "@workspace/ui/components/input";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { DeleteOrganizationSection } from "./delete-organization-section.client";
+import { OrganizationLogoUpload } from "./organization-logo-upload.client";
 import {
   UpdateOrganizationInputs,
   UpdateOrganizationSchema,
 } from "./update-organization.schema";
-import { DeleteOrganizationSection } from "./delete-organization-section.client";
-import { OrganizationLogoUpload } from "./organization-logo-upload.client";
 
 export function OrganizationGeneralTab() {
   const { data: activeOrg } = useActiveOrganization();
@@ -79,6 +79,7 @@ export function OrganizationGeneralTab() {
         title="Logo"
         description="Changez le logo de votre organisation"
         cardTitle="Logo de l'organisation"
+        cardClassName="max-w-md"
       >
         <OrganizationLogoUpload />
       </DashboardSection>
@@ -87,6 +88,7 @@ export function OrganizationGeneralTab() {
         title="Informations générales"
         description="Mettez à jour le nom et le slug de votre organisation"
         cardTitle="Informations de l'organisation"
+        cardClassName="max-w-md"
       >
         <Form {...form}>
           <form
@@ -103,7 +105,7 @@ export function OrganizationGeneralTab() {
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="max-w-sm">
+                <FormItem className="">
                   <FormLabel>Nom</FormLabel>
                   <FormControl>
                     <Input
@@ -121,7 +123,7 @@ export function OrganizationGeneralTab() {
               control={form.control}
               name="slug"
               render={({ field }) => (
-                <FormItem className="max-w-sm">
+                <FormItem className="">
                   <FormLabel>Slug</FormLabel>
                   <FormControl>
                     <Input
@@ -135,14 +137,8 @@ export function OrganizationGeneralTab() {
               )}
             />
 
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="self-start"
-            >
-              {isPending
-                ? "Mise à jour en cours..."
-                : "Mettre à jour"}
+            <Button type="submit" disabled={isPending} className="self-end">
+              {isPending ? "Mise à jour en cours..." : "Mettre à jour"}
             </Button>
           </form>
         </Form>
@@ -152,6 +148,7 @@ export function OrganizationGeneralTab() {
         title="Supprimer l'organisation"
         description="Supprimez définitivement cette organisation et toutes ses données"
         cardTitle="Zone de danger"
+        cardClassName="max-w-md"
       >
         <DeleteOrganizationSection />
       </DashboardSection>
