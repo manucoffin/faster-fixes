@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { Building2, CreditCard, Mail, Settings2 } from "lucide-react";
+import { CreditCard, Settings2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { OrganizationSwitcher } from "./organization-switcher.client";
@@ -35,24 +35,6 @@ export const AuthenticatedSidebar = async ({
                 <SidebarMenuButton tooltip="Paramètres">
                   <Settings2 />
                   <span>Paramètres</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <Link href="/mon-compte/organisation">
-                <SidebarMenuButton tooltip="Organisation">
-                  <Building2 />
-                  <span>Organisation</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <Link href="/mon-compte/invitations">
-                <SidebarMenuButton tooltip="Invitations">
-                  <Mail />
-                  <span>Invitations</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

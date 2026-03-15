@@ -5,8 +5,6 @@ export const forgotPasswordUrl = "/mot-de-passe-oublie";
 export const resetPasswordUrl = "/reinitialiser-mot-de-passe";
 export const onboardingUrl = "/premiers-pas";
 export const billingUrl = "/mon-compte/facturation";
-export const organisationUrl = "/mon-compte/organisation";
-export const invitationsUrl = "/mon-compte/invitations";
 
 // Redirects
 export const defaultRedirect = "/mon-compte";
