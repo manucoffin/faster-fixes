@@ -1,0 +1,1 @@
+DEPRECATED: No assets needed for this skill. Keeping file to preserve structure.
