@@ -1,4 +1,4 @@
-const S3_BASE_URL = process.env.NEXT_PUBLIC_S3_BASE_URL ?? "";
+const STORAGE_BASE_URL = process.env.NEXT_PUBLIC_STORAGE_BASE_URL ?? "";
 
 /**
  * Resolves an S3 key to a full URL.
@@ -7,5 +7,5 @@ const S3_BASE_URL = process.env.NEXT_PUBLIC_S3_BASE_URL ?? "";
  */
 export function resolveS3Url(key: string): string {
   if (key.startsWith("http")) return key;
-  return `${S3_BASE_URL}/${key}`;
+  return `${STORAGE_BASE_URL}/${key}`;
 }

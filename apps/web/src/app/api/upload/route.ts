@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const router: Router = {
   client: s3Client,
-  bucketName: process.env.S3_BUCKET_NAME!,
+  bucketName: process.env.STORAGE_BUCKET_NAME!,
   routes: {
     "organization-logo": route({
       fileTypes: ["image/png", "image/jpeg", "image/webp"],
