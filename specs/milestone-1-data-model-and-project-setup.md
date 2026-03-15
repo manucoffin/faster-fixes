@@ -17,11 +17,12 @@ Define the core domain models and let authenticated users create projects, manag
 | updatedAt          | DateTime | Auto                                               |
 | name               | String   | Display name (e.g. "Client XYZ Website")           |
 | url                | String   | Single URL for the project (e.g. https://client.com) |
-| apiKey             | String   | Unique, generated at creation. Used by widget to submit feedback. Hashed in DB. |
+| apiKeyHash         | String   | SHA-256 hash of the API key. Used to verify widget requests. |
+| apiKeyLastFour     | String   | Last 4 characters of the raw key, for masked display in settings. |
 | organizationId     | String   | FK to Organization                                 |
 
 - **One URL per project.** Separate projects for staging vs production.
-- **One API key per project.** Shown in full only at creation time. Masked (last 4 chars) in settings afterward. Regeneration creates a new key and invalidates the old one.
+- **One API key per project.** Custom implementation (not the Better Auth API Key plugin — the plugin only supports user/org-level keys, not project-scoped ones). Generated with `crypto.randomBytes(32)` and prefixed with `ff_`. The raw key is shown in full only at creation time. Only the SHA-256 hash and last 4 characters are stored. Regeneration replaces the hash and invalidates the old key.
 - **Plan-based limits:** Basic plan = 1 project, Premium = unlimited. Enforced at creation time.
 - **Deletion:** Hard delete. Cascades to all related records (WidgetConfig, Reviewer, Feedback, FeedbackAttachment).
 
@@ -141,7 +142,7 @@ Accessible from the project page.
 
 Public endpoint called by the widget (and testable with curl/Postman in M1).
 
-**Authentication:** API key in `Authorization: Bearer {apiKey}` header. Validates against the Project's hashed API key.
+**Authentication:** API key in `Authorization: Bearer {apiKey}` header. The server hashes the incoming key with SHA-256 and looks up the Project by `apiKeyHash`.
 
 **Request body:**
 
