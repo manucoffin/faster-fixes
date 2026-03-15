@@ -1,5 +1,8 @@
+import { APP_URL } from "@/app/_constants/app";
+import { DEFAULT_OG_IMAGE_URL, SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProvider } from "@/lib/trpc/trpc-provider";
 import "@workspace/ui/globals.css";
+import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Outfit } from "next/font/google";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
@@ -11,6 +14,39 @@ const fontSans = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",
 })
+
+export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s - ${SITE_NAME}`,
+  },
+  description: SITE_META_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "fr_FR",
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE_URL,
+        width: 1200,
+        height: 630,
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+};
 
 export default function RootLayout({
   children,

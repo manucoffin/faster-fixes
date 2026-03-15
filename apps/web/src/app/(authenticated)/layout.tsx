@@ -3,12 +3,20 @@ import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@workspace/ui/components/sidebar";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
 import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
 import { AuthenticatedSidebar } from "./_features/sidebar/authenticated-sidebar.server";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function AuthenticatedLayout({ children }: LayoutParams) {
   const session = await auth.api.getSession({
