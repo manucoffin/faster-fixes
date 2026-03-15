@@ -1,11 +1,8 @@
-- setup la section organisations
-- sortir le form de organization tab
+- si je suis membre d'une orga, je ne dois pas avoir accès à la page paramères de l'orga à la place just un bouton pour quitter l'orga
 - mon-compte/invitation + organisations
 - mettre le tableau des membres invités dans la même page que les membres
 - ajouter bouton renvoi email
-- empecher d'editer le slug de l'orga
 - empêcher de créer une organization
-- mettre les invit & params dans le dropdown
 
 - Setup le centre de notifications
 - [ ] ORG
