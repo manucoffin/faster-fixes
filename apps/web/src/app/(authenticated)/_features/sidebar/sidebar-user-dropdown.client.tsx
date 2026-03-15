@@ -3,7 +3,7 @@
 import { signOut, useSession } from "@/lib/auth";
 import { rootUrl } from "@/lib/routing";
 import { getInitials } from "@/utils/text/get-initials";
-import UserPlaceholder from "@public/static/user-placeholder.jpg";
+import UserPlaceholder from "@public/images/user-placeholder.jpg";
 import {
   Avatar,
   AvatarFallback,
