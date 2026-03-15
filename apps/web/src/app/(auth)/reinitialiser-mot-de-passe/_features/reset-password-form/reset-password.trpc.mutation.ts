@@ -2,7 +2,7 @@
 
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { ResetPasswordSchema } from "./reset-password.schema";
 
@@ -54,3 +54,7 @@ export const resetPasswordMutation = publicProcedure
       });
     }
   });
+
+export type ResetPasswordOutput = inferProcedureOutput<
+  typeof resetPasswordMutation
+>;

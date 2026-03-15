@@ -3,7 +3,7 @@
 import { resetPasswordUrl } from "@/lib/routing";
 import { auth } from "@/server/auth";
 import { publicProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { ForgotPasswordSchema } from "./forgot-password.schema";
 
@@ -48,3 +48,7 @@ export const forgotPasswordMutation = publicProcedure
       });
     }
   });
+
+export type ForgotPasswordOutput = inferProcedureOutput<
+  typeof forgotPasswordMutation
+>;
