@@ -1,4 +1,5 @@
 import { checkRateLimit } from "@/server/api/check-rate-limit";
+import { handlePreflight, withCors } from "@/server/api/cors";
 import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
@@ -24,28 +25,35 @@ const CreateFeedbackSchema = z.object({
   viewportHeight: z.number().int().optional(),
 });
 
+export async function OPTIONS(req: NextRequest) {
+  return handlePreflight(req) ?? new NextResponse(null, { status: 204 });
+}
+
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
   if (!validateOrigin(req.headers, project.url)) {
-    return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
+    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return withCors(req, NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }));
   }
 
   const allowed = await checkRateLimit(project.apiKeyHash, "submit");
   if (!allowed) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded. Try again later." },
-      { status: 429 },
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "Rate limit exceeded. Try again later." },
+        { status: 429 },
+      ),
     );
   }
 
@@ -53,26 +61,29 @@ export async function POST(req: NextRequest) {
   try {
     formData = await req.formData();
   } catch {
-    return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+    return withCors(req, NextResponse.json({ error: "Invalid form data" }, { status: 400 }));
   }
 
   const rawData = formData.get("data");
   if (typeof rawData !== "string") {
-    return NextResponse.json({ error: "Missing data field" }, { status: 400 });
+    return withCors(req, NextResponse.json({ error: "Missing data field" }, { status: 400 }));
   }
 
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(rawData);
   } catch {
-    return NextResponse.json({ error: "Invalid JSON in data field" }, { status: 400 });
+    return withCors(req, NextResponse.json({ error: "Invalid JSON in data field" }, { status: 400 }));
   }
 
   const parsed = CreateFeedbackSchema.safeParse(parsedJson);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten() },
-      { status: 422 },
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 422 },
+      ),
     );
   }
 
@@ -85,9 +96,12 @@ export async function POST(req: NextRequest) {
     try {
       const buffer = Buffer.from(await screenshotFile.arrayBuffer());
       if (buffer.length > 5 * 1024 * 1024) {
-        return NextResponse.json(
-          { error: "Screenshot exceeds 5MB limit" },
-          { status: 413 },
+        return withCors(
+          req,
+          NextResponse.json(
+            { error: "Screenshot exceeds 5MB limit" },
+            { status: 413 },
+          ),
         );
       }
 
@@ -137,22 +151,25 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json(
-    {
-      id: feedback.id,
-      status: feedback.status,
-      comment: feedback.comment,
-      pageUrl: feedback.pageUrl,
-      clickX: feedback.clickX,
-      clickY: feedback.clickY,
-      selector: feedback.selector,
-      screenshotUrl: feedback.screenshot
-        ? buildAssetUrl(feedback.screenshot)
-        : null,
-      reviewer: feedback.reviewer,
-      createdAt: feedback.createdAt,
-    },
-    { status: 201 },
+  return withCors(
+    req,
+    NextResponse.json(
+      {
+        id: feedback.id,
+        status: feedback.status,
+        comment: feedback.comment,
+        pageUrl: feedback.pageUrl,
+        clickX: feedback.clickX,
+        clickY: feedback.clickY,
+        selector: feedback.selector,
+        screenshotUrl: feedback.screenshot
+          ? buildAssetUrl(feedback.screenshot)
+          : null,
+        reviewer: feedback.reviewer,
+        createdAt: feedback.createdAt,
+      },
+      { status: 201 },
+    ),
   );
 }
 
@@ -160,29 +177,35 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return withCors(req, NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }));
   }
 
   const allowed = await checkRateLimit(project.apiKeyHash, "read");
   if (!allowed) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded. Try again later." },
-      { status: 429 },
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "Rate limit exceeded. Try again later." },
+        { status: 429 },
+      ),
     );
   }
 
   const { searchParams } = req.nextUrl;
   const url = searchParams.get("url");
   if (!url) {
-    return NextResponse.json(
-      { error: "url query parameter is required" },
-      { status: 422 },
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "url query parameter is required" },
+        { status: 422 },
+      ),
     );
   }
 
@@ -198,18 +221,21 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({
-    feedback: feedbackList.map((f) => ({
-      id: f.id,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      selector: f.selector,
-      screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
-      reviewer: f.reviewer,
-      createdAt: f.createdAt,
-    })),
-  });
+  return withCors(
+    req,
+    NextResponse.json({
+      feedback: feedbackList.map((f) => ({
+        id: f.id,
+        status: f.status,
+        comment: f.comment,
+        pageUrl: f.pageUrl,
+        clickX: f.clickX,
+        clickY: f.clickY,
+        selector: f.selector,
+        screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
+        reviewer: f.reviewer,
+        createdAt: f.createdAt,
+      })),
+    }),
+  );
 }
