@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateProjectDialog } from "@/app/(authenticated)/projects/_features/create/create-project-dialog.client";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -43,12 +44,12 @@ export function ProjectList() {
             Create your first project to start collecting feedback.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/projects/new">
+        <CreateProjectDialog>
+          <Button>
             <Plus className="size-4" />
             Create project
-          </Link>
-        </Button>
+          </Button>
+        </CreateProjectDialog>
       </div>
     ),
     Success: ({ data: projects }) => (
