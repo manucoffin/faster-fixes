@@ -7,6 +7,15 @@ import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@workspace/ui/components/empty";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import {
   Table,
   TableBody,
   TableCell,
@@ -16,8 +25,11 @@ import {
 } from "@workspace/ui/components/table";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { FolderOpen, Plus } from "lucide-react";
+import { AlertCircle, FolderOpen, Plus } from "lucide-react";
 import Link from "next/link";
+
+const TABLE_COLUMNS = 4;
+const SKELETON_ROWS = 3;
 
 export function ProjectList() {
   const trpc = useTRPC();
@@ -31,26 +43,62 @@ export function ProjectList() {
   );
 
   return matchQueryStatus(projectsQuery, {
-    Loading: <p className="text-muted-foreground text-sm">Loading...</p>,
+    Loading: (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>URL</TableHead>
+            <TableHead>Feedback</TableHead>
+            <TableHead>Created</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
+            <TableRow key={index}>
+              {Array.from({ length: TABLE_COLUMNS }).map((_, cellIndex) => (
+                <TableCell key={cellIndex}>
+                  <Skeleton className="h-6 w-full" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ),
     Errored: (
-      <p className="text-destructive text-sm">Error loading projects.</p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <AlertCircle />
+          </EmptyMedia>
+          <EmptyTitle>Failed to load projects</EmptyTitle>
+          <EmptyDescription>
+            Something went wrong. Please try again later.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     ),
     Empty: (
-      <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-        <FolderOpen className="text-muted-foreground h-12 w-12" />
-        <div>
-          <p className="text-lg font-medium">No projects</p>
-          <p className="text-muted-foreground text-sm">
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderOpen />
+          </EmptyMedia>
+          <EmptyTitle>No projects</EmptyTitle>
+          <EmptyDescription>
             Create your first project to start collecting feedback.
-          </p>
-        </div>
-        <CreateProjectDialog>
-          <Button>
-            <Plus className="size-4" />
-            Create project
-          </Button>
-        </CreateProjectDialog>
-      </div>
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <CreateProjectDialog>
+            <Button>
+              <Plus className="size-4" />
+              Create project
+            </Button>
+          </CreateProjectDialog>
+        </EmptyContent>
+      </Empty>
     ),
     Success: ({ data: projects }) => (
       <Table>
