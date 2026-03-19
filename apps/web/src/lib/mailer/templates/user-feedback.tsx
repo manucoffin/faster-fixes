@@ -9,6 +9,8 @@ import {
   Text,
 } from "@react-email/components";
 
+import { emailTailwindConfig } from "./tailwind.config";
+
 interface UserFeedbackProps {
   senderName?: string;
   senderEmail?: string;
@@ -16,37 +18,36 @@ interface UserFeedbackProps {
 }
 
 export const UserFeedback = ({
-  senderName = "Un utilisateur",
-  senderEmail = "utilisateur@exemple.com",
-  message = "Ceci est un exemple de feedback.",
+  senderName = "A user",
+  senderEmail = "user@example.com",
+  message = "This is a sample feedback message.",
 }: UserFeedbackProps) => {
   return (
-    <Html lang="fr" dir="ltr">
-      <Tailwind>
+    <Html lang="en" dir="ltr">
+      <Tailwind config={emailTailwindConfig}>
         <Head />
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white max-w-[600px] mx-auto px-[40px] py-[40px]">
+        <Body className="bg-secondary py-[40px] font-sans">
+          <Container className="mx-auto max-w-[600px] bg-card px-[40px] py-[40px]">
             <Section>
-              <Text className="text-[24px] font-bold text-gray-900 mb-[24px] mt-0">
-                Nouveau feedback
+              <Text className="mt-0 mb-[24px] text-[24px] font-bold text-foreground">
+                New feedback
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                <strong>{senderName}</strong> ({senderEmail}) a envoyé un
-                feedback :
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                <strong>{senderName}</strong> ({senderEmail}) sent
+                feedback:
               </Text>
 
-              <Section className="bg-gray-50 rounded-[8px] px-[24px] py-[16px] mb-[32px]">
-                <Text className="text-[16px] text-gray-800 mt-0 mb-0 leading-[24px] whitespace-pre-line">
+              <Section className="mb-[32px] rounded-[8px] bg-muted px-[24px] py-[16px]">
+                <Text className="mt-0 mb-0 text-[16px] leading-[24px] text-foreground whitespace-pre-line">
                   {message}
                 </Text>
               </Section>
 
-              <Hr className="border-gray-200 my-[32px]" />
+              <Hr className="my-[32px] border-border" />
 
-              <Text className="text-[12px] text-gray-400 mb-[8px] mt-0">
-                Ce message a été envoyé via le formulaire de feedback de
-                l&apos;application.
+              <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
+                This message was sent via the application feedback form.
               </Text>
             </Section>
           </Container>

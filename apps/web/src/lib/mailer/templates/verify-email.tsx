@@ -8,7 +8,9 @@ import {
   Section,
   Tailwind,
   Text,
-} from '@react-email/components';
+} from "@react-email/components";
+
+import { emailTailwindConfig } from "./tailwind.config";
 
 interface VerifyEmailProps {
   verificationLink?: string;
@@ -16,46 +18,48 @@ interface VerifyEmailProps {
 
 export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
   return (
-    <Html lang="fr" dir="ltr">
-      <Tailwind>
+    <Html lang="en" dir="ltr">
+      <Tailwind config={emailTailwindConfig}>
         <Head />
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white max-w-[600px] mx-auto px-[40px] py-[40px]">
+        <Body className="bg-secondary py-[40px] font-sans">
+          <Container className="mx-auto max-w-[600px] bg-card px-[40px] py-[40px]">
             <Section>
-              <Text className="text-[24px] font-bold text-gray-900 mb-[24px] mt-0">
-                Vérifiez votre adresse email
+              <Text className="mt-0 mb-[24px] text-[24px] font-bold text-foreground">
+                Verify your email address
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                Bonjour,
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                Hello,
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[32px] mt-0 leading-[24px]">
-                Merci de vous être inscrit ! Pour finaliser la création de votre compte,
-                veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse email.
+              <Text className="mt-0 mb-[32px] text-[16px] leading-[24px] text-foreground">
+                Thank you for signing up! To complete your account setup,
+                please click the button below to verify your email address.
               </Text>
 
-              <Section className="text-center mb-[32px]">
+              <Section className="mb-[32px] text-center">
                 <Button
                   href={verificationLink}
-                  className="bg-black text-white px-[32px] py-[12px] text-[16px] font-medium no-underline box-border"
+                  className="box-border bg-primary px-[32px] py-[12px] text-[16px] font-medium text-primary-foreground no-underline"
                 >
-                  Vérifier mon email
+                  Verify my email
                 </Button>
               </Section>
 
-              <Text className="text-[14px] text-gray-500 mb-[24px] mt-0 leading-[20px]">
-                Si vous n'arrivez pas à cliquer sur le bouton, copiez et collez ce lien dans votre navigateur :
+              <Text className="mt-0 mb-[24px] text-[14px] leading-[20px] text-muted-foreground">
+                If you can&apos;t click the button, copy and paste this
+                link into your browser:
               </Text>
 
-              <Text className="text-[14px] text-gray-500 mb-[32px] mt-0 break-all">
+              <Text className="mt-0 mb-[32px] text-[14px] break-all text-muted-foreground">
                 {verificationLink}
               </Text>
 
-              <Hr className="border-gray-200 my-[32px]" />
+              <Hr className="my-[32px] border-border" />
 
-              <Text className="text-[12px] text-gray-400 mb-[8px] mt-0">
-                Si vous n'avez pas créé de compte, vous pouvez ignorer cet email.
+              <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
+                If you didn&apos;t create an account, you can safely
+                ignore this email.
               </Text>
             </Section>
           </Container>
@@ -64,4 +68,3 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
     </Html>
   );
 };
-

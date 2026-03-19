@@ -1,4 +1,4 @@
-import { getAppUrl } from '@/utils/url/get-app-url';
+import { getAppUrl } from "@/utils/url/get-app-url";
 import {
   Body,
   Button,
@@ -9,7 +9,9 @@ import {
   Section,
   Tailwind,
   Text,
-} from '@react-email/components';
+} from "@react-email/components";
+
+import { emailTailwindConfig } from "./tailwind.config";
 
 interface ResetPasswordProps {
   resetPasswordLink?: string;
@@ -21,51 +23,52 @@ export const ResetPassword = ({
   resetPasswordLink,
 }: ResetPasswordProps) => {
   return (
-    <Html lang="fr" dir="ltr">
-      <Tailwind>
+    <Html lang="en" dir="ltr">
+      <Tailwind config={emailTailwindConfig}>
         <Head />
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white max-w-[600px] mx-auto px-[40px] py-[40px]">
+        <Body className="bg-secondary py-[40px] font-sans">
+          <Container className="mx-auto max-w-[600px] bg-card px-[40px] py-[40px]">
             <Section>
-              <Text className="text-[24px] font-bold text-gray-900 mb-[24px] mt-0">
-                Réinitialisation de mot de passe
+              <Text className="mt-0 mb-[24px] text-[24px] font-bold text-foreground">
+                Password reset
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                Bonjour,
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                Hello,
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                Vous avez demandé la réinitialisation de votre mot de passe.
-                Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                You requested a password reset. Click the button below
+                to create a new password.
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[32px] mt-0 leading-[24px]">
-                Ce lien expirera dans 24 heures pour des raisons de sécurité.
+              <Text className="mt-0 mb-[32px] text-[16px] leading-[24px] text-foreground">
+                This link will expire in 24 hours for security reasons.
               </Text>
 
-              <Section className="text-center mb-[32px]">
+              <Section className="mb-[32px] text-center">
                 <Button
                   href={resetPasswordLink}
-                  className="bg-black text-white px-[32px] py-[12px] text-[16px] font-medium no-underline box-border"
+                  className="box-border bg-primary px-[32px] py-[12px] text-[16px] font-medium text-primary-foreground no-underline"
                 >
-                  Réinitialiser mon mot de passe
+                  Reset my password
                 </Button>
               </Section>
 
-              <Text className="text-[14px] text-gray-500 mb-[24px] mt-0 leading-[20px]">
-                Si vous n'arrivez pas à cliquer sur le bouton, copiez et collez ce lien dans votre navigateur :
+              <Text className="mt-0 mb-[24px] text-[14px] leading-[20px] text-muted-foreground">
+                If you can&apos;t click the button, copy and paste this
+                link into your browser:
               </Text>
 
-              <Text className="text-[14px] text-gray-500 mb-[32px] mt-0 break-all">
+              <Text className="mt-0 mb-[32px] text-[14px] break-all text-muted-foreground">
                 {resetPasswordLink}
               </Text>
 
-              <Hr className="border-gray-200 my-[32px]" />
+              <Hr className="my-[32px] border-border" />
 
-              <Text className="text-[12px] text-gray-400 mb-[8px] mt-0">
-                Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.
-                Votre mot de passe restera inchangé.
+              <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
+                If you didn&apos;t request this reset, you can safely
+                ignore this email. Your password will remain unchanged.
               </Text>
             </Section>
           </Container>
@@ -74,4 +77,3 @@ export const ResetPassword = ({
     </Html>
   );
 };
-

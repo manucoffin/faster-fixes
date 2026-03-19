@@ -11,6 +11,8 @@ import {
   Text,
 } from "@react-email/components";
 
+import { emailTailwindConfig } from "./tailwind.config";
+
 interface OrganizationInvitationProps {
   organizationName?: string;
   inviterName?: string;
@@ -27,53 +29,53 @@ export const OrganizationInvitation = ({
   role = "member",
 }: OrganizationInvitationProps) => {
   return (
-    <Html lang="fr" dir="ltr">
-      <Tailwind>
+    <Html lang="en" dir="ltr">
+      <Tailwind config={emailTailwindConfig}>
         <Head />
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white max-w-[600px] mx-auto px-[40px] py-[40px]">
+        <Body className="bg-secondary py-[40px] font-sans">
+          <Container className="mx-auto max-w-[600px] bg-card px-[40px] py-[40px]">
             <Section>
-              <Text className="text-[24px] font-bold text-gray-900 mb-[24px] mt-0">
-                Invitation à rejoindre une organisation
+              <Text className="mt-0 mb-[24px] text-[24px] font-bold text-foreground">
+                Invitation to join an organization
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                Bonjour,
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                Hello,
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] mt-0 leading-[24px]">
-                <strong>{inviterName}</strong> vous invite à rejoindre
-                l&apos;organisation <strong>{organizationName}</strong> en tant
-                que <strong>{role}</strong>.
+              <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
+                <strong>{inviterName}</strong> has invited you to join
+                the organization <strong>{organizationName}</strong> as
+                a <strong>{role}</strong>.
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[32px] mt-0 leading-[24px]">
-                Cliquez sur le bouton ci-dessous pour accepter l&apos;invitation.
+              <Text className="mt-0 mb-[32px] text-[16px] leading-[24px] text-foreground">
+                Click the button below to accept the invitation.
               </Text>
 
-              <Section className="text-center mb-[32px]">
+              <Section className="mb-[32px] text-center">
                 <Button
                   href={invitationLink}
-                  className="bg-black text-white px-[32px] py-[12px] text-[16px] font-medium no-underline box-border"
+                  className="box-border bg-primary px-[32px] py-[12px] text-[16px] font-medium text-primary-foreground no-underline"
                 >
-                  Voir l&apos;invitation
+                  View invitation
                 </Button>
               </Section>
 
-              <Text className="text-[14px] text-gray-500 mb-[24px] mt-0 leading-[20px]">
-                Si vous n&apos;arrivez pas à cliquer sur le bouton, copiez et
-                collez ce lien dans votre navigateur :
+              <Text className="mt-0 mb-[24px] text-[14px] leading-[20px] text-muted-foreground">
+                If you can&apos;t click the button, copy and paste this
+                link into your browser:
               </Text>
 
-              <Text className="text-[14px] text-gray-500 mb-[32px] mt-0 break-all">
+              <Text className="mt-0 mb-[32px] text-[14px] break-all text-muted-foreground">
                 {invitationLink}
               </Text>
 
-              <Hr className="border-gray-200 my-[32px]" />
+              <Hr className="my-[32px] border-border" />
 
-              <Text className="text-[12px] text-gray-400 mb-[8px] mt-0">
-                Si vous n&apos;attendiez pas cette invitation, vous pouvez
-                ignorer cet email.
+              <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
+                If you weren&apos;t expecting this invitation, you can
+                safely ignore this email.
               </Text>
             </Section>
           </Container>
