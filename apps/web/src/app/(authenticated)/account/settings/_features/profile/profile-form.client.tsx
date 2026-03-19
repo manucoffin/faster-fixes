@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -29,6 +30,7 @@ import {
 
 export function ProfileForm() {
   const trpc = useTRPC();
+  const { refetch: refetchSession } = useSession();
 
   const getProfileQuery = useQuery(trpc.authenticated.account.profile.get.queryOptions());
 
@@ -52,7 +54,8 @@ export function ProfileForm() {
 
   const updateProfileMutation =
     useMutation(trpc.authenticated.account.profile.update.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
+        await refetchSession({ query: { disableCookieCache: true } });
         toast.success("Profile updated successfully");
       },
       onError: (error) => {
