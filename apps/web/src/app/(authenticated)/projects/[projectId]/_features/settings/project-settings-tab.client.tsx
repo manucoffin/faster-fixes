@@ -1,6 +1,10 @@
 "use client";
 
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
+import {
+  UpdateProjectInputs,
+  UpdateProjectSchema,
+} from "@/app/(authenticated)/projects/_features/settings/update-project.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,10 +39,6 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  UpdateProjectInputs,
-  UpdateProjectSchema,
-} from "@/app/(authenticated)/projets/_features/settings/update-project.schema";
 
 type ProjectSettingsTabProps = {
   projectId: string;
@@ -112,8 +112,9 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
           url: project.url,
           widgetColor: project.widgetConfig?.color ?? "#6366f1",
           widgetPosition:
-            (project.widgetConfig?.position as "bottom-right" | "bottom-left") ??
-            "bottom-right",
+            (project.widgetConfig?.position as
+              | "bottom-right"
+              | "bottom-left") ?? "bottom-right",
         }
       : undefined,
   });
@@ -143,7 +144,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
             className="flex flex-col gap-6"
           >
             {form.formState.errors.root && (
-              <p className="text-sm text-destructive">
+              <p className="text-destructive text-sm">
                 {form.formState.errors.root.message}
               </p>
             )}
@@ -224,9 +225,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="bottom-right">
-                        Bottom right
-                      </SelectItem>
+                      <SelectItem value="bottom-right">Bottom right</SelectItem>
                       <SelectItem value="bottom-left">Bottom left</SelectItem>
                     </SelectContent>
                   </Select>
@@ -253,24 +252,24 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         cardClassName="lg:max-w-lg"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
+          <div className="bg-muted flex items-center gap-2 rounded-md border p-3">
             <code className="flex-1 font-mono text-sm">
               ff_••••••••••••••••••••••••••••••{project?.apiKeyLastFour}
             </code>
           </div>
 
           {newApiKey && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
-              <p className="mb-2 text-xs font-medium text-destructive">
+            <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
+              <p className="text-destructive mb-2 text-xs font-medium">
                 New key — copy it now, it won&apos;t be shown again.
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 break-all font-mono text-sm">
+                <code className="flex-1 font-mono text-sm break-all">
                   {newApiKey}
                 </code>
                 <Button variant="ghost" size="icon" onClick={handleCopyKey}>
                   {keyCopied ? (
-                    <Check className="h-4 w-4 text-success" />
+                    <Check className="text-success h-4 w-4" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
@@ -282,7 +281,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
           <Dialog open={regenOpen} onOpenChange={setRegenOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="self-start">
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="size-4" />
                 Regenerate API key
               </Button>
             </DialogTrigger>
@@ -296,10 +295,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setRegenOpen(false)}
-                >
+                <Button variant="outline" onClick={() => setRegenOpen(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -326,7 +322,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <DialogTrigger asChild>
             <Button variant="destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="size-4" />
               Delete project
             </Button>
           </DialogTrigger>

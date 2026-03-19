@@ -3,7 +3,7 @@
 import {
   CreateProjectInputs,
   CreateProjectSchema,
-} from "@/app/(authenticated)/projets/_features/create/create-project.schema";
+} from "@/app/(authenticated)/projects/_features/create/create-project.schema";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -141,9 +141,7 @@ export function CreateProjectForm() {
             disabled={createProject.isPending}
             className="self-end"
           >
-            {createProject.isPending
-              ? "Creating..."
-              : "Create project"}
+            {createProject.isPending ? "Creating..." : "Create project"}
           </Button>
         </form>
       </Form>
@@ -164,7 +162,7 @@ export function CreateProjectForm() {
             </code>
             <Button variant="ghost" size="icon" onClick={handleCopy}>
               {copied ? (
-                <Check className="h-4 w-4 text-success" />
+                <Check className="text-success h-4 w-4" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}

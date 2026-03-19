@@ -3,9 +3,9 @@
 import {
   CreateReviewerInputs,
   CreateReviewerSchema,
-} from "@/app/(authenticated)/projets/_features/reviewers/create-reviewer.schema";
-import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+} from "@/app/(authenticated)/projects/_features/reviewers/create-reviewer.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
@@ -104,12 +104,12 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
   return (
     <div className="flex flex-col gap-8">
       {newShareUrl && (
-        <div className="rounded-md border border-success bg-success/10 p-4">
-          <p className="mb-2 text-sm font-medium text-success">
+        <div className="border-success bg-success/10 rounded-md border p-4">
+          <p className="text-success mb-2 text-sm font-medium">
             Reviewer created! Share this link with your client:
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 rounded bg-background px-2 py-1 font-mono text-xs break-all">
+            <code className="bg-background flex-1 rounded px-2 py-1 font-mono text-xs break-all">
               {newShareUrl}
             </code>
             <Button
@@ -118,7 +118,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
               onClick={() => handleCopy(newShareUrl, "new")}
             >
               {copied === "new" ? (
-                <Check className="h-4 w-4 text-success" />
+                <Check className="text-success h-4 w-4" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -131,7 +131,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="size-4" />
               Add reviewer
             </Button>
           </DialogTrigger>
@@ -185,7 +185,9 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
 
       {matchQueryStatus(reviewersQuery, {
         Loading: <p className="text-muted-foreground text-sm">Loading...</p>,
-        Errored: <p className="text-destructive text-sm">Error loading reviewers.</p>,
+        Errored: (
+          <p className="text-destructive text-sm">Error loading reviewers.</p>
+        ),
         Empty: (
           <p className="text-muted-foreground py-8 text-center text-sm">
             No reviewers. Add your first client.
@@ -221,7 +223,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
                       onClick={() => handleCopy(reviewer.shareUrl, reviewer.id)}
                     >
                       {copied === reviewer.id ? (
-                        <Check className="mr-1 h-3 w-3 text-success" />
+                        <Check className="text-success mr-1 h-3 w-3" />
                       ) : (
                         <Copy className="mr-1 h-3 w-3" />
                       )}
