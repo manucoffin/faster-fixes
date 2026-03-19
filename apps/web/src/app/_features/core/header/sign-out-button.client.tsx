@@ -10,6 +10,7 @@ export function SignOutButton() {
     <DropdownMenuItem
       onClick={handleSignOut}
       className="cursor-pointer"
+      variant="destructive"
     >
       Sign out
     </DropdownMenuItem>

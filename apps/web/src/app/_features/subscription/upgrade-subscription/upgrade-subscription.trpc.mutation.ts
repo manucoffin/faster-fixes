@@ -33,10 +33,10 @@ export const upgradeSubscription = protectedProcedure
         referenceId: activeOrganization.id,
         customerType: "organization",
         annual: input.annual || false,
-        successUrl: `${appUrl}/mon-compte/facturation?success=true`,
-        cancelUrl: `${appUrl}/mon-compte/facturation?cancelled=true`,
+        successUrl: `${appUrl}/account/billing?success=true`,
+        cancelUrl: `${appUrl}/account/billing?cancelled=true`,
         disableRedirect: true,
-        returnUrl: `${appUrl}/mon-compte/facturation`,
+        returnUrl: `${appUrl}/account/billing`,
       },
       headers: await headers(),
     });

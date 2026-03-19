@@ -21,10 +21,10 @@ interface OrganizationInvitationProps {
 const baseUrl = getAppUrl();
 
 export const OrganizationInvitation = ({
-  organizationName = "Mon organisation",
-  inviterName = "Un utilisateur",
-  invitationLink = `${baseUrl}/mon-compte/invitations`,
-  role = "membre",
+  organizationName = "My organization",
+  inviterName = "A user",
+  invitationLink = `${baseUrl}/organization/invitations`,
+  role = "member",
 }: OrganizationInvitationProps) => {
   return (
     <Html lang="fr" dir="ltr">

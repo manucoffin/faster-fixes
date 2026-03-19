@@ -1,7 +1,7 @@
 "use client";
 
 import { defaultRedirect } from "@/app/_constants";
-import { organization, useActiveO@/app/_constants/routesom "@/lib/auth";
+import { organization, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";

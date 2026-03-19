@@ -31,8 +31,8 @@ export default async function AdminUserDetailsPage(props: PageParams) {
     <DashboardPageContent
       title={pageTitle}
       breadcrumbs={[
-        { label: "Tableau de bord", link: "/admin" },
-        { label: "Utilisateurs", link: "/admin/utilisateurs" },
+        { label: "Dashboard", link: "/admin" },
+        { label: "Users", link: "/admin/users" },
         { label: pageTitle, },
       ]}
     >

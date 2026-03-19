@@ -141,14 +141,14 @@ export function OrganizationSwitcher() {
 
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/organisation" className="flex items-center">
+                <Link href="/organization" className="flex items-center">
                   <Settings2 className="mr-2 size-4" />
                   Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/organisation/invitations"
+                  href="/organization/invitations"
                   className="flex items-center"
                 >
                   <Mail className="mr-2 size-4" />

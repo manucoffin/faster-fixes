@@ -18,7 +18,7 @@ export const createBillingPortal = protectedProcedure.mutation(
     }
 
     const appUrl = getAppUrl();
-    const returnUrl = `${appUrl}/mon-compte/facturation`;
+    const returnUrl = `${appUrl}/account/billing`;
 
     try {
       // Call Better Auth Stripe API to create billing portal session

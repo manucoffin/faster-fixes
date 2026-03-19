@@ -31,19 +31,21 @@ export function ProjectList() {
 
   return matchQueryStatus(projectsQuery, {
     Loading: <p className="text-muted-foreground text-sm">Loading...</p>,
-    Errored: <p className="text-destructive text-sm">Error loading projects.</p>,
+    Errored: (
+      <p className="text-destructive text-sm">Error loading projects.</p>
+    ),
     Empty: (
       <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-        <FolderOpen className="h-12 w-12 text-muted-foreground" />
+        <FolderOpen className="text-muted-foreground h-12 w-12" />
         <div>
           <p className="text-lg font-medium">No projects</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Create your first project to start collecting feedback.
           </p>
         </div>
         <Button asChild>
-          <Link href="/projets/nouveau">
-            <Plus className="mr-2 h-4 w-4" />
+          <Link href="/projects/new">
+            <Plus className="size-4" />
             Create project
           </Link>
         </Button>
@@ -63,11 +65,16 @@ export function ProjectList() {
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell className="font-medium">
-                <Link href={`/projets/${project.id}`} className="hover:underline">
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="hover:underline"
+                >
                   {project.name}
                 </Link>
               </TableCell>
-              <TableCell className="text-muted-foreground">{project.url}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {project.url}
+              </TableCell>
               <TableCell>{project.feedbackCount}</TableCell>
               <TableCell className="text-muted-foreground">
                 {formatDistanceToNow(project.createdAt, {

@@ -32,7 +32,7 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
         description: "Utilisateur supprimé avec succès",
       });
       queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
-      router.push("/admin/utilisateurs");
+      router.push("/admin/users");
     },
     onError: (error) => {
       toast.error("Erreur", {

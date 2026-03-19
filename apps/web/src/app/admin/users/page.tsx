@@ -9,8 +9,8 @@ export default function AdminUsersPage() {
       title="Utilisateurs"
       actions={<CreateUserDialog />}
       breadcrumbs={[
-        { label: "Tableau de bord", link: "/admin" },
-        { label: "Utilisateurs", link: "/admin/utilisateurs" },
+        { label: "Dashboard", link: "/admin" },
+        { label: "Users", link: "/admin/users" },
       ]}
     >
       <Suspense>

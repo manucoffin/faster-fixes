@@ -56,7 +56,7 @@ export function EmailForm() {
 
       await changeEmail({
         newEmail: data.newEmail,
-        callbackURL: "/mon-compte/parametres",
+        callbackURL: "/account/settings",
       });
 
       toast.success("Verification email sent!");

@@ -136,7 +136,7 @@ export function SidebarUserDropdown() {
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/mon-compte/parametres"
+                  href="/account/settings"
                   className="flex items-center"
                 >
                   <Settings2 className="mr-2 size-4" />
@@ -146,7 +146,7 @@ export function SidebarUserDropdown() {
 
               <DropdownMenuItem asChild>
                 <Link
-                  href="/mon-compte/facturation"
+                  href="/account/billing"
                   className="flex items-center"
                 >
                   <CreditCard className="mr-2 size-4" />

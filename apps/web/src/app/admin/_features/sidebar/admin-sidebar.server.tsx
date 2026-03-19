@@ -38,8 +38,8 @@ export const AdminSidebar = async ({
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Utilisateurs">
-                <Link href="/admin/utilisateurs">
+              <SidebarMenuButton asChild tooltip="Users">
+                <Link href="/admin/users">
                   <Users />
                   <span>Utilisateurs</span>
                 </Link>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -34,17 +34,21 @@ export function CreateUserDialog() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const createUserMutation = useMutation(trpc.admin.users.create.mutationOptions({
-    onSuccess: () => {
-      toast.success("Utilisateur créé avec succès");
-      setOpen(false);
-      form.reset();
-      queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
-    },
-    onError: (error) => {
-      toast.error(error.message || "Erreur lors de la création de l'utilisateur");
-    },
-  }));
+  const createUserMutation = useMutation(
+    trpc.admin.users.create.mutationOptions({
+      onSuccess: () => {
+        toast.success("Utilisateur créé avec succès");
+        setOpen(false);
+        form.reset();
+        queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
+      },
+      onError: (error) => {
+        toast.error(
+          error.message || "Erreur lors de la création de l'utilisateur",
+        );
+      },
+    }),
+  );
 
   const form = useForm<CreateUserInputs>({
     resolver: zodResolver(CreateUserSchema),
@@ -64,7 +68,7 @@ export function CreateUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" size="sm">
           <Plus />
           Ajouter un utilisateur
         </Button>
@@ -73,7 +77,8 @@ export function CreateUserDialog() {
         <DialogHeader>
           <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
           <DialogDescription>
-            Remplissez les informations de l&apos;utilisateur. Un mot de passe temporaire sera généré.
+            Remplissez les informations de l&apos;utilisateur. Un mot de passe
+            temporaire sera généré.
           </DialogDescription>
         </DialogHeader>
 
@@ -158,7 +163,9 @@ export function CreateUserDialog() {
                 disabled={!form.formState.isValid}
                 pending={createUserMutation.isPending}
               >
-                {createUserMutation.isPending ? "Création..." : "Créer l'utilisateur"}
+                {createUserMutation.isPending
+                  ? "Création..."
+                  : "Créer l'utilisateur"}
               </ActionButton>
             </DialogFooter>
           </form>

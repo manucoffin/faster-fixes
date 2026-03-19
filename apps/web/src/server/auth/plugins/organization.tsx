@@ -31,7 +31,7 @@ export const organizationPlugin = organization({
       const role =
         ORGANIZATION_ROLES[data.role as keyof typeof ORGANIZATION_ROLES] ??
         data.role;
-      const invitationLink = `${getAppUrl()}/mon-compte/invitations`;
+      const invitationLink = `${getAppUrl()}/organization/invitations`;
 
       const body = await render(
         <OrganizationInvitation

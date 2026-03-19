@@ -87,7 +87,7 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
   const deleteProject = useMutation(
     trpc.authenticated.projets.delete.mutationOptions({
       onSuccess: () => {
-        router.push("/projets");
+        router.push("/projects");
         toast.success("Project deleted");
       },
       onError: (error) => {

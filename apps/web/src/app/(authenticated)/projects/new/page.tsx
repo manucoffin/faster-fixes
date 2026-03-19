@@ -7,7 +7,7 @@ export default function NouveauProjetPage() {
     <DashboardPageContent
       title="New project"
       breadcrumbs={[
-        { label: "Projects", link: "/projets" },
+        { label: "Projects", link: "/projects" },
         { label: "New" },
       ]}
     >

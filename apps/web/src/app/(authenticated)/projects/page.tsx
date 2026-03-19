@@ -10,9 +10,9 @@ export default function ProjetsPage() {
       title="Projects"
       breadcrumbs={[{ label: "Projects" }]}
       actions={
-        <Button asChild>
-          <Link href="/projets/nouveau">
-            <Plus className="mr-2 h-4 w-4" />
+        <Button asChild size="sm">
+          <Link href="/projects/new">
+            <Plus className="size-4" />
             New project
           </Link>
         </Button>

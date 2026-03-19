@@ -1,7 +1,7 @@
 "use client";
 
 import { loginUrl } from "@/app/_constants";
-import { getSession } from@/app/_constants/routes
+import { getSession } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@workspace/ui/components/button";

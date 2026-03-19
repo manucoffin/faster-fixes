@@ -31,8 +31,8 @@ export const AuthenticatedSidebar = async ({
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/projets">
-                <SidebarMenuButton tooltip="Projets">
+              <Link href="/projects">
+                <SidebarMenuButton tooltip="Projects">
                   <FolderOpen />
                   <span>My projects</span>
                 </SidebarMenuButton>
@@ -45,7 +45,7 @@ export const AuthenticatedSidebar = async ({
           <SidebarGroupLabel>My Account</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/mon-compte/parametres">
+              <Link href="/account/settings">
                 <SidebarMenuButton tooltip="Settings">
                   <Settings2 />
                   <span>Settings</span>
@@ -54,7 +54,7 @@ export const AuthenticatedSidebar = async ({
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <Link href="/mon-compte/facturation">
+              <Link href="/account/billing">
                 <SidebarMenuButton tooltip="Billing">
                   <CreditCard />
                   <span>Billing</span>

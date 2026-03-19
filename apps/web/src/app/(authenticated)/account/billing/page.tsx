@@ -1,5 +1,5 @@
 import { loginUrl } from "@/app/_constants";
-import { DashboardPageCont@/app/_constants/routesp/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { auth } from "@/server/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
