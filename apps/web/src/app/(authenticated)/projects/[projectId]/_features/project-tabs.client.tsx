@@ -7,8 +7,8 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
-import { ProjectSettingsTab } from "./settings/project-settings-tab.client";
 import { ReviewersTab } from "./reviewers/reviewers-tab.client";
+import { ProjectSettingsTab } from "./settings/project-settings-tab.client";
 
 type ProjectTabsProps = {
   projectId: string;
@@ -17,19 +17,19 @@ type ProjectTabsProps = {
 export function ProjectTabs({ projectId }: ProjectTabsProps) {
   const [tab, setTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("overview"),
+    parseAsString.withDefault("inbox"),
   );
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList>
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="inbox">Inbox</TabsTrigger>
         <TabsTrigger value="reviewers">Reviewers</TabsTrigger>
+        <TabsTrigger value="settings">Settings</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="mt-6">
-        <div className="flex flex-col items-center justify-center gap-3 py-20 text-center text-muted-foreground">
+      <TabsContent value="inbox" className="mt-6">
+        <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 py-20 text-center">
           <p className="text-lg font-medium">Feedback inbox</p>
           <p className="text-sm">
             The feedback inbox will be available in a future version.
