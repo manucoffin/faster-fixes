@@ -1,8 +1,8 @@
 "use server";
 
+import { UpdateProjectSchema } from "@/app/(authenticated)/projects/[projectId]/_features/settings/update/update-project.schema";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import { UpdateProjectSchema } from "./update-project.schema";
 
 export const updateProject = protectedProcedure
   .input(UpdateProjectSchema)
