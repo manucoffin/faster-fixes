@@ -13,6 +13,12 @@
 - User-facing UI copy: English only. Professional, clear, and concise — match the tone of serious developer tools (e.g., Vercel, Linear, Stripe). No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated wording.
 - All `unstable_cache` usage must include `cacheTags` from `@/server/cache/cache-tags`.
 
+## Code comments
+
+- Add inline comments only when the logic is not self-evident — complex conditions, non-obvious side effects, tricky workarounds, or subtle business rules.
+- Never comment what the code plainly says (e.g. no `// get user` above `getUser()`).
+- Prefer a short inline `// why` over a multi-line block above a function.
+
 ## Critical conventions
 
 - Follow detailed project rules in `.claude/rules/rules-index.md`.
