@@ -38,3 +38,8 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Agents output
+findings.md
+progress.md
+task_plan.md
