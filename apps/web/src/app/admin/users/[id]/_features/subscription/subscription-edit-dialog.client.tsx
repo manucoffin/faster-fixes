@@ -1,12 +1,12 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { Button } from "@workspace/ui/components/button";
 import { Calendar } from "@workspace/ui/components/calendar";
@@ -69,18 +69,22 @@ export function SubscriptionEditDialog({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const updateMutation = useMutation(trpc.admin.users.subscription.update.mutationOptions({
-    onSuccess: () => {
-      toast.success("Abonnement mis à jour avec succès");
-      setOpen(false);
-      queryClient.invalidateQueries(trpc.admin.users.subscription.get.queryFilter());
-    },
-    onError: (error: any) => {
-      toast.error(
-        error.message || "Erreur lors de la mise à jour de l'abonnement",
-      );
-    },
-  }));
+  const updateMutation = useMutation(
+    trpc.admin.users.subscription.update.mutationOptions({
+      onSuccess: () => {
+        toast.success("Abonnement mis à jour avec succès");
+        setOpen(false);
+        queryClient.invalidateQueries(
+          trpc.admin.users.subscription.get.queryFilter(),
+        );
+      },
+      onError: (error: any) => {
+        toast.error(
+          error.message || "Erreur lors de la mise à jour de l'abonnement",
+        );
+      },
+    }),
+  );
 
   const form = useForm<UpdateSubscriptionInputs>({
     resolver: zodResolver(UpdateSubscriptionSchema),
@@ -134,13 +138,13 @@ export function SubscriptionEditDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Organisation */}
+            {/* organization */}
             <FormField
               control={form.control}
               name="organizationId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organisation</FormLabel>
+                  <FormLabel>organization</FormLabel>
                   <FormControl>
                     <UserOrganizationSelect
                       userId={userId}

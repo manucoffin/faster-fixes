@@ -61,7 +61,7 @@ export function OrganizationSwitcher() {
     return <OrganizationSwitcherLoading />;
   }
 
-  const orgName = activeOrg?.name ?? "Organisation";
+  const orgName = activeOrg?.name ?? "organization";
   const orgLogo = (activeOrg as Record<string, unknown>)?.logo as
     | string
     | undefined;
@@ -86,7 +86,7 @@ export function OrganizationSwitcher() {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{orgName}</span>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="text-muted-foreground truncate text-xs">
                     {activeOrg?.slug}
                   </span>
                 </div>
@@ -126,7 +126,7 @@ export function OrganizationSwitcher() {
                       </Avatar>
                       <span className="flex-1 truncate">{org.name}</span>
                       {org.id === activeOrg?.id && (
-                        <Check className="size-4 text-muted-foreground" />
+                        <Check className="text-muted-foreground size-4" />
                       )}
                     </DropdownMenuItem>
                   );

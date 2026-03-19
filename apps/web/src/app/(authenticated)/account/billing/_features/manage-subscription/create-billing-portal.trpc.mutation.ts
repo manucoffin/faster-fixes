@@ -13,7 +13,7 @@ export const createBillingPortal = protectedProcedure.mutation(
     if (!activeOrganization) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas d'organisation active",
+        message: "Vous n'avez pas d'organization active",
       });
     }
 

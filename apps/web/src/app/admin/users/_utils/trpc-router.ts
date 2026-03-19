@@ -19,7 +19,7 @@ export const usersRouter = router({
   create: createUser,
   delete: deleteUser,
   impersonate: impersonateUser,
-  organisations: router({
+  organizations: router({
     list: getUserOrganizations,
   }),
   sessions: router({

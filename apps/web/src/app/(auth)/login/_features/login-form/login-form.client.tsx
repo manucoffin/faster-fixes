@@ -1,7 +1,7 @@
 "use client";
 
-import { SendVerificationEmailButton } from "@/app/_@/app/_constants/routesnd-verification-email-button/send-verification-email-button.client";
-import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants";
+import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants/routes";
+import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

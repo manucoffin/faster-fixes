@@ -16,16 +16,19 @@ export function RejectInvitationButton({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const rejectMutation =
-    useMutation(trpc.authenticated.organisation.invitation.reject.mutationOptions({
+  const rejectMutation = useMutation(
+    trpc.authenticated.organization.invitation.reject.mutationOptions({
       onSuccess: () => {
         toast.success("Invitation refusée");
-        queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.getReceived.queryFilter());
+        queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.getReceived.queryFilter(),
+        );
       },
       onError: (error) => {
         toast.error(error.message || "Erreur lors du refus de l'invitation.");
       },
-    }));
+    }),
+  );
 
   return (
     <Button

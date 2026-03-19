@@ -1,4 +1,4 @@
-import { loginUrl } from "@/app/_constants";
+import { loginUrl } from "@/app/_constants/routes";
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { auth } from "@/server/auth";
 import { headers } from "next/headers";

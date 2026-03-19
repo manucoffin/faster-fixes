@@ -28,8 +28,8 @@ export function MemberActionsDropdown({
   const trpc = useTRPC();
   const { refetch: refetchActiveOrg } = useActiveOrganization();
 
-  const updateRole =
-    useMutation(trpc.authenticated.organisation.member.updateRole.mutationOptions({
+  const updateRole = useMutation(
+    trpc.authenticated.organization.member.updateRole.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Role updated successfully");
@@ -37,10 +37,11 @@ export function MemberActionsDropdown({
       onError: (error) => {
         toast.error(error.message || "Error changing role.");
       },
-    }));
+    }),
+  );
 
-  const removeMember =
-    useMutation(trpc.authenticated.organisation.member.delete.mutationOptions({
+  const removeMember = useMutation(
+    trpc.authenticated.organization.member.delete.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Member removed successfully");
@@ -48,7 +49,8 @@ export function MemberActionsDropdown({
       onError: (error) => {
         toast.error(error.message || "Error removing member.");
       },
-    }));
+    }),
+  );
 
   const isPending = updateRole.isPending || removeMember.isPending;
 

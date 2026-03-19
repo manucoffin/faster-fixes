@@ -3,9 +3,9 @@
 import { UploadButton } from "@/app/_features/core/upload/upload-button";
 import { organization, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation } from "@tanstack/react-query";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { getInitials } from "@/utils/text/get-initials";
+import { useMutation } from "@tanstack/react-query";
 import {
   Avatar,
   AvatarFallback,
@@ -20,10 +20,11 @@ export function OrganizationLogoUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
-  const deleteOldLogo =
-    useMutation(trpc.authenticated.organisation.updateLogo.mutationOptions());
+  const deleteOldLogo = useMutation(
+    trpc.authenticated.organization.updateLogo.mutationOptions(),
+  );
 
-  const orgName = activeOrg?.name ?? "Organisation";
+  const orgName = activeOrg?.name ?? "organization";
   const orgLogo = (activeOrg as Record<string, unknown>)?.logo as
     | string
     | undefined;

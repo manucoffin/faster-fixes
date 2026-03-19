@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultRedirect } from "@/app/_constants";
+import { defaultRedirect } from "@/app/_constants/routes";
 import {
   organization,
   useActiveOrganization,
@@ -33,7 +33,7 @@ export function LeaveOrganizationSection() {
   const [open, setOpen] = React.useState(false);
 
   const leaveOrganization = useMutation(
-    trpc.authenticated.organisation.leave.mutationOptions({
+    trpc.authenticated.organization.leave.mutationOptions({
       onSuccess: async () => {
         toast.success("You have left the organization");
         setOpen(false);
@@ -72,7 +72,7 @@ export function LeaveOrganizationSection() {
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
               <LogOut className="text-destructive h-5 w-5" />
-              <AlertDialogTitle>Quitter l&apos;organisation</AlertDialogTitle>
+              <AlertDialogTitle>Quitter l&apos;organization</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="pt-2">
               You are about to leave the organization{" "}

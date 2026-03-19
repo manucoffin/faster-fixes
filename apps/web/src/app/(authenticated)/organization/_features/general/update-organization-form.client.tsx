@@ -2,8 +2,8 @@
 
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -17,8 +17,8 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import slugify from "slugify";
+import { toast } from "sonner";
 import {
   UpdateOrganizationInputs,
   UpdateOrganizationSchema,
@@ -29,20 +29,19 @@ export function UpdateOrganizationForm() {
   const { data: activeOrg, refetch: refetchActiveOrg } =
     useActiveOrganization();
 
-  const updateOrganization =
-    useMutation(trpc.authenticated.organisation.update.mutationOptions({
+  const updateOrganization = useMutation(
+    trpc.authenticated.organization.update.mutationOptions({
       onSuccess: async () => {
         await refetchActiveOrg();
         toast.success("Organization updated successfully");
       },
       onError: (error) => {
         form.setError("root", {
-          message:
-            error.message ||
-            "Error updating organization.",
+          message: error.message || "Error updating organization.",
         });
       },
-    }));
+    }),
+  );
 
   const form = useForm<UpdateOrganizationInputs>({
     resolver: zodResolver(UpdateOrganizationSchema),
@@ -72,7 +71,7 @@ export function UpdateOrganizationForm() {
         className="flex flex-col gap-6"
       >
         {form.formState.errors.root && (
-          <p className="text-sm text-destructive">
+          <p className="text-destructive text-sm">
             {form.formState.errors.root.message}
           </p>
         )}
@@ -103,9 +102,7 @@ export function UpdateOrganizationForm() {
           disabled={updateOrganization.isPending}
           className="self-end"
         >
-          {updateOrganization.isPending
-            ? "Updating..."
-            : "Update"}
+          {updateOrganization.isPending ? "Updating..." : "Update"}
         </Button>
       </form>
     </Form>

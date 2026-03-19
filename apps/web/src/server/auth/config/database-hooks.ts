@@ -16,12 +16,12 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         });
 
         // Generate a unique slug for the default organization
-        const organizationSlug = await generateUniqueSlug("Mon organisation");
+        const organizationSlug = await generateUniqueSlug("My organization");
 
         // Create a default organization for every new user
         await prisma.organization.create({
           data: {
-            name: "Mon organisation",
+            name: "My organization",
             slug: organizationSlug,
             isDefault: true,
             members: {
@@ -89,9 +89,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         }
       },
       after: async (session) => {
-        console.log(
-          `[audit] session.created userId=${session.userId}`,
-        );
+        console.log(`[audit] session.created userId=${session.userId}`);
       },
     },
   },

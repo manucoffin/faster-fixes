@@ -1,8 +1,8 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import { useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,11 @@ export function UserOrganizationSelect({
   placeholder = "Select an organization",
 }: UserOrganizationSelectProps) {
   const trpc = useTRPC();
-  const organizationsQuery = useQuery(trpc.admin.users.organisations.list.queryOptions({
-    userId,
-  }));
+  const organizationsQuery = useQuery(
+    trpc.admin.users.organizations.list.queryOptions({
+      userId,
+    }),
+  );
 
   return matchQueryStatus(organizationsQuery, {
     Loading: <Skeleton className="h-10 w-full rounded-md" />,
@@ -38,8 +40,8 @@ export function UserOrganizationSelect({
       </div>
     ),
     Empty: (
-      <div className="text-sm text-muted-foreground">
-        Aucune organisation trouvée pour cet utilisateur
+      <div className="text-muted-foreground text-sm">
+        Aucune organization trouvée pour cet utilisateur
       </div>
     ),
     Success: () => (

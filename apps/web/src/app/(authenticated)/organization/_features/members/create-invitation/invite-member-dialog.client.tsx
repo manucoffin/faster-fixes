@@ -2,8 +2,8 @@
 
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -57,20 +57,22 @@ export function InviteMemberDialog({
     }
   };
 
-  const createInvitation =
-    useMutation(trpc.authenticated.organisation.invitation.create.mutationOptions({
+  const createInvitation = useMutation(
+    trpc.authenticated.organization.invitation.create.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.get.queryFilter(),
+        );
         toast.success("Invitation sent successfully");
         handleOpenChange(false);
       },
       onError: (error) => {
         form.setError("root", {
-          message:
-            error.message || "Error sending invitation.",
+          message: error.message || "Error sending invitation.",
         });
       },
-    }));
+    }),
+  );
 
   const onSubmit = (data: InviteMemberFormInputs) => {
     if (!activeOrg) return;
@@ -98,7 +100,7 @@ export function InviteMemberDialog({
             className="flex flex-col gap-4"
           >
             {form.formState.errors.root && (
-              <p className="text-sm text-destructive">
+              <p className="text-destructive text-sm">
                 {form.formState.errors.root.message}
               </p>
             )}
@@ -132,9 +134,7 @@ export function InviteMemberDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={createInvitation.isPending}>
-                {createInvitation.isPending
-                  ? "Sending..."
-                  : "Send invitation"}
+                {createInvitation.isPending ? "Sending..." : "Send invitation"}
               </Button>
             </DialogFooter>
           </form>

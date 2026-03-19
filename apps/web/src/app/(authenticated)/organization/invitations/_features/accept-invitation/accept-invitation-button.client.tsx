@@ -20,21 +20,24 @@ export function AcceptInvitationButton({
   const { refetch: refetchOrganizations } = useListOrganizations();
   const queryClient = useQueryClient();
 
-  const acceptMutation =
-    useMutation(trpc.authenticated.organisation.invitation.accept.mutationOptions({
+  const acceptMutation = useMutation(
+    trpc.authenticated.organization.invitation.accept.mutationOptions({
       onSuccess: async () => {
         toast.success("Invitation acceptée");
 
         await organization.setActive({ organizationId });
         await refetchOrganizations();
-        queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.getReceived.queryFilter());
+        queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.getReceived.queryFilter(),
+        );
       },
       onError: (error) => {
         toast.error(
           error.message || "Erreur lors de l'acceptation de l'invitation.",
         );
       },
-    }));
+    }),
+  );
 
   return (
     <Button

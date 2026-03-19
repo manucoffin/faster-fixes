@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultRedirect } from "@/app/_constants";
+import { defaultRedirect } from "@/app/_constants/routes";
 import { organization, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ export function DeleteOrganizationSection() {
   const [isPending, setIsPending] = React.useState(false);
 
   const orgDetailsQuery = useQuery(
-    trpc.authenticated.organisation.get.queryOptions(
+    trpc.authenticated.organization.get.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id },
     ),

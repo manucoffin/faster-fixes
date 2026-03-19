@@ -34,7 +34,7 @@ const router: Router = {
 
         if (!membership) {
           throw new RejectUpload(
-            "Vous n'avez pas les permissions pour modifier cette organisation.",
+            "Vous n'avez pas les permissions pour modifier cette organization.",
           );
         }
 

@@ -22,18 +22,19 @@ export function InvitationActionsDropdown({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const cancelInvitation =
-    useMutation(trpc.authenticated.organisation.invitation.delete.mutationOptions({
+  const cancelInvitation = useMutation(
+    trpc.authenticated.organization.invitation.delete.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.authenticated.organisation.invitation.get.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.get.queryFilter(),
+        );
         toast.success("Invitation canceled");
       },
       onError: (error) => {
-        toast.error(
-          error.message || "Error canceling invitation.",
-        );
+        toast.error(error.message || "Error canceling invitation.");
       },
-    }));
+    }),
+  );
 
   return (
     <DropdownMenu>

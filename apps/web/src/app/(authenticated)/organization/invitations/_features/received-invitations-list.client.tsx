@@ -2,8 +2,8 @@
 
 import { getRoleLabel } from "@/app/_features/organization/_utils/organization-roles";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Card,
@@ -47,8 +47,9 @@ function LoadingSkeleton() {
 
 export function ReceivedInvitationsList() {
   const trpc = useTRPC();
-  const invitationsQuery =
-    useQuery(trpc.authenticated.organisation.invitation.getReceived.queryOptions());
+  const invitationsQuery = useQuery(
+    trpc.authenticated.organization.invitation.getReceived.queryOptions(),
+  );
 
   return matchQueryStatus(invitationsQuery, {
     Loading: <LoadingSkeleton />,
@@ -56,9 +57,7 @@ export function ReceivedInvitationsList() {
       <Empty>
         <EmptyHeader>
           <EmptyTitle>Error</EmptyTitle>
-          <EmptyDescription>
-            Unable to load invitations.
-          </EmptyDescription>
+          <EmptyDescription>Unable to load invitations.</EmptyDescription>
         </EmptyHeader>
       </Empty>
     ),

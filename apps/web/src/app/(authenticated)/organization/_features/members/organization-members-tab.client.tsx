@@ -7,14 +7,13 @@ import {
   useSession,
 } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
-import { Facehash } from "facehash";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -25,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { Facehash } from "facehash";
 import { LogOut, Mail, Plus } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
@@ -65,25 +65,26 @@ export function OrganizationMembersTab() {
   const canManage = currentRole === "owner" || currentRole === "admin";
   const isOwner = currentRole === "owner";
 
-  const invitationsQuery =
-    useQuery(trpc.authenticated.organisation.invitation.get.queryOptions(
+  const invitationsQuery = useQuery(
+    trpc.authenticated.organization.invitation.get.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id && canManage },
-    ));
+    ),
+  );
 
   const invitations = invitationsQuery.data ?? [];
 
-  const leaveOrganization = useMutation(trpc.authenticated.organisation.leave.mutationOptions({
-    onSuccess: async () => {
-      await refetchActiveOrg();
-      toast.success("You have left the organization");
-    },
-    onError: (error) => {
-      toast.error(
-        error.message || "Error leaving the organization.",
-      );
-    },
-  }));
+  const leaveOrganization = useMutation(
+    trpc.authenticated.organization.leave.mutationOptions({
+      onSuccess: async () => {
+        await refetchActiveOrg();
+        toast.success("You have left the organization");
+      },
+      onError: (error) => {
+        toast.error(error.message || "Error leaving the organization.");
+      },
+    }),
+  );
 
   const handleLeave = () => {
     if (!activeOrg) return;
@@ -124,12 +125,19 @@ export function OrganizationMembersTab() {
                     <Avatar className="h-8 w-8">
                       {member.user.image && (
                         <AvatarImage
-                          src={member.user.image.startsWith("http") ? member.user.image : resolveS3Url(member.user.image)}
+                          src={
+                            member.user.image.startsWith("http")
+                              ? member.user.image
+                              : resolveS3Url(member.user.image)
+                          }
                           alt={memberName}
                         />
                       )}
                       <AvatarFallback>
-                        <Facehash name={member.user.email ?? memberName} size={32} />
+                        <Facehash
+                          name={member.user.email ?? memberName}
+                          size={32}
+                        />
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{memberName}</span>
@@ -200,9 +208,7 @@ export function OrganizationMembersTab() {
                 <Badge variant="secondary">Pending</Badge>
               </TableCell>
               <TableCell>
-                <InvitationActionsDropdown
-                  invitationId={invitation.id}
-                />
+                <InvitationActionsDropdown invitationId={invitation.id} />
               </TableCell>
             </TableRow>
           ))}
