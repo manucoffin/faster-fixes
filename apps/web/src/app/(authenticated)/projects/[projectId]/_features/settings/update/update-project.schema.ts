@@ -11,6 +11,7 @@ export const UpdateProjectSchema = z.object({
     "bottom-right",
     "bottom-left",
   ]),
+  widgetEnabled: z.boolean(),
 });
 
 export type UpdateProjectInputs = z.infer<typeof UpdateProjectSchema>;

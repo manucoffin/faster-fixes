@@ -38,6 +38,7 @@ export const updateProject = protectedProcedure
           update: {
             color: input.widgetColor,
             position: input.widgetPosition,
+            enabled: input.widgetEnabled,
           },
         },
       },

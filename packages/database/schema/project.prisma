@@ -27,8 +27,9 @@ model WidgetConfig {
     projectId String  @unique
     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    color    String @default("#6366f1")
-    position String @default("bottom-right")
+    color    String  @default("#6366f1")
+    position String  @default("bottom-right")
+    enabled  Boolean @default(true)
 
     @@map("widget_config")
 }

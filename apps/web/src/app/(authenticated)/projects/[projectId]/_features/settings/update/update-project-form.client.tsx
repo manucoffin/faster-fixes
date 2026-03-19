@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Switch } from "@workspace/ui/components/switch";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -62,6 +63,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
       url: "",
       widgetColor: "#6366f1",
       widgetPosition: "bottom-right",
+      widgetEnabled: true,
     },
     values: project
       ? {
@@ -73,6 +75,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
             (project.widgetConfig
               ?.position as UpdateProjectInputs["widgetPosition"]) ??
             "bottom-right",
+          widgetEnabled: project.widgetConfig?.enabled ?? true,
         }
       : undefined,
   });
@@ -122,6 +125,26 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="widgetEnabled"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center justify-between">
+                <FormLabel>Widget enabled</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={updateProject.isPending}
+                  />
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
