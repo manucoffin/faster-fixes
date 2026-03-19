@@ -13,21 +13,14 @@ import {
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
+import type { GetReviewersOutput } from "./get-reviewers.trpc.query";
 import { DeleteReviewerButton } from "./delete/delete-reviewer-button.client";
 import { RestoreReviewerButton } from "./restore/restore-reviewer-button.client";
 import { RevokeReviewerButton } from "./revoke/revoke-reviewer-button.client";
 
-type Reviewer = {
-  id: string;
-  name: string;
-  isActive: boolean;
-  feedbackCount: number;
-  shareUrl: string;
-};
-
 type ReviewersTableProps = {
   projectId: string;
-  reviewers: Reviewer[];
+  reviewers: GetReviewersOutput;
 };
 
 export function ReviewersTable({ projectId, reviewers }: ReviewersTableProps) {
