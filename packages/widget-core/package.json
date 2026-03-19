@@ -15,12 +15,9 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "!dist/**/*.map"],
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
