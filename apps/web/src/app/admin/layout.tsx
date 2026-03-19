@@ -1,8 +1,12 @@
-import { loginUrl } from "@/lib/routing";
+import { loginUrl } from "@/app/_constants/routes";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
 import { Separator } from "@workspace/ui/components/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@workspace/ui/components/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@workspace/ui/components/sidebar";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -27,7 +31,6 @@ export default async function AdminLayout({ children }: LayoutParams) {
     redirect(loginUrl);
   }
 
-
   return (
     <SidebarProvider>
       <BreadcrumbProvider>
@@ -38,7 +41,10 @@ export default async function AdminLayout({ children }: LayoutParams) {
             <div className="flex w-full items-center justify-between px-4">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+                <Separator
+                  orientation="vertical"
+                  className="mr-2 data-[orientation=vertical]:h-4"
+                />
                 <Breadcrumbs />
               </div>
 
@@ -48,9 +54,7 @@ export default async function AdminLayout({ children }: LayoutParams) {
             </div>
           </header>
 
-          <main className="px-4">
-            {children}
-          </main>
+          <main className="px-4">{children}</main>
         </SidebarInset>
       </BreadcrumbProvider>
     </SidebarProvider>

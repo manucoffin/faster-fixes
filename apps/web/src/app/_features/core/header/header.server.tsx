@@ -1,4 +1,5 @@
-import { loginUrl } from "@/lib/routing";
+import { loginUrl } from "@/app/_constants/routes";
+import { Facehash } from "@/app/_features/core/avatar/facehash-avatar.client";
 import { auth } from "@/server/auth";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import {
@@ -6,14 +7,13 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
-import { Facehash } from "@/app/_features/core/avatar/facehash-avatar.client";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import {
   NavigationMenu,
@@ -41,18 +41,18 @@ export async function Header() {
     : null;
 
   return (
-    <header className="border-b border-border bg-background sticky top-0 z-40">
-      <div className="flex items-center justify-between px-4 h-16 container mx-auto gap-4">
+    <header className="border-border bg-background sticky top-0 z-40 border-b">
+      <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
         {/* Logo - Left */}
         <Link
           href="/"
-          className="font-bold text-xl text-foreground hover:text-accent transition-colors shrink-0"
+          className="text-foreground hover:text-accent shrink-0 text-xl font-bold transition-colors"
         >
           StartupMaker
         </Link>
 
         {/* Navigation - Center */}
-        <div className="hidden md:flex flex-1 justify-center">
+        <div className="hidden flex-1 justify-center md:flex">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -68,9 +68,8 @@ export async function Header() {
         </div>
 
         {/* User Menu - Right */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle size="icon" variant="ghost" />
-
 
           {session ? (
             <DropdownMenu>
@@ -84,7 +83,10 @@ export async function Header() {
                       />
                     )}
                     <AvatarFallback>
-                      <Facehash name={session.user.email ?? session.user.name ?? "User"} size={32} />
+                      <Facehash
+                        name={session.user.email ?? session.user.name ?? "User"}
+                        size={32}
+                      />
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -92,10 +94,10 @@ export async function Header() {
 
               <DropdownMenuContent align="end" className="w-56">
                 <div className="flex flex-col gap-2 p-2">
-                  <div className="text-sm font-medium text-foreground">
+                  <div className="text-foreground text-sm font-medium">
                     {session.user.name}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {session.user.email}
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { getSession } from "@/lib/auth";
-import { loginUrl } from "@/lib/routing";
+import { loginUrl } from "@/app/_constants";
+import { getSession } from@/app/_constants/routes
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { Button, buttonVariants } from "@workspace/ui/components/button";
@@ -12,8 +12,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 interface UpgradeSubscriptionButtonProps
-  extends React.ComponentProps<"button">,
-  VariantProps<typeof buttonVariants> {
+  extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   planName: string;
   isAnnual: boolean;
   onSuccess?: () => void;
@@ -27,30 +26,29 @@ export function UpgradeSubscriptionButton({
 }: UpgradeSubscriptionButtonProps) {
   const trpc = useTRPC();
   // const { data: session } = useSession()
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const upgradePlanMutation =
-    useMutation(trpc.subscription.upgrade.mutationOptions(
-      {
-        onSuccess: (data) => {
-          // Redirect to Stripe checkout
-          if (data.url) {
-            window.location.href = data.url;
-          }
-        },
-        onError: (error) => {
-          console.error("Error upgrading plan:", error);
-          toast(error.message);
-        },
+  const upgradePlanMutation = useMutation(
+    trpc.subscription.upgrade.mutationOptions({
+      onSuccess: (data) => {
+        // Redirect to Stripe checkout
+        if (data.url) {
+          window.location.href = data.url;
+        }
       },
-    ));
+      onError: (error) => {
+        console.error("Error upgrading plan:", error);
+        toast(error.message);
+      },
+    }),
+  );
 
   const handleUpgrade = useCallback(async () => {
-    const { data: session } = await getSession()
+    const { data: session } = await getSession();
     if (!session) {
-      router.push(`${loginUrl}?callbackUrl=${pathname}`)
-      return
+      router.push(`${loginUrl}?callbackUrl=${pathname}`);
+      return;
     }
 
     await upgradePlanMutation.mutateAsync({
@@ -58,7 +56,6 @@ export function UpgradeSubscriptionButton({
       annual: isAnnual,
     });
   }, [upgradePlanMutation, isAnnual]);
-
 
   return (
     <Button
