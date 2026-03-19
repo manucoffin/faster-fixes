@@ -2,10 +2,22 @@
   "name": "@fasterfixes/core",
   "version": "0.0.1",
   "type": "module",
-  "private": true,
   "scripts": {
+    "build": "tsdown",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "zod": "^4.3.5"
@@ -14,13 +26,7 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.1",
+    "tsdown": "^0.21.4",
     "typescript": "^5.9.3"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./client": "./src/client.ts",
-    "./types": "./src/types.ts",
-    "./constants": "./src/constants.ts",
-    "./utils/*": "./src/utils/*.ts"
   }
 }
