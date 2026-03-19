@@ -56,7 +56,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   return (
     <AlertDialog onOpenChange={() => setConfirmationText("")}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">
+        <Button variant="destructive" className="self-end">
           <Trash2 className="size-4" />
           Delete project
         </Button>
@@ -71,8 +71,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
         </AlertDialogHeader>
         <div className="flex flex-col gap-2">
           <Label htmlFor="confirm-delete">
-            Type <span className="font-semibold">{projectName}</span> to
-            confirm
+            Type <span className="font-semibold">{projectName}</span> to confirm
           </Label>
           <Input
             id="confirm-delete"

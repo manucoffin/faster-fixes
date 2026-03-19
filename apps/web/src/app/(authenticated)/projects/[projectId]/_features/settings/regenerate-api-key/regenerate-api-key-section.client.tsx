@@ -82,7 +82,7 @@ export function RegenerateApiKeySection({
 
       <Dialog open={regenOpen} onOpenChange={setRegenOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="self-start">
+          <Button variant="outline" className="self-end">
             <RefreshCw className="size-4" />
             Regenerate API key
           </Button>
