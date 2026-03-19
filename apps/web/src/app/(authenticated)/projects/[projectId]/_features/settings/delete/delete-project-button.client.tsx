@@ -1,7 +1,7 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ type DeleteProjectButtonProps = {
 export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   const trpc = useTRPC();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [confirmationText, setConfirmationText] = useState("");
 
   const { data: project } = useQuery(
@@ -37,6 +38,9 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   const deleteProject = useMutation(
     trpc.authenticated.projets.delete.mutationOptions({
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.authenticated.projets.list.queryKey(),
+        });
         router.push("/projects");
         toast.success("Project deleted");
       },
