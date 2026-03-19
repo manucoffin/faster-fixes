@@ -127,8 +127,10 @@ export function FeedbackList() {
                     }
                   }
                   setActiveFeedback(item);
-                } else {
-                  // Navigate to the feedback's page
+                } else if (
+                  item.pageUrl.startsWith("https://") ||
+                  item.pageUrl.startsWith("http://")
+                ) {
                   window.location.href = item.pageUrl;
                 }
               }}
