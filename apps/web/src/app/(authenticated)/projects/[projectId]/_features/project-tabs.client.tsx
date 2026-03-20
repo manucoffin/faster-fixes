@@ -7,6 +7,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
+import { InboxTab } from "./inbox/inbox-tab.client";
 import { ReviewersTab } from "./reviewers/reviewers-tab.client";
 import { ProjectSettingsTab } from "./settings/project-settings-tab.client";
 
@@ -29,12 +30,7 @@ export function ProjectTabs({ projectId }: ProjectTabsProps) {
       </TabsList>
 
       <TabsContent value="inbox" className="mt-6">
-        <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 py-20 text-center">
-          <p className="text-lg font-medium">Feedback inbox</p>
-          <p className="text-sm">
-            The feedback inbox will be available in a future version.
-          </p>
-        </div>
+        <InboxTab projectId={projectId} />
       </TabsContent>
 
       <TabsContent value="settings" className="mt-6">
