@@ -14,6 +14,8 @@
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook"
   },
   "dependencies": {
+    "@fasterfixes/core": "workspace:*",
+    "@fasterfixes/react": "workspace:*",
     "@better-auth/stripe": "^1.5.4",
     "@better-upload/client": "^3.0.14",
     "@better-upload/server": "^3.0.14",

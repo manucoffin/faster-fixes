@@ -1,6 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
 import { DEFAULT_OG_IMAGE_URL, SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
+import { FeedbackProvider } from "@fasterfixes/react";
 import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
@@ -70,7 +71,12 @@ export default function RootLayout({
               <NuqsAdapter>
                 <StopImpersonateButton />
 
-                {children}
+                <FeedbackProvider
+                  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
+                  apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
+                >
+                  {children}
+                </FeedbackProvider>
 
                 <Toaster />
               </NuqsAdapter>
