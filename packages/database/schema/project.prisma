@@ -81,7 +81,11 @@ model Feedback {
     screenshotId String?
     screenshot   Asset?  @relation("FeedbackScreenshot", fields: [screenshotId], references: [id], onDelete: SetNull)
 
+    assigneeId String?
+    assignee   Member? @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
     @@index([projectId])
     @@index([reviewerId])
+    @@index([assigneeId])
     @@map("feedback")
 }
