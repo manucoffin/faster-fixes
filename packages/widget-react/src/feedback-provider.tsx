@@ -59,6 +59,7 @@ export function FeedbackProvider({
   const [showList, setShowList] = useState(false);
   const [highlightSelector, setHighlightSelector] = useState<string | null>(null);
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
+  const pendingFeedbackHandled = useRef(false);
 
   const client = useMemo(
     () => new FasterFixesClient({ apiKey, apiOrigin }),
@@ -149,6 +150,37 @@ export function FeedbackProvider({
     void init();
   }, [client]);
 
+  // Open pending feedback after navigation (runs once after init + feedback load)
+  useEffect(() => {
+    if (!initialized || feedbackItems.length === 0 || pendingFeedbackHandled.current) return;
+    try {
+      const pendingId = sessionStorage.getItem("ff_pending_feedback");
+      if (!pendingId) return;
+      sessionStorage.removeItem("ff_pending_feedback");
+      pendingFeedbackHandled.current = true;
+
+      const pending = feedbackItems.find((f) => f.id === pendingId);
+      if (!pending) return;
+
+      // Delay to let page layout stabilize
+      setTimeout(() => {
+        setActiveFeedback(pending);
+        if (pending.selector) {
+          setTimeout(() => {
+            try {
+              const el = document.querySelector(pending.selector!);
+              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+            } catch {
+              // Selector failed
+            }
+          }, 200);
+        }
+      }, 100);
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, [initialized, feedbackItems]);
+
   // Don't render if not initialized, no token, or widget disabled
   if (!initialized || !reviewerToken || !config || !config.enabled) {
     return <>{children}</>;
@@ -224,6 +256,8 @@ export function FeedbackProvider({
               position: "relative",
               zIndex: 2147483647,
             }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Annotation mode overlay */}
             <AnnotationOverlay />

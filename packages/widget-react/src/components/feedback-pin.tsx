@@ -28,6 +28,8 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     left: number;
   } | null>(null);
 
+  const PIN_SIZE = 24;
+
   const updatePosition = useCallback(() => {
     // Try CSS selector first — gives live viewport coords
     if (item.selector) {
@@ -35,10 +37,22 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         const el = document.querySelector(item.selector);
         if (el) {
           const rect = el.getBoundingClientRect();
-          setPosition({
-            top: rect.top,
-            left: rect.right + 4,
-          });
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+
+          // Horizontal: prefer right side, flip to left if overflowing
+          const left =
+            rect.right + 4 + PIN_SIZE > vw
+              ? rect.left - PIN_SIZE - 4
+              : rect.right + 4;
+
+          // Vertical: prefer top-aligned, push up if overflowing bottom
+          const top =
+            rect.top + PIN_SIZE > vh
+              ? rect.bottom - PIN_SIZE
+              : rect.top;
+
+          setPosition({ top, left });
           return;
         }
       } catch {
@@ -46,7 +60,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
       }
     }
 
-    // Fallback to stored coordinates (viewport coords at click time, offset by scroll delta)
+    // Fallback to stored coordinates (viewport coords at click time)
     if (item.clickX != null && item.clickY != null) {
       setPosition({
         top: item.clickY,
@@ -59,9 +73,18 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     updatePosition();
     window.addEventListener("scroll", updatePosition, { passive: true });
     window.addEventListener("resize", updatePosition, { passive: true });
+    window.addEventListener("load", updatePosition);
+
+    // Recalculate after layout stabilizes (fonts, images, lazy content)
+    const raf = requestAnimationFrame(updatePosition);
+    const delayed = setTimeout(updatePosition, 500);
+
     return () => {
       window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("load", updatePosition);
+      cancelAnimationFrame(raf);
+      clearTimeout(delayed);
     };
   }, [updatePosition]);
 

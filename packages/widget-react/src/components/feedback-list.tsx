@@ -119,7 +119,6 @@ export function FeedbackList() {
               className={`ff-feedback-list-item ${classNames.feedbackListItem ?? ""}`}
               style={feedbackListItemStyle}
               onClick={() => {
-                // If feedback is on the current page, scroll to element and open pin
                 if (item.pageUrl === window.location.href) {
                   if (item.selector) {
                     try {
@@ -134,6 +133,12 @@ export function FeedbackList() {
                   item.pageUrl.startsWith("https://") ||
                   item.pageUrl.startsWith("http://")
                 ) {
+                  // Store the feedback ID so the widget opens it after navigation
+                  try {
+                    sessionStorage.setItem("ff_pending_feedback", item.id);
+                  } catch {
+                    // sessionStorage unavailable
+                  }
                   window.location.href = item.pageUrl;
                 }
               }}
