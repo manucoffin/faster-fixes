@@ -1,9 +1,12 @@
 import { GetFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_features/get-feedback.trpc.query";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useFeedbackMutations(projectId: string) {
+export function useFeedbackMutations() {
+  const { activeProject } = useActiveProject();
+  const projectId = activeProject!.id;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 

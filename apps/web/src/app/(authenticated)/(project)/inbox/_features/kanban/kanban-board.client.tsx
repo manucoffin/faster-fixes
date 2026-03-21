@@ -18,7 +18,6 @@ import { KanbanColumn } from "./kanban-column.client";
 type FeedbackItem = GetFeedbackOutput[number];
 
 type KanbanBoardProps = {
-  projectId: string;
   feedback: FeedbackItem[];
   pageUrlFilter: string | null;
   sort: string;
@@ -51,13 +50,12 @@ function sortFeedback(items: FeedbackItem[], sort: string): FeedbackItem[] {
 }
 
 export function KanbanBoard({
-  projectId,
   feedback,
   pageUrlFilter,
   sort,
   onSelectFeedback,
 }: KanbanBoardProps) {
-  const { updateStatus, bulkUpdateStatus } = useFeedbackMutations(projectId);
+  const { updateStatus, bulkUpdateStatus } = useFeedbackMutations();
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const sensors = useSensors(

@@ -17,17 +17,15 @@ const STATUS_OPTIONS = [
 ];
 
 type StatusSelectProps = {
-  projectId: string;
   feedbackId: string;
   value: string;
 };
 
 export function StatusSelect({
-  projectId,
   feedbackId,
   value,
 }: StatusSelectProps) {
-  const { updateStatus } = useFeedbackMutations(projectId);
+  const { updateStatus } = useFeedbackMutations();
 
   return (
     <div>

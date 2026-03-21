@@ -40,5 +40,5 @@ export function InboxContent() {
     );
   }
 
-  return <InboxTabs projectId={activeProject.id} />;
+  return <InboxTabs />;
 }

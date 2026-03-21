@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import { DataTable } from "@/app/_features/core/datatable/data-table";
 import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header";
 import { useTRPC } from "@/lib/trpc/trpc-client";
@@ -25,11 +26,9 @@ import { Archive } from "lucide-react";
 
 type ArchivedItem = GetArchivedFeedbackOutput["items"][number];
 
-type ArchiveTabProps = {
-  projectId: string;
-};
-
-export function ArchiveTab({ projectId }: ArchiveTabProps) {
+export function ArchiveTab() {
+  const { activeProject } = useActiveProject();
+  const projectId = activeProject!.id;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [page, setPage] = React.useState(1);

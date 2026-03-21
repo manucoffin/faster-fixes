@@ -18,17 +18,15 @@ import {
 import { UserPlus } from "lucide-react";
 
 type AssigneeSelectProps = {
-  projectId: string;
   feedbackId: string;
   value: string | null;
 };
 
 export function AssigneeSelect({
-  projectId,
   feedbackId,
   value,
 }: AssigneeSelectProps) {
-  const { updateAssignee } = useFeedbackMutations(projectId);
+  const { updateAssignee } = useFeedbackMutations();
   const { members, currentMemberId } = useOrgMembers();
 
   return (

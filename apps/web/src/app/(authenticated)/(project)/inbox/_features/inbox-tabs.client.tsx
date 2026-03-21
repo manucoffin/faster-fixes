@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,9 @@ import { FeedbackDetailPanel } from "./feedback-panel/feedback-detail-panel.clie
 import { FeedbackFilters } from "./filters/feedback-filters.client";
 import { KanbanBoard } from "./kanban/kanban-board.client";
 
-export function InboxTabs({ projectId }: { projectId: string }) {
+export function InboxTabs() {
+  const { activeProject } = useActiveProject();
+  const projectId = activeProject!.id;
   const trpc = useTRPC();
 
   const [view, setView] = useQueryState(
@@ -122,7 +125,6 @@ export function InboxTabs({ projectId }: { projectId: string }) {
             ),
             Success: ({ data: feedback }) => (
               <KanbanBoard
-                projectId={projectId}
                 feedback={feedback}
                 pageUrlFilter={pageUrlFilter}
                 sort={sort}
@@ -133,12 +135,11 @@ export function InboxTabs({ projectId }: { projectId: string }) {
         </TabsContent>
 
         <TabsContent value="archive" className="mt-4">
-          <ArchiveTab projectId={projectId} />
+          <ArchiveTab />
         </TabsContent>
       </Tabs>
 
       <FeedbackDetailPanel
-        projectId={projectId}
         feedback={selectedFeedback}
         open={!!selectedFeedbackId}
         onOpenChange={(open) => {

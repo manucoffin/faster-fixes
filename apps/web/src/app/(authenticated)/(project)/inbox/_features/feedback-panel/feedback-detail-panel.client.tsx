@@ -17,7 +17,6 @@ import { StatusSelect } from "./status-select.client";
 type FeedbackItem = GetFeedbackOutput[number];
 
 type FeedbackDetailPanelProps = {
-  projectId: string;
   feedback: FeedbackItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,7 +37,6 @@ function formatBrowserMeta(f: FeedbackItem) {
 }
 
 export function FeedbackDetailPanel({
-  projectId,
   feedback,
   open,
   onOpenChange,
@@ -129,13 +127,11 @@ export function FeedbackDetailPanel({
           <Separator />
 
           <StatusSelect
-            projectId={projectId}
             feedbackId={feedback.id}
             value={feedback.status}
           />
 
           <AssigneeSelect
-            projectId={projectId}
             feedbackId={feedback.id}
             value={feedback.assignee?.id ?? null}
           />
