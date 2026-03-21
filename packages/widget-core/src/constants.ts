@@ -12,6 +12,8 @@ export const WIDGET_POSITIONS: WidgetPosition[] = [
   "bottom-left",
   "top-right",
   "top-left",
+  "middle-right",
+  "middle-left",
 ];
 
 export const STATUS_COLORS: Record<FeedbackStatus, string> = {

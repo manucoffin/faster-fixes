@@ -1,4 +1,10 @@
-export type WidgetPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left";
+export type WidgetPosition =
+  | "bottom-right"
+  | "bottom-left"
+  | "top-right"
+  | "top-left"
+  | "middle-right"
+  | "middle-left";
 
 export type FeedbackStatus = "new" | "in_progress" | "resolved" | "closed";
 

@@ -38,14 +38,14 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
   const queryClient = useQueryClient();
 
   const { data: project } = useQuery(
-    trpc.authenticated.projets.get.queryOptions({ projectId }),
+    trpc.authenticated.projects.get.queryOptions({ projectId }),
   );
 
   const updateProject = useMutation(
-    trpc.authenticated.projets.update.mutationOptions({
+    trpc.authenticated.projects.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(
-          trpc.authenticated.projets.get.queryOptions({ projectId }),
+          trpc.authenticated.projects.get.queryOptions({ projectId }),
         );
         toast.success("Project updated");
       },
@@ -196,6 +196,8 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
                 <SelectContent>
                   <SelectItem value="top-right">Top right</SelectItem>
                   <SelectItem value="top-left">Top left</SelectItem>
+                  <SelectItem value="middle-right">Middle right</SelectItem>
+                  <SelectItem value="middle-left">Middle left</SelectItem>
                   <SelectItem value="bottom-right">Bottom right</SelectItem>
                   <SelectItem value="bottom-left">Bottom left</SelectItem>
                 </SelectContent>

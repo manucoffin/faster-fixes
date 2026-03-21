@@ -10,6 +10,8 @@ export const UpdateProjectSchema = z.object({
     "top-left",
     "bottom-right",
     "bottom-left",
+    "middle-right",
+    "middle-left",
   ]),
   widgetEnabled: z.boolean(),
 });
