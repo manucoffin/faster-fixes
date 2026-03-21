@@ -47,9 +47,6 @@ export function AnnotationOverlay() {
       generateSelector(target);
 
       // Capture screenshot asynchronously, store promise for submit to await
-      console.info("[faster-fixes] starting screenshot capture...");
-      console.info("[faster-fixes] html2canvas fn:", typeof html2canvas);
-
       const capturePromise = html2canvas(document.body, {
         useCORS: true,
         allowTaint: true,
@@ -59,25 +56,37 @@ export function AnnotationOverlay() {
         height: window.innerHeight,
         x: window.scrollX,
         y: window.scrollY,
-      })
-        .then((canvas) => {
-          console.info("[faster-fixes] html2canvas resolved — canvas:", canvas?.tagName, canvas?.width, "x", canvas?.height);
-          return new Promise<Blob | null>((resolve) => {
-            canvas.toBlob((blob) => {
-              console.info("[faster-fixes] toBlob result — blob:", blob ? `${blob.size} bytes (${blob.type})` : "null");
-              resolve(blob);
-            }, "image/png");
+        // Strip widget elements and ignore CSS parsing errors
+        ignoreElements: (el) => el.hasAttribute?.("data-ff-widget") ?? false,
+        onclone: (_doc, clonedEl) => {
+          // Remove style elements that may contain unsupported CSS (e.g. CSS layers, custom properties)
+          clonedEl.querySelectorAll("style").forEach((style) => {
+            try {
+              // If the style sheet has rules that can't be accessed, remove it
+              if (style.sheet) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                style.sheet.cssRules;
+              }
+            } catch {
+              style.remove();
+            }
           });
-        })
+        },
+      })
+        .then(
+          (canvas) =>
+            new Promise<Blob | null>((resolve) => {
+              canvas.toBlob((blob) => resolve(blob), "image/png");
+            }),
+        )
         .catch((err) => {
-          console.error("[faster-fixes] screenshot capture failed:", err);
+          console.warn("[faster-fixes] screenshot capture failed:", err);
           return null;
         });
 
       screenshotCaptureRef.current = capturePromise;
 
       capturePromise.then((blob) => {
-        console.info("[faster-fixes] screenshot blob ready:", blob ? `${blob.size} bytes` : "null");
         if (blob) setScreenshotBlob(blob);
       });
 
