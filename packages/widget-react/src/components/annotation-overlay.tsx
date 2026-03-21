@@ -53,10 +53,10 @@ export function AnnotationOverlay() {
         x: window.scrollX,
         y: window.scrollY,
         // Strip widget elements and ignore CSS parsing errors
-        ignoreElements: (el) => el.hasAttribute?.("data-ff-widget") ?? false,
-        onclone: (_doc, clonedEl) => {
+        ignoreElements: (el: Element) => el.hasAttribute?.("data-ff-widget") ?? false,
+        onclone: (_doc: Document, clonedEl: HTMLElement) => {
           // Remove style elements that may contain unsupported CSS (e.g. CSS layers, custom properties)
-          clonedEl.querySelectorAll("style").forEach((style) => {
+          clonedEl.querySelectorAll("style").forEach((style: HTMLStyleElement) => {
             try {
               // If the style sheet has rules that can't be accessed, remove it
               if (style.sheet) {

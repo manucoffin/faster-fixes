@@ -40,7 +40,7 @@ export function CommentPopover() {
   const [error, setError] = useState<string | null>(null);
   const [fadingOut, setFadingOut] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const frozenStyleRef = useRef<React.CSSProperties | null>(null);
 
   const isOpen = mode === "selected" || mode === "submitting" || mode === "error";
@@ -57,7 +57,9 @@ export function CommentPopover() {
   });
 
   // Clean up timer on unmount
-  useEffect(() => () => clearTimeout(fadeTimerRef.current), []);
+  useEffect(() => () => {
+    if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
+  }, []);
 
   function resetState() {
     setComment("");

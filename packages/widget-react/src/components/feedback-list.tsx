@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { STATUS_COLORS } from "@fasterfixes/core";
 import type { FeedbackStatus } from "@fasterfixes/core";
+import { STATUS_COLORS } from "@fasterfixes/core";
+import { useEffect, useRef, useState } from "react";
 import { useFeedbackContext } from "../context.js";
 import {
-  feedbackListStyle,
   feedbackListItemStyle,
+  feedbackListStyle,
   secondaryButtonStyle,
 } from "../styles.js";
 
@@ -18,7 +18,6 @@ export function FeedbackList() {
     setActiveFeedback,
     classNames,
     labels,
-    color,
     position,
     showList,
   } = useFeedbackContext();
@@ -26,11 +25,11 @@ export function FeedbackList() {
   // Delayed unmount: stay mounted during exit animation
   const [mounted, setMounted] = useState(showList);
   const [exiting, setExiting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (showList) {
-      clearTimeout(timerRef.current);
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
       setExiting(false);
       setMounted(true);
     } else if (mounted) {
@@ -40,7 +39,9 @@ export function FeedbackList() {
         setExiting(false);
       }, EXIT_DURATION);
     }
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    };
   }, [showList, mounted]);
 
   if (!mounted) return null;
@@ -87,7 +88,8 @@ export function FeedbackList() {
               ...secondaryButtonStyle,
               padding: "2px 8px",
               fontSize: 11,
-              color: color,
+              color: "inherit",
+              textDecoration: "underline",
             }}
             onClick={() => setShowResolved(!showResolved)}
           >
@@ -123,7 +125,10 @@ export function FeedbackList() {
                   if (item.selector) {
                     try {
                       const el = document.querySelector(item.selector);
-                      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      el?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
                     } catch {
                       // Selector failed
                     }
