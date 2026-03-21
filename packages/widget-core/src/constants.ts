@@ -23,7 +23,7 @@ export const STATUS_COLORS: Record<FeedbackStatus, string> = {
   closed: "#6b7280",
 };
 
-export const DEFAULT_API_ORIGIN = "https://app.fasterfixes.com";
+export const DEFAULT_API_ORIGIN = "https://app.faster-fixes.com";
 
 export const DEFAULT_LABELS = {
   submitButton: "Submit",

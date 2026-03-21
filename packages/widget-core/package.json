@@ -4,8 +4,8 @@
   "description": "Core client library for the FasterFixes feedback widget. Handles API communication, feedback submission, and reviewer authentication.",
   "type": "module",
   "license": "MIT",
-  "author": "FasterFixes <support@fasterfixes.com> (https://fasterfixes.com)",
-  "homepage": "https://fasterfixes.com",
+  "author": "FasterFixes <support@faster-fixes.com> (https://faster-fixes.com)",
+  "homepage": "https://faster-fixes.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/manucoffin/faster-fixes.git",

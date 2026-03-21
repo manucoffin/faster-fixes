@@ -207,6 +207,7 @@ All endpoints are Next.js API routes under `/api/v1/`. URL path versioning — w
 ### Rate Limiting
 
 Per API key, generous limits:
+
 - Submissions: 100/hour
 - Reads: 1000/hour
 
@@ -219,6 +220,7 @@ Fetch project widget settings.
 **Auth**: API key only (no reviewer token needed)
 
 **Response**:
+
 ```json
 {
   "enabled": true,
@@ -234,9 +236,11 @@ Fetch existing feedback for a specific page URL.
 **Auth**: API key + reviewer token
 
 **Query params**:
+
 - `url` (required): the page URL to filter feedback by
 
 **Response**:
+
 ```json
 {
   "feedback": [
@@ -265,6 +269,7 @@ Submit new feedback.
 **Content-Type**: `multipart/form-data`
 
 **Fields**:
+
 - `screenshot` (file, optional): viewport screenshot blob, max 5MB
 - `data` (JSON string): feedback metadata
 
@@ -294,6 +299,7 @@ Edit feedback comment.
 **Auth**: API key + reviewer token
 
 **Body**:
+
 ```json
 {
   "comment": "Updated comment text"
@@ -329,18 +335,18 @@ This is the only schema change required. All other fields needed for feedback (s
 
 ## Technical Decisions
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Screenshot library | html2canvas (bundled) | Most popular, well-tested. ~40KB gzipped. |
-| Screenshot timing | On element click (async) | Captures page before popover appears. Popover opens immediately for fast UX. |
-| Screenshot scope | Visible viewport only | Fastest, lowest payload. Shows exactly what the user sees. |
-| Selector strategy | Best-effort unique CSS path | No host page cooperation needed. May break on DOM changes but good enough. |
-| Popover positioning | Floating UI (smart auto-position) | Handles viewport edge cases, flips as needed. |
-| CSS isolation | Scoped `ff-` prefixed classes | Simpler than Shadow DOM, allows intentional host overrides. |
-| Pin positioning | Static after render | Lighter than tracking on scroll/resize. Uses selector + absolute coords fallback. |
-| Screenshot upload | Server-side (multipart) | Simpler widget code. Server handles storage upload internally. |
-| Screenshot storage | File key only (not full URL) | Flexible — storage provider can change without updating records. |
-| Error handling | Show error + retry button | Preserves form state. User doesn't lose their comment on failure. |
+| Decision            | Choice                            | Rationale                                                                         |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------- |
+| Screenshot library  | html2canvas (bundled)             | Most popular, well-tested. ~40KB gzipped.                                         |
+| Screenshot timing   | On element click (async)          | Captures page before popover appears. Popover opens immediately for fast UX.      |
+| Screenshot scope    | Visible viewport only             | Fastest, lowest payload. Shows exactly what the user sees.                        |
+| Selector strategy   | Best-effort unique CSS path       | No host page cooperation needed. May break on DOM changes but good enough.        |
+| Popover positioning | Floating UI (smart auto-position) | Handles viewport edge cases, flips as needed.                                     |
+| CSS isolation       | Scoped `ff-` prefixed classes     | Simpler than Shadow DOM, allows intentional host overrides.                       |
+| Pin positioning     | Static after render               | Lighter than tracking on scroll/resize. Uses selector + absolute coords fallback. |
+| Screenshot upload   | Server-side (multipart)           | Simpler widget code. Server handles storage upload internally.                    |
+| Screenshot storage  | File key only (not full URL)      | Flexible — storage provider can change without updating records.                  |
+| Error handling      | Show error + retry button         | Preserves form state. User doesn't lose their comment on failure.                 |
 
 ---
 
@@ -349,7 +355,7 @@ This is the only schema change required. All other fields needed for feedback (s
 ```tsx
 interface FeedbackProviderProps {
   apiKey: string;
-  apiOrigin?: string; // default: "https://app.fasterfixes.com" — override for self-hosted deployments
+  apiOrigin?: string; // default: "https://app.faster-fixes.com" — override for self-hosted deployments
   classNames?: {
     button?: string;
     popover?: string;
@@ -362,21 +368,21 @@ interface FeedbackProviderProps {
     feedbackListItem?: string;
   };
   labels?: {
-    submitButton?: string;       // default: "Submit"
-    cancelButton?: string;       // default: "Cancel"
+    submitButton?: string; // default: "Submit"
+    cancelButton?: string; // default: "Cancel"
     textareaPlaceholder?: string; // default: "Describe the issue..."
-    successMessage?: string;     // default: "Feedback sent"
-    closeButton?: string;        // default: "Close"
-    retryButton?: string;        // default: "Retry"
-    errorMessage?: string;       // default: "Something went wrong"
-    deleteConfirm?: string;      // default: "Delete this feedback?"
-    deleteButton?: string;       // default: "Delete"
-    editButton?: string;         // default: "Edit"
-    saveButton?: string;         // default: "Save"
-    showResolved?: string;       // default: "Show resolved"
-    hideResolved?: string;       // default: "Hide resolved"
-    feedbackListTitle?: string;  // default: "Feedback"
-    emptyList?: string;          // default: "No feedback on this page"
+    successMessage?: string; // default: "Feedback sent"
+    closeButton?: string; // default: "Close"
+    retryButton?: string; // default: "Retry"
+    errorMessage?: string; // default: "Something went wrong"
+    deleteConfirm?: string; // default: "Delete this feedback?"
+    deleteButton?: string; // default: "Delete"
+    editButton?: string; // default: "Edit"
+    saveButton?: string; // default: "Save"
+    showResolved?: string; // default: "Show resolved"
+    hideResolved?: string; // default: "Hide resolved"
+    feedbackListTitle?: string; // default: "Feedback"
+    emptyList?: string; // default: "No feedback on this page"
   };
   children: React.ReactNode;
 }
@@ -406,11 +412,11 @@ function MyComponent() {
 
 ### `useFeedback()` return value
 
-| Method / Property | Type | Description |
-|---|---|---|
-| `show()` | `() => void` | Show the widget (floating button + pins). No-op if already visible. |
-| `hide()` | `() => void` | Hide the widget entirely (button + pins + any open popover). Exits annotation mode if active. |
-| `isVisible` | `boolean` | Whether the widget is currently visible. |
+| Method / Property | Type         | Description                                                                                   |
+| ----------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| `show()`          | `() => void` | Show the widget (floating button + pins). No-op if already visible.                           |
+| `hide()`          | `() => void` | Hide the widget entirely (button + pins + any open popover). Exits annotation mode if active. |
+| `isVisible`       | `boolean`    | Whether the widget is currently visible.                                                      |
 
 This allows developers to conditionally show the widget on specific pages, behind feature flags, or in response to user actions — without unmounting the provider.
 
@@ -437,6 +443,7 @@ This milestone delivers the **full widget experience**:
 ## Done When
 
 A reviewer can:
+
 1. Visit a page with `?ff_token=xxx`
 2. Click the floating button to enter annotation mode
 3. Hover over elements (outline + overlay feedback)

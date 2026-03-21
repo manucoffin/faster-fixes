@@ -1,6 +1,6 @@
 # @fasterfixes/core
 
-Core client library for [FasterFixes](https://fasterfixes.com) — the visual feedback tool for web applications.
+Core client library for [FasterFixes](https://faster-fixes.com) — the visual feedback tool for web applications.
 
 This package provides the API client, types, and utilities used by the FasterFixes widget. Most users should install `@fasterfixes/react` instead, which includes this package automatically.
 
@@ -32,7 +32,7 @@ await client.createFeedback(
     clickY: 320,
   },
   reviewerToken,
-  screenshotBlob // optional
+  screenshotBlob, // optional
 );
 
 // Fetch feedback for a page
@@ -43,21 +43,21 @@ const { feedback } = await client.getFeedback(reviewerToken, pageUrl);
 
 ### `FasterFixesClient`
 
-| Method | Description |
-|--------|-------------|
-| `getConfig()` | Fetch widget configuration (color, position, enabled) |
-| `getFeedback(token, url?)` | Fetch feedback items, optionally filtered by page URL |
-| `createFeedback(data, token, screenshot?)` | Submit new feedback with optional screenshot |
-| `updateFeedback(id, data, token)` | Update an existing feedback comment |
-| `deleteFeedback(id, token)` | Delete a feedback item |
+| Method                                     | Description                                           |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `getConfig()`                              | Fetch widget configuration (color, position, enabled) |
+| `getFeedback(token, url?)`                 | Fetch feedback items, optionally filtered by page URL |
+| `createFeedback(data, token, screenshot?)` | Submit new feedback with optional screenshot          |
+| `updateFeedback(id, data, token)`          | Update an existing feedback comment                   |
+| `deleteFeedback(id, token)`                | Delete a feedback item                                |
 
 ### Utilities
 
-| Export | Description |
-|--------|-------------|
-| `generateSelector(element)` | Generate a CSS selector path for a DOM element |
-| `getBrowserInfo()` | Detect browser name, version, OS, and viewport size |
-| `resolveReviewerToken()` | Resolve reviewer token from URL param or localStorage |
+| Export                      | Description                                           |
+| --------------------------- | ----------------------------------------------------- |
+| `generateSelector(element)` | Generate a CSS selector path for a DOM element        |
+| `getBrowserInfo()`          | Detect browser name, version, OS, and viewport size   |
+| `resolveReviewerToken()`    | Resolve reviewer token from URL param or localStorage |
 
 ## Types
 

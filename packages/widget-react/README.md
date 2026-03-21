@@ -1,6 +1,6 @@
 # @fasterfixes/react
 
-React feedback widget for [FasterFixes](https://fasterfixes.com) — collect visual feedback with screenshots, element annotations, and inline comments.
+React feedback widget for [FasterFixes](https://faster-fixes.com) — collect visual feedback with screenshots, element annotations, and inline comments.
 
 ## Installation
 
@@ -39,12 +39,12 @@ That's it. The widget appears as a floating button. Reviewers with a valid token
 
 ### `FeedbackProvider`
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `apiKey` | `string` | Yes | Your FasterFixes project API key |
-| `apiOrigin` | `string` | No | Custom API origin (default: `https://app.fasterfixes.com`) |
-| `classNames` | `Partial<ClassNames>` | No | CSS class overrides for widget elements |
-| `labels` | `Partial<Labels>` | No | Custom UI text labels |
+| Prop         | Type                  | Required | Description                                                 |
+| ------------ | --------------------- | -------- | ----------------------------------------------------------- |
+| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                            |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://app.faster-fixes.com`) |
+| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                     |
+| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                       |
 
 ### `useFeedback` hook
 
