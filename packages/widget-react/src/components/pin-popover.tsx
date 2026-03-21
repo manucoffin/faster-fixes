@@ -36,6 +36,16 @@ export function PinPopover() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset local state when switching between feedback items
+  useEffect(() => {
+    setIsEditing(false);
+    setEditComment("");
+    setIsSaving(false);
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+    setError(null);
+  }, [activeFeedback?.id]);
+
   // Find the target element for positioning
   const targetEl = (() => {
     if (!activeFeedback) return null;
@@ -242,6 +252,14 @@ export function PinPopover() {
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="button"
+              style={secondaryButtonStyle}
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              {labels.cancelButton}
+            </button>
+            <button
+              type="button"
               style={{
                 ...buttonBaseStyle,
                 backgroundColor: "#dc2626",
@@ -252,14 +270,6 @@ export function PinPopover() {
               disabled={isDeleting}
             >
               {isDeleting ? "..." : labels.deleteButton}
-            </button>
-            <button
-              type="button"
-              style={secondaryButtonStyle}
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isDeleting}
-            >
-              {labels.cancelButton}
             </button>
           </div>
         </div>
