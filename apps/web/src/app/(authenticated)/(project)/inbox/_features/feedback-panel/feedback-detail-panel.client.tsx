@@ -12,6 +12,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import { ExternalLink, ImageOff } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { AssigneeSelect } from "./assignee-select.client";
+import { CopyFeedbackMarkdown } from "./copy-feedback-markdown.client";
+import { ScreenshotDialog } from "./screenshot-dialog.client";
 import { StatusSelect } from "./status-select.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
@@ -57,15 +59,18 @@ export function FeedbackDetailPanel({
 
         <div className="flex flex-col gap-6 p-4 pt-0">
           {/* Page URL */}
-          <a
-            href={feedback.pageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-          >
-            {feedback.pageUrl}
-            <ExternalLink className="size-3.5" />
-          </a>
+          <div className="flex items-center justify-between gap-2">
+            <a
+              href={feedback.pageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary inline-flex min-w-0 items-center gap-1.5 text-sm font-medium hover:underline"
+            >
+              <span className="truncate">{feedback.pageUrl}</span>
+              <ExternalLink className="size-3.5 shrink-0" />
+            </a>
+            <CopyFeedbackMarkdown feedback={feedback} />
+          </div>
 
           {/* Comment */}
           <div>
@@ -86,11 +91,7 @@ export function FeedbackDetailPanel({
             </h4>
             {feedback.screenshotUrl ? (
               <div className="flex flex-col gap-2">
-                <img
-                  src={feedback.screenshotUrl}
-                  alt="Feedback screenshot"
-                  className="w-full rounded-md border"
-                />
+                <ScreenshotDialog src={feedback.screenshotUrl} />
                 <div className="text-muted-foreground flex flex-col gap-0.5 text-xs">
                   {feedback.clickX != null && feedback.clickY != null && (
                     <span>

@@ -2,10 +2,13 @@
 
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { Separator } from "@workspace/ui/components/separator";
 import { Archive, ArrowRight, X } from "lucide-react";
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import { CopySelectedMarkdown } from "./copy-selected-markdown.client";
 
 type BulkActionToolbarProps = {
-  selectedCount: number;
+  selectedItems: GetFeedbackOutput[number][];
   onMoveToStatus: (status: string) => void;
   onArchive: () => void;
   onClearSelection: () => void;
@@ -18,16 +21,25 @@ const STATUS_OPTIONS = [
 ] as const;
 
 export function BulkActionToolbar({
-  selectedCount,
+  selectedItems,
   onMoveToStatus,
   onArchive,
   onClearSelection,
 }: BulkActionToolbarProps) {
-  if (selectedCount === 0) return null;
+  if (selectedItems.length === 0) return null;
 
   return (
-    <div className="bg-muted/50 animate-in fade-in duration-200 flex items-center gap-2 rounded-lg border p-2">
-      <Badge variant="secondary">{selectedCount} selected</Badge>
+    <div className="bg-muted/50 animate-in fade-in flex items-center gap-2 rounded-lg border p-2 duration-200">
+      <Badge variant="secondary">
+        <span className="tabular-nums">{selectedItems.length}</span> selected
+      </Badge>
+
+      <CopySelectedMarkdown items={selectedItems} />
+
+      <Separator
+        orientation="vertical"
+        className="ml-2 data-[orientation=vertical]:h-5"
+      />
 
       <div className="flex items-center gap-1">
         <span className="text-muted-foreground ml-2 text-xs">Move to:</span>

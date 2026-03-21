@@ -161,7 +161,7 @@ export function KanbanBoard({
       </div>
 
       <BulkActionToolbar
-        selectedCount={selectedIds.size}
+        selectedItems={feedback.filter((f) => selectedIds.has(f.id))}
         onMoveToStatus={(status) => handleBulkAction(status)}
         onArchive={() => handleBulkAction("closed")}
         onClearSelection={() => setSelectedIds(new Set())}
