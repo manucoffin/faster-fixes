@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useFeedbackContext } from "../context.js";
 import { triggerButtonStyle, toolbarStyle, toolbarButtonStyle } from "../styles.js";
 
@@ -155,12 +155,8 @@ export function FloatingButton() {
   // Bottom/middle positions: toolbar grows upward, close button at bottom
   const expandsUp = position.includes("bottom") || position.includes("middle");
 
-  const stylesInjected = useRef(false);
   useEffect(() => {
-    if (!stylesInjected.current) {
-      ensureAnimationStyles();
-      stylesInjected.current = true;
-    }
+    ensureAnimationStyles();
   }, []);
 
   const isActive = mode !== "idle";

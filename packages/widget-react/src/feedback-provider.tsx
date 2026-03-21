@@ -66,10 +66,7 @@ export function FeedbackProvider({
     [apiKey, apiOrigin],
   );
 
-  const mergedClassNames: ClassNames = useMemo(
-    () => ({ ...customClassNames }),
-    [customClassNames],
-  );
+  const mergedClassNames: ClassNames = { ...customClassNames };
 
   const mergedLabels: Labels = useMemo(
     () => ({ ...DEFAULT_LABELS, ...customLabels }),
@@ -113,11 +110,6 @@ export function FeedbackProvider({
       clearInterval(interval);
     };
   }, []);
-
-  // Sync highlight with active feedback
-  useEffect(() => {
-    setHighlightSelector(activeFeedback?.selector ?? null);
-  }, [activeFeedback]);
 
   // Initialization: token → config → feedback
   useEffect(() => {
@@ -165,6 +157,7 @@ export function FeedbackProvider({
       // Delay to let page layout stabilize
       setTimeout(() => {
         setActiveFeedback(pending);
+        setHighlightSelector(pending.selector ?? null);
         if (pending.selector) {
           setTimeout(() => {
             try {
@@ -220,7 +213,6 @@ export function FeedbackProvider({
     show,
     hide,
     feedbackItems,
-    setFeedbackItems,
     refreshFeedback,
     selectedElement,
     setSelectedElement,
@@ -259,19 +251,14 @@ export function FeedbackProvider({
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* Annotation mode overlay */}
             <AnnotationOverlay />
-
-            {/* Element highlight for hovered/active pins */}
             <ElementHighlight />
 
-            {/* Existing feedback pins — only current page */}
             {showPins &&
               visiblePins.map((item) => (
                 <FeedbackPin key={item.id} item={item} />
               ))}
 
-            {/* Toolbar + list container */}
             <div
               style={{
                 position: "fixed",
@@ -294,7 +281,6 @@ export function FeedbackProvider({
               {isActive && <FeedbackList />}
             </div>
 
-            {/* Popovers rendered last so they appear above toolbar */}
             <CommentPopover />
             <PinPopover />
           </div>,

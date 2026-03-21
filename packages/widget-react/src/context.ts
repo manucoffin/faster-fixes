@@ -42,7 +42,6 @@ export type FeedbackContextValue = {
 
   // Feedback data
   feedbackItems: FeedbackItem[];
-  setFeedbackItems: (items: FeedbackItem[]) => void;
   refreshFeedback: () => Promise<void>;
 
   // Selection state

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { generateSelector } from "@fasterfixes/core";
 import html2canvas from "html2canvas-pro";
 import { useFeedbackContext } from "../context.js";
 import { overlayHighlightStyle } from "../styles.js";
@@ -42,9 +41,6 @@ export function AnnotationOverlay() {
 
       setSelectedElement(target);
       setClickCoords({ x: e.clientX, y: e.clientY });
-
-      // Generate selector
-      generateSelector(target);
 
       // Capture screenshot asynchronously, store promise for submit to await
       const capturePromise = html2canvas(document.body, {
