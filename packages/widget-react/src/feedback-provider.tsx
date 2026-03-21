@@ -42,6 +42,9 @@ export function FeedbackProvider({
   const [mode, setMode] = useState<WidgetMode>("idle");
   const [isVisible, setIsVisible] = useState(true);
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
+  const [currentUrl, setCurrentUrl] = useState(() =>
+    typeof window !== "undefined" ? window.location.href : "",
+  );
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
   const [clickCoords, setClickCoords] = useState<{
     x: number;
@@ -72,18 +75,43 @@ export function FeedbackProvider({
     [customLabels],
   );
 
+  // Fetch ALL feedback for the project (list shows all, pins filter by page)
   const refreshFeedback = useCallback(async () => {
     if (!reviewerToken) return;
     try {
-      const res = await client.getFeedback(
-        window.location.href,
-        reviewerToken,
-      );
+      const res = await client.getFeedback(reviewerToken);
       setFeedbackItems(res.feedback);
     } catch {
       // Silently fail — pins just won't update
     }
   }, [client, reviewerToken]);
+
+  // Detect URL changes (SPA navigation)
+  useEffect(() => {
+    function checkUrl() {
+      const href = window.location.href;
+      setCurrentUrl((prev) => {
+        if (prev !== href) {
+          // Clear active pin when navigating
+          setActiveFeedback(null);
+          setHighlightSelector(null);
+          return href;
+        }
+        return prev;
+      });
+    }
+
+    // Listen for browser back/forward
+    window.addEventListener("popstate", checkUrl);
+
+    // Poll for pushState/replaceState navigation (SPA frameworks)
+    const interval = setInterval(checkUrl, 500);
+
+    return () => {
+      window.removeEventListener("popstate", checkUrl);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Sync highlight with active feedback
   useEffect(() => {
@@ -109,10 +137,8 @@ export function FeedbackProvider({
           return;
         }
 
-        const res = await client.getFeedback(
-          window.location.href,
-          token!,
-        );
+        // Fetch all feedback for the project
+        const res = await client.getFeedback(token!);
         setFeedbackItems(res.feedback);
       } catch {
         // Config/feedback fetch failed — widget won't render
@@ -140,9 +166,13 @@ export function FeedbackProvider({
     setShowList(false);
   };
 
+  // Pins: only show feedback for the current page
+  const currentPageItems = feedbackItems.filter(
+    (f) => f.pageUrl === currentUrl,
+  );
   const visiblePins = showResolved
-    ? feedbackItems
-    : feedbackItems.filter(
+    ? currentPageItems
+    : currentPageItems.filter(
         (f) => f.status !== "resolved" && f.status !== "closed",
       );
 
@@ -201,7 +231,7 @@ export function FeedbackProvider({
             {/* Element highlight for hovered/active pins */}
             <ElementHighlight />
 
-            {/* Existing feedback pins (only when visible and active) */}
+            {/* Existing feedback pins — only current page */}
             {showPins &&
               visiblePins.map((item) => (
                 <FeedbackPin key={item.id} item={item} />

@@ -214,20 +214,11 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl;
   const url = searchParams.get("url");
-  if (!url) {
-    return withCors(
-      req,
-      NextResponse.json(
-        { error: "url query parameter is required" },
-        { status: 422 },
-      ),
-    );
-  }
 
   const feedbackList = await prisma.feedback.findMany({
     where: {
       projectId: project.id,
-      pageUrl: url,
+      ...(url ? { pageUrl: url } : {}),
     },
     orderBy: { createdAt: "desc" },
     include: {
