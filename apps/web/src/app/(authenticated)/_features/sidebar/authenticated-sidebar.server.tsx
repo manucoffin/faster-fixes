@@ -10,10 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { CreditCard, FolderOpen, Settings2 } from "lucide-react";
+import { CreditCard, Settings2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { OrganizationSwitcher } from "./organization/organization-switcher.client";
+import { ProjectSwitcher } from "./project/project-switcher.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
 export const AuthenticatedSidebar = async ({
@@ -24,23 +25,10 @@ export const AuthenticatedSidebar = async ({
       <SidebarHeader>
         <AppLogo className="w-40 p-2" />
         <OrganizationSwitcher />
+        <ProjectSwitcher />
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/projects">
-                <SidebarMenuButton tooltip="Projects">
-                  <FolderOpen />
-                  <span>My projects</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
         <SidebarGroup>
           <SidebarGroupLabel>My Account</SidebarGroupLabel>
           <SidebarMenu>

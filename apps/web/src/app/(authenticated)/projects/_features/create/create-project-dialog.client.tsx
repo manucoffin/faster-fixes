@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,16 +34,29 @@ import {
 } from "./create-project.schema";
 
 type CreateProjectDialogProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
+export function CreateProjectDialog({
+  children,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: CreateProjectDialogProps) {
   const trpc = useTRPC();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: activeOrg } = useActiveOrganization();
+  const { setActiveProject } = useActiveProject();
 
-  const [open, setOpen] = React.useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled
+    ? (controlledOnOpenChange ?? (() => {}))
+    : setUncontrolledOpen;
+
   const [rawApiKey, setRawApiKey] = React.useState<string | null>(null);
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
@@ -62,6 +76,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
         setOpen(false);
         setRawApiKey(result.rawApiKey);
         setProjectId(result.id);
+        setActiveProject(result.id);
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projets.list.queryKey(),
         });
@@ -109,7 +124,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
+        {children && <DialogTrigger asChild>{children}</DialogTrigger>}
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>New project</DialogTitle>
