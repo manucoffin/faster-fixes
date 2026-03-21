@@ -33,13 +33,14 @@ export const triggerButtonStyle = (
 
 export const toolbarStyle = (color: string): React.CSSProperties => ({
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   gap: 4,
   backgroundColor: color,
   borderRadius: 24,
   padding: 4,
+  width: 40,
   boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-  transition: "width 0.2s ease",
   overflow: "hidden",
 });
 
@@ -59,16 +60,16 @@ export const toolbarButtonStyle: React.CSSProperties = {
 };
 
 export const popoverStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
+  backgroundColor: "#1c1c1c",
   borderRadius: 8,
-  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
   padding: 16,
   width: 320,
   zIndex: 2147483647,
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontSize: 14,
-  color: "#1a1a1a",
+  color: "#e4e4e7",
   pointerEvents: "auto",
 };
 
@@ -76,13 +77,15 @@ export const textareaStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 80,
   padding: 8,
-  border: "1px solid #e2e8f0",
+  border: "1px solid #3f3f46",
   borderRadius: 6,
   resize: "vertical",
   fontFamily: "inherit",
   fontSize: 14,
   outline: "none",
   boxSizing: "border-box",
+  backgroundColor: "#27272a",
+  color: "#e4e4e7",
 };
 
 export const buttonBaseStyle: React.CSSProperties = {
@@ -104,7 +107,7 @@ export const primaryButtonStyle = (color: string): React.CSSProperties => ({
 export const secondaryButtonStyle: React.CSSProperties = {
   ...buttonBaseStyle,
   backgroundColor: "transparent",
-  color: "#64748b",
+  color: "#a1a1aa",
 };
 
 export const pinStyle = (statusColor: string): React.CSSProperties => ({
@@ -112,8 +115,8 @@ export const pinStyle = (statusColor: string): React.CSSProperties => ({
   height: 24,
   borderRadius: "50%",
   backgroundColor: statusColor,
-  border: "2px solid #fff",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+  border: "2px solid #27272a",
+  boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -135,23 +138,23 @@ export const overlayHighlightStyle: React.CSSProperties = {
 };
 
 export const feedbackListStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
+  backgroundColor: "#1c1c1c",
   borderRadius: 8,
-  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
   maxHeight: 320,
   overflowY: "auto",
   width: 320,
-  marginBottom: 8,
   zIndex: 2147483647,
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontSize: 13,
+  color: "#e4e4e7",
   pointerEvents: "auto",
 };
 
 export const feedbackListItemStyle: React.CSSProperties = {
   padding: "10px 14px",
-  borderBottom: "1px solid #f1f5f9",
+  borderBottom: "1px solid #3f3f46",
   cursor: "pointer",
   display: "flex",
   alignItems: "center",

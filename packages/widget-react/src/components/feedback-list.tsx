@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STATUS_COLORS } from "@fasterfixes/core";
 import type { FeedbackStatus } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
@@ -7,6 +7,8 @@ import {
   feedbackListItemStyle,
   secondaryButtonStyle,
 } from "../styles.js";
+
+const EXIT_DURATION = 150;
 
 export function FeedbackList() {
   const {
@@ -17,9 +19,41 @@ export function FeedbackList() {
     classNames,
     labels,
     color,
+    position,
+    showList,
   } = useFeedbackContext();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Delayed unmount: stay mounted during exit animation
+  const [mounted, setMounted] = useState(showList);
+  const [exiting, setExiting] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (showList) {
+      clearTimeout(timerRef.current);
+      setExiting(false);
+      setMounted(true);
+    } else if (mounted) {
+      setExiting(true);
+      timerRef.current = setTimeout(() => {
+        setMounted(false);
+        setExiting(false);
+      }, EXIT_DURATION);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [showList, mounted]);
+
+  if (!mounted) return null;
+
+  const enterAnimation = position.includes("right")
+    ? "ff-list-slide-left 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)"
+    : "ff-list-slide-right 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+  const exitAnimation = position.includes("right")
+    ? `ff-list-exit-left ${EXIT_DURATION}ms ease-in forwards`
+    : `ff-list-exit-right ${EXIT_DURATION}ms ease-in forwards`;
+
+  const animation = exiting ? exitAnimation : enterAnimation;
 
   const visibleItems = showResolved
     ? feedbackItems
@@ -27,37 +61,17 @@ export function FeedbackList() {
         (f) => f.status !== "resolved" && f.status !== "closed",
       );
 
-  if (isCollapsed) {
-    return (
-      <button
-        type="button"
-        data-ff-widget
-        style={{
-          ...secondaryButtonStyle,
-          backgroundColor: "#fff",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          borderRadius: 8,
-          marginBottom: 8,
-          fontSize: 12,
-        }}
-        onClick={() => setIsCollapsed(false)}
-      >
-        {labels.feedbackListTitle} ({visibleItems.length})
-      </button>
-    );
-  }
-
   return (
     <div
       className={`ff-feedback-list ${classNames.feedbackList ?? ""}`}
-      style={feedbackListStyle}
+      style={{ ...feedbackListStyle, animation }}
       data-ff-widget
     >
       {/* Header */}
       <div
         style={{
           padding: "10px 14px",
-          borderBottom: "1px solid #e2e8f0",
+          borderBottom: "1px solid #3f3f46",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -79,17 +93,6 @@ export function FeedbackList() {
           >
             {showResolved ? labels.hideResolved : labels.showResolved}
           </button>
-          <button
-            type="button"
-            style={{
-              ...secondaryButtonStyle,
-              padding: "2px 6px",
-              fontSize: 12,
-            }}
-            onClick={() => setIsCollapsed(true)}
-          >
-            &times;
-          </button>
         </div>
       </div>
 
@@ -99,7 +102,7 @@ export function FeedbackList() {
           style={{
             padding: "20px 14px",
             textAlign: "center",
-            color: "#94a3b8",
+            color: "#71717a",
             fontSize: 13,
           }}
         >
@@ -155,7 +158,7 @@ export function FeedbackList() {
                 >
                   {item.comment}
                 </p>
-                <span style={{ fontSize: 11, color: "#94a3b8" }}>
+                <span style={{ fontSize: 11, color: "#71717a" }}>
                   {item.reviewer.name}
                 </span>
               </div>

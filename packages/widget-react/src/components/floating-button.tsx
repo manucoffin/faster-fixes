@@ -12,12 +12,12 @@ function ensureAnimationStyles() {
   style.textContent = `
     @keyframes ff-toolbar-expand {
       0% {
-        max-width: 40px;
+        max-height: 40px;
         border-radius: 50%;
         opacity: 0.8;
       }
       100% {
-        max-width: 200px;
+        max-height: 200px;
         border-radius: 24px;
         opacity: 1;
       }
@@ -25,6 +25,26 @@ function ensureAnimationStyles() {
     @keyframes ff-button-pop {
       from { transform: scale(0.6); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes ff-list-slide-left {
+      from { transform: translateX(12px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes ff-list-slide-right {
+      from { transform: translateX(-12px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes ff-popover-fadeout {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(8px); opacity: 0; }
+    }
+    @keyframes ff-list-exit-left {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(12px); opacity: 0; }
+    }
+    @keyframes ff-list-exit-right {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-12px); opacity: 0; }
     }
   `;
   document.head.appendChild(style);
@@ -129,7 +149,11 @@ export function FloatingButton() {
     setShowPins,
     showList,
     setShowList,
+    position,
   } = useFeedbackContext();
+
+  // Bottom/middle positions: toolbar grows upward, close button at bottom
+  const expandsUp = position.includes("bottom") || position.includes("middle");
 
   const stylesInjected = useRef(false);
   useEffect(() => {
@@ -178,59 +202,71 @@ export function FloatingButton() {
     );
   }
 
-  // Active state: expanded toolbar pill
+  const listButton = (
+    <button
+      key="list"
+      type="button"
+      style={{
+        ...toolbarButtonStyle,
+        backgroundColor: showList
+          ? "rgba(255,255,255,0.3)"
+          : "rgba(255,255,255,0.15)",
+      }}
+      onClick={() => setShowList(!showList)}
+      aria-label={showList ? "Hide feedback list" : "Show feedback list"}
+      title={showList ? "Hide list" : "Show list"}
+    >
+      <ListIcon />
+    </button>
+  );
+
+  const eyeButton = (
+    <button
+      key="eye"
+      type="button"
+      style={{
+        ...toolbarButtonStyle,
+        backgroundColor: showPins
+          ? "rgba(255,255,255,0.15)"
+          : "rgba(255,255,255,0.3)",
+      }}
+      onClick={() => setShowPins(!showPins)}
+      aria-label={showPins ? "Hide all feedback" : "Show all feedback"}
+      title={showPins ? "Hide markers" : "Show markers"}
+    >
+      {showPins ? <EyeIcon /> : <EyeOffIcon />}
+    </button>
+  );
+
+  const closeButton = (
+    <button
+      key="close"
+      type="button"
+      style={toolbarButtonStyle}
+      onClick={handleClose}
+      aria-label="Exit feedback mode"
+      title="Close"
+    >
+      <CloseIcon />
+    </button>
+  );
+
+  // Close button stays nearest to where the trigger button was
+  const buttons = expandsUp
+    ? [listButton, eyeButton, closeButton]
+    : [closeButton, listButton, eyeButton];
+
+  // Active state: expanded vertical toolbar
   return (
     <div
       className={`ff-button ${classNames.button ?? ""}`}
       style={{
         ...toolbarStyle(color),
         animation: "ff-toolbar-expand 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-        overflow: "hidden",
       }}
       data-ff-widget
     >
-      {/* Toggle list */}
-      <button
-        type="button"
-        style={{
-          ...toolbarButtonStyle,
-          backgroundColor: showList
-            ? "rgba(255,255,255,0.3)"
-            : "rgba(255,255,255,0.15)",
-        }}
-        onClick={() => setShowList(!showList)}
-        aria-label={showList ? "Hide feedback list" : "Show feedback list"}
-        title={showList ? "Hide list" : "Show list"}
-      >
-        <ListIcon />
-      </button>
-
-      {/* Toggle pin visibility */}
-      <button
-        type="button"
-        style={{
-          ...toolbarButtonStyle,
-          backgroundColor: showPins
-            ? "rgba(255,255,255,0.15)"
-            : "rgba(255,255,255,0.3)",
-        }}
-        onClick={() => setShowPins(!showPins)}
-        aria-label={showPins ? "Hide all feedback" : "Show all feedback"}
-        title={showPins ? "Hide markers" : "Show markers"}
-      >
-        {showPins ? <EyeIcon /> : <EyeOffIcon />}
-      </button>
-
-      {/* Close */}
-      <button
-        type="button"
-        style={toolbarButtonStyle}
-        onClick={handleClose}
-        aria-label="Exit feedback mode"
-        title="Close"
-      >
-        <CloseIcon />
-      </button>
+      {buttons}
     </div>
   );
 }

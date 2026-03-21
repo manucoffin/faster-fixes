@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useFloating,
   autoUpdate,
@@ -14,6 +14,8 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from "../styles.js";
+
+const FADEOUT_DURATION = 200;
 
 export function CommentPopover() {
   const {
@@ -36,10 +38,15 @@ export function CommentPopover() {
 
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fadingOut, setFadingOut] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const frozenStyleRef = useRef<React.CSSProperties | null>(null);
+
+  const isOpen = mode === "selected" || mode === "submitting" || mode === "error";
 
   const { refs, floatingStyles } = useFloating({
-    open: mode === "selected" || mode === "submitting" || mode === "success" || mode === "error",
+    open: isOpen || fadingOut,
     elements: {
       reference: selectedElement,
     },
@@ -49,13 +56,22 @@ export function CommentPopover() {
     placement: "bottom",
   });
 
-  function handleCancel() {
+  // Clean up timer on unmount
+  useEffect(() => () => clearTimeout(fadeTimerRef.current), []);
+
+  function resetState() {
     setComment("");
     setError(null);
+    setFadingOut(false);
+    frozenStyleRef.current = null;
     setSelectedElement(null);
     setClickCoords(null);
     setScreenshotBlob(null);
     setMode("idle");
+  }
+
+  function handleCancel() {
+    resetState();
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -73,14 +89,9 @@ export function CommentPopover() {
     const browserInfo = getBrowserInfo();
     const selector = selectedElement ? generateSelector(selectedElement) : undefined;
 
-    // Await the screenshot capture if still in progress
     let screenshot = screenshotBlob;
-    console.info("[faster-fixes] submit — screenshotBlob from state:", screenshot ? `${screenshot.size} bytes` : "null");
-    console.info("[faster-fixes] submit — screenshotCaptureRef.current:", screenshotCaptureRef.current ? "promise present" : "null");
     if (!screenshot && screenshotCaptureRef.current) {
-      console.info("[faster-fixes] submit — awaiting screenshot capture promise...");
       screenshot = await screenshotCaptureRef.current;
-      console.info("[faster-fixes] submit — awaited result:", screenshot ? `${screenshot.size} bytes` : "null");
     }
 
     try {
@@ -97,9 +108,25 @@ export function CommentPopover() {
         screenshot ?? undefined,
       );
 
+      void refreshFeedback();
+
+      // Freeze the current position before fading so Floating UI recalc can't move it
+      const floatingEl = refs.floating.current;
+      if (floatingEl) {
+        const rect = floatingEl.getBoundingClientRect();
+        frozenStyleRef.current = {
+          position: "fixed",
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+        };
+      }
+
       setComment("");
-      setMode("success");
-      await refreshFeedback();
+
+      // Fade out then close
+      setFadingOut(true);
+      fadeTimerRef.current = setTimeout(resetState, FADEOUT_DURATION);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : labels.errorMessage,
@@ -108,24 +135,12 @@ export function CommentPopover() {
     }
   }
 
-  function handleCloseSuccess() {
-    setSelectedElement(null);
-    setClickCoords(null);
-    setScreenshotBlob(null);
-    setMode("idle");
-  }
-
   function handleRetry() {
     setMode("selected");
     void handleSubmit();
   }
 
-  if (
-    mode !== "selected" &&
-    mode !== "submitting" &&
-    mode !== "success" &&
-    mode !== "error"
-  ) {
+  if (!isOpen && !fadingOut) {
     return null;
   }
 
@@ -133,24 +148,19 @@ export function CommentPopover() {
     <div
       ref={refs.setFloating}
       className={`ff-popover ${classNames.popover ?? ""}`}
-      style={{ ...popoverStyle, ...floatingStyles }}
+      style={{
+        ...popoverStyle,
+        ...(fadingOut && frozenStyleRef.current
+          ? frozenStyleRef.current
+          : floatingStyles),
+        ...(fadingOut
+          ? { animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards` }
+          : undefined),
+      }}
       data-ff-widget
       onKeyDown={handleKeyDown}
     >
-      {mode === "success" ? (
-        <div className={`ff-success ${classNames.successState ?? ""}`}>
-          <p style={{ margin: "0 0 12px", color: "#16a34a", fontWeight: 500 }}>
-            {labels.successMessage}
-          </p>
-          <button
-            type="button"
-            style={secondaryButtonStyle}
-            onClick={handleCloseSuccess}
-          >
-            {labels.closeButton}
-          </button>
-        </div>
-      ) : mode === "error" ? (
+      {mode === "error" && !fadingOut ? (
         <div className={`ff-error ${classNames.errorState ?? ""}`}>
           <p style={{ margin: "0 0 8px", color: "#dc2626", fontSize: 13 }}>
             {error ?? labels.errorMessage}
@@ -181,7 +191,7 @@ export function CommentPopover() {
             placeholder={labels.textareaPlaceholder}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            disabled={mode === "submitting"}
+            disabled={mode === "submitting" || fadingOut}
             autoFocus
           />
           <div
@@ -196,7 +206,7 @@ export function CommentPopover() {
               type="button"
               style={secondaryButtonStyle}
               onClick={handleCancel}
-              disabled={mode === "submitting"}
+              disabled={mode === "submitting" || fadingOut}
             >
               {labels.cancelButton}
             </button>
@@ -204,10 +214,10 @@ export function CommentPopover() {
               type="button"
               style={{
                 ...primaryButtonStyle(color),
-                opacity: mode === "submitting" || !comment.trim() ? 0.6 : 1,
+                opacity: mode === "submitting" || !comment.trim() || fadingOut ? 0.6 : 1,
               }}
               onClick={handleSubmit}
-              disabled={mode === "submitting" || !comment.trim()}
+              disabled={mode === "submitting" || !comment.trim() || fadingOut}
             >
               {mode === "submitting" ? "..." : labels.submitButton}
             </button>
