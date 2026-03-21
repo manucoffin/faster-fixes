@@ -26,7 +26,7 @@ export function BulkActionToolbar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="bg-muted/50 flex items-center gap-2 rounded-lg border p-2">
+    <div className="bg-muted/50 animate-in fade-in duration-200 flex items-center gap-2 rounded-lg border p-2">
       <Badge variant="secondary">{selectedCount} selected</Badge>
 
       <div className="flex items-center gap-1">

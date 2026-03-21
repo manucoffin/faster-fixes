@@ -13,7 +13,7 @@ import {
 import * as React from "react";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
-import { KanbanColumn } from "./kanban-column.client";
+import { KanbanColumnBody, KanbanColumnHeader } from "./kanban-column.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -146,6 +146,20 @@ export function KanbanBoard({
         </p>
       </div>
 
+      <div className="grid grid-cols-3 gap-4">
+        {COLUMNS.map((col) => (
+          <KanbanColumnHeader
+            key={col.id}
+            id={col.id}
+            title={col.title}
+            count={(grouped[col.id] ?? []).length}
+            selectedIds={selectedIds}
+            itemIds={(grouped[col.id] ?? []).map((i) => i.id)}
+            onToggleSelectAll={handleToggleSelectAll}
+          />
+        ))}
+      </div>
+
       <BulkActionToolbar
         selectedCount={selectedIds.size}
         onMoveToStatus={(status) => handleBulkAction(status)}
@@ -160,14 +174,12 @@ export function KanbanBoard({
       >
         <div className="grid grid-cols-3 gap-4">
           {COLUMNS.map((col) => (
-            <KanbanColumn
+            <KanbanColumnBody
               key={col.id}
               id={col.id}
-              title={col.title}
               items={grouped[col.id] ?? []}
               selectedIds={selectedIds}
               onToggleSelect={handleToggleSelect}
-              onToggleSelectAll={handleToggleSelectAll}
               onSelectFeedback={onSelectFeedback}
             />
           ))}
