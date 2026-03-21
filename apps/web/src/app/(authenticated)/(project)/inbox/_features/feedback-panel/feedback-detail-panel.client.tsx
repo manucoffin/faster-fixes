@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
+import { useOrgMembers } from "@/app/(authenticated)/(project)/inbox/_features/use-org-members";
 import {
   Avatar,
   AvatarFallback,
@@ -27,20 +29,11 @@ import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
-type OrgMember = {
-  id: string;
-  name: string | null;
-  image: string | null;
-};
-
 type FeedbackDetailPanelProps = {
+  projectId: string;
   feedback: FeedbackItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStatusChange: (feedbackId: string, status: string) => void;
-  onAssigneeChange: (feedbackId: string, assigneeId: string | null) => void;
-  orgMembers: OrgMember[];
-  currentMemberId: string | null;
 };
 
 const STATUS_OPTIONS = [
@@ -65,14 +58,14 @@ function formatBrowserMeta(f: FeedbackItem) {
 }
 
 export function FeedbackDetailPanel({
+  projectId,
   feedback,
   open,
   onOpenChange,
-  onStatusChange,
-  onAssigneeChange,
-  orgMembers,
-  currentMemberId,
 }: FeedbackDetailPanelProps) {
+  const { updateStatus, updateAssignee } = useFeedbackMutations(projectId);
+  const { members: orgMembers, currentMemberId } = useOrgMembers();
+
   if (!feedback) return null;
 
   const browserMeta = formatBrowserMeta(feedback);
@@ -165,7 +158,7 @@ export function FeedbackDetailPanel({
             </h4>
             <Select
               value={feedback.status}
-              onValueChange={(value) => onStatusChange(feedback.id, value)}
+              onValueChange={(value) => updateStatus(feedback.id, value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -191,7 +184,7 @@ export function FeedbackDetailPanel({
                   variant="ghost"
                   size="sm"
                   className="h-7 text-xs"
-                  onClick={() => onAssigneeChange(feedback.id, currentMemberId)}
+                  onClick={() => updateAssignee(feedback.id, currentMemberId)}
                 >
                   <UserPlus className="mr-1 size-3" />
                   Assign to me
@@ -201,7 +194,7 @@ export function FeedbackDetailPanel({
             <Select
               value={feedback.assignee?.id ?? "unassigned"}
               onValueChange={(value) =>
-                onAssigneeChange(
+                updateAssignee(
                   feedback.id,
                   value === "unassigned" ? null : value,
                 )

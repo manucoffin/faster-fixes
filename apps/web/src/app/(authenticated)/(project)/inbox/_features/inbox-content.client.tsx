@@ -1,9 +1,9 @@
 "use client";
 
-import { useActiveMember, useActiveOrganization } from "@/lib/auth";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Empty,
   EmptyDescription,
@@ -18,25 +18,47 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { AlertCircle, Archive, Inbox } from "lucide-react";
+import { AlertCircle, Archive, FolderOpen, Inbox } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
-import { toast } from "sonner";
 import { ArchiveTab } from "./archive/archive-tab.client";
 import { FeedbackDetailPanel } from "./feedback-panel/feedback-detail-panel.client";
 import { FeedbackFilters } from "./filters/feedback-filters.client";
-import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
 import { KanbanBoard } from "./kanban/kanban-board.client";
 
-type InboxTabProps = {
-  projectId: string;
-};
+export function InboxContent() {
+  const { activeProject, isPending } = useActiveProject();
 
-export function InboxTab({ projectId }: InboxTabProps) {
+  if (isPending) {
+    return (
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!activeProject) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderOpen />
+          </EmptyMedia>
+          <EmptyTitle>Select a project</EmptyTitle>
+          <EmptyDescription>
+            Choose a project from the sidebar to view its feedback inbox.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  return <InboxBoard projectId={activeProject.id} />;
+}
+
+function InboxBoard({ projectId }: { projectId: string }) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const { data: activeOrg } = useActiveOrganization();
-  const { data: activeMember } = useActiveMember();
 
   const [view, setView] = useQueryState(
     "view",
@@ -60,121 +82,10 @@ export function InboxTab({ projectId }: InboxTabProps) {
     }),
   );
 
-  const feedbackQueryKey = trpc.authenticated.projects.feedback.list.queryKey({
-    projectId,
-  });
-
-  const updateStatusMutation = useMutation(
-    trpc.authenticated.projects.feedback.updateStatus.mutationOptions({
-      onMutate: async ({ feedbackId, status }) => {
-        await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
-        const previous = queryClient.getQueryData(feedbackQueryKey);
-
-        queryClient.setQueryData(
-          feedbackQueryKey,
-          (old: GetFeedbackOutput | undefined) =>
-            old?.map((f) => (f.id === feedbackId ? { ...f, status } : f)),
-        );
-
-        return { previous };
-      },
-      onError: (_err, _vars, context) => {
-        if (context?.previous) {
-          queryClient.setQueryData(feedbackQueryKey, context.previous);
-        }
-        toast.error("Failed to update status.");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
-    }),
-  );
-
-  const bulkUpdateStatusMutation = useMutation(
-    trpc.authenticated.projects.feedback.bulkUpdateStatus.mutationOptions({
-      onMutate: async ({ feedbackIds, status }) => {
-        await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
-        const previous = queryClient.getQueryData(feedbackQueryKey);
-        const idSet = new Set(feedbackIds);
-
-        queryClient.setQueryData(
-          feedbackQueryKey,
-          (old: GetFeedbackOutput | undefined) =>
-            old?.map((f) => (idSet.has(f.id) ? { ...f, status } : f)),
-        );
-
-        return { previous };
-      },
-      onError: (_err, _vars, context) => {
-        if (context?.previous) {
-          queryClient.setQueryData(feedbackQueryKey, context.previous);
-        }
-        toast.error("Failed to update status.");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
-    }),
-  );
-
-  const updateAssigneeMutation = useMutation(
-    trpc.authenticated.projects.feedback.updateAssignee.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
-      onError: () => {
-        toast.error("Failed to update assignee.");
-      },
-    }),
-  );
-
-  const orgMembers = React.useMemo(() => {
-    const members = (activeOrg as Record<string, unknown> | undefined)
-      ?.members as
-      | Array<{
-          id: string;
-          userId: string;
-          role: string;
-          user: { id: string; name: string; email: string; image?: string };
-        }>
-      | undefined;
-
-    return (
-      members?.map((m) => ({
-        id: m.id,
-        name: m.user.name || m.user.email,
-        image: m.user.image ?? null,
-      })) ?? []
-    );
-  }, [activeOrg]);
-
-  const currentMemberId =
-    ((activeMember as Record<string, unknown> | undefined)?.id as
-      | string
-      | undefined) ?? null;
-
   const selectedFeedback = React.useMemo(
     () => feedbackQuery.data?.find((f) => f.id === selectedFeedbackId) ?? null,
     [feedbackQuery.data, selectedFeedbackId],
   );
-
-  function handleStatusChange(feedbackId: string, status: string) {
-    updateStatusMutation.mutate({
-      feedbackId,
-      status: status as "new" | "in_progress" | "resolved" | "closed",
-    });
-  }
-
-  function handleBulkStatusChange(feedbackIds: string[], status: string) {
-    bulkUpdateStatusMutation.mutate({
-      feedbackIds,
-      status: status as "new" | "in_progress" | "resolved" | "closed",
-    });
-  }
-
-  function handleAssigneeChange(feedbackId: string, assigneeId: string | null) {
-    updateAssigneeMutation.mutate({ feedbackId, assigneeId });
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -243,11 +154,10 @@ export function InboxTab({ projectId }: InboxTabProps) {
             ),
             Success: ({ data: feedback }) => (
               <KanbanBoard
+                projectId={projectId}
                 feedback={feedback}
                 pageUrlFilter={pageUrlFilter}
                 sort={sort}
-                onStatusChange={handleStatusChange}
-                onBulkStatusChange={handleBulkStatusChange}
                 onSelectFeedback={(id) => setSelectedFeedbackId(id)}
               />
             ),
@@ -260,15 +170,12 @@ export function InboxTab({ projectId }: InboxTabProps) {
       </Tabs>
 
       <FeedbackDetailPanel
+        projectId={projectId}
         feedback={selectedFeedback}
         open={!!selectedFeedbackId}
         onOpenChange={(open) => {
           if (!open) setSelectedFeedbackId(null);
         }}
-        onStatusChange={handleStatusChange}
-        onAssigneeChange={handleAssigneeChange}
-        orgMembers={orgMembers}
-        currentMemberId={currentMemberId}
       />
     </div>
   );

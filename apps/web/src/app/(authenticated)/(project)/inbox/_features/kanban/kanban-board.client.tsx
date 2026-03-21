@@ -1,5 +1,6 @@
 "use client";
 
+import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
 import {
   closestCenter,
   DndContext,
@@ -17,11 +18,10 @@ import { KanbanColumn } from "./kanban-column.client";
 type FeedbackItem = GetFeedbackOutput[number];
 
 type KanbanBoardProps = {
+  projectId: string;
   feedback: FeedbackItem[];
   pageUrlFilter: string | null;
   sort: string;
-  onStatusChange: (feedbackId: string, status: string) => void;
-  onBulkStatusChange: (feedbackIds: string[], status: string) => void;
   onSelectFeedback: (id: string) => void;
 };
 
@@ -51,13 +51,13 @@ function sortFeedback(items: FeedbackItem[], sort: string): FeedbackItem[] {
 }
 
 export function KanbanBoard({
+  projectId,
   feedback,
   pageUrlFilter,
   sort,
-  onStatusChange,
-  onBulkStatusChange,
   onSelectFeedback,
 }: KanbanBoardProps) {
+  const { updateStatus, bulkUpdateStatus } = useFeedbackMutations(projectId);
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const sensors = useSensors(
@@ -105,7 +105,7 @@ export function KanbanBoard({
     const item = feedback.find((f) => f.id === feedbackId);
     if (!item || item.status === newStatus) return;
 
-    onStatusChange(feedbackId, newStatus);
+    updateStatus(feedbackId, newStatus);
   }
 
   function handleToggleSelect(id: string) {
@@ -136,7 +136,7 @@ export function KanbanBoard({
   function handleBulkAction(status: string) {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
-    onBulkStatusChange(ids, status);
+    bulkUpdateStatus(ids, status);
     setSelectedIds(new Set());
   }
 

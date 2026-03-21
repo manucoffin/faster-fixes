@@ -1,5 +1,10 @@
-import { InboxPage } from "./_features/inbox-page.client";
+import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { InboxContent } from "./_features/inbox-content.client";
 
 export default function Page() {
-  return <InboxPage />;
+  return (
+    <DashboardPageContent breadcrumbs={[{ label: "Inbox" }]}>
+      <InboxContent />
+    </DashboardPageContent>
+  );
 }
