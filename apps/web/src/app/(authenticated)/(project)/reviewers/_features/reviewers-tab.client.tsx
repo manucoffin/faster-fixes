@@ -39,7 +39,7 @@ export function ReviewersTab({ projectId }: ReviewersTabProps) {
   const [newShareUrl, setNewShareUrl] = React.useState<string | null>(null);
 
   const reviewersQuery = useQuery(
-    trpc.authenticated.projets.reviewer.list.queryOptions({ projectId }),
+    trpc.authenticated.projects.reviewer.list.queryOptions({ projectId }),
   );
 
   return (

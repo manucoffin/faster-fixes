@@ -30,11 +30,11 @@ export function RegenerateApiKeySection({
   const [regenOpen, setRegenOpen] = React.useState(false);
 
   const { data: project } = useQuery(
-    trpc.authenticated.projets.get.queryOptions({ projectId }),
+    trpc.authenticated.projects.get.queryOptions({ projectId }),
   );
 
   const regenerateApiKey = useMutation(
-    trpc.authenticated.projets.regenerateApiKey.mutationOptions({
+    trpc.authenticated.projects.regenerateApiKey.mutationOptions({
       onSuccess: (result) => {
         setNewApiKey(result.rawApiKey);
         setRegenOpen(false);

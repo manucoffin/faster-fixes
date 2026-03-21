@@ -40,7 +40,7 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
   const sortOrder = sorting[0]?.desc === false ? "asc" as const : "desc" as const;
 
   const archiveQuery = useQuery(
-    trpc.authenticated.projets.feedback.listArchived.queryOptions({
+    trpc.authenticated.projects.feedback.listArchived.queryOptions({
       projectId,
       page,
       pageSize: 20,
@@ -51,10 +51,10 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
   );
 
   const hardDeleteMutation = useMutation(
-    trpc.authenticated.projets.feedback.hardDelete.mutationOptions({
+    trpc.authenticated.projects.feedback.hardDelete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projets.feedback.listArchived.queryKey({ projectId }),
+          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId }),
         });
         toast.success("Feedback deleted permanently.");
       },
@@ -65,10 +65,10 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
   );
 
   const bulkHardDeleteMutation = useMutation(
-    trpc.authenticated.projets.feedback.bulkHardDelete.mutationOptions({
+    trpc.authenticated.projects.feedback.bulkHardDelete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projets.feedback.listArchived.queryKey({ projectId }),
+          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId }),
         });
         toast.success("Feedback deleted permanently.");
       },

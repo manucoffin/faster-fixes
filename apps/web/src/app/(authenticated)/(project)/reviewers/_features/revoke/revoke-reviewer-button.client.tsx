@@ -32,10 +32,10 @@ export function RevokeReviewerButton({
   const queryClient = useQueryClient();
 
   const revokeReviewer = useMutation(
-    trpc.authenticated.projets.reviewer.revoke.mutationOptions({
+    trpc.authenticated.projects.reviewer.revoke.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(
-          trpc.authenticated.projets.reviewer.list.queryOptions({ projectId }),
+          trpc.authenticated.projects.reviewer.list.queryOptions({ projectId }),
         );
         toast.success("Reviewer revoked");
       },
