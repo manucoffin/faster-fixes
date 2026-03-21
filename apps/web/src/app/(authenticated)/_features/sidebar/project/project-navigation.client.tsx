@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import {
   SidebarGroup,
   SidebarGroupLabel,

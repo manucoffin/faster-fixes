@@ -1,7 +1,6 @@
 "use client";
 
-import { CreateProjectDialog } from "./create/create-project-dialog.client";
-import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +20,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Check, ChevronsUpDown, FolderOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { CreateProjectDialog } from "./create/create-project-dialog.client";
 
 function ProjectSwitcherLoading() {
   return (
@@ -110,7 +110,6 @@ export function ProjectSwitcher() {
                 <Plus className="mr-2 size-4" />
                 Create project
               </DropdownMenuItem>
-
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>

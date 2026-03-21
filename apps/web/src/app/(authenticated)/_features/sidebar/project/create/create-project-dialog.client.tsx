@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,13 +70,13 @@ export function CreateProjectDialog({
   });
 
   const createProject = useMutation(
-    trpc.authenticated.projets.create.mutationOptions({
+    trpc.authenticated.projects.create.mutationOptions({
       onSuccess: (result) => {
         setOpen(false);
         setRawApiKey(result.rawApiKey);
         setActiveProject(result.id);
         queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projets.list.queryKey(),
+          queryKey: trpc.authenticated.projects.list.queryKey(),
         });
       },
       onError: (error) => {

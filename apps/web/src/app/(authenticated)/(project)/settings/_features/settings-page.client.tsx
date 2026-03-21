@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
-import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
+import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import {
   Empty,
   EmptyDescription,
@@ -44,10 +44,7 @@ export function SettingsPage() {
 
   return (
     <DashboardPageContent
-      breadcrumbs={[
-        { label: activeProject.name },
-        { label: "Settings" },
-      ]}
+      breadcrumbs={[{ label: activeProject.name }, { label: "Settings" }]}
     >
       <ProjectSettingsTab projectId={activeProject.id} />
     </DashboardPageContent>

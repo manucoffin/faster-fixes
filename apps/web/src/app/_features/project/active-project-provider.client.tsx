@@ -38,7 +38,7 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
   const prevOrgIdRef = useRef<string | undefined>(activeOrg?.id);
 
   const { data: projects, isPending } = useQuery(
-    trpc.authenticated.projets.list.queryOptions(
+    trpc.authenticated.projects.list.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id },
     ),

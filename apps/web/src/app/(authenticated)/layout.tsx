@@ -1,5 +1,5 @@
 import { loginUrl } from "@/app/_constants/routes";
-import { ActiveProjectProvider } from "@/lib/active-project/active-project-provider.client";
+import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
 import { Separator } from "@workspace/ui/components/separator";
