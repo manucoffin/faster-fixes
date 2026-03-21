@@ -1,21 +1,58 @@
 {
   "name": "@fasterfixes/core",
   "version": "0.0.2",
+  "description": "Core client library for the FasterFixes feedback widget. Handles API communication, feedback submission, and reviewer authentication.",
   "type": "module",
+  "license": "MIT",
+  "author": "FasterFixes <support@fasterfixes.com> (https://fasterfixes.com)",
+  "homepage": "https://fasterfixes.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manucoffin/faster-fixes.git",
+    "directory": "packages/widget-core"
+  },
+  "bugs": {
+    "url": "https://github.com/manucoffin/faster-fixes/issues"
+  },
+  "keywords": [
+    "feedback",
+    "widget",
+    "bug-reporting",
+    "visual-feedback",
+    "annotation",
+    "screenshot",
+    "user-feedback",
+    "qa",
+    "testing"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsdown",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit"
   },
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "!dist/**/*.map"],
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
