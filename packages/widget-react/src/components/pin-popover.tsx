@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useFloating,
   autoUpdate,
@@ -59,6 +59,27 @@ export function PinPopover() {
     middleware: [offset(12), flip(), shift({ padding: 8 })],
     placement: "bottom",
   });
+
+  // Close on outside click
+  const handleOutsideClick = useCallback(
+    (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (target.closest("[data-ff-widget]")) return;
+      setIsEditing(false);
+      setShowDeleteConfirm(false);
+      setError(null);
+      setActiveFeedback(null);
+    },
+    [setActiveFeedback],
+  );
+
+  useEffect(() => {
+    if (!activeFeedback) return;
+    document.addEventListener("mousedown", handleOutsideClick, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick, true);
+    };
+  }, [activeFeedback, handleOutsideClick]);
 
   if (!activeFeedback) return null;
 
@@ -150,13 +171,18 @@ export function PinPopover() {
               display: "inline-block",
             }}
           />
-          <span style={{ fontSize: 12, color: "#64748b" }}>
+          <span style={{ fontSize: 12, color: "#71717a" }}>
             {activeFeedback.reviewer.name}
           </span>
         </div>
         <button
           type="button"
-          style={{ ...secondaryButtonStyle, padding: "2px 6px", fontSize: 12 }}
+          style={{
+            ...secondaryButtonStyle,
+            padding: "4px 8px",
+            fontSize: 16,
+            lineHeight: 1,
+          }}
           onClick={handleClose}
         >
           &times;
