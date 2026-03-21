@@ -4,7 +4,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { Badge } from "@workspace/ui/components/badge";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
-import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { KanbanCard } from "./kanban-card.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
@@ -31,7 +31,9 @@ export function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id });
 
   const columnItemIds = items.map((i) => i.id);
-  const allSelected = columnItemIds.length > 0 && columnItemIds.every((id) => selectedIds.has(id));
+  const allSelected =
+    columnItemIds.length > 0 &&
+    columnItemIds.every((id) => selectedIds.has(id));
   const someSelected = columnItemIds.some((id) => selectedIds.has(id));
 
   return (

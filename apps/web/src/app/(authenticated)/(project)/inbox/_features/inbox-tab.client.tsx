@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useActiveMember,
-  useActiveOrganization,
-} from "@/lib/auth";
+import { useActiveMember, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,15 +18,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { AlertCircle, Inbox, Archive } from "lucide-react";
+import { AlertCircle, Archive, Inbox } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { toast } from "sonner";
 import { ArchiveTab } from "./archive/archive-tab.client";
 import { FeedbackDetailPanel } from "./feedback-detail-panel.client";
-import { FeedbackFilters } from "./feedback-filters.client";
-import { KanbanBoard } from "./kanban-board.client";
+import { FeedbackFilters } from "./filters/feedback-filters.client";
 import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
+import { KanbanBoard } from "./kanban/kanban-board.client";
 
 type InboxTabProps = {
   projectId: string;
@@ -50,23 +47,25 @@ export function InboxTab({ projectId }: InboxTabProps) {
     "sort",
     parseAsString.withDefault("newest"),
   );
-  const [selectedFeedbackId, setSelectedFeedbackId] = useQueryState("feedbackId");
+  const [selectedFeedbackId, setSelectedFeedbackId] =
+    useQueryState("feedbackId");
 
   const feedbackQuery = useQuery(
-    trpc.authenticated.projets.feedback.list.queryOptions({ projectId }),
+    trpc.authenticated.projects.feedback.list.queryOptions({ projectId }),
   );
 
   const pageUrlsQuery = useQuery(
-    trpc.authenticated.projets.feedback.distinctPageUrls.queryOptions({
+    trpc.authenticated.projects.feedback.distinctPageUrls.queryOptions({
       projectId,
     }),
   );
 
-  const feedbackQueryKey =
-    trpc.authenticated.projets.feedback.list.queryKey({ projectId });
+  const feedbackQueryKey = trpc.authenticated.projects.feedback.list.queryKey({
+    projectId,
+  });
 
   const updateStatusMutation = useMutation(
-    trpc.authenticated.projets.feedback.updateStatus.mutationOptions({
+    trpc.authenticated.projects.feedback.updateStatus.mutationOptions({
       onMutate: async ({ feedbackId, status }) => {
         await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
         const previous = queryClient.getQueryData(feedbackQueryKey);
@@ -74,9 +73,7 @@ export function InboxTab({ projectId }: InboxTabProps) {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: GetFeedbackOutput | undefined) =>
-            old?.map((f) =>
-              f.id === feedbackId ? { ...f, status } : f,
-            ),
+            old?.map((f) => (f.id === feedbackId ? { ...f, status } : f)),
         );
 
         return { previous };
@@ -94,7 +91,7 @@ export function InboxTab({ projectId }: InboxTabProps) {
   );
 
   const bulkUpdateStatusMutation = useMutation(
-    trpc.authenticated.projets.feedback.bulkUpdateStatus.mutationOptions({
+    trpc.authenticated.projects.feedback.bulkUpdateStatus.mutationOptions({
       onMutate: async ({ feedbackIds, status }) => {
         await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
         const previous = queryClient.getQueryData(feedbackQueryKey);
@@ -103,9 +100,7 @@ export function InboxTab({ projectId }: InboxTabProps) {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: GetFeedbackOutput | undefined) =>
-            old?.map((f) =>
-              idSet.has(f.id) ? { ...f, status } : f,
-            ),
+            old?.map((f) => (idSet.has(f.id) ? { ...f, status } : f)),
         );
 
         return { previous };
@@ -123,7 +118,7 @@ export function InboxTab({ projectId }: InboxTabProps) {
   );
 
   const updateAssigneeMutation = useMutation(
-    trpc.authenticated.projets.feedback.updateAssignee.mutationOptions({
+    trpc.authenticated.projects.feedback.updateAssignee.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
       },
@@ -153,12 +148,13 @@ export function InboxTab({ projectId }: InboxTabProps) {
     );
   }, [activeOrg]);
 
-  const currentMemberId = (activeMember as Record<string, unknown> | undefined)
-    ?.id as string | undefined ?? null;
+  const currentMemberId =
+    ((activeMember as Record<string, unknown> | undefined)?.id as
+      | string
+      | undefined) ?? null;
 
   const selectedFeedback = React.useMemo(
-    () =>
-      feedbackQuery.data?.find((f) => f.id === selectedFeedbackId) ?? null,
+    () => feedbackQuery.data?.find((f) => f.id === selectedFeedbackId) ?? null,
     [feedbackQuery.data, selectedFeedbackId],
   );
 
@@ -176,10 +172,7 @@ export function InboxTab({ projectId }: InboxTabProps) {
     });
   }
 
-  function handleAssigneeChange(
-    feedbackId: string,
-    assigneeId: string | null,
-  ) {
+  function handleAssigneeChange(feedbackId: string, assigneeId: string | null) {
     updateAssigneeMutation.mutate({ feedbackId, assigneeId });
   }
 

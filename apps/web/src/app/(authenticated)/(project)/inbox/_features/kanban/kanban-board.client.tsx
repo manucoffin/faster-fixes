@@ -10,8 +10,8 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import * as React from "react";
-import { BulkActionToolbar } from "./bulk-action-toolbar.client";
-import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
+import { BulkActionToolbar } from "../bulk-action-toolbar.client";
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { KanbanColumn } from "./kanban-column.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
@@ -35,11 +35,17 @@ function sortFeedback(items: FeedbackItem[], sort: string): FeedbackItem[] {
   return [...items].sort((a, b) => {
     switch (sort) {
       case "oldest":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       case "updated":
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        return (
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
       default: // newest
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
     }
   });
 }

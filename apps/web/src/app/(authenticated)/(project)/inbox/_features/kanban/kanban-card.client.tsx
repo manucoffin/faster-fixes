@@ -2,11 +2,15 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { formatDistanceToNow } from "date-fns";
 import { GripVertical } from "lucide-react";
-import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -58,7 +62,10 @@ export function KanbanCard({
       }}
     >
       {selectionMode && (
-        <div className="flex items-start pt-0.5" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-start pt-0.5"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => onToggleSelect(feedback.id)}
@@ -67,7 +74,7 @@ export function KanbanCard({
       )}
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm leading-snug line-clamp-3">{feedback.comment}</p>
+        <p className="line-clamp-3 text-sm leading-snug">{feedback.comment}</p>
 
         <p className="text-muted-foreground mt-1.5 truncate text-xs">
           {formatPageUrl(feedback.pageUrl)}
@@ -90,7 +97,9 @@ export function KanbanCard({
           </span>
 
           <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-            {formatDistanceToNow(new Date(feedback.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(feedback.createdAt), {
+              addSuffix: true,
+            })}
           </span>
         </div>
       </div>

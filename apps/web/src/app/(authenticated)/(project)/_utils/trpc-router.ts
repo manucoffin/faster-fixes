@@ -4,8 +4,8 @@ import { bulkHardDeleteFeedback } from "../inbox/_features/archive/bulk-hard-del
 import { getArchivedFeedback } from "../inbox/_features/archive/get-archived-feedback.trpc.query";
 import { hardDeleteFeedback } from "../inbox/_features/archive/hard-delete-feedback.trpc.mutation";
 import { bulkUpdateFeedbackStatus } from "../inbox/_features/bulk-update-feedback-status.trpc.mutation";
+import { getDistinctPageUrls } from "../inbox/_features/filters/get-distinct-page-urls.trpc.query";
 import { getFeedback } from "../inbox/_features/get-feedback.trpc.query";
-import { getDistinctPageUrls } from "../inbox/_features/get-distinct-page-urls.trpc.query";
 import { updateFeedbackAssignee } from "../inbox/_features/update-feedback-assignee.trpc.mutation";
 import { updateFeedbackStatus } from "../inbox/_features/update-feedback-status.trpc.mutation";
 import { createReviewer } from "../reviewers/_features/create/create-reviewer.trpc.mutation";
@@ -19,7 +19,7 @@ import { regenerateApiKey } from "../settings/_features/regenerate-api-key/regen
 import { updateProject } from "../settings/_features/update/update-project.trpc.mutation";
 import { getProjects } from "./get-projects.trpc.query";
 
-export const projetsRouter = router({
+export const projectsRouter = router({
   list: getProjects,
   create: createProject,
   get: getProject,
