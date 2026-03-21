@@ -72,7 +72,7 @@ export function SubscriptionEditDialog({
   const updateMutation = useMutation(
     trpc.admin.users.subscription.update.mutationOptions({
       onSuccess: () => {
-        toast.success("Abonnement mis à jour avec succès");
+        toast.success("Subscription updated successfully");
         setOpen(false);
         queryClient.invalidateQueries(
           trpc.admin.users.subscription.get.queryFilter(),
@@ -80,7 +80,7 @@ export function SubscriptionEditDialog({
       },
       onError: (error: any) => {
         toast.error(
-          error.message || "Erreur lors de la mise à jour de l'abonnement",
+          error.message || "Failed to update subscription",
         );
       },
     }),
@@ -116,7 +116,7 @@ export function SubscriptionEditDialog({
 
   const onSubmit = async (data: any) => {
     if (!data.id) {
-      toast.error("ID d'abonnement manquant");
+      toast.error("Missing subscription ID");
       return;
     }
     await updateMutation.mutateAsync(data);
@@ -125,14 +125,13 @@ export function SubscriptionEditDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Modifier</Button>
+        <Button>Edit</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Modifier l&apos;abonnement</DialogTitle>
+          <DialogTitle>Edit subscription</DialogTitle>
           <DialogDescription>
-            Mettez à jour les informations d&apos;abonnement de
-            l&apos;utilisateur.
+            Update the subscription details for this user.
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +143,7 @@ export function SubscriptionEditDialog({
               name="organizationId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>organization</FormLabel>
+                  <FormLabel>Organization</FormLabel>
                   <FormControl>
                     <UserOrganizationSelect
                       userId={userId}
@@ -157,13 +156,13 @@ export function SubscriptionEditDialog({
               )}
             />
 
-            {/* Statut d'abonnement */}
+            {/* Subscription status */}
             <FormField
               control={form.control}
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Statut</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -171,7 +170,7 @@ export function SubscriptionEditDialog({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un statut" />
+                        <SelectValue placeholder="Select a status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -201,7 +200,7 @@ export function SubscriptionEditDialog({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un plan" />
+                        <SelectValue placeholder="Select a plan" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -217,7 +216,7 @@ export function SubscriptionEditDialog({
               )}
             />
 
-            {/* Annulation à la fin de la période */}
+            {/* Cancel at period end */}
             <FormField
               control={form.control}
               name="cancelAtPeriodEnd"
@@ -230,7 +229,7 @@ export function SubscriptionEditDialog({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Annuler à la fin de la période</FormLabel>
+                    <FormLabel>Cancel at period end</FormLabel>
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -239,13 +238,13 @@ export function SubscriptionEditDialog({
 
             {/* Date Fields */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Date de début */}
+              {/* Start date */}
               <FormField
                 control={form.control}
                 name="periodStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date de début</FormLabel>
+                    <FormLabel>Start date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -259,7 +258,7 @@ export function SubscriptionEditDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -279,13 +278,13 @@ export function SubscriptionEditDialog({
                 )}
               />
 
-              {/* Date de fin */}
+              {/* End date */}
               <FormField
                 control={form.control}
                 name="periodEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date de fin</FormLabel>
+                    <FormLabel>End date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -299,7 +298,7 @@ export function SubscriptionEditDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -320,15 +319,15 @@ export function SubscriptionEditDialog({
               />
             </div>
 
-            {/* Période d'essai */}
+            {/* Trial period */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Début d'essai */}
+              {/* Trial start */}
               <FormField
                 control={form.control}
                 name="trialStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Début de l&apos;essai</FormLabel>
+                    <FormLabel>Trial start</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -342,7 +341,7 @@ export function SubscriptionEditDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -362,13 +361,13 @@ export function SubscriptionEditDialog({
                 )}
               />
 
-              {/* Fin d'essai */}
+              {/* Trial end */}
               <FormField
                 control={form.control}
                 name="trialEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fin de l&apos;essai</FormLabel>
+                    <FormLabel>Trial end</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -382,7 +381,7 @@ export function SubscriptionEditDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -405,17 +404,17 @@ export function SubscriptionEditDialog({
 
             {/* Stripe Fields */}
             <div className="flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-4">
-              {/* Identifiant client Stripe */}
+              {/* Stripe customer ID */}
               {/* <FormField
                 control={form.control}
                 name="stripeCustomerId"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>ID client Stripe</FormLabel>
+                    <FormLabel>Stripe customer ID</FormLabel>
                     <FormControl>
                       <input
                         className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Entrer l'ID client Stripe"
+                        placeholder="Enter Stripe customer ID"
                         {...field}
                       />
                     </FormControl>
@@ -424,17 +423,17 @@ export function SubscriptionEditDialog({
                 )}
               /> */}
 
-              {/* Identifiant d'abonnement Stripe */}
+              {/* Stripe subscription ID */}
               {/* <FormField
                 control={form.control}
                 name="stripeSubscriptionId"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>ID d&apos;abonnement Stripe</FormLabel>
+                    <FormLabel>Stripe subscription ID</FormLabel>
                     <FormControl>
                       <input
                         className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Entrer l'ID d'abonnement Stripe"
+                        placeholder="Enter Stripe subscription ID"
                         {...field}
                       />
                     </FormControl>
@@ -450,7 +449,7 @@ export function SubscriptionEditDialog({
                 disabled={!form.formState.isValid}
                 pending={updateMutation.isPending}
               >
-                {updateMutation.isPending ? "Mise à jour..." : "Mettre à jour"}
+                {updateMutation.isPending ? "Updating..." : "Update"}
               </ActionButton>
             </DialogFooter>
           </form>

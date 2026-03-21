@@ -12,14 +12,14 @@ export default async function GeneralSalesConditionsPage() {
   return (
     <>
       <H1 className="text-primary mb-8 self-start">
-        {pageData?.pageTitle || "Conditions Générales de Vente"}
+        {pageData?.pageTitle || "Terms of sale"}
       </H1>
 
       {pageData?.pageContent ? (
         <RichText data={pageData.pageContent} />
       ) : (
         <p className="text-muted-foreground">
-          Aucun contenu disponible pour le moment.
+          No content available at this time.
         </p>
       )}
     </>

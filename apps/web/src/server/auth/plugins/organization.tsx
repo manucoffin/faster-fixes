@@ -45,7 +45,7 @@ export const organizationPlugin = organization({
       await mailer.emails.send({
         from,
         to,
-        subject: `Invitation à rejoindre ${org.name}`,
+        subject: `Invitation to join ${org.name}`,
         body,
       });
     } catch (error) {

@@ -20,7 +20,7 @@ export const emailVerification: NonNullable<
     });
 
     if (!dbUser) {
-      throw Error("Cet utilisateur n'existe pas.");
+      throw Error("This user does not exist.");
     }
 
     const normalizedEmail = user.email.toLowerCase().trim();
@@ -34,7 +34,7 @@ export const emailVerification: NonNullable<
     await mailer.emails.send({
       from,
       to,
-      subject: "Vérifiez votre email",
+      subject: "Verify your email",
       body,
     });
   },

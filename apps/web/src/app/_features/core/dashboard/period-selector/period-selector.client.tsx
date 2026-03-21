@@ -8,7 +8,6 @@ import {
   PopoverTrigger,
 } from "@workspace/ui/components/popover";
 import { format, sub } from "date-fns";
-import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import * as React from "react";
@@ -26,42 +25,42 @@ type PredefinedPeriod = {
 
 const PREDEFINED_PERIODS: Record<string, PredefinedPeriod> = {
   last24h: {
-    label: "Dernières 24h",
+    label: "Last 24h",
     getValue: () => ({
       from: sub(new Date(), { days: 1 }),
       to: new Date(),
     }),
   },
   last7days: {
-    label: "Derniers 7 jours",
+    label: "Last 7 days",
     getValue: () => ({
       from: sub(new Date(), { days: 7 }),
       to: new Date(),
     }),
   },
   last30days: {
-    label: "Derniers 30 jours",
+    label: "Last 30 days",
     getValue: () => ({
       from: sub(new Date(), { days: 30 }),
       to: new Date(),
     }),
   },
   last90days: {
-    label: "Derniers 90 jours",
+    label: "Last 90 days",
     getValue: () => ({
       from: sub(new Date(), { days: 90 }),
       to: new Date(),
     }),
   },
   last6months: {
-    label: "Derniers 6 mois",
+    label: "Last 6 months",
     getValue: () => ({
       from: sub(new Date(), { months: 6 }),
       to: new Date(),
     }),
   },
   last12months: {
-    label: "Derniers 12 mois",
+    label: "Last 12 months",
     getValue: () => ({
       from: sub(new Date(), { months: 12 }),
       to: new Date(),
@@ -106,14 +105,14 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
 
   const formatDateRange = (range: DateRange | undefined) => {
     if (!range?.from || !range?.to) {
-      return "Sélectionner une période";
+      return "Select a period";
     }
 
     if (range.from.toDateString() === range.to.toDateString()) {
-      return format(range.from, "d MMM yyyy", { locale: fr });
+      return format(range.from, "d MMM yyyy");
     }
 
-    return `${format(range.from, "d MMM", { locale: fr })} - ${format(range.to, "d MMM yyyy", { locale: fr })}`;
+    return `${format(range.from, "d MMM")} - ${format(range.to, "d MMM yyyy")}`;
   };
 
   return (

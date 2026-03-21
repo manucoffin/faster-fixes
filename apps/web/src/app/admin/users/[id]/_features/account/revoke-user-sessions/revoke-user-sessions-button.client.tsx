@@ -27,14 +27,14 @@ export const RevokeUserSessionsButton = ({
   const revokeSessionsMutation =
     useMutation(trpc.admin.users.sessions.revoke.mutationOptions({
       onSuccess: () => {
-        toast.success("Succès", {
-          description: "Toutes les sessions utilisateur ont été révoquées",
+        toast.success("Success", {
+          description: "All user sessions have been revoked",
         });
       },
       onError: (error) => {
-        toast.error("Erreur", {
+        toast.error("Error", {
           description:
-            error.message || "Impossible de révoquer les sessions utilisateur",
+            error.message || "Failed to revoke user sessions",
         });
       },
     }));
@@ -47,29 +47,29 @@ export const RevokeUserSessionsButton = ({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="outline" disabled={revokeSessionsMutation.isPending}>
-          Déconnecter de tous les appareils
+          Sign out from all devices
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Déconnecter l&apos;utilisateur de tous les appareils ?
+            Sign out user from all devices?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action déconnectera l&apos;utilisateur de toutes ses sessions
-            actives sur tous les appareils. L&apos;utilisateur devra se
-            reconnecter pour accéder à son compte.
+            This will sign the user out of all active sessions across all
+            devices. The user will need to sign in again to access their
+            account.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRevoke}
             disabled={revokeSessionsMutation.isPending}
           >
             {revokeSessionsMutation.isPending
-              ? "Déconnexion..."
-              : "Déconnecter"}
+              ? "Signing out..."
+              : "Sign out"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

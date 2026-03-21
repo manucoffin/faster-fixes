@@ -16,11 +16,11 @@ interface PasswordRule {
 }
 
 const defaultRules: PasswordRule[] = [
-  { label: "Au moins 8 caractères", test: (p) => p.length >= 8 },
-  { label: "Au moins une lettre", test: (p) => /[A-Za-z]/.test(p) },
-  { label: "Au moins un chiffre", test: (p) => /\d/.test(p) },
+  { label: "At least 8 characters", test: (p) => p.length >= 8 },
+  { label: "At least one letter", test: (p) => /[A-Za-z]/.test(p) },
+  { label: "At least one number", test: (p) => /\d/.test(p) },
   {
-    label: "Au moins un caractère spécial",
+    label: "At least one special character",
     test: (p) => /[^A-Za-z0-9]/.test(p),
   },
 ];
@@ -65,7 +65,7 @@ const PasswordStrengthIndicator = ({
         <PopoverTrigger asChild>
           <button
             type="button"
-            aria-label="Critères du mot de passe"
+            aria-label="Password requirements"
             className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
           >
             <Info className="size-3.5" />
@@ -73,7 +73,7 @@ const PasswordStrengthIndicator = ({
         </PopoverTrigger>
         <PopoverContent align="start" className="w-64">
           <p className="mb-2 text-sm font-medium">
-            Votre mot de passe doit contenir :
+            Your password must contain:
           </p>
           <ul className="flex flex-col gap-1.5">
             {results.map((rule) => (

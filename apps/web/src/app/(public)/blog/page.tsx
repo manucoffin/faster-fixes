@@ -12,12 +12,12 @@ import { BlogItemListSchema } from "./_features/seo/blog-item-list-schema";
 // Metadata for the main blog page
 export const metadata: Metadata = {
   title: `Blog - ${SITE_NAME}`,
-  description: "Explorez nos articles et publications. Restez informé des dernières actualités et tendances.",
-  keywords: "blog, articles, publications, actualités",
+  description: "Explore our articles and publications. Stay informed about the latest news and trends.",
+  keywords: "blog, articles, publications, news",
   openGraph: {
     type: "website",
     title: `Blog - ${SITE_NAME}`,
-    description: "Explorez nos articles et publications",
+    description: "Explore our articles and publications",
     url: `${APP_URL}/blog`,
     siteName: SITE_NAME,
     images: [
@@ -28,18 +28,18 @@ export const metadata: Metadata = {
         height: 630,
       },
     ],
-    locale: "fr_FR",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: `Blog - ${SITE_NAME}`,
-    description: "Explorez nos articles et publications",
+    description: "Explore our articles and publications",
     images: [DEFAULT_OG_IMAGE_URL],
   },
   alternates: {
     canonical: `${APP_URL}/blog`,
     languages: {
-      fr: `${APP_URL}/blog`,
+      en: `${APP_URL}/blog`,
       "x-default": `${APP_URL}/blog`,
     },
   },
@@ -65,7 +65,7 @@ export default async function BlogPage() {
       <BlogItemListSchema posts={posts} />
       <BreadcrumbSchema
         items={[
-          { name: "Accueil", url: APP_URL },
+          { name: "Home", url: APP_URL },
           { name: "Blog", url: `${APP_URL}/blog` },
         ]}
       />

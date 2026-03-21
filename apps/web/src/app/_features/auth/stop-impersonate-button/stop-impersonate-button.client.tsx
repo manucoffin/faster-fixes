@@ -26,16 +26,16 @@ export const StopImpersonateButton = () => {
 
   const stopImpersonateMutation = useMutation(trpc.auth.stopImpersonate.mutationOptions({
     onSuccess: async () => {
-      toast.success("Succès", {
-        description: "Vous êtes revenu à votre compte administrateur",
+      toast.success("Success", {
+        description: "You have returned to your admin account",
       });
       await refetchSession();
       router.push("/admin");
     },
     onError: (error) => {
-      toast.error("Erreur", {
+      toast.error("Error", {
         description:
-          error.message || "Impossible d'arrêter l'emprunt d'identité",
+          error.message || "Failed to stop impersonation",
       });
     },
   }));
@@ -59,7 +59,7 @@ export const StopImpersonateButton = () => {
             size="icon"
             variant="destructive"
             disabled={stopImpersonateMutation.isPending}
-            title="Arrêter l'emprunt d'identité"
+            title="Stop impersonation"
           >
             <LogOut className="size-4" />
           </Button>
@@ -67,24 +67,23 @@ export const StopImpersonateButton = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Arrêter l&apos;emprunt d&apos;identité ?
+              Stop impersonation?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Vous allez retourner à votre compte administrateur. L&apos;accès
-              au compte de l&apos;utilisateur {session?.user?.email} sera
-              révoqué.
+              You will return to your admin account. Access to the account of
+              user {session?.user?.email} will be revoked.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleStopImpersonate}
               disabled={stopImpersonateMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {stopImpersonateMutation.isPending
-                ? "Arrêt en cours..."
-                : "Arrêter l'emprunt"}
+                ? "Stopping..."
+                : "Stop impersonation"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

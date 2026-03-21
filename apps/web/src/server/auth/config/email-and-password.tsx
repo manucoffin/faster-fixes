@@ -24,7 +24,7 @@ export const emailAndPassword: NonNullable<
       await mailer.emails.send({
         from,
         to,
-        subject: "Réinitialisation de mot de passe",
+        subject: "Password reset",
         body,
       });
     } catch (error) {
@@ -33,7 +33,7 @@ export const emailAndPassword: NonNullable<
         error,
       );
       throw new Error(
-        "Erreur lors de l'envoi de l'email de réinitialisation. Veuillez réessayer.",
+        "Failed to send the password reset email. Please try again.",
       );
     }
   },

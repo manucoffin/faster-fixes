@@ -11,6 +11,6 @@ export function handleTRPCError(error: unknown, message?: string) {
     code: "INTERNAL_SERVER_ERROR",
     message:
       message ||
-      "Une erreur inattendue est survenue, veuillez réessayer plus tard.",
+      "An unexpected error occurred. Please try again later.",
   });
 }

@@ -66,11 +66,11 @@ export function UpgradeSubscriptionButton({
       {upgradePlanMutation.isPending ? (
         <>
           <Loader2 className="mr-2 size-4 animate-spin" />
-          Chargement...
+          Loading...
         </>
       ) : (
         <span>
-          Je choisis{" "}
+          Choose{" "}
           <span className="font-semibold capitalize">{planName}</span>
         </span>
       )}

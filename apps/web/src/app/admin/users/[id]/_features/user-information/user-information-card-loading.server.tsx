@@ -11,7 +11,7 @@ export async function UserInformationCardLoading() {
   return (
     <Card className="shadow-none lg:col-span-2">
       <CardHeader>
-        <CardTitle>Informations de l&apos;utilisateur</CardTitle>
+        <CardTitle>User information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -20,36 +20,36 @@ export async function UserInformationCardLoading() {
             <Skeleton className="h-5 w-full" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">Nom</p>
+            <p className="text-muted-foreground text-sm">Name</p>
             <Skeleton className="h-5 w-4/5" />
           </div>
           <div>
             <p className="text-muted-foreground text-sm">
-              Type d&apos;utilisateur
+              User type
             </p>
             <Skeleton className="h-5 w-3/5" />
           </div>
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-muted-foreground mb-2 text-sm">Rôle</p>
+          <p className="text-muted-foreground mb-2 text-sm">Role</p>
           <Skeleton className="h-6 w-20" />
         </div>
 
         <div className="border-t pt-4">
           <p className="text-muted-foreground mb-2 text-sm">
-            Détails du compte
+            Account details
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-muted-foreground text-sm">
-                Onboarding terminé
+                Onboarding completed
               </p>
               <Skeleton className="h-5 w-24" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">
-                Newsletter acceptée
+                Newsletter opted in
               </p>
               <Skeleton className="h-5 w-28" />
             </div>

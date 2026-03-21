@@ -65,7 +65,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
 
   return (
     <div className="bg-muted/50 mb-8 rounded-lg border p-6">
-      <h2 className="mb-4 text-lg font-semibold">Table des matières</h2>
+      <h2 className="mb-4 text-lg font-semibold">Table of contents</h2>
       <nav>
         <ul className="space-y-2">
           {headings.map((heading, index) => (

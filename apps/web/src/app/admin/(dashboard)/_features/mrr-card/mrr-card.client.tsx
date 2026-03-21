@@ -34,7 +34,7 @@ export function MrrCard() {
           <CardContent>
             <div className="text-2xl font-bold">{formattedTotalRevenue}</div>
             <p className="text-muted-foreground mb-4 text-xs">
-              Revenu total généré
+              Total revenue
             </p>
 
             {/* Breakdown section */}
@@ -84,7 +84,7 @@ function MrrCardError() {
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
         <p className="text-destructive text-sm">
-          Erreur lors du chargement des statistiques
+          Failed to load statistics
         </p>
       </CardContent>
     </Card>

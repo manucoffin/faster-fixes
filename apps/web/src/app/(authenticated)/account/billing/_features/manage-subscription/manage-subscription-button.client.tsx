@@ -48,10 +48,10 @@ export function ManageSubscriptionButton({
       {createBillingPortalMutation.isPending ? (
         <>
           <Loader2 className="size-4 animate-spin" />
-          Chargement...
+          Loading...
         </>
       ) : (
-        "Gérer mon abonnement"
+        "Manage subscription"
       )}
     </Button>
   );

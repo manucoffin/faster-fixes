@@ -41,7 +41,7 @@ export function UserOrganizationSelect({
     ),
     Empty: (
       <div className="text-muted-foreground text-sm">
-        Aucune organization trouvée pour cet utilisateur
+        No organization found for this user
       </div>
     ),
     Success: () => (

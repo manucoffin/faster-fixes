@@ -156,7 +156,7 @@ export default async function BlogPostPage(props: PageParams) {
                   <time dateTime={post.publishedAt || post.createdAt}>
                     {new Date(
                       post.publishedAt || post.createdAt,
-                    ).toLocaleDateString("fr-FR", {
+                    ).toLocaleDateString("en-US", {
                       day: "numeric",
                       month: "long",
                       year: "numeric",
@@ -166,7 +166,7 @@ export default async function BlogPostPage(props: PageParams) {
                 {post.readingTime && (
                   <>
                     <span>•</span>
-                    <span className="">{post.readingTime} min de lecture</span>
+                    <span className="">{post.readingTime} min read</span>
                   </>
                 )}
               </div>
@@ -269,8 +269,8 @@ export async function generateMetadata(props: {
 
     if (!post) {
       return {
-        title: "Article non trouvé",
-        description: "L'article demandé n'a pas été trouvé.",
+        title: "Article not found",
+        description: "The requested article was not found.",
       };
     }
 
@@ -281,7 +281,7 @@ export async function generateMetadata(props: {
 
     const title = post.meta?.title || post.title;
     const description =
-      post.meta?.description || post.excerpt || "Article de blog sur Tobalgo";
+      post.meta?.description || post.excerpt || "Blog article on Tobalgo";
     const imageUrl =
       featuredImage?.url ||
       (post.meta?.image as Media)?.url ||
@@ -303,8 +303,8 @@ export async function generateMetadata(props: {
       keywords: [
         ...(tags?.map((tag) => tag.name) || []),
         category.name,
-        "soins vétérinaires",
-        "animaux de compagnie",
+        "veterinary care",
+        "pets",
         "tobalgo",
       ]
         .filter(Boolean)
@@ -329,7 +329,7 @@ export async function generateMetadata(props: {
         publishedTime: publishDate,
         modifiedTime: new Date(post.updatedAt).toISOString(),
         section: category.name,
-        locale: "fr_FR",
+        locale: "en_US",
       },
       twitter: {
         card: "summary_large_image",
@@ -360,7 +360,7 @@ export async function generateMetadata(props: {
     return {
       title: "Article - Blog",
       description:
-        "Blog Tobalgo - Articles sur les soins vétérinaires et les animaux de compagnie",
+        "Tobalgo Blog - Articles on veterinary care and pets",
     };
   }
 }

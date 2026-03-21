@@ -10,8 +10,8 @@ export function BlogCollectionPageSchema() {
     url: `${APP_URL}/blog`,
     name: `Blog - ${SITE_NAME}`,
     description:
-      "Découvrez nos conseils d'experts pour le bien-être et la santé de vos animaux de compagnie. Guides pratiques, astuces vétérinaires et actualités.",
-    inLanguage: "fr-FR",
+      "Expert tips for the well-being and health of your pets. Practical guides, veterinary advice, and news.",
+    inLanguage: "en-US",
     isPartOf: {
       "@type": "WebSite",
       "@id": `${APP_URL}#website`,
@@ -24,7 +24,7 @@ export function BlogCollectionPageSchema() {
         {
           "@type": "ListItem",
           position: 1,
-          name: "Accueil",
+          name: "Home",
           item: APP_URL,
         },
         {
@@ -39,7 +39,7 @@ export function BlogCollectionPageSchema() {
       "@type": "Thing",
       name: "Blog Tobalgo",
       description:
-        "Conseils et articles sur le bien-être des animaux de compagnie",
+        "Tips and articles on pet well-being",
     },
     significantLink: `${APP_URL}/blog`,
     relatedLink: `${APP_URL}`,

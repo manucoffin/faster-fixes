@@ -25,7 +25,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
     },
   });
 
-  const pageTitle = user ? `Détails de ${user.name}` : "Utilisateur";
+  const pageTitle = user ? `${user.name} details` : "User";
 
   return (
     <DashboardPageContent

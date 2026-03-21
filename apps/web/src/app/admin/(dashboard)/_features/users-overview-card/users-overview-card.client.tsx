@@ -18,14 +18,14 @@ export function UsersOverviewCard() {
         <CardContent>
           <div className="text-2xl font-bold">{data?.totalCount}</div>
           <p className="text-muted-foreground mb-4 text-xs">
-            Total utilisateurs
+            Total users
           </p>
 
           {/* New users this month section */}
           <div className="space-y-3 border-t pt-4">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-xs">
-                Nouveaux ce mois
+                New this month
               </span>
               <span className="text-sm font-semibold">
                 {data?.newUsersThisMonth}
@@ -46,13 +46,13 @@ function UsersOverviewCardLoading() {
           <Skeleton className="h-8 w-24" />
         </div>
         <p className="text-muted-foreground mb-4 text-xs">
-          Total utilisateurs
+          Total users
         </p>
 
         {/* New users section skeleton */}
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">Nouveaux ce mois</span>
+            <span className="text-muted-foreground text-xs">New this month</span>
             <Skeleton className="h-5 w-8" />
           </div>
         </div>
@@ -66,7 +66,7 @@ function UsersOverviewCardError() {
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
         <p className="text-destructive text-sm">
-          Erreur lors du chargement des statistiques
+          Failed to load statistics
         </p>
       </CardContent>
     </Card>

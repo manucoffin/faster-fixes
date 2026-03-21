@@ -1,4 +1,4 @@
-export const COMPANY_STREET_ADDRESS = "1 rue des champs Élysées";
+export const COMPANY_STREET_ADDRESS = "93 rue robert";
 export const COMPANY_ADDRESS_LOCALITY = "Lyon";
 export const COMPANY_ADDRESS_REGION = "Auvergne Rhône-Alpes";
 export const COMPANY_POSTAL_CODE = "69009";

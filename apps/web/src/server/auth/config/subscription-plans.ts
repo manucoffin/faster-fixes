@@ -18,83 +18,83 @@ export enum SubscriptionStatus {
 
 export const PLAN_DESCRIPTIONS = {
   [SubscriptionPlanName.Basic]:
-    "Parfait pour commencer. Accédez aux fonctionnalités essentielles pour gérer votre profil et analyser vos données.",
+    "Perfect to get started. Access essential features to manage your profile and analyze your data.",
   [SubscriptionPlanName.Premium]:
-    "Notre meilleur plan. Accédez à des outils avancés, des intégrations et un support prioritaire.",
+    "Our best plan. Access advanced tools, integrations, and priority support.",
 };
 
 export const PLAN_FEATURES = {
   [SubscriptionPlanName.Basic]: [
     {
       id: "user_profiles",
-      label: "Création et gestion de profils utilisateur",
+      label: "User profile creation and management",
       highlighted: false,
     },
     {
       id: "basic_analytics",
-      label: "Analyses basiques et rapports d'utilisation",
+      label: "Basic analytics and usage reports",
       highlighted: false,
     },
     {
       id: "email_support",
-      label: "Support par email",
+      label: "Email support",
       highlighted: false,
     },
     {
       id: "api_access",
-      label: "Accès API standard",
+      label: "Standard API access",
       highlighted: false,
     },
   ],
   [SubscriptionPlanName.Premium]: [
     {
       id: "user_profiles",
-      label: "Création et gestion de profils utilisateur",
+      label: "User profile creation and management",
       highlighted: false,
     },
     {
       id: "basic_analytics",
-      label: "Analyses basiques et rapports d'utilisation",
+      label: "Basic analytics and usage reports",
       highlighted: false,
     },
     {
       id: "email_support",
-      label: "Support par email",
+      label: "Email support",
       highlighted: false,
     },
     {
       id: "api_access",
-      label: "Accès API standard",
+      label: "Standard API access",
       highlighted: false,
     },
     {
       id: "premium_features",
-      label: "Toutes les fonctionnalités du plan Basic",
+      label: "All Basic plan features",
       highlighted: true,
     },
     {
       id: "advanced_analytics",
-      label: "Analyses avancées et rapports personnalisés",
+      label: "Advanced analytics and custom reports",
       highlighted: false,
     },
     {
       id: "priority_support",
-      label: "Support prioritaire par email et chat",
+      label: "Priority support via email and chat",
       highlighted: false,
     },
     {
       id: "integrations",
-      label: "Intégrations avec des services tiers",
+      label: "Third-party service integrations",
       highlighted: false,
     },
     {
       id: "custom_branding",
-      label: "Options de branding personnalisé",
+      label: "Custom branding options",
       highlighted: false,
     },
     {
       id: "advanced_api",
-      label: "Accès API premium avec limites de débit élevées",
+      label: "Premium API access with higher rate limits",
       highlighted: false,
     },
   ],

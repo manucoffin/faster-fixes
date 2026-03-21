@@ -26,11 +26,11 @@ export async function RelatedArticles({
       <div className="mx-auto max-w-(--breakpoint-lg)">
         <div className="mb-12 text-center">
           <H2 className="mx-auto text-3xl font-bold">
-            Articles similaires dans{" "}
+            Related articles in{" "}
             <span className="text-primary">{categoryName}</span>
           </H2>
           <p className="text-muted-foreground mt-4 text-lg">
-            Découvrez d&apos;autres articles qui pourraient vous intéresser
+            Discover more articles you might find interesting
           </p>
         </div>
 

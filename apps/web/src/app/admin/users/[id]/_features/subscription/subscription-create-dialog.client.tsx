@@ -69,7 +69,7 @@ export function SubscriptionCreateDialog({
   const createMutation = useMutation(
     trpc.admin.users.subscription.create.mutationOptions({
       onSuccess: () => {
-        toast.success("Abonnement créé avec succès");
+        toast.success("Subscription created successfully");
         setOpen(false);
         queryClient.invalidateQueries(
           trpc.admin.users.subscription.get.queryFilter(),
@@ -77,7 +77,7 @@ export function SubscriptionCreateDialog({
       },
       onError: (error) => {
         toast.error(
-          error.message || "Erreur lors de la création de l'abonnement",
+          error.message || "Failed to create subscription",
         );
       },
     }),
@@ -107,13 +107,13 @@ export function SubscriptionCreateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Créer un abonnement</Button>
+        <Button>Create subscription</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Créer un abonnement</DialogTitle>
+          <DialogTitle>Create subscription</DialogTitle>
           <DialogDescription>
-            Créez un nouvel abonnement pour cet utilisateur.
+            Create a new subscription for this user.
           </DialogDescription>
         </DialogHeader>
 
@@ -125,7 +125,7 @@ export function SubscriptionCreateDialog({
               name="organizationId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>organization</FormLabel>
+                  <FormLabel>Organization</FormLabel>
                   <FormControl>
                     <UserOrganizationSelect
                       userId={userId}
@@ -153,7 +153,7 @@ export function SubscriptionCreateDialog({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un plan" />
+                          <SelectValue placeholder="Select a plan" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -169,13 +169,13 @@ export function SubscriptionCreateDialog({
                 )}
               />
 
-              {/* Statut d'abonnement */}
+              {/* Subscription status */}
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Statut</FormLabel>
+                    <FormLabel>Status</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -183,7 +183,7 @@ export function SubscriptionCreateDialog({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un statut" />
+                          <SelectValue placeholder="Select a status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -200,7 +200,7 @@ export function SubscriptionCreateDialog({
               />
             </div>
 
-            {/* Annulation à la fin de la période */}
+            {/* Cancel at period end */}
             <FormField
               control={form.control}
               name="cancelAtPeriodEnd"
@@ -213,7 +213,7 @@ export function SubscriptionCreateDialog({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Annuler à la fin de la période</FormLabel>
+                    <FormLabel>Cancel at period end</FormLabel>
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -222,13 +222,13 @@ export function SubscriptionCreateDialog({
 
             {/* Date Fields */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Date de début */}
+              {/* Start date */}
               <FormField
                 control={form.control}
                 name="periodStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date de début</FormLabel>
+                    <FormLabel>Start date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -242,7 +242,7 @@ export function SubscriptionCreateDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -262,13 +262,13 @@ export function SubscriptionCreateDialog({
                 )}
               />
 
-              {/* Date de fin */}
+              {/* End date */}
               <FormField
                 control={form.control}
                 name="periodEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date de fin</FormLabel>
+                    <FormLabel>End date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -282,7 +282,7 @@ export function SubscriptionCreateDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -303,15 +303,15 @@ export function SubscriptionCreateDialog({
               />
             </div>
 
-            {/* Période d'essai */}
+            {/* Trial period */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Début d'essai */}
+              {/* Trial start */}
               <FormField
                 control={form.control}
                 name="trialStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Début de l&apos;essai</FormLabel>
+                    <FormLabel>Trial start</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -325,7 +325,7 @@ export function SubscriptionCreateDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -345,13 +345,13 @@ export function SubscriptionCreateDialog({
                 )}
               />
 
-              {/* Fin d'essai */}
+              {/* Trial end */}
               <FormField
                 control={form.control}
                 name="trialEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fin de l&apos;essai</FormLabel>
+                    <FormLabel>Trial end</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -365,7 +365,7 @@ export function SubscriptionCreateDialog({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>Choisir une date</span>
+                              <span>Pick a date</span>
                             )}
                             <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
@@ -388,17 +388,17 @@ export function SubscriptionCreateDialog({
 
             {/* Stripe Fields */}
             <div className="flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-4">
-              {/* Identifiant client Stripe */}
+              {/* Stripe customer ID */}
               <FormField
                 control={form.control}
                 name="stripeCustomerId"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>ID client Stripe</FormLabel>
+                    <FormLabel>Stripe customer ID</FormLabel>
                     <FormControl>
                       <input
                         className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Entrer l'ID client Stripe"
+                        placeholder="Enter Stripe customer ID"
                         {...field}
                       />
                     </FormControl>
@@ -407,17 +407,17 @@ export function SubscriptionCreateDialog({
                 )}
               />
 
-              {/* Identifiant d'abonnement Stripe */}
+              {/* Stripe subscription ID */}
               <FormField
                 control={form.control}
                 name="stripeSubscriptionId"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>ID d&apos;abonnement Stripe</FormLabel>
+                    <FormLabel>Stripe subscription ID</FormLabel>
                     <FormControl>
                       <input
                         className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Entrer l'ID d'abonnement Stripe"
+                        placeholder="Enter Stripe subscription ID"
                         {...field}
                       />
                     </FormControl>
@@ -433,7 +433,7 @@ export function SubscriptionCreateDialog({
                 disabled={!form.formState.isValid}
                 pending={createMutation.isPending}
               >
-                {createMutation.isPending ? "Création..." : "Créer"}
+                {createMutation.isPending ? "Creating..." : "Create"}
               </ActionButton>
             </DialogFooter>
           </form>

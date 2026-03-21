@@ -27,16 +27,16 @@ export const RequestPasswordResetButton = ({
   const requestPasswordResetMutation =
     useMutation(trpc.admin.users.password.requestReset.mutationOptions({
       onSuccess: () => {
-        toast.success("Succès", {
+        toast.success("Success", {
           description:
-            "Un email de réinitialisation de mot de passe a été envoyé à l'utilisateur",
+            "A password reset email has been sent to the user",
         });
       },
       onError: (error) => {
-        toast.error("Erreur", {
+        toast.error("Error", {
           description:
             error.message ||
-            "Impossible d'envoyer le lien de réinitialisation de mot de passe",
+            "Failed to send password reset link",
         });
       },
     }));
@@ -52,29 +52,28 @@ export const RequestPasswordResetButton = ({
           variant="outline"
           disabled={requestPasswordResetMutation.isPending}
         >
-          Réinitialiser le mot de passe
+          Reset password
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Envoyer un lien de réinitialisation de mot de passe ?
+            Send a password reset link?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Un email contenant un lien de réinitialisation de mot de passe sera
-            envoyé à l&apos;utilisateur. L&apos;utilisateur pourra alors créer
-            un nouveau mot de passe.
+            An email with a password reset link will be sent to the user. The
+            user will then be able to create a new password.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRequestReset}
             disabled={requestPasswordResetMutation.isPending}
           >
             {requestPasswordResetMutation.isPending
-              ? "Envoi en cours..."
-              : "Envoyer"}
+              ? "Sending..."
+              : "Send"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

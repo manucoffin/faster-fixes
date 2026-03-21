@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import { SubscriptionCreateDialog } from "./subscription-create-dialog.client";
 import { SubscriptionEditDialog } from "./subscription-edit-dialog.client";
@@ -35,8 +34,8 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
     return (
       <Card className="">
         <CardHeader>
-          <p className="text-muted-foreground text-sm">Abonnement</p>
-          <CardTitle>Chargement...</CardTitle>
+          <p className="text-muted-foreground text-sm">Subscription</p>
+          <CardTitle>Loading...</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin" />
@@ -48,16 +47,16 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
   return (
     <Card className="">
       <CardHeader>
-        <p className="text-muted-foreground text-sm">Abonnement</p>
+        <p className="text-muted-foreground text-sm">Subscription</p>
 
-        <CardTitle>{subscription ? subscription.plan : "Non abonné"}</CardTitle>
+        <CardTitle>{subscription ? subscription.plan : "Not subscribed"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {subscription ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-muted-foreground text-sm">Statut</p>
+                <p className="text-muted-foreground text-sm">Status</p>
                 <Badge
                   variant={
                     subscription.status === "active" ? "default" : "secondary"
@@ -71,11 +70,9 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
               </div>
               {subscription.periodEnd && (
                 <div>
-                  <p className="text-muted-foreground text-sm">Jusqu&apos;au</p>
+                  <p className="text-muted-foreground text-sm">Until</p>
                   <p className="font-medium">
-                    {format(new Date(subscription.periodEnd), "PPP", {
-                      locale: fr,
-                    })}
+                    {format(new Date(subscription.periodEnd), "PPP")}
                   </p>
                 </div>
               )}
@@ -84,7 +81,7 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
         ) : (
           <div className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              Aucun abonnement actif
+              No active subscription
             </p>
           </div>
         )}

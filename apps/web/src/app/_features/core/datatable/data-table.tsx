@@ -60,9 +60,9 @@ export const DataTable = <TData, TValue>({
   search,
   setSearch,
   isLoading = false,
-  errorMessage = "Une erreur est survenue lors du chargement des données.",
+  errorMessage = "An error occurred while loading data.",
   isError = false,
-  searchInputPlaceholder = "Rechercher...",
+  searchInputPlaceholder = "Search...",
   meta,
   filterComponents,
   exportConfig,
@@ -203,7 +203,7 @@ export const DataTable = <TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Aucun résultat.
+                  No results.
                 </TableCell>
               </TableRow>
             )}
@@ -214,7 +214,7 @@ export const DataTable = <TData, TValue>({
       {/* Pagination Controls */}
       <div className="flex items-center justify-between px-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
-          Page {currentPage} sur {pageCount}
+          Page {currentPage} of {pageCount}
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -223,7 +223,7 @@ export const DataTable = <TData, TValue>({
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            Précédent
+            Previous
           </Button>
           <Button
             variant="outline"
@@ -231,7 +231,7 @@ export const DataTable = <TData, TValue>({
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === pageCount}
           >
-            Suivant
+            Next
           </Button>
         </div>
       </div>

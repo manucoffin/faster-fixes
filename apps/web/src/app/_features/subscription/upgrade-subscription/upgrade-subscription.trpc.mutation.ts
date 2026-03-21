@@ -20,7 +20,7 @@ export const upgradeSubscription = protectedProcedure
     if (!activeOrganization) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas d'organization active",
+        message: "You do not have an active organization",
       });
     }
 

@@ -34,17 +34,17 @@ export const ImpersonateUserButton = ({
   const impersonateUserMutation =
     useMutation(trpc.admin.users.impersonate.mutationOptions({
       onSuccess: async () => {
-        toast.success("Succès", {
-          description: `Vous êtes maintenant connecté en tant que ${userEmail}`,
+        toast.success("Success", {
+          description: `You are now signed in as ${userEmail}`,
         });
         await refetchSession();
         router.push("/");
       },
       onError: (error) => {
-        toast.error("Erreur", {
+        toast.error("Error", {
           description:
             error.message ||
-            "Impossible d'emprunter l'identité de cet utilisateur",
+            "Failed to impersonate this user",
         });
       },
     }));
@@ -57,29 +57,28 @@ export const ImpersonateUserButton = ({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="outline" disabled={impersonateUserMutation.isPending}>
-          Emprunter l&apos;identité
+          Impersonate
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Êtes-vous sûr de vouloir emprunter l&apos;identité de cet
-            utilisateur ?
+            Are you sure you want to impersonate this user?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Vous serez connecté en tant que {userEmail}. Vous pourrez utiliser
-            l&apos;application en tant que cet utilisateur.
+            You will be signed in as {userEmail}. You will be able to use the
+            application as this user.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleImpersonate}
             disabled={impersonateUserMutation.isPending}
           >
             {impersonateUserMutation.isPending
-              ? "Emprunt en cours..."
-              : "Emprunter l'identité"}
+              ? "Impersonating..."
+              : "Impersonate"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

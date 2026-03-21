@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const CreateUserSchema = z.object({
-  email: z.email("Adresse email invalide"),
-  name: z.string().min(1, "Le nom est requis").max(255),
+  email: z.email("Invalid email address"),
+  name: z.string().min(1, "Name is required").max(255),
   firstName: z.string().max(255).optional().or(z.literal("")),
   lastName: z.string().max(255).optional().or(z.literal("")),
 });

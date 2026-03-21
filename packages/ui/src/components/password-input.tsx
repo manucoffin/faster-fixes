@@ -21,7 +21,7 @@ export const PasswordInput = ({ showToggle = true, ...props }: PasswordInputProp
       <InputGroupAddon align="inline-end">
         {showToggle && (
           <InputGroupButton
-            aria-label="Révéler le mot de passe"
+            aria-label="Toggle password visibility"
             title="show"
             size="icon-xs"
             onClick={togglePasswordVisibility}

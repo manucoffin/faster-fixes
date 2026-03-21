@@ -49,10 +49,10 @@ export default async function ResetPasswordPage(props: PageParams) {
 
             <div className="space-y-4">
               <Button className="w-full" asChild>
-                <Link href={forgotPasswordUrl}>Demander un nouveau lien</Link>
+                <Link href={forgotPasswordUrl}>Request a new link</Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
-                <Link href={loginUrl}>Retour à la connexion</Link>
+                <Link href={loginUrl}>Back to sign in</Link>
               </Button>
             </div>
           </>

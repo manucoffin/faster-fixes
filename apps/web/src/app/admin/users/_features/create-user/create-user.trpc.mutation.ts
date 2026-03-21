@@ -28,7 +28,7 @@ export const createUser = adminProcedure
       if (!data?.user) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Échec de la création du compte",
+          message: "Failed to create account",
         });
       }
 
@@ -66,13 +66,13 @@ export const createUser = adminProcedure
       if (error instanceof Error && error.message.includes("email")) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Cet email est déjà enregistré",
+          message: "This email is already registered",
         });
       }
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Échec de la création de l'utilisateur. Veuillez réessayer.",
+        message: "Failed to create user. Please try again.",
       });
     }
   });

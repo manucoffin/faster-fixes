@@ -13,7 +13,7 @@ export const createBillingPortal = protectedProcedure.mutation(
     if (!activeOrganization) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas d'organization active",
+        message: "You do not have an active organization",
       });
     }
 
@@ -36,7 +36,7 @@ export const createBillingPortal = protectedProcedure.mutation(
       console.error(error);
 
       throw new Error(
-        "Une erreur s'est produite lors de l'accès au portail de facturation. Veuillez réessayer.",
+        "An error occurred while accessing the billing portal. Please try again.",
       );
     }
   },

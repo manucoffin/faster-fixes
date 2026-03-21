@@ -22,7 +22,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Nom" />
+      <DataTableColumnHeader column={column} title="Name" />
     ),
     cell: ({ row, getValue }) => {
       const name = getValue<string>();
@@ -69,11 +69,11 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date de création" />
+      <DataTableColumnHeader column={column} title="Created at" />
     ),
     cell: ({ row, getValue }) => {
       const date = new Date(getValue<string>());
-      return <div>{date.toLocaleDateString("fr-FR")}</div>;
+      return <div>{date.toLocaleDateString("en-US")}</div>;
     },
     enableSorting: true,
   },
@@ -194,12 +194,12 @@ export const UsersTable = () => {
       setSearch={setSearchInput}
       isLoading={isLoading}
       isError={isError}
-      errorMessage="Une erreur est survenue"
-      searchInputPlaceholder="Rechercher un utilisateur..."
+      errorMessage="An error occurred"
+      searchInputPlaceholder="Search for a user..."
       onSortingChange={handleSortingChange}
       exportConfig={{
         enabled: true,
-        filename: `utilisateurs-${new Date().toISOString().split("T")[0]}.csv`,
+        filename: `users-${new Date().toISOString().split("T")[0]}.csv`,
         data: exportData || [],
       }}
     />

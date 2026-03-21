@@ -19,13 +19,13 @@ export function RejectInvitationButton({
   const rejectMutation = useMutation(
     trpc.authenticated.organization.invitation.reject.mutationOptions({
       onSuccess: () => {
-        toast.success("Invitation refusée");
+        toast.success("Invitation declined");
         queryClient.invalidateQueries(
           trpc.authenticated.organization.invitation.getReceived.queryFilter(),
         );
       },
       onError: (error) => {
-        toast.error(error.message || "Erreur lors du refus de l'invitation.");
+        toast.error(error.message || "Failed to decline invitation.");
       },
     }),
   );
@@ -39,7 +39,7 @@ export function RejectInvitationButton({
       className="flex-1"
     >
       <X className="size-4" />
-      Refuser
+      Decline
     </Button>
   );
 }

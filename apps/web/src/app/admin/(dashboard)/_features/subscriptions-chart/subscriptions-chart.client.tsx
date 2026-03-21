@@ -40,7 +40,7 @@ export function SubscriptionsChart() {
       <Card className="lg:col-span-4">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Abonnements et Utilisateurs par Mois</CardTitle>
+            <CardTitle>Subscriptions and users by month</CardTitle>
             <PeriodSelector />
           </div>
         </CardHeader>
@@ -49,15 +49,15 @@ export function SubscriptionsChart() {
             className="h-[300px] w-full"
             config={{
               users: {
-                label: "Nouveaux Utilisateurs",
+                label: "New users",
                 color: "var(--chart-5)",
               },
               subscriptions: {
-                label: "Nouveaux Abonnements",
+                label: "New subscriptions",
                 color: "var(--chart-1)",
               },
               revenue: {
-                label: "Revenu",
+                label: "Revenue",
                 color: "var(--chart-2)",
               },
             }}
@@ -80,7 +80,7 @@ export function SubscriptionsChart() {
                 tick={{ fontSize: 12 }}
                 allowDecimals={false}
                 label={{
-                  value: "Utilisateurs",
+                  value: "Users",
                   angle: -90,
                   position: "insideLeft",
                 }}
@@ -94,7 +94,7 @@ export function SubscriptionsChart() {
                 tick={{ fontSize: 12 }}
                 allowDecimals={false}
                 label={{
-                  value: "Abonnements",
+                  value: "Subscriptions",
                   angle: 90,
                   position: "insideRight",
                 }}
@@ -157,10 +157,10 @@ export function SubscriptionsChart() {
                             />
                             <span className="text-muted-foreground">
                               {entry.name === "users"
-                                ? "Utilisateurs:"
+                                ? "Users:"
                                 : entry.name === "subscriptions"
-                                  ? "Abonnements:"
-                                  : "Revenu:"}
+                                  ? "Subscriptions:"
+                                  : "Revenue:"}
                             </span>
                             <span className="font-medium">
                               {entry.name === "revenue"
@@ -199,11 +199,11 @@ function SubscriptionsChartError() {
   return (
     <Card className="border-destructive/50 lg:col-span-4">
       <CardHeader>
-        <CardTitle>Abonnements et Utilisateurs par Mois</CardTitle>
+        <CardTitle>Subscriptions and users by month</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
         <p className="text-destructive text-sm">
-          Erreur lors du chargement des statistiques
+          Failed to load statistics
         </p>
       </CardContent>
     </Card>

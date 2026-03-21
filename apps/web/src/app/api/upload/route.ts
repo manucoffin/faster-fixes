@@ -21,7 +21,7 @@ const router: Router = {
         });
 
         if (!session) {
-          throw new RejectUpload("Non autorisé");
+          throw new RejectUpload("Unauthorized");
         }
 
         const membership = await prisma.member.findFirst({
@@ -34,7 +34,7 @@ const router: Router = {
 
         if (!membership) {
           throw new RejectUpload(
-            "Vous n'avez pas les permissions pour modifier cette organization.",
+            "You do not have permission to modify this organization.",
           );
         }
 
@@ -56,7 +56,7 @@ const router: Router = {
         });
 
         if (!session) {
-          throw new RejectUpload("Non autorisé");
+          throw new RejectUpload("Unauthorized");
         }
 
         const extension = file.type.split("/")[1] ?? "png";

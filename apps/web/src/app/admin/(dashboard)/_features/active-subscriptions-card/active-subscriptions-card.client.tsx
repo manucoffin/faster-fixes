@@ -19,11 +19,11 @@ export function ActiveSubscriptionsCard() {
           <div className="flex items-baseline gap-2">
             <div className="text-2xl font-bold">{data?.totalCount}</div>
             <span className="text-muted-foreground text-xs">
-              ({data?.conversionRate}% des utilisateurs)
+              ({data?.conversionRate}% of users)
             </span>
           </div>
           <p className="text-muted-foreground mb-4 text-xs">
-            Abonnements Actifs
+            Active subscriptions
           </p>
 
           {/* Breakdown section */}
@@ -81,7 +81,7 @@ function ActiveSubscriptionsCardError() {
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
         <p className="text-destructive text-sm">
-          Erreur lors du chargement des statistiques
+          Failed to load statistics
         </p>
       </CardContent>
     </Card>

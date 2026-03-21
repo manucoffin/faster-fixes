@@ -29,10 +29,10 @@ export const AdminSidebar = async ({
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Tableau de bord">
+              <SidebarMenuButton asChild tooltip="Dashboard">
                 <Link href="/admin">
                   <LayoutDashboard />
-                  <span>Tableau de bord</span>
+                  <span>Dashboard</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -41,7 +41,7 @@ export const AdminSidebar = async ({
               <SidebarMenuButton asChild tooltip="Users">
                 <Link href="/admin/users">
                   <Users />
-                  <span>Utilisateurs</span>
+                  <span>Users</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

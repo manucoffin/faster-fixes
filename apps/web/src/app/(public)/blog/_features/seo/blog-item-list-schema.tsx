@@ -11,8 +11,8 @@ export function BlogItemListSchema({ posts }: BlogItemListSchemaProps) {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "@id": `${APP_URL}/blog#itemlist`,
-    name: "Articles du blog Tobalgo",
-    description: "Liste des derniers articles publiés sur le blog",
+    name: "Tobalgo blog articles",
+    description: "Latest blog articles",
     numberOfItems: posts.length,
     itemListElement: posts.map((post, index) => {
       return {

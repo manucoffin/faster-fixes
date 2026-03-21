@@ -153,7 +153,7 @@ export function FileUpload({
               variant="destructive"
               size="icon-xs"
               onClick={handleRemove}
-              aria-label="Supprimer le fichier"
+              aria-label="Remove file"
             >
               <Trash2 />
             </Button>
@@ -193,8 +193,8 @@ export function FileUpload({
         <div className="mt-3 flex flex-col gap-1 text-center">
           <p className="text-sm font-semibold">
             {isUploading
-              ? "Envoi en cours..."
-              : "Glissez-déposez un fichier ici"}
+              ? "Uploading..."
+              : "Drag and drop a file here"}
           </p>
 
           {description && (
@@ -204,9 +204,9 @@ export function FileUpload({
               ) : (
                 <>
                   {description.maxFileSize &&
-                    `Jusqu'à ${description.maxFileSize}. `}
+                    `Up to ${description.maxFileSize}. `}
                   {description.fileTypes &&
-                    `Formats acceptés : ${description.fileTypes}.`}
+                    `Accepted formats: ${description.fileTypes}.`}
                 </>
               )}
             </p>
@@ -228,7 +228,7 @@ export function FileUpload({
             <div className="my-2">
               <Upload className="size-6" />
             </div>
-            <p className="mt-3 text-sm font-semibold">Déposez le fichier ici</p>
+            <p className="mt-3 text-sm font-semibold">Drop the file here</p>
           </div>
         </div>
       )}

@@ -8,7 +8,7 @@ export const getProfile = protectedProcedure.query(async ({ ctx }) => {
   if (!userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Vous devez être connecté",
+      message: "You must be signed in",
     });
   }
 

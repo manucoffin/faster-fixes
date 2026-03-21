@@ -19,7 +19,7 @@ export const getProjects = protectedProcedure
     if (!membership) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: "Vous n'avez pas accès à cette organization.",
+        message: "You do not have access to this organization.",
       });
     }
 

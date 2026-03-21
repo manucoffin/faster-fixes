@@ -12,14 +12,14 @@ export default async function TermsPage() {
   return (
     <>
       <H1 className="text-primary mb-8 self-start">
-        {pageData?.pageTitle || "Conditions générales d'utilisation"}
+        {pageData?.pageTitle || "Terms of use"}
       </H1>
 
       {pageData?.pageContent ? (
         <RichText data={pageData.pageContent} />
       ) : (
         <p className="text-muted-foreground">
-          Aucun contenu disponible pour le moment.
+          No content available at this time.
         </p>
       )}
     </>

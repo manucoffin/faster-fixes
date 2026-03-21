@@ -38,7 +38,7 @@ export function EmailInformation({ userId }: EmailInformationProps) {
     ),
     Errored: (
       <div className="text-sm text-red-600">
-        Erreur lors de la récupération de l&apos;email
+        Failed to retrieve email
       </div>
     ),
     Empty: <div />,
@@ -61,8 +61,8 @@ export function EmailInformation({ userId }: EmailInformationProps) {
                 </TooltipTrigger>
                 <TooltipContent>
                   {emailData.emailVerified
-                    ? "Email vérifié"
-                    : "Email non vérifié"}
+                    ? "Email verified"
+                    : "Email not verified"}
                 </TooltipContent>
               </Tooltip>
               <span>{emailData.email}</span>
@@ -88,7 +88,7 @@ export function EmailInformation({ userId }: EmailInformationProps) {
                   variant="default"
                   size="sm"
                 >
-                  Renvoyer l&apos;email de vérification
+                  Resend verification email
                 </SendVerificationEmailButton> */}
               </div>
             </PopoverContent>

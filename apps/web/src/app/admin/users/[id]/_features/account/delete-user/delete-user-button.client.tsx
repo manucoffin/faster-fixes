@@ -28,15 +28,15 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
 
   const deleteUserMutation = useMutation(trpc.admin.users.delete.mutationOptions({
     onSuccess: () => {
-      toast.success("Succès", {
-        description: "Utilisateur supprimé avec succès",
+      toast.success("Success", {
+        description: "User deleted successfully",
       });
       queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
       router.push("/admin/users");
     },
     onError: (error) => {
-      toast.error("Erreur", {
-        description: error.message || "Une erreur est survenue",
+      toast.error("Error", {
+        description: error.message || "An error occurred",
       });
     },
   }));
@@ -52,28 +52,27 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
           variant="destructive"
           disabled={deleteUserMutation.isPending}
         >
-          Supprimer le compte
+          Delete account
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+            Are you sure you want to delete this user?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est irréversible. Cette suppression supprimera le
-            compte utilisateur et supprimera toutes les données associées de nos
-            serveurs.
+            This action is irreversible. It will delete the user account and all
+            associated data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleteUserMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteUserMutation.isPending ? "Suppression..." : "Supprimer"}
+            {deleteUserMutation.isPending ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

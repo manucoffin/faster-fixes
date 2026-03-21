@@ -85,21 +85,20 @@ export function UpgradeSubscriptionDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {trigger || <Button variant="outline">Changer de plan</Button>}
+        {trigger || <Button variant="outline">Change plan</Button>}
       </DialogTrigger>
       <DialogContent className="h-full w-full max-w-full overflow-y-auto sm:max-h-[95svh] sm:max-w-[90svw] md:h-fit xl:max-w-[60svw]">
         <DialogHeader className="h-fit">
-          <DialogTitle>Choisissez votre plan</DialogTitle>
+          <DialogTitle>Choose your plan</DialogTitle>
           <DialogDescription>
-            Sélectionnez le plan qui correspond le mieux à vos besoins
+            Select the plan that best fits your needs
           </DialogDescription>
 
           {today < launchPromotionEndDate ? (
             <div className="rounded-2xl border border-blue-800/20 bg-blue-50 p-3">
-              Pour les fêtes, Tobalgo vous offre un{" "}
-              <strong>accès gratuit</strong> à toutes les fonctionnalités,
-              jusqu&apos;au 31 décembre inclus ! 🥳 Prenez votre abonnement dès
-              maintenant pour en profiter.
+              For a limited time, enjoy{" "}
+              <strong>free access</strong> to all features
+              until December 31. Subscribe now to get started.
             </div>
           ) : null}
 
@@ -110,7 +109,7 @@ export function UpgradeSubscriptionDialog({
               onCheckedChange={setIsAnnual}
             />
             <Label htmlFor="annual" className="cursor-pointer">
-              Facturation annuelle
+              Annual billing
             </Label>
           </div>
         </DialogHeader>
@@ -126,10 +125,10 @@ export function UpgradeSubscriptionDialog({
           Errored: (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>Erreur lors du chargement des prix</EmptyTitle>
+                <EmptyTitle>Failed to load pricing</EmptyTitle>
                 <EmptyDescription>
-                  Une erreur s&apos;est produite lors du chargement des tarifs.
-                  Veuillez réessayer.
+                  An error occurred while loading pricing.
+                  Please try again.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -137,10 +136,9 @@ export function UpgradeSubscriptionDialog({
           Empty: (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>Aucun plan disponible</EmptyTitle>
+                <EmptyTitle>No plans available</EmptyTitle>
                 <EmptyDescription>
-                  Aucun plan d&apos;abonnement n&apos;est actuellement
-                  disponible.
+                  No subscription plans are currently available.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -204,7 +202,7 @@ export function UpgradeSubscriptionDialog({
                       price={priceHT}
                       priceTTC={priceTTC}
                       freeTrialDays={freeTrialDays}
-                      badge={isHighlighted ? "Le plus populaire" : undefined}
+                      badge={isHighlighted ? "Most popular" : undefined}
                       features={features}
                       variant={isHighlighted ? "highlighted" : "default"}
                       isAnnual={isAnnual}
@@ -218,11 +216,11 @@ export function UpgradeSubscriptionDialog({
                         {upgradePlanMutation.isPending ? (
                           <>
                             <Loader2 className="mr-2 size-4 animate-spin" />
-                            Chargement...
+                            Loading...
                           </>
                         ) : (
                           <span>
-                            Je choisis{" "}
+                            Choose{" "}
                             <span className="font-semibold capitalize">
                               {plan.name}
                             </span>
