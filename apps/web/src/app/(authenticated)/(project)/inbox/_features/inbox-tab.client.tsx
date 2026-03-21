@@ -25,7 +25,7 @@ import { AlertCircle, Inbox, Archive } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { toast } from "sonner";
-import { ArchiveTab } from "../archive/archive-tab.client";
+import { ArchiveTab } from "./archive/archive-tab.client";
 import { FeedbackDetailPanel } from "./feedback-detail-panel.client";
 import { FeedbackFilters } from "./feedback-filters.client";
 import { KanbanBoard } from "./kanban-board.client";

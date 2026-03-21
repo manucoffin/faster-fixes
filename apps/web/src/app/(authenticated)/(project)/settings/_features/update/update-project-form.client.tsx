@@ -3,7 +3,7 @@
 import {
   UpdateProjectInputs,
   UpdateProjectSchema,
-} from "@/app/(authenticated)/projects/[projectId]/_features/settings/update/update-project.schema";
+} from "@/app/(authenticated)/(project)/settings/_features/update/update-project.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

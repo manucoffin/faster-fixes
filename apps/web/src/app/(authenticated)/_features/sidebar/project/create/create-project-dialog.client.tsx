@@ -58,7 +58,6 @@ export function CreateProjectDialog({
     : setUncontrolledOpen;
 
   const [rawApiKey, setRawApiKey] = React.useState<string | null>(null);
-  const [projectId, setProjectId] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   const form = useForm<CreateProjectInputs>({
@@ -75,7 +74,6 @@ export function CreateProjectDialog({
       onSuccess: (result) => {
         setOpen(false);
         setRawApiKey(result.rawApiKey);
-        setProjectId(result.id);
         setActiveProject(result.id);
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projets.list.queryKey(),
@@ -101,9 +99,7 @@ export function CreateProjectDialog({
   };
 
   const handleApiKeyDialogClose = () => {
-    if (projectId) {
-      router.push(`/projects/${projectId}`);
-    }
+    router.push("/inbox");
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -200,7 +196,7 @@ export function CreateProjectDialog({
       <Dialog open={!!rawApiKey} onOpenChange={handleApiKeyDialogClose}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Project created!</DialogTitle>
+            <DialogTitle>Project created</DialogTitle>
             <DialogDescription>
               Here is your API key. It will only be shown once. Copy it now and
               store it in a safe place.

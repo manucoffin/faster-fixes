@@ -46,7 +46,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projets.list.queryKey(),
         });
-        router.push("/projects");
+        router.push("/inbox");
         toast.success("Project deleted");
       },
       onError: (error) => {

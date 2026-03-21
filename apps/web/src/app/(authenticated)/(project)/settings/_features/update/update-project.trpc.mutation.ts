@@ -1,6 +1,6 @@
 "use server";
 
-import { UpdateProjectSchema } from "@/app/(authenticated)/projects/[projectId]/_features/settings/update/update-project.schema";
+import { UpdateProjectSchema } from "@/app/(authenticated)/(project)/settings/_features/update/update-project.schema";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 

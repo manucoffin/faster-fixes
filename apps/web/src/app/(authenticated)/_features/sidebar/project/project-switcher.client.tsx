@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateProjectDialog } from "@/app/(authenticated)/projects/_features/create/create-project-dialog.client";
+import { CreateProjectDialog } from "./create/create-project-dialog.client";
 import { useActiveProject } from "@/lib/active-project/active-project-provider.client";
 import {
   DropdownMenu,
@@ -18,8 +18,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Check, ChevronsUpDown, FolderOpen, List, Plus } from "lucide-react";
-import Link from "next/link";
+import { Check, ChevronsUpDown, FolderOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -92,7 +91,7 @@ export function ProjectSwitcher() {
                       key={project.id}
                       onSelect={() => {
                         setActiveProject(project.id);
-                        router.push(`/projects/${project.id}`);
+                        router.push("/inbox");
                       }}
                       className="flex items-center gap-2"
                     >
@@ -112,20 +111,6 @@ export function ProjectSwitcher() {
                 Create project
               </DropdownMenuItem>
 
-              {hasProjects && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/projects"
-                      className="flex items-center"
-                    >
-                      <List className="mr-2 size-4" />
-                      All projects
-                    </Link>
-                  </DropdownMenuItem>
-                </>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>

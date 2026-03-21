@@ -14,6 +14,7 @@ import { CreditCard, Settings2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { OrganizationSwitcher } from "./organization/organization-switcher.client";
+import { ProjectNavigation } from "./project/project-navigation.client";
 import { ProjectSwitcher } from "./project/project-switcher.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
@@ -29,6 +30,8 @@ export const AuthenticatedSidebar = async ({
       </SidebarHeader>
 
       <SidebarContent>
+        <ProjectNavigation />
+
         <SidebarGroup>
           <SidebarGroupLabel>My Account</SidebarGroupLabel>
           <SidebarMenu>

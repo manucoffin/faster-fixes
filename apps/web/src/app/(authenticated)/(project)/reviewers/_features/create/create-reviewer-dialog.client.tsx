@@ -3,7 +3,7 @@
 import {
   CreateReviewerInputs,
   CreateReviewerSchema,
-} from "@/app/(authenticated)/projects/[projectId]/_features/reviewers/create/create-reviewer.schema";
+} from "@/app/(authenticated)/(project)/reviewers/_features/create/create-reviewer.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
