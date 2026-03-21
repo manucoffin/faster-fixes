@@ -62,6 +62,10 @@ export type FeedbackContextValue = {
   showResolved: boolean;
   setShowResolved: (show: boolean) => void;
 
+  // Element highlight (hover/active pin)
+  highlightSelector: string | null;
+  setHighlightSelector: (selector: string | null) => void;
+
   // Toolbar toggles
   showPins: boolean;
   setShowPins: (show: boolean) => void;

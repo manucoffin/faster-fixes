@@ -19,6 +19,7 @@ import { CommentPopover } from "./components/comment-popover.js";
 import { FeedbackPin } from "./components/feedback-pin.js";
 import { PinPopover } from "./components/pin-popover.js";
 import { FeedbackList } from "./components/feedback-list.js";
+import { ElementHighlight } from "./components/element-highlight.js";
 
 type FeedbackProviderProps = {
   apiKey: string;
@@ -53,6 +54,7 @@ export function FeedbackProvider({
   const [showResolved, setShowResolved] = useState(false);
   const [showPins, setShowPins] = useState(true);
   const [showList, setShowList] = useState(false);
+  const [highlightSelector, setHighlightSelector] = useState<string | null>(null);
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
 
   const client = useMemo(
@@ -82,6 +84,11 @@ export function FeedbackProvider({
       // Silently fail — pins just won't update
     }
   }, [client, reviewerToken]);
+
+  // Sync highlight with active feedback
+  useEffect(() => {
+    setHighlightSelector(activeFeedback?.selector ?? null);
+  }, [activeFeedback]);
 
   // Initialization: token → config → feedback
   useEffect(() => {
@@ -167,6 +174,8 @@ export function FeedbackProvider({
     setShowPins,
     showList,
     setShowList,
+    highlightSelector,
+    setHighlightSelector,
     screenshotCaptureRef,
     classNames: mergedClassNames,
     labels: mergedLabels,
@@ -189,6 +198,9 @@ export function FeedbackProvider({
             {/* Annotation mode overlay */}
             <AnnotationOverlay />
 
+            {/* Element highlight for hovered/active pins */}
+            <ElementHighlight />
+
             {/* Existing feedback pins (only when visible and active) */}
             {showPins &&
               visiblePins.map((item) => (
@@ -201,16 +213,21 @@ export function FeedbackProvider({
                 position: "fixed",
                 ...posStyle,
                 display: "flex",
-                flexDirection: "column",
-                alignItems: position.includes("right")
+                flexDirection: position.includes("right")
+                  ? "row-reverse"
+                  : "row",
+                alignItems: position.includes("bottom")
                   ? "flex-end"
-                  : "flex-start",
+                  : position.includes("top")
+                    ? "flex-start"
+                    : "center",
+                gap: 8,
                 zIndex: 2147483647,
                 pointerEvents: "auto",
               }}
             >
-              {isActive && showList && <FeedbackList />}
               <FloatingButton />
+              {isActive && <FeedbackList />}
             </div>
 
             {/* Popovers rendered last so they appear above toolbar */}

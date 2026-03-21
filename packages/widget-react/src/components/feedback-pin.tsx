@@ -21,7 +21,7 @@ const PinIcon = () => (
 );
 
 export function FeedbackPin({ item }: FeedbackPinProps) {
-  const { classNames, setActiveFeedback, activeFeedback } =
+  const { classNames, setActiveFeedback, activeFeedback, setHighlightSelector } =
     useFeedbackContext();
   const [position, setPosition] = useState<{
     top: number;
@@ -81,9 +81,20 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         transform: isActive ? "scale(1.2)" : "scale(1)",
       }}
       data-ff-widget
+      onMouseEnter={() => {
+        if (item.selector) setHighlightSelector(item.selector);
+      }}
+      onMouseLeave={() => {
+        // Only clear if this pin's selector is the one highlighted (not the active feedback's)
+        if (!activeFeedback || activeFeedback.id !== item.id) {
+          setHighlightSelector(activeFeedback?.selector ?? null);
+        }
+      }}
       onClick={(e) => {
         e.stopPropagation();
-        setActiveFeedback(isActive ? null : item);
+        const next = isActive ? null : item;
+        setActiveFeedback(next);
+        setHighlightSelector(next?.selector ?? null);
       }}
       aria-label={`Feedback: ${item.comment.slice(0, 50)}`}
     >
