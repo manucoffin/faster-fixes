@@ -1,20 +1,5 @@
 "use client";
 
-import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
-import { useOrgMembers } from "@/app/(authenticated)/(project)/inbox/_features/use-org-members";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
-import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
 import {
   Sheet,
@@ -24,8 +9,10 @@ import {
   SheetTitle,
 } from "@workspace/ui/components/sheet";
 import { format, formatDistanceToNow } from "date-fns";
-import { ExternalLink, ImageOff, UserPlus } from "lucide-react";
+import { ExternalLink, ImageOff } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import { AssigneeSelect } from "./assignee-select.client";
+import { StatusSelect } from "./status-select.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -35,13 +22,6 @@ type FeedbackDetailPanelProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-const STATUS_OPTIONS = [
-  { value: "new", label: "New" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" },
-];
 
 function formatBrowserMeta(f: FeedbackItem) {
   const parts: string[] = [];
@@ -63,9 +43,6 @@ export function FeedbackDetailPanel({
   open,
   onOpenChange,
 }: FeedbackDetailPanelProps) {
-  const { updateStatus, updateAssignee } = useFeedbackMutations(projectId);
-  const { members: orgMembers, currentMemberId } = useOrgMembers();
-
   if (!feedback) return null;
 
   const browserMeta = formatBrowserMeta(feedback);
@@ -151,76 +128,17 @@ export function FeedbackDetailPanel({
 
           <Separator />
 
-          {/* Status */}
-          <div>
-            <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-              Status
-            </h4>
-            <Select
-              value={feedback.status}
-              onValueChange={(value) => updateStatus(feedback.id, value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <StatusSelect
+            projectId={projectId}
+            feedbackId={feedback.id}
+            value={feedback.status}
+          />
 
-          {/* Assignee */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <h4 className="text-muted-foreground text-xs font-medium uppercase">
-                Assignee
-              </h4>
-              {currentMemberId && feedback.assignee?.id !== currentMemberId && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => updateAssignee(feedback.id, currentMemberId)}
-                >
-                  <UserPlus className="mr-1 size-3" />
-                  Assign to me
-                </Button>
-              )}
-            </div>
-            <Select
-              value={feedback.assignee?.id ?? "unassigned"}
-              onValueChange={(value) =>
-                updateAssignee(
-                  feedback.id,
-                  value === "unassigned" ? null : value,
-                )
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {orgMembers.map((member) => (
-                  <SelectItem key={member.id} value={member.id}>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="size-5">
-                        <AvatarImage src={member.image ?? undefined} />
-                        <AvatarFallback className="text-[10px]">
-                          {member.name?.charAt(0)?.toUpperCase() ?? "?"}
-                        </AvatarFallback>
-                      </Avatar>
-                      {member.name ?? "Unknown"}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <AssigneeSelect
+            projectId={projectId}
+            feedbackId={feedback.id}
+            value={feedback.assignee?.id ?? null}
+          />
 
           <Separator />
 
