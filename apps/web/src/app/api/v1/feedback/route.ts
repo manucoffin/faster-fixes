@@ -31,8 +31,11 @@ export async function OPTIONS(req: NextRequest) {
 
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
+  console.info("[feedback] POST /api/v1/feedback — content-type:", req.headers.get("content-type"));
+
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
+    console.warn("[feedback] unauthorized — invalid API key");
     return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
@@ -91,11 +94,18 @@ export async function POST(req: NextRequest) {
 
   // Handle optional screenshot upload
   let screenshotId: string | undefined;
-  const screenshotFile = formData.get("screenshot");
-  if (screenshotFile instanceof File) {
+  const screenshotField = formData.get("screenshot");
+  console.info("[feedback] screenshot field present:", screenshotField !== null, "| instanceof File:", screenshotField instanceof File);
+  if (screenshotField !== null && !(screenshotField instanceof File)) {
+    console.warn("[feedback] screenshot field is not a File — type:", typeof screenshotField, "| value preview:", String(screenshotField).slice(0, 100));
+  }
+  if (screenshotField instanceof File) {
+    console.info("[feedback] screenshot file — name:", screenshotField.name, "| type:", screenshotField.type, "| size:", screenshotField.size);
     try {
-      const buffer = Buffer.from(await screenshotFile.arrayBuffer());
+      const buffer = Buffer.from(await screenshotField.arrayBuffer());
+      console.info("[feedback] screenshot buffer length:", buffer.length);
       if (buffer.length > 5 * 1024 * 1024) {
+        console.warn("[feedback] screenshot exceeds 5MB limit:", buffer.length);
         return withCors(
           req,
           NextResponse.json(
@@ -107,25 +117,28 @@ export async function POST(req: NextRequest) {
 
       const key = `feedback-screenshots/${project.id}/${crypto.randomUUID()}.png`;
       const bucket = process.env.STORAGE_BUCKET_NAME!;
+      console.info("[feedback] uploading screenshot — key:", key, "| bucket:", bucket);
 
       await putObject(s3Client, {
         bucket,
         key,
         body: buffer,
-        contentType: screenshotFile.type || "image/png",
+        contentType: screenshotField.type || "image/png",
       });
+      console.info("[feedback] screenshot uploaded to R2 successfully");
 
       const asset = await createAsset({
         key,
         bucket,
         provider: "r2",
         filename: "screenshot.png",
-        mimeType: screenshotFile.type || "image/png",
+        mimeType: screenshotField.type || "image/png",
         size: buffer.length,
       });
       screenshotId = asset.id;
-    } catch {
-      // Screenshot upload failed — proceed without it
+      console.info("[feedback] asset record created — id:", asset.id);
+    } catch (err) {
+      console.error("[feedback] screenshot upload failed:", err);
     }
   }
 
@@ -150,6 +163,8 @@ export async function POST(req: NextRequest) {
       screenshot: { select: { key: true, provider: true, bucket: true } },
     },
   });
+
+  console.info("[feedback] created — id:", feedback.id, "| screenshotId:", screenshotId ?? "none");
 
   return withCors(
     req,

@@ -78,7 +78,10 @@ export class FasterFixesClient {
     const formData = new FormData();
     formData.append("data", JSON.stringify(data));
     if (screenshot) {
+      console.info("[faster-fixes] attaching screenshot — size:", screenshot.size, "| type:", screenshot.type);
       formData.append("screenshot", screenshot, "screenshot.png");
+    } else {
+      console.info("[faster-fixes] no screenshot blob provided");
     }
 
     return this.request<CreateFeedbackResponse>("/api/v1/feedback", {

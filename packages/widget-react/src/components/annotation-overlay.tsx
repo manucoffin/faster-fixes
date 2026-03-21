@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { generateSelector } from "@fasterfixes/core";
-const html2canvasModule = await import("html2canvas");
-const captureScreenshot = (
-  html2canvasModule as unknown as { default: (el: HTMLElement, opts?: object) => Promise<HTMLCanvasElement> }
-).default;
+import html2canvas from "html2canvas-pro";
 import { useFeedbackContext } from "../context.js";
 import { overlayHighlightStyle } from "../styles.js";
 
@@ -16,6 +13,7 @@ export function AnnotationOverlay() {
     setSelectedElement,
     setClickCoords,
     setScreenshotBlob,
+    screenshotCaptureRef,
   } = useFeedbackContext();
 
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
@@ -35,11 +33,12 @@ export function AnnotationOverlay() {
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
       const target = e.target as Element;
       if (target.closest("[data-ff-widget]")) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
 
       setSelectedElement(target);
       setClickCoords({ x: e.clientX, y: e.clientY });
@@ -47,8 +46,11 @@ export function AnnotationOverlay() {
       // Generate selector
       generateSelector(target);
 
-      // Capture screenshot asynchronously
-      captureScreenshot(document.body, {
+      // Capture screenshot asynchronously, store promise for submit to await
+      console.info("[faster-fixes] starting screenshot capture...");
+      console.info("[faster-fixes] html2canvas fn:", typeof html2canvas);
+
+      const capturePromise = html2canvas(document.body, {
         useCORS: true,
         allowTaint: true,
         windowWidth: window.innerWidth,
@@ -59,18 +61,39 @@ export function AnnotationOverlay() {
         y: window.scrollY,
       })
         .then((canvas) => {
-          canvas.toBlob((blob) => {
-            if (blob) setScreenshotBlob(blob);
-          }, "image/png");
+          console.info("[faster-fixes] html2canvas resolved — canvas:", canvas?.tagName, canvas?.width, "x", canvas?.height);
+          return new Promise<Blob | null>((resolve) => {
+            canvas.toBlob((blob) => {
+              console.info("[faster-fixes] toBlob result — blob:", blob ? `${blob.size} bytes (${blob.type})` : "null");
+              resolve(blob);
+            }, "image/png");
+          });
         })
-        .catch(() => {
-          // Screenshot failed — continue without it
+        .catch((err) => {
+          console.error("[faster-fixes] screenshot capture failed:", err);
+          return null;
         });
+
+      screenshotCaptureRef.current = capturePromise;
+
+      capturePromise.then((blob) => {
+        console.info("[faster-fixes] screenshot blob ready:", blob ? `${blob.size} bytes` : "null");
+        if (blob) setScreenshotBlob(blob);
+      });
 
       setMode("selected");
     },
-    [setMode, setSelectedElement, setClickCoords, setScreenshotBlob],
+    [setMode, setSelectedElement, setClickCoords, setScreenshotBlob, screenshotCaptureRef],
   );
+
+  // Suppress pointer-down/mousedown so dialogs/drawers don't close
+  const suppressEvent = useCallback((e: Event) => {
+    const target = e.target as Element;
+    if (target.closest("[data-ff-widget]")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -86,6 +109,8 @@ export function AnnotationOverlay() {
 
     document.addEventListener("mousemove", handleMouseMove, true);
     document.addEventListener("click", handleClick, true);
+    document.addEventListener("mousedown", suppressEvent, true);
+    document.addEventListener("pointerdown", suppressEvent, true);
     document.addEventListener("keydown", handleKeyDown, true);
 
     // Set crosshair cursor
@@ -94,10 +119,12 @@ export function AnnotationOverlay() {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove, true);
       document.removeEventListener("click", handleClick, true);
+      document.removeEventListener("mousedown", suppressEvent, true);
+      document.removeEventListener("pointerdown", suppressEvent, true);
       document.removeEventListener("keydown", handleKeyDown, true);
       document.body.style.cursor = "";
     };
-  }, [mode, handleMouseMove, handleClick, handleKeyDown]);
+  }, [mode, handleMouseMove, handleClick, suppressEvent, handleKeyDown]);
 
   if (mode !== "annotating" || !highlightRect) return null;
 

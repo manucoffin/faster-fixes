@@ -52,6 +52,7 @@ export type FeedbackContextValue = {
   setClickCoords: (coords: { x: number; y: number } | null) => void;
   screenshotBlob: Blob | null;
   setScreenshotBlob: (blob: Blob | null) => void;
+  screenshotCaptureRef: React.RefObject<Promise<Blob | null> | null>;
 
   // Active pin (for viewing/editing existing feedback)
   activeFeedback: FeedbackItem | null;
@@ -60,6 +61,12 @@ export type FeedbackContextValue = {
   // Resolved filter
   showResolved: boolean;
   setShowResolved: (show: boolean) => void;
+
+  // Toolbar toggles
+  showPins: boolean;
+  setShowPins: (show: boolean) => void;
+  showList: boolean;
+  setShowList: (show: boolean) => void;
 
   // Customization
   classNames: ClassNames;

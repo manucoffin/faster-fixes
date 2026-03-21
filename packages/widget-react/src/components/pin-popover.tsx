@@ -54,6 +54,7 @@ export function PinPopover() {
     elements: {
       reference: targetEl,
     },
+    strategy: "fixed",
     whileElementsMounted: targetEl ? autoUpdate : undefined,
     middleware: [offset(12), flip(), shift({ padding: 8 })],
     placement: "bottom",

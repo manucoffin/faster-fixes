@@ -8,13 +8,15 @@ export const POSITION_STYLES: Record<WidgetPosition, React.CSSProperties> = {
   "bottom-left": { bottom: 20, left: 20 },
   "top-right": { top: 20, right: 20 },
   "top-left": { top: 20, left: 20 },
+  "middle-right": { top: "50%", right: 20, transform: "translateY(-50%)" },
+  "middle-left": { top: "50%", left: 20, transform: "translateY(-50%)" },
 };
 
-export const floatingButtonStyle = (
+export const triggerButtonStyle = (
   color: string,
 ): React.CSSProperties => ({
-  width: 48,
-  height: 48,
+  width: 40,
+  height: 40,
   borderRadius: "50%",
   backgroundColor: color,
   color: "#fff",
@@ -24,10 +26,37 @@ export const floatingButtonStyle = (
   alignItems: "center",
   justifyContent: "center",
   boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-  zIndex: 2147483647,
   position: "relative",
-  transition: "transform 0.15s ease",
+  transition: "transform 0.15s ease, background-color 0.15s ease",
+  flexShrink: 0,
 });
+
+export const toolbarStyle = (color: string): React.CSSProperties => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  backgroundColor: color,
+  borderRadius: 24,
+  padding: 4,
+  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+  transition: "width 0.2s ease",
+  overflow: "hidden",
+});
+
+export const toolbarButtonStyle: React.CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
+  backgroundColor: "rgba(255,255,255,0.15)",
+  color: "#fff",
+  border: "none",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  transition: "background-color 0.15s ease",
+};
 
 export const popoverStyle: React.CSSProperties = {
   backgroundColor: "#fff",
@@ -40,6 +69,7 @@ export const popoverStyle: React.CSSProperties = {
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontSize: 14,
   color: "#1a1a1a",
+  pointerEvents: "auto",
 };
 
 export const textareaStyle: React.CSSProperties = {
@@ -88,15 +118,17 @@ export const pinStyle = (statusColor: string): React.CSSProperties => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  position: "absolute",
+  position: "fixed",
   zIndex: 2147483646,
   transition: "transform 0.15s ease",
+  pointerEvents: "auto",
 });
 
 export const overlayHighlightStyle: React.CSSProperties = {
   position: "fixed",
   pointerEvents: "none",
   border: "2px solid",
+  borderRadius: 4,
   backgroundColor: "rgba(99, 102, 241, 0.1)",
   zIndex: 2147483645,
   transition: "all 0.1s ease",
@@ -114,6 +146,7 @@ export const feedbackListStyle: React.CSSProperties = {
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   fontSize: 13,
+  pointerEvents: "auto",
 };
 
 export const feedbackListItemStyle: React.CSSProperties = {

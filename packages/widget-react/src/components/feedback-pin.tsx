@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { STATUS_COLORS } from "@fasterfixes/core";
 import type { FeedbackItem, FeedbackStatus } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
@@ -28,16 +28,16 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     left: number;
   } | null>(null);
 
-  useEffect(() => {
-    // Try CSS selector first
+  const updatePosition = useCallback(() => {
+    // Try CSS selector first — gives live viewport coords
     if (item.selector) {
       try {
         const el = document.querySelector(item.selector);
         if (el) {
           const rect = el.getBoundingClientRect();
           setPosition({
-            top: rect.top + window.scrollY,
-            left: rect.right + window.scrollX + 4,
+            top: rect.top,
+            left: rect.right + 4,
           });
           return;
         }
@@ -46,14 +46,24 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
       }
     }
 
-    // Fallback to absolute coordinates
+    // Fallback to stored coordinates (viewport coords at click time, offset by scroll delta)
     if (item.clickX != null && item.clickY != null) {
       setPosition({
-        top: item.clickY + window.scrollY,
-        left: item.clickX + window.scrollX,
+        top: item.clickY,
+        left: item.clickX,
       });
     }
   }, [item.selector, item.clickX, item.clickY]);
+
+  useEffect(() => {
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, { passive: true });
+    window.addEventListener("resize", updatePosition, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [updatePosition]);
 
   if (!position) return null;
 

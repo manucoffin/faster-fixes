@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   FasterFixesClient,
@@ -51,6 +51,9 @@ export function FeedbackProvider({
     null,
   );
   const [showResolved, setShowResolved] = useState(false);
+  const [showPins, setShowPins] = useState(true);
+  const [showList, setShowList] = useState(false);
+  const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
 
   const client = useMemo(
     () => new FasterFixesClient({ apiKey, apiOrigin }),
@@ -127,6 +130,7 @@ export function FeedbackProvider({
     setMode("idle");
     setActiveFeedback(null);
     setSelectedElement(null);
+    setShowList(false);
   };
 
   const visiblePins = showResolved
@@ -134,6 +138,8 @@ export function FeedbackProvider({
     : feedbackItems.filter(
         (f) => f.status !== "resolved" && f.status !== "closed",
       );
+
+  const isActive = mode !== "idle";
 
   const contextValue = {
     client,
@@ -157,6 +163,11 @@ export function FeedbackProvider({
     setActiveFeedback,
     showResolved,
     setShowResolved,
+    showPins,
+    setShowPins,
+    showList,
+    setShowList,
+    screenshotCaptureRef,
     classNames: mergedClassNames,
     labels: mergedLabels,
     position,
@@ -168,22 +179,23 @@ export function FeedbackProvider({
       {children}
       {isVisible &&
         createPortal(
-          <div data-ff-widget>
+          <div
+            data-ff-widget
+            style={{
+              position: "relative",
+              zIndex: 2147483647,
+            }}
+          >
             {/* Annotation mode overlay */}
             <AnnotationOverlay />
 
-            {/* Comment popover (new feedback) */}
-            <CommentPopover />
+            {/* Existing feedback pins (only when visible and active) */}
+            {showPins &&
+              visiblePins.map((item) => (
+                <FeedbackPin key={item.id} item={item} />
+              ))}
 
-            {/* Existing feedback pins */}
-            {visiblePins.map((item) => (
-              <FeedbackPin key={item.id} item={item} />
-            ))}
-
-            {/* Pin popover (view/edit existing) */}
-            <PinPopover />
-
-            {/* Floating button + list container */}
+            {/* Toolbar + list container */}
             <div
               style={{
                 position: "fixed",
@@ -194,11 +206,16 @@ export function FeedbackProvider({
                   ? "flex-end"
                   : "flex-start",
                 zIndex: 2147483647,
+                pointerEvents: "auto",
               }}
             >
-              <FeedbackList />
+              {isActive && showList && <FeedbackList />}
               <FloatingButton />
             </div>
+
+            {/* Popovers rendered last so they appear above toolbar */}
+            <CommentPopover />
+            <PinPopover />
           </div>,
           document.body,
         )}

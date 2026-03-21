@@ -27,6 +27,7 @@ export function CommentPopover() {
     selectedElement,
     clickCoords,
     screenshotBlob,
+    screenshotCaptureRef,
     setSelectedElement,
     setClickCoords,
     setScreenshotBlob,
@@ -42,6 +43,7 @@ export function CommentPopover() {
     elements: {
       reference: selectedElement,
     },
+    strategy: "fixed",
     whileElementsMounted: autoUpdate,
     middleware: [offset(12), flip(), shift({ padding: 8 })],
     placement: "bottom",
@@ -71,6 +73,16 @@ export function CommentPopover() {
     const browserInfo = getBrowserInfo();
     const selector = selectedElement ? generateSelector(selectedElement) : undefined;
 
+    // Await the screenshot capture if still in progress
+    let screenshot = screenshotBlob;
+    console.info("[faster-fixes] submit — screenshotBlob from state:", screenshot ? `${screenshot.size} bytes` : "null");
+    console.info("[faster-fixes] submit — screenshotCaptureRef.current:", screenshotCaptureRef.current ? "promise present" : "null");
+    if (!screenshot && screenshotCaptureRef.current) {
+      console.info("[faster-fixes] submit — awaiting screenshot capture promise...");
+      screenshot = await screenshotCaptureRef.current;
+      console.info("[faster-fixes] submit — awaited result:", screenshot ? `${screenshot.size} bytes` : "null");
+    }
+
     try {
       await client.createFeedback(
         {
@@ -82,7 +94,7 @@ export function CommentPopover() {
           ...browserInfo,
         },
         reviewerToken,
-        screenshotBlob ?? undefined,
+        screenshot ?? undefined,
       );
 
       setComment("");
