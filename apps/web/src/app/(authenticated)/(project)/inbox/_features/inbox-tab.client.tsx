@@ -23,7 +23,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import * as React from "react";
 import { toast } from "sonner";
 import { ArchiveTab } from "./archive/archive-tab.client";
-import { FeedbackDetailPanel } from "./feedback-detail-panel.client";
+import { FeedbackDetailPanel } from "./feedback-panel/feedback-detail-panel.client";
 import { FeedbackFilters } from "./filters/feedback-filters.client";
 import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
 import { KanbanBoard } from "./kanban/kanban-board.client";

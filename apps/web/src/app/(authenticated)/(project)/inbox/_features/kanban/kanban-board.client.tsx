@@ -10,7 +10,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import * as React from "react";
-import { BulkActionToolbar } from "../bulk-action-toolbar.client";
+import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { KanbanColumn } from "./kanban-column.client";
 

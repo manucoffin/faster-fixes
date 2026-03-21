@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { Button } from "@workspace/ui/components/button";
 import {
   Select,
@@ -19,7 +23,7 @@ import {
 } from "@workspace/ui/components/sheet";
 import { format, formatDistanceToNow } from "date-fns";
 import { ExternalLink, ImageOff, UserPlus } from "lucide-react";
-import type { GetFeedbackOutput } from "./get-feedback.trpc.query";
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -49,7 +53,9 @@ const STATUS_OPTIONS = [
 function formatBrowserMeta(f: FeedbackItem) {
   const parts: string[] = [];
   if (f.browserName) {
-    parts.push(f.browserVersion ? `${f.browserName} ${f.browserVersion}` : f.browserName);
+    parts.push(
+      f.browserVersion ? `${f.browserName} ${f.browserVersion}` : f.browserName,
+    );
   }
   if (f.os) parts.push(f.os);
   if (f.viewportWidth && f.viewportHeight) {
@@ -120,10 +126,13 @@ export function FeedbackDetailPanel({
                 <div className="text-muted-foreground flex flex-col gap-0.5 text-xs">
                   {feedback.clickX != null && feedback.clickY != null && (
                     <span>
-                      Click: ({Math.round(feedback.clickX)}, {Math.round(feedback.clickY)})
+                      Click: ({Math.round(feedback.clickX)},{" "}
+                      {Math.round(feedback.clickY)})
                     </span>
                   )}
-                  {feedback.selector && <span>Selector: {feedback.selector}</span>}
+                  {feedback.selector && (
+                    <span>Selector: {feedback.selector}</span>
+                  )}
                 </div>
               </div>
             ) : (
@@ -192,7 +201,10 @@ export function FeedbackDetailPanel({
             <Select
               value={feedback.assignee?.id ?? "unassigned"}
               onValueChange={(value) =>
-                onAssigneeChange(feedback.id, value === "unassigned" ? null : value)
+                onAssigneeChange(
+                  feedback.id,
+                  value === "unassigned" ? null : value,
+                )
               }
             >
               <SelectTrigger className="w-full">
@@ -227,7 +239,9 @@ export function FeedbackDetailPanel({
             </span>
             <span>
               Last updated{" "}
-              {formatDistanceToNow(new Date(feedback.updatedAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(feedback.updatedAt), {
+                addSuffix: true,
+              })}
             </span>
           </div>
         </div>
