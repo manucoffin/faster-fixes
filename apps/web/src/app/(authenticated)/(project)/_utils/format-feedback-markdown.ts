@@ -1,74 +1,80 @@
-import { format } from "date-fns";
 import type { GetFeedbackOutput } from "../inbox/_features/get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
 export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
+  const md = f.metadata as Record<string, unknown> | null;
   const lines: string[] = [];
-  lines.push(`# Feedback`);
-  lines.push("");
-  lines.push(`**Page:** ${f.pageUrl}`);
-  lines.push(`**Status:** ${f.status}`);
-  if (f.assignee) lines.push(`**Assignee:** ${f.assignee.name}`);
-  lines.push(`**Submitted by:** ${f.reviewer.name}`);
-  lines.push(`**Date:** ${format(new Date(f.createdAt), "MMM d, yyyy")}`);
-  lines.push("");
-  lines.push(`## Comment`);
-  lines.push("");
-  lines.push(f.comment);
 
-  const meta: string[] = [];
+  // Task framing — tell the AI agent what to do
+  lines.push("# Bug Report");
+  lines.push("");
+  lines.push(
+    "A user reported a bug on your application. Find and fix the issue described below.",
+  );
+
+  // Where to look — most actionable info first
+  const locationLines: string[] = [];
+  locationLines.push(`**Page URL:** ${f.pageUrl}`);
+  if (md?.reactComponentPath) {
+    locationLines.push(`**Component tree:** \`${md.reactComponentPath}\``);
+  }
+  if (md?.sourceFile) {
+    locationLines.push(`**Source file:** \`${md.sourceFile}\``);
+  }
+  if (f.selector) locationLines.push(`**DOM selector:** \`${f.selector}\``);
+  if (md?.elementDescription) {
+    locationLines.push(`**Element:** ${md.elementDescription}`);
+  }
+
+  lines.push("");
+  lines.push("## Where to look");
+  lines.push("");
+  lines.push(...locationLines);
+
+  // What's wrong — the user's description as a blockquote
+  lines.push("");
+  lines.push("## What's wrong");
+  lines.push("");
+  const quotedComment = f.comment
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n");
+  lines.push(quotedComment);
+
+  if (md?.nearbyText) {
+    lines.push("");
+    lines.push(`**Nearby text:** "${md.nearbyText}"`);
+  }
+
+  // Environment — only if there's something to show
+  const envLines: string[] = [];
   if (f.browserName) {
-    meta.push(
+    envLines.push(
       `**Browser:** ${f.browserName}${f.browserVersion ? ` ${f.browserVersion}` : ""}`,
     );
   }
-  if (f.os) meta.push(`**OS:** ${f.os}`);
+  if (f.os) envLines.push(`**OS:** ${f.os}`);
   if (f.viewportWidth && f.viewportHeight) {
-    meta.push(`**Viewport:** ${f.viewportWidth}\u00d7${f.viewportHeight}`);
-  }
-  if (f.selector) meta.push(`**Selector:** \`${f.selector}\``);
-  if (f.clickX != null && f.clickY != null) {
-    meta.push(
-      `**Click position:** (${Math.round(f.clickX)}, ${Math.round(f.clickY)})`,
-    );
+    envLines.push(`**Viewport:** ${f.viewportWidth}\u00d7${f.viewportHeight}`);
   }
 
-  if (meta.length > 0) {
+  if (envLines.length > 0) {
     lines.push("");
-    lines.push(`## Browser & context`);
+    lines.push("## Environment");
     lines.push("");
-    lines.push(...meta);
+    lines.push(...envLines);
   }
 
-  const md = f.metadata as Record<string, unknown> | null;
-  if (md) {
-    const contextLines: string[] = [];
-    if (md.elementDescription) {
-      contextLines.push(`**Element:** ${md.elementDescription}`);
-    }
-    if (md.reactComponentPath) {
-      contextLines.push(`**Component:** \`${md.reactComponentPath}\``);
-    }
-    if (md.sourceFile) {
-      contextLines.push(`**Source:** \`${md.sourceFile}\``);
-    }
-    if (md.nearbyText) {
-      contextLines.push(`**Nearby text:** "${md.nearbyText}"`);
-    }
-    if (contextLines.length > 0) {
-      lines.push("");
-      lines.push("## Element context");
-      lines.push("");
-      lines.push(...contextLines);
-    }
-  }
-
+  // Screenshot with instruction for multimodal AI agents
   if (f.screenshotUrl) {
     lines.push("");
-    lines.push(`## Screenshot`);
+    lines.push("## Screenshot");
     lines.push("");
-    lines.push(`![Feedback screenshot](${f.screenshotUrl})`);
+    lines.push(
+      "Examine this screenshot for visual context of the reported issue:",
+    );
+    lines.push(`![Bug report screenshot](${f.screenshotUrl})`);
   }
 
   return lines.join("\n");
