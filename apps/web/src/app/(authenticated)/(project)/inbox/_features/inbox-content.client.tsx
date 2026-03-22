@@ -43,7 +43,7 @@ export function InboxContent() {
 
   return (
     <DashboardPageContent
-      breadcrumbs={[{ label: activeProject.name }, { label: "Inbox" }]}
+      breadcrumbs={[{ label: "Inbox" }]}
     >
       <InboxTabs />
     </DashboardPageContent>

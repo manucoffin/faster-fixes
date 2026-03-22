@@ -37,12 +37,9 @@ function OrganizationSwitcherLoading() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton size="lg" className="cursor-default">
-          <Skeleton className="h-8 w-8 rounded-lg" />
-          <div className="grid flex-1 gap-1.5 text-left text-sm leading-tight">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-3 w-16" />
-          </div>
+        <SidebarMenuButton size="default" className="cursor-default">
+          <Skeleton className="h-6 w-6 rounded-md" />
+          <Skeleton className="h-4 w-24" />
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
@@ -73,23 +70,20 @@ export function OrganizationSwitcher() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
-                size="lg"
+                size="default"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
               >
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-6 w-6 rounded-md">
                   {orgLogo && (
                     <AvatarImage src={resolveS3Url(orgLogo)} alt={orgName} />
                   )}
-                  <AvatarFallback className="rounded-lg text-xs">
+                  <AvatarFallback className="rounded-md text-[10px]">
                     {getInitials(orgName)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{orgName}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {activeOrg?.slug}
-                  </span>
-                </div>
+                <span className="truncate text-sm font-semibold">
+                  {orgName}
+                </span>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>

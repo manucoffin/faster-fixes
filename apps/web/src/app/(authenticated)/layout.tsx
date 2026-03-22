@@ -2,7 +2,6 @@ import { loginUrl } from "@/app/_constants/routes";
 import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
-import { Separator } from "@workspace/ui/components/separator";
 import {
   SidebarInset,
   SidebarProvider,
@@ -15,6 +14,7 @@ import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/brea
 import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
 import { FeedbackButton } from "./_features/feedback/feedback-button.client";
+import { HeaderProjectSwitcher } from "./_features/header/header-project-switcher.client";
 import { AuthenticatedSidebar } from "./_features/sidebar/authenticated-sidebar.server";
 
 export const metadata: Metadata = {
@@ -40,14 +40,12 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
           <AuthenticatedSidebar />
 
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center justify-between gap-2">
+            <header className="flex h-12 shrink-0 items-center justify-between gap-2">
               <div className="flex w-full items-center justify-between px-4">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="-ml-1" />
-                  <Separator
-                    orientation="vertical"
-                    className="mr-2 hidden data-[orientation=vertical]:h-4 md:block"
-                  />
+
+                  <HeaderProjectSwitcher />
                   <div className="hidden md:block">
                     <Breadcrumbs />
                   </div>

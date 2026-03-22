@@ -15,3 +15,19 @@ export const AppLogo = ({ className, ...props }: Props) => {
     </Link>
   );
 };
+
+type AppLogoMarkProps = Omit<ComponentProps<typeof Link>, "href"> & {
+  className?: string;
+};
+
+export const AppLogoMark = ({ className, ...props }: AppLogoMarkProps) => {
+  return (
+    <Link
+      href="/"
+      className={cn("text-base leading-none font-bold", className)}
+      {...props}
+    >
+      F<span className="text-primary">F</span>
+    </Link>
+  );
+};

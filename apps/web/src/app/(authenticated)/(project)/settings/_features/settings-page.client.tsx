@@ -44,7 +44,7 @@ export function SettingsPage() {
 
   return (
     <DashboardPageContent
-      breadcrumbs={[{ label: activeProject.name }, { label: "Settings" }]}
+      breadcrumbs={[{ label: "Settings" }]}
     >
       <ProjectSettingsTab projectId={activeProject.id} />
     </DashboardPageContent>

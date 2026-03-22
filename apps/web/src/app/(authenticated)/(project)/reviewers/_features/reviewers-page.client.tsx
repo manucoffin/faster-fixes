@@ -44,7 +44,7 @@ export function ReviewersPage() {
 
   return (
     <DashboardPageContent
-      breadcrumbs={[{ label: activeProject.name }, { label: "Reviewers" }]}
+      breadcrumbs={[{ label: "Reviewers" }]}
     >
       <ReviewersTab projectId={activeProject.id} />
     </DashboardPageContent>

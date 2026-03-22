@@ -26,7 +26,7 @@ export function Breadcrumbs() {
 
           return (
             <React.Fragment key={index}>
-              {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
                 {isLast ? (
                   <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
