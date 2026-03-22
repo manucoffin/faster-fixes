@@ -53,7 +53,7 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
 
                 <div className="flex items-center gap-2">
                   <FeedbackButton />
-                  <ThemeToggle variant="ghost" size="icon" />
+                  <ThemeToggle variant="ghost" size="icon-sm" />
                 </div>
               </div>
             </header>

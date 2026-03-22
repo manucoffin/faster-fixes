@@ -24,7 +24,8 @@ export const AuthenticatedSidebar = async ({
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <AppLogo className="w-40 p-2" />
+        <AppLogo className="p-2" />
+
         <OrganizationSwitcher />
         <ProjectSwitcher />
       </SidebarHeader>
