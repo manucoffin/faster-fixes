@@ -3,6 +3,7 @@ import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
 import type { FeedbackItem, FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import { pinStyle } from "../styles.js";
+import { clamp } from "../utils.js";
 
 type FeedbackPinProps = {
   item: FeedbackItem;
@@ -24,10 +25,6 @@ const PinIcon = () => (
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
 
 function getPinAnchor(metadata: FeedbackItem["metadata"]): PinAnchor | null {
   const pinAnchor = (metadata as Record<string, unknown> | null)?.pinAnchor;

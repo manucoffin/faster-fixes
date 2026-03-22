@@ -14,12 +14,9 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from "../styles.js";
+import { clamp } from "../utils.js";
 
 const FADEOUT_DURATION = 200;
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
 
 export function CommentPopover() {
   const {
