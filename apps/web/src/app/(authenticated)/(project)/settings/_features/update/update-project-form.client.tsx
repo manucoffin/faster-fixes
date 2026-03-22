@@ -47,6 +47,9 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
         queryClient.invalidateQueries(
           trpc.authenticated.projects.get.queryOptions({ projectId }),
         );
+        queryClient.invalidateQueries({
+          queryKey: trpc.authenticated.projects.list.queryKey(),
+        });
         toast.success("Project updated");
       },
       onError: (error) => {
