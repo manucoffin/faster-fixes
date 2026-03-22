@@ -11,7 +11,7 @@ type UploadButtonProps = {
   route: string;
   /** File accept attribute */
   accept?: string;
-  /** Button label (default: "Choisir un fichier") */
+  /** Button label (default: "Choose a file") */
   label?: string;
   /** Description shown below the button (e.g. file constraints) */
   description?: string;
@@ -34,7 +34,7 @@ type UploadButtonProps = {
 export function UploadButton({
   route: uploadRoute,
   accept,
-  label = "Choisir un fichier",
+  label = "Choose a file",
   description,
   disabled = false,
   metadata,
@@ -93,7 +93,7 @@ export function UploadButton({
         ) : (
           (icon ?? <Upload className="size-4" />)
         )}
-        {control.isPending ? "Upload en cours..." : label}
+        {control.isPending ? "Uploading..." : label}
       </Button>
 
       {description && (

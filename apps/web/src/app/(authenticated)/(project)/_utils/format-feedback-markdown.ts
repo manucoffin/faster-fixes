@@ -7,10 +7,10 @@ export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
   const lines: string[] = [];
 
   // Task framing — tell the AI agent what to do
-  lines.push("# Bug Report");
+  lines.push("# Feedback Report");
   lines.push("");
   lines.push(
-    "A user reported a bug on your application. Find and fix the issue described below.",
+    "A user left feedback on your application. Review and address the issue described below.",
   );
 
   // Where to look — most actionable info first
@@ -72,9 +72,9 @@ export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
     lines.push("## Screenshot");
     lines.push("");
     lines.push(
-      "Examine this screenshot for visual context of the reported issue:",
+      "Examine this screenshot for visual context of the reported feedback:",
     );
-    lines.push(`![Bug report screenshot](${f.screenshotUrl})`);
+    lines.push(`![Feedback screenshot](${f.screenshotUrl})`);
   }
 
   return lines.join("\n");
