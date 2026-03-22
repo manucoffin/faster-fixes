@@ -56,7 +56,7 @@ export function KanbanCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="group bg-card border-border flex cursor-pointer gap-2 rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md"
+      className="group bg-card border-border flex cursor-pointer gap-2 rounded-lg border p-3 transition duration-300 hover:shadow-sm"
       onClick={() => {
         if (!isDragging) onSelect(feedback.id);
       }}
