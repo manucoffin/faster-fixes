@@ -30,6 +30,7 @@ export type FeedbackItem = {
   screenshotUrl: string | null;
   reviewer: FeedbackReviewer;
   createdAt: string;
+  metadata?: Record<string, unknown> | null;
 };
 
 export type FeedbackListResponse = {
@@ -47,6 +48,7 @@ export type CreateFeedbackData = {
   os?: string;
   viewportWidth?: number;
   viewportHeight?: number;
+  metadata?: Record<string, unknown>;
 };
 
 export type UpdateFeedbackData = {

@@ -70,6 +70,7 @@ export const getFeedback = protectedProcedure
           }
         : null,
       screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
+      metadata: f.metadata as Record<string, unknown> | null,
     }));
   });
 

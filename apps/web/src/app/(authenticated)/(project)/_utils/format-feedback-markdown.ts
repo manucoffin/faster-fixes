@@ -41,6 +41,29 @@ export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
     lines.push(...meta);
   }
 
+  const md = f.metadata as Record<string, unknown> | null;
+  if (md) {
+    const contextLines: string[] = [];
+    if (md.elementDescription) {
+      contextLines.push(`**Element:** ${md.elementDescription}`);
+    }
+    if (md.reactComponentPath) {
+      contextLines.push(`**Component:** \`${md.reactComponentPath}\``);
+    }
+    if (md.sourceFile) {
+      contextLines.push(`**Source:** \`${md.sourceFile}\``);
+    }
+    if (md.nearbyText) {
+      contextLines.push(`**Nearby text:** "${md.nearbyText}"`);
+    }
+    if (contextLines.length > 0) {
+      lines.push("");
+      lines.push("## Element context");
+      lines.push("");
+      lines.push(...contextLines);
+    }
+  }
+
   if (f.screenshotUrl) {
     lines.push("");
     lines.push(`## Screenshot`);

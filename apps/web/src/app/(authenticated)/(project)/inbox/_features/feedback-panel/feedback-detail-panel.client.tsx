@@ -112,6 +112,42 @@ export function FeedbackDetailPanel({
             )}
           </div>
 
+          {/* Element context from metadata */}
+          {feedback.metadata &&
+            (() => {
+              const md = feedback.metadata as Record<string, unknown>;
+              const hasContext =
+                md.elementDescription ||
+                md.reactComponentPath ||
+                md.sourceFile;
+              if (!hasContext) return null;
+              return (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="text-muted-foreground mb-1 text-xs font-medium uppercase">
+                      Element
+                    </h4>
+                    <div className="flex flex-col gap-1 text-sm">
+                      {typeof md.elementDescription === "string" && (
+                        <p>{md.elementDescription}</p>
+                      )}
+                      {typeof md.reactComponentPath === "string" && (
+                        <p className="text-muted-foreground font-mono text-xs">
+                          {md.reactComponentPath}
+                        </p>
+                      )}
+                      {typeof md.sourceFile === "string" && (
+                        <p className="text-muted-foreground font-mono text-xs">
+                          {md.sourceFile}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
           {/* Browser Metadata */}
           {browserMeta && (
             <>

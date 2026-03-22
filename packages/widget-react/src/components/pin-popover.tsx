@@ -46,26 +46,18 @@ export function PinPopover() {
     setError(null);
   }, [activeFeedback?.id]);
 
-  // Find the target element for positioning
-  const targetEl = (() => {
-    if (!activeFeedback) return null;
-    if (activeFeedback.selector) {
-      try {
-        return document.querySelector(activeFeedback.selector);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  })();
+  // Anchor popover to the pin element (always visible, regardless of target element state)
+  const pinEl = activeFeedback
+    ? document.querySelector(`[data-ff-pin-id="${activeFeedback.id}"]`)
+    : null;
 
   const { refs, floatingStyles } = useFloating({
     open: !!activeFeedback,
     elements: {
-      reference: targetEl,
+      reference: pinEl,
     },
     strategy: "fixed",
-    whileElementsMounted: targetEl ? autoUpdate : undefined,
+    whileElementsMounted: pinEl ? autoUpdate : undefined,
     middleware: [offset(12), flip(), shift({ padding: 8 })],
     placement: "bottom",
   });
@@ -144,22 +136,11 @@ export function PinPopover() {
     setActiveFeedback(null);
   }
 
-  // If no target element, position at the click coords
-  const positionStyles: React.CSSProperties = targetEl
-    ? floatingStyles
-    : activeFeedback.clickX != null && activeFeedback.clickY != null
-      ? {
-          position: "absolute",
-          top: activeFeedback.clickY + window.scrollY + 12,
-          left: activeFeedback.clickX + window.scrollX,
-        }
-      : floatingStyles;
-
   return (
     <div
       ref={refs.setFloating}
       className={`ff-popover ${classNames.popover ?? ""}`}
-      style={{ ...popoverStyle, ...positionStyles }}
+      style={{ ...popoverStyle, ...floatingStyles }}
       data-ff-widget
     >
       {/* Header with status */}

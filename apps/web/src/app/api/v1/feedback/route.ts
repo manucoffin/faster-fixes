@@ -23,6 +23,7 @@ const CreateFeedbackSchema = z.object({
   os: z.string().optional(),
   viewportWidth: z.number().int().optional(),
   viewportHeight: z.number().int().optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export async function OPTIONS(req: NextRequest) {
@@ -156,6 +157,7 @@ export async function POST(req: NextRequest) {
       os: data.os,
       viewportWidth: data.viewportWidth,
       viewportHeight: data.viewportHeight,
+      metadata: data.metadata,
       screenshotId,
     },
     include: {
@@ -180,6 +182,7 @@ export async function POST(req: NextRequest) {
         screenshotUrl: feedback.screenshot
           ? buildAssetUrl(feedback.screenshot)
           : null,
+        metadata: feedback.metadata,
         reviewer: feedback.reviewer,
         createdAt: feedback.createdAt,
       },
@@ -239,6 +242,7 @@ export async function GET(req: NextRequest) {
         clickY: f.clickY,
         selector: f.selector,
         screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
+        metadata: f.metadata,
         reviewer: f.reviewer,
         createdAt: f.createdAt,
       })),

@@ -6,7 +6,7 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
-import { generateSelector, getBrowserInfo } from "@fasterfixes/core";
+import { generateSelectors, captureElementContext, getBrowserInfo } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import {
   popoverStyle,
@@ -89,7 +89,15 @@ export function CommentPopover() {
     setError(null);
 
     const browserInfo = getBrowserInfo();
-    const selector = selectedElement ? generateSelector(selectedElement) : undefined;
+
+    let selector: string | undefined;
+    let metadata: Record<string, unknown> | undefined;
+    if (selectedElement) {
+      const result = generateSelectors(selectedElement);
+      selector = result.best;
+      const context = captureElementContext(selectedElement, result.strategies);
+      metadata = { ...context };
+    }
 
     let screenshot = screenshotBlob;
     if (!screenshot && screenshotCaptureRef.current) {
@@ -104,6 +112,7 @@ export function CommentPopover() {
           selector,
           clickX: clickCoords?.x,
           clickY: clickCoords?.y,
+          metadata,
           ...browserInfo,
         },
         reviewerToken,

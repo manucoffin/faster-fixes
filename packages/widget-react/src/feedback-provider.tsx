@@ -4,10 +4,12 @@ import {
   FasterFixesClient,
   DEFAULT_LABELS,
   resolveReviewerToken,
+  resolveElement,
 } from "@fasterfixes/core";
 import type {
   FeedbackItem,
   Labels,
+  SelectorStrategies,
   WidgetConfig,
   WidgetPosition,
 } from "@fasterfixes/core";
@@ -158,16 +160,13 @@ export function FeedbackProvider({
       setTimeout(() => {
         setActiveFeedback(pending);
         setHighlightSelector(pending.selector ?? null);
-        if (pending.selector) {
-          setTimeout(() => {
-            try {
-              const el = document.querySelector(pending.selector!);
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-            } catch {
-              // Selector failed
-            }
-          }, 200);
-        }
+
+        setTimeout(() => {
+          const strategies = (pending.metadata as Record<string, unknown> | null)
+            ?.selectors as SelectorStrategies | undefined;
+          const el = resolveElement(pending.selector, strategies);
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 200);
       }, 100);
     } catch {
       // sessionStorage unavailable

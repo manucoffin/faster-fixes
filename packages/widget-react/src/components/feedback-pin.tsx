@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { STATUS_COLORS } from "@fasterfixes/core";
-import type { FeedbackItem, FeedbackStatus } from "@fasterfixes/core";
+import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
+import type { FeedbackItem, FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import { pinStyle } from "../styles.js";
 
@@ -31,33 +31,28 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   const PIN_SIZE = 24;
 
   const updatePosition = useCallback(() => {
-    // Try CSS selector first — gives live viewport coords
-    if (item.selector) {
-      try {
-        const el = document.querySelector(item.selector);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const vw = window.innerWidth;
-          const vh = window.innerHeight;
+    // Try multi-strategy element resolution
+    const strategies = (item.metadata as Record<string, unknown> | null)
+      ?.selectors as SelectorStrategies | undefined;
+    const el = resolveElement(item.selector, strategies);
 
-          // Horizontal: prefer right side, flip to left if overflowing
-          const left =
-            rect.right + 4 + PIN_SIZE > vw
-              ? rect.left - PIN_SIZE - 4
-              : rect.right + 4;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
 
-          // Vertical: prefer top-aligned, push up if overflowing bottom
-          const top =
-            rect.top + PIN_SIZE > vh
-              ? rect.bottom - PIN_SIZE
-              : rect.top;
+      const left =
+        rect.right + 4 + PIN_SIZE > vw
+          ? rect.left - PIN_SIZE - 4
+          : rect.right + 4;
 
-          setPosition({ top, left });
-          return;
-        }
-      } catch {
-        // Selector failed — fall through to coords
-      }
+      const top =
+        rect.top + PIN_SIZE > vh
+          ? rect.bottom - PIN_SIZE
+          : rect.top;
+
+      setPosition({ top, left });
+      return;
     }
 
     // Fallback to stored coordinates (viewport coords at click time)
@@ -67,7 +62,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         left: item.clickX,
       });
     }
-  }, [item.selector, item.clickX, item.clickY]);
+  }, [item.selector, item.clickX, item.clickY, item.metadata]);
 
   useEffect(() => {
     updatePosition();
@@ -104,6 +99,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         transform: isActive ? "scale(1.2)" : "scale(1)",
       }}
       data-ff-widget
+      data-ff-pin-id={item.id}
       onMouseEnter={() => {
         if (item.selector) setHighlightSelector(item.selector);
       }}

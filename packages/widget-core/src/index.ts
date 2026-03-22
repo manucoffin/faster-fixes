@@ -27,5 +27,8 @@ export {
 export type { Labels } from "./constants.js";
 
 export { resolveReviewerToken } from "./utils/token.js";
-export { generateSelector } from "./utils/selector.js";
+export { generateSelector, generateSelectors, resolveElement } from "./utils/selector.js";
+export type { SelectorStrategies } from "./utils/selector.js";
+export { captureElementContext } from "./utils/element-context.js";
+export type { ElementContext } from "./utils/element-context.js";
 export { getBrowserInfo } from "./utils/browser.js";

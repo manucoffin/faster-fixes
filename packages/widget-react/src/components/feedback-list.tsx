@@ -1,5 +1,5 @@
-import type { FeedbackStatus } from "@fasterfixes/core";
-import { STATUS_COLORS } from "@fasterfixes/core";
+import type { FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
+import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
 import { useEffect, useRef, useState } from "react";
 import { useFeedbackContext } from "../context.js";
 import {
@@ -122,17 +122,13 @@ export function FeedbackList() {
               style={feedbackListItemStyle}
               onClick={() => {
                 if (item.pageUrl === window.location.href) {
-                  if (item.selector) {
-                    try {
-                      const el = document.querySelector(item.selector);
-                      el?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                      });
-                    } catch {
-                      // Selector failed
-                    }
-                  }
+                  const strategies = (item.metadata as Record<string, unknown> | null)
+                    ?.selectors as SelectorStrategies | undefined;
+                  const el = resolveElement(item.selector, strategies);
+                  el?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
                   setActiveFeedback(item);
                 } else if (
                   item.pageUrl.startsWith("https://") ||
