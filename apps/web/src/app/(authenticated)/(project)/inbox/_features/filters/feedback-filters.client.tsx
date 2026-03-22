@@ -1,19 +1,13 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@workspace/ui/components/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@workspace/ui/components/combobox";
 import {
   Select,
   SelectContent,
@@ -21,8 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { cn } from "@workspace/ui/lib/utils";
-import { Check, ChevronsUpDown, X } from "lucide-react";
 import * as React from "react";
 
 type FeedbackFiltersProps = {
@@ -49,68 +41,31 @@ export function FeedbackFilters({
   sort,
   onSortChange,
 }: FeedbackFiltersProps) {
-  const [open, setOpen] = React.useState(false);
-
   return (
     <div className="flex w-full flex-wrap items-center gap-2 sm:w-fit">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between sm:w-[250px]"
-          >
-            {selectedPageUrl ? (
-              <span className="truncate">{formatPageUrl(selectedPageUrl)}</span>
-            ) : (
-              <span className="text-muted-foreground">Filter by page</span>
+      <Combobox
+        items={pageUrls}
+        value={selectedPageUrl}
+        onValueChange={(value) => onPageUrlChange(value)}
+        itemToStringValue={formatPageUrl}
+      >
+        <ComboboxInput
+          placeholder="Filter by page"
+          showTrigger
+          showClear={!!selectedPageUrl}
+          className="w-full sm:w-[250px]"
+        />
+        <ComboboxContent>
+          <ComboboxEmpty>No pages found.</ComboboxEmpty>
+          <ComboboxList>
+            {(url) => (
+              <ComboboxItem key={url} value={url}>
+                <span className="truncate">{formatPageUrl(url)}</span>
+              </ComboboxItem>
             )}
-            <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0"
-          align="start"
-        >
-          <Command>
-            <CommandInput placeholder="Search pages..." />
-            <CommandList>
-              <CommandEmpty>No pages found.</CommandEmpty>
-              <CommandGroup>
-                {pageUrls.map((url) => (
-                  <CommandItem
-                    key={url}
-                    value={url}
-                    onSelect={() => {
-                      onPageUrlChange(selectedPageUrl === url ? null : url);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 size-4",
-                        selectedPageUrl === url ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    <span className="truncate">{formatPageUrl(url)}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      {selectedPageUrl && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onPageUrlChange(null)}
-        >
-          <X className="size-4" />
-        </Button>
-      )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
 
       <Select value={sort} onValueChange={onSortChange}>
         <SelectTrigger className="w-full sm:w-[160px]">
