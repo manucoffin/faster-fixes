@@ -1,6 +1,8 @@
 "use client";
 
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import { AlertTriangleIcon } from "lucide-react";
 
 import { DeleteProjectButton } from "./delete/delete-project-button.client";
 import { RegenerateApiKeySection } from "./regenerate-api-key/regenerate-api-key-section.client";
@@ -37,7 +39,16 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         cardTitle="Delete project"
         cardClassName="lg:max-w-lg"
       >
-        <DeleteProjectButton projectId={projectId} />
+        <div className="flex flex-col gap-4">
+          <Alert variant="destructive">
+            <AlertTriangleIcon />
+            <AlertDescription>
+              Warning: deleting this project is irreversible. All reviewers,
+              feedback, and associated files will be permanently deleted.
+            </AlertDescription>
+          </Alert>
+          <DeleteProjectButton projectId={projectId} />
+        </div>
       </DashboardSection>
     </div>
   );
