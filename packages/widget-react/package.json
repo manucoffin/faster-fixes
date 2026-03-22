@@ -61,7 +61,7 @@
   "dependencies": {
     "@fasterfixes/core": "workspace:*",
     "@floating-ui/react": "^0.27.16",
-    "html2canvas-pro": "^2.0.2"
+    "modern-screenshot": "^4.6.8"
   },
   "peerDependencies": {
     "react": ">=18",

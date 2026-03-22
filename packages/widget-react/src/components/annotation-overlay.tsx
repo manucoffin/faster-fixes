@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import html2canvas from "html2canvas-pro";
+import { domToBlob } from "modern-screenshot";
 import { useFeedbackContext } from "../context.js";
 import { overlayHighlightStyle } from "../styles.js";
 
@@ -43,42 +43,22 @@ export function AnnotationOverlay() {
       setClickCoords({ x: e.clientX, y: e.clientY });
 
       // Capture screenshot asynchronously, store promise for submit to await
-      const capturePromise = html2canvas(document.body, {
-        useCORS: true,
-        allowTaint: true,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
+      const capturePromise = domToBlob(document.body, {
         width: window.innerWidth,
         height: window.innerHeight,
-        x: window.scrollX,
-        y: window.scrollY,
-        // Strip widget elements and ignore CSS parsing errors
-        ignoreElements: (el: Element) => el.hasAttribute?.("data-ff-widget") ?? false,
-        onclone: (_doc: Document, clonedEl: HTMLElement) => {
-          // Remove style elements that may contain unsupported CSS (e.g. CSS layers, custom properties)
-          clonedEl.querySelectorAll("style").forEach((style: HTMLStyleElement) => {
-            try {
-              // If the style sheet has rules that can't be accessed, remove it
-              if (style.sheet) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                style.sheet.cssRules;
-              }
-            } catch {
-              style.remove();
-            }
-          });
+        scale: window.devicePixelRatio || 1,
+        features: {
+          restoreScrollPosition: true,
         },
-      })
-        .then(
-          (canvas) =>
-            new Promise<Blob | null>((resolve) => {
-              canvas.toBlob((blob) => resolve(blob), "image/png");
-            }),
-        )
-        .catch((err) => {
-          console.warn("[faster-fixes] screenshot capture failed:", err);
-          return null;
-        });
+        // Inverted from html2canvas: return true to INCLUDE, false to EXCLUDE
+        filter: (el: Node) => {
+          if (el instanceof Element) return !el.hasAttribute("data-ff-widget");
+          return true;
+        },
+      }).catch((err) => {
+        console.warn("[faster-fixes] screenshot capture failed:", err);
+        return null;
+      });
 
       screenshotCaptureRef.current = capturePromise;
 
