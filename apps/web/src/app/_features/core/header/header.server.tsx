@@ -48,7 +48,7 @@ export async function Header() {
           href="/"
           className="text-foreground hover:text-accent shrink-0 text-xl font-bold transition-colors"
         >
-          StartupMaker
+          FasterFixes
         </Link>
 
         {/* Navigation - Center */}

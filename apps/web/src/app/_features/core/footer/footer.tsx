@@ -15,7 +15,7 @@ const data = {
   youtubeLink: YOUTUBE_URL,
   tiktokLink: TIKTOK_URL,
   company: {
-    name: "Startup Maker",
+    name: "FasterFixes",
     description:
       "Fuel your entrepreneurial journey with our comprehensive platform designed to help you build, develop, and grow your business.",
   },
