@@ -38,7 +38,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
               {subscriptionPlan && (
                 <Badge
                   variant={
-                    subscriptionPlan === SubscriptionPlanName.Basic
+                    subscriptionPlan === SubscriptionPlanName.Agency
                       ? "default"
                       : "secondary"
                   }

@@ -176,13 +176,13 @@ export function UpgradeSubscriptionDialog({
                   const allFeatures =
                     PLAN_FEATURES[plan.name as keyof typeof PLAN_FEATURES] ||
                     [];
-                  // Filter out common features only for Premium plan
+                  // Filter out common features only for Agency plan
                   const features =
-                    plan.name === SubscriptionPlanName.Premium
+                    plan.name === SubscriptionPlanName.Agency
                       ? allFeatures.filter((f) => !commonFeatureIds.has(f.id))
                       : allFeatures;
                   const isHighlighted =
-                    plan.name === SubscriptionPlanName.Premium;
+                    plan.name === SubscriptionPlanName.Pro;
 
                   // Calculate price in euros (Stripe stores in cents)
                   const priceHT = selectedPrice

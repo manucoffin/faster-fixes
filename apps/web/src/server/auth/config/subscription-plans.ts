@@ -1,8 +1,9 @@
 import type { StripePlan } from "@better-auth/stripe";
 
 export enum SubscriptionPlanName {
-  Basic = "basic",
-  Premium = "premium",
+  Free = "free",
+  Pro = "pro",
+  Agency = "agency",
 }
 
 export enum SubscriptionStatus {
@@ -16,65 +17,107 @@ export enum SubscriptionStatus {
   Paused = "paused",
 }
 
+export const PLAN_LIMITS = {
+  [SubscriptionPlanName.Free]: {
+    projects: 1,
+    feedbacks: 50,
+    seats: 1,
+  },
+  [SubscriptionPlanName.Pro]: {
+    projects: 5,
+    feedbacks: Infinity,
+    seats: 5,
+  },
+  [SubscriptionPlanName.Agency]: {
+    projects: Infinity,
+    feedbacks: Infinity,
+    seats: Infinity,
+  },
+};
+
 export const PLAN_DESCRIPTIONS = {
-  [SubscriptionPlanName.Basic]:
-    "Perfect to get started. Access essential features to manage your profile and analyze your data.",
-  [SubscriptionPlanName.Premium]:
-    "Our best plan. Access advanced tools, integrations, and priority support.",
+  [SubscriptionPlanName.Free]:
+    "Get started with one project. Ideal for testing and solo use.",
+  [SubscriptionPlanName.Pro]:
+    "For small teams managing multiple client projects.",
+  [SubscriptionPlanName.Agency]:
+    "For agencies with many concurrent projects and large teams.",
 };
 
 export const PLAN_FEATURES = {
-  [SubscriptionPlanName.Basic]: [
+  [SubscriptionPlanName.Free]: [
     {
-      id: "user_profiles",
-      label: "User profile creation and management",
+      id: "projects",
+      label: "1 project",
       highlighted: false,
     },
     {
-      id: "basic_analytics",
-      label: "Basic analytics and usage reports",
+      id: "feedbacks",
+      label: "Up to 50 feedback items",
       highlighted: false,
     },
     {
-      id: "email_support",
-      label: "Email support",
+      id: "seats",
+      label: "1 team member",
       highlighted: false,
     },
     {
-      id: "api_access",
-      label: "Standard API access",
+      id: "widget",
+      label: "Website feedback widget",
+      highlighted: false,
+    },
+    {
+      id: "dashboard",
+      label: "Feedback management dashboard",
       highlighted: false,
     },
   ],
-  [SubscriptionPlanName.Premium]: [
+  [SubscriptionPlanName.Pro]: [
     {
-      id: "user_profiles",
-      label: "User profile creation and management",
-      highlighted: false,
-    },
-    {
-      id: "basic_analytics",
-      label: "Basic analytics and usage reports",
-      highlighted: false,
-    },
-    {
-      id: "email_support",
-      label: "Email support",
-      highlighted: false,
-    },
-    {
-      id: "api_access",
-      label: "Standard API access",
-      highlighted: false,
-    },
-    {
-      id: "premium_features",
-      label: "All Basic plan features",
+      id: "includes_free",
+      label: "Everything in Free",
       highlighted: true,
     },
     {
-      id: "advanced_analytics",
-      label: "Advanced analytics and custom reports",
+      id: "projects",
+      label: "Up to 5 projects",
+      highlighted: false,
+    },
+    {
+      id: "feedbacks",
+      label: "Unlimited feedback",
+      highlighted: false,
+    },
+    {
+      id: "seats",
+      label: "Up to 5 team members",
+      highlighted: false,
+    },
+    {
+      id: "priority_email_support",
+      label: "Priority email support",
+      highlighted: false,
+    },
+  ],
+  [SubscriptionPlanName.Agency]: [
+    {
+      id: "includes_pro",
+      label: "Everything in Pro",
+      highlighted: true,
+    },
+    {
+      id: "projects",
+      label: "Unlimited projects",
+      highlighted: false,
+    },
+    {
+      id: "feedbacks",
+      label: "Unlimited feedback",
+      highlighted: false,
+    },
+    {
+      id: "seats",
+      label: "Unlimited team members",
       highlighted: false,
     },
     {
@@ -82,57 +125,30 @@ export const PLAN_FEATURES = {
       label: "Priority support via email and chat",
       highlighted: false,
     },
-    {
-      id: "integrations",
-      label: "Third-party service integrations",
-      highlighted: false,
-    },
-    {
-      id: "custom_branding",
-      label: "Custom branding options",
-      highlighted: false,
-    },
-    {
-      id: "advanced_api",
-      label: "Premium API access with higher rate limits",
-      highlighted: false,
-    },
   ],
 };
 
 export const SUBSCRIPTION_PLANS: StripePlan[] = [
   {
-    name: SubscriptionPlanName.Basic,
-    priceId: process.env.BASIC_MONTHLY_PRICE_ID,
-    lookupKey: "basic_monthly",
-    annualDiscountPriceId: process.env.BASIC_YEARLY_PRICE_ID,
-    annualDiscountLookupKey: "basic_yearly",
+    name: SubscriptionPlanName.Pro,
+    priceId: process.env.PRO_MONTHLY_PRICE_ID,
+    lookupKey: "pro_monthly",
+    annualDiscountPriceId: process.env.PRO_YEARLY_PRICE_ID,
+    annualDiscountLookupKey: "pro_yearly",
     limits: {
-      seats: 1,
+      seats: PLAN_LIMITS[SubscriptionPlanName.Pro].seats,
     },
     group: "",
-    // freeTrial: {
-    //   days: 0,
-    //   onTrialStart: async (subscription) => {},
-    //   onTrialEnd: async (data) => {},
-    //   onTrialExpired: async (subscription) => {},
-    // },
   },
   {
-    name: SubscriptionPlanName.Premium,
-    priceId: process.env.PREMIUM_MONTHLY_PRICE_ID,
-    lookupKey: "premium_monthly",
-    annualDiscountPriceId: process.env.PREMIUM_YEARLY_PRICE_ID,
-    annualDiscountLookupKey: "premium_yearly",
+    name: SubscriptionPlanName.Agency,
+    priceId: process.env.AGENCY_MONTHLY_PRICE_ID,
+    lookupKey: "agency_monthly",
+    annualDiscountPriceId: process.env.AGENCY_YEARLY_PRICE_ID,
+    annualDiscountLookupKey: "agency_yearly",
     limits: {
-      seats: 1,
+      seats: PLAN_LIMITS[SubscriptionPlanName.Agency].seats,
     },
     group: "",
-    // freeTrial: {
-    //   days: 0,
-    //   onTrialStart: async (subscription) => {},
-    //   onTrialEnd: async (data) => {},
-    //   onTrialExpired: async (subscription) => {},
-    // },
   },
 ];
