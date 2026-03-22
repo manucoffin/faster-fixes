@@ -60,9 +60,9 @@ export class FasterFixesClient {
     reviewerToken: string,
     url?: string,
   ): Promise<FeedbackListResponse> {
-    const params = url ? new URLSearchParams({ url }) : new URLSearchParams();
+    const query = url ? `?${new URLSearchParams({ url }).toString()}` : "";
     return this.request<FeedbackListResponse>(
-      `/api/v1/feedback?${params.toString()}`,
+      `/api/v1/feedback${query}`,
       {
         method: "GET",
         headers: this.headers(reviewerToken),

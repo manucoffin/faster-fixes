@@ -1,6 +1,6 @@
 import type { WidgetPosition } from "@fasterfixes/core";
 
-const Z_WIDGET = 2147483647;
+export const Z_WIDGET = 2147483647;
 const Z_PIN = 2147483646;
 const Z_HIGHLIGHT = 2147483645;
 const SHADOW_SM = "0 2px 8px rgba(0,0,0,0.2)";

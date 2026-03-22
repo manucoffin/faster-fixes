@@ -14,7 +14,7 @@ import type {
   WidgetPosition,
 } from "@fasterfixes/core";
 import { FeedbackContext, type ClassNames, type WidgetMode } from "./context.js";
-import { POSITION_STYLES } from "./styles.js";
+import { POSITION_STYLES, Z_WIDGET } from "./styles.js";
 import { FloatingButton } from "./components/floating-button.js";
 import { AnnotationOverlay } from "./components/annotation-overlay.js";
 import { CommentPopover } from "./components/comment-popover.js";
@@ -69,7 +69,7 @@ export function FeedbackProvider({
     [apiKey, apiOrigin],
   );
 
-  const mergedClassNames: ClassNames = { ...customClassNames };
+  const mergedClassNames: ClassNames = customClassNames ?? {};
 
   const mergedLabels: Labels = useMemo(
     () => ({ ...DEFAULT_LABELS, ...customLabels }),
@@ -325,7 +325,7 @@ export function FeedbackProvider({
             data-ff-widget
             style={{
               position: "relative",
-              zIndex: 2147483647,
+              zIndex: Z_WIDGET,
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -352,7 +352,7 @@ export function FeedbackProvider({
                     ? "flex-start"
                     : "center",
                 gap: 8,
-                zIndex: 2147483647,
+                zIndex: Z_WIDGET,
                 pointerEvents: "auto",
               }}
             >
