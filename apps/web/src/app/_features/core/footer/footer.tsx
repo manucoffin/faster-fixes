@@ -17,7 +17,7 @@ const data = {
   company: {
     name: "FasterFixes",
     description:
-      "Fuel your entrepreneurial journey with our comprehensive platform designed to help you build, develop, and grow your business.",
+      "Collect client feedback directly on your website. Get structured, agent-ready tasks your AI coding tools can act on immediately.",
   },
 };
 
