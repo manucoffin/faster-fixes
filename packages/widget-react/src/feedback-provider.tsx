@@ -62,6 +62,7 @@ export function FeedbackProvider({
   const [highlightSelector, setHighlightSelector] = useState<string | null>(null);
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
   const pendingFeedbackHandled = useRef(false);
+  const portalCleanupRef = useRef<(() => void) | null>(null);
 
   const client = useMemo(
     () => new FasterFixesClient({ apiKey, apiOrigin }),
@@ -173,6 +174,84 @@ export function FeedbackProvider({
     }
   }, [initialized, feedbackItems]);
 
+  // Callback ref for the portal wrapper — sets up interaction protections
+  // when the element mounts and cleans up when it unmounts.
+  const portalRef = useCallback((el: HTMLDivElement | null) => {
+    // Clean up previous
+    if (portalCleanupRef.current) {
+      portalCleanupRef.current();
+      portalCleanupRef.current = null;
+    }
+
+    if (!el) return;
+
+    // --- Prevent dialog libraries from blocking widget interaction ---
+
+    // 1. Stop native event propagation so dialog focus traps and
+    //    click-outside handlers in the bubble phase can't see our events.
+    const stop = (e: Event) => e.stopPropagation();
+    el.addEventListener("focusin", stop);
+    el.addEventListener("pointerdown", stop);
+    el.addEventListener("mousedown", stop);
+
+    // 2. Strip inert/aria-hidden attributes that dialog libraries set
+    //    on sibling elements to block interaction.
+    const attrObserver = new MutationObserver(() => {
+      if (el.hasAttribute("inert")) el.removeAttribute("inert");
+      if (el.getAttribute("aria-hidden") === "true") {
+        el.removeAttribute("aria-hidden");
+      }
+    });
+    attrObserver.observe(el, {
+      attributes: true,
+      attributeFilter: ["inert", "aria-hidden"],
+    });
+
+    // 3. Re-focus mechanism for capture-phase focus traps that our
+    //    stopPropagation can't intercept. If focus is stolen from a
+    //    widget input, we immediately re-focus it.
+    const handleDocumentFocusOut = (e: FocusEvent) => {
+      const relatedTarget = e.relatedTarget;
+      if (relatedTarget instanceof Element && el.contains(relatedTarget)) {
+        e.stopImmediatePropagation();
+      }
+    };
+
+    let refocusing = false;
+    const handleFocusOut = (e: FocusEvent) => {
+      if (refocusing) return;
+      const target = e.target as HTMLElement | null;
+      const relatedTarget = e.relatedTarget as Element | null;
+      if (
+        target?.matches("textarea, input, [contenteditable]") &&
+        (!relatedTarget || !el.contains(relatedTarget))
+      ) {
+        refocusing = true;
+        requestAnimationFrame(() => {
+          target.focus();
+          refocusing = false;
+        });
+      }
+    };
+    el.addEventListener("focusout", handleFocusOut);
+    el.ownerDocument.addEventListener("focusout", handleDocumentFocusOut);
+
+    // Strip on mount in case a dialog is already open
+    if (el.hasAttribute("inert")) el.removeAttribute("inert");
+    if (el.getAttribute("aria-hidden") === "true") {
+      el.removeAttribute("aria-hidden");
+    }
+
+    portalCleanupRef.current = () => {
+      el.removeEventListener("focusin", stop);
+      el.removeEventListener("pointerdown", stop);
+      el.removeEventListener("mousedown", stop);
+      el.removeEventListener("focusout", handleFocusOut);
+      el.ownerDocument.removeEventListener("focusout", handleDocumentFocusOut);
+      attrObserver.disconnect();
+    };
+  }, []);
+
   // Don't render if not initialized, no token, or widget disabled
   if (!initialized || !reviewerToken || !config || !config.enabled) {
     return <>{children}</>;
@@ -242,6 +321,7 @@ export function FeedbackProvider({
       {isVisible &&
         createPortal(
           <div
+            ref={portalRef}
             data-ff-widget
             style={{
               position: "relative",

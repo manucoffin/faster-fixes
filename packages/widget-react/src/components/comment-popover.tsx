@@ -17,6 +17,10 @@ import {
 
 const FADEOUT_DURATION = 200;
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
 export function CommentPopover() {
   const {
     mode,
@@ -97,6 +101,16 @@ export function CommentPopover() {
       selector = result.best;
       const context = captureElementContext(selectedElement, result.strategies);
       metadata = { ...context };
+
+      if (clickCoords) {
+        const rect = selectedElement.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          metadata.pinAnchor = {
+            x: clamp((clickCoords.x - rect.left) / rect.width, 0, 1),
+            y: clamp((clickCoords.y - rect.top) / rect.height, 0, 1),
+          };
+        }
+      }
     }
 
     let screenshot = screenshotBlob;

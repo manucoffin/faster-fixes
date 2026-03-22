@@ -8,6 +8,11 @@ type FeedbackPinProps = {
   item: FeedbackItem;
 };
 
+type PinAnchor = {
+  x: number;
+  y: number;
+};
+
 const PinIcon = () => (
   <svg
     width="12"
@@ -20,6 +25,26 @@ const PinIcon = () => (
   </svg>
 );
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getPinAnchor(metadata: FeedbackItem["metadata"]): PinAnchor | null {
+  const pinAnchor = (metadata as Record<string, unknown> | null)?.pinAnchor;
+  if (!pinAnchor || typeof pinAnchor !== "object") {
+    return null;
+  }
+
+  const x = (pinAnchor as Record<string, unknown>).x;
+  const y = (pinAnchor as Record<string, unknown>).y;
+
+  if (typeof x !== "number" || typeof y !== "number") {
+    return null;
+  }
+
+  return { x: clamp(x, 0, 1), y: clamp(y, 0, 1) };
+}
+
 export function FeedbackPin({ item }: FeedbackPinProps) {
   const { classNames, setActiveFeedback, activeFeedback, setHighlightSelector } =
     useFeedbackContext();
@@ -31,31 +56,52 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   const PIN_SIZE = 24;
 
   const updatePosition = useCallback(() => {
-    // Try multi-strategy element resolution
-    const strategies = (item.metadata as Record<string, unknown> | null)
-      ?.selectors as SelectorStrategies | undefined;
-    const el = resolveElement(item.selector, strategies);
+    const metadata = item.metadata as Record<string, unknown> | null;
+    const strategies = metadata?.selectors as SelectorStrategies | undefined;
+    const pinAnchor = getPinAnchor(item.metadata);
+    const hasSelector = !!(item.selector || strategies);
+    const el = hasSelector ? resolveElement(item.selector, strategies) : null;
 
     if (el) {
       const rect = el.getBoundingClientRect();
+
+      // Hide pin if the element is not visible (e.g. inside a closed dialog)
+      if (rect.width === 0 && rect.height === 0) {
+        setPosition(null);
+        return;
+      }
+
       const vw = window.innerWidth;
       const vh = window.innerHeight;
+      const anchorX = pinAnchor ? rect.left + rect.width * pinAnchor.x : rect.right;
+      const anchorY = pinAnchor ? rect.top + rect.height * pinAnchor.y : rect.top;
 
-      const left =
-        rect.right + 4 + PIN_SIZE > vw
-          ? rect.left - PIN_SIZE - 4
-          : rect.right + 4;
+      // Horizontal: prefer the click side for newer pins, otherwise use the element edge.
+      let left = anchorX + 4;
+      if (left + PIN_SIZE > vw) {
+        left = anchorX - PIN_SIZE - 4;
+      }
+      left = clamp(left, 0, vw - PIN_SIZE);
 
-      const top =
-        rect.top + PIN_SIZE > vh
-          ? rect.bottom - PIN_SIZE
-          : rect.top;
+      let top = pinAnchor ? anchorY - PIN_SIZE / 2 : rect.top;
+      if (!pinAnchor && top + PIN_SIZE > vh) {
+        top = rect.bottom - PIN_SIZE;
+      }
+      top = clamp(top, 0, vh - PIN_SIZE);
 
       setPosition({ top, left });
       return;
     }
 
-    // Fallback to stored coordinates (viewport coords at click time)
+    // Element not found. Only hide if this is a new pin with strategies
+    // (it was on a dialog/transient element). Old pins without strategies
+    // fall back to stored coordinates to preserve backward compat.
+    if (hasSelector && strategies) {
+      setPosition(null);
+      return;
+    }
+
+    // Fall back to stored coordinates
     if (item.clickX != null && item.clickY != null) {
       setPosition({
         top: item.clickY,
@@ -70,16 +116,25 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     window.addEventListener("resize", updatePosition, { passive: true });
     window.addEventListener("load", updatePosition);
 
-    // Recalculate after layout stabilizes (fonts, images, lazy content)
+    // Staggered retries to handle hydration and lazy rendering.
+    // React hydration timing is non-deterministic — a single 500ms retry
+    // isn't always enough for the DOM to stabilize.
     const raf = requestAnimationFrame(updatePosition);
-    const delayed = setTimeout(updatePosition, 500);
+    const retryTimers = [100, 300, 600, 1200, 2500].map((delay) =>
+      setTimeout(updatePosition, delay),
+    );
+
+    // Watch for direct children of body changing (dialog portals opening/closing)
+    const observer = new MutationObserver(updatePosition);
+    observer.observe(document.body, { childList: true });
 
     return () => {
       window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("load", updatePosition);
       cancelAnimationFrame(raf);
-      clearTimeout(delayed);
+      retryTimers.forEach(clearTimeout);
+      observer.disconnect();
     };
   }, [updatePosition]);
 
