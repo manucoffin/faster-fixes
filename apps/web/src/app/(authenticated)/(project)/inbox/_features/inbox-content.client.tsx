@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import {
   Empty,
@@ -17,7 +18,7 @@ export function InboxContent() {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 p-6">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -40,5 +41,11 @@ export function InboxContent() {
     );
   }
 
-  return <InboxTabs />;
+  return (
+    <DashboardPageContent
+      breadcrumbs={[{ label: activeProject.name }, { label: "Inbox" }]}
+    >
+      <InboxTabs />
+    </DashboardPageContent>
+  );
 }
