@@ -29,7 +29,7 @@ export function BulkActionToolbar({
   if (selectedItems.length === 0) return null;
 
   return (
-    <div className="bg-muted/50 animate-in fade-in flex items-center gap-2 rounded-lg border p-2 duration-200">
+    <div className="bg-muted/50 animate-in fade-in flex flex-wrap items-center gap-2 rounded-lg border p-2 duration-200">
       <Badge variant="secondary">
         <span className="tabular-nums">{selectedItems.length}</span> selected
       </Badge>

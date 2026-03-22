@@ -14,6 +14,7 @@ import * as React from "react";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { KanbanColumnBody, KanbanColumnHeader } from "./kanban-column.client";
+import { KanbanMobile } from "./kanban-mobile.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -92,6 +93,15 @@ export function KanbanBoard({
 
   const totalCount = filtered.length;
 
+  const bulkToolbar = (
+    <BulkActionToolbar
+      selectedItems={feedback.filter((f) => selectedIds.has(f.id))}
+      onMoveToStatus={(status) => handleBulkAction(status)}
+      onArchive={() => handleBulkAction("closed")}
+      onClearSelection={() => setSelectedIds(new Set())}
+    />
+  );
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
@@ -146,7 +156,18 @@ export function KanbanBoard({
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <KanbanMobile
+        columns={COLUMNS}
+        grouped={grouped}
+        selectedIds={selectedIds}
+        toolbar={bulkToolbar}
+        onToggleSelect={handleToggleSelect}
+        onToggleSelectAll={handleToggleSelectAll}
+        onSelectFeedback={onSelectFeedback}
+      />
+
+      {/* Desktop: column headers */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-3">
         {COLUMNS.map((col) => (
           <KanbanColumnHeader
             key={col.id}
@@ -160,19 +181,15 @@ export function KanbanBoard({
         ))}
       </div>
 
-      <BulkActionToolbar
-        selectedItems={feedback.filter((f) => selectedIds.has(f.id))}
-        onMoveToStatus={(status) => handleBulkAction(status)}
-        onArchive={() => handleBulkAction("closed")}
-        onClearSelection={() => setSelectedIds(new Set())}
-      />
+      <div className="hidden lg:block">{bulkToolbar}</div>
 
+      {/* Desktop: columns with DnD */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-3 gap-4">
+        <div className="hidden gap-4 lg:grid lg:grid-cols-3">
           {COLUMNS.map((col) => (
             <KanbanColumnBody
               key={col.id}

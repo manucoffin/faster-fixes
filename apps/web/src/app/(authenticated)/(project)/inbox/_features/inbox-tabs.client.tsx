@@ -61,7 +61,7 @@ export function InboxTabs() {
   return (
     <div className="flex flex-col gap-4">
       <Tabs value={view} onValueChange={setView}>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
             <TabsTrigger value="board">
               <Inbox className="mr-1.5 size-4" />
@@ -87,14 +87,22 @@ export function InboxTabs() {
         <TabsContent value="board" className="mt-4">
           {matchQueryStatus(feedbackQuery, {
             Loading: (
-              <div className="grid grid-cols-3 gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex flex-col gap-2">
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                  </div>
-                ))}
+              <div className="flex flex-col gap-4">
+                <Skeleton className="h-9 w-full rounded-full lg:hidden" />
+                <div className="hidden gap-4 lg:grid lg:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex flex-col gap-2">
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-2 lg:hidden">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
               </div>
             ),
             Errored: (

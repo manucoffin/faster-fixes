@@ -105,7 +105,7 @@ export function KanbanCard({
       </div>
 
       <div
-        className="text-muted-foreground flex shrink-0 cursor-grab items-center opacity-0 transition-opacity group-hover:opacity-100"
+        className="text-muted-foreground hidden shrink-0 cursor-grab items-center opacity-0 transition-opacity group-hover:opacity-100 lg:flex"
         {...listeners}
         {...attributes}
       >

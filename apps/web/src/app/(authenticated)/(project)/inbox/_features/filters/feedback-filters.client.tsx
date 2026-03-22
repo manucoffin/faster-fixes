@@ -52,14 +52,14 @@ export function FeedbackFilters({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2 sm:w-fit">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[250px] justify-between"
+            className="w-full justify-between sm:w-[250px]"
           >
             {selectedPageUrl ? (
               <span className="truncate">{formatPageUrl(selectedPageUrl)}</span>
@@ -69,7 +69,10 @@ export function FeedbackFilters({
             <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[250px] p-0" align="start">
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] p-0"
+          align="start"
+        >
           <Command>
             <CommandInput placeholder="Search pages..." />
             <CommandList>
@@ -102,16 +105,15 @@ export function FeedbackFilters({
       {selectedPageUrl && (
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={() => onPageUrlChange(null)}
-          className="h-8 px-2"
         >
           <X className="size-4" />
         </Button>
       )}
 
       <Select value={sort} onValueChange={onSortChange}>
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger className="w-full sm:w-[160px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
