@@ -70,7 +70,7 @@ export function KanbanColumnBody({
       )}
     >
       {items.length === 0 ? (
-        <div className="text-muted-foreground flex flex-1 items-center justify-center py-8 text-center text-sm">
+        <div className="text-muted-foreground py-8 text-center text-sm">
           No items
         </div>
       ) : (
