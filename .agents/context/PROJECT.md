@@ -34,26 +34,15 @@ It provides:
    - Screenshot
    - Page URL
    - Browser metadata
+   - DOM selector and element description
+   - React component tree (when available)
    - Timestamp
 3. **A developer dashboard** where feedback is collected and organized.
+4. **Agent-ready markdown export** — each feedback item can be copied as a structured markdown bug report, ready to paste into an AI coding agent like Claude Code.
 
 The key idea is to transform:
 
-> **messy client feedback → clear developer tasks**
-
-## AI Integration
-
-A core feature of the system is the ability to **convert raw client comments into structured tasks** using AI.
-
-The AI layer can:
-
-- Summarize feedback
-- Clarify vague comments
-- Categorize issues (bug, UI tweak, content change, etc.)
-- Generate developer-friendly tasks
-- Produce structured output that can be used by coding agents
-
-This allows feedback to become **agent-ready instructions**.
+> **messy client feedback → agent-ready bug report → AI-assisted fix**
 
 ## Developer Workflow
 
@@ -61,18 +50,17 @@ The product is designed for **developer-first workflows**.
 
 Typical usage:
 
-1. A client leaves feedback directly on the website.
-2. The system captures the context.
-3. The feedback is transformed into a structured task.
-4. Developers can:
-   - copy it as Markdown
-   - send it to their issue tracker
-   - expose it via API or webhook
-   - allow AI coding agents to process it.
+1. A client leaves feedback directly on the website via the widget.
+2. The system captures the full context (screenshot, URL, selector, component tree, browser info).
+3. The developer opens the dashboard and copies the feedback as structured markdown.
+4. The developer pastes the markdown into an AI coding agent (e.g., Claude Code).
+5. The agent locates the relevant code and fixes the issue.
+
+The markdown export is the core feature. It formats feedback as a structured report with sections for location (URL, component path, source file, DOM selector), the user's comment, environment details, and a screenshot — everything an AI agent needs to understand and address the feedback without further context.
 
 The goal is to reduce the gap between:
 
-> **client comment → developer action**
+> **client comment → copy markdown → paste into AI agent → fix**
 
 ## Target Users
 
@@ -100,13 +88,17 @@ The product follows these principles:
 - **Developer-first**
 - **Simple for non-technical clients**
 - **Minimal friction**
-- **Clear workflows**
-- **Automation-ready**
+- **Agent-ready output**
+- **No AI magic in the product itself** — the AI is the developer's coding agent, not a feature of this tool
 
 It should feel closer to a **developer tool** than a heavy project management system.
 
-## Long-Term Vision
+## Future Possibilities
 
-In the long term, the system should become a **bridge between client feedback and autonomous development tools**, enabling workflows such as:
+In the future, the system could evolve to include:
 
-client feedback → structured task → AI coding agent → code fix → pull request
+- **AI-powered task transformation** — summarizing feedback, clarifying vague comments, categorizing issues (bug, UI tweak, content change)
+- **Direct integrations** — pushing structured tasks to issue trackers (Linear, Jira) or triggering webhooks
+- **Autonomous workflows** — end-to-end pipelines where feedback automatically triggers an AI coding agent to produce a fix and open a pull request
+
+These features are not currently in scope but represent the long-term direction.
