@@ -17,7 +17,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
+import { CopyableText } from "@workspace/ui/components/copyable-text";
 import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   Select,
   SelectContent,
@@ -100,6 +103,15 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
             </AlertDescription>
           </Alert>
         )}
+
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-medium">Project ID</Label>
+          <CopyableText className="bg-muted w-fit rounded-md px-3 py-1.5 font-mono text-sm">
+            {project?.publicId ?? "..."}
+          </CopyableText>
+        </div>
+
+        <Separator />
 
         <FormField
           control={form.control}

@@ -31,6 +31,7 @@ export const getProject = protectedProcedure
 
     return {
       id: project.id,
+      publicId: project.publicId,
       name: project.name,
       url: project.url,
       apiKeyLastFour: project.apiKeyLastFour,
