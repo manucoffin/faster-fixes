@@ -1,13 +1,32 @@
-import type { GetFeedbackOutput } from "../inbox/_features/get-feedback.trpc.query";
+/**
+ * Shared markdown formatter for feedback items.
+ * Used by both the dashboard export and the agent API.
+ */
 
-type FeedbackItem = GetFeedbackOutput[number];
+export type FeedbackForMarkdown = {
+  id: string;
+  status: string;
+  comment: string;
+  pageUrl: string;
+  selector: string | null;
+  clickX: number | null;
+  clickY: number | null;
+  viewportWidth: number | null;
+  viewportHeight: number | null;
+  browserName: string | null;
+  browserVersion: string | null;
+  os: string | null;
+  screenshotUrl: string | null;
+  metadata: Record<string, unknown> | null;
+};
 
-export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
-  const md = f.metadata as Record<string, unknown> | null;
+export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
+  const md = f.metadata;
   const lines: string[] = [];
 
-  // Task framing — tell the AI agent what to do
-  lines.push("# Feedback Report");
+  lines.push(`# Feedback ${f.id}`);
+  lines.push("");
+  lines.push(`**Status:** ${f.status}`);
   lines.push("");
   lines.push(
     "A user left feedback on your application. Review and address the issue described below.",
@@ -78,4 +97,13 @@ export function formatFeedbackAsMarkdown(f: FeedbackItem): string {
   }
 
   return lines.join("\n");
+}
+
+export function formatFeedbackListAsMarkdown(
+  feedbacks: FeedbackForMarkdown[],
+): string {
+  if (feedbacks.length === 0) return "No feedback items found.";
+  return feedbacks
+    .map((f) => formatFeedbackAsMarkdown(f))
+    .join("\n\n---\n\n");
 }
