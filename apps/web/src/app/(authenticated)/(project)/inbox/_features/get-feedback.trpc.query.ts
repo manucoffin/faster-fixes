@@ -1,6 +1,6 @@
 "use server";
 
-import { buildAssetUrl } from "@/server/storage/build-asset-url";
+import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
@@ -46,32 +46,36 @@ export const getFeedback = protectedProcedure
       },
     });
 
-    return feedback.map((f) => ({
-      id: f.id,
-      createdAt: f.createdAt,
-      updatedAt: f.updatedAt,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      selector: f.selector,
-      browserName: f.browserName,
-      browserVersion: f.browserVersion,
-      os: f.os,
-      viewportWidth: f.viewportWidth,
-      viewportHeight: f.viewportHeight,
-      reviewer: f.reviewer,
-      assignee: f.assignee
-        ? {
-            id: f.assignee.id,
-            name: f.assignee.user.name,
-            image: f.assignee.user.image,
-          }
-        : null,
-      screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
-      metadata: f.metadata as Record<string, unknown> | null,
-    }));
+    return Promise.all(
+      feedback.map(async (f) => ({
+        id: f.id,
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+        status: f.status,
+        comment: f.comment,
+        pageUrl: f.pageUrl,
+        clickX: f.clickX,
+        clickY: f.clickY,
+        selector: f.selector,
+        browserName: f.browserName,
+        browserVersion: f.browserVersion,
+        os: f.os,
+        viewportWidth: f.viewportWidth,
+        viewportHeight: f.viewportHeight,
+        reviewer: f.reviewer,
+        assignee: f.assignee
+          ? {
+              id: f.assignee.id,
+              name: f.assignee.user.name,
+              image: f.assignee.user.image,
+            }
+          : null,
+        screenshotUrl: f.screenshot
+          ? await getSignedAssetUrl(f.screenshot)
+          : null,
+        metadata: f.metadata as Record<string, unknown> | null,
+      })),
+    );
   });
 
 export type GetFeedbackOutput = inferProcedureOutput<typeof getFeedback>;

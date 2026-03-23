@@ -1,6 +1,6 @@
 "use server";
 
-import { buildAssetUrl } from "@/server/storage/build-asset-url";
+import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
@@ -68,8 +68,8 @@ export const getArchivedFeedback = protectedProcedure
       prisma.feedback.count({ where }),
     ]);
 
-    return {
-      items: items.map((f) => ({
+    const mappedItems = await Promise.all(
+      items.map(async (f) => ({
         id: f.id,
         createdAt: f.createdAt,
         updatedAt: f.updatedAt,
@@ -83,8 +83,14 @@ export const getArchivedFeedback = protectedProcedure
               image: f.assignee.user.image,
             }
           : null,
-        screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
+        screenshotUrl: f.screenshot
+          ? await getSignedAssetUrl(f.screenshot)
+          : null,
       })),
+    );
+
+    return {
+      items: mappedItems,
       totalCount,
       pageCount: Math.ceil(totalCount / input.pageSize),
     };

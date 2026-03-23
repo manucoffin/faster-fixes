@@ -2,7 +2,7 @@ import { formatFeedbackListAsMarkdown } from "@/app/_features/feedback/format-fe
 import { hasScope } from "@/server/api/check-agent-scope";
 import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { resolveAgentToken } from "@/server/api/resolve-agent-token";
-import { buildAssetUrl } from "@/server/storage/build-asset-url";
+import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 import { ListFeedbacksQuerySchema } from "../agent.schema";
@@ -77,24 +77,28 @@ export async function GET(req: NextRequest) {
     `[agent-api] feedbacks:list tokenId=${agentToken.id} project=${projectId} count=${feedbacks.length}`,
   );
 
-  const mapped = feedbacks.map((f) => ({
-    id: f.id,
-    status: f.status,
-    comment: f.comment,
-    pageUrl: f.pageUrl,
-    selector: f.selector,
-    clickX: f.clickX,
-    clickY: f.clickY,
-    viewportWidth: f.viewportWidth,
-    viewportHeight: f.viewportHeight,
-    browserName: f.browserName,
-    browserVersion: f.browserVersion,
-    os: f.os,
-    screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
-    metadata: f.metadata as Record<string, unknown> | null,
-    reviewerName: f.reviewer.name,
-    createdAt: f.createdAt,
-  }));
+  const mapped = await Promise.all(
+    feedbacks.map(async (f) => ({
+      id: f.id,
+      status: f.status,
+      comment: f.comment,
+      pageUrl: f.pageUrl,
+      selector: f.selector,
+      clickX: f.clickX,
+      clickY: f.clickY,
+      viewportWidth: f.viewportWidth,
+      viewportHeight: f.viewportHeight,
+      browserName: f.browserName,
+      browserVersion: f.browserVersion,
+      os: f.os,
+      screenshotUrl: f.screenshot
+        ? await getSignedAssetUrl(f.screenshot)
+        : null,
+      metadata: f.metadata as Record<string, unknown> | null,
+      reviewerName: f.reviewer.name,
+      createdAt: f.createdAt,
+    })),
+  );
 
   if (format === "markdown") {
     return new NextResponse(formatFeedbackListAsMarkdown(mapped), {

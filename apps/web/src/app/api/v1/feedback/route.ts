@@ -4,7 +4,7 @@ import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
 import { createAsset } from "@/server/storage/create-asset";
-import { buildAssetUrl } from "@/server/storage/build-asset-url";
+import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { s3Client } from "@/server/storage";
 import { putObject } from "@better-upload/server/helpers";
 import { prisma } from "@workspace/db";
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
         clickY: feedback.clickY,
         selector: feedback.selector,
         screenshotUrl: feedback.screenshot
-          ? buildAssetUrl(feedback.screenshot)
+          ? await getSignedAssetUrl(feedback.screenshot)
           : null,
         metadata: feedback.metadata,
         reviewer: feedback.reviewer,
@@ -230,22 +230,26 @@ export async function GET(req: NextRequest) {
     },
   });
 
+  const feedback = await Promise.all(
+    feedbackList.map(async (f) => ({
+      id: f.id,
+      status: f.status,
+      comment: f.comment,
+      pageUrl: f.pageUrl,
+      clickX: f.clickX,
+      clickY: f.clickY,
+      selector: f.selector,
+      screenshotUrl: f.screenshot
+        ? await getSignedAssetUrl(f.screenshot)
+        : null,
+      metadata: f.metadata,
+      reviewer: f.reviewer,
+      createdAt: f.createdAt,
+    })),
+  );
+
   return withCors(
     req,
-    NextResponse.json({
-      feedback: feedbackList.map((f) => ({
-        id: f.id,
-        status: f.status,
-        comment: f.comment,
-        pageUrl: f.pageUrl,
-        clickX: f.clickX,
-        clickY: f.clickY,
-        selector: f.selector,
-        screenshotUrl: f.screenshot ? buildAssetUrl(f.screenshot) : null,
-        metadata: f.metadata,
-        reviewer: f.reviewer,
-        createdAt: f.createdAt,
-      })),
-    }),
+    NextResponse.json({ feedback }),
   );
 }
