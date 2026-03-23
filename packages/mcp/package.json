@@ -1,0 +1,74 @@
+{
+  "name": "@fasterfixes/mcp",
+  "version": "0.0.1",
+  "description": "MCP server for Faster Fixes — lets AI agents list and manage client feedback",
+  "type": "module",
+  "license": "MIT",
+  "author": "FasterFixes <support@faster-fixes.com> (https://faster-fixes.com)",
+  "homepage": "https://faster-fixes.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manucoffin/faster-fixes.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/manucoffin/faster-fixes/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agent",
+    "feedback",
+    "claude",
+    "claude-code",
+    "developer-tools",
+    "faster-fixes"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "fasterfixes-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "^9.39.1",
+    "tsdown": "^0.21.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

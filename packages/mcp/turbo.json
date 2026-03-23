@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"],
+      "env": [
+        "FASTER_FIXES_TOKEN",
+        "FASTER_FIXES_PROJECT",
+        "FASTER_FIXES_URL"
+      ]
+    }
+  }
+}
