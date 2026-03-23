@@ -11,6 +11,8 @@ type RateLimitConfig = {
 const RATE_LIMITS = {
   submit: { max: 100, windowMs: 3_600_000 } satisfies RateLimitConfig,
   read: { max: 1000, windowMs: 3_600_000 } satisfies RateLimitConfig,
+  "agent:read": { max: 200, windowMs: 3_600_000 } satisfies RateLimitConfig,
+  "agent:write": { max: 50, windowMs: 3_600_000 } satisfies RateLimitConfig,
 } as const;
 
 type RateLimitAction = keyof typeof RATE_LIMITS;

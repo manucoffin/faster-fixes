@@ -15,7 +15,8 @@ model Organization {
 
     subscription Subscription?
 
-    projects Project[]
+    projects    Project[]
+    agentTokens AgentToken[]
 
     @@unique([slug])
     @@map("organization")

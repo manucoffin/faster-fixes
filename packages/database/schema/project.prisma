@@ -5,6 +5,7 @@ model Project {
 
     name            String
     url             String
+    publicId        String @unique
     apiKeyHash      String
     apiKeyLastFour  String
 
@@ -16,6 +17,7 @@ model Project {
     feedback     Feedback[]
 
     @@index([organizationId])
+    @@index([publicId])
     @@map("project")
 }
 

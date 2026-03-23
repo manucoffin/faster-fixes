@@ -12,6 +12,10 @@ function generateApiKey(): { raw: string; hash: string; lastFour: string } {
   return { raw, hash, lastFour };
 }
 
+function generatePublicId(): string {
+  return "proj_" + crypto.randomBytes(12).toString("hex");
+}
+
 export const createProject = protectedProcedure
   .input(CreateProjectSchema)
   .mutation(async ({ input, ctx }) => {
@@ -57,6 +61,7 @@ export const createProject = protectedProcedure
       data: {
         name: input.name,
         url: input.url,
+        publicId: generatePublicId(),
         apiKeyHash: hash,
         apiKeyLastFour: lastFour,
         organizationId: input.organizationId,

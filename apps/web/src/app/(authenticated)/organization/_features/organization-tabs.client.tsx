@@ -10,6 +10,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
+import { AgentTokensSection } from "./agent-tokens/agent-tokens-section.client";
 import { OrganizationGeneralTab } from "./general/organization-general-tab.client";
 import { LeaveOrganizationSection } from "./leave-organization/leave-organization-section.client";
 import { OrganizationMembersTab } from "./members/organization-members-tab.client";
@@ -43,6 +44,7 @@ export function OrganizationTabs() {
       <TabsList>
         <TabsTrigger value="general">General</TabsTrigger>
         <TabsTrigger value="members">Members</TabsTrigger>
+        <TabsTrigger value="agent-tokens">Agent tokens</TabsTrigger>
       </TabsList>
 
       <TabsContent value="general" className="mt-6">
@@ -51,6 +53,10 @@ export function OrganizationTabs() {
 
       <TabsContent value="members" className="mt-6">
         <OrganizationMembersTab />
+      </TabsContent>
+
+      <TabsContent value="agent-tokens" className="mt-6">
+        <AgentTokensSection />
       </TabsContent>
     </Tabs>
   );

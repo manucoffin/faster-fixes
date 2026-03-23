@@ -1,0 +1,21 @@
+model AgentToken {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name          String
+    tokenHash     String @unique
+    tokenLastFour String
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    scopes     String[]
+    isActive   Boolean   @default(true)
+    lastUsedAt DateTime?
+    revokedAt  DateTime?
+
+    @@index([organizationId])
+    @@index([tokenHash])
+    @@map("agent_token")
+}
