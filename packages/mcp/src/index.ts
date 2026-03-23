@@ -34,7 +34,7 @@ server.registerTool(
     title: "List Feedbacks",
     description:
       "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, and screenshot. Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
-    inputSchema: z.object({
+    inputSchema: {
       status: z
         .enum(["new", "in_progress", "resolved", "closed"])
         .optional()
@@ -49,7 +49,7 @@ server.registerTool(
         .optional()
         .default("markdown")
         .describe("Response format. Use markdown for readable output"),
-    }),
+    },
   },
   async ({ status, page_url, format }) => {
     try {
@@ -83,7 +83,7 @@ server.registerTool(
     title: "Update Feedback Status",
     description:
       "Update the status of a feedback item. Use 'in_progress' when you start working on a fix, and 'resolved' when the fix is complete.",
-    inputSchema: z.object({
+    inputSchema: {
       feedback_id: z
         .string()
         .uuid()
@@ -91,7 +91,7 @@ server.registerTool(
       status: z
         .enum(["new", "in_progress", "resolved", "closed"])
         .describe("The new status"),
-    }),
+    },
   },
   async ({ feedback_id, status }) => {
     try {
