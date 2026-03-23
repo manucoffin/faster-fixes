@@ -12,31 +12,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Plus } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
-
-type CreateAgentTokenDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
 
 const AVAILABLE_SCOPES = [
   { value: "feedbacks:read", label: "Read feedbacks" },
   { value: "feedbacks:update_status", label: "Update feedback status" },
 ] as const;
 
-export function CreateAgentTokenDialog({
-  open,
-  onOpenChange,
-}: CreateAgentTokenDialogProps) {
+export function CreateAgentTokenDialog() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { data: activeOrg } = useActiveOrganization();
 
+  const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [scopes, setScopes] = React.useState<string[]>([
     "feedbacks:read",
@@ -77,14 +71,14 @@ export function CreateAgentTokenDialog({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleClose = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
       setName("");
       setScopes(["feedbacks:read", "feedbacks:update_status"]);
       setRawToken(null);
       setCopied(false);
     }
-    onOpenChange(open);
+    setOpen(next);
   };
 
   const toggleScope = (scope: string) => {
@@ -95,92 +89,100 @@ export function CreateAgentTokenDialog({
     );
   };
 
-  if (rawToken) {
-    return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Agent token created</DialogTitle>
-            <DialogDescription>
-              Copy this token now. It will not be shown again.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
-            <div className="flex items-center gap-2">
-              <code className="flex-1 font-mono text-sm break-all">
-                {rawToken}
-              </code>
-              <Button variant="ghost" size="icon" onClick={handleCopy}>
-                {copied ? (
-                  <Check className="text-success h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => handleClose(false)}>Done</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="size-4" />
+          Create token
+        </Button>
+      </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create agent token</DialogTitle>
-          <DialogDescription>
-            Generate a token for AI agents like Claude Code to access your
-            feedback.
-          </DialogDescription>
-        </DialogHeader>
+        {rawToken ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Agent token created</DialogTitle>
+              <DialogDescription>
+                Copy this token now. It will not be shown again.
+              </DialogDescription>
+            </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="token-name">Name</Label>
-            <Input
-              id="token-name"
-              placeholder="e.g. Claude Code"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Permissions</Label>
-            {AVAILABLE_SCOPES.map((scope) => (
-              <div key={scope.value} className="flex items-center gap-2">
-                <Checkbox
-                  id={scope.value}
-                  checked={scopes.includes(scope.value)}
-                  onCheckedChange={() => toggleScope(scope.value)}
-                />
-                <Label htmlFor={scope.value} className="font-normal">
-                  {scope.label}
-                </Label>
+            <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
+              <div className="flex items-center gap-2">
+                <code className="flex-1 font-mono text-sm break-all">
+                  {rawToken}
+                </code>
+                <Button variant="ghost" size="icon" onClick={handleCopy}>
+                  {copied ? (
+                    <Check className="text-success h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)}>
-            Cancel
-          </Button>
-          <Button
-            disabled={
-              createToken.isPending || !name.trim() || scopes.length === 0
-            }
-            onClick={handleCreate}
-          >
-            {createToken.isPending ? "Creating..." : "Create token"}
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button onClick={() => handleOpenChange(false)}>Done</Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Create agent token</DialogTitle>
+              <DialogDescription>
+                This token authenticates the Faster Fixes MCP server, giving
+                your AI coding agent access to feedback across all projects in
+                this organization.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="token-name">Name</Label>
+                <Input
+                  id="token-name"
+                  placeholder="e.g. Claude Code"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Permissions</Label>
+                {AVAILABLE_SCOPES.map((scope) => (
+                  <div key={scope.value} className="flex items-center gap-2">
+                    <Checkbox
+                      id={scope.value}
+                      checked={scopes.includes(scope.value)}
+                      onCheckedChange={() => toggleScope(scope.value)}
+                    />
+                    <Label htmlFor={scope.value} className="font-normal">
+                      {scope.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={
+                  createToken.isPending || !name.trim() || scopes.length === 0
+                }
+                onClick={handleCreate}
+              >
+                {createToken.isPending ? "Creating..." : "Create token"}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

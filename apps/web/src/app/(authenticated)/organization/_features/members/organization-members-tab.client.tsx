@@ -25,10 +25,8 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Facehash } from "facehash";
-import { LogOut, Mail, Plus } from "lucide-react";
-import * as React from "react";
+import { LogOut, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { InviteMemberDialog } from "./create-invitation/invite-member-dialog.client";
 import { InvitationActionsDropdown } from "./invitation-actions-dropdown.client";
 import { MemberActionsDropdown } from "./member-actions-dropdown.client";
 
@@ -49,7 +47,6 @@ export function OrganizationMembersTab() {
   const { data: activeOrg, refetch: refetchActiveOrg } =
     useActiveOrganization();
   const { data: memberRoleData } = useActiveMemberRole();
-  const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false);
 
   const currentRole = memberRoleData?.role;
 
@@ -93,15 +90,6 @@ export function OrganizationMembersTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      {canManage && (
-        <div className="flex justify-end">
-          <Button onClick={() => setInviteDialogOpen(true)}>
-            <Plus className="size-4" />
-            Invite member
-          </Button>
-        </div>
-      )}
-
       <Table>
         <TableHeader>
           <TableRow>
@@ -225,11 +213,6 @@ export function OrganizationMembersTab() {
           )}
         </TableBody>
       </Table>
-
-      <InviteMemberDialog
-        open={inviteDialogOpen}
-        onOpenChange={setInviteDialogOpen}
-      />
     </div>
   );
 }

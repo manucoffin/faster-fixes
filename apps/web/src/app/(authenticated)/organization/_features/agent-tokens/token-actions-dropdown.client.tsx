@@ -73,7 +73,7 @@ export function TokenActionsDropdown({
               })
             }
           >
-            <ShieldOff className="mr-2 h-4 w-4" />
+            <ShieldOff className="size-4" />
             Revoke
           </DropdownMenuItem>
         )}
@@ -86,7 +86,7 @@ export function TokenActionsDropdown({
             })
           }
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 className="size-4" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

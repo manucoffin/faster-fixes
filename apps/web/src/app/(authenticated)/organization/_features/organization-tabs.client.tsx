@@ -10,9 +10,11 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { parseAsString, useQueryState } from "nuqs";
+import { CreateAgentTokenDialog } from "./agent-tokens/create-agent-token-dialog.client";
 import { AgentTokensSection } from "./agent-tokens/agent-tokens-section.client";
 import { OrganizationGeneralTab } from "./general/organization-general-tab.client";
 import { LeaveOrganizationSection } from "./leave-organization/leave-organization-section.client";
+import { InviteMemberButton } from "./members/invite-member-button.client";
 import { OrganizationMembersTab } from "./members/organization-members-tab.client";
 
 export function OrganizationTabs() {
@@ -41,11 +43,16 @@ export function OrganizationTabs() {
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList>
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="members">Members</TabsTrigger>
-        <TabsTrigger value="agent-tokens">Agent tokens</TabsTrigger>
-      </TabsList>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="agent-tokens">Agent tokens</TabsTrigger>
+        </TabsList>
+
+        {tab === "members" && <InviteMemberButton />}
+        {tab === "agent-tokens" && <CreateAgentTokenDialog />}
+      </div>
 
       <TabsContent value="general" className="mt-6">
         <OrganizationGeneralTab />

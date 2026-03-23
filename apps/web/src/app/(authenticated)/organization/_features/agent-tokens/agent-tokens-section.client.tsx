@@ -4,7 +4,6 @@ import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
 import {
   Table,
   TableBody,
@@ -13,9 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Plus } from "lucide-react";
-import * as React from "react";
-import { CreateAgentTokenDialog } from "./create-agent-token-dialog.client";
 import { TokenActionsDropdown } from "./token-actions-dropdown.client";
 
 function formatDate(date: Date | string | null): string {
@@ -45,7 +41,6 @@ function formatScopes(scopes: string[]): string {
 export function AgentTokensSection() {
   const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
-  const [createOpen, setCreateOpen] = React.useState(false);
 
   const tokensQuery = useQuery(
     trpc.authenticated.organization.agentToken.list.queryOptions(
@@ -58,13 +53,6 @@ export function AgentTokensSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="size-4" />
-          Create token
-        </Button>
-      </div>
-
       <Table>
         <TableHeader>
           <TableRow>
@@ -113,15 +101,13 @@ export function AgentTokensSection() {
                 colSpan={6}
                 className="text-muted-foreground py-8 text-center"
               >
-                No agent tokens. Create one to connect AI agents to your
-                feedback.
+                No agent tokens yet. Create one to authenticate the Faster
+                Fixes MCP server.
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
-
-      <CreateAgentTokenDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }
