@@ -28,9 +28,9 @@ export function NewShareUrlBanner({ shareUrl }: NewShareUrlBannerProps) {
         </code>
         <Button variant="ghost" size="icon" onClick={handleCopy}>
           {copied ? (
-            <Check className="text-success h-4 w-4" />
+            <Check className="text-success size-4" />
           ) : (
-            <Copy className="h-4 w-4" />
+            <Copy className="size-4" />
           )}
         </Button>
       </div>
