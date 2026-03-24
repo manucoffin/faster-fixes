@@ -1,3 +1,4 @@
+import { createIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-issue-for-feedback.trpc.mutation";
 import { updateFeedbackAssignee } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-assignee.trpc.mutation";
 import { updateFeedbackStatus } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-status.trpc.mutation";
 import { createProject } from "@/app/(authenticated)/_features/sidebar/project/create/create-project.trpc.mutation";
@@ -15,6 +16,11 @@ import { restoreReviewer } from "../reviewers/_features/restore/restore-reviewer
 import { revokeReviewer } from "../reviewers/_features/revoke/revoke-reviewer.trpc.mutation";
 import { deleteProject } from "../settings/_features/delete/delete-project.trpc.mutation";
 import { getProject } from "../settings/_features/get-project.trpc.query";
+import { getProjectGitHubLink } from "../settings/_features/github/get-project-link.trpc.query";
+import { linkRepo } from "../settings/_features/github/link-repo.trpc.mutation";
+import { listAccessibleRepos } from "../settings/_features/github/list-accessible-repos.trpc.query";
+import { unlinkRepo } from "../settings/_features/github/unlink-repo.trpc.mutation";
+import { updateProjectLink } from "../settings/_features/github/update-project-link.trpc.mutation";
 import { regenerateApiKey } from "../settings/_features/regenerate-api-key/regenerate-api-key.trpc.mutation";
 import { updateProject } from "../settings/_features/update/update-project.trpc.mutation";
 import { getProjects } from "./get-projects.trpc.query";
@@ -42,5 +48,13 @@ export const projectsRouter = router({
     bulkUpdateStatus: bulkUpdateFeedbackStatus,
     hardDelete: hardDeleteFeedback,
     bulkHardDelete: bulkHardDeleteFeedback,
+    createIssue: createIssueForFeedback,
+  }),
+  github: router({
+    getLink: getProjectGitHubLink,
+    listRepos: listAccessibleRepos,
+    linkRepo,
+    unlinkRepo,
+    updateLink: updateProjectLink,
   }),
 });

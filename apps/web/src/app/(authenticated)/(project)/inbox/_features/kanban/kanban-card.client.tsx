@@ -9,7 +9,7 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { formatDistanceToNow } from "date-fns";
-import { GripVertical } from "lucide-react";
+import { Github, GripVertical } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
@@ -95,6 +95,10 @@ export function KanbanCard({
           <span className="text-muted-foreground truncate text-xs">
             {feedback.reviewer.name}
           </span>
+
+          {feedback.issueLink && (
+            <Github className="text-muted-foreground size-3.5 shrink-0" />
+          )}
 
           <span className="text-muted-foreground ml-auto shrink-0 text-xs">
             {formatDistanceToNow(new Date(feedback.createdAt), {

@@ -1,0 +1,70 @@
+model GitHubInstallation {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    installationId   Int    @unique
+    accountLogin     String
+    accountType      String
+    accountAvatarUrl String?
+
+    installedById String
+    installedBy   Member @relation(fields: [installedById], references: [id], onDelete: Restrict)
+
+    projectLinks ProjectGitHubLink[]
+
+    @@index([organizationId])
+    @@map("github_installation")
+}
+
+model ProjectGitHubLink {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String  @unique
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    gitHubInstallationId String
+    gitHubInstallation   GitHubInstallation @relation(fields: [gitHubInstallationId], references: [id], onDelete: Cascade)
+
+    repoId       Int
+    repoOwner    String
+    repoName     String
+    repoFullName String
+
+    autoCreateIssues Boolean  @default(true)
+    defaultLabels    String[] @default(["faster-fixes"])
+
+    feedbackIssueLinks FeedbackIssueLink[]
+
+    @@index([gitHubInstallationId])
+    @@map("project_github_link")
+}
+
+model FeedbackIssueLink {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    feedbackId String   @unique
+    feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+    projectGitHubLinkId String
+    projectGitHubLink   ProjectGitHubLink @relation(fields: [projectGitHubLinkId], references: [id], onDelete: Cascade)
+
+    issueNumber Int
+    issueUrl    String
+    issueState  String @default("open")
+
+    issueNodeId String?
+
+    lastSyncSource String?
+    lastSyncAt     DateTime?
+
+    @@index([projectGitHubLinkId])
+    @@map("feedback_issue_link")
+}

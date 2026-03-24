@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { AlertTriangleIcon } from "lucide-react";
 
 import { DeleteProjectButton } from "./delete/delete-project-button.client";
+import { GitHubSection } from "./github/github-section.client";
 import { RegenerateApiKeySection } from "./regenerate-api-key/regenerate-api-key-section.client";
 import { UpdateProjectForm } from "./update/update-project-form.client";
 
@@ -31,6 +32,15 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         cardClassName="lg:max-w-lg"
       >
         <RegenerateApiKeySection projectId={projectId} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="GitHub"
+        description="Link a GitHub repository to automatically create issues from feedback."
+        cardTitle="GitHub integration"
+        cardClassName="lg:max-w-lg"
+      >
+        <GitHubSection projectId={projectId} />
       </DashboardSection>
 
       <DashboardSection

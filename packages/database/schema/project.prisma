@@ -15,6 +15,7 @@ model Project {
     widgetConfig WidgetConfig?
     reviewers    Reviewer[]
     feedback     Feedback[]
+    gitHubLink   ProjectGitHubLink?
 
     @@index([organizationId])
     @@index([publicId])
@@ -85,6 +86,8 @@ model Feedback {
 
     assigneeId String?
     assignee   Member? @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
+    issueLink FeedbackIssueLink?
 
     @@index([projectId])
     @@index([reviewerId])

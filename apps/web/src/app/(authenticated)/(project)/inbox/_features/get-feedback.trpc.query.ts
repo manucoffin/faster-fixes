@@ -43,6 +43,13 @@ export const getFeedback = protectedProcedure
         screenshot: {
           select: { id: true, key: true, provider: true, bucket: true },
         },
+        issueLink: {
+          select: {
+            issueNumber: true,
+            issueUrl: true,
+            issueState: true,
+          },
+        },
       },
     });
 
@@ -74,6 +81,7 @@ export const getFeedback = protectedProcedure
           ? await getSignedAssetUrl(f.screenshot)
           : null,
         metadata: f.metadata as Record<string, unknown> | null,
+        issueLink: f.issueLink,
       })),
     );
   });

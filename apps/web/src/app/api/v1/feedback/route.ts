@@ -3,6 +3,7 @@ import { handlePreflight, withCors } from "@/server/api/cors";
 import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
+import { inngest } from "@/server/inngest";
 import { createAsset } from "@/server/storage/create-asset";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { s3Client } from "@/server/storage";
@@ -167,6 +168,11 @@ export async function POST(req: NextRequest) {
   });
 
   console.info("[feedback] created — id:", feedback.id, "| screenshotId:", screenshotId ?? "none");
+
+  // Fire-and-forget: trigger GitHub issue creation if configured
+  inngest
+    .send({ name: "feedback/created", data: { feedbackId: feedback.id } })
+    .catch(() => {});
 
   return withCors(
     req,

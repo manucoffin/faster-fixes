@@ -13,6 +13,8 @@ import { revokeAgentToken } from "../_features/agent-tokens/revoke-agent-token.t
 import { getOrganizationDetails } from "../_features/general/get-organization-details.trpc.query";
 import { updateOrganizationLogo } from "../_features/general/update-organization-logo.trpc.mutation";
 import { updateOrganization } from "../_features/general/update-organization.trpc.mutation";
+import { disconnectGitHub } from "../_features/integrations/disconnect-github.trpc.mutation";
+import { getGitHubInstallation } from "../_features/integrations/get-github-installation.trpc.query";
 import { leaveOrganization } from "../_features/leave-organization/leave-organization.trpc.mutation";
 import { getInvitations } from "../_features/members/get-invitations.trpc.query";
 
@@ -38,5 +40,9 @@ export const organizationRouter = router({
     create: createAgentToken,
     revoke: revokeAgentToken,
     delete: deleteAgentToken,
+  }),
+  github: router({
+    getInstallation: getGitHubInstallation,
+    disconnect: disconnectGitHub,
   }),
 });

@@ -1,5 +1,6 @@
 "use server";
 
+import { inngest } from "@/server/inngest";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
@@ -38,6 +39,13 @@ export const bulkUpdateFeedbackStatus = protectedProcedure
       where: { id: { in: input.feedbackIds } },
       data: { status: input.status },
     });
+
+    // Fire-and-forget: sync each feedback status to GitHub
+    const events = input.feedbackIds.map((feedbackId) => ({
+      name: "feedback/status-changed" as const,
+      data: { feedbackId, newStatus: input.status },
+    }));
+    inngest.send(events).catch(() => {});
 
     return { count: input.feedbackIds.length };
   });

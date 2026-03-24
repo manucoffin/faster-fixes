@@ -13,6 +13,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import { CreateAgentTokenDialog } from "./agent-tokens/create-agent-token-dialog.client";
 import { AgentTokensSection } from "./agent-tokens/agent-tokens-section.client";
 import { OrganizationGeneralTab } from "./general/organization-general-tab.client";
+import { OrganizationIntegrationsTab } from "./integrations/organization-integrations-tab.client";
 import { LeaveOrganizationSection } from "./leave-organization/leave-organization-section.client";
 import { InviteMemberButton } from "./members/invite-member-button.client";
 import { OrganizationMembersTab } from "./members/organization-members-tab.client";
@@ -48,6 +49,7 @@ export function OrganizationTabs() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="agent-tokens">Agent tokens</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
         </TabsList>
 
         {tab === "members" && <InviteMemberButton />}
@@ -64,6 +66,10 @@ export function OrganizationTabs() {
 
       <TabsContent value="agent-tokens" className="mt-6">
         <AgentTokensSection />
+      </TabsContent>
+
+      <TabsContent value="integrations" className="mt-6">
+        <OrganizationIntegrationsTab />
       </TabsContent>
     </Tabs>
   );

@@ -1,5 +1,6 @@
 "use server";
 
+import { inngest } from "@/server/inngest";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { UpdateFeedbackStatusSchema } from "./update-feedback-status.schema";
@@ -33,6 +34,14 @@ export const updateFeedbackStatus = protectedProcedure
       where: { id: input.feedbackId },
       data: { status: input.status },
     });
+
+    // Fire-and-forget: sync status to GitHub if linked
+    inngest
+      .send({
+        name: "feedback/status-changed",
+        data: { feedbackId: input.feedbackId, newStatus: input.status },
+      })
+      .catch(() => {});
 
     return { id: input.feedbackId };
   });

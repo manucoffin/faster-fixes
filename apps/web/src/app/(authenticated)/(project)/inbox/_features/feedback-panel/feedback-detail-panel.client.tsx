@@ -13,6 +13,7 @@ import { ExternalLink, ImageOff } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { AssigneeSelect } from "./assignee-select.client";
 import { CopyFeedbackMarkdown } from "./copy-feedback-markdown.client";
+import { GitHubIssueBadge } from "./github-issue-badge.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
 import { StatusSelect } from "./status-select.client";
 
@@ -22,6 +23,8 @@ type FeedbackDetailPanelProps = {
   feedback: FeedbackItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId: string;
+  hasGitHubLink?: boolean;
 };
 
 function formatBrowserMeta(f: FeedbackItem) {
@@ -42,6 +45,8 @@ export function FeedbackDetailPanel({
   feedback,
   open,
   onOpenChange,
+  projectId,
+  hasGitHubLink = false,
 }: FeedbackDetailPanelProps) {
   if (!feedback) return null;
 
@@ -166,6 +171,13 @@ export function FeedbackDetailPanel({
           <StatusSelect
             feedbackId={feedback.id}
             value={feedback.status}
+          />
+
+          <GitHubIssueBadge
+            issueLink={feedback.issueLink}
+            feedbackId={feedback.id}
+            hasGitHubLink={hasGitHubLink}
+            projectId={projectId}
           />
 
           <AssigneeSelect

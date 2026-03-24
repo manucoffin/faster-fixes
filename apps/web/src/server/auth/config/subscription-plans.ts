@@ -22,16 +22,19 @@ export const PLAN_LIMITS = {
     projects: 1,
     feedbacks: 50,
     seats: 1,
+    githubIntegration: false,
   },
   [SubscriptionPlanName.Pro]: {
     projects: 5,
     feedbacks: Infinity,
     seats: 5,
+    githubIntegration: true,
   },
   [SubscriptionPlanName.Agency]: {
     projects: Infinity,
     feedbacks: Infinity,
     seats: Infinity,
+    githubIntegration: true,
   },
 };
 
@@ -92,6 +95,11 @@ export const PLAN_FEATURES = {
       id: "seats",
       label: "Up to 5 team members",
       highlighted: false,
+    },
+    {
+      id: "github_integration",
+      label: "GitHub integration",
+      highlighted: true,
     },
     {
       id: "priority_email_support",

@@ -53,6 +53,10 @@ export function InboxTabs() {
     }),
   );
 
+  const gitHubLinkQuery = useQuery(
+    trpc.authenticated.projects.github.getLink.queryOptions({ projectId }),
+  );
+
   const selectedFeedback = React.useMemo(
     () => feedbackQuery.data?.find((f) => f.id === selectedFeedbackId) ?? null,
     [feedbackQuery.data, selectedFeedbackId],
@@ -153,6 +157,8 @@ export function InboxTabs() {
         onOpenChange={(open) => {
           if (!open) setSelectedFeedbackId(null);
         }}
+        projectId={projectId}
+        hasGitHubLink={!!gitHubLinkQuery.data}
       />
     </div>
   );

@@ -1,0 +1,87 @@
+import { inngest } from "@/server/inngest";
+import { verifyWebhookSignature } from "@/server/github/verify-webhook";
+import { prisma } from "@workspace/db";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const rawBody = await req.text();
+  const signature = req.headers.get("x-hub-signature-256") ?? "";
+  const secret = process.env.GITHUB_WEBHOOK_SECRET!;
+
+  if (!verifyWebhookSignature(rawBody, signature, secret)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  const event = req.headers.get("x-github-event");
+  const payload = JSON.parse(rawBody);
+
+  if (event === "installation") {
+    await handleInstallationEvent(payload);
+  }
+
+  if (event === "issues") {
+    await handleIssuesEvent(payload);
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+type InstallationPayload = {
+  action: string;
+  installation: {
+    id: number;
+    account: { login: string; type: string; avatar_url?: string };
+  };
+};
+
+async function handleInstallationEvent(payload: InstallationPayload) {
+  const { action, installation } = payload;
+
+  if (action === "deleted") {
+    await prisma.gitHubInstallation.deleteMany({
+      where: { installationId: installation.id },
+    });
+  }
+
+  // "created" is handled by the setup URL callback, but handle as fallback
+  if (action === "created") {
+    const existing = await prisma.gitHubInstallation.findUnique({
+      where: { installationId: installation.id },
+    });
+    if (!existing) {
+      // Cannot create without org context — the setup URL is the primary path.
+      // Log for debugging only.
+      console.warn(
+        `[github-webhook] installation.created for ${installation.id} but no matching record found. User should complete setup via the app.`,
+      );
+    }
+  }
+}
+
+type IssuesPayload = {
+  action: string;
+  issue: {
+    number: number;
+    state: string;
+    state_reason?: string | null;
+    node_id?: string;
+  };
+  repository: { full_name: string };
+  installation?: { id: number };
+};
+
+async function handleIssuesEvent(payload: IssuesPayload) {
+  const { action, issue, repository } = payload;
+
+  if (action !== "closed" && action !== "reopened") return;
+
+  await inngest.send({
+    name: "github/webhook.issues",
+    data: {
+      action,
+      issueNumber: issue.number,
+      issueState: issue.state,
+      repoFullName: repository.full_name,
+    },
+  });
+}

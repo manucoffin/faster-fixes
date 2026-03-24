@@ -18,6 +18,8 @@ model Organization {
     projects    Project[]
     agentTokens AgentToken[]
 
+    gitHubInstallations GitHubInstallation[]
+
     @@unique([slug])
     @@map("organization")
 }
@@ -33,7 +35,8 @@ model Member {
     user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
     role           String       @default("member")
 
-    assignedFeedback Feedback[]
+    assignedFeedback    Feedback[]
+    gitHubInstallations GitHubInstallation[]
 
     @@index([organizationId])
     @@index([userId])
