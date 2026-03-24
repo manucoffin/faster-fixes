@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   if (!installationId) {
     return NextResponse.redirect(
-      `${orgSettingsUrl}&error=missing_installation_id`,
+      `${orgSettingsUrl}?error=missing_installation_id`,
     );
   }
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!activeOrganization) {
-    return NextResponse.redirect(`${orgSettingsUrl}&error=no_active_org`);
+    return NextResponse.redirect(`${orgSettingsUrl}?error=no_active_org`);
   }
 
   const activeOrgId = activeOrganization.id;
@@ -46,12 +46,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!membership) {
-    return NextResponse.redirect(`${orgSettingsUrl}&error=insufficient_role`);
-  }
-
-  if (setupAction === "update") {
-    // Repo selection changed — no DB update needed, repos are fetched live
-    return NextResponse.redirect(`${orgSettingsUrl}&github=updated`);
+    return NextResponse.redirect(`${orgSettingsUrl}?error=insufficient_role`);
   }
 
   // Verify the installation exists on GitHub
@@ -69,7 +64,7 @@ export async function GET(req: NextRequest) {
     installationData = response.data as typeof installationData;
   } catch {
     return NextResponse.redirect(
-      `${orgSettingsUrl}&error=installation_not_found`,
+      `${orgSettingsUrl}?error=installation_not_found`,
     );
   }
 
@@ -91,5 +86,5 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.redirect(`${orgSettingsUrl}&github=connected`);
+  return NextResponse.redirect(`${orgSettingsUrl}?github=connected`);
 }
