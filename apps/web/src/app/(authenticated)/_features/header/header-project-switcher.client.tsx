@@ -14,7 +14,6 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Check, ChevronsUpDown, FolderOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as React from "react";
 import { CreateProjectDialog } from "../sidebar/project/create/create-project-dialog.client";
 
 function HeaderProjectSwitcherLoading() {
@@ -67,7 +66,7 @@ export function HeaderProjectSwitcher() {
           <DropdownMenuSeparator />
           <CreateProjectDialog>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <Plus className="mr-2 size-4" />
+              <Plus className="size-4" />
               Create project
             </DropdownMenuItem>
           </CreateProjectDialog>

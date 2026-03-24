@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Inbox, Settings2, Users } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import { NoProjectsCard } from "./no-projects-card.client";
 export function ProjectNavigation() {
   const { activeProject, projects, isPending } = useActiveProject();
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
 
   if (isPending) return null;
 
@@ -42,7 +44,7 @@ export function ProjectNavigation() {
               isActive={pathname === item.href}
               tooltip={item.label}
             >
-              <Link href={item.href}>
+              <Link href={item.href} onClick={() => setOpenMobile(false)}>
                 <item.icon />
                 <span>{item.label}</span>
               </Link>

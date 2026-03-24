@@ -3,16 +3,10 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { Blocks, CreditCard, Settings2 } from "lucide-react";
-import Link from "next/link";
 import * as React from "react";
+import { AppNavigation } from "./app-navigation.client";
 import { OrganizationSwitcher } from "./organization/organization-switcher.client";
 import { ProjectNavigation } from "./project/project-navigation.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
@@ -31,43 +25,7 @@ export const AuthenticatedSidebar = async ({
 
       <SidebarContent>
         <ProjectNavigation />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/integrations">
-                <SidebarMenuButton tooltip="Integrations">
-                  <Blocks />
-                  <span>Integrations</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>My Account</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/account/settings">
-                <SidebarMenuButton tooltip="Settings">
-                  <Settings2 />
-                  <span>Settings</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <Link href="/account/billing">
-                <SidebarMenuButton tooltip="Billing">
-                  <CreditCard />
-                  <span>Billing</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        <AppNavigation />
       </SidebarContent>
 
       <SidebarFooter>
