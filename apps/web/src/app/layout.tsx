@@ -1,12 +1,16 @@
 import { APP_URL } from "@/app/_constants/app";
-import { DEFAULT_OG_IMAGE_URL, SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
+import {
+  DEFAULT_OG_IMAGE_URL,
+  SITE_META_DESCRIPTION,
+  SITE_NAME,
+} from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
 import { FeedbackProvider } from "@fasterfixes/react";
 import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Outfit } from "next/font/google";
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
 import { ConsentProvider } from "./_features/c15t/consent-provider";
@@ -14,7 +18,7 @@ import { ConsentProvider } from "./_features/c15t/consent-provider";
 const fontSans = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -52,13 +56,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} font-sans antialiased `}
-      >
+    <html lang="fr" suppressHydrationWarning className="scroll-smooth">
+      <body className={`${fontSans.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -85,5 +87,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
