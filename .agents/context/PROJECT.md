@@ -46,9 +46,9 @@ The key idea is to transform:
 
 ## Developer Workflow
 
-The product is designed for **developer-first workflows**.
+The product is designed for **developer-first workflows** with two paths to consume feedback:
 
-Typical usage:
+### Manual workflow (dashboard)
 
 1. A client leaves feedback directly on the website via the widget.
 2. The system captures the full context (screenshot, URL, selector, component tree, browser info).
@@ -56,11 +56,23 @@ Typical usage:
 4. The developer pastes the markdown into an AI coding agent (e.g., Claude Code).
 5. The agent locates the relevant code and fixes the issue.
 
-The markdown export is the core feature. It formats feedback as a structured report with sections for location (URL, component path, source file, DOM selector), the user's comment, environment details, and a screenshot — everything an AI agent needs to understand and address the feedback without further context.
+### MCP workflow (terminal-native)
+
+1. A client leaves feedback via the widget.
+2. The developer asks their AI coding agent to check for new feedback — the agent calls the Faster Fixes MCP server directly.
+3. The MCP returns structured markdown with all context (page URL, component tree, source file, selector, screenshot).
+4. The agent reads the feedback, locates the relevant code, and fixes the issue.
+5. The agent marks the feedback as resolved via the MCP.
+
+The developer never leaves their terminal. The MCP server (`@fasterfixes/mcp`) can be installed on any agent harness that supports the Model Context Protocol — Claude Code, Cursor, Windsurf, or others. It connects to the Faster Fixes API using an organization-scoped agent token and exposes two tools: `list_feedbacks` and `update_feedback_status`.
+
+Because the MCP exposes a standard tool interface, it also enables automation. For example, a developer could set up a Claude Code scheduled task that runs daily, fetches all new feedback, fixes the issues, and opens pull requests — fully unattended.
+
+Both workflows produce the same structured markdown report with sections for location (URL, component path, source file, DOM selector), the user's comment, environment details, and a screenshot — everything an AI agent needs to understand and address the feedback without further context.
 
 The goal is to reduce the gap between:
 
-> **client comment → copy markdown → paste into AI agent → fix**
+> **client comment → AI agent retrieves and fixes → done**
 
 ## Target Users
 
@@ -100,5 +112,4 @@ In the future, the system could evolve to include:
 - **AI-powered task transformation** — summarizing feedback, clarifying vague comments, categorizing issues (bug, UI tweak, content change)
 - **Direct integrations** — pushing structured tasks to issue trackers (Linear, Jira) or triggering webhooks
 - **Autonomous workflows** — end-to-end pipelines where feedback automatically triggers an AI coding agent to produce a fix and open a pull request
-
-These features are not currently in scope but represent the long-term direction.
+- **Agent Skills** — shipping a TanStack Intent skill with the npm widget package so agents automatically learn the Faster Fixes workflow when the widget is installed
