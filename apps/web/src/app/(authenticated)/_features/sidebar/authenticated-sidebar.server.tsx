@@ -33,7 +33,7 @@ export const AuthenticatedSidebar = async ({
         <ProjectNavigation />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Organization</SidebarGroupLabel>
+          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <Link href="/integrations">
