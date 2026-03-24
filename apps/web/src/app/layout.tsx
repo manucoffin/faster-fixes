@@ -9,7 +9,7 @@ import { FeedbackProvider } from "@fasterfixes/react";
 import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { Outfit } from "next/font/google";
+import { JetBrains_Mono, Outfit } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
@@ -18,6 +18,11 @@ import { ConsentProvider } from "./_features/c15t/consent-provider";
 const fontSans = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -60,7 +65,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning className="scroll-smooth">
-      <body className={`${fontSans.variable} font-sans antialiased`}>
+      <body className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
