@@ -25,8 +25,6 @@ export function HeaderProjectSwitcher() {
   const { activeProject, projects, isPending, setActiveProject } =
     useActiveProject();
   const router = useRouter();
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
-
   if (isPending) {
     return <HeaderProjectSwitcherLoading />;
   }
@@ -67,17 +65,14 @@ export function HeaderProjectSwitcher() {
           )}
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setCreateDialogOpen(true)}>
-            <Plus className="mr-2 size-4" />
-            Create project
-          </DropdownMenuItem>
+          <CreateProjectDialog>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <Plus className="mr-2 size-4" />
+              Create project
+            </DropdownMenuItem>
+          </CreateProjectDialog>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <CreateProjectDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
     </>
   );
 }

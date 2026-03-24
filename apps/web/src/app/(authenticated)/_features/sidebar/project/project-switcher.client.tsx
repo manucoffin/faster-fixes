@@ -19,7 +19,6 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Check, ChevronsUpDown, FolderOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as React from "react";
 import { CreateProjectDialog } from "./create/create-project-dialog.client";
 
 function ProjectSwitcherLoading() {
@@ -43,8 +42,6 @@ export function ProjectSwitcher() {
     useActiveProject();
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
-
   if (isPending) {
     return <ProjectSwitcherLoading />;
   }
@@ -106,19 +103,16 @@ export function ProjectSwitcher() {
               )}
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => setCreateDialogOpen(true)}>
-                <Plus className="mr-2 size-4" />
-                Create project
-              </DropdownMenuItem>
+              <CreateProjectDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Plus className="size-4" />
+                  Create project
+                </DropdownMenuItem>
+              </CreateProjectDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-
-      <CreateProjectDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
     </>
   );
 }

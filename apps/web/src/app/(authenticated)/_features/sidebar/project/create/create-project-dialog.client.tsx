@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -35,28 +35,16 @@ import {
 
 type CreateProjectDialogProps = {
   children?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
 };
 
-export function CreateProjectDialog({
-  children,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-}: CreateProjectDialogProps) {
+export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   const trpc = useTRPC();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: activeOrg } = useActiveOrganization();
   const { setActiveProject } = useActiveProject();
 
-  const isControlled = controlledOpen !== undefined;
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
-  const open = isControlled ? controlledOpen : uncontrolledOpen;
-  const setOpen = isControlled
-    ? (controlledOnOpenChange ?? (() => {}))
-    : setUncontrolledOpen;
-
+  const [open, setOpen] = React.useState(false);
   const [rawApiKey, setRawApiKey] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
 
@@ -120,7 +108,14 @@ export function CreateProjectDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        {children && <DialogTrigger asChild>{children}</DialogTrigger>}
+        <DialogTrigger asChild>
+          {children ?? (
+            <Button size="sm" className="w-full">
+              <Plus className="size-4" />
+              New project
+            </Button>
+          )}
+        </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>New project</DialogTitle>

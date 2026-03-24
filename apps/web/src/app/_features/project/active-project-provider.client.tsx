@@ -59,6 +59,15 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
   const validatedProject =
     projects?.find((p) => p.id === activeProjectId) ?? null;
 
+  // Auto-select first project when none is active
+  useEffect(() => {
+    if (!isPending && !validatedProject && projects && projects.length > 0) {
+      const firstId = projects[0]!.id;
+      setCookie(firstId);
+      setActiveProjectIdState(firstId);
+    }
+  }, [isPending, validatedProject, projects]);
+
   const setActiveProject = useCallback((projectId: string) => {
     setCookie(projectId);
     setActiveProjectIdState(projectId);

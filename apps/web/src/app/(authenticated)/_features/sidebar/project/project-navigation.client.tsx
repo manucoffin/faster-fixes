@@ -11,10 +11,17 @@ import {
 import { Inbox, Settings2, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NoProjectsCard } from "./no-projects-card.client";
 
 export function ProjectNavigation() {
-  const { activeProject } = useActiveProject();
+  const { activeProject, projects, isPending } = useActiveProject();
   const pathname = usePathname();
+
+  if (isPending) return null;
+
+  if (projects.length === 0) {
+    return <NoProjectsCard />;
+  }
 
   if (!activeProject) return null;
 
