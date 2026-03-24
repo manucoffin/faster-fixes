@@ -40,11 +40,11 @@ export function CreateAgentTokenDialog() {
   const [copied, setCopied] = React.useState(false);
 
   const createToken = useMutation(
-    trpc.authenticated.organization.agentToken.create.mutationOptions({
+    trpc.authenticated.integrations.agentToken.create.mutationOptions({
       onSuccess: (result) => {
         setRawToken(result.rawToken);
         queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.organization.agentToken.list.queryKey({
+          queryKey: trpc.authenticated.integrations.agentToken.list.queryKey({
             organizationId: activeOrg?.id ?? "",
           }),
         });
@@ -83,16 +83,14 @@ export function CreateAgentTokenDialog() {
 
   const toggleScope = (scope: string) => {
     setScopes((prev) =>
-      prev.includes(scope)
-        ? prev.filter((s) => s !== scope)
-        : [...prev, scope],
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="outline" size="sm" className="w-full">
           <Plus className="size-4" />
           Create token
         </Button>
@@ -114,9 +112,9 @@ export function CreateAgentTokenDialog() {
                 </code>
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {copied ? (
-                    <Check className="text-success h-4 w-4" />
+                    <Check className="text-success size-4" />
                   ) : (
-                    <Copy className="h-4 w-4" />
+                    <Copy className="size-4" />
                   )}
                 </Button>
               </div>
@@ -153,11 +151,14 @@ export function CreateAgentTokenDialog() {
                 {AVAILABLE_SCOPES.map((scope) => (
                   <div key={scope.value} className="flex items-center gap-2">
                     <Checkbox
-                      id={scope.value}
+                      id={`integrations-${scope.value}`}
                       checked={scopes.includes(scope.value)}
                       onCheckedChange={() => toggleScope(scope.value)}
                     />
-                    <Label htmlFor={scope.value} className="font-normal">
+                    <Label
+                      htmlFor={`integrations-${scope.value}`}
+                      className="font-normal"
+                    >
                       {scope.label}
                     </Label>
                   </div>
@@ -166,10 +167,7 @@ export function CreateAgentTokenDialog() {
             </div>
 
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-              >
+              <Button variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
               <Button

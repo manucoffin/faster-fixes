@@ -37,7 +37,7 @@ export function GitHubSection({ projectId }: GitHubSectionProps) {
   const { data: activeOrg } = useActiveOrganization();
 
   const installationQuery = useQuery(
-    trpc.authenticated.organization.github.getInstallation.queryOptions(
+    trpc.authenticated.integrations.github.getInstallation.queryOptions(
       undefined,
       { enabled: !!activeOrg?.id },
     ),
@@ -67,8 +67,8 @@ export function GitHubSection({ projectId }: GitHubSectionProps) {
           Connect GitHub in organization settings to enable issue creation.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>
-          <a href="/organization?tab=integrations">
-            Go to organization settings
+          <a href="/integrations">
+            Go to integrations
           </a>
         </Button>
       </div>

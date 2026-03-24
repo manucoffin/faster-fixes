@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const setupAction = searchParams.get("setup_action");
 
   const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
-  const orgSettingsUrl = `${baseUrl}/organization?tab=integrations`;
+  const orgSettingsUrl = `${baseUrl}/integrations`;
 
   if (!installationId) {
     return NextResponse.redirect(

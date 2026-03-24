@@ -56,4 +56,6 @@ export const getGitHubInstallation = protectedProcedure.query(
   },
 );
 
-export type GetGitHubInstallationOutput = inferProcedureOutput<typeof getGitHubInstallation>;
+export type GetGitHubInstallationOutput = inferProcedureOutput<
+  typeof getGitHubInstallation
+>;

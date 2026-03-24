@@ -6,15 +6,9 @@ import { acceptInvitation } from "@/app/(authenticated)/organization/invitations
 import { getReceivedInvitations } from "@/app/(authenticated)/organization/invitations/_features/get-received-invitations.trpc.query";
 import { rejectInvitation } from "@/app/(authenticated)/organization/invitations/_features/reject-invitation/reject-invitation.trpc.mutation";
 import { router } from "@/server/trpc/trpc";
-import { createAgentToken } from "../_features/agent-tokens/create-agent-token.trpc.mutation";
-import { deleteAgentToken } from "../_features/agent-tokens/delete-agent-token.trpc.mutation";
-import { getAgentTokens } from "../_features/agent-tokens/get-agent-tokens.trpc.query";
-import { revokeAgentToken } from "../_features/agent-tokens/revoke-agent-token.trpc.mutation";
 import { getOrganizationDetails } from "../_features/general/get-organization-details.trpc.query";
 import { updateOrganizationLogo } from "../_features/general/update-organization-logo.trpc.mutation";
 import { updateOrganization } from "../_features/general/update-organization.trpc.mutation";
-import { disconnectGitHub } from "../_features/integrations/disconnect-github.trpc.mutation";
-import { getGitHubInstallation } from "../_features/integrations/get-github-installation.trpc.query";
 import { leaveOrganization } from "../_features/leave-organization/leave-organization.trpc.mutation";
 import { getInvitations } from "../_features/members/get-invitations.trpc.query";
 
@@ -34,15 +28,5 @@ export const organizationRouter = router({
   member: router({
     updateRole: updateMemberRole,
     delete: deleteMember,
-  }),
-  agentToken: router({
-    list: getAgentTokens,
-    create: createAgentToken,
-    revoke: revokeAgentToken,
-    delete: deleteAgentToken,
-  }),
-  github: router({
-    getInstallation: getGitHubInstallation,
-    disconnect: disconnectGitHub,
   }),
 });

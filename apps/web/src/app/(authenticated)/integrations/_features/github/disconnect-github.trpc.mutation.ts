@@ -41,4 +41,6 @@ export const disconnectGitHub = protectedProcedure.mutation(async ({ ctx }) => {
   return { success: true };
 });
 
-export type DisconnectGitHubOutput = inferProcedureOutput<typeof disconnectGitHub>;
+export type DisconnectGitHubOutput = inferProcedureOutput<
+  typeof disconnectGitHub
+>;
