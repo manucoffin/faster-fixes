@@ -39,6 +39,8 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+.mcp.json
+
 # Agents output
 findings.md
 progress.md
