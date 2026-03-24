@@ -1,6 +1,7 @@
 import { hasScope } from "@/server/api/check-agent-scope";
 import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { resolveAgentToken } from "@/server/api/resolve-agent-token";
+import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -73,6 +74,14 @@ export async function POST(req: NextRequest, context: RouteContext) {
   console.info(
     `[agent-api] feedbacks:update_status tokenId=${agentToken.id} feedbackId=${feedback.id} ${previousStatus} -> ${parsed.data.status}`,
   );
+
+  // Fire-and-forget: sync status to GitHub if linked
+  inngest
+    .send({
+      name: "feedback/status-changed",
+      data: { feedbackId: feedback.id, newStatus: parsed.data.status },
+    })
+    .catch(() => {});
 
   return NextResponse.json({
     id: updated.id,
