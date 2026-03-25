@@ -7,6 +7,7 @@ const nextConfig = {
 
   experimental: {
     authInterrupts: true,
+    turbopackFileSystemCacheForDev: false,
   },
 
   async headers() {
