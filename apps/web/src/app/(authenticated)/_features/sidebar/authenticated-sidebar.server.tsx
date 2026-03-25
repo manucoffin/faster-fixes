@@ -4,7 +4,11 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import { ArrowUpRight, BookOpen } from "lucide-react";
 import * as React from "react";
 import { AppNavigation } from "./app-navigation.client";
 import { OrganizationSwitcher } from "./organization/organization-switcher.client";
@@ -29,6 +33,17 @@ export const AuthenticatedSidebar = async ({
       </SidebarContent>
 
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Documentation">
+              <a href="/docs" target="_blank" rel="noopener noreferrer">
+                <BookOpen />
+                <span>Documentation</span>
+                <ArrowUpRight className="text-muted-foreground size-3.5" />
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarUserDropdown />
       </SidebarFooter>
     </Sidebar>
