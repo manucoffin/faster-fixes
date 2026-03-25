@@ -11,6 +11,26 @@
       "sourceType": "github",
       "computedHash": "2e83eda2221e97166172a0798e9b0379e34080595e107e2fc0cf580e9b3bbf7b"
     },
+    "inngest-durable-functions": {
+      "source": "inngest/inngest-skills",
+      "sourceType": "github",
+      "computedHash": "41bb4227cae8585e3678041f0e898c65a4c48ca841dc5099cfdd741586301bfa"
+    },
+    "inngest-events": {
+      "source": "inngest/inngest-skills",
+      "sourceType": "github",
+      "computedHash": "4200e01340c04ea17efc929dfc829481ac986598599fdf99ea5c4209890dba81"
+    },
+    "inngest-flow-control": {
+      "source": "inngest/inngest-skills",
+      "sourceType": "github",
+      "computedHash": "740354a5b02936c86721364234f4dc00b0a1b6bbf0c3a357748770b2691dbe1c"
+    },
+    "inngest-steps": {
+      "source": "inngest/inngest-skills",
+      "sourceType": "github",
+      "computedHash": "70a5c25b8c6c99a7dd63f23377d70fd75e2211425da659996b6e2f7eeed08554"
+    },
     "planning-with-files": {
       "source": "othmanadi/planning-with-files",
       "sourceType": "github",
