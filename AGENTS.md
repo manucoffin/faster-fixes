@@ -15,7 +15,8 @@
 
 ## Code comments
 
-- Add inline comments only when the logic is not self-evident — complex conditions, non-obvious side effects, tricky workarounds, or subtle business rules.
+- Comments exist to capture **decisions**, not describe code. A dev returning in 6 months should understand *why* the code is this way, not *what* it does.
+- Comment when: choosing one approach over an obvious alternative, working around a limitation, relying on non-obvious behavior, or enforcing a subtle business rule.
 - Never comment what the code plainly says (e.g. no `// get user` above `getUser()`).
 - Prefer a short inline `// why` over a multi-line block above a function.
 
