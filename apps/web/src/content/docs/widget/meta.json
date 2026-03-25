@@ -1,0 +1,5 @@
+{
+  "title": "Widget",
+  "defaultOpen": true,
+  "pages": ["installation", "configuration", "customization", "use-feedback-hook"]
+}

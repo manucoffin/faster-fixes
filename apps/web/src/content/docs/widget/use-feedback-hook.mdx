@@ -1,0 +1,72 @@
+---
+title: useFeedback Hook
+description: Control the widget programmatically with the useFeedback hook.
+---
+
+The `useFeedback` hook provides programmatic control over the widget from any component inside the `FeedbackProvider`.
+
+```tsx
+import { useFeedback } from "@fasterfixes/react";
+
+function CustomFeedbackButton() {
+  const { show, hide, isVisible, startAnnotation } = useFeedback();
+
+  return (
+    <button onClick={() => startAnnotation()}>
+      Report an issue
+    </button>
+  );
+}
+```
+
+## Return values
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `show` | `() => void` | Show the widget |
+| `hide` | `() => void` | Hide the widget |
+| `isVisible` | `boolean` | Whether the widget is currently visible |
+| `startAnnotation` | `() => void` | Enter annotation mode (user can click elements) |
+| `feedbackItems` | `FeedbackItem[]` | All feedback items for the current project |
+| `togglePins` | `() => void` | Toggle visibility of feedback pins on the page |
+| `showPins` | `boolean` | Whether pins are currently visible |
+
+## Custom trigger button
+
+Replace the default floating button with your own UI:
+
+```tsx
+import { useFeedback } from "@fasterfixes/react";
+
+function FeedbackTrigger() {
+  const { startAnnotation, feedbackItems } = useFeedback();
+
+  return (
+    <div>
+      <button onClick={() => startAnnotation()}>
+        Leave feedback ({feedbackItems.length})
+      </button>
+    </div>
+  );
+}
+```
+
+## Toggle pins
+
+Let users show or hide feedback pins on the page:
+
+```tsx
+import { useFeedback } from "@fasterfixes/react";
+
+function PinToggle() {
+  const { togglePins, showPins } = useFeedback();
+
+  return (
+    <button onClick={togglePins}>
+      {showPins ? "Hide" : "Show"} feedback pins
+    </button>
+  );
+}
+```
+
+The `useFeedback` hook must be used inside a component wrapped by `FeedbackProvider`.

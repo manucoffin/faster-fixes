@@ -1,0 +1,133 @@
+---
+title: Setup
+description: Configure the MCP server for your editor.
+---
+
+Install the MCP server using npx (no installation required):
+
+```bash
+npx -y @fasterfixes/mcp
+```
+
+## Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FASTER_FIXES_TOKEN` | Yes | Agent token from Organization Settings → Agent Tokens (prefix: `ff_agent_`) |
+| `FASTER_FIXES_PROJECT` | Yes | Project ID from Project Settings (prefix: `proj_`) |
+| `FASTER_FIXES_URL` | No | API base URL (defaults to `https://faster-fixes.com`) |
+
+## Claude Code
+
+Create `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "faster-fixes": {
+      "command": "npx",
+      "args": ["-y", "@fasterfixes/mcp"],
+      "env": {
+        "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+        "FASTER_FIXES_PROJECT": "proj_xxx"
+      }
+    }
+  }
+}
+```
+
+## Cursor
+
+Create `.cursor/mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "faster-fixes": {
+      "command": "npx",
+      "args": ["-y", "@fasterfixes/mcp"],
+      "env": {
+        "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+        "FASTER_FIXES_PROJECT": "proj_xxx"
+      }
+    }
+  }
+}
+```
+
+## VS Code (GitHub Copilot)
+
+Create `.vscode/mcp.json` in your project root:
+
+```json
+{
+  "servers": {
+    "faster-fixes": {
+      "command": "npx",
+      "args": ["-y", "@fasterfixes/mcp"],
+      "env": {
+        "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+        "FASTER_FIXES_PROJECT": "proj_xxx"
+      }
+    }
+  }
+}
+```
+
+Note: VS Code uses `servers` instead of `mcpServers`.
+
+## Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "faster-fixes": {
+      "command": "npx",
+      "args": ["-y", "@fasterfixes/mcp"],
+      "env": {
+        "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+        "FASTER_FIXES_PROJECT": "proj_xxx"
+      }
+    }
+  }
+}
+```
+
+## Codex
+
+Add to `.codex/config.toml` in your project root:
+
+```toml
+[mcp_servers.faster-fixes]
+command = "npx"
+args = ["-y", "@fasterfixes/mcp"]
+
+[mcp_servers.faster-fixes.env]
+FASTER_FIXES_TOKEN = "ff_agent_xxx"
+FASTER_FIXES_PROJECT = "proj_xxx"
+```
+
+## Zed
+
+Add to `~/.config/zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "faster-fixes": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@fasterfixes/mcp"],
+        "env": {
+          "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+          "FASTER_FIXES_PROJECT": "proj_xxx"
+        }
+      }
+    }
+  }
+}
+```
+
+Once configured, see the [available tools](/docs/mcp/tools).

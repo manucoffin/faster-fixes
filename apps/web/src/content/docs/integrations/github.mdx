@@ -1,0 +1,46 @@
+---
+title: GitHub
+description: Automatically create GitHub issues from feedback and sync status bidirectionally.
+---
+
+Faster Fixes integrates with GitHub to automatically create issues when new feedback is submitted and sync status changes between the dashboard and GitHub.
+
+## Setup
+
+1. Go to **Organization Settings → Integrations**
+2. Install the Faster Fixes GitHub App
+3. Select which repositories to grant access to
+4. In **Project Settings → GitHub**, link your project to a repository
+
+## Auto-create issues
+
+When enabled (on by default), new feedback automatically creates a GitHub issue in the linked repository. The issue includes:
+
+- Feedback comment
+- Page URL
+- DOM selector
+- Browser info
+- Link to the screenshot
+
+## Default labels
+
+Issues are tagged with `faster-fixes` by default. You can customize labels in the GitHub link settings.
+
+## Bidirectional status sync
+
+Status changes propagate in both directions:
+
+| Action | Result |
+|--------|--------|
+| Feedback marked **resolved** or **closed** in dashboard | GitHub issue is closed |
+| Feedback marked **new** or **in_progress** in dashboard | GitHub issue is reopened |
+| GitHub issue **closed** | Feedback status updated to closed |
+| GitHub issue **reopened** | Feedback status updated to new |
+
+## Manual issue creation
+
+You can create a GitHub issue manually from any feedback item in the Inbox using the **Create Issue** action.
+
+## Unlinking
+
+You can unlink a repository from **Project Settings → GitHub** at any time. Existing issue links are preserved but sync stops.

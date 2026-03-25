@@ -1,0 +1,44 @@
+---
+title: Configuration
+description: Configure widget behavior, position, and appearance.
+---
+
+The widget can be configured through the dashboard and through props.
+
+## Dashboard settings
+
+Managed in Project Settings:
+
+- **Enabled** — Toggle the widget on/off without deploying code changes
+- **Position** — Where the floating button appears on the page
+- **Color** — Widget accent color
+
+## Available positions
+
+| Position | Description |
+|----------|-------------|
+| `bottom-right` | Bottom-right corner (default) |
+| `bottom-left` | Bottom-left corner |
+| `top-right` | Top-right corner |
+| `top-left` | Top-left corner |
+| `middle-right` | Middle of the right edge |
+| `middle-left` | Middle of the left edge |
+
+## What the widget captures
+
+When a reviewer clicks an element, the widget captures:
+
+- **Screenshot** — full viewport capture (PNG), excluding widget elements
+- **Page URL** — current page being reviewed
+- **DOM selector** — smart selector with fallback hierarchy (`data-testid` → `id` → `name` → `aria-label` → stable classes → `nth-of-type` path)
+- **React component tree** — component path from fiber tree (dev builds only, e.g. `<App> <Layout> <Dialog> <Button>`)
+- **Source file** — file path from React `_debugSource` (dev builds only)
+- **Click coordinates** — X/Y position relative to viewport
+- **Browser info** — browser name, version, OS
+- **Viewport size** — width and height
+
+## Environment variable
+
+```bash
+NEXT_PUBLIC_FF_API_KEY=your-api-key
+```

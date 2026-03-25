@@ -1,0 +1,55 @@
+---
+title: Customization
+description: Customize widget appearance with custom CSS classes and text labels.
+---
+
+## Custom CSS classes
+
+Override the default widget styles using the `classNames` prop:
+
+```tsx
+<FeedbackProvider
+  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY!}
+  classNames={{
+    button: "my-custom-button",
+    popover: "my-custom-popover",
+    textarea: "my-custom-textarea",
+  }}
+>
+  {children}
+</FeedbackProvider>
+```
+
+### Available `classNames` keys
+
+| Key | Description |
+|-----|-------------|
+| `button` | The floating action button |
+| `popover` | The comment popover container |
+| `textarea` | The feedback text input |
+| `pin` | Feedback pins on the page |
+| `overlay` | The annotation overlay |
+| `successState` | Success message after submission |
+| `errorState` | Error message on failure |
+| `feedbackList` | The feedback list panel |
+| `feedbackListItem` | Individual items in the feedback list |
+
+## Custom labels
+
+Override the default text strings using the `labels` prop:
+
+```tsx
+<FeedbackProvider
+  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY!}
+  labels={{
+    submitButton: "Send feedback",
+    cancelButton: "Cancel",
+    textareaPlaceholder: "Describe the issue...",
+    successMessage: "Feedback submitted",
+  }}
+>
+  {children}
+</FeedbackProvider>
+```
+
+The `labels` prop accepts partial overrides — only specify the strings you want to change.

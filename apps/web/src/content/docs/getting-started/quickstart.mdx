@@ -1,0 +1,60 @@
+---
+title: Quickstart
+description: Go from zero to collecting your first feedback in under 5 minutes.
+---
+
+## 1. Create an account
+
+Sign up at [app.faster-fixes.com](https://app.faster-fixes.com). Create your organization when prompted.
+
+## 2. Create a project
+
+Go to your dashboard and click **New Project**. Enter your project name and website URL (e.g. `https://myapp.com`). Copy the **API key** shown after creation.
+
+## 3. Install the widget
+
+```bash
+npm install @fasterfixes/react
+```
+
+## 4. Add the provider
+
+Wrap your app with `FeedbackProvider`:
+
+```tsx title="app/layout.tsx"
+import { FeedbackProvider } from "@fasterfixes/react";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>
+        <FeedbackProvider apiKey="your-api-key">
+          {children}
+        </FeedbackProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+In production, use an environment variable for the API key:
+
+```tsx
+<FeedbackProvider apiKey={process.env.NEXT_PUBLIC_FASTER_FIXES_API_KEY!}>
+```
+
+## 5. Create a reviewer
+
+In your project dashboard, go to **Reviewers** and create a new reviewer (e.g. "Client - John"). Copy the review link.
+
+## 6. Collect feedback
+
+Open your site using the review link. A floating button appears. Click it, then click any element on the page to annotate it. Write a comment and submit.
+
+## 7. View in dashboard
+
+Go back to your project's **Inbox**. The feedback appears with the screenshot, page URL, browser info, and DOM selector.
+
+---
+
+Next steps: [Configure the widget](/docs/widget/configuration) or [set up the MCP server](/docs/mcp) for AI agent workflows.

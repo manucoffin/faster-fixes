@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: What is Faster Fixes and why it exists.
+---
+
+Faster Fixes is a feedback widget and developer dashboard that turns messy client feedback into structured, agent-ready bug reports.
+
+## The problem
+
+During review and QA cycles, clients send feedback through WhatsApp, Slack, email — scattered screenshots, vague comments, no page links. Developers waste time interpreting what the client meant, locating the relevant page, and rephrasing feedback into actionable tasks.
+
+## The solution
+
+A website widget lets clients click anywhere on the page to leave feedback. The system automatically captures a screenshot, page URL, DOM selector, React component tree, and browser metadata. Feedback appears in a developer dashboard or can be consumed directly by AI coding agents via the MCP server.
+
+## Key features
+
+- **Website feedback widget** — Drop-in React component for any site
+- **Automatic context capture** — Screenshot, URL, DOM selector, component tree, browser metadata
+- **Developer dashboard** — Feedback inbox with filtering and status management
+- **MCP server** — AI agent integration for Claude Code, Cursor, VS Code, and others
+- **GitHub integration** — Auto-create issues with bidirectional status sync
+- **Agent-ready markdown export** — Copy structured feedback directly into your workflow
+
+## Two workflows
+
+### Manual
+
+1. Client leaves feedback on your site
+2. Developer views feedback in the dashboard
+3. Developer copies the feedback as markdown
+4. Developer pastes into an AI agent for resolution
+
+### MCP
+
+1. Client leaves feedback on your site
+2. AI agent fetches feedback via the MCP server
+3. Agent locates the relevant code using captured context
+4. Agent fixes the issue and marks the feedback as resolved
+
+## Who it's for
+
+Freelance developers, small web agencies, and teams building SaaS or web apps. Designed for React and Next.js stacks.
+
+---
+
+Get started with the [Quickstart](/docs/getting-started/quickstart).

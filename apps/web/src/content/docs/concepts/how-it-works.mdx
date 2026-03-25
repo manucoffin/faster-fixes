@@ -1,0 +1,48 @@
+---
+title: How It Works
+description: Architecture overview of the feedback capture and delivery pipeline.
+---
+
+Faster Fixes has three main components: the widget, the API, and the consumption layer (dashboard + MCP).
+
+## 1. Widget (client-side)
+
+The widget runs in the reviewer's browser. When they click an element:
+
+- A full-page screenshot is captured (excluding widget UI)
+- A smart DOM selector is generated with fallback strategies
+- The React component tree is extracted (dev builds)
+- Browser metadata is collected (name, version, OS, viewport)
+- Click coordinates are recorded
+
+All data is sent to the Faster Fixes API as a multipart form upload.
+
+## 2. API (server-side)
+
+The API receives feedback, validates the request (API key, reviewer token, origin), stores the data, and uploads the screenshot to cloud storage. It then triggers background jobs:
+
+- Create a GitHub issue (if GitHub integration is enabled)
+- Notify connected clients via real-time updates
+
+## 3. Consumption layer
+
+Feedback can be consumed two ways:
+
+- **Dashboard**: A web interface where developers view, filter, assign, and manage feedback. Supports bulk actions, status management, and markdown export.
+- **MCP Server**: An AI agent interface. The agent calls `list_feedbacks` to get structured feedback and `update_feedback_status` to mark items as resolved. The developer never leaves their terminal.
+
+## Data flow
+
+```
+Reviewer clicks element on website
+        ↓
+Widget captures context (screenshot, selector, component tree, browser info)
+        ↓
+Feedback submitted to Faster Fixes API
+        ↓
+    ┌───────────┬──────────────┐
+    ↓           ↓              ↓
+Dashboard   MCP Server    GitHub Issue
+    ↓           ↓              ↓
+Developer   AI Agent     Issue Tracker
+```

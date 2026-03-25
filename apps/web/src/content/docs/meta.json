@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "index",
+    "---",
+    "getting-started",
+    "widget",
+    "---",
+    "mcp",
+    "integrations",
+    "---",
+    "concepts",
+    "api-reference"
+  ]
+}

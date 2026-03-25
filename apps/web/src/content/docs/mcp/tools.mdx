@@ -1,0 +1,65 @@
+---
+title: Tools
+description: "Reference for MCP tools: list_feedbacks and update_feedback_status."
+---
+
+The MCP server exposes two tools.
+
+## `list_feedbacks`
+
+Lists feedback items for your project with optional filtering.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `status` | `string` | No | Filter by status: `new`, `in_progress`, `resolved`, or `closed` |
+| `page_url` | `string` | No | Filter by page URL where feedback was submitted |
+| `format` | `string` | No | Output format: `markdown` (default) or `json` |
+
+### Example usage (in an AI agent)
+
+> "Check for new feedback on my project"
+
+The agent calls `list_feedbacks` with `status: "new"` and receives structured feedback including:
+
+- Feedback comment and page URL
+- DOM selector and click coordinates
+- React component tree and source file
+- Browser info and viewport size
+- Screenshot URL
+
+## `update_feedback_status`
+
+Updates the status of a feedback item.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `feedback_id` | `string` (UUID) | Yes | The feedback ID to update |
+| `status` | `string` | Yes | New status: `new`, `in_progress`, `resolved`, or `closed` |
+
+### Example usage (in an AI agent)
+
+> "Mark this feedback as resolved"
+
+The agent calls `update_feedback_status` with the feedback ID and `status: "resolved"`.
+
+## Feedback statuses
+
+| Status | Description |
+|--------|-------------|
+| `new` | Feedback just submitted (default) |
+| `in_progress` | A developer or agent is working on it |
+| `resolved` | The issue has been fixed |
+| `closed` | Closed without fixing (e.g. not actionable) |
+
+## Rate limits
+
+| Action | Limit |
+|--------|-------|
+| `list_feedbacks` | 200 requests/hour |
+| `update_feedback_status` | 50 requests/hour |
+
+Rate limits are per agent token.

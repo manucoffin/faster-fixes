@@ -1,0 +1,33 @@
+---
+title: Reviewer Tokens
+description: How reviewer authentication works and how to manage access.
+---
+
+Reviewers are the people who leave feedback — typically clients or stakeholders. They don't need a Faster Fixes account. Access is managed through tokens.
+
+## How tokens work
+
+1. Each reviewer gets a unique token when created in the dashboard
+2. The token is appended to your website URL: `https://yoursite.com?ff_token=<token>`
+3. When the reviewer opens this link, the widget activates and attributes feedback to them
+4. The token is persisted in the reviewer's browser (`localStorage`), so subsequent visits don't require the URL parameter
+
+## Security
+
+- Tokens are hashed with SHA-256 before storage — the raw token is never saved in the database
+- Origin validation ensures feedback can only be submitted from your project's configured URL
+- Rate limiting prevents abuse (100 submissions per hour)
+
+## Managing reviewers
+
+- **Create**: Dashboard → Reviewers → Create Reviewer. Use descriptive names (e.g. "Sarah - CEO").
+- **Revoke**: Temporarily disable a reviewer's access. Existing feedback is preserved.
+- **Restore**: Re-enable a revoked reviewer.
+- **Delete**: Permanently remove a reviewer and disassociate their feedback.
+
+## Best practices
+
+- Create one token per person for clear feedback attribution
+- Use descriptive names so you can identify who left each comment
+- Revoke tokens after the review phase ends
+- Never share a single token across multiple reviewers

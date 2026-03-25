@@ -1,0 +1,118 @@
+---
+title: Agent API
+description: REST API for AI agents to list feedback and update status.
+---
+
+The Agent API is designed for programmatic access by AI coding agents. It's the same API used by the [MCP server](/docs/mcp).
+
+**Base URL:** `https://app.faster-fixes.com/api/v1/agent`
+
+## Authentication
+
+All requests require a Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer ff_agent_xxx
+```
+
+Create agent tokens in **Organization Settings → Agent Tokens**. See [Agent Tokens](/docs/concepts/agent-tokens) for details.
+
+---
+
+## List feedbacks
+
+```
+GET /feedbacks?project=proj_xxx
+```
+
+### Query parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project` | `string` | Yes | Project ID (prefix: `proj_`) |
+| `status` | `string` | No | Filter: `new`, `in_progress`, `resolved`, `closed` |
+| `page_url` | `string` | No | Filter by page URL |
+| `format` | `string` | No | `json` (default) or `markdown` |
+
+### JSON response
+
+```json
+{
+  "feedbacks": [
+    {
+      "id": "uuid",
+      "status": "new",
+      "comment": "The spacing between these buttons is too large",
+      "pageUrl": "https://myapp.com/settings",
+      "selector": "[data-testid=\"save-btn\"]",
+      "clickX": 450,
+      "clickY": 320,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "browserName": "Chrome",
+      "browserVersion": "120",
+      "os": "macOS",
+      "screenshotUrl": "https://...",
+      "metadata": {},
+      "reviewerName": "Sarah",
+      "createdAt": "2025-01-15T10:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+### Markdown response
+
+When `format=markdown`, the response is a structured markdown document with sections for each feedback item, ready for AI agent consumption.
+
+---
+
+## Update feedback status
+
+```
+POST /feedbacks/:id/status
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "status": "resolved"
+}
+```
+
+### Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `status` | `string` | Yes | `new`, `in_progress`, `resolved`, or `closed` |
+
+### Response
+
+```json
+{
+  "id": "uuid",
+  "status": "resolved",
+  "updatedAt": "2025-01-15T11:00:00Z"
+}
+```
+
+If a GitHub issue is linked, the status change is automatically synced.
+
+---
+
+## Rate limits
+
+| Action | Limit |
+|--------|-------|
+| List feedbacks | 200 requests/hour |
+| Update status | 50 requests/hour |
+
+## Required scopes
+
+| Endpoint | Scope |
+|----------|-------|
+| `GET /feedbacks` | `feedbacks:read` |
+| `POST /feedbacks/:id/status` | `feedbacks:update_status` |

@@ -1,0 +1,46 @@
+---
+title: Agent Tokens
+description: Organization-scoped API tokens for AI agent access.
+---
+
+Agent tokens allow AI coding agents to access your feedback programmatically through the MCP server or REST API.
+
+## Creating a token
+
+1. Go to **Organization Settings → Agent Tokens**
+2. Click **Create Token**
+3. Name your token (e.g. "Claude Code - Main Project")
+4. Copy the token immediately — it won't be shown again
+
+The token is prefixed with `ff_agent_` for easy identification.
+
+## Scopes
+
+Each token has fine-grained permissions:
+
+| Scope | Permission |
+|-------|-----------|
+| `feedbacks:read` | List and read feedback items |
+| `feedbacks:update_status` | Update feedback status (new, in_progress, resolved, closed) |
+
+## Rate limits
+
+| Action | Limit |
+|--------|-------|
+| Read operations | 200 requests/hour |
+| Write operations | 50 requests/hour |
+
+Rate limits are tracked per token. Exceeding the limit returns a `429 Too Many Requests` response.
+
+## Security
+
+- Tokens are hashed with SHA-256 — the raw token is never stored
+- Token validation uses constant-time comparison to prevent timing attacks
+- `lastUsedAt` is tracked for audit purposes
+- Tokens can be revoked instantly by disabling them
+
+## Managing tokens
+
+- **Revoke**: Disable a token immediately. The MCP server or API calls using it will fail.
+- **Delete**: Permanently remove the token.
+- Create separate tokens per agent or environment for granular access control.
