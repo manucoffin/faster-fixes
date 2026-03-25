@@ -27,6 +27,8 @@ const CreateFeedbackSchema = z.object({
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
+const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
 export async function OPTIONS(req: NextRequest) {
   return handlePreflight(req) ?? new NextResponse(null, { status: 204 });
 }
@@ -102,6 +104,16 @@ export async function POST(req: NextRequest) {
     console.warn("[feedback] screenshot field is not a File — type:", typeof screenshotField, "| value preview:", String(screenshotField).slice(0, 100));
   }
   if (screenshotField instanceof File) {
+    if (!ALLOWED_SCREENSHOT_TYPES.includes(screenshotField.type)) {
+      return withCors(
+        req,
+        NextResponse.json(
+          { error: "Invalid screenshot type. Allowed: PNG, JPEG, WebP" },
+          { status: 400 },
+        ),
+      );
+    }
+
     console.info("[feedback] screenshot file — name:", screenshotField.name, "| type:", screenshotField.type, "| size:", screenshotField.size);
     try {
       const buffer = Buffer.from(await screenshotField.arrayBuffer());
@@ -117,7 +129,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const key = `feedback-screenshots/${project.id}/${crypto.randomUUID()}.png`;
+      const ext = screenshotField.type.split("/")[1] || "png";
+      const key = `feedback-screenshots/${project.id}/${crypto.randomUUID()}.${ext}`;
       const bucket = process.env.STORAGE_BUCKET_NAME!;
       console.info("[feedback] uploading screenshot — key:", key, "| bucket:", bucket);
 
@@ -125,7 +138,7 @@ export async function POST(req: NextRequest) {
         bucket,
         key,
         body: buffer,
-        contentType: screenshotField.type || "image/png",
+        contentType: screenshotField.type,
       });
       console.info("[feedback] screenshot uploaded to R2 successfully");
 
@@ -133,8 +146,8 @@ export async function POST(req: NextRequest) {
         key,
         bucket,
         provider: "r2",
-        filename: "screenshot.png",
-        mimeType: screenshotField.type || "image/png",
+        filename: `screenshot.${ext}`,
+        mimeType: screenshotField.type,
         size: buffer.length,
       });
       screenshotId = asset.id;
@@ -202,6 +215,10 @@ export async function GET(req: NextRequest) {
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
     return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+  }
+
+  if (!validateOrigin(req.headers, project.url)) {
+    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");

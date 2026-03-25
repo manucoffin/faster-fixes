@@ -1,3 +1,4 @@
+import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -35,17 +36,25 @@ export const publicProcedure = t.procedure.use(async ({ next }) => {
 });
 
 // Procedure that requires authentication
-export const protectedProcedure = publicProcedure.use((opts) => {
-  const { session } = opts.ctx;
+export const protectedProcedure = publicProcedure
+  .use((opts) => {
+    const { session } = opts.ctx;
 
-  if (!session || !session.user || !session.user.id) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-    });
-  }
+    if (!session || !session.user || !session.user.id) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+      });
+    }
 
-  return opts.next({ ctx: { session } });
-});
+    return opts.next({ ctx: { session } });
+  })
+  .use(async (opts) => {
+    const allowed = await checkRateLimit(opts.ctx.session.user.id, "trpc");
+    if (!allowed) {
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+    }
+    return opts.next();
+  });
 
 export const adminProcedure = protectedProcedure.use((opts) => {
   const { session } = opts.ctx;

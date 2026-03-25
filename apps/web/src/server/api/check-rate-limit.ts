@@ -13,6 +13,7 @@ const RATE_LIMITS = {
   read: { max: 1000, windowMs: 3_600_000 } satisfies RateLimitConfig,
   "agent:read": { max: 200, windowMs: 3_600_000 } satisfies RateLimitConfig,
   "agent:write": { max: 50, windowMs: 3_600_000 } satisfies RateLimitConfig,
+  trpc: { max: 300, windowMs: 60_000 } satisfies RateLimitConfig,
 } as const;
 
 type RateLimitAction = keyof typeof RATE_LIMITS;

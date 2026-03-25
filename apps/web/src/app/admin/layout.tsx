@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: LayoutParams) {
     headers: await headers(),
   });
 
-  if (!session) {
+  if (!session || session.user.role !== "admin") {
     redirect(loginUrl);
   }
 

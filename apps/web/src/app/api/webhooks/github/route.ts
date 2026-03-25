@@ -1,6 +1,7 @@
 import { inngest } from "@/server/inngest";
 import { verifyWebhookSignature } from "@/server/github/verify-webhook";
 import { prisma } from "@workspace/db";
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -12,15 +13,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
+  let payload: unknown;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  // Replay protection: reject duplicate deliveries
+  const deliveryId = req.headers.get("x-github-delivery");
+  if (deliveryId) {
+    try {
+      await prisma.rateLimit.create({
+        data: {
+          id: crypto.randomUUID(),
+          key: `webhook:github:${deliveryId}`,
+          count: 1,
+          lastRequest: BigInt(Date.now()),
+        },
+      });
+    } catch {
+      // Unique constraint violation — already processed this delivery
+      return NextResponse.json({ ok: true, skipped: "duplicate delivery" });
+    }
+  }
+
   const event = req.headers.get("x-github-event");
-  const payload = JSON.parse(rawBody);
 
   if (event === "installation") {
-    await handleInstallationEvent(payload);
+    await handleInstallationEvent(payload as InstallationPayload);
   }
 
   if (event === "issues") {
-    await handleIssuesEvent(payload);
+    await handleIssuesEvent(payload as IssuesPayload);
   }
 
   return NextResponse.json({ ok: true });

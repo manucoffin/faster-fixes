@@ -1,6 +1,7 @@
 import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { handlePreflight, withCors } from "@/server/api/cors";
 import { resolveProject } from "@/server/api/resolve-project";
+import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,6 +24,10 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
     return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+  }
+
+  if (!validateOrigin(req.headers, project.url)) {
+    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
@@ -92,10 +97,25 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
+  if (!validateOrigin(req.headers, project.url)) {
+    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
+  }
+
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
     return withCors(req, NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }));
+  }
+
+  const allowed = await checkRateLimit(project.apiKeyHash, "submit");
+  if (!allowed) {
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "Rate limit exceeded. Try again later." },
+        { status: 429 },
+      ),
+    );
   }
 
   const feedback = await prisma.feedback.findFirst({

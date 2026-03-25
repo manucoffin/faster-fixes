@@ -40,7 +40,8 @@ export const bulkUpdateFeedbackStatus = protectedProcedure
       data: { status: input.status },
     });
 
-    // Fire-and-forget: sync each feedback status to GitHub
+    // Fan-out: one event per feedback so each gets independent retries and
+    // fault isolation — a single failing GitHub sync won't block the others.
     const events = input.feedbackIds.map((feedbackId) => ({
       name: "feedback/status-changed" as const,
       data: { feedbackId, newStatus: input.status },

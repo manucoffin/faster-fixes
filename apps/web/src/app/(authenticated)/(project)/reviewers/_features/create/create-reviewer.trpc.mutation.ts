@@ -31,20 +31,22 @@ export const createReviewer = protectedProcedure
     }
 
     const token = crypto.randomBytes(24).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     const reviewer = await prisma.reviewer.create({
       data: {
         projectId: input.projectId,
         name: input.name,
-        token,
+        token: tokenHash,
       },
     });
 
+    // Return raw token once — only the hash is persisted
     return {
       id: reviewer.id,
       name: reviewer.name,
-      token: reviewer.token,
-      shareUrl: `${project.url}?ff_token=${reviewer.token}`,
+      token,
+      shareUrl: `${project.url}?ff_token=${token}`,
     };
   });
 
