@@ -59,13 +59,13 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
 
   const createProject = useMutation(
     trpc.authenticated.projects.create.mutationOptions({
-      onSuccess: (result) => {
+      onSuccess: async (result) => {
         setOpen(false);
         setRawApiKey(result.rawApiKey);
-        setActiveProject(result.id);
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.list.queryKey(),
         });
+        setActiveProject(result.id);
       },
       onError: (error) => {
         form.setError("root", {
@@ -87,6 +87,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   };
 
   const handleApiKeyDialogClose = () => {
+    setRawApiKey(null);
     router.push("/inbox");
   };
 
