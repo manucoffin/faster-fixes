@@ -10,13 +10,13 @@ import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { JetBrains_Mono, Outfit } from "next/font/google";
+import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
 import { ConsentProvider } from "./_features/c15t/consent-provider";
 
-const fontSans = Outfit({
+const fontSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
