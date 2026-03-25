@@ -1,18 +1,21 @@
+import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
+
 const steps = [
   {
-    number: "1",
+    label: "// 01",
     title: "Your client annotates any element",
     description:
       "No account, no onboarding. They click, leave a comment, and move on. Screenshot, URL, component path, and browser details are captured automatically.",
   },
   {
-    number: "2",
+    label: "// 02",
     title: "Feedback is structured and agent-ready",
     description:
       "The widget structures every detail automatically. Your agent receives a complete report and knows exactly where to look.",
   },
   {
-    number: "3",
+    label: "// 03",
     title: "Your agent pulls it and fixes it automatically",
     description:
       "Connect the MCP server once. Your agent fetches new feedback, locates the code, applies the fix, and marks it resolved. Fully unattended.",
@@ -34,18 +37,31 @@ export function HowItWorksSection() {
           </h2>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
+        {/* TODO: replace with actual product video */}
+        <div className="bg-muted mx-auto mt-12 flex aspect-video max-w-4xl items-center justify-center rounded-xl border">
+          <p className="text-muted-foreground text-sm">
+            Product video placeholder
+          </p>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
           {steps.map((step) => (
-            <div key={step.number} className="flex flex-col gap-4">
-              <div className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold">
-                {step.number}
-              </div>
+            <div key={step.label} className="flex flex-col gap-3">
+              <span className="text-muted-foreground font-mono text-sm">
+                {step.label}
+              </span>
               <h3 className="text-lg font-semibold md:text-xl">{step.title}</h3>
               <p className="text-muted-foreground text-lg leading-relaxed md:text-xl">
                 {step.description}
               </p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <Button asChild variant="outline" size="lg">
+            <Link href="/docs">Read the docs</Link>
+          </Button>
         </div>
       </div>
     </section>

@@ -1,25 +1,7 @@
-import { GitPullRequestIcon, LayoutDashboardIcon, TerminalIcon } from "lucide-react";
-
-const dashboardSteps = [
-  "Open your dashboard, review new feedback",
-  "Copy the structured markdown report",
-  "Paste it into your coding agent",
-  "The agent locates the code and applies the fix",
-];
-
-const mcpSteps = [
-  "Ask your agent to check for new feedback",
-  "The agent calls the MCP server and receives the structured report",
-  "It locates the code and applies the fix",
-  "It marks the feedback as resolved via MCP",
-];
-
-const githubSteps = [
-  "Connect your GitHub repo in project settings",
-  "New feedback automatically creates a GitHub issue with full context",
-  "Closing an issue marks the feedback as resolved — and vice versa",
-  "Status stays in sync across both tools",
-];
+import { signupUrl } from "@/app/_constants/routes";
+import { Button } from "@workspace/ui/components/button";
+import { ArrowRightIcon, LayoutDashboardIcon, TerminalIcon } from "lucide-react";
+import Link from "next/link";
 
 export function AgentWorkflowSection() {
   return (
@@ -27,73 +9,41 @@ export function AgentWorkflowSection() {
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
-            Fits into your existing workflow
+            Let your agent handle it. Or stay in the loop.
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Use the dashboard, connect the MCP server to your coding agent, or
-            let GitHub Issues handle the routing. Pick what works for your team.
+            Your clients flag issues. Your agent fixes them. You review the
+            diff.
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-lg border p-6">
             <div className="mb-4 flex items-center gap-3">
-              <LayoutDashboardIcon className="text-muted-foreground size-5" />
+              <TerminalIcon className="text-muted-foreground size-5" />
               <h3 className="text-sm font-semibold uppercase tracking-wider">
-                Dashboard
+                Full automation
               </h3>
             </div>
-            <ol className="flex flex-col gap-3">
-              {dashboardSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 text-sm">
-                  <span className="text-muted-foreground mt-0.5 shrink-0 font-medium">
-                    {index + 1}.
-                  </span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="border-primary/20 bg-primary/5 rounded-lg border p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <TerminalIcon className="text-primary size-5" />
-              <h3 className="text-primary text-sm font-semibold uppercase tracking-wider">
-                MCP Server
-              </h3>
-            </div>
-            <ol className="flex flex-col gap-3">
-              {mcpSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 text-sm">
-                  <span className="text-primary mt-0.5 shrink-0 font-medium">
-                    {index + 1}.
-                  </span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-            <p className="text-primary/80 mt-4 text-sm font-medium">
-              You never leave your editor.
+            <p className="text-muted-foreground text-lg leading-relaxed md:text-xl">
+              Connect the MCP server once. Your agent fetches new feedback,
+              locates the code, applies the fix, and marks it resolved. Fully
+              unattended.
             </p>
           </div>
 
           <div className="rounded-lg border p-6">
             <div className="mb-4 flex items-center gap-3">
-              <GitPullRequestIcon className="text-muted-foreground size-5" />
+              <LayoutDashboardIcon className="text-muted-foreground size-5" />
               <h3 className="text-sm font-semibold uppercase tracking-wider">
-                GitHub Issues
+                Manual review
               </h3>
             </div>
-            <ol className="flex flex-col gap-3">
-              {githubSteps.map((step, index) => (
-                <li key={step} className="flex gap-3 text-sm">
-                  <span className="text-muted-foreground mt-0.5 shrink-0 font-medium">
-                    {index + 1}.
-                  </span>
-                  {step}
-                </li>
-              ))}
-            </ol>
+            <p className="text-muted-foreground text-lg leading-relaxed md:text-xl">
+              Open the dashboard, review incoming feedback, and copy the
+              structured report into your coding agent when you are ready to
+              act.
+            </p>
           </div>
         </div>
 
@@ -101,6 +51,15 @@ export function AgentWorkflowSection() {
           MCP works with Claude Code, Cursor, Windsurf, and any agent that
           supports the Model Context Protocol.
         </p>
+
+        <div className="mt-8 flex justify-center">
+          <Button asChild size="lg">
+            <Link href={signupUrl}>
+              Get Started Free
+              <ArrowRightIcon />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );

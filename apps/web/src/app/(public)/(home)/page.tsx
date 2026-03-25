@@ -27,10 +27,10 @@ export default function Page() {
     <div>
       <HeroSection />
       <HowItWorksSection />
-      <AgentWorkflowSection />
       <ProblemSection />
       <ReframeSection />
       <BeforeAfterSection />
+      <AgentWorkflowSection />
       <StackSection />
       <FaqSection />
       <FinalCtaSection />
