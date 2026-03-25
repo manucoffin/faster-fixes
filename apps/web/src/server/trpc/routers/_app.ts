@@ -1,6 +1,7 @@
 import { authRouter } from "@/app/(auth)/_utils/trpc-router";
 import { authenticatedRouter } from "@/app/(authenticated)/_utils/trpc-router";
 import { authenticationFeatureRouter } from "@/app/_features/auth/_utils/trpc-router";
+import { githubFeatureRouter } from "@/app/_features/github/_utils/trpc-router";
 import { organizationFeatureRouter } from "@/app/_features/organization/_utils/trpc-router";
 import { subscriptionFeatureRouter } from "@/app/_features/subscription/_utils/trpc-router";
 import { adminRouter } from "@/app/admin/_utils/trpc-router";
@@ -10,6 +11,7 @@ export const appRouter = router({
   auth: mergeRouters(authRouter, authenticationFeatureRouter),
   authenticated: authenticatedRouter,
   admin: adminRouter,
+  github: githubFeatureRouter,
   organization: organizationFeatureRouter,
   subscription: subscriptionFeatureRouter,
 });
