@@ -33,21 +33,21 @@ export function ProblemSection() {
           <h2 className="text-3xl font-bold md:text-4xl">
             You already know this workflow
           </h2>
-          <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+          <p className="text-muted-foreground mt-6 text-lg leading-relaxed md:text-xl">
             A client sends a WhatsApp voice note and three screenshots taken
             from their phone. One shows the wrong page. Another is cropped so
             you cannot see the URL bar. The third has a red circle drawn
             around... something. The message says &quot;this doesn&apos;t look
             right on my end.&quot;
           </p>
-          <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
+          <p className="text-muted-foreground mt-4 text-lg leading-relaxed md:text-xl">
             You spend the next 20 minutes finding the page, opening dev tools,
             guessing the browser, and reconstructing what they saw.
           </p>
         </div>
 
         <div className="mx-auto mt-10 max-w-2xl text-center">
-          <p className="text-muted-foreground text-base">
+          <p className="text-muted-foreground text-lg md:text-xl">
             That 20-minute detour happens several times a week across every
             active project. Over a year, you lose hundreds of hours — not
             building, not shipping, just decoding what your client meant.

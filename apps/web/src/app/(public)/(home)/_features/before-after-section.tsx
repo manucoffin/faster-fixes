@@ -36,7 +36,7 @@ export function BeforeAfterSection() {
                 <span className="text-muted-foreground mb-2 block text-xs font-semibold uppercase tracking-wider">
                   Without FasterFixes
                 </span>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground text-lg leading-relaxed md:text-xl">
                   {scene.without}
                 </p>
               </div>
@@ -45,7 +45,7 @@ export function BeforeAfterSection() {
                 <span className="text-primary mb-2 block text-xs font-semibold uppercase tracking-wider">
                   With FasterFixes
                 </span>
-                <p className="text-sm leading-relaxed">{scene.with}</p>
+                <p className="text-lg leading-relaxed md:text-xl">{scene.with}</p>
               </div>
             </div>
           ))}

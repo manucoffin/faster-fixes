@@ -12,7 +12,7 @@ export function FinalCtaSection() {
             Every feedback message you decode manually is time you could have
             shipped
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="text-muted-foreground mt-4 text-lg md:text-xl">
             Set up FasterFixes in under 5 minutes. One npm install. Free plan
             included.
           </p>

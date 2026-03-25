@@ -48,7 +48,7 @@ export function StackSection() {
           <h2 className="text-3xl font-bold md:text-4xl">
             Built for your stack
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="text-muted-foreground mt-4 text-lg md:text-xl">
             The widget is available for React-based apps today. The MCP server
             connects to any agent that supports the Model Context Protocol.
           </p>

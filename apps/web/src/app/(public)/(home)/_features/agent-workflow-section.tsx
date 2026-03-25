@@ -29,7 +29,7 @@ export function AgentWorkflowSection() {
           <h2 className="text-3xl font-bold md:text-4xl">
             Fits into your existing workflow
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="text-muted-foreground mt-4 text-lg md:text-xl">
             Use the dashboard, connect the MCP server to your coding agent, or
             let GitHub Issues handle the routing. Pick what works for your team.
           </p>

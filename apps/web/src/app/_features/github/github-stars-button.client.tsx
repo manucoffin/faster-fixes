@@ -2,9 +2,9 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { useQuery } from "@tanstack/react-query";
 import { LoaderIcon, StarIcon } from "lucide-react";
 
 const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
