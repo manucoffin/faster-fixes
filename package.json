@@ -7,6 +7,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:agent-rules": "turbo run lint:agent-rules --filter=web",
+    "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {

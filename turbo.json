@@ -1,43 +1,20 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://turborepo.dev/schema.v2.json",
   "ui": "tui",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"],
-      "env": [
-        "DOMAIN_NAME",
-        "DATABASE_URL",
-
-        "BETTER_AUTH_SECRET",
-        "BETTER_AUTH_URL",
-
-        "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
-        "STRIPE_SECRET_KEY",
-        "STRIPE_WEBHOOK_SIGNING_SECRET",
-        "PRO_MONTHLY_PRICE_ID",
-        "PRO_YEARLY_PRICE_ID",
-        "AGENCY_MONTHLY_PRICE_ID",
-        "AGENCY_YEARLY_PRICE_ID",
-
-        "PLUNK_SECRET_KEY",
-        "RESEND_API_KEY",
-
-        "STORAGE_REGION",
-        "STORAGE_BUCKET_NAME",
-        "NEXT_PUBLIC_STORAGE_BASE_URL",
-        "R2_ACCOUNT_ID",
-        "R2_ACCESS_KEY_ID",
-        "R2_SECRET_ACCESS_KEY"
-      ]
+      "outputs": ["dist/**"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["transit"]
     },
     "lint:agent-rules": {},
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["transit"]
     },
     "dev": {
       "cache": false,
