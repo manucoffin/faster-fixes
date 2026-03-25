@@ -4,6 +4,9 @@
 @source "../**/*.{ts,tsx}";
 
 @import "tw-animate-css";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
 @plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:is(.dark *));
@@ -67,9 +70,9 @@
 }
 
 .dark {
-  --background: oklch(0.20 0.0036 106.6427);
+  --background: oklch(0.2 0.0036 106.6427);
   --foreground: oklch(0.8074 0.0142 93.0137);
-  --card: oklch(0.20 0.0036 106.6427);
+  --card: oklch(0.2 0.0036 106.6427);
   --card-foreground: oklch(0.9818 0.0054 95.0986);
   --popover: oklch(0.24 0.0035 106.6039);
   --popover-foreground: oklch(0.9211 0.004 106.4781);
@@ -93,7 +96,7 @@
   --chart-3: oklch(0.845 0.143 164.978);
   --chart-4: oklch(0.685 0.169 237.323);
   --chart-5: oklch(0.97 0.001 106.424);
-  --sidebar: oklch(0.20 0.0036 106.6427);
+  --sidebar: oklch(0.2 0.0036 106.6427);
   --sidebar-foreground: oklch(0.8074 0.0142 93.0137);
   --sidebar-primary: oklch(0.4455 0.1073 242.7919);
   --sidebar-primary-foreground: oklch(1 0 0);

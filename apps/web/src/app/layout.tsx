@@ -7,6 +7,7 @@ import {
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
 import { FeedbackProvider } from "@fasterfixes/react";
 import "@workspace/ui/globals.css";
+import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { JetBrains_Mono, Outfit } from "next/font/google";
@@ -65,7 +66,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning className="scroll-smooth">
-      <body className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}>
+      <body
+        className={`${fontSans.variable} ${fontMono.variable} flex min-h-screen flex-col font-sans antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -82,7 +85,7 @@ export default function RootLayout({
                   apiKey={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
                 >
-                  {children}
+                  <RootProvider>{children}</RootProvider>
                 </FeedbackProvider>
 
                 <Toaster />

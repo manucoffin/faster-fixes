@@ -7,7 +7,8 @@
       "@workspace/ui/*": ["../../packages/ui/src/*"],
       "@workspace/db/*": ["../../packages/database/*"],
       "@public/*": ["./public/*"],
-      "@private/*": ["./private/*"]
+      "@private/*": ["./private/*"],
+      "@collections/*": [".source/*"]
     },
     "plugins": [
       {
