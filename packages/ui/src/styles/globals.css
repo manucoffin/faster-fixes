@@ -4,10 +4,13 @@
 @source "../**/*.{ts,tsx}";
 
 @import "tw-animate-css";
-@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/shadcn.css";
 @import "fumadocs-ui/css/preset.css";
 
-@plugin '@tailwindcss/typography';
+/* renamed to avoid conflict with fumadocs' built-in prose plugin */
+@plugin "@tailwindcss/typography" {
+  className: wysiwyg;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -123,6 +126,30 @@
   --shadow-xl:
     0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+}
+
+/* fumadocs: the app's --primary is a blue bg color, but fumadocs uses
+   fd-primary as a heading/text color. Override to neutral values so docs
+   text is readable, while the sidebar keeps the blue for active items. */
+:root {
+  --color-fd-primary: var(--foreground);
+  --color-fd-primary-foreground: var(--background);
+}
+
+.dark {
+  --color-fd-primary: var(--card-foreground);
+  --color-fd-primary-foreground: var(--background);
+}
+
+/* sidebar keeps the blue accent for active items, lightened in dark mode */
+#nd-sidebar {
+  --color-fd-primary: var(--sidebar-primary);
+  --color-fd-primary-foreground: var(--sidebar-primary-foreground);
+}
+
+.dark #nd-sidebar {
+  --color-fd-primary: oklch(0.65 0.1073 242.7919);
 }
 
 @theme inline {

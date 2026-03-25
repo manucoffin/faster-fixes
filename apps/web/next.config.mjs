@@ -1,8 +1,7 @@
-import createMDX from "@next/mdx";
+import { createMDX } from "fumadocs-mdx/next";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   transpilePackages: ["@workspace/ui"],
   typedRoutes: true,
 
@@ -90,10 +89,6 @@ const nextConfig = {
   },
 };
 
-const withMDX = createMDX({
-  options: {
-    remarkPlugins: ["remark-gfm"],
-  },
-});
+const withMDX = createMDX();
 
 export default withMDX(nextConfig);

@@ -4,9 +4,10 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
+  MarkdownCopyButton,
 } from "fumadocs-ui/layouts/docs/page";
 import { createRelativeLink } from "fumadocs-ui/mdx";
-import { getMDXComponents } from "mdx-components";
+import { getDocsMDXComponents } from "mdx-components";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -19,11 +20,17 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
+      <div className="flex items-center justify-between gap-4">
+        <DocsTitle className="mb-0">{page.data.title}</DocsTitle>
+        <MarkdownCopyButton
+          markdownUrl={`/api/docs/${page.slugs.join("/")}`}
+          className="not-prose shrink-0"
+        />
+      </div>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
         <MDX
-          components={getMDXComponents({
+          components={getDocsMDXComponents({
             // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
           })}
