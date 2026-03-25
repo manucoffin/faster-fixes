@@ -1,5 +1,7 @@
 # @fasterfixes/react
 
+> **[Documentation](https://faster-fixes.com/docs)** · [Website](https://faster-fixes.com)
+
 React feedback widget for [FasterFixes](https://faster-fixes.com) — collect visual feedback with screenshots, element annotations, and inline comments.
 
 ## Installation
@@ -54,7 +56,8 @@ Control the widget programmatically:
 import { useFeedback } from "@fasterfixes/react";
 
 function MyComponent() {
-  const { show, hide, isVisible } = useFeedback();
+  const { show, hide, isVisible, startAnnotation, feedbackItems, togglePins, showPins } =
+    useFeedback();
 
   return (
     <button onClick={() => (isVisible ? hide() : show())}>
@@ -64,10 +67,22 @@ function MyComponent() {
 }
 ```
 
+| Property          | Type               | Description                           |
+| ----------------- | ------------------ | ------------------------------------- |
+| `show`            | `() => void`       | Show the widget                       |
+| `hide`            | `() => void`       | Hide the widget and reset mode        |
+| `isVisible`       | `boolean`          | Whether the widget is currently shown |
+| `startAnnotation` | `() => void`       | Enter annotation mode directly        |
+| `feedbackItems`   | `FeedbackItem[]`   | All feedback items for the project    |
+| `togglePins`      | `() => void`       | Toggle pin visibility on the page     |
+| `showPins`        | `boolean`          | Whether pins are currently visible    |
+
 ## Features
 
 - Visual element annotation with click-to-select
 - Automatic screenshot capture
+- Edit and delete existing feedback
+- Resolved feedback filtering
 - Dark mode UI
 - Animated toolbar with list and visibility toggles
 - Feedback pins positioned on annotated elements

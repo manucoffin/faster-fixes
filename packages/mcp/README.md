@@ -1,5 +1,7 @@
 # @fasterfixes/mcp
 
+> **[Documentation](https://faster-fixes.com/docs)** · [Website](https://faster-fixes.com)
+
 MCP server for [Faster Fixes](https://faster-fixes.com) — connect AI coding agents to your client feedback.
 
 Clients leave feedback on your site via the widget. This MCP server lets your AI coding agent fetch that feedback and update its status, so you never leave your terminal.
