@@ -67,7 +67,7 @@ export const createProject = protectedProcedure
         organizationId: input.organizationId,
         widgetConfig: {
           create: {
-            color: "#6366f1",
+            color: "#02527E",
             position: "bottom-right",
           },
         },

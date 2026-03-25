@@ -67,7 +67,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
       projectId,
       name: "",
       url: "",
-      widgetColor: "#6366f1",
+      widgetColor: "#02527E",
       widgetPosition: "bottom-right",
       widgetEnabled: true,
     },
@@ -76,7 +76,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
           projectId,
           name: project.name,
           url: project.url,
-          widgetColor: project.widgetConfig?.color ?? "#6366f1",
+          widgetColor: project.widgetConfig?.color ?? "#02527E",
           widgetPosition:
             (project.widgetConfig
               ?.position as UpdateProjectInputs["widgetPosition"]) ??
@@ -181,7 +181,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
                   />
                   <Input
                     className="flex-1"
-                    placeholder="#6366f1"
+                    placeholder="#02527E"
                     disabled={updateProject.isPending}
                     {...field}
                   />
