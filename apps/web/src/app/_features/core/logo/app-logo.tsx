@@ -11,7 +11,7 @@ export const AppLogo = ({ className, ...props }: Props) => {
   return (
     <Link href="/" className={cn("text-xl font-bold", className)} {...props}>
       Faster
-      <span className="text-primary">Fixes</span>
+      <span className="text-primary font-bold">Fixes</span>
     </Link>
   );
 };

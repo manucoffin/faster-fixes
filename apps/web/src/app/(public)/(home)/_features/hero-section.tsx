@@ -13,15 +13,13 @@ export function HeroSection() {
         </Badge>
 
         <h1 className="max-w-3xl text-4xl leading-tight font-bold md:text-5xl lg:text-6xl">
-          Client feedback was never meant for developers
+          The open-source feedback pipeline for AI-native dev teams.
         </h1>
 
         <p className="text-muted-foreground mt-6 max-w-2xl text-lg md:text-xl">
-          Translating client requests into dev tasks is a PM or PO&apos;s job.
-          In a small team, that falls on you. FasterFixes removes you from the
-          loop — your clients report issues directly on your app, every
-          technical detail is captured automatically, and your coding agent
-          fixes them.
+          Your clients annotate issues directly on your site. Every technical
+          detail is captured automatically. Your coding agent gets a structured
+          task and fixes it — no back-and-forth, no deciphering, just shipping.
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -32,7 +30,7 @@ export function HeroSection() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="#how-it-works">See how it works</Link>
+            <Link href="/docs">Read the docs</Link>
           </Button>
         </div>
       </div>

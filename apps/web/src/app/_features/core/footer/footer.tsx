@@ -1,54 +1,21 @@
-import { INSTAGRAM_URL, LINKEDIN_URL, TIKTOK_URL, YOUTUBE_URL } from "@/app/_constants/company";
+import { SITE_META_DESCRIPTION } from "@/app/_constants/seo";
 import { ManageConsentButton } from "@/app/_features/c15t/manage-consent-button";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
-import { InstagramIcon } from "@workspace/ui/components/icons/instagram-icon";
-import { LinkedinIcon } from "@workspace/ui/components/icons/linkedin-icon";
-import { TiktokIcon } from "@workspace/ui/components/icons/tiktok-icon";
-import { YoutubeIcon } from "@workspace/ui/components/icons/youtube-icon";
 import { Route } from "next";
 import Link from "next/link";
+import { GitHubStarsButton } from "../../github/github-stars-button.client";
 import { AppLogo } from "../logo/app-logo";
 
-const data = {
-  instaLink: INSTAGRAM_URL,
-  linkedinLink: LINKEDIN_URL,
-  youtubeLink: YOUTUBE_URL,
-  tiktokLink: TIKTOK_URL,
-  company: {
-    name: "FasterFixes",
-    description:
-      "Collect client feedback directly on your website. Get structured, agent-ready tasks your AI coding tools can act on immediately.",
-  },
-};
-
-const socialLinks = [
-  { icon: YoutubeIcon, label: "YouTube", href: data.youtubeLink },
-  { icon: TiktokIcon, label: "TikTok", href: data.youtubeLink },
-  { icon: InstagramIcon, label: "Instagram", href: data.instaLink },
-  { icon: LinkedinIcon, label: "LinkedIn", href: data.linkedinLink },
-];
-
-const legalLinks = [
-  {
-    text: "Privacy policy",
-    href: "/politique-de-confidentialite" as Route,
-  },
-  { text: "CGU", href: "/cgu" as Route },
-  { text: "CGV", href: "/cgv" as Route },
-];
-
-const aboutLinks = [
-  { text: "About", href: "/a-propos" as Route },
+const productLinks = [
+  { text: "Documentation", href: "/docs" as Route },
+  { text: "Pricing", href: "/pricing" as Route },
   { text: "Blog", href: "/blog" as Route },
 ];
 
-const helpfulLinks = [
-  {
-    text: "Get started",
-    href: "/getting-started" as Route,
-  },
-  { text: "Pricing", href: "/pricing" as Route },
-  { text: "Contact", href: "/contact" as Route },
+const legalLinks = [
+  { text: "Privacy policy", href: "/privacy-policy" as Route },
+  { text: "Terms of use", href: "/terms" as Route },
+  { text: "Terms of sale", href: "/terms-of-sale" as Route },
 ];
 
 export function Footer() {
@@ -56,58 +23,30 @@ export function Footer() {
 
   return (
     <footer className="w-full place-self-end border-t">
-      <div className="container mx-auto px-4 pt-16 pb-6 lg:pt-24">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="mx-auto px-4 pt-16 pb-6 lg:pt-24">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div>
-            <div className="text-primary flex justify-center gap-2 sm:justify-start">
-              <AppLogo iconClassName="w-32" />
+            <div className="flex justify-center sm:justify-start">
+              <AppLogo />
             </div>
 
             <p className="text-muted-foreground mx-auto mt-6 max-w-md text-center leading-relaxed sm:mx-0 sm:max-w-xs sm:text-left">
-              {data.company.description}
+              {SITE_META_DESCRIPTION}
             </p>
 
-            <ul className="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
-              {socialLinks.map(({ icon: Icon, label, href }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground transition"
-                  >
-                    <span className="sr-only">{label}</span>
-                    <Icon
-                      className="fill-muted-foreground size-6"
-                      fill="currentColor"
-                    />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-8 flex justify-center sm:justify-start">
+              <GitHubStarsButton />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold">About</p>
+              <p className="text-lg font-semibold">Product</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {aboutLinks.map(({ text, href }) => (
+                {productLinks.map(({ text, href }) => (
                   <li key={text}>
                     <Link href={href}>
-                      <AnimatedText >{text}</AnimatedText>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="text-center sm:text-left">
-              <p className="text-lg font-semibold">Useful</p>
-              <ul className="mt-8 space-y-4 text-sm">
-                {helpfulLinks.map(({ text, href }) => (
-                  <li key={text}>
-                    <Link href={href}>
-                      <AnimatedText >{text}</AnimatedText>
+                      <AnimatedText>{text}</AnimatedText>
                     </Link>
                   </li>
                 ))}
@@ -120,13 +59,13 @@ export function Footer() {
                 {legalLinks.map(({ text, href }) => (
                   <li key={text}>
                     <Link href={href}>
-                      <AnimatedText >{text}</AnimatedText>
+                      <AnimatedText>{text}</AnimatedText>
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <ManageConsentButton className="px-0 py-0 font-normal h-fit hover:no-underline" >
-                    <AnimatedText >Privacy preferences</AnimatedText>
+                  <ManageConsentButton className="text-foreground h-fit px-0 py-0 font-normal hover:no-underline">
+                    <AnimatedText>Privacy preferences</AnimatedText>
                   </ManageConsentButton>
                 </li>
               </ul>
@@ -135,15 +74,23 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mt-12 border-t pt-6 pb-4">
-        <div className="container mx-auto px-4">
-          <div className="text-center sm:flex sm:justify-between sm:text-left">
-            <p className="text-sm">
-              <span className="block sm:inline">All rights reserved.</span>
+      <div className="border-border/40 mt-12 border-t pt-6 pb-4">
+        <div className="mx-auto px-4">
+          <div className="text-muted-foreground text-center text-sm sm:flex sm:justify-between sm:text-left">
+            <p>
+              Open source under{" "}
+              <a
+                href="https://github.com/manucoffin/faster-fixes/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4 hover:no-underline"
+              >
+                AGPL-3.0
+              </a>
             </p>
 
-            <p className="mt-4 text-sm sm:order-first sm:mt-0">
-              &copy; {currentYear} {data.company.name}
+            <p className="mt-4 sm:order-first sm:mt-0">
+              &copy; {currentYear} FasterFixes
             </p>
           </div>
         </div>
