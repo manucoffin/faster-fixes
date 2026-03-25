@@ -17,10 +17,10 @@ import { revokeReviewer } from "../reviewers/_features/revoke/revoke-reviewer.tr
 import { deleteProject } from "../settings/_features/delete/delete-project.trpc.mutation";
 import { getProject } from "../settings/_features/get-project.trpc.query";
 import { getProjectGitHubLink } from "../settings/_features/github/get-project-link.trpc.query";
-import { linkRepo } from "../settings/_features/github/link-repo.trpc.mutation";
-import { listAccessibleRepos } from "../settings/_features/github/list-accessible-repos.trpc.query";
-import { unlinkRepo } from "../settings/_features/github/unlink-repo.trpc.mutation";
-import { updateProjectLink } from "../settings/_features/github/update-project-link.trpc.mutation";
+import { linkRepo } from "../settings/_features/github/link-repo/link-repo.trpc.mutation";
+import { listAccessibleRepos } from "../settings/_features/github/link-repo/list-accessible-repos.trpc.query";
+import { unlinkRepo } from "../settings/_features/github/unlink-repo/unlink-repo.trpc.mutation";
+import { updateProjectLink } from "../settings/_features/github/update-link/update-project-link.trpc.mutation";
 import { regenerateApiKey } from "../settings/_features/regenerate-api-key/regenerate-api-key.trpc.mutation";
 import { updateProject } from "../settings/_features/update/update-project.trpc.mutation";
 import { getProjects } from "./get-projects.trpc.query";

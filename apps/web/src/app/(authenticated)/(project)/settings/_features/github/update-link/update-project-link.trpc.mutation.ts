@@ -51,4 +51,6 @@ export const updateProjectLink = protectedProcedure
     return { success: true };
   });
 
-export type UpdateProjectLinkOutput = inferProcedureOutput<typeof updateProjectLink>;
+export type UpdateProjectLinkOutput = inferProcedureOutput<
+  typeof updateProjectLink
+>;
