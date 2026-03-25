@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { Github } from "lucide-react";
+import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 
 export function GitHubNotConnected() {
   return (
@@ -16,7 +16,7 @@ export function GitHubNotConnected() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Github className="size-4" />
+          <GithubIcon className="size-4" />
           Connect to GitHub
         </a>
       </Button>

@@ -3,7 +3,7 @@
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
-import { Github } from "lucide-react";
+import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { toast } from "sonner";
 
 type GitHubIssueBadgeProps = {
@@ -47,7 +47,7 @@ export function GitHubIssueBadge({
         rel="noopener noreferrer"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
       >
-        <Github className="size-3.5" />
+        <GithubIcon className="size-3.5" />
         <span>#{issueLink.issueNumber}</span>
         <span className="text-xs">
           ({issueLink.issueState})
@@ -65,7 +65,7 @@ export function GitHubIssueBadge({
       onClick={() => createIssueMutation.mutate({ feedbackId })}
       disabled={createIssueMutation.isPending}
     >
-      <Github className="mr-1 size-3.5" />
+      <GithubIcon className="mr-1 size-3.5" />
       Create GitHub issue
     </Button>
   );

@@ -9,7 +9,8 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { formatDistanceToNow } from "date-fns";
-import { Github, GripVertical } from "lucide-react";
+import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
+import { GripVertical } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type FeedbackItem = GetFeedbackOutput[number];
@@ -97,7 +98,7 @@ export function KanbanCard({
           </span>
 
           {feedback.issueLink && (
-            <Github className="text-muted-foreground size-3.5 shrink-0" />
+            <GithubIcon className="text-muted-foreground size-3.5 shrink-0" />
           )}
 
           <span className="text-muted-foreground ml-auto shrink-0 text-xs">
