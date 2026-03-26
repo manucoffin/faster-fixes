@@ -140,6 +140,10 @@
 .dark {
   --color-fd-primary: var(--card-foreground);
   --color-fd-primary-foreground: var(--background);
+  /* shadcn --secondary is light even in dark mode (for badges/buttons),
+     but fumadocs uses fd-secondary as code-block bg inside tabs */
+  --color-fd-secondary: var(--muted);
+  --color-fd-secondary-foreground: var(--muted-foreground);
 }
 
 /* sidebar keeps the blue accent for active items, lightened in dark mode */
