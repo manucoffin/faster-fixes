@@ -13,7 +13,6 @@ interface PlanCardProps {
   title: string;
   description: string;
   price: number;
-  priceTTC: number;
   badge?: string;
   freeTrialDays?: number;
   features: PlanFeature[];
@@ -26,7 +25,6 @@ export function PlanCard({
   title,
   description,
   price,
-  priceTTC,
   badge,
   freeTrialDays,
   features,
@@ -63,20 +61,16 @@ export function PlanCard({
           <div className="flex items-end gap-2">
             <span className="text-foreground text-5xl font-bold">{price}</span>
             <div className="text-foreground text-lg">
-              <span className="font-bold">€ HT</span>
+              <span className="font-bold">$</span>
               <br />
-              <span className="text-sm">/{isAnnual ? "an" : "mois"}</span>
+              <span className="text-sm">/{isAnnual ? "year" : "month"}</span>
             </div>
           </div>
-          <p className="text-muted-foreground text-sm">
-            (soit {priceTTC.toFixed(2)}€ TTC)
-          </p>
         </div>
 
         {freeTrialDays && (
           <div className="text-muted-foreground mb-6 flex items-center gap-2">
-            <Gift className="size-4" /> {freeTrialDays} jours offerts sans
-            engagement
+            <Gift className="size-4" /> {freeTrialDays}-day free trial, no commitment
           </div>
         )}
 

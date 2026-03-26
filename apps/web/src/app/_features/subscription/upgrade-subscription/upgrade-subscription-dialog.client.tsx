@@ -1,14 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  PLAN_DESCRIPTIONS,
-  PLAN_FEATURES,
-  SUBSCRIPTION_PLANS,
-  SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
-import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -18,19 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@workspace/ui/components/empty";
-import { Label } from "@workspace/ui/components/label";
-import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Switch } from "@workspace/ui/components/switch";
-import { Loader2 } from "lucide-react";
-import { ReactNode, useCallback, useState } from "react";
-import { toast } from "sonner";
-import { PlanCard } from "../plan-card/plan-card";
+import { ReactNode, useState } from "react";
+import { PlanSelection } from "./plan-selection.client";
 
 interface UpgradeSubscriptionDialogProps {
   trigger?: ReactNode;
@@ -39,48 +19,7 @@ interface UpgradeSubscriptionDialogProps {
 export function UpgradeSubscriptionDialog({
   trigger,
 }: UpgradeSubscriptionDialogProps) {
-  const trpc = useTRPC();
   const [isOpen, setIsOpen] = useState(false);
-  const [isAnnual, setIsAnnual] = useState(false);
-
-  // Fetch stripe prices for all plans
-  const stripePricesQuery = useQuery(trpc.subscription.getPlansPrices.queryOptions(
-    {
-      planNames: SUBSCRIPTION_PLANS.map((p) => p.name),
-    },
-    {
-      enabled: isOpen, // Only fetch when dialog is open
-    },
-  ));
-
-  const upgradePlanMutation =
-    useMutation(trpc.subscription.upgrade.mutationOptions(
-      {
-        onSuccess: (data) => {
-          // Redirect to Stripe checkout
-          if (data.url) {
-            window.location.href = data.url;
-          }
-        },
-        onError: (error) => {
-          console.error("Error upgrading plan:", error);
-          toast(error.message);
-        },
-      },
-    ));
-
-  const handleUpgrade = useCallback(
-    async (planName: string) => {
-      await upgradePlanMutation.mutateAsync({
-        planName,
-        annual: isAnnual,
-      });
-    },
-    [upgradePlanMutation, isAnnual],
-  );
-
-  const today = new Date();
-  const launchPromotionEndDate = new Date("2026-01-01");
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -93,147 +32,9 @@ export function UpgradeSubscriptionDialog({
           <DialogDescription>
             Select the plan that best fits your needs
           </DialogDescription>
-
-          {today < launchPromotionEndDate ? (
-            <div className="rounded-2xl border border-blue-800/20 bg-blue-50 p-3">
-              For a limited time, enjoy{" "}
-              <strong>free access</strong> to all features
-              until December 31. Subscribe now to get started.
-            </div>
-          ) : null}
-
-          <div className="mt-4 flex items-center gap-2">
-            <Switch
-              id="annual"
-              checked={isAnnual}
-              onCheckedChange={setIsAnnual}
-            />
-            <Label htmlFor="annual" className="cursor-pointer">
-              Annual billing
-            </Label>
-          </div>
         </DialogHeader>
 
-        {matchQueryStatus(stripePricesQuery, {
-          Loading: (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {Array.from({ length: SUBSCRIPTION_PLANS.length }).map((_, i) => (
-                <Skeleton key={i} className="h-96" />
-              ))}
-            </div>
-          ),
-          Errored: (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>Failed to load pricing</EmptyTitle>
-                <EmptyDescription>
-                  An error occurred while loading pricing.
-                  Please try again.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ),
-          Empty: (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>No plans available</EmptyTitle>
-                <EmptyDescription>
-                  No subscription plans are currently available.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ),
-          Success: ({ data: stripePrices }) => {
-            // Get all unique feature IDs from all plans
-            const allFeatureIds = new Set(
-              Object.values(PLAN_FEATURES)
-                .flat()
-                .map((f) => f.id),
-            );
-
-            // Count how many plans have each feature
-            const featureCountByPlan = Array.from(allFeatureIds).map((id) => ({
-              id,
-              count: Object.values(PLAN_FEATURES).filter((features) =>
-                features.some((f) => f.id === id),
-              ).length,
-            }));
-
-            // Features that appear in ALL plans (identical features)
-            const commonFeatureIds = new Set(
-              featureCountByPlan
-                .filter((f) => f.count === Object.keys(PLAN_FEATURES).length)
-                .map((f) => f.id),
-            );
-
-            return (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {SUBSCRIPTION_PLANS.map((plan) => {
-                  const priceData = stripePrices[plan.name];
-                  const selectedPrice = isAnnual
-                    ? priceData?.annual
-                    : priceData?.monthly;
-                  const allFeatures =
-                    PLAN_FEATURES[plan.name as keyof typeof PLAN_FEATURES] ||
-                    [];
-                  // Filter out common features only for Agency plan
-                  const features =
-                    plan.name === SubscriptionPlanName.Agency
-                      ? allFeatures.filter((f) => !commonFeatureIds.has(f.id))
-                      : allFeatures;
-                  const isHighlighted =
-                    plan.name === SubscriptionPlanName.Pro;
-
-                  // Calculate price in euros (Stripe stores in cents)
-                  const priceHT = selectedPrice
-                    ? selectedPrice.unit_amount! / 100
-                    : 0;
-                  const priceTTC = (priceHT * 1.2);
-
-                  const freeTrialDays = plan.freeTrial?.days;
-
-                  return (
-                    <PlanCard
-                      key={plan.name}
-                      title={plan.name}
-                      description={
-                        PLAN_DESCRIPTIONS[plan.name as SubscriptionPlanName]
-                      }
-                      price={priceHT}
-                      priceTTC={priceTTC}
-                      freeTrialDays={freeTrialDays}
-                      badge={isHighlighted ? "Most popular" : undefined}
-                      features={features}
-                      variant={isHighlighted ? "highlighted" : "default"}
-                      isAnnual={isAnnual}
-                    >
-                      <Button
-                        onClick={() => handleUpgrade(plan.name)}
-                        disabled={upgradePlanMutation.isPending}
-                        className="w-full"
-                        variant={isHighlighted ? "default" : "secondary"}
-                      >
-                        {upgradePlanMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 size-4 animate-spin" />
-                            Loading...
-                          </>
-                        ) : (
-                          <span>
-                            Choose{" "}
-                            <span className="font-semibold capitalize">
-                              {plan.name}
-                            </span>
-                          </span>
-                        )}
-                      </Button>
-                    </PlanCard>
-                  );
-                })}
-              </div>
-            );
-          },
-        })}
+        {isOpen && <PlanSelection />}
       </DialogContent>
     </Dialog>
   );
