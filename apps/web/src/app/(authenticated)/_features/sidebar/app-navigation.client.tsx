@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -8,7 +9,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { Blocks, CreditCard, Settings2 } from "lucide-react";
+import { Blocks, CreditCard, Settings2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -16,14 +17,10 @@ const applicationItems = [
   { label: "Integrations", href: "/integrations" as const, icon: Blocks },
 ];
 
-const accountItems = [
-  { label: "Settings", href: "/account/settings" as const, icon: Settings2 },
-  { label: "Billing", href: "/account/billing" as const, icon: CreditCard },
-];
-
 export function AppNavigation() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { isFreePlan } = usePlanGate();
 
   return (
     <>
@@ -50,20 +47,41 @@ export function AppNavigation() {
       <SidebarGroup>
         <SidebarGroupLabel>My Account</SidebarGroupLabel>
         <SidebarMenu>
-          {accountItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith(item.href)}
-                tooltip={item.label}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname.startsWith("/account/settings")}
+              tooltip="Settings"
+            >
+              <Link
+                href="/account/settings"
+                onClick={() => setOpenMobile(false)}
               >
-                <Link href={item.href} onClick={() => setOpenMobile(false)}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                <Settings2 />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname.startsWith("/account/billing")}
+              tooltip={isFreePlan ? "Get Pro" : "Billing"}
+            >
+              <Link
+                href="/account/billing"
+                onClick={() => setOpenMobile(false)}
+              >
+                {isFreePlan ? (
+                  <Sparkles className="text-amber-500" />
+                ) : (
+                  <CreditCard />
+                )}
+                <span>{isFreePlan ? "Get Pro" : "Billing"}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
     </>
