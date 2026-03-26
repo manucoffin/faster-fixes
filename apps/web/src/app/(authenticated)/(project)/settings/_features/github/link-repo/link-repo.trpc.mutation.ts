@@ -1,10 +1,12 @@
 "use server";
 
-import { protectedProcedure } from "@/server/trpc/trpc";
+import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
+import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { LinkRepoSchema } from "./link-repo.schema";
 
-export const linkRepo = protectedProcedure
+export const linkRepo = planAwareProcedure
+  .use(enforceFeature("githubIntegration"))
   .input(LinkRepoSchema)
   .mutation(async ({ input, ctx }) => {
     const { prisma, session } = ctx;

@@ -4,6 +4,7 @@ import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
 import { inngest } from "@/server/inngest";
+import { checkResourceLimit } from "@/server/subscription";
 import { createAsset } from "@/server/storage/create-asset";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { s3Client } from "@/server/storage";
@@ -60,6 +61,23 @@ export async function POST(req: NextRequest) {
       NextResponse.json(
         { error: "Rate limit exceeded. Try again later." },
         { status: 429 },
+      ),
+    );
+  }
+
+  const feedbackCheck = await checkResourceLimit(project.organizationId, "feedbacks", prisma);
+  if (!feedbackCheck.allowed) {
+    const { metadata } = feedbackCheck.denial;
+    return withCors(
+      req,
+      NextResponse.json(
+        {
+          error: "Feedback limit reached for this organization's plan.",
+          code: "RESOURCE_LIMIT_EXCEEDED",
+          current: metadata.current,
+          limit: metadata.limit,
+        },
+        { status: 403 },
       ),
     );
   }

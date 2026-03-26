@@ -1,11 +1,13 @@
 "use server";
 
 import { auth } from "@/server/auth";
-import { protectedProcedure } from "@/server/trpc/trpc";
+import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
+import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { CreateInvitationSchema } from "./create-invitation.schema";
 
-export const createInvitation = protectedProcedure
+export const createInvitation = planAwareProcedure
+  .use(enforceLimit("seats"))
   .input(CreateInvitationSchema)
   .mutation(async ({ input, ctx }) => {
     const { prisma, session, headers } = ctx;
