@@ -9,7 +9,14 @@ type Props = Omit<ComponentProps<typeof Link>, "href"> & {
 
 export const AppLogo = ({ className, ...props }: Props) => {
   return (
-    <Link href="/" className={cn("font-medium", className)} {...props}>
+    <Link
+      href="/"
+      className={cn(
+        "dark:hover:text-primary-foreground hover:text-foreground font-medium transition-colors",
+        className,
+      )}
+      {...props}
+    >
       /fasterfixes
     </Link>
   );
@@ -21,7 +28,14 @@ type AppLogoMarkProps = Omit<ComponentProps<typeof Link>, "href"> & {
 
 export const AppLogoMark = ({ className, ...props }: AppLogoMarkProps) => {
   return (
-    <Link href="/" className={cn("font-medium", className)} {...props}>
+    <Link
+      href="/"
+      className={cn(
+        "dark:hover:text-primary-foreground hover:text-foreground font-medium transition-colors",
+        className,
+      )}
+      {...props}
+    >
       /ff
     </Link>
   );

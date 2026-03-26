@@ -45,7 +45,10 @@ export function Footer() {
               <ul className="mt-8 space-y-4 text-sm">
                 {productLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href}>
+                    <Link
+                      href={href}
+                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                    >
                       <AnimatedText>{text}</AnimatedText>
                     </Link>
                   </li>
@@ -58,13 +61,16 @@ export function Footer() {
               <ul className="mt-8 space-y-4 text-sm">
                 {legalLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href}>
+                    <Link
+                      href={href}
+                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                    >
                       <AnimatedText>{text}</AnimatedText>
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <ManageConsentButton className="text-foreground h-fit px-0 py-0 font-normal hover:no-underline">
+                  <ManageConsentButton className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground h-fit px-0 py-0 font-normal transition-colors hover:no-underline">
                     <AnimatedText>Privacy preferences</AnimatedText>
                   </ManageConsentButton>
                 </li>
