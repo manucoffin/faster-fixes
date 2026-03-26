@@ -22,21 +22,34 @@ export const PLAN_LIMITS = {
     projects: 1,
     feedbacks: 50,
     seats: 1,
+    organizations: 1,
     githubIntegration: false,
   },
   [SubscriptionPlanName.Pro]: {
     projects: 5,
     feedbacks: Infinity,
     seats: 5,
+    organizations: Infinity,
     githubIntegration: true,
   },
   [SubscriptionPlanName.Agency]: {
     projects: Infinity,
     feedbacks: Infinity,
     seats: Infinity,
+    organizations: Infinity,
     githubIntegration: true,
   },
-};
+} as const;
+
+export type PlanLimits = (typeof PLAN_LIMITS)[SubscriptionPlanName];
+
+export type LimitableResource = {
+  [K in keyof PlanLimits]: PlanLimits[K] extends number ? K : never;
+}[keyof PlanLimits];
+
+export type FeatureGate = {
+  [K in keyof PlanLimits]: PlanLimits[K] extends boolean ? K : never;
+}[keyof PlanLimits];
 
 export const PLAN_DESCRIPTIONS = {
   [SubscriptionPlanName.Free]:
