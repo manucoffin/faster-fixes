@@ -10,13 +10,17 @@ import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { DM_Sans, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
 import { ConsentProvider } from "./_features/c15t/consent-provider";
 
-const fontSans = DM_Sans({
+const fontSans2 = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+const fontSans = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -65,7 +69,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning className="scroll-smooth">
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${fontSans.variable} ${fontMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
@@ -84,6 +88,8 @@ export default function RootLayout({
                 <FeedbackProvider
                   apiKey={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
+                  color="var(--primary)"
+                  position="bottom-right"
                 >
                   <RootProvider>{children}</RootProvider>
                 </FeedbackProvider>

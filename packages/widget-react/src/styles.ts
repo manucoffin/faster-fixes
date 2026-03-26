@@ -16,13 +16,11 @@ export const POSITION_STYLES: Record<WidgetPosition, React.CSSProperties> = {
   "middle-left": { top: "50%", left: 20, transform: "translateY(-50%)" },
 };
 
-export const triggerButtonStyle = (
-  color: string,
-): React.CSSProperties => ({
+export const triggerButtonStyle = (): React.CSSProperties => ({
   width: 40,
   height: 40,
   borderRadius: "50%",
-  backgroundColor: color,
+  backgroundColor: "var(--ff-accent)",
   color: "#fff",
   border: "none",
   cursor: "pointer",
@@ -35,12 +33,12 @@ export const triggerButtonStyle = (
   flexShrink: 0,
 });
 
-export const toolbarStyle = (color: string): React.CSSProperties => ({
+export const toolbarStyle = (): React.CSSProperties => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   gap: 4,
-  backgroundColor: color,
+  backgroundColor: "var(--ff-accent)",
   borderRadius: 24,
   padding: 4,
   width: 40,
@@ -101,9 +99,9 @@ export const buttonBaseStyle: React.CSSProperties = {
   transition: "opacity 0.15s ease",
 };
 
-export const primaryButtonStyle = (color: string): React.CSSProperties => ({
+export const primaryButtonStyle = (): React.CSSProperties => ({
   ...buttonBaseStyle,
-  backgroundColor: color,
+  backgroundColor: "var(--ff-accent)",
   color: "#fff",
 });
 

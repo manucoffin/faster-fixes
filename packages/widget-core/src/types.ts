@@ -10,8 +10,6 @@ export type FeedbackStatus = "new" | "in_progress" | "resolved" | "closed";
 
 export type WidgetConfig = {
   enabled: boolean;
-  color: string;
-  position: WidgetPosition;
 };
 
 export type FeedbackReviewer = {

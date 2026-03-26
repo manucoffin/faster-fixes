@@ -10,10 +10,38 @@ The widget can be configured through the dashboard and through props.
 Managed in Project Settings:
 
 - **Enabled** — Toggle the widget on/off without deploying code changes
-- **Position** — Where the floating button appears on the page
-- **Color** — Widget accent color
 
-## Available positions
+## Props
+
+`color` and `position` are configured as optional props on `FeedbackProvider`:
+
+```tsx
+<FeedbackProvider
+  apiKey="your-api-key"
+  color="#e63946"
+  position="bottom-left"
+>
+  {children}
+</FeedbackProvider>
+```
+
+### Color
+
+The `color` prop accepts any CSS color value, including CSS variables:
+
+```tsx
+<FeedbackProvider apiKey="your-api-key" color="var(--color-blue-500)">
+```
+
+Default: `#02527E`.
+
+The color is applied as a CSS custom property `--ff-accent`, so styles passed via the `classNames` prop naturally take precedence.
+
+### Position
+
+The `position` prop controls where the floating button appears. Default: `bottom-right`.
+
+The `WidgetPosition` type is exported from the `@fasterfixes/core` package.
 
 | Position | Description |
 |----------|-------------|

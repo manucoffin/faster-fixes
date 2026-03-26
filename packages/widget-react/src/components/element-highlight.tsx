@@ -3,7 +3,7 @@ import { useFeedbackContext } from "../context.js";
 import { overlayHighlightStyle } from "../styles.js";
 
 export function ElementHighlight() {
-  const { highlightSelector, color } = useFeedbackContext();
+  const { highlightSelector } = useFeedbackContext();
   const [rect, setRect] = useState<DOMRect | null>(null);
 
   const updateRect = useCallback(() => {
@@ -42,7 +42,7 @@ export function ElementHighlight() {
       data-ff-widget
       style={{
         ...overlayHighlightStyle,
-        borderColor: color,
+        borderColor: "var(--ff-accent)",
         top: rect.top,
         left: rect.left,
         width: rect.width,

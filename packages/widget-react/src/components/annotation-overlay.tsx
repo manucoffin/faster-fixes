@@ -7,7 +7,6 @@ export function AnnotationOverlay() {
   const {
     mode,
     setMode,
-    color,
     classNames,
     setSelectedElement,
     setClickCoords,
@@ -119,7 +118,7 @@ export function AnnotationOverlay() {
       data-ff-widget
       style={{
         ...overlayHighlightStyle,
-        borderColor: color,
+        borderColor: "var(--ff-accent)",
         top: highlightRect.top,
         left: highlightRect.left,
         width: highlightRect.width,

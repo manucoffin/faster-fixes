@@ -25,6 +25,9 @@ export const STATUS_COLORS: Record<FeedbackStatus, string> = {
 
 export const DEFAULT_API_ORIGIN = "https://app.faster-fixes.com";
 
+export const DEFAULT_WIDGET_COLOR = "#02527E";
+export const DEFAULT_WIDGET_POSITION: WidgetPosition = "bottom-right";
+
 export const DEFAULT_LABELS = {
   submitButton: "Submit",
   cancelButton: "Cancel",

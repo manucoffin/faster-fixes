@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import {
   FasterFixesClient,
   DEFAULT_LABELS,
+  DEFAULT_WIDGET_COLOR,
+  DEFAULT_WIDGET_POSITION,
   resolveReviewerToken,
   resolveElement,
 } from "@fasterfixes/core";
@@ -26,6 +28,8 @@ import { ElementHighlight } from "./components/element-highlight.js";
 type FeedbackProviderProps = {
   apiKey: string;
   apiOrigin?: string;
+  color?: string;
+  position?: WidgetPosition;
   classNames?: Partial<ClassNames>;
   labels?: Partial<Labels>;
   children: React.ReactNode;
@@ -34,6 +38,8 @@ type FeedbackProviderProps = {
 export function FeedbackProvider({
   apiKey,
   apiOrigin,
+  color,
+  position,
   classNames: customClassNames,
   labels: customLabels,
   children,
@@ -63,6 +69,9 @@ export function FeedbackProvider({
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
   const pendingFeedbackHandled = useRef(false);
   const portalCleanupRef = useRef<(() => void) | null>(null);
+
+  const effectiveColor = color ?? DEFAULT_WIDGET_COLOR;
+  const effectivePosition = position ?? DEFAULT_WIDGET_POSITION;
 
   const client = useMemo(
     () => new FasterFixesClient({ apiKey, apiOrigin }),
@@ -257,8 +266,7 @@ export function FeedbackProvider({
     return <>{children}</>;
   }
 
-  const position = config.position as WidgetPosition;
-  const posStyle = POSITION_STYLES[position] ?? POSITION_STYLES["bottom-right"];
+  const posStyle = POSITION_STYLES[effectivePosition] ?? POSITION_STYLES["bottom-right"];
 
   const show = () => setIsVisible(true);
   const hide = () => {
@@ -311,8 +319,8 @@ export function FeedbackProvider({
     screenshotCaptureRef,
     classNames: mergedClassNames,
     labels: mergedLabels,
-    position,
-    color: config.color,
+    position: effectivePosition,
+    color: effectiveColor,
   };
 
   return (
@@ -326,7 +334,8 @@ export function FeedbackProvider({
             style={{
               position: "relative",
               zIndex: Z_WIDGET,
-            }}
+              '--ff-accent': effectiveColor,
+            } as React.CSSProperties}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
@@ -343,12 +352,12 @@ export function FeedbackProvider({
                 position: "fixed",
                 ...posStyle,
                 display: "flex",
-                flexDirection: position.includes("right")
+                flexDirection: effectivePosition.includes("right")
                   ? "row-reverse"
                   : "row",
-                alignItems: position.includes("bottom")
+                alignItems: effectivePosition.includes("bottom")
                   ? "flex-end"
-                  : position.includes("top")
+                  : effectivePosition.includes("top")
                     ? "flex-start"
                     : "center",
                 gap: 8,

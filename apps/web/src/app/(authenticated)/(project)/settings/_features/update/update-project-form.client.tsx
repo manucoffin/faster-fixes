@@ -21,13 +21,6 @@ import { CopyableText } from "@workspace/ui/components/copyable-text";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import { Switch } from "@workspace/ui/components/switch";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -67,8 +60,6 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
       projectId,
       name: "",
       url: "",
-      widgetColor: "#02527E",
-      widgetPosition: "bottom-right",
       widgetEnabled: true,
     },
     values: project
@@ -76,11 +67,6 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
           projectId,
           name: project.name,
           url: project.url,
-          widgetColor: project.widgetConfig?.color ?? "#02527E",
-          widgetPosition:
-            (project.widgetConfig
-              ?.position as UpdateProjectInputs["widgetPosition"]) ??
-            "bottom-right",
           widgetEnabled: project.widgetConfig?.enabled ?? true,
         }
       : undefined,
@@ -160,63 +146,6 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
                   />
                 </FormControl>
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="widgetColor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Widget color</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    disabled={updateProject.isPending}
-                    className="h-10 w-12 cursor-pointer rounded border"
-                    {...field}
-                  />
-                  <Input
-                    className="flex-1"
-                    placeholder="#02527E"
-                    disabled={updateProject.isPending}
-                    {...field}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="widgetPosition"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Widget position</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={updateProject.isPending}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="top-right">Top right</SelectItem>
-                  <SelectItem value="top-left">Top left</SelectItem>
-                  <SelectItem value="middle-right">Middle right</SelectItem>
-                  <SelectItem value="middle-left">Middle left</SelectItem>
-                  <SelectItem value="bottom-right">Bottom right</SelectItem>
-                  <SelectItem value="bottom-left">Bottom left</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

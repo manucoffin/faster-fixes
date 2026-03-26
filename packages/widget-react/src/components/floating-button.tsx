@@ -139,7 +139,6 @@ export function FloatingButton() {
   const {
     mode,
     setMode,
-    color,
     classNames,
     setActiveFeedback,
     setSelectedElement,
@@ -185,8 +184,8 @@ export function FloatingButton() {
       <button
         className={`ff-button ${classNames.button ?? ""}`}
         style={{
-          ...triggerButtonStyle(color),
-          animation: "ff-button-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          ...triggerButtonStyle(),
+          animation: "ff-button-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
         onClick={handleTriggerClick}
         aria-label="Start feedback"
@@ -257,8 +256,8 @@ export function FloatingButton() {
     <div
       className={`ff-button ${classNames.button ?? ""}`}
       style={{
-        ...toolbarStyle(color),
-        animation: "ff-toolbar-expand 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        ...toolbarStyle(),
+        animation: "ff-toolbar-expand 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
       }}
       data-ff-widget
     >

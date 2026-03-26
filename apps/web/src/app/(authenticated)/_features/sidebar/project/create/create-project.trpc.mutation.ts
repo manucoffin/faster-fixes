@@ -66,10 +66,7 @@ export const createProject = protectedProcedure
         apiKeyLastFour: lastFour,
         organizationId: input.organizationId,
         widgetConfig: {
-          create: {
-            color: "#02527E",
-            position: "bottom-right",
-          },
+          create: {},
         },
       },
     });

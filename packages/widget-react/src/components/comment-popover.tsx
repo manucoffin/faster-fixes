@@ -24,7 +24,6 @@ export function CommentPopover() {
     setMode,
     client,
     reviewerToken,
-    color,
     classNames,
     labels,
     selectedElement,
@@ -190,7 +189,7 @@ export function CommentPopover() {
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="button"
-              style={primaryButtonStyle(color)}
+              style={primaryButtonStyle()}
               onClick={handleRetry}
             >
               {labels.retryButton}
@@ -235,7 +234,7 @@ export function CommentPopover() {
             <button
               type="button"
               style={{
-                ...primaryButtonStyle(color),
+                ...primaryButtonStyle(),
                 opacity: mode === "submitting" || !comment.trim() || fadingOut ? 0.6 : 1,
               }}
               onClick={handleSubmit}

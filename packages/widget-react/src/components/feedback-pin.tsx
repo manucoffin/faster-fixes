@@ -68,6 +68,12 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         return;
       }
 
+      // Hide pin if the element has scrolled out of the viewport
+      if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
+        setPosition(null);
+        return;
+      }
+
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const anchorX = pinAnchor ? rect.left + rect.width * pinAnchor.x : rect.right;

@@ -36,8 +36,6 @@ export const updateProject = protectedProcedure
         url: input.url,
         widgetConfig: {
           update: {
-            color: input.widgetColor,
-            position: input.widgetPosition,
             enabled: input.widgetEnabled,
           },
         },

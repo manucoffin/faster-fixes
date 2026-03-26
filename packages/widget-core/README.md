@@ -47,7 +47,7 @@ const { feedback } = await client.getFeedback(reviewerToken, pageUrl);
 
 | Method                                     | Description                                           |
 | ------------------------------------------ | ----------------------------------------------------- |
-| `getConfig()`                              | Fetch widget configuration (color, position, enabled) |
+| `getConfig()`                              | Fetch widget configuration (enabled status)           |
 | `getFeedback(token, url?)`                 | Fetch feedback items, optionally filtered by page URL |
 | `createFeedback(data, token, screenshot?)` | Submit new feedback with optional screenshot          |
 | `updateFeedback(id, data, token)`          | Update an existing feedback comment                   |
@@ -80,7 +80,7 @@ All TypeScript types are exported, including: `WidgetConfig`, `WidgetPosition`, 
 
 ### Constants
 
-Useful constants are also exported: `FEEDBACK_STATUSES`, `WIDGET_POSITIONS`, `STATUS_COLORS`, `DEFAULT_LABELS`.
+Useful constants are also exported: `FEEDBACK_STATUSES`, `WIDGET_POSITIONS`, `STATUS_COLORS`, `DEFAULT_LABELS`, `DEFAULT_WIDGET_COLOR`, `DEFAULT_WIDGET_POSITION`.
 
 ## License
 

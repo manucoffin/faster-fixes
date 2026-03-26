@@ -43,6 +43,18 @@ In production, use an environment variable for the API key:
 <FeedbackProvider apiKey={process.env.NEXT_PUBLIC_FASTER_FIXES_API_KEY!}>
 ```
 
+You can also customize the widget appearance inline:
+
+```tsx
+<FeedbackProvider
+  apiKey={process.env.NEXT_PUBLIC_FASTER_FIXES_API_KEY!}
+  color="#e63946"
+  position="bottom-left"
+>
+```
+
+Both props are optional. See [Configuration](/docs/widget/configuration) for all available options.
+
 ## 5. Create a reviewer
 
 In your project dashboard, go to **Reviewers** and create a new reviewer (e.g. "Client - John"). Copy the review link.

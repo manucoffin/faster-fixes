@@ -35,8 +35,6 @@ export async function GET(req: NextRequest) {
     req,
     NextResponse.json({
       enabled: config?.enabled ?? true,
-      color: config?.color ?? "#02527E",
-      position: config?.position ?? "bottom-right",
     }),
   );
 }

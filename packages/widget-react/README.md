@@ -28,6 +28,26 @@ function App() {
 
 That's it. The widget appears as a floating button. Reviewers with a valid token can click elements, annotate them, and submit feedback with automatic screenshots.
 
+### Customize appearance
+
+```tsx
+<FeedbackProvider
+  apiKey="your-project-api-key"
+  color="#e63946"
+  position="bottom-left"
+>
+  <YourApp />
+</FeedbackProvider>
+```
+
+`color` accepts any CSS color value, including CSS variables:
+
+```tsx
+<FeedbackProvider apiKey="your-project-api-key" color="var(--brand-primary)">
+```
+
+The color is applied as a `--ff-accent` CSS custom property on the widget root. Any `classNames` overrides take precedence.
+
 ## How it works
 
 1. A reviewer visits your site with a token link (`?ff_token=...`)
@@ -41,12 +61,14 @@ That's it. The widget appears as a floating button. Reviewers with a valid token
 
 ### `FeedbackProvider`
 
-| Prop         | Type                  | Required | Description                                                 |
-| ------------ | --------------------- | -------- | ----------------------------------------------------------- |
-| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                            |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://app.faster-fixes.com`) |
-| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                     |
-| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                       |
+| Prop         | Type                  | Required | Description                                                             |
+| ------------ | --------------------- | -------- | ----------------------------------------------------------------------- |
+| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                                        |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://app.faster-fixes.com`)             |
+| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`)          |
+| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)                      |
+| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                                 |
+| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                                   |
 
 ### `useFeedback` hook
 

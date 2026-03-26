@@ -23,7 +23,6 @@ export function PinPopover() {
     setActiveFeedback,
     client,
     reviewerToken,
-    color,
     classNames,
     labels,
     refreshFeedback,
@@ -215,7 +214,7 @@ export function PinPopover() {
             <button
               type="button"
               style={{
-                ...primaryButtonStyle(color),
+                ...primaryButtonStyle(),
                 opacity: isSaving || !editComment.trim() ? 0.6 : 1,
               }}
               onClick={handleSave}

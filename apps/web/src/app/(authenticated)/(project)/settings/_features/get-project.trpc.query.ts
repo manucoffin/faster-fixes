@@ -38,8 +38,6 @@ export const getProject = protectedProcedure
       createdAt: project.createdAt,
       widgetConfig: project.widgetConfig
         ? {
-            color: project.widgetConfig.color,
-            position: project.widgetConfig.position,
             enabled: project.widgetConfig.enabled,
           }
         : null,
