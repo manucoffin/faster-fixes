@@ -11,11 +11,8 @@ export async function GET(
   const page = source.getPage(slug);
   if (!page) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const filePath = join(
-    process.cwd(),
-    "src/content/docs",
-    `${page.path}.mdx`,
-  );
+  // page.path already includes the .mdx extension (e.g. "widget/installation.mdx")
+  const filePath = join(process.cwd(), "src/content/docs", page.path);
 
   try {
     const content = await readFile(filePath, "utf-8");

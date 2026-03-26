@@ -1,9 +1,9 @@
-import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import type { DocsLayoutProps } from "fumadocs-ui/layouts/docs";
 
-export function baseOptions(): BaseLayoutProps {
+export function baseOptions(): Omit<DocsLayoutProps, "tree" | "children"> {
   return {
-    nav: {
-      title: "Faster Fixes",
-    },
+    nav: { title: "" },
+    themeSwitch: { enabled: false },
+    sidebar: { collapsible: false },
   };
 }

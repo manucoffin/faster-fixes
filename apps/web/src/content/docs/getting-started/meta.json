@@ -1,5 +1,5 @@
 {
   "title": "Getting Started",
   "defaultOpen": true,
-  "pages": ["quickstart", "project-setup", "sharing-with-clients"]
+  "pages": ["../index", "quickstart", "project-setup", "sharing-with-clients"]
 }

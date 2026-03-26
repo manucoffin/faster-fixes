@@ -152,6 +152,16 @@
   --color-fd-primary: oklch(0.65 0.1073 242.7919);
 }
 
+/* docs search trigger: readable in dark mode, pointer cursor */
+[data-search-full] {
+  cursor: pointer;
+}
+
+.dark [data-search-full] {
+  background-color: var(--muted);
+}
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

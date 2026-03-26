@@ -1,13 +1,10 @@
 {
   "pages": [
-    "index",
-    "---",
     "getting-started",
     "widget",
-    "---",
     "mcp",
-    "integrations",
     "---",
+    "integrations",
     "concepts",
     "api-reference"
   ]

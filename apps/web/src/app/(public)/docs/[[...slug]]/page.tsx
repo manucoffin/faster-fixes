@@ -24,7 +24,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         <DocsTitle className="mb-0">{page.data.title}</DocsTitle>
         <MarkdownCopyButton
           markdownUrl={`/api/docs/${page.slugs.join("/")}`}
-          className="not-prose shrink-0"
+          className="not-prose shrink-0 cursor-pointer"
         />
       </div>
       <DocsDescription>{page.data.description}</DocsDescription>
