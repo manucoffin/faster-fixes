@@ -2,6 +2,7 @@ import { signupUrl } from "@/app/_constants/routes";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowRightIcon, CheckIcon } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { CopyCommand } from "./copy-command.client";
 import { HeroDotBackground } from "./hero-dot-background.client";
@@ -49,7 +50,7 @@ export function HeroSection() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/docs">Read the docs</Link>
+                <Link href={"/docs" as Route}>Read the docs</Link>
               </Button>
             </div>
 

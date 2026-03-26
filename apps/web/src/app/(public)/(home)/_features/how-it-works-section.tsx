@@ -1,4 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
+import type { Route } from "next";
 import Link from "next/link";
 
 const steps = [
@@ -60,7 +61,7 @@ export function HowItWorksSection() {
 
         <div className="mt-12 flex justify-center">
           <Button asChild variant="outline" size="lg">
-            <Link href="/docs">Read the docs</Link>
+            <Link href={"/docs" as Route}>Read the docs</Link>
           </Button>
         </div>
       </div>
