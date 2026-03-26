@@ -24,6 +24,7 @@ export const PLAN_LIMITS = {
     seats: 1,
     organizations: 1,
     githubIntegration: false,
+    whiteLabel: false,
   },
   [SubscriptionPlanName.Pro]: {
     projects: 5,
@@ -31,6 +32,7 @@ export const PLAN_LIMITS = {
     seats: 5,
     organizations: Infinity,
     githubIntegration: true,
+    whiteLabel: true,
   },
   [SubscriptionPlanName.Agency]: {
     projects: Infinity,
@@ -38,6 +40,7 @@ export const PLAN_LIMITS = {
     seats: Infinity,
     organizations: Infinity,
     githubIntegration: true,
+    whiteLabel: true,
   },
 } as const;
 
@@ -112,7 +115,12 @@ export const PLAN_FEATURES = {
     {
       id: "github_integration",
       label: "GitHub integration",
-      highlighted: true,
+      highlighted: false,
+    },
+    {
+      id: "white_label",
+      label: "White-label widget",
+      highlighted: false,
     },
     {
       id: "priority_email_support",

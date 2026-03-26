@@ -2,6 +2,8 @@ import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { handlePreflight, withCors } from "@/server/api/cors";
 import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
+import { resolveOrganizationPlan } from "@/server/auth/subscription/resolve-organization-plan";
+import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function OPTIONS(req: NextRequest) {
@@ -30,11 +32,13 @@ export async function GET(req: NextRequest) {
   }
 
   const config = project.widgetConfig;
+  const plan = await resolveOrganizationPlan(project.organizationId, prisma);
 
   return withCors(
     req,
     NextResponse.json({
       enabled: config?.enabled ?? true,
+      branding: !plan.limits.whiteLabel,
     }),
   );
 }

@@ -20,6 +20,7 @@ export function FeedbackList() {
     labels,
     position,
     showList,
+    config,
   } = useFeedbackContext();
 
   // Delayed unmount: stay mounted during exit animation
@@ -171,6 +172,30 @@ export function FeedbackList() {
             </div>
           );
         })
+      )}
+
+      {config.branding && (
+        <div
+          style={{
+            padding: "6px 14px",
+            borderTop: "1px solid #3f3f46",
+            textAlign: "center",
+            fontSize: 10,
+            color: "#52525b",
+          }}
+        >
+          <a
+            href="https://faster-fixes.com?ref=widget"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#52525b",
+              textDecoration: "none",
+            }}
+          >
+            Powered by FasterFixes
+          </a>
+        </div>
       )}
     </div>
   );
