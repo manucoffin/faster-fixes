@@ -4,4 +4,10 @@ export const docs = defineDocs({
   dir: "src/content/docs",
 });
 
-export default defineConfig();
+export default defineConfig({
+  mdxOptions: {
+    remarkNpmOptions: {
+      persist: { id: "package-manager" },
+    },
+  },
+});

@@ -1,0 +1,21 @@
+---
+title: Other Frameworks
+description: Use Faster Fixes with non-React frameworks via the core client.
+---
+
+We are actively working on integrations for other frameworks. In the meantime, you can use the core client directly:
+
+```package-install
+@fasterfixes/core
+```
+
+```ts
+import { FasterFixesClient } from "@fasterfixes/core";
+
+const client = new FasterFixesClient({
+  apiKey: "your-api-key",
+  apiOrigin: "https://faster-fixes.com", // optional
+});
+```
+
+The core package provides the API client, selector generation utilities, and browser info helpers without any React dependency. See the [Feedback API](/docs/api-reference/feedback-api) for all available endpoints.

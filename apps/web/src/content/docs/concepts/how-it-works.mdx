@@ -22,7 +22,6 @@ All data is sent to the Faster Fixes API as a multipart form upload.
 The API receives feedback, validates the request (API key, reviewer token, origin), stores the data, and uploads the screenshot to cloud storage. It then triggers background jobs:
 
 - Create a GitHub issue (if GitHub integration is enabled)
-- Notify connected clients via real-time updates
 
 ## 3. Consumption layer
 

@@ -1,0 +1,76 @@
+---
+title: React
+description: Install and configure the Faster Fixes widget in your React application.
+---
+
+## Installation
+
+```package-install
+@fasterfixes/react
+```
+
+## Provider setup
+
+Wrap your application with `FeedbackProvider`:
+
+```tsx title="app/layout.tsx"
+import { FeedbackProvider } from "@fasterfixes/react";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html>
+      <body>
+        <FeedbackProvider apiKey={process.env.NEXT_PUBLIC_FF_API_KEY!}>
+          {children}
+        </FeedbackProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Get your API key in [Project Settings](https://faster-fixes.com/settings).
+
+## Props
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | Yes | Your project API key from the dashboard |
+| `apiOrigin` | `string` | No | API base URL. Defaults to `https://faster-fixes.com` |
+| `color` | `string` | No | Accent color. Accepts any CSS color value. Defaults to `#02527E` |
+| `position` | `WidgetPosition` | No | Floating button placement. Defaults to `bottom-right` |
+| `classNames` | `object` | No | CSS class overrides for widget elements |
+| `labels` | `object` | No | Custom text labels for the widget UI |
+
+## Color
+
+The `color` prop accepts any CSS color value, including CSS variables:
+
+```tsx
+<FeedbackProvider apiKey="your-api-key" color="var(--color-blue-500)">
+```
+
+Default: `#02527E`. The color is applied as a CSS custom property `--ff-accent`, so styles passed via the `classNames` prop naturally take precedence.
+
+## Position
+
+The `position` prop controls where the floating button appears. Default: `bottom-right`.
+
+| Position | Description |
+| --- | --- |
+| `bottom-right` | Bottom-right corner (default) |
+| `bottom-left` | Bottom-left corner |
+| `top-right` | Top-right corner |
+| `top-left` | Top-left corner |
+| `middle-right` | Middle of the right edge |
+| `middle-left` | Middle of the left edge |
+
+The `WidgetPosition` type is exported from the `@fasterfixes/core` package.
+
+## Dashboard toggle
+
+You can enable or disable the widget from [Project Settings](https://faster-fixes.com/settings) without deploying code changes.
