@@ -1,12 +1,14 @@
 import type { LimitableResource } from "@/server/auth/config/subscription-plans";
-import { checkResourceLimit } from "@/server/subscription";
+import { checkResourceLimit } from "@/server/auth/subscription";
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";
 
 export function enforceLimit(resource: LimitableResource) {
   return middleware(async ({ ctx, next }) => {
     const organizationId = (
-      ctx.session as { session?: { activeOrganizationId?: string | null } } | null
+      ctx.session as {
+        session?: { activeOrganizationId?: string | null };
+      } | null
     )?.session?.activeOrganizationId;
 
     if (!organizationId) {
@@ -16,7 +18,11 @@ export function enforceLimit(resource: LimitableResource) {
       });
     }
 
-    const result = await checkResourceLimit(organizationId, resource, ctx.prisma);
+    const result = await checkResourceLimit(
+      organizationId,
+      resource,
+      ctx.prisma,
+    );
 
     if (!result.allowed) {
       throw new TRPCError({

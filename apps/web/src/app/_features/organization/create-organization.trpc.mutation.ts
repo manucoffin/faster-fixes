@@ -1,7 +1,7 @@
 "use server";
 
 import { generateUniqueSlug } from "@/app/_features/organization/_utils/generate-unique-slug";
-import { checkOrganizationLimit } from "@/server/subscription";
+import { checkOrganizationLimit } from "@/server/auth/subscription";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { CreateOrganizationSchema } from "./create-organization.schema";

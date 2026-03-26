@@ -3,11 +3,11 @@ import { handlePreflight, withCors } from "@/server/api/cors";
 import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
+import { checkResourceLimit } from "@/server/auth/subscription";
 import { inngest } from "@/server/inngest";
-import { checkResourceLimit } from "@/server/subscription";
+import { s3Client } from "@/server/storage";
 import { createAsset } from "@/server/storage/create-asset";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { s3Client } from "@/server/storage";
 import { putObject } from "@better-upload/server/helpers";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
@@ -36,22 +36,34 @@ export async function OPTIONS(req: NextRequest) {
 
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
-  console.info("[feedback] POST /api/v1/feedback — content-type:", req.headers.get("content-type"));
+  console.info(
+    "[feedback] POST /api/v1/feedback — content-type:",
+    req.headers.get("content-type"),
+  );
 
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
     console.warn("[feedback] unauthorized — invalid API key");
-    return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    );
   }
 
   if (!validateOrigin(req.headers, project.url)) {
-    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Origin not allowed" }, { status: 403 }),
+    );
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return withCors(req, NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }),
+    );
   }
 
   const allowed = await checkRateLimit(project.apiKeyHash, "submit");
@@ -65,7 +77,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const feedbackCheck = await checkResourceLimit(project.organizationId, "feedbacks", prisma);
+  const feedbackCheck = await checkResourceLimit(
+    project.organizationId,
+    "feedbacks",
+    prisma,
+  );
   if (!feedbackCheck.allowed) {
     const { metadata } = feedbackCheck.denial;
     return withCors(
@@ -86,19 +102,31 @@ export async function POST(req: NextRequest) {
   try {
     formData = await req.formData();
   } catch {
-    return withCors(req, NextResponse.json({ error: "Invalid form data" }, { status: 400 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Invalid form data" }, { status: 400 }),
+    );
   }
 
   const rawData = formData.get("data");
   if (typeof rawData !== "string") {
-    return withCors(req, NextResponse.json({ error: "Missing data field" }, { status: 400 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Missing data field" }, { status: 400 }),
+    );
   }
 
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(rawData);
   } catch {
-    return withCors(req, NextResponse.json({ error: "Invalid JSON in data field" }, { status: 400 }));
+    return withCors(
+      req,
+      NextResponse.json(
+        { error: "Invalid JSON in data field" },
+        { status: 400 },
+      ),
+    );
   }
 
   const parsed = CreateFeedbackSchema.safeParse(parsedJson);
@@ -117,9 +145,19 @@ export async function POST(req: NextRequest) {
   // Handle optional screenshot upload
   let screenshotId: string | undefined;
   const screenshotField = formData.get("screenshot");
-  console.info("[feedback] screenshot field present:", screenshotField !== null, "| instanceof File:", screenshotField instanceof File);
+  console.info(
+    "[feedback] screenshot field present:",
+    screenshotField !== null,
+    "| instanceof File:",
+    screenshotField instanceof File,
+  );
   if (screenshotField !== null && !(screenshotField instanceof File)) {
-    console.warn("[feedback] screenshot field is not a File — type:", typeof screenshotField, "| value preview:", String(screenshotField).slice(0, 100));
+    console.warn(
+      "[feedback] screenshot field is not a File — type:",
+      typeof screenshotField,
+      "| value preview:",
+      String(screenshotField).slice(0, 100),
+    );
   }
   if (screenshotField instanceof File) {
     if (!ALLOWED_SCREENSHOT_TYPES.includes(screenshotField.type)) {
@@ -132,7 +170,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.info("[feedback] screenshot file — name:", screenshotField.name, "| type:", screenshotField.type, "| size:", screenshotField.size);
+    console.info(
+      "[feedback] screenshot file — name:",
+      screenshotField.name,
+      "| type:",
+      screenshotField.type,
+      "| size:",
+      screenshotField.size,
+    );
     try {
       const buffer = Buffer.from(await screenshotField.arrayBuffer());
       console.info("[feedback] screenshot buffer length:", buffer.length);
@@ -150,7 +195,12 @@ export async function POST(req: NextRequest) {
       const ext = screenshotField.type.split("/")[1] || "png";
       const key = `feedback-screenshots/${project.id}/${crypto.randomUUID()}.${ext}`;
       const bucket = process.env.STORAGE_BUCKET_NAME!;
-      console.info("[feedback] uploading screenshot — key:", key, "| bucket:", bucket);
+      console.info(
+        "[feedback] uploading screenshot — key:",
+        key,
+        "| bucket:",
+        bucket,
+      );
 
       await putObject(s3Client, {
         bucket,
@@ -198,7 +248,12 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  console.info("[feedback] created — id:", feedback.id, "| screenshotId:", screenshotId ?? "none");
+  console.info(
+    "[feedback] created — id:",
+    feedback.id,
+    "| screenshotId:",
+    screenshotId ?? "none",
+  );
 
   // Fire-and-forget: trigger GitHub issue creation if configured
   inngest
@@ -232,17 +287,26 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const project = await resolveProject(req.headers.get("x-api-key"));
   if (!project) {
-    return withCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    );
   }
 
   if (!validateOrigin(req.headers, project.url)) {
-    return withCors(req, NextResponse.json({ error: "Origin not allowed" }, { status: 403 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Origin not allowed" }, { status: 403 }),
+    );
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return withCors(req, NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }));
+    return withCors(
+      req,
+      NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 }),
+    );
   }
 
   const allowed = await checkRateLimit(project.apiKeyHash, "read");
@@ -289,8 +353,5 @@ export async function GET(req: NextRequest) {
     })),
   );
 
-  return withCors(
-    req,
-    NextResponse.json({ feedback }),
-  );
+  return withCors(req, NextResponse.json({ feedback }));
 }

@@ -1,4 +1,4 @@
-import type { PlanDenial } from "@/server/subscription/denial";
+import type { PlanDenial } from "@/server/auth/subscription/denial";
 
 /**
  * Extracts a structured PlanDenial from a tRPC error, if present.

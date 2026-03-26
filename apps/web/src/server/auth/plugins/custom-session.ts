@@ -3,7 +3,7 @@ import {
   type PlanLimits,
   SubscriptionPlanName,
 } from "@/server/auth/config/subscription-plans";
-import { resolveOrganizationPlan } from "@/server/subscription";
+import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { prisma } from "@workspace/db";
 import { customSession } from "better-auth/plugins";
 

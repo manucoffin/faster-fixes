@@ -1,4 +1,7 @@
-import { resolveOrganizationPlan, type ResolvedPlan } from "@/server/subscription";
+import {
+  resolveOrganizationPlan,
+  type ResolvedPlan,
+} from "@/server/auth/subscription";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure } from "../trpc";
 
