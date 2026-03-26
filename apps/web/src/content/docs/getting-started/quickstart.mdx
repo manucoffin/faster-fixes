@@ -3,70 +3,69 @@ title: Quickstart
 description: Go from zero to collecting your first feedback in under 5 minutes.
 ---
 
-## 1. Create an account
-
-Sign up at [app.faster-fixes.com](https://app.faster-fixes.com). Create your organization when prompted.
-
-## 2. Create a project
-
-Go to your dashboard and click **New Project**. Enter your project name and website URL (e.g. `https://myapp.com`). Copy the **API key** shown after creation.
-
-## 3. Install the widget
+## 1. Install the widget
 
 ```bash
 npm install @fasterfixes/react
 ```
 
-## 4. Add the provider
+## 2. Add the provider
 
 Wrap your app with `FeedbackProvider`:
 
 ```tsx title="app/layout.tsx"
 import { FeedbackProvider } from "@fasterfixes/react";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html>
       <body>
-        <FeedbackProvider apiKey="your-api-key">
-          {children}
-        </FeedbackProvider>
+        <FeedbackProvider apiKey="your-api-key">{children}</FeedbackProvider>
       </body>
     </html>
   );
 }
 ```
 
-In production, use an environment variable for the API key:
+## 3. Get your API key
 
-```tsx
-<FeedbackProvider apiKey={process.env.NEXT_PUBLIC_FASTER_FIXES_API_KEY!}>
+Go to [faster-fixes.com](https://faster-fixes.com), create a project, and copy the API key. Paste it into the `apiKey` prop above.
+
+## 4. Collect your first feedback
+
+To test the widget yourself:
+
+- In your project dashboard, go to **Reviewers** and create a reviewer (e.g. "Client - John"). Copy the review link.
+- Open your site using that link. A floating button appears — click it, then click any element on the page to annotate it. Write a comment and submit.
+- Go back to your project's **Inbox**. The feedback appears with the screenshot, page URL, browser info, and DOM selector.
+
+In practice, share the review link with your actual clients so they can leave feedback directly. See [Reviewer Tokens](/docs/concepts/reviewer-tokens) for more on managing reviewers and access.
+
+## 5. Connect your AI coding agent
+
+Create an agent token in [Integrations](https://faster-fixes.com/integrations). Then add `.mcp.json` to your project root:
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "faster-fixes": {
+      "command": "npx",
+      "args": ["-y", "@fasterfixes/mcp"],
+      "env": {
+        "FASTER_FIXES_TOKEN": "ff_agent_xxx",
+        "FASTER_FIXES_PROJECT": "proj_xxx"
+      }
+    }
+  }
+}
 ```
 
-You can also customize the widget appearance inline:
-
-```tsx
-<FeedbackProvider
-  apiKey={process.env.NEXT_PUBLIC_FASTER_FIXES_API_KEY!}
-  color="#e63946"
-  position="bottom-left"
->
-```
-
-Both props are optional. See [Configuration](/docs/widget/configuration) for all available options.
-
-## 5. Create a reviewer
-
-In your project dashboard, go to **Reviewers** and create a new reviewer (e.g. "Client - John"). Copy the review link.
-
-## 6. Collect feedback
-
-Open your site using the review link. A floating button appears. Click it, then click any element on the page to annotate it. Write a comment and submit.
-
-## 7. View in dashboard
-
-Go back to your project's **Inbox**. The feedback appears with the screenshot, page URL, browser info, and DOM selector.
+See the [MCP setup guide](/docs/mcp/setup) for other editors (Cursor, VS Code, Windsurf, Codex, Zed).
 
 ---
 
-Next steps: [Configure the widget](/docs/widget/configuration) or [set up the MCP server](/docs/mcp) for AI agent workflows.
+🎉 That's it! You can now ask your AI agent to fetch client feedback, locate the relevant code, and fix issues automatically.

@@ -1,6 +1,6 @@
 ---
 title: Reviewer Tokens
-description: How reviewer authentication works and how to manage access.
+description: How reviewer authentication works and how to share review links with clients.
 ---
 
 Reviewers are the people who leave feedback — typically clients or stakeholders. They don't need a Faster Fixes account. Access is managed through tokens.
@@ -12,6 +12,10 @@ Reviewers are the people who leave feedback — typically clients or stakeholder
 3. When the reviewer opens this link, the widget activates and attributes feedback to them
 4. The token is persisted in the reviewer's browser (`localStorage`), so subsequent visits don't require the URL parameter
 
+## Sharing the review link
+
+In your project dashboard, go to **Reviewers** → **Create Reviewer**. Give each reviewer a descriptive name (e.g. "Sarah - Product Manager"). Copy the generated review link and share it with your client.
+
 ## Security
 
 - Tokens are hashed with SHA-256 before storage — the raw token is never saved in the database
@@ -20,14 +24,15 @@ Reviewers are the people who leave feedback — typically clients or stakeholder
 
 ## Managing reviewers
 
-- **Create**: Dashboard → Reviewers → Create Reviewer. Use descriptive names (e.g. "Sarah - CEO").
-- **Revoke**: Temporarily disable a reviewer's access. Existing feedback is preserved.
-- **Restore**: Re-enable a revoked reviewer.
-- **Delete**: Permanently remove a reviewer and disassociate their feedback.
+| Action | Effect |
+| --- | --- |
+| **Revoke** | Temporarily disable a reviewer's access. Existing feedback is preserved. |
+| **Restore** | Re-enable a revoked reviewer. |
+| **Delete** | Permanently remove a reviewer and disassociate their feedback. |
 
 ## Best practices
 
-- Create one token per person for clear feedback attribution
-- Use descriptive names so you can identify who left each comment
-- Revoke tokens after the review phase ends
-- Never share a single token across multiple reviewers
+- **One token per person** — Create a separate reviewer for each person so feedback is clearly attributed.
+- **Use descriptive names** — Names like "Sarah - Product Manager" make it easy to identify who left each piece of feedback.
+- **Revoke after review** — Disable tokens after the review phase ends to prevent stale feedback.
+- **Never share a single token across multiple reviewers.**
