@@ -7,7 +7,6 @@ const nextConfig = {
 
   experimental: {
     authInterrupts: true,
-    turbopackFileSystemCacheForDev: false,
   },
 
   async headers() {
@@ -31,17 +30,6 @@ const nextConfig = {
       },
     ];
   },
-
-  // // Exclude server-only packages from bundling to prevent Turbopack errors
-  serverExternalPackages: [
-    "drizzle-kit",
-    "drizzle-orm",
-    "@libsql/client",
-    "postgres",
-    "pg-native",
-    "esbuild",
-    "esbuild-register",
-  ],
 
   images: {
     // Optimize image formats for better performance
