@@ -61,14 +61,14 @@ The color is applied as a `--ff-accent` CSS custom property on the widget root. 
 
 ### `FeedbackProvider`
 
-| Prop         | Type                  | Required | Description                                                             |
-| ------------ | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                                        |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://app.faster-fixes.com`)             |
-| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`)          |
-| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)                      |
-| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                                 |
-| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                                   |
+| Prop         | Type                  | Required | Description                                                    |
+| ------------ | --------------------- | -------- | -------------------------------------------------------------- |
+| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                               |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://faster-fixes.com`)        |
+| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`) |
+| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)             |
+| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                        |
+| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                          |
 
 ### `useFeedback` hook
 
@@ -78,8 +78,15 @@ Control the widget programmatically:
 import { useFeedback } from "@fasterfixes/react";
 
 function MyComponent() {
-  const { show, hide, isVisible, startAnnotation, feedbackItems, togglePins, showPins } =
-    useFeedback();
+  const {
+    show,
+    hide,
+    isVisible,
+    startAnnotation,
+    feedbackItems,
+    togglePins,
+    showPins,
+  } = useFeedback();
 
   return (
     <button onClick={() => (isVisible ? hide() : show())}>
@@ -89,15 +96,15 @@ function MyComponent() {
 }
 ```
 
-| Property          | Type               | Description                           |
-| ----------------- | ------------------ | ------------------------------------- |
-| `show`            | `() => void`       | Show the widget                       |
-| `hide`            | `() => void`       | Hide the widget and reset mode        |
-| `isVisible`       | `boolean`          | Whether the widget is currently shown |
-| `startAnnotation` | `() => void`       | Enter annotation mode directly        |
-| `feedbackItems`   | `FeedbackItem[]`   | All feedback items for the project    |
-| `togglePins`      | `() => void`       | Toggle pin visibility on the page     |
-| `showPins`        | `boolean`          | Whether pins are currently visible    |
+| Property          | Type             | Description                           |
+| ----------------- | ---------------- | ------------------------------------- |
+| `show`            | `() => void`     | Show the widget                       |
+| `hide`            | `() => void`     | Hide the widget and reset mode        |
+| `isVisible`       | `boolean`        | Whether the widget is currently shown |
+| `startAnnotation` | `() => void`     | Enter annotation mode directly        |
+| `feedbackItems`   | `FeedbackItem[]` | All feedback items for the project    |
+| `togglePins`      | `() => void`     | Toggle pin visibility on the page     |
+| `showPins`        | `boolean`        | Whether pins are currently visible    |
 
 ## Features
 

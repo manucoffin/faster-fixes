@@ -5,15 +5,15 @@ description: REST API for submitting and managing feedback.
 
 The Feedback API is used by the widget to submit and retrieve feedback. You can also use it directly for custom integrations.
 
-**Base URL:** `https://app.faster-fixes.com/api/v1`
+**Base URL:** `https://faster-fixes.com/api/v1`
 
 ## Authentication
 
 All requests require two headers:
 
-| Header | Description |
-|--------|-------------|
-| `x-api-key` | Your project API key |
+| Header             | Description            |
+| ------------------ | ---------------------- |
+| `x-api-key`        | Your project API key   |
 | `x-reviewer-token` | A valid reviewer token |
 
 ---
@@ -27,33 +27,33 @@ Content-Type: multipart/form-data
 
 ### Headers
 
-| Header | Required | Description |
-|--------|----------|-------------|
-| `x-api-key` | Yes | Project API key |
-| `x-reviewer-token` | Yes | Reviewer token |
+| Header             | Required | Description     |
+| ------------------ | -------- | --------------- |
+| `x-api-key`        | Yes      | Project API key |
+| `x-reviewer-token` | Yes      | Reviewer token  |
 
 ### Body (multipart form)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `data` | JSON string | Yes | Feedback data (see below) |
-| `screenshot` | File | No | PNG, JPEG, or WebP screenshot (max 5MB) |
+| Field        | Type        | Required | Description                             |
+| ------------ | ----------- | -------- | --------------------------------------- |
+| `data`       | JSON string | Yes      | Feedback data (see below)               |
+| `screenshot` | File        | No       | PNG, JPEG, or WebP screenshot (max 5MB) |
 
 ### `data` JSON fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `comment` | `string` | Yes | Feedback comment |
-| `pageUrl` | `string` | Yes | Page URL where feedback was left |
-| `selector` | `string` | No | DOM selector of the annotated element |
-| `clickX` | `number` | No | Click X coordinate |
-| `clickY` | `number` | No | Click Y coordinate |
-| `browserName` | `string` | No | Browser name |
-| `browserVersion` | `string` | No | Browser version |
-| `os` | `string` | No | Operating system |
-| `viewportWidth` | `number` | No | Viewport width |
-| `viewportHeight` | `number` | No | Viewport height |
-| `metadata` | `object` | No | Custom metadata |
+| Field            | Type     | Required | Description                           |
+| ---------------- | -------- | -------- | ------------------------------------- |
+| `comment`        | `string` | Yes      | Feedback comment                      |
+| `pageUrl`        | `string` | Yes      | Page URL where feedback was left      |
+| `selector`       | `string` | No       | DOM selector of the annotated element |
+| `clickX`         | `number` | No       | Click X coordinate                    |
+| `clickY`         | `number` | No       | Click Y coordinate                    |
+| `browserName`    | `string` | No       | Browser name                          |
+| `browserVersion` | `string` | No       | Browser version                       |
+| `os`             | `string` | No       | Operating system                      |
+| `viewportWidth`  | `number` | No       | Viewport width                        |
+| `viewportHeight` | `number` | No       | Viewport height                       |
+| `metadata`       | `object` | No       | Custom metadata                       |
 
 ### Response
 
@@ -81,9 +81,9 @@ Returns all feedback for the specified page URL.
 
 ### Query parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `url` | `string` | Yes | Page URL to filter by |
+| Parameter | Type     | Required | Description           |
+| --------- | -------- | -------- | --------------------- |
+| `url`     | `string` | Yes      | Page URL to filter by |
 
 ---
 
@@ -96,9 +96,9 @@ Content-Type: application/json
 
 ### Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `comment` | `string` | Yes | Updated comment |
+| Field     | Type     | Required | Description     |
+| --------- | -------- | -------- | --------------- |
+| `comment` | `string` | Yes      | Updated comment |
 
 ---
 
@@ -114,7 +114,7 @@ Permanently deletes the feedback item.
 
 ## Rate limits
 
-| Action | Limit |
-|--------|-------|
-| Submit feedback | 100 requests/hour |
-| Read feedback | 1,000 requests/hour |
+| Action          | Limit               |
+| --------------- | ------------------- |
+| Submit feedback | 100 requests/hour   |
+| Read feedback   | 1,000 requests/hour |

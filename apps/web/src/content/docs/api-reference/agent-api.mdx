@@ -5,7 +5,7 @@ description: REST API for AI agents to list feedback and update status.
 
 The Agent API is designed for programmatic access by AI coding agents. It's the same API used by the [MCP server](/docs/mcp).
 
-**Base URL:** `https://app.faster-fixes.com/api/v1/agent`
+**Base URL:** `https://faster-fixes.com/api/v1/agent`
 
 ## Authentication
 
@@ -27,12 +27,12 @@ GET /feedbacks?project=proj_xxx
 
 ### Query parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `project` | `string` | Yes | Project ID (prefix: `proj_`) |
-| `status` | `string` | No | Filter: `new`, `in_progress`, `resolved`, `closed` |
-| `page_url` | `string` | No | Filter by page URL |
-| `format` | `string` | No | `json` (default) or `markdown` |
+| Parameter  | Type     | Required | Description                                        |
+| ---------- | -------- | -------- | -------------------------------------------------- |
+| `project`  | `string` | Yes      | Project ID (prefix: `proj_`)                       |
+| `status`   | `string` | No       | Filter: `new`, `in_progress`, `resolved`, `closed` |
+| `page_url` | `string` | No       | Filter by page URL                                 |
+| `format`   | `string` | No       | `json` (default) or `markdown`                     |
 
 ### JSON response
 
@@ -85,9 +85,9 @@ Content-Type: application/json
 
 ### Parameters
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `status` | `string` | Yes | `new`, `in_progress`, `resolved`, or `closed` |
+| Field    | Type     | Required | Description                                   |
+| -------- | -------- | -------- | --------------------------------------------- |
+| `status` | `string` | Yes      | `new`, `in_progress`, `resolved`, or `closed` |
 
 ### Response
 
@@ -105,14 +105,14 @@ If a GitHub issue is linked, the status change is automatically synced.
 
 ## Rate limits
 
-| Action | Limit |
-|--------|-------|
+| Action         | Limit             |
+| -------------- | ----------------- |
 | List feedbacks | 200 requests/hour |
-| Update status | 50 requests/hour |
+| Update status  | 50 requests/hour  |
 
 ## Required scopes
 
-| Endpoint | Scope |
-|----------|-------|
-| `GET /feedbacks` | `feedbacks:read` |
+| Endpoint                     | Scope                     |
+| ---------------------------- | ------------------------- |
+| `GET /feedbacks`             | `feedbacks:read`          |
 | `POST /feedbacks/:id/status` | `feedbacks:update_status` |
