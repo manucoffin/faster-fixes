@@ -28,7 +28,8 @@ export function HeroSection() {
             </Badge>
 
             <h1 className="max-w-xl text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-              Client feedback that fixes itself.
+              Client feedback that{" "}
+              <span className="bg-primary/40 px-1">fixes itself.</span>
             </h1>
 
             <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
