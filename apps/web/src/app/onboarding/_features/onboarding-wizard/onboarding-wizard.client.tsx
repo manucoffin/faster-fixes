@@ -2,61 +2,12 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
-import { cn } from "@workspace/ui/lib/utils";
-import { Check } from "lucide-react";
 import * as React from "react";
+import { NextStepsStep } from "../complete-onboarding/next-steps-step.client";
+import { ProjectNameStep } from "../create-project/project-name-step.client";
+import { WebsiteUrlStep } from "../create-project/website-url-step.client";
 import { InstallSnippetStep } from "./install-snippet-step.client";
-import { NextStepsStep } from "./next-steps-step.client";
-import { ProjectNameStep } from "./project-name-step.client";
-import { WebsiteUrlStep } from "./website-url-step.client";
-
-const STEPPER_LABELS = ["Project", "Website", "Install"] as const;
-
-function StepIndicator({
-  step,
-  currentStep,
-}: {
-  step: number;
-  currentStep: number;
-}) {
-  const isCompleted = currentStep > step;
-  const isCurrent = currentStep === step;
-
-  return (
-    <div className="flex items-center gap-2">
-      <div
-        className={cn(
-          "flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
-          isCompleted && "bg-primary text-primary-foreground",
-          isCurrent &&
-            "bg-primary text-primary-foreground ring-primary/20 ring-4",
-          !isCompleted && !isCurrent && "bg-muted text-muted-foreground",
-        )}
-      >
-        {isCompleted ? <Check className="size-4" /> : step + 1}
-      </div>
-      <span
-        className={cn(
-          "hidden text-sm sm:inline",
-          isCurrent ? "text-foreground font-medium" : "text-muted-foreground",
-        )}
-      >
-        {STEPPER_LABELS[step]}
-      </span>
-    </div>
-  );
-}
-
-function StepConnector({ completed }: { completed: boolean }) {
-  return (
-    <div
-      className={cn(
-        "h-px flex-1 transition-colors",
-        completed ? "bg-primary" : "bg-border",
-      )}
-    />
-  );
-}
+import { Stepper } from "./step-indicator.client";
 
 export function OnboardingWizard() {
   const trpc = useTRPC();
@@ -103,18 +54,7 @@ export function OnboardingWizard() {
 
   return (
     <div className="flex flex-col gap-8">
-      {currentStep < 3 && (
-        <div className="flex items-center gap-3">
-          {STEPPER_LABELS.map((_, i) => (
-            <React.Fragment key={i}>
-              <StepIndicator step={i} currentStep={currentStep} />
-              {i < STEPPER_LABELS.length - 1 && (
-                <StepConnector completed={currentStep > i} />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+      {currentStep < 3 && <Stepper currentStep={currentStep} />}
 
       <div className="bg-card rounded-xl border p-6">
         {currentStep === 0 && (
@@ -137,7 +77,10 @@ export function OnboardingWizard() {
         )}
 
         {currentStep === 2 && apiKey && (
-          <InstallSnippetStep apiKey={apiKey} onNext={() => setCurrentStep(3)} />
+          <InstallSnippetStep
+            apiKey={apiKey}
+            onNext={() => setCurrentStep(3)}
+          />
         )}
 
         {currentStep === 3 && <NextStepsStep onFinish={handleFinish} />}

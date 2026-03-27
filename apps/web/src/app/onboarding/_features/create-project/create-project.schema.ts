@@ -5,6 +5,6 @@ export const CreateOnboardingProjectSchema = z.object({
   url: z.url("URL must be valid (e.g. https://client.com)"),
 });
 
-export type CreateOnboardingProjectSchemaType = z.infer<
+export type CreateOnboardingProjectInput = z.infer<
   typeof CreateOnboardingProjectSchema
 >;

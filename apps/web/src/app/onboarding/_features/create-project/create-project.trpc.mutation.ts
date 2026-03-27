@@ -1,20 +1,10 @@
 "use server";
 
+import { generateApiKey } from "@/app/_features/project/generate-api-key";
+import { generatePublicId } from "@/app/_features/project/generate-public-id";
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
-import crypto from "crypto";
-import { CreateOnboardingProjectSchema } from "./complete-onboarding.schema";
-
-function generateApiKey() {
-  const raw = "ff_" + crypto.randomBytes(32).toString("hex");
-  const hash = crypto.createHash("sha256").update(raw).digest("hex");
-  const lastFour = raw.slice(-4);
-  return { raw, hash, lastFour };
-}
-
-function generatePublicId() {
-  return "proj_" + crypto.randomBytes(12).toString("hex");
-}
+import { TRPCError, inferProcedureOutput } from "@trpc/server";
+import { CreateOnboardingProjectSchema } from "./create-project.schema";
 
 export const createOnboardingProject = protectedProcedure
   .input(CreateOnboardingProjectSchema)
@@ -68,15 +58,6 @@ export const createOnboardingProject = protectedProcedure
     };
   });
 
-export const completeOnboarding = protectedProcedure.mutation(
-  async ({ ctx }) => {
-    const { prisma, session } = ctx;
-
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { onboardingCompleted: true },
-    });
-
-    return { success: true };
-  },
-);
+export type CreateOnboardingProjectOutput = inferProcedureOutput<
+  typeof createOnboardingProject
+>;
