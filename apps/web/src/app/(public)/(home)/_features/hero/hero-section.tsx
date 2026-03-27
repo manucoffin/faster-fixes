@@ -1,17 +1,13 @@
 import { signupUrl } from "@/app/_constants/routes";
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
-import { CopyCommand } from "./copy-command.client";
-import { HeroDotBackground } from "./hero-dot-background.client";
+import { CopyCommand } from "../copy-command.client";
+import { HeroDotBackground } from "../hero-dot-background.client";
+import { HeroFlowAnimation } from "./hero-flow-animation.client";
 
-const objectionRemovers = [
-  "2-minute setup",
-  "No credit card required",
-  "Open source",
-];
+const objectionRemovers = ["2-minute setup", "No credit card required"];
 
 export function HeroSection() {
   return (
@@ -20,17 +16,8 @@ export function HeroSection() {
         <div className="container mx-auto grid grid-cols-1 items-center gap-12 px-4 lg:grid-cols-2 lg:gap-16">
           {/* Left column: copy */}
           <div className="flex flex-col items-start">
-            <Badge
-              variant="outline"
-              className="mb-6 inline-flex items-center gap-2 px-3 py-1 text-sm"
-            >
-              <span className="bg-primary size-1.5 rounded-full" />
-              The open source feedback pipeline
-            </Badge>
-
             <h1 className="max-w-xl text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-              Client feedback that{" "}
-              <span className="bg-primary/40 px-1">fixes itself.</span>
+              Client feedback that fixes itself.
             </h1>
 
             <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
@@ -64,9 +51,12 @@ export function HeroSection() {
             </ul>
           </div>
 
-          {/* Right column: product demo placeholder */}
-          <div className="bg-muted/30 border-border flex aspect-[4/3] w-full items-center justify-center rounded-xl border">
-            <p className="text-muted-foreground text-sm">Product demo</p>
+          {/* Right column: flow animation */}
+          <div className="flex flex-col gap-8">
+            <span className="text-muted-foreground font-mono text-sm">
+              {"// The open source feedback pipeline:"}
+            </span>
+            <HeroFlowAnimation />
           </div>
         </div>
       </section>
