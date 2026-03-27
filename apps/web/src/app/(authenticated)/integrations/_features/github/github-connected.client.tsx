@@ -65,7 +65,7 @@ export function GitHubConnected({ installation }: GitHubConnectedProps) {
             <Badge variant="secondary">{installation.accountType}</Badge>
           </div>
           <span className="text-muted-foreground text-sm">
-            Connected by {installation.installedByName} on{" "}
+            Connected{installation.installedByName ? ` by ${installation.installedByName}` : ""} on{" "}
             {new Date(installation.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",

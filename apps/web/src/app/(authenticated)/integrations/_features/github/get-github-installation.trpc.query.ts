@@ -50,7 +50,7 @@ export const getGitHubInstallation = protectedProcedure.query(
       accountLogin: installation.accountLogin,
       accountType: installation.accountType,
       accountAvatarUrl: installation.accountAvatarUrl,
-      installedByName: installation.installedBy.user.name,
+      installedByName: installation.installedBy?.user.name ?? null,
       createdAt: installation.createdAt,
     };
   },

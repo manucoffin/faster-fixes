@@ -11,8 +11,8 @@ model GitHubInstallation {
     accountType      String
     accountAvatarUrl String?
 
-    installedById String
-    installedBy   Member @relation(fields: [installedById], references: [id], onDelete: Restrict)
+    installedById String?
+    installedBy   Member? @relation(fields: [installedById], references: [id], onDelete: SetNull)
 
     projectLinks ProjectGitHubLink[]
 
