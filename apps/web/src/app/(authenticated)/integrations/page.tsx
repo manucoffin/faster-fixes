@@ -18,7 +18,17 @@ export default function IntegrationsPage() {
 
         <DashboardSection
           title="MCP Server"
-          description="API tokens for authenticating the Faster Fixes MCP server."
+          description={
+            <>
+              API tokens for authenticating the Faster Fixes MCP server.{" "}
+              <a
+                href="/docs/mcp/setup"
+                className="text-primary underline underline-offset-4 hover:text-primary/80"
+              >
+                Setup guide
+              </a>
+            </>
+          }
           cardTitle="MCP Server"
           cardClassName="lg:max-w-lg"
         >
