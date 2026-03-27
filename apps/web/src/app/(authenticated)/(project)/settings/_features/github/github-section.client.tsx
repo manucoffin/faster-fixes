@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ type GitHubSectionProps = {
 export function GitHubSection({ projectId }: GitHubSectionProps) {
   const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
+  const { canAccess } = usePlanGate();
 
   const installationQuery = useQuery(
     trpc.authenticated.integrations.github.getInstallation.queryOptions(
@@ -38,6 +40,19 @@ export function GitHubSection({ projectId }: GitHubSectionProps) {
   const installation = installationQuery.data;
   const link = linkQuery.data;
   const repos = reposQuery.data ?? [];
+
+  if (!canAccess("githubIntegration")) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-muted-foreground text-sm">
+          GitHub integration is available on paid plans.
+        </p>
+        <Button className="w-fit" asChild>
+          <a href="/account/billing">Upgrade your plan</a>
+        </Button>
+      </div>
+    );
+  }
 
   if (!installation) {
     return (
