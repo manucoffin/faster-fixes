@@ -1,7 +1,7 @@
-import { mailer } from "@/lib/mailer/client";
-import { SENDER_EMAIL, TEST_RECIPIENT_EMAIL } from "@/lib/mailer/constants";
-import { OrganizationInvitation } from "@/lib/mailer/templates/organization-invitation";
 import { ORGANIZATION_ROLES } from "@/app/_features/organization/_utils/organization-roles";
+import { mailer } from "@/lib/mailer/client";
+import { SENDER_EMAIL } from "@/lib/mailer/constants";
+import { OrganizationInvitation } from "@/lib/mailer/templates/organization-invitation";
 import { getAppUrl } from "@/utils/url/get-app-url";
 import { render } from "@react-email/components";
 import { organization } from "better-auth/plugins";
@@ -23,10 +23,6 @@ export const organizationPlugin = organization({
       const { email, organization: org, inviter } = data;
       const normalizedEmail = email.toLowerCase().trim();
       const from = SENDER_EMAIL;
-      const to =
-        process.env.NODE_ENV === "production"
-          ? normalizedEmail
-          : TEST_RECIPIENT_EMAIL;
       const inviterName = inviter.user.name || inviter.user.email;
       const role =
         ORGANIZATION_ROLES[data.role as keyof typeof ORGANIZATION_ROLES] ??
@@ -44,7 +40,7 @@ export const organizationPlugin = organization({
 
       await mailer.emails.send({
         from,
-        to,
+        to: normalizedEmail,
         subject: `Invitation to join ${org.name}`,
         body,
       });
