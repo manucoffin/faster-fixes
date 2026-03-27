@@ -140,6 +140,16 @@ Add to `~/.config/zed/settings.json`:
 
 Note: Zed uses `"context_servers"` as the key, and the config goes directly in your main settings file.
 
+## Agent Skill (optional)
+
+For a one-command workflow, install the **fix-feedback** skill. It teaches your agent the full loop: fetch → fix → resolve.
+
+```bash
+npx skills add manucoffin/faster-fixes/packages/skills/fix-feedback
+```
+
+Then just say `fix feedback` and your agent handles the rest. Works with Claude Code, Cursor, Windsurf, and 40+ other agents via [skills.sh](https://skills.sh).
+
 ## Usage
 
 After configuring, ask your agent:
