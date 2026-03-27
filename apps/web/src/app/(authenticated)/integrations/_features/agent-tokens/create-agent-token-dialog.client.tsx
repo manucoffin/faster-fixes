@@ -43,11 +43,6 @@ export function CreateAgentTokenDialog() {
     trpc.authenticated.integrations.agentToken.create.mutationOptions({
       onSuccess: (result) => {
         setRawToken(result.rawToken);
-        queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.integrations.agentToken.list.queryKey({
-            organizationId: activeOrg?.id ?? "",
-          }),
-        });
       },
       onError: (error) => {
         toast.error(error.message);
@@ -73,6 +68,14 @@ export function CreateAgentTokenDialog() {
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
+      // Invalidate on close so the list refreshes only after the user has copied the token
+      if (rawToken) {
+        queryClient.invalidateQueries({
+          queryKey: trpc.authenticated.integrations.agentToken.list.queryKey({
+            organizationId: activeOrg?.id ?? "",
+          }),
+        });
+      }
       setName("");
       setScopes(["feedbacks:read", "feedbacks:update_status"]);
       setRawToken(null);
