@@ -1,8 +1,8 @@
 "use server";
 
+import { generateApiKey } from "@/app/_features/project/generate-api-key";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import crypto from "crypto";
 import z from "zod";
 
 export const regenerateApiKey = protectedProcedure
@@ -30,9 +30,7 @@ export const regenerateApiKey = protectedProcedure
       throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
     }
 
-    const raw = "ff_" + crypto.randomBytes(32).toString("hex");
-    const hash = crypto.createHash("sha256").update(raw).digest("hex");
-    const lastFour = raw.slice(-4);
+    const { raw, hash, lastFour } = generateApiKey();
 
     await prisma.project.update({
       where: { id: input.projectId },
@@ -42,4 +40,6 @@ export const regenerateApiKey = protectedProcedure
     return { rawApiKey: raw };
   });
 
-export type RegenerateApiKeyOutput = inferProcedureOutput<typeof regenerateApiKey>;
+export type RegenerateApiKeyOutput = inferProcedureOutput<
+  typeof regenerateApiKey
+>;

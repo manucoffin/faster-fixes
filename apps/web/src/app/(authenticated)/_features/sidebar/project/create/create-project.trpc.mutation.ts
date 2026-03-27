@@ -1,21 +1,11 @@
 "use server";
 
+import { generateApiKey } from "@/app/_features/project/generate-api-key";
+import { generatePublicId } from "@/app/_features/project/generate-public-id";
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import crypto from "crypto";
 import { CreateProjectSchema } from "./create-project.schema";
-
-function generateApiKey(): { raw: string; hash: string; lastFour: string } {
-  const raw = "ff_" + crypto.randomBytes(32).toString("hex");
-  const hash = crypto.createHash("sha256").update(raw).digest("hex");
-  const lastFour = raw.slice(-4);
-  return { raw, hash, lastFour };
-}
-
-function generatePublicId(): string {
-  return "proj_" + crypto.randomBytes(12).toString("hex");
-}
 
 export const createProject = planAwareProcedure
   .use(enforceLimit("projects"))
