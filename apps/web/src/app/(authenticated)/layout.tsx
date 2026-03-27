@@ -1,7 +1,8 @@
-import { loginUrl } from "@/app/_constants/routes";
+import { loginUrl, onboardingUrl } from "@/app/_constants/routes";
 import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
+import { prisma } from "@workspace/db";
 import {
   SidebarInset,
   SidebarProvider,
@@ -31,6 +32,16 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
 
   if (!session) {
     redirect(loginUrl);
+  }
+
+  // Direct DB check bypasses better-auth's 5-minute cookie cache
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { onboardingCompleted: true },
+  });
+
+  if (!user?.onboardingCompleted) {
+    redirect(onboardingUrl);
   }
 
   return (
