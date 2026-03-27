@@ -48,3 +48,6 @@ progress.md
 task_plan.md
 temp/
 specs/
+
+# Skill eval workspaces
+packages/skills/*-workspace/
