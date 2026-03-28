@@ -20,6 +20,8 @@ model Subscription {
     canceledAt           DateTime?
     endedAt              DateTime?
     seats                Int?
+    billingInterval      String?
+    stripeScheduleId     String?
 
     // Optional organizationId, in case someday we want to link subscription directly to a user.
     // We keep referenceId anyways as main source of truth
