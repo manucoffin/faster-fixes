@@ -118,3 +118,12 @@ export function isSafeForDebugging(): boolean {
   const env = getEnvironmentInfo();
   return env.isDevelopment || env.isPreview || env.isTest;
 }
+
+/**
+ * Check if this is the official cloud-hosted instance.
+ * Self-hosted instances leave NEXT_PUBLIC_IS_CLOUD unset or "false",
+ * which disables marketing pages (home, pricing, blog, docs, legal).
+ */
+export function isCloud(): boolean {
+  return process.env.NEXT_PUBLIC_IS_CLOUD === "true";
+}

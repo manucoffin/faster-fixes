@@ -1,6 +1,7 @@
 import { loginUrl, onboardingUrl } from "@/app/_constants/routes";
 import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
 import { auth } from "@/server/auth";
+import { isCloud } from "@/utils/environment/env";
 import { LayoutParams } from "@/types/next";
 import { prisma } from "@workspace/db";
 import {
@@ -63,7 +64,7 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <FeedbackButton />
+                  {isCloud() && <FeedbackButton />}
                   <ThemeToggle variant="ghost" size="icon-sm" />
                 </div>
               </div>

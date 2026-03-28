@@ -4,6 +4,7 @@ import {
   SubscriptionPlanName,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
+import { isCloud } from "@/utils/environment/env";
 import type { PrismaClient, Subscription } from "@workspace/db/generated/prisma/client";
 
 export type ResolvedPlan = {
@@ -23,6 +24,16 @@ export async function resolveOrganizationPlan(
   organizationId: string,
   prisma: PrismaClient,
 ): Promise<ResolvedPlan> {
+  // Self-hosted instances get full access without billing
+  if (!isCloud()) {
+    return {
+      planName: SubscriptionPlanName.Agency,
+      limits: PLAN_LIMITS[SubscriptionPlanName.Agency],
+      status: SubscriptionStatus.Active,
+      subscription: null,
+      isFreePlan: false,
+    };
+  }
   const subscription = await prisma.subscription.findFirst({
     where: { referenceId: organizationId },
     orderBy: { createdAt: "desc" },

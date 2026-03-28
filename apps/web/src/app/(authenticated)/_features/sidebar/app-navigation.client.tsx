@@ -1,6 +1,7 @@
 "use client";
 
 import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { isCloud } from "@/utils/environment/env";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -63,25 +64,27 @@ export function AppNavigation() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname.startsWith("/account/billing")}
-              tooltip={isFreePlan ? "Upgrade" : "Billing"}
-            >
-              <Link
-                href="/account/billing"
-                onClick={() => setOpenMobile(false)}
+          {isCloud() && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/account/billing")}
+                tooltip={isFreePlan ? "Upgrade" : "Billing"}
               >
-                {isFreePlan ? (
-                  <Sparkles className="text-amber-500" />
-                ) : (
-                  <CreditCard />
-                )}
-                <span>{isFreePlan ? "Upgrade" : "Billing"}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+                <Link
+                  href="/account/billing"
+                  onClick={() => setOpenMobile(false)}
+                >
+                  {isFreePlan ? (
+                    <Sparkles className="text-amber-500" />
+                  ) : (
+                    <CreditCard />
+                  )}
+                  <span>{isFreePlan ? "Upgrade" : "Billing"}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarGroup>
     </>
