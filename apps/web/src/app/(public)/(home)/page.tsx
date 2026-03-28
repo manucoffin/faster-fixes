@@ -10,8 +10,7 @@ import { FaqSection } from "./_features/faq-section";
 import { FinalCtaSection } from "./_features/final-cta-section";
 import { HeroSection } from "./_features/hero/hero-section";
 import { HowItWorksSection } from "./_features/how-it-works/how-it-works-section";
-import { ProblemSection } from "./_features/problem-section";
-import { ReframeSection } from "./_features/reframe-section";
+import { ProblemSection } from "./_features/problem/problem-section";
 import { StackSection } from "./_features/stack-section";
 
 export const metadata: Metadata = {
@@ -28,7 +27,6 @@ export default function Page() {
       <HeroSection />
       <HowItWorksSection />
       <ProblemSection />
-      <ReframeSection />
       <BeforeAfterSection />
       <AgentWorkflowSection />
       <StackSection />
