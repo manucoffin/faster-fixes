@@ -11,6 +11,7 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { DM_Sans, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
@@ -99,6 +100,13 @@ export default function RootLayout({
             </TRPCProvider>
           </ConsentProvider>
         </ThemeProvider>
+
+        <Script
+          defer
+          src="https://umami-analytics-swart.vercel.app/script.js"
+          data-website-id="8308ff4b-0aab-4cee-9042-359d0217a5e8"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
