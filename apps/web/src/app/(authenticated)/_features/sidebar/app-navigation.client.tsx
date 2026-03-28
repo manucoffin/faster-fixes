@@ -67,7 +67,7 @@ export function AppNavigation() {
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/account/billing")}
-              tooltip={isFreePlan ? "Get Pro" : "Billing"}
+              tooltip={isFreePlan ? "Upgrade" : "Billing"}
             >
               <Link
                 href="/account/billing"
@@ -78,7 +78,7 @@ export function AppNavigation() {
                 ) : (
                   <CreditCard />
                 )}
-                <span>{isFreePlan ? "Get Pro" : "Billing"}</span>
+                <span>{isFreePlan ? "Upgrade" : "Billing"}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

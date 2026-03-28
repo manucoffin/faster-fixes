@@ -1,12 +1,12 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { useQuery } from "@tanstack/react-query";
 import {
   SUBSCRIPTION_PLANS,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import { useQuery } from "@tanstack/react-query";
 import { Empty, EmptyHeader, EmptyTitle } from "@workspace/ui/components/empty";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
@@ -23,18 +23,22 @@ export function BillingDetailsCard({
 }: BillingDetailsCardProps) {
   const trpc = useTRPC();
 
-  const getStripePricesQuery = useQuery(trpc.subscription.getPlansPrices.queryOptions({
-    planNames: [planName],
-  }));
+  const getStripePricesQuery = useQuery(
+    trpc.subscription.getPlansPrices.queryOptions({
+      planNames: [planName],
+    }),
+  );
 
-  const getStripeSubscriptionQuery = useQuery(trpc.subscription.getStripeSubscription.queryOptions(
-    {
-      stripeSubscriptionId: stripeSubscriptionId!,
-    },
-    {
-      enabled: !!stripeSubscriptionId,
-    },
-  ));
+  const getStripeSubscriptionQuery = useQuery(
+    trpc.subscription.getStripeSubscription.queryOptions(
+      {
+        stripeSubscriptionId: stripeSubscriptionId!,
+      },
+      {
+        enabled: !!stripeSubscriptionId,
+      },
+    ),
+  );
 
   // Determine billing period based on current price ID
   const determineBillingPeriod = () => {
@@ -94,7 +98,7 @@ export function BillingDetailsCard({
       }
 
       // Calculate price in euros (Stripe stores in cents)
-      const priceValue = ((price.unit_amount ?? 0) / 100)
+      const priceValue = (price.unit_amount ?? 0) / 100;
       const priceHT = priceValue.toFixed(2);
       const priceTTC = (priceValue * 1.2).toFixed(2);
       const billingLabel =
@@ -115,7 +119,7 @@ export function BillingDetailsCard({
             </div>
 
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">TVA (20%)</span>
+              <span className="text-muted-foreground text-sm">VAT (20%)</span>
               <span className="text-sm font-medium">
                 {(priceValue * 0.2).toFixed(2)} {price.currency?.toUpperCase()}
               </span>
