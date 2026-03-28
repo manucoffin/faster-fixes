@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Core client library for the FasterFixes feedback widget. Handles API communication, feedback submission, and reviewer authentication.",
   "type": "module",
   "license": "MIT",
