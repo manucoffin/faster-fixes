@@ -1,6 +1,9 @@
 import { signupUrl } from "@/app/_constants/routes";
+import { auth } from "@/server/auth";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoginForm } from "./_features/login-form/login-form.client";
 
@@ -9,7 +12,14 @@ export const metadata: Metadata = {
   description: "Sign in to your account.",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session) {
+    redirect("/inbox");
+  }
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
