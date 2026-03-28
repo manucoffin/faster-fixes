@@ -5,8 +5,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import { Button } from "@workspace/ui/components/button";
+import type { Route } from "next";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
-const faqs = [
+export const faqs: {
+  question: string;
+  answer: string;
+  footer?: ReactNode;
+}[] = [
   {
     question: "How does the widget work?",
     answer:
@@ -35,11 +43,16 @@ const faqs = [
   {
     question: "Is this just another annotation tool?",
     answer:
-      "Annotation tools improve how clients give feedback. FasterFixes improves what arrives on the developer's side. The output is a structured markdown report with full technical context — not a pin on a screenshot. It is designed to be consumed by AI coding agents, not just read by humans.",
+      "Annotation tools make it easier for clients to report bugs — a human still has to read, interpret, and relay that to an AI. FasterFixes removes that step. Feedback is captured as structured technical data and delivered via MCP to an AI coding agent that reads and acts on it directly. The loop is: client reports, agent fixes.",
   },
   {
     question: "How much does it cost?",
-    answer: `The Free plan covers 1 project with up to 50 feedback items — ideal for testing or solo use. The Pro plan is $${PLAN_PRICES["pro"]}/month for up to 5 projects, unlimited feedback, and 5 team members — designed for freelancers and small teams managing multiple client projects. The Agency plan is $${PLAN_PRICES["agency"]}/month with unlimited projects, feedback, and team members — built for agencies with many concurrent projects and larger teams.`,
+    answer: `FasterFixes offers a free plan for solo use, a Pro plan at $${PLAN_PRICES["pro"]}/month for freelancers and small teams, and an Agency plan at $${PLAN_PRICES["agency"]}/month for agencies managing many client projects.`,
+    footer: (
+      <Button variant="outline" size="sm" className="mt-4" asChild>
+        <Link href={"/pricing" as Route}>See pricing</Link>
+      </Button>
+    ),
   },
   {
     question: "Which frameworks are supported?",
@@ -62,11 +75,12 @@ export function FaqSection() {
           <Accordion type="single" collapsible>
             {faqs.map((faq) => (
               <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                <AccordionTrigger className="text-lg md:text-xl">{faq.question}</AccordionTrigger>
                 <AccordionContent>
                   <p className="text-muted-foreground text-lg md:text-xl">
                     {faq.answer}
                   </p>
+                  {faq.footer}
                 </AccordionContent>
               </AccordionItem>
             ))}

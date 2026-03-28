@@ -2,6 +2,7 @@ import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+import { CopyCommand } from "./copy-command.client";
 
 export function FinalCtaSection() {
   return (
@@ -9,13 +10,13 @@ export function FinalCtaSection() {
       <div className="container mx-auto px-4">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
-            Every feedback message you decode manually is time you could have
-            shipped
+            Let your coding agent handle client feedback.
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Set up FasterFixes in under 5 minutes. One npm install. Free plan
-            included.
+            Free plan. Two-minute setup. One npm install.
           </p>
+
+          <CopyCommand command="npm install @fasterfixes/react" />
 
           <div className="mt-8">
             <Button asChild size="lg">

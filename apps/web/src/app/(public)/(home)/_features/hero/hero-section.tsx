@@ -4,7 +4,7 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { CopyCommand } from "../copy-command.client";
-import { HeroDotBackground } from "../hero-dot-background.client";
+import { HeroDotBackground } from "./hero-dot-background.client";
 import { HeroFlowAnimation } from "./hero-flow-animation.client";
 
 const objectionRemovers = ["2-minute setup", "No credit card required"];
