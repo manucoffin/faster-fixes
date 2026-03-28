@@ -6,10 +6,10 @@ import Link from "next/link";
 import { GitHubStarsButton } from "../../github/github-stars-button.client";
 import { AppLogo } from "../logo/app-logo";
 
-const productLinks = [
-  { text: "Documentation", href: "/docs" as Route },
-  { text: "Pricing", href: "/pricing" as Route },
-  { text: "Blog", href: "/blog" as Route },
+const productLinks: { text: string; href: string; external?: boolean }[] = [
+  { text: "Documentation", href: "/docs" },
+  { text: "Pricing", href: "/pricing" },
+  { text: "Support", href: "mailto:support@faster-fixes.com", external: true },
 ];
 
 const legalLinks = [
@@ -43,14 +43,23 @@ export function Footer() {
             <div className="text-center sm:text-left">
               <p className="text-lg font-semibold">Product</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {productLinks.map(({ text, href }) => (
+                {productLinks.map(({ text, href, external }) => (
                   <li key={text}>
-                    <Link
-                      href={href}
-                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
-                    >
-                      <AnimatedText>{text}</AnimatedText>
-                    </Link>
+                    {external ? (
+                      <a
+                        href={href}
+                        className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                      >
+                        <AnimatedText>{text}</AnimatedText>
+                      </a>
+                    ) : (
+                      <Link
+                        href={href as Route}
+                        className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                      >
+                        <AnimatedText>{text}</AnimatedText>
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
