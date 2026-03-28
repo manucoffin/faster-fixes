@@ -2,6 +2,7 @@
   "name": "@workspace/db",
   "version": "0.0.0",
   "scripts": {
+    "build": "prisma generate",
     "db:gen": "prisma generate",
     "db:seed": "dotenv -e .env.local -- npx prisma db seed",
     "db:pull": "dotenv -e .env.local -- npx prisma db pull",
