@@ -19,7 +19,7 @@ const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 const navLinks = [
   { href: "/docs", label: "Documentation" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/blog", label: "Blog" },
+  // { href: "/blog", label: "Blog" },
 ];
 
 export async function Header() {
@@ -41,7 +41,7 @@ export async function Header() {
                 <NavigationMenuItem key={link.href}>
                   <NavigationMenuLink
                     asChild
-                    className="hover:bg-transparent focus:bg-transparent data-[active=true]:bg-transparent data-[active=true]:hover:bg-transparent data-[active=true]:focus:bg-transparent rounded-none p-0"
+                    className="rounded-none p-0 hover:bg-transparent focus:bg-transparent data-[active=true]:bg-transparent data-[active=true]:hover:bg-transparent data-[active=true]:focus:bg-transparent"
                   >
                     <Link href={link.href as never} className="text-sm">
                       <AnimatedText>{link.label}</AnimatedText>
