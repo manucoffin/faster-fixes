@@ -54,6 +54,12 @@ export type FeatureGate = {
   [K in keyof PlanLimits]: PlanLimits[K] extends boolean ? K : never;
 }[keyof PlanLimits];
 
+export const PLAN_PRICES = {
+  [SubscriptionPlanName.Free]: 0,
+  [SubscriptionPlanName.Pro]: 20,
+  [SubscriptionPlanName.Agency]: 99,
+} as const;
+
 export const PLAN_DESCRIPTIONS = {
   [SubscriptionPlanName.Free]:
     "Get started with one project. Ideal for testing and solo use.",
@@ -151,7 +157,7 @@ export const PLAN_FEATURES = {
     },
     {
       id: "priority_support",
-      label: "Priority support via email and chat",
+      label: "Priority email support",
       highlighted: false,
     },
   ],

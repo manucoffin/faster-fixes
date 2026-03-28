@@ -1,3 +1,4 @@
+import { PLAN_PRICES } from "@/server/auth/config/subscription-plans";
 import {
   Accordion,
   AccordionContent,
@@ -38,8 +39,7 @@ const faqs = [
   },
   {
     question: "How much does it cost?",
-    answer:
-      "The Free plan covers 1 project with up to 50 feedback items — ideal for testing or solo use. The Pro plan is $20/month for up to 5 projects, unlimited feedback, and 5 team members — designed for freelancers and small teams managing multiple client projects. The Agency plan is $90/month with unlimited projects, feedback, and team members — built for agencies with many concurrent projects and larger teams.",
+    answer: `The Free plan covers 1 project with up to 50 feedback items — ideal for testing or solo use. The Pro plan is $${PLAN_PRICES["pro"]}/month for up to 5 projects, unlimited feedback, and 5 team members — designed for freelancers and small teams managing multiple client projects. The Agency plan is $${PLAN_PRICES["agency"]}/month with unlimited projects, feedback, and team members — built for agencies with many concurrent projects and larger teams.`,
   },
   {
     question: "Which frameworks are supported?",
@@ -64,7 +64,9 @@ export function FaqSection() {
               <AccordionItem key={faq.question} value={faq.question}>
                 <AccordionTrigger>{faq.question}</AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">{faq.answer}</p>
+                  <p className="text-muted-foreground text-lg md:text-xl">
+                    {faq.answer}
+                  </p>
                 </AccordionContent>
               </AccordionItem>
             ))}
