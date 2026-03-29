@@ -37,14 +37,9 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
       },
     },
     update: {
-      after: async ({ data, oldData }) => {
-        const userData = data as { id: string; email: string };
-        const oldUserData = oldData as { email?: string } | undefined;
-        if (oldUserData?.email !== userData.email) {
-          console.log(
-            `[audit] user.email_changed userId=${userData.id} old=${oldUserData?.email} new=${userData.email}`,
-          );
-        }
+      // Better Auth passes the updated user directly, not { data, oldData }
+      after: async (user) => {
+        console.log(`[audit] user.updated userId=${user.id}`);
       },
     },
   },
