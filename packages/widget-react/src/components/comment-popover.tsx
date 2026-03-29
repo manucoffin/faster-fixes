@@ -6,6 +6,7 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
+import { domToBlob } from "modern-screenshot";
 import { generateSelectors, captureElementContext, getBrowserInfo } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import {
@@ -88,9 +89,6 @@ export function CommentPopover() {
     setMode("submitting");
     setError(null);
 
-    const t0 = performance.now();
-    const elapsed = () => `${(performance.now() - t0).toFixed(0)}ms`;
-
     const browserInfo = getBrowserInfo();
 
     let selector: string | undefined;
@@ -111,16 +109,9 @@ export function CommentPopover() {
         }
       }
     }
-    console.info("[faster-fixes][timing] selectors + context:", elapsed());
-
-    let screenshot = screenshotBlob;
-    if (!screenshot && screenshotCaptureRef.current) {
-      screenshot = await screenshotCaptureRef.current;
-    }
-    console.info("[faster-fixes][timing] screenshot ready:", elapsed(), "| size:", screenshot?.size ?? 0, "bytes");
 
     try {
-      await client.createFeedback(
+      const created = await client.createFeedback(
         {
           comment: comment.trim(),
           pageUrl: window.location.href,
@@ -131,9 +122,10 @@ export function CommentPopover() {
           ...browserInfo,
         },
         reviewerToken,
-        screenshot ?? undefined,
       );
-      console.info("[faster-fixes][timing] createFeedback API done:", elapsed());
+
+      // Upload screenshot in the background — don't block the user
+      void uploadScreenshotInBackground(created.id);
 
       void refreshFeedback();
 
@@ -159,6 +151,44 @@ export function CommentPopover() {
         err instanceof Error ? err.message : labels.errorMessage,
       );
       setMode("error");
+    }
+  }
+
+  async function uploadScreenshotInBackground(feedbackId: string) {
+    try {
+      let screenshot = screenshotBlob;
+
+      // Wait up to 3s for the full-quality capture already in progress
+      if (!screenshot && screenshotCaptureRef.current) {
+        screenshot = await Promise.race([
+          screenshotCaptureRef.current,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+        ]);
+      }
+
+      // Full capture too slow — retry without images/videos for a fast lightweight capture
+      if (!screenshot) {
+        screenshot = await domToBlob(document.body, {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          scale: window.devicePixelRatio || 1,
+          features: { restoreScrollPosition: true },
+          filter: (el: Node) => {
+            if (el instanceof Element && el.hasAttribute("data-ff-widget")) return false;
+            if (el instanceof HTMLImageElement) return false;
+            if (el instanceof HTMLVideoElement) return false;
+            if (el instanceof HTMLPictureElement) return false;
+            return true;
+          },
+        }).catch(() => null);
+      }
+
+      if (!screenshot) return;
+
+      await client.attachScreenshot(feedbackId, screenshot, reviewerToken);
+      void refreshFeedback();
+    } catch {
+      // Screenshot is best-effort — never surface errors to the user
     }
   }
 

@@ -112,6 +112,21 @@ export class FasterFixesClient {
       headers: this.headers(reviewerToken),
     });
   }
+
+  async attachScreenshot(
+    feedbackId: string,
+    screenshot: Blob,
+    reviewerToken: string,
+  ): Promise<void> {
+    const formData = new FormData();
+    formData.append("screenshot", screenshot, "screenshot.png");
+
+    await this.request<unknown>(`/api/v1/feedback/${feedbackId}/screenshot`, {
+      method: "PUT",
+      headers: this.headers(reviewerToken),
+      body: formData,
+    });
+  }
 }
 
 export class ApiError extends Error {
