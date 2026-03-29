@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     // Rebuild the callback URL using baseUrl to avoid protocol/host mismatches from tunnels
     const callbackUrl = `${baseUrl}/api/github/setup?installation_id=${installationId}&setup_action=${setupAction ?? "install"}`;
     return NextResponse.redirect(
-      `${baseUrl}/sign-in?callbackURL=${encodeURIComponent(callbackUrl)}`,
+      `${baseUrl}/login?nextUrl=${encodeURIComponent(callbackUrl)}`,
     );
   }
 
