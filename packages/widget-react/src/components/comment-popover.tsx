@@ -88,6 +88,9 @@ export function CommentPopover() {
     setMode("submitting");
     setError(null);
 
+    const t0 = performance.now();
+    const elapsed = () => `${(performance.now() - t0).toFixed(0)}ms`;
+
     const browserInfo = getBrowserInfo();
 
     let selector: string | undefined;
@@ -108,11 +111,13 @@ export function CommentPopover() {
         }
       }
     }
+    console.info("[faster-fixes][timing] selectors + context:", elapsed());
 
     let screenshot = screenshotBlob;
     if (!screenshot && screenshotCaptureRef.current) {
       screenshot = await screenshotCaptureRef.current;
     }
+    console.info("[faster-fixes][timing] screenshot ready:", elapsed(), "| size:", screenshot?.size ?? 0, "bytes");
 
     try {
       await client.createFeedback(
@@ -128,6 +133,7 @@ export function CommentPopover() {
         reviewerToken,
         screenshot ?? undefined,
       );
+      console.info("[faster-fixes][timing] createFeedback API done:", elapsed());
 
       void refreshFeedback();
 
