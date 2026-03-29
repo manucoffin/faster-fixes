@@ -185,7 +185,7 @@ Update the status of a feedback item.
 | ---------------------- | -------- | ----------------------------------------------------- |
 | `FASTER_FIXES_TOKEN`   | Yes      | Agent token from Organization Settings                |
 | `FASTER_FIXES_PROJECT` | Yes      | Project ID (`proj_...`) from Project Settings         |
-| `FASTER_FIXES_URL`     | No       | API base URL (defaults to `https://faster-fixes.com`) |
+| `FASTER_FIXES_URL`     | No       | API base URL (defaults to `https://www.faster-fixes.com`) |
 
 ## Security
 

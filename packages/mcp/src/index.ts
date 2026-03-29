@@ -6,7 +6,7 @@ import { FasterFixesClient } from "./api-client.js";
 const token = process.env.FASTER_FIXES_TOKEN;
 const project = process.env.FASTER_FIXES_PROJECT;
 const baseUrl =
-  process.env.FASTER_FIXES_URL ?? "https://faster-fixes.com";
+  process.env.FASTER_FIXES_URL ?? "https://www.faster-fixes.com";
 
 if (!token) {
   process.stderr.write(

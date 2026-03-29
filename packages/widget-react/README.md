@@ -64,7 +64,7 @@ The color is applied as a `--ff-accent` CSS custom property on the widget root. 
 | Prop         | Type                  | Required | Description                                                    |
 | ------------ | --------------------- | -------- | -------------------------------------------------------------- |
 | `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                               |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://faster-fixes.com`)        |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)    |
 | `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`) |
 | `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)             |
 | `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                        |
