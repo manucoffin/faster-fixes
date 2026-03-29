@@ -3,11 +3,16 @@ title: Setup
 description: Connect the MCP server to your AI coding agent to fetch and resolve client feedback directly from your terminal.
 ---
 
-Install the MCP server using npx (no installation required):
+Install the MCP server with a single command (Claude Code):
 
-```npm
-npx -y @fasterfixes/mcp
+```bash
+claude mcp add faster-fixes -s project \
+  --env FASTER_FIXES_TOKEN=ff_agent_xxx \
+  --env FASTER_FIXES_PROJECT=proj_xxx \
+  -- npx -y @fasterfixes/mcp
 ```
+
+For other editors, add the JSON config below.
 
 ## Environment variables
 

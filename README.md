@@ -61,7 +61,7 @@ Open the Faster Fixes dashboard to see all feedback items organized by project a
 Connect the Faster Fixes MCP server to your editor. Your AI coding agent can fetch new feedback, read the full context, locate the relevant code, fix the issue, and mark it as resolved — without leaving the terminal.
 
 ```bash
-claude mcp add faster-fixes \
+claude mcp add faster-fixes -s project \
   --env FASTER_FIXES_TOKEN=ff_agent_xxx \
   --env FASTER_FIXES_PROJECT=proj_xxx \
   -- npx -y @fasterfixes/mcp

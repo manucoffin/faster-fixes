@@ -13,11 +13,18 @@ Clients leave feedback on your site via the widget. This MCP server lets your AI
 
 ## Installation
 
-The MCP server runs via `npx` — no global install needed. Add the config for your editor below.
+No global install needed. Run a single command to configure your editor.
 
 ### Claude Code
 
-Add to `.mcp.json` at your project root:
+```bash
+claude mcp add faster-fixes -s project \
+  --env FASTER_FIXES_TOKEN=ff_agent_xxx \
+  --env FASTER_FIXES_PROJECT=proj_xxx \
+  -- npx -y @fasterfixes/mcp
+```
+
+Or add to `.mcp.json` at your project root:
 
 ```json
 {
@@ -32,15 +39,6 @@ Add to `.mcp.json` at your project root:
     }
   }
 }
-```
-
-Or use the CLI:
-
-```bash
-claude mcp add faster-fixes \
-  --env FASTER_FIXES_TOKEN=ff_agent_xxx \
-  --env FASTER_FIXES_PROJECT=proj_xxx \
-  -- npx -y @fasterfixes/mcp
 ```
 
 ### Cursor
