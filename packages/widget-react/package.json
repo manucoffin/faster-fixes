@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/react",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "React feedback widget for FasterFixes. Drop-in component for collecting visual feedback with screenshots, element annotations, and inline comments.",
   "type": "module",
   "license": "MIT",
