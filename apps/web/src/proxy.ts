@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { corsHeaders } from "@/server/api/cors";
 import { isCloud } from "@/utils/environment/env";
 
 // Routes only available on the official cloud-hosted instance.
@@ -14,9 +15,39 @@ const CLOUD_ONLY_ROUTES = [
   "/terms-of-sale",
 ];
 
+// Widget-facing routes that need CORS for cross-origin browser requests
+function needsCors(pathname: string): boolean {
+  return (
+    pathname.startsWith("/api/v1/widget/") ||
+    pathname.startsWith("/api/v1/feedback")
+  );
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // CORS handling for widget-facing API routes — applied at the proxy level
+  // so headers survive any downstream redirects (e.g. trailing-slash 307s)
+  if (needsCors(pathname)) {
+    const origin = request.headers.get("origin");
+
+    if (request.method === "OPTIONS") {
+      return new NextResponse(null, {
+        status: 204,
+        headers: origin ? corsHeaders(origin) : undefined,
+      });
+    }
+
+    const response = NextResponse.next();
+    if (origin) {
+      for (const [key, value] of Object.entries(corsHeaders(origin))) {
+        response.headers.set(key, value);
+      }
+    }
+    return response;
+  }
+
+  // Cloud/self-hosted proxy
   if (!isCloud() && isCloudOnlyRoute(pathname)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -35,7 +66,10 @@ function isCloudOnlyRoute(pathname: string): boolean {
 
 export const config = {
   matcher: [
-    // Match all routes except Next.js internals, static files, and API routes
+    // Widget-facing API routes (CORS)
+    "/api/v1/widget/:path*",
+    "/api/v1/feedback/:path*",
+    // Non-static routes (cloud/self-hosted proxy)
     "/((?!api|_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt).*)",
   ],
 };
