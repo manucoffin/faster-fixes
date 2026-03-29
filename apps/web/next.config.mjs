@@ -4,6 +4,9 @@ import { createMDX } from "fumadocs-mdx/next";
 const nextConfig = {
   transpilePackages: ["@workspace/ui"],
   typedRoutes: true,
+  // Without this, Next.js issues a 307 trailing-slash redirect before the
+  // proxy runs, stripping CORS headers from widget API responses.
+  skipTrailingSlashRedirect: true,
 
   experimental: {
     authInterrupts: true,
