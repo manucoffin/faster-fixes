@@ -1,6 +1,7 @@
 ---
 name: fix-feedback
-description: Invoke when the user says "fix feedback", mentions Faster Fixes, or wants to check, triage, or fix issues that clients reported through a website feedback widget. This skill fetches client-submitted bug reports and comments from the Faster Fixes platform via MCP, then locates and fixes each reported issue in the codebase. Covers: reviewing new client reports, triaging widget-collected feedback, fixing bugs clients found on the live site, processing comments left via an on-page widget. Does NOT cover: code review comments, fixing feedback-form UI bugs, responding to product feedback, refactoring feedback components, or creating surveys.
+description: >
+  Invoke when the user says "fix feedback", mentions Faster Fixes, or wants to check, triage, or fix issues that clients reported through a website feedback widget. This skill fetches client-submitted bug reports and comments from the Faster Fixes platform via MCP, then locates and fixes each reported issue in the codebase. Covers reviewing new client reports, triaging widget-collected feedback, fixing bugs clients found on the live site, processing comments left via an on-page widget. Does NOT cover code review comments, fixing feedback-form UI bugs, responding to product feedback, refactoring feedback components, or creating surveys.
 ---
 
 # Fix Feedback
