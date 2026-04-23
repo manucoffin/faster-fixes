@@ -18,7 +18,7 @@ export function BeforeAfterSection() {
             The difference
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
-            See what changes
+            See what changes with a visual feedback tool
           </h2>
         </div>
 

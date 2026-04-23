@@ -87,7 +87,11 @@ export function HeroFlowAnimation() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: heroStyles }} />
-      <div className="flex w-full flex-col gap-3">
+      <div
+        className="flex w-full flex-col gap-3"
+        role="img"
+        aria-label="Animation of a visual feedback tool: clients pin issues directly on a live website, then a coding agent fixes each pinned file in the terminal."
+      >
         {/* Browser mockup */}
         <TerminalFrame
           title="yourapp.com"

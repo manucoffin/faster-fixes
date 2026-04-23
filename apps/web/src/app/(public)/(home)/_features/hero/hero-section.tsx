@@ -23,7 +23,7 @@ export function HeroSection() {
             <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
               Open-source website feedback widget for dev teams. Clients
               annotate issues on your live site, your AI coding agent ships the
-              fix. No more WhatsApp threads.
+              fix. No more messy revision rounds.
             </p>
 
             <CopyCommand command="npm install @fasterfixes/react" />
@@ -53,7 +53,7 @@ export function HeroSection() {
           {/* Right column: flow animation */}
           <div className="flex flex-col gap-8">
             <span className="text-muted-foreground font-mono text-sm">
-              {"// The open source feedback pipeline:"}
+              {"// The new feedback pipeline:"}
             </span>
             <HeroFlowAnimation />
           </div>
