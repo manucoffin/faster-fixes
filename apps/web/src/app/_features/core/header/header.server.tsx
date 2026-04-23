@@ -20,6 +20,7 @@ const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 const navLinks = [
   { href: "/docs", label: "Documentation" },
   { href: "/pricing", label: "Pricing" },
+  // { href: "/open-source", label: "Open source" },
   // { href: "/blog", label: "Blog" },
 ] satisfies { href: string; label: string }[];
 

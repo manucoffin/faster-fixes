@@ -9,6 +9,7 @@ import { AppLogo } from "../logo/app-logo";
 const productLinks: { text: string; href: string; external?: boolean }[] = [
   { text: "Documentation", href: "/docs" },
   { text: "Pricing", href: "/pricing" },
+  { text: "Open source", href: "/open-source" },
   { text: "Support", href: "mailto:support@faster-fixes.com", external: true },
 ];
 
