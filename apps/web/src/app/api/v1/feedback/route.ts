@@ -31,16 +31,12 @@ const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
-  const t0 = performance.now();
-  const elapsed = () => `${(performance.now() - t0).toFixed(0)}ms`;
-
   console.info(
     "[feedback] POST /api/v1/feedback — content-type:",
     req.headers.get("content-type"),
   );
 
   const project = await resolveProject(req.headers.get("x-api-key"));
-  console.info("[feedback][timing] resolveProject:", elapsed());
   if (!project) {
     console.warn("[feedback] unauthorized — invalid API key");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,13 +48,11 @@ export async function POST(req: NextRequest) {
 
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
-  console.info("[feedback][timing] validateReviewer:", elapsed());
   if (!reviewer) {
     return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
   }
 
   const allowed = await checkRateLimit(project.apiKeyHash, "submit");
-  console.info("[feedback][timing] checkRateLimit:", elapsed());
   if (!allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },
@@ -71,7 +65,6 @@ export async function POST(req: NextRequest) {
     "feedbacks",
     prisma,
   );
-  console.info("[feedback][timing] checkResourceLimit:", elapsed());
   if (!feedbackCheck.allowed) {
     const { metadata } = feedbackCheck.denial;
     return NextResponse.json(
@@ -91,7 +84,6 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
-  console.info("[feedback][timing] formData parsed:", elapsed());
 
   const rawData = formData.get("data");
   if (typeof rawData !== "string") {
@@ -178,8 +170,6 @@ export async function POST(req: NextRequest) {
         body: buffer,
         contentType: screenshotField.type,
       });
-      console.info("[feedback][timing] R2 putObject:", elapsed());
-
       const asset = await createAsset({
         key,
         bucket,
@@ -189,7 +179,6 @@ export async function POST(req: NextRequest) {
         size: buffer.length,
       });
       screenshotId = asset.id;
-      console.info("[feedback][timing] createAsset:", elapsed());
     } catch (err) {
       console.error("[feedback] screenshot upload failed:", err);
     }
@@ -217,7 +206,6 @@ export async function POST(req: NextRequest) {
       screenshot: { select: { key: true, provider: true, bucket: true } },
     },
   });
-  console.info("[feedback][timing] feedback.create:", elapsed());
 
   // Fire-and-forget: trigger GitHub issue creation if configured
   inngest
@@ -227,8 +215,6 @@ export async function POST(req: NextRequest) {
   const screenshotUrl = feedback.screenshot
     ? await getSignedAssetUrl(feedback.screenshot)
     : null;
-  console.info("[feedback][timing] getSignedAssetUrl:", elapsed());
-  console.info("[feedback][timing] total:", elapsed());
 
   return NextResponse.json(
     {
