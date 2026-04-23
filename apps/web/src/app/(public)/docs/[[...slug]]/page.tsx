@@ -1,3 +1,4 @@
+import { APP_URL } from "@/app/_constants/app";
 import { source } from "@/lib/docs/source";
 import {
   DocsBody,
@@ -53,8 +54,22 @@ export async function generateMetadata(
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const canonicalPath = page.slugs.length > 0 ? `/docs/${page.slugs.join("/")}` : "/docs";
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical: `${APP_URL}${canonicalPath}`,
+    },
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      url: `${APP_URL}${canonicalPath}`,
+    },
+    twitter: {
+      title: page.data.title,
+      description: page.data.description,
+    },
   };
 }

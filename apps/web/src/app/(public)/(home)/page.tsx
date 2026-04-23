@@ -1,7 +1,12 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
+import {
+  SITE_META_DESCRIPTION,
+  SITE_NAME,
+  SITE_TAGLINE,
+} from "@/app/_constants/seo";
 import { FaqSchema } from "@/app/_features/seo/faq-schema";
 import { OrganizationSchema } from "@/app/_features/seo/organization-schema";
+import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
 import { WebSiteSchema } from "@/app/_features/seo/website-schema";
 import type { Metadata } from "next";
 
@@ -14,10 +19,37 @@ import { ProblemSection } from "./_features/problem/problem-section";
 import { SolutionSection } from "./_features/solution/solution-section";
 
 export const metadata: Metadata = {
-  title: SITE_NAME,
+  title: {
+    absolute: `${SITE_NAME} — ${SITE_TAGLINE}`,
+  },
   description: SITE_META_DESCRIPTION,
+  keywords: [
+    "website feedback widget",
+    "bug reporting tool",
+    "visual feedback tool",
+    "client feedback tool",
+    "open source feedback widget",
+    "feedback widget for Next.js",
+    "feedback widget React",
+    "MCP server bug tracking",
+    "Claude Code feedback",
+    "Cursor feedback integration",
+    "BugHerd alternative",
+    "Marker.io alternative",
+    "Usersnap alternative",
+    "Userback alternative",
+  ],
   alternates: {
     canonical: APP_URL,
+  },
+  openGraph: {
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_META_DESCRIPTION,
+    url: APP_URL,
+  },
+  twitter: {
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_META_DESCRIPTION,
   },
 };
 
@@ -35,6 +67,7 @@ export default function Page() {
       <FaqSchema faqs={faqs} />
       <OrganizationSchema />
       <WebSiteSchema />
+      <SoftwareApplicationSchema />
     </div>
   );
 }

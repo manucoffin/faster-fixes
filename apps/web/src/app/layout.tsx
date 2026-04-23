@@ -1,9 +1,5 @@
 import { APP_URL } from "@/app/_constants/app";
-import {
-  DEFAULT_OG_IMAGE_URL,
-  SITE_META_DESCRIPTION,
-  SITE_NAME,
-} from "@/app/_constants/seo";
+import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
 import { FeedbackProvider } from "@fasterfixes/react";
 import "@workspace/ui/globals.css";
@@ -41,15 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    locale: "fr_FR",
-    images: [
-      {
-        url: DEFAULT_OG_IMAGE_URL,
-        width: 1200,
-        height: 630,
-        alt: SITE_NAME,
-      },
-    ],
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
@@ -70,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${fontSans.variable} ${fontMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >

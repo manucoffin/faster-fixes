@@ -21,10 +21,9 @@ export function HeroSection() {
             </h1>
 
             <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
-              Your clients annotate issues directly on your live site. Every
-              technical detail is captured automatically. Your AI agent receives
-              a structured task and ships the fix. No more deciphering WhatsApp
-              messages.
+              Open-source website feedback widget for dev teams. Clients
+              annotate issues on your live site, your AI coding agent ships the
+              fix. No more WhatsApp threads.
             </p>
 
             <CopyCommand command="npm install @fasterfixes/react" />

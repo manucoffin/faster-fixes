@@ -12,7 +12,7 @@ export function WebSiteSchema() {
     name: SITE_NAME,
     url: appUrl,
     description: SITE_META_DESCRIPTION,
-    inLanguage: "fr-FR",
+    inLanguage: "en-US",
     publisher: {
       "@id": `${appUrl}#organization`,
     },

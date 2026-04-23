@@ -13,7 +13,7 @@ export function WebPageSchema({
   title,
   description,
   url,
-  language = "fr-FR",
+  language = "en-US",
   datePublished,
   dateModified,
 }: WebPageSchemaProps) {
