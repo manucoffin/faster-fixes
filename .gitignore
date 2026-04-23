@@ -50,3 +50,5 @@ task_plan.md
 
 # Skill eval workspaces
 packages/skills/*-workspace/
+# Added by code-review-graph
+.code-review-graph/

@@ -10,7 +10,6 @@
     "allow": [
       "Write(src/**)",
       "Edit(src/**)",
-
       "Bash(git:*)",
       "Bash(pnpm:*)",
       "Bash(pnpm lint:*)",
@@ -21,7 +20,6 @@
       "Bash(node:*)",
       "Bash(mkdir:*)",
       "Bash(cp:*)",
-
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "mcp__shadcn__get_component",
@@ -32,7 +30,6 @@
       "Bash(rm:*)",
       "Bash(rm -rf:*)",
       "Bash(rmdir:*)",
-
       "Bash(npm run:*)",
       "Bash(pnpm build)",
       "Bash(pnpm build:*)",
@@ -47,20 +44,24 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit:*.ts|Edit:*.tsx",
+        "matcher": "Edit|Write|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm type:check"
+            "command": "code-review-graph update --skip-flows",
+            "timeout": 30
           }
         ]
-      },
+      }
+    ],
+    "SessionStart": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm lint"
+            "command": "code-review-graph status",
+            "timeout": 10
           }
         ]
       }
