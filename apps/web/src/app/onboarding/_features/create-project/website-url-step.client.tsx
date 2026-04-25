@@ -5,8 +5,8 @@ import { Input } from "@workspace/ui/components/input";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 type WebsiteUrlStepProps = {
-  url: string;
-  onUrlChange: (url: string) => void;
+  domain: string;
+  onDomainChange: (domain: string) => void;
   onBack: () => void;
   onNext: () => void;
   isPending: boolean;
@@ -14,8 +14,8 @@ type WebsiteUrlStepProps = {
 };
 
 export function WebsiteUrlStep({
-  url,
-  onUrlChange,
+  domain,
+  onDomainChange,
   onBack,
   onNext,
   isPending,
@@ -24,24 +24,24 @@ export function WebsiteUrlStep({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold">What&apos;s the website URL?</h1>
+        <h1 className="text-2xl font-bold">What&apos;s the website domain?</h1>
         <p className="text-muted-foreground text-sm">
-          The main URL of the website where you&apos;ll install the feedback widget.
+          The domain of the website where you&apos;ll install the feedback
+          widget. www. and protocol variants are matched automatically.
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="project-url" className="text-sm font-medium">
-          Website URL
+        <label htmlFor="project-domain" className="text-sm font-medium">
+          Website domain
         </label>
         <Input
-          id="project-url"
-          placeholder="https://client.com"
-          type="url"
-          value={url}
-          onChange={(e) => onUrlChange(e.target.value)}
+          id="project-domain"
+          placeholder="client.com"
+          value={domain}
+          onChange={(e) => onDomainChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && url.trim()) onNext();
+            if (e.key === "Enter" && domain.trim()) onNext();
           }}
           disabled={isPending}
           autoFocus
@@ -54,7 +54,7 @@ export function WebsiteUrlStep({
           <ArrowLeft className="size-4" />
           Back
         </Button>
-        <Button onClick={onNext} disabled={!url.trim() || isPending}>
+        <Button onClick={onNext} disabled={!domain.trim() || isPending}>
           {isPending ? (
             <>
               <Loader2 className="size-4 animate-spin" />

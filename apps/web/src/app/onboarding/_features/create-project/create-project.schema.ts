@@ -1,8 +1,10 @@
 import z from "zod";
 
+import { DomainSchema } from "@/app/_features/project/normalize-domain";
+
 export const CreateOnboardingProjectSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
-  url: z.url("URL must be valid (e.g. https://client.com)"),
+  domain: DomainSchema,
 });
 
 export type CreateOnboardingProjectInput = z.infer<

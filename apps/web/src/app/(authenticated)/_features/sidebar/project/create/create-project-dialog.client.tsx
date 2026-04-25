@@ -53,7 +53,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
     defaultValues: {
       organizationId: activeOrg?.id ?? "",
       name: "",
-      url: "",
+      domain: "",
     },
   });
 
@@ -157,20 +157,20 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
 
               <FormField
                 control={form.control}
-                name="url"
+                name="domain"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project URL</FormLabel>
+                    <FormLabel>Project domain</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://client.com"
-                        type="url"
+                        placeholder="client.com"
                         disabled={createProject.isPending}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      The main URL of your client&apos;s site.
+                      The domain of your client&apos;s site. www. and protocol
+                      variants are matched automatically.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

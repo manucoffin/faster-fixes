@@ -43,7 +43,7 @@ export const getReviewers = protectedProcedure
       isActive: r.isActive,
       createdAt: r.createdAt,
       feedbackCount: r._count.feedback,
-      shareUrl: `${project.url}?ff_token=${r.token}`,
+      shareUrl: `https://${project.domain}?ff_token=${r.token}`,
     }));
   });
 

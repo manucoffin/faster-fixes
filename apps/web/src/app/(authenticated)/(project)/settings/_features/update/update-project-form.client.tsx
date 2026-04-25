@@ -59,14 +59,14 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
     defaultValues: {
       projectId,
       name: "",
-      url: "",
+      domain: "",
       widgetEnabled: true,
     },
     values: project
       ? {
           projectId,
           name: project.name,
-          url: project.url,
+          domain: project.domain,
           widgetEnabled: project.widgetConfig?.enabled ?? true,
         }
       : undefined,
@@ -115,13 +115,13 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
 
         <FormField
           control={form.control}
-          name="url"
+          name="domain"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL</FormLabel>
+              <FormLabel>Domain</FormLabel>
               <FormControl>
                 <Input
-                  type="url"
+                  placeholder="client.com"
                   disabled={updateProject.isPending}
                   {...field}
                 />

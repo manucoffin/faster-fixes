@@ -14,7 +14,7 @@ export function OnboardingWizard() {
 
   const [currentStep, setCurrentStep] = React.useState(0);
   const [name, setName] = React.useState("");
-  const [url, setUrl] = React.useState("");
+  const [domain, setDomain] = React.useState("");
   const [apiKey, setApiKey] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -45,7 +45,7 @@ export function OnboardingWizard() {
 
   const handleCreateProject = () => {
     setError(null);
-    createProject.mutate({ name: name.trim(), url: url.trim() });
+    createProject.mutate({ name: name.trim(), domain: domain.trim() });
   };
 
   const handleFinish = () => {
@@ -67,8 +67,8 @@ export function OnboardingWizard() {
 
         {currentStep === 1 && (
           <WebsiteUrlStep
-            url={url}
-            onUrlChange={setUrl}
+            domain={domain}
+            onDomainChange={setDomain}
             onBack={() => setCurrentStep(0)}
             onNext={handleCreateProject}
             isPending={createProject.isPending}

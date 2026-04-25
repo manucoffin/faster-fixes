@@ -1,3 +1,5 @@
+import { normalizeDomain } from "@/app/_features/project/normalize-domain";
+
 // Checked via URL.hostname — parsed, so "localhost.evil.com" does NOT match.
 const LOCALHOST_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
 
@@ -10,8 +12,10 @@ function isLocalhostOrigin(origin: string): boolean {
 }
 
 /**
- * Validates that the request origin matches the project's registered URL.
- * Compares origins (protocol + host) to allow subpaths.
+ * Validates that the request origin's host matches the project's registered
+ * domain after normalization (lowercased, www. stripped). Protocol, port, and
+ * path are ignored, so https://acme.com and http://www.acme.com both match a
+ * project domain of "acme.com".
  *
  * Localhost origins are always allowed so developers can test the widget
  * before deploying. The browser Origin header cannot be spoofed by web pages,
@@ -20,18 +24,16 @@ function isLocalhostOrigin(origin: string): boolean {
  */
 export function validateOrigin(
   headers: Headers,
-  projectUrl: string,
+  projectDomain: string,
 ): boolean {
   const origin = headers.get("origin") ?? headers.get("referer");
   if (!origin) return false;
 
   if (isLocalhostOrigin(origin)) return true;
 
-  try {
-    const requestOrigin = new URL(origin).origin;
-    const projectOrigin = new URL(projectUrl).origin;
-    return requestOrigin === projectOrigin;
-  } catch {
-    return false;
-  }
+  const requestDomain = normalizeDomain(origin);
+  const expected = normalizeDomain(projectDomain);
+  if (!requestDomain || !expected) return false;
+
+  return requestDomain === expected;
 }

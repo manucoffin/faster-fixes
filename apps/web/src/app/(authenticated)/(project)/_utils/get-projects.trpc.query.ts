@@ -34,7 +34,7 @@ export const getProjects = protectedProcedure
     return projects.map((p) => ({
       id: p.id,
       name: p.name,
-      url: p.url,
+      domain: p.domain,
       apiKeyLastFour: p.apiKeyLastFour,
       createdAt: p.createdAt,
       feedbackCount: p._count.feedback,

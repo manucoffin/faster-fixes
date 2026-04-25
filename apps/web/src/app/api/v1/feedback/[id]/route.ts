@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.url)) {
+  if (!validateOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
@@ -83,7 +83,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.url)) {
+  if (!validateOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 

@@ -4,7 +4,7 @@ model Project {
     updatedAt DateTime @updatedAt
 
     name            String
-    url             String
+    domain          String @map("url")
     publicId        String @unique
     apiKeyHash      String
     apiKeyLastFour  String

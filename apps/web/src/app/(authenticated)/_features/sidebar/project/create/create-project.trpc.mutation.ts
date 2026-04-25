@@ -33,7 +33,7 @@ export const createProject = planAwareProcedure
     const project = await prisma.project.create({
       data: {
         name: input.name,
-        url: input.url,
+        domain: input.domain,
         publicId: generatePublicId(),
         apiKeyHash: hash,
         apiKeyLastFour: lastFour,

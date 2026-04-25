@@ -33,7 +33,7 @@ export const getProject = protectedProcedure
       id: project.id,
       publicId: project.publicId,
       name: project.name,
-      url: project.url,
+      domain: project.domain,
       apiKeyLastFour: project.apiKeyLastFour,
       createdAt: project.createdAt,
       widgetConfig: project.widgetConfig

@@ -1,9 +1,11 @@
 import z from "zod";
 
+import { DomainSchema } from "@/app/_features/project/normalize-domain";
+
 export const UpdateProjectSchema = z.object({
   projectId: z.string(),
   name: z.string().trim().min(1, "Name is required"),
-  url: z.string().url("URL must be valid (e.g. https://example.com)"),
+  domain: DomainSchema,
   widgetEnabled: z.boolean(),
 });
 

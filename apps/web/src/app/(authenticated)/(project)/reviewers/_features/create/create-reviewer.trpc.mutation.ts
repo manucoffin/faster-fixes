@@ -46,7 +46,7 @@ export const createReviewer = protectedProcedure
       id: reviewer.id,
       name: reviewer.name,
       token,
-      shareUrl: `${project.url}?ff_token=${token}`,
+      shareUrl: `https://${project.domain}?ff_token=${token}`,
     };
   });
 

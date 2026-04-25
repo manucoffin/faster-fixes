@@ -13,7 +13,7 @@ import {
 type Project = {
   id: string;
   name: string;
-  url: string;
+  domain: string;
   feedbackCount: number;
 };
 
