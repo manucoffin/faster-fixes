@@ -7,6 +7,8 @@ interface WebPageSchemaProps {
   language?: string;
   datePublished?: string | null;
   dateModified?: string | null;
+  /** Schema.org @id of the entity the page is about (e.g. SoftwareApplication). */
+  aboutId?: string;
 }
 
 export function WebPageSchema({
@@ -16,6 +18,7 @@ export function WebPageSchema({
   language = "en-US",
   datePublished,
   dateModified,
+  aboutId,
 }: WebPageSchemaProps) {
   const jsonLd: WithContext<WebPage> = {
     "@context": "https://schema.org",
@@ -27,6 +30,10 @@ export function WebPageSchema({
     inLanguage: language,
     ...(datePublished && { datePublished }),
     ...(dateModified && { dateModified }),
+    ...(aboutId && {
+      about: { "@id": aboutId },
+      mainEntity: { "@id": aboutId },
+    }),
     isPartOf: {
       "@id": url.split("/").slice(0, 3).join("/") + "#website",
     },
