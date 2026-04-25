@@ -13,6 +13,10 @@ const productLinks: { text: string; href: string; external?: boolean }[] = [
   { text: "Support", href: "mailto:support@faster-fixes.com", external: true },
 ];
 
+const alternativesLinks: { text: string; href: Route }[] = [
+  { text: "BugHerd alternative", href: "/vs/bugherd" as Route },
+];
+
 const legalLinks = [
   { text: "Privacy policy", href: "/privacy-policy" as Route },
   { text: "Terms of use", href: "/terms" as Route },
@@ -40,7 +44,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             <div className="text-center sm:text-left">
               <p className="text-lg font-semibold">Product</p>
               <ul className="mt-8 space-y-4 text-sm">
@@ -61,6 +65,22 @@ export function Footer() {
                         <AnimatedText>{text}</AnimatedText>
                       </Link>
                     )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="text-center sm:text-left">
+              <p className="text-lg font-semibold">Comparisons</p>
+              <ul className="mt-8 space-y-4 text-sm">
+                {alternativesLinks.map(({ text, href }) => (
+                  <li key={text}>
+                    <Link
+                      href={href}
+                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                    >
+                      <AnimatedText>{text}</AnimatedText>
+                    </Link>
                   </li>
                 ))}
               </ul>
