@@ -5,8 +5,11 @@ import { inngest } from "./index";
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
 export const syncFeedbackStatusToGitHub = inngest.createFunction(
-  { id: "sync-feedback-status-to-github", retries: 3 },
-  { event: "feedback/status-changed" },
+  {
+    id: "sync-feedback-status-to-github",
+    retries: 3,
+    triggers: [{ event: "feedback/status-changed" }],
+  },
   async ({ event }) => {
     const { feedbackId, newStatus } = event.data;
 

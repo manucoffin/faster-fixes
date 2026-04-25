@@ -4,8 +4,11 @@ import { inngest } from "./index";
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
 export const syncGitHubIssueStatus = inngest.createFunction(
-  { id: "sync-github-issue-status", retries: 3 },
-  { event: "github/webhook.issues" },
+  {
+    id: "sync-github-issue-status",
+    retries: 3,
+    triggers: [{ event: "github/webhook.issues" }],
+  },
   async ({ event }) => {
     const { action, issueNumber, repoFullName } = event.data;
 

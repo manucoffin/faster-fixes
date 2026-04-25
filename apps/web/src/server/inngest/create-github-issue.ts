@@ -8,8 +8,11 @@ import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 
 export const createGitHubIssue = inngest.createFunction(
-  { id: "create-github-issue", retries: 3 },
-  { event: "feedback/created" },
+  {
+    id: "create-github-issue",
+    retries: 3,
+    triggers: [{ event: "feedback/created" }],
+  },
   async ({ event }) => {
     const { feedbackId } = event.data;
 
