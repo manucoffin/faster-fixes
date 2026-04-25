@@ -13,6 +13,7 @@ import {
 } from "@workspace/ui/components/navigation-menu";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { MobileNav } from "./mobile-nav.client";
 import { ThemeToggle } from "./theme-toggle.client";
 
 const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
@@ -31,14 +32,22 @@ export async function Header() {
 
   return (
     <header className="border-border/40 bg-background sticky top-0 z-40 border-b">
-      <div className="flex h-16 items-center justify-between gap-4 px-4">
-        {/* Logo - Left */}
-        <AppLogo className="shrink-0" />
+      <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
+        {/* Left: hamburger on mobile, logo on desktop */}
+        <div className="flex items-center">
+          {isCloud() && (
+            <div className="md:hidden">
+              <MobileNav links={navLinks} />
+            </div>
+          )}
+          <AppLogo className="hidden shrink-0 md:flex" />
+        </div>
 
-        {/* Navigation - Center (cloud-only marketing links) */}
-        {isCloud() && (
-          <div className="hidden flex-1 justify-center md:flex">
-            <NavigationMenu>
+        {/* Center: logo on mobile, nav on desktop */}
+        <div className="flex justify-center">
+          <AppLogo className="shrink-0 md:hidden" />
+          {isCloud() && (
+            <NavigationMenu className="hidden md:flex">
               <NavigationMenuList className="gap-8">
                 {navLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
@@ -54,11 +63,11 @@ export async function Header() {
                 ))}
               </NavigationMenuList>
             </NavigationMenu>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Actions - Right */}
-        <div className="flex shrink-0 items-center gap-2">
+        {/* Right: actions */}
+        <div className="flex shrink-0 items-center justify-end gap-2">
           <ThemeToggle size="icon" variant="ghost" />
 
           <Button asChild variant="ghost" size="icon">
