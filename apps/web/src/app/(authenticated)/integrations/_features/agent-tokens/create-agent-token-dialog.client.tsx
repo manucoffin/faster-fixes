@@ -23,6 +23,7 @@ import { toast } from "sonner";
 const AVAILABLE_SCOPES = [
   { value: "feedbacks:read", label: "Read feedbacks" },
   { value: "feedbacks:update_status", label: "Update feedback status" },
+  { value: "feedbacks:create", label: "Create feedbacks" },
 ] as const;
 
 export function CreateAgentTokenDialog() {
@@ -55,7 +56,11 @@ export function CreateAgentTokenDialog() {
     createToken.mutate({
       organizationId: activeOrg.id,
       name: name.trim(),
-      scopes: scopes as ("feedbacks:read" | "feedbacks:update_status")[],
+      scopes: scopes as (
+        | "feedbacks:read"
+        | "feedbacks:update_status"
+        | "feedbacks:create"
+      )[],
     });
   };
 

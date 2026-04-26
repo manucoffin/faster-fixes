@@ -41,6 +41,8 @@ function formatScopes(scopes: string[]): string {
           return "Read";
         case "feedbacks:update_status":
           return "Update status";
+        case "feedbacks:create":
+          return "Create";
         default:
           return s;
       }
