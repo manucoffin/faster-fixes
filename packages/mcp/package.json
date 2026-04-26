@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/mcp",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "MCP server for Faster Fixes — lets AI agents list and manage client feedback",
   "type": "module",
   "license": "MIT",

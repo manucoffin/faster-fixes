@@ -1,42 +1,11 @@
-type ListFeedbacksParams = {
-  status?: string;
-  page_url?: string;
-  format?: "json" | "markdown";
-};
-
-type FeedbackJson = {
-  id: string;
-  status: string;
-  comment: string;
-  pageUrl: string;
-  selector: string | null;
-  clickX: number | null;
-  clickY: number | null;
-  viewportWidth: number | null;
-  viewportHeight: number | null;
-  browserName: string | null;
-  browserVersion: string | null;
-  os: string | null;
-  screenshotUrl: string | null;
-  reviewerName: string;
-  createdAt: string;
-};
-
-type ListFeedbacksJsonResponse = {
-  feedbacks: FeedbackJson[];
-  count: number;
-};
-
-type UpdateStatusResponse = {
-  id: string;
-  status: string;
-  updatedAt: string;
-};
-
-type ApiError = {
-  error: string;
-  code: string;
-};
+import type {
+  ApiError,
+  CreateFeedbacksParams,
+  CreateFeedbacksResponse,
+  ListFeedbacksJsonResponse,
+  ListFeedbacksParams,
+  UpdateStatusResponse,
+} from "./api-types";
 
 export class FasterFixesClient {
   constructor(
@@ -45,10 +14,7 @@ export class FasterFixesClient {
     private projectId: string,
   ) {}
 
-  private async request<T>(
-    path: string,
-    options?: RequestInit,
-  ): Promise<T> {
+  private async request<T>(path: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const res = await fetch(url, {
       ...options,
@@ -66,7 +32,6 @@ export class FasterFixesClient {
       );
     }
 
-    // Handle markdown responses
     const contentType = res.headers.get("content-type") ?? "";
     if (contentType.includes("text/markdown")) {
       return (await res.text()) as T;
@@ -107,5 +72,19 @@ export class FasterFixesClient {
         body: JSON.stringify({ status }),
       },
     );
+  }
+
+  async createFeedbacks(
+    params: CreateFeedbacksParams,
+  ): Promise<CreateFeedbacksResponse> {
+    return this.request<CreateFeedbacksResponse>(`/api/v1/agent/feedbacks`, {
+      method: "POST",
+      body: JSON.stringify({
+        project: this.projectId,
+        feedbacks: params.feedbacks,
+        ...(params.reviewerName ? { reviewer_name: params.reviewerName } : {}),
+        ...(params.source ? { source: params.source } : {}),
+      }),
+    });
   }
 }

@@ -179,6 +179,34 @@ Update the status of a feedback item.
 | `feedback_id` | string | Yes      | The feedback ID                               |
 | `status`      | string | Yes      | `new`, `in_progress`, `resolved`, or `closed` |
 
+### `create_feedbacks`
+
+Create one or many feedback items. Designed for migrating from BugHerd, Marker.io, Userback, Usersnap, and similar tools — feed the agent a CSV or JSON export and it will populate Faster Fixes. The batch is atomic, and integrations (e.g. GitHub issue creation) are intentionally skipped so an import does not fan out into hundreds of issues.
+
+| Parameter       | Type   | Required | Description                                                                                |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------ |
+| `feedbacks`     | array  | Yes      | Up to 100 feedback items per call. See item shape below.                                   |
+| `reviewer_name` | string | No       | Name of the reviewer to attribute imports to. Reused if it exists. Defaults to "Imported feedback". |
+| `source`        | string | No       | Origin tool tag (e.g. `bugherd`, `marker.io`). Stamped into each item's metadata.          |
+
+Each feedback item:
+
+| Field            | Type   | Required | Description                                                          |
+| ---------------- | ------ | -------- | -------------------------------------------------------------------- |
+| `comment`        | string | Yes      | Bug description / feedback text.                                     |
+| `pageUrl`        | string | Yes      | Page URL where the feedback was originally left.                     |
+| `status`         | string | No       | `new` (default), `in_progress`, `resolved`, or `closed`.             |
+| `selector`       | string | No       | CSS selector of the targeted element.                                |
+| `clickX`         | number | No       | Click X coordinate (px).                                             |
+| `clickY`         | number | No       | Click Y coordinate (px).                                             |
+| `browserName`    | string | No       | Browser name from the original report.                               |
+| `browserVersion` | string | No       | Browser version.                                                     |
+| `os`             | string | No       | Operating system.                                                    |
+| `viewportWidth`  | number | No       | Viewport width (px).                                                 |
+| `viewportHeight` | number | No       | Viewport height (px).                                                |
+| `createdAt`      | string | No       | ISO 8601 timestamp. Preserves the original report date during migration. |
+| `metadata`       | object | No       | Arbitrary key/value pairs (e.g. `{ "originalId": "bh-12345" }`).     |
+
 ## Environment variables
 
 | Variable               | Required | Description                                           |
@@ -189,10 +217,10 @@ Update the status of a feedback item.
 
 ## Security
 
-- The agent token is scoped to your organization and can only read feedback and update status
-- No delete, create, or admin operations are available
-- Tokens can be revoked instantly from the dashboard
-- All API calls are rate-limited
+- The agent token is scoped to your organization. Each capability (read, update status, create) is a separate permission you grant when creating the token — leave any unchecked to lock the agent out of that operation.
+- No delete or admin operations are available.
+- Tokens can be revoked instantly from the dashboard.
+- All API calls are rate-limited, and bulk creates are capped at 100 items per call and stop at your plan's feedback limit.
 
 ## License
 
