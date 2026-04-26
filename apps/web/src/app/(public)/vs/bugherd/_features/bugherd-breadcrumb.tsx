@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export function BugherdBreadcrumb() {
   return (
-    <div className="container mx-auto px-4 pt-6">
+    <div className="mx-auto px-4 pt-4">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
