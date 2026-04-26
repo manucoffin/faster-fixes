@@ -159,7 +159,7 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "How do I move my BugHerd data over?",
     answer:
-      "BugHerd supports CSV, XML, and JSON exports from all plans. Today the migration is manual — use the export as a reference to recreate active items in FasterFixes. A create_feedback tool is on the MCP roadmap so your AI agent will be able to read the export and backfill the dashboard for you.",
+      "BugHerd supports CSV, XML, and JSON exports from all plans. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
   },
   {
     question: "Does FasterFixes integrate with GitHub like BugHerd does?",

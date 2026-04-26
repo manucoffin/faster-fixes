@@ -8,8 +8,8 @@ export const migrationSteps = [
     body: "Start on the hosted free plan or follow the self-hosting guide to deploy on your own infrastructure. Run npm install @fasterfixes/react, drop the component into your layout, and generate a shareable link for each client. No account required for clients.",
   },
   {
-    label: "Recreate active feedback",
-    body: "For now, this step is manual — use the Marker.io export as a reference and recreate active items in FasterFixes. Coming soon: a create_feedback MCP tool will let your AI agent read the export and backfill the dashboard for you.",
+    label: "Import active feedback via the MCP",
+    body: "Connect @fasterfixes/mcp to your AI agent and point it at the Marker.io CSV. The agent parses the file and calls the create_feedbacks tool to bulk-import items — up to 100 per call, with original timestamps preserved and attributed to a named reviewer. The import skips integration fan-out, so migrated items do not open GitHub issues.",
   },
   {
     label: "Know what you give up",
@@ -29,8 +29,8 @@ export function MarkerIoMigrationSection() {
             Switching from Marker.io
           </h2>
           <p className="text-muted-foreground mt-4 text-lg">
-            No one-click import button. Most React or Next.js projects can
-            still complete the migration in under an hour.
+            No one-click import button. Hand your AI agent the existing export
+            and the MCP backfills the dashboard for you.
           </p>
         </div>
 

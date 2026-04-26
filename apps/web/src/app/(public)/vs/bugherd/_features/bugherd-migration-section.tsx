@@ -8,8 +8,8 @@ export const migrationSteps = [
     body: "Run npm install @fasterfixes/react, drop the component into your layout, and generate a shareable link for each client. No account required for clients. Connect @fasterfixes/mcp to your coding agent if you use Claude Code, Cursor, or Codex.",
   },
   {
-    label: "Recreate active feedback",
-    body: "For now, this step is manual — use the BugHerd export as a reference and recreate active items in FasterFixes. Coming soon: a create_feedback MCP tool will let your AI agent read the export and backfill the dashboard for you. The roadmap is public.",
+    label: "Import active feedback via the MCP",
+    body: "Connect @fasterfixes/mcp to your AI agent and hand it the BugHerd CSV, XML, or JSON export. The agent parses the file and calls the create_feedbacks tool to bulk-import items — up to 100 per call, with original timestamps preserved and attributed to a named reviewer. The import skips integration fan-out, so migrated items do not open GitHub issues.",
   },
   {
     label: "Know what you give up",

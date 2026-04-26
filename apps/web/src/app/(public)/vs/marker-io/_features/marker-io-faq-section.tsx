@@ -157,7 +157,7 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "How do I move my Marker.io data over?",
     answer:
-      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the React widget in your project, and reconnect your GitHub integration. Today the migration is manual — a create_feedback MCP tool is on the roadmap so your AI agent will be able to read the export and backfill the dashboard for you.",
+      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the React widget in your project, and reconnect your GitHub integration. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
   },
   {
     question:
