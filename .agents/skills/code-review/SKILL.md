@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review and auto-fix code against project rules and conventions. Use after completing a feature, big refactor, or before committing. Invoke with /code-review. Checks modified/created files for file naming, React patterns, tRPC types, Zod schemas, forms, TailwindCSS colors, and code elegance, then directly fixes violations in place.
+description: Review and auto-fix code against project rules and conventions. Use after completing a feature, big refactor, or before committing. Invoke with /code-review. Checks modified/created files for file naming, React patterns, tRPC types, Zod schemas, forms, TailwindCSS colors, code elegance, and component size / single-responsibility / folder organization, then directly fixes violations in place (flags large refactors for user confirmation).
 ---
 
 # Code Review
@@ -25,13 +25,14 @@ Read each changed file and check against applicable rules:
 
 | File pattern | Rules to apply |
 |---|---|
-| Any `.ts` / `.tsx` | #1 File naming, #5 Language, #7 Code elegance |
+| Any `.ts` / `.tsx` | #1 File naming, #5 Language, #7 Code elegance, #8 Component size & folder org |
 | `*.client.tsx` | + #2 React components, #2 Query status matching |
 | `*.schema.ts` | + #3 Zod schemas (extend, nativeEnum for Prisma enums) |
 | `*.trpc.mutation.ts` / `*.trpc.query.ts` | + #6 tRPC OutputType reuse |
 | Any `.ts` / `.tsx` with hand-written types | + #6 tRPC OutputType reuse |
 | Any `.tsx` with `className` | + TailwindCSS semantic colors (enforced by linter) |
 | Any `.tsx` with form logic | + #4 Forms (react-hook-form, no useEffect) |
+| Any `_features/` folder that has 5+ flat files mixing flows | + #8 Folder organization (propose subfolder-per-flow split) |
 
 ### Step 4: Fix violations
 
