@@ -41,6 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${APP_URL}/vs/marker-io`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...docPages,
     {
       url: `${APP_URL}/privacy-policy`,

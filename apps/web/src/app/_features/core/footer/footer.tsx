@@ -15,6 +15,7 @@ const productLinks: { text: string; href: string; external?: boolean }[] = [
 
 const alternativesLinks: { text: string; href: Route }[] = [
   { text: "BugHerd alternative", href: "/vs/bugherd" as Route },
+  { text: "Marker.io alternative", href: "/vs/marker-io" as Route },
 ];
 
 const legalLinks = [
