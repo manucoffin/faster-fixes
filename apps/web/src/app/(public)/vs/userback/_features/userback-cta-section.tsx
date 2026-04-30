@@ -11,17 +11,17 @@ export function UserbackCtaSection() {
       <div className="container mx-auto px-4">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
-            Start with the open-source plan
+            Ready to switch from Userback?
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Free plan with no time limit. Self-host for full infrastructure
-            control or use the hosted version. No credit card required.
+            Try FasterFixes free — no time limit, no credit card. Self-host
+            for full infrastructure control or use the hosted version.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
             <Button asChild size="lg">
               <Link href={signupUrl}>
-                Get started free
+                Try FasterFixes free
                 <ArrowRightIcon />
               </Link>
             </Button>

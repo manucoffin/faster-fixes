@@ -11,16 +11,17 @@ export function BugherdCtaSection() {
       <div className="container mx-auto px-4">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
-            Start building on infrastructure you control
+            Ready to switch from BugHerd?
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Free plan, no credit card required. Self-host or use the cloud.
+            Try FasterFixes free — no credit card, no per-seat pricing.
+            Self-host on your own stack or use the hosted version.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
             <Button asChild size="lg">
               <Link href={signupUrl}>
-                Get started free
+                Try FasterFixes free
                 <ArrowRightIcon />
               </Link>
             </Button>

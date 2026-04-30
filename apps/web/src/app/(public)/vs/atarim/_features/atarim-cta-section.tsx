@@ -11,17 +11,17 @@ export function AtarimCtaSection() {
       <div className="container mx-auto px-4">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
-            Start with the open-source plan
+            Ready to switch from Atarim?
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Free to start — self-host for $0 or use hosted Pro at $20/month
-            flat. No per-seat pricing, no vendor lock-in.
+            Try FasterFixes free — self-host for $0 or use hosted Pro at
+            $20/month flat. No per-seat pricing, no vendor lock-in.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
             <Button asChild size="lg">
               <Link href={signupUrl}>
-                Get started free
+                Try FasterFixes free
                 <ArrowRightIcon />
               </Link>
             </Button>
