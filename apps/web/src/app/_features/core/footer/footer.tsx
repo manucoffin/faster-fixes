@@ -18,6 +18,7 @@ const alternativesLinks: { text: string; href: Route }[] = [
   { text: "Marker.io alternative", href: "/vs/marker-io" as Route },
   { text: "Usersnap alternative", href: "/vs/usersnap" as Route },
   { text: "Userback alternative", href: "/vs/userback" as Route },
+  { text: "Atarim alternative", href: "/vs/atarim" as Route },
 ];
 
 const legalLinks = [
