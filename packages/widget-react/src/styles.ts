@@ -33,17 +33,24 @@ export const triggerButtonStyle = (): React.CSSProperties => ({
   flexShrink: 0,
 });
 
-export const toolbarStyle = (): React.CSSProperties => ({
+export const toolbarStyle = (
+  state: "collapsed" | "expanded" = "collapsed",
+): React.CSSProperties => ({
+  position: "relative",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   gap: 4,
   backgroundColor: "var(--ff-accent)",
-  borderRadius: 24,
+  borderRadius: state === "expanded" ? 24 : "50%",
   padding: 4,
   width: 40,
+  height: state === "expanded" ? 112 : 40,
   boxShadow: SHADOW_SM,
-  overflow: "hidden",
+  cursor: state === "collapsed" ? "pointer" : "default",
+  overflow: "visible",
+  transition:
+    "height 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.22s ease, transform 0.16s ease, background-color 0.15s ease",
 });
 
 export const toolbarButtonStyle: React.CSSProperties = {
@@ -124,7 +131,7 @@ export const pinStyle = (statusColor: string): React.CSSProperties => ({
   justifyContent: "center",
   position: "fixed",
   zIndex: Z_PIN,
-  transition: "transform 0.15s ease",
+  transition: "transform 0.15s ease, opacity 0.15s ease",
   pointerEvents: "auto",
 });
 

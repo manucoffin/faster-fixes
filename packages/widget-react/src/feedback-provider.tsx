@@ -332,8 +332,7 @@ export function FeedbackProvider({
             ref={portalRef}
             data-ff-widget
             style={{
-              position: "relative",
-              zIndex: Z_WIDGET,
+              display: "contents",
               '--ff-accent': effectiveColor,
             } as React.CSSProperties}
             onPointerDown={(e) => e.stopPropagation()}

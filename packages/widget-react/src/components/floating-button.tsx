@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFeedbackContext } from "../context.js";
-import { triggerButtonStyle, toolbarStyle, toolbarButtonStyle } from "../styles.js";
+import { toolbarStyle, toolbarButtonStyle } from "../styles.js";
 
 // Inject keyframes once
 const STYLE_ID = "ff-widget-animations";
@@ -10,18 +10,6 @@ function ensureAnimationStyles() {
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = `
-    @keyframes ff-toolbar-expand {
-      0% {
-        max-height: 40px;
-        border-radius: 50%;
-        opacity: 0.8;
-      }
-      100% {
-        max-height: 200px;
-        border-radius: 24px;
-        opacity: 1;
-      }
-    }
     @keyframes ff-button-pop {
       from { transform: scale(0.6); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
@@ -45,6 +33,101 @@ function ensureAnimationStyles() {
     @keyframes ff-list-exit-right {
       from { transform: translateX(0); opacity: 1; }
       to { transform: translateX(-12px); opacity: 0; }
+    }
+    .ff-toolbar-trigger-content,
+    .ff-toolbar-controls-content {
+      position: absolute;
+      inset: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition:
+        opacity 150ms ease,
+        transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+        filter 220ms ease;
+    }
+    .ff-toolbar-trigger-content[data-visible="false"] {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.72);
+    }
+    .ff-toolbar-controls-content {
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ff-toolbar-controls-content[data-visible="false"] {
+      opacity: 0;
+      pointer-events: none;
+      filter: blur(6px);
+      transform: scale(0.72) translateY(6px);
+    }
+    .ff-toolbar-controls-content[data-visible="true"] {
+      opacity: 1;
+      pointer-events: auto;
+      filter: blur(0);
+      transform: scale(1) translateY(0);
+    }
+    .ff-toolbar-button-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ff-toolbar-tooltip {
+      position: absolute;
+      top: 50%;
+      width: max-content;
+      max-width: 180px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #18181b;
+      color: #f4f4f5;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+      font: 500 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 2147483647;
+      transition:
+        opacity 130ms ease,
+        transform 130ms ease,
+        visibility 130ms ease;
+      transition-delay: 650ms;
+    }
+    .ff-tooltip-left .ff-toolbar-tooltip {
+      right: calc(100% + 10px);
+      transform: translate(4px, -50%) scale(0.96);
+    }
+    .ff-tooltip-right .ff-toolbar-tooltip {
+      left: calc(100% + 10px);
+      transform: translate(-4px, -50%) scale(0.96);
+    }
+    .ff-tooltip-left:hover .ff-toolbar-tooltip {
+      transform: translate(0, -50%) scale(1);
+    }
+    .ff-tooltip-right:hover .ff-toolbar-tooltip {
+      transform: translate(0, -50%) scale(1);
+    }
+    .ff-toolbar-button-wrap:hover .ff-toolbar-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+    .ff-toolbar-tooltip-session .ff-toolbar-button-wrap:hover .ff-toolbar-tooltip {
+      transition-delay: 0ms;
+    }
+    .ff-toolbar-tooltips-hidden .ff-toolbar-tooltip {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transition: none !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ff-toolbar-trigger-content,
+      .ff-toolbar-controls-content,
+      .ff-toolbar-tooltip {
+        transition-duration: 1ms !important;
+        transform: none !important;
+        filter: none !important;
+      }
     }
   `;
   document.head.appendChild(style);
@@ -135,6 +218,50 @@ const CloseIcon = () => (
   </svg>
 );
 
+type ToolbarControlProps = {
+  label: string;
+  tooltipSide: "left" | "right";
+  interaction: "enabled" | "disabled";
+  tone?: "active" | "normal";
+  onClick: () => void;
+  children: React.ReactNode;
+};
+
+function ToolbarControl({
+  label,
+  tooltipSide,
+  interaction,
+  tone,
+  onClick,
+  children,
+}: ToolbarControlProps) {
+  const isEnabled = interaction === "enabled";
+
+  return (
+    <span className={`ff-toolbar-button-wrap ff-tooltip-${tooltipSide}`}>
+      <button
+        type="button"
+        style={{
+          ...toolbarButtonStyle,
+          backgroundColor: tone === "active"
+            ? "rgba(255,255,255,0.3)"
+            : "rgba(255,255,255,0.15)",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!isEnabled) return;
+          onClick();
+        }}
+        tabIndex={isEnabled ? 0 : -1}
+        aria-label={label}
+      >
+        {children}
+      </button>
+      <span className="ff-toolbar-tooltip">{label}</span>
+    </span>
+  );
+}
+
 export function FloatingButton() {
   const {
     mode,
@@ -150,12 +277,26 @@ export function FloatingButton() {
     setShowList,
     position,
   } = useFeedbackContext();
+  const [tooltipsHidden, setTooltipsHidden] = useState(false);
+  const [tooltipSessionActive, setTooltipSessionActive] = useState(false);
+  const tooltipSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Bottom/middle positions: toolbar grows upward, close button at bottom
   const expandsUp = position.includes("bottom") || position.includes("middle");
+  const tooltipSide = position.includes("left") ? "right" : "left";
 
   useEffect(() => {
     ensureAnimationStyles();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (tooltipSessionTimerRef.current !== null) {
+        clearTimeout(tooltipSessionTimerRef.current);
+      }
+    };
   }, []);
 
   const isActive = mode !== "idle";
@@ -169,6 +310,14 @@ export function FloatingButton() {
     setMode("annotating");
   }
 
+  function handleShellKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (isActive) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+
+    e.preventDefault();
+    handleTriggerClick();
+  }
+
   function handleClose() {
     setMode("idle");
     setShowList(false);
@@ -178,72 +327,65 @@ export function FloatingButton() {
     setScreenshotBlob(null);
   }
 
-  // Idle state: small circular button
-  if (!isActive) {
-    return (
-      <button
-        className={`ff-button ${classNames.button ?? ""}`}
-        style={{
-          ...triggerButtonStyle(),
-          animation: "ff-button-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        }}
-        onClick={handleTriggerClick}
-        aria-label="Start feedback"
-        type="button"
-        data-ff-widget
-      >
-        <MessageIcon />
-      </button>
-    );
+  function handleToolbarMouseEnter() {
+    if (tooltipSessionActive || tooltipSessionTimerRef.current !== null) return;
+
+    tooltipSessionTimerRef.current = setTimeout(() => {
+      tooltipSessionTimerRef.current = null;
+      setTooltipSessionActive(true);
+    }, 650);
+  }
+
+  function handleToolbarMouseLeave() {
+    if (tooltipSessionTimerRef.current !== null) {
+      clearTimeout(tooltipSessionTimerRef.current);
+      tooltipSessionTimerRef.current = null;
+    }
+    setTooltipSessionActive(false);
+    setTooltipsHidden(false);
+  }
+
+  function runToolbarAction(action: () => void) {
+    setTooltipsHidden(true);
+    action();
   }
 
   const listButton = (
-    <button
+    <ToolbarControl
       key="list"
-      type="button"
-      style={{
-        ...toolbarButtonStyle,
-        backgroundColor: showList
-          ? "rgba(255,255,255,0.3)"
-          : "rgba(255,255,255,0.15)",
-      }}
-      onClick={() => setShowList(!showList)}
-      aria-label={showList ? "Hide feedback list" : "Show feedback list"}
-      title={showList ? "Hide list" : "Show list"}
+      label={showList ? "Hide feedback list" : "Show feedback list"}
+      tooltipSide={tooltipSide}
+      interaction={isActive ? "enabled" : "disabled"}
+      tone={showList ? "active" : "normal"}
+      onClick={() => runToolbarAction(() => setShowList(!showList))}
     >
       <ListIcon />
-    </button>
+    </ToolbarControl>
   );
 
   const eyeButton = (
-    <button
+    <ToolbarControl
       key="eye"
-      type="button"
-      style={{
-        ...toolbarButtonStyle,
-        backgroundColor: showPins
-          ? "rgba(255,255,255,0.15)"
-          : "rgba(255,255,255,0.3)",
-      }}
-      onClick={() => setShowPins(!showPins)}
-      aria-label={showPins ? "Hide all feedback" : "Show all feedback"}
-      title={showPins ? "Hide markers" : "Show markers"}
+      label={showPins ? "Hide markers" : "Show markers"}
+      tooltipSide={tooltipSide}
+      interaction={isActive ? "enabled" : "disabled"}
+      tone={!showPins ? "active" : "normal"}
+      onClick={() => runToolbarAction(() => setShowPins(!showPins))}
     >
       {showPins ? <EyeIcon /> : <EyeOffIcon />}
-    </button>
+    </ToolbarControl>
   );
 
   const closeButton = (
-    <button
+    <ToolbarControl
       key="close"
-      type="button"
-      style={toolbarButtonStyle}
-      onClick={handleClose}
-      aria-label="Exit feedback mode"
-      title="Close"
+      label="Exit feedback mode"
+      tooltipSide={tooltipSide}
+      interaction={isActive ? "enabled" : "disabled"}
+      onClick={() => runToolbarAction(handleClose)}
     >
       <CloseIcon />
-    </button>
+    </ToolbarControl>
   );
 
   // Close button stays nearest to where the trigger button was
@@ -251,17 +393,38 @@ export function FloatingButton() {
     ? [listButton, eyeButton, closeButton]
     : [closeButton, listButton, eyeButton];
 
-  // Active state: expanded vertical toolbar
   return (
     <div
-      className={`ff-button ${classNames.button ?? ""}`}
+      className={`ff-button ff-toolbar-shell ${classNames.button ?? ""}`}
       style={{
-        ...toolbarStyle(),
-        animation: "ff-toolbar-expand 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        ...toolbarStyle(isActive ? "expanded" : "collapsed"),
+        animation: "ff-button-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}
+      onClick={!isActive ? handleTriggerClick : undefined}
+      onKeyDown={handleShellKeyDown}
+      onMouseEnter={handleToolbarMouseEnter}
+      onMouseLeave={handleToolbarMouseLeave}
+      role={!isActive ? "button" : undefined}
+      tabIndex={!isActive ? 0 : undefined}
+      aria-label={!isActive ? "Start feedback" : undefined}
       data-ff-widget
     >
-      {buttons}
+      <div
+        className="ff-toolbar-trigger-content"
+        data-visible={!isActive}
+        aria-hidden={isActive}
+      >
+        <MessageIcon />
+      </div>
+      <div
+        className={`ff-toolbar-controls-content ${
+          tooltipSessionActive ? "ff-toolbar-tooltip-session" : ""
+        } ${tooltipsHidden ? "ff-toolbar-tooltips-hidden" : ""}`}
+        data-visible={isActive}
+        aria-hidden={!isActive}
+      >
+        {buttons}
+      </div>
     </div>
   );
 }

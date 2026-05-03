@@ -15,7 +15,7 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
 } from "../styles.js";
-import { clamp } from "../utils.js";
+import { clamp, createPinPlacementMetadata } from "../utils.js";
 
 const FADEOUT_DURATION = 200;
 
@@ -96,18 +96,25 @@ export function CommentPopover() {
     if (selectedElement) {
       const result = generateSelectors(selectedElement);
       selector = result.best;
-      const context = captureElementContext(selectedElement, result.strategies);
-      metadata = { ...context };
+      const nextMetadata: Record<string, unknown> = {
+        ...captureElementContext(selectedElement, result.strategies),
+      };
 
       if (clickCoords) {
         const rect = selectedElement.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
-          metadata.pinAnchor = {
+          nextMetadata.pinAnchor = {
             x: clamp((clickCoords.x - rect.left) / rect.width, 0, 1),
             y: clamp((clickCoords.y - rect.top) / rect.height, 0, 1),
           };
+          nextMetadata.pinPlacement = createPinPlacementMetadata(
+            selectedElement,
+            clickCoords,
+          );
         }
       }
+
+      metadata = nextMetadata;
     }
 
     try {

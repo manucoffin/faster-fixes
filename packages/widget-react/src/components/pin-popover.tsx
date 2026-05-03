@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useFloating,
   autoUpdate,
@@ -17,6 +17,8 @@ import {
   buttonBaseStyle,
 } from "../styles.js";
 
+const FADEOUT_DURATION = 160;
+
 export function PinPopover() {
   const {
     activeFeedback,
@@ -34,6 +36,11 @@ export function PinPopover() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [renderedFeedback, setRenderedFeedback] =
+    useState<typeof activeFeedback>(activeFeedback);
+  const [exiting, setExiting] = useState(false);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const frozenStyleRef = useRef<React.CSSProperties | null>(null);
 
   // Reset local state when switching between feedback items
   useEffect(() => {
@@ -46,12 +53,13 @@ export function PinPopover() {
   }, [activeFeedback?.id]);
 
   // Anchor popover to the pin element (always visible, regardless of target element state)
+  const currentFeedback = activeFeedback ?? renderedFeedback;
   const pinEl = activeFeedback
     ? document.querySelector(`[data-ff-pin-id="${activeFeedback.id}"]`)
     : null;
 
   const { refs, floatingStyles } = useFloating({
-    open: !!activeFeedback,
+    open: !!activeFeedback || exiting,
     elements: {
       reference: pinEl,
     },
@@ -60,6 +68,40 @@ export function PinPopover() {
     middleware: [offset(12), flip(), shift({ padding: 8 })],
     placement: "bottom",
   });
+
+  useEffect(() => {
+    if (activeFeedback) {
+      if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
+      frozenStyleRef.current = null;
+      setRenderedFeedback(activeFeedback);
+      setExiting(false);
+      return;
+    }
+
+    if (!renderedFeedback) return;
+
+    const floatingEl = refs.floating.current;
+    if (floatingEl) {
+      const rect = floatingEl.getBoundingClientRect();
+      frozenStyleRef.current = {
+        position: "fixed",
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+      };
+    }
+
+    setExiting(true);
+    fadeTimerRef.current = setTimeout(() => {
+      setRenderedFeedback(null);
+      setExiting(false);
+      frozenStyleRef.current = null;
+    }, FADEOUT_DURATION);
+
+    return () => {
+      if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
+    };
+  }, [activeFeedback, renderedFeedback, refs.floating]);
 
   // Close on outside click
   const handleOutsideClick = useCallback(
@@ -82,13 +124,13 @@ export function PinPopover() {
     };
   }, [activeFeedback, handleOutsideClick]);
 
-  if (!activeFeedback) return null;
+  if (!currentFeedback) return null;
 
   const statusColor =
-    STATUS_COLORS[activeFeedback.status as FeedbackStatus] ?? STATUS_COLORS.new;
+    STATUS_COLORS[currentFeedback.status as FeedbackStatus] ?? STATUS_COLORS.new;
 
   function handleStartEdit() {
-    setEditComment(activeFeedback!.comment);
+    setEditComment(currentFeedback!.comment);
     setIsEditing(true);
     setError(null);
   }
@@ -100,7 +142,7 @@ export function PinPopover() {
 
     try {
       await client.updateFeedback(
-        activeFeedback!.id,
+        currentFeedback!.id,
         { comment: editComment.trim() },
         reviewerToken,
       );
@@ -119,7 +161,7 @@ export function PinPopover() {
     setError(null);
 
     try {
-      await client.deleteFeedback(activeFeedback!.id, reviewerToken);
+      await client.deleteFeedback(currentFeedback!.id, reviewerToken);
       setActiveFeedback(null);
       await refreshFeedback();
     } catch (err) {
@@ -139,7 +181,18 @@ export function PinPopover() {
     <div
       ref={refs.setFloating}
       className={`ff-popover ${classNames.popover ?? ""}`}
-      style={{ ...popoverStyle, ...floatingStyles }}
+      style={{
+        ...popoverStyle,
+        ...(exiting && frozenStyleRef.current
+          ? frozenStyleRef.current
+          : floatingStyles),
+        ...(exiting
+          ? {
+              animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards`,
+              pointerEvents: "none",
+            }
+          : undefined),
+      }}
       data-ff-widget
     >
       {/* Header with status */}
@@ -162,7 +215,7 @@ export function PinPopover() {
             }}
           />
           <span style={{ fontSize: 12, color: "#71717a" }}>
-            {activeFeedback.reviewer.name}
+            {currentFeedback.reviewer.name}
           </span>
         </div>
         <button
@@ -256,7 +309,7 @@ export function PinPopover() {
       ) : (
         <>
           <p style={{ margin: "0 0 10px", whiteSpace: "pre-wrap" }}>
-            {activeFeedback.comment}
+            {currentFeedback.comment}
           </p>
           <div style={{ display: "flex", gap: 8 }}>
             <button

@@ -3,15 +3,22 @@ import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
 import type { FeedbackItem, FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import { pinStyle } from "../styles.js";
-import { clamp } from "../utils.js";
+import {
+  clamp,
+  getPinAnchor,
+  getPinPlacementMetadata,
+  getViewportAnchoringKind,
+} from "../utils.js";
+import type { PinPlacementMode } from "../utils.js";
 
 type FeedbackPinProps = {
   item: FeedbackItem;
 };
 
-type PinAnchor = {
-  x: number;
-  y: number;
+type PinPosition = {
+  mode: PinPlacementMode;
+  top: number;
+  left: number;
 };
 
 const PinIcon = () => (
@@ -26,29 +33,10 @@ const PinIcon = () => (
   </svg>
 );
 
-function getPinAnchor(metadata: FeedbackItem["metadata"]): PinAnchor | null {
-  const pinAnchor = (metadata as Record<string, unknown> | null)?.pinAnchor;
-  if (!pinAnchor || typeof pinAnchor !== "object") {
-    return null;
-  }
-
-  const x = (pinAnchor as Record<string, unknown>).x;
-  const y = (pinAnchor as Record<string, unknown>).y;
-
-  if (typeof x !== "number" || typeof y !== "number") {
-    return null;
-  }
-
-  return { x: clamp(x, 0, 1), y: clamp(y, 0, 1) };
-}
-
 export function FeedbackPin({ item }: FeedbackPinProps) {
   const { classNames, setActiveFeedback, activeFeedback, setHighlightSelector } =
     useFeedbackContext();
-  const [position, setPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
+  const [position, setPosition] = useState<PinPosition | null>(null);
 
   const PIN_SIZE = 24;
 
@@ -68,16 +56,14 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
         return;
       }
 
-      // Hide pin if the element has scrolled out of the viewport
-      if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
-        setPosition(null);
-        return;
-      }
-
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const anchorX = pinAnchor ? rect.left + rect.width * pinAnchor.x : rect.right;
       const anchorY = pinAnchor ? rect.top + rect.height * pinAnchor.y : rect.top;
+      const storedPlacement = getPinPlacementMetadata(item.metadata);
+      const targetKind = storedPlacement?.targetKind ?? getViewportAnchoringKind(el);
+      const mode: PinPlacementMode =
+        storedPlacement?.mode ?? (targetKind === "normal" ? "document" : "viewport");
 
       // Horizontal: prefer the click side for newer pins, otherwise use the element edge.
       let left = anchorX + 4;
@@ -90,9 +76,13 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
       if (!pinAnchor && top + PIN_SIZE > vh) {
         top = rect.bottom - PIN_SIZE;
       }
-      top = clamp(top, 0, vh - PIN_SIZE);
+      top = mode === "viewport" ? clamp(top, 0, vh - PIN_SIZE) : top;
 
-      setPosition({ top, left });
+      setPosition({
+        mode,
+        top: mode === "document" ? top + window.scrollY : top,
+        left: mode === "document" ? left + window.scrollX : left,
+      });
       return;
     }
 
@@ -106,16 +96,29 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
 
     // Fall back to stored coordinates
     if (item.clickX != null && item.clickY != null) {
+      const storedPlacement = getPinPlacementMetadata(item.metadata);
+      if (storedPlacement?.mode === "document" && storedPlacement.documentPoint) {
+        setPosition({
+          mode: "document",
+          top: storedPlacement.documentPoint.y,
+          left: storedPlacement.documentPoint.x,
+        });
+        return;
+      }
+
       setPosition({
+        mode: "viewport",
         top: item.clickY,
         left: item.clickX,
       });
+      return;
     }
+
+    setPosition(null);
   }, [item.selector, item.clickX, item.clickY, item.metadata]);
 
   useEffect(() => {
     updatePosition();
-    window.addEventListener("scroll", updatePosition, { passive: true });
     window.addEventListener("resize", updatePosition, { passive: true });
     window.addEventListener("load", updatePosition);
 
@@ -132,7 +135,6 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     observer.observe(document.body, { childList: true });
 
     return () => {
-      window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("load", updatePosition);
       cancelAnimationFrame(raf);
@@ -152,11 +154,13 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
       className={`ff-pin ${classNames.pin ?? ""}`}
       style={{
         ...pinStyle(statusColor),
+        position: position.mode === "document" ? "absolute" : "fixed",
         top: position.top,
         left: position.left,
         transform: isActive ? "scale(1.2)" : "scale(1)",
       }}
       data-ff-widget
+      data-ff-pin-mode={position.mode}
       data-ff-pin-id={item.id}
       onMouseEnter={() => {
         if (item.selector) setHighlightSelector(item.selector);
