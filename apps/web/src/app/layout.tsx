@@ -78,7 +78,7 @@ export default function RootLayout({
                   apiKey={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
                   color="var(--primary)"
-                  position="bottom-right"
+                  position="bottom-left"
                 >
                   <RootProvider>{children}</RootProvider>
                 </FeedbackProvider>
