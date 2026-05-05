@@ -13,7 +13,7 @@ const STATUS_OPTIONS = [
   { value: "new", label: "New" },
   { value: "in_progress", label: "In Progress" },
   { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" },
+  { value: "closed", label: "Archived" },
 ];
 
 type StatusSelectProps = {
