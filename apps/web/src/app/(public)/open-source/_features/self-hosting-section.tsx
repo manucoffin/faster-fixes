@@ -66,6 +66,17 @@ export function SelfHostingSection() {
             </Link>
           </Button>
         </div>
+
+        <p className="text-muted-foreground mt-6 text-center text-sm">
+          Already on GitHub? Pair the self-hosted dashboard with the{" "}
+          <Link
+            href={"/integrations/github" as Route}
+            className="text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            GitHub integration
+          </Link>{" "}
+          to push every feedback item straight into your repo as an issue.
+        </p>
       </div>
     </section>
   );

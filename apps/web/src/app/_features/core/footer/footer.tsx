@@ -13,6 +13,10 @@ const productLinks: { text: string; href: string; external?: boolean }[] = [
   { text: "Support", href: "mailto:support@faster-fixes.com", external: true },
 ];
 
+const integrationLinks: { text: string; href: Route }[] = [
+  { text: "GitHub integration", href: "/integrations/github" as Route },
+];
+
 const alternativesLinks: { text: string; href: Route }[] = [
   { text: "BugHerd alternative", href: "/vs/bugherd" as Route },
   { text: "Marker.io alternative", href: "/vs/marker-io" as Route },
@@ -34,7 +38,7 @@ export function Footer() {
   return (
     <footer className="w-full place-self-end border-t">
       <div className="mx-auto px-4 pt-16 pb-6 lg:pt-24">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr]">
           <div>
             <div className="flex justify-center sm:justify-start">
               <AppLogo />
@@ -49,7 +53,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="text-center sm:text-left">
               <p className="text-lg font-semibold">Product</p>
               <ul className="mt-8 space-y-4 text-sm">
@@ -70,6 +74,22 @@ export function Footer() {
                         <AnimatedText>{text}</AnimatedText>
                       </Link>
                     )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="text-center sm:text-left">
+              <p className="text-lg font-semibold">Integrations</p>
+              <ul className="mt-8 space-y-4 text-sm">
+                {integrationLinks.map(({ text, href }) => (
+                  <li key={text}>
+                    <Link
+                      href={href}
+                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                    >
+                      <AnimatedText>{text}</AnimatedText>
+                    </Link>
                   </li>
                 ))}
               </ul>
