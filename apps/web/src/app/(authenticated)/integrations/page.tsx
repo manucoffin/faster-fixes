@@ -2,6 +2,7 @@ import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dash
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { AgentTokensSection } from "./_features/agent-tokens/agent-tokens-section.client";
 import { GitHubIntegrationSection } from "./_features/github/github-integration-section.client";
+import { LinearIntegrationSection } from "./_features/linear/linear-integration-section.client";
 
 export default function IntegrationsPage() {
   return (
@@ -14,6 +15,15 @@ export default function IntegrationsPage() {
           cardClassName="lg:max-w-lg"
         >
           <GitHubIntegrationSection />
+        </DashboardSection>
+
+        <DashboardSection
+          title="Linear"
+          description="Connect your Linear workspace to mirror feedback into Linear as issues."
+          cardTitle="Linear integration"
+          cardClassName="lg:max-w-lg"
+        >
+          <LinearIntegrationSection />
         </DashboardSection>
 
         <DashboardSection

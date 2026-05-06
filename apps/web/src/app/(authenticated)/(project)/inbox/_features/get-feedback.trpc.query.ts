@@ -50,6 +50,14 @@ export const getFeedback = protectedProcedure
             issueState: true,
           },
         },
+        linearIssueLink: {
+          select: {
+            issueId: true,
+            issueIdentifier: true,
+            issueUrl: true,
+            issueStateType: true,
+          },
+        },
       },
     });
 
@@ -82,6 +90,7 @@ export const getFeedback = protectedProcedure
           : null,
         metadata: f.metadata as Record<string, unknown> | null,
         issueLink: f.issueLink,
+        linearIssueLink: f.linearIssueLink,
       })),
     );
   });

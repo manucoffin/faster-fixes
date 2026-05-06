@@ -5,7 +5,7 @@ import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { z } from "zod";
 
-export const createIssueForFeedback = protectedProcedure
+export const createLinearIssueForFeedback = protectedProcedure
   .input(z.object({ feedbackId: z.string() }))
   .mutation(async ({ input, ctx }) => {
     const { prisma, session } = ctx;
@@ -16,15 +16,18 @@ export const createIssueForFeedback = protectedProcedure
         project: {
           select: {
             organizationId: true,
-            gitHubLink: { select: { id: true } },
+            linearLink: { select: { id: true } },
           },
         },
-        issueLink: { select: { id: true } },
+        linearIssueLink: { select: { id: true } },
       },
     });
 
     if (!feedback) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Feedback not found." });
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Feedback not found.",
+      });
     }
 
     const membership = await prisma.member.findFirst({
@@ -38,26 +41,28 @@ export const createIssueForFeedback = protectedProcedure
       throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
     }
 
-    if (feedback.issueLink) {
+    if (feedback.linearIssueLink) {
       throw new TRPCError({
         code: "CONFLICT",
-        message: "A GitHub issue already exists for this feedback.",
+        message: "A Linear issue already exists for this feedback.",
       });
     }
 
-    if (!feedback.project.gitHubLink) {
+    if (!feedback.project.linearLink) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "No GitHub repository linked to this project.",
+        message: "No Linear team linked to this project.",
       });
     }
 
     await inngest.send({
       name: "feedback/integration-issue-requested",
-      data: { feedbackId: input.feedbackId, target: "github" },
+      data: { feedbackId: input.feedbackId, target: "linear" },
     });
 
     return { queued: true };
   });
 
-export type CreateIssueForFeedbackOutput = inferProcedureOutput<typeof createIssueForFeedback>;
+export type CreateLinearIssueForFeedbackOutput = inferProcedureOutput<
+  typeof createLinearIssueForFeedback
+>;

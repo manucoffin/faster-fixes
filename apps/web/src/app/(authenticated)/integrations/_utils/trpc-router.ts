@@ -5,6 +5,8 @@ import { getAgentTokens } from "../_features/agent-tokens/get-agent-tokens.trpc.
 import { revokeAgentToken } from "../_features/agent-tokens/revoke-agent-token.trpc.mutation";
 import { disconnectGitHub } from "../_features/github/disconnect-github.trpc.mutation";
 import { getGitHubInstallation } from "../_features/github/get-github-installation.trpc.query";
+import { disconnectLinear } from "../_features/linear/disconnect-linear.trpc.mutation";
+import { getLinearInstallation } from "../_features/linear/get-linear-installation.trpc.query";
 
 export const integrationsRouter = router({
   agentToken: router({
@@ -16,5 +18,9 @@ export const integrationsRouter = router({
   github: router({
     getInstallation: getGitHubInstallation,
     disconnect: disconnectGitHub,
+  }),
+  linear: router({
+    getInstallation: getLinearInstallation,
+    disconnect: disconnectLinear,
   }),
 });

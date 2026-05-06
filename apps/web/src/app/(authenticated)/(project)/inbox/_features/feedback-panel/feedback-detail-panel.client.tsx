@@ -13,9 +13,9 @@ import { ExternalLink, ImageOff } from "lucide-react";
 import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { AssigneeSelect } from "./assignee-select.client";
 import { CopyFeedbackMarkdown } from "./copy-feedback-markdown.client";
-import { GitHubIssueBadge } from "./github-issue-badge.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
 import { StatusSelect } from "./status-select.client";
+import { TrackersSection } from "./trackers-section.client";
 
 type FeedbackItem = GetFeedbackOutput[number];
 
@@ -25,6 +25,7 @@ type FeedbackDetailPanelProps = {
   onOpenChange: (open: boolean) => void;
   projectId: string;
   hasGitHubLink?: boolean;
+  hasLinearLink?: boolean;
 };
 
 function formatBrowserMeta(f: FeedbackItem) {
@@ -47,6 +48,7 @@ export function FeedbackDetailPanel({
   onOpenChange,
   projectId,
   hasGitHubLink = false,
+  hasLinearLink = false,
 }: FeedbackDetailPanelProps) {
   if (!feedback) return null;
 
@@ -173,11 +175,13 @@ export function FeedbackDetailPanel({
             value={feedback.status}
           />
 
-          <GitHubIssueBadge
-            issueLink={feedback.issueLink}
+          <TrackersSection
             feedbackId={feedback.id}
-            hasGitHubLink={hasGitHubLink}
             projectId={projectId}
+            hasGitHubLink={hasGitHubLink}
+            hasLinearLink={hasLinearLink}
+            githubIssueLink={feedback.issueLink}
+            linearIssueLink={feedback.linearIssueLink}
           />
 
           <AssigneeSelect
