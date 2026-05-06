@@ -1,6 +1,6 @@
 # Encrypt Tracker tokens at rest, even though Better Auth stores user OAuth tokens in plaintext
 
-`LinearInstallation.accessToken`, `refreshToken`, and `webhookSecret` are encrypted at rest with AES-256-GCM, keyed by `LINEAR_TOKEN_ENCRYPTION_KEY`. The Better Auth `Account` model in the same database stores user `accessToken` / `refreshToken` as plaintext.
+`LinearInstallation.accessToken` and `refreshToken` are encrypted at rest with AES-256-GCM, keyed by `LINEAR_TOKEN_ENCRYPTION_KEY`. The Better Auth `Account` model in the same database stores user `accessToken` / `refreshToken` as plaintext. (The Linear webhook signing secret is app-level, lives in env as `LINEAR_WEBHOOK_SIGNING_SECRET`, and is therefore not in DB scope.)
 
 ## Why
 
