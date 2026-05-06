@@ -1,9 +1,17 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
-import { Label } from "@workspace/ui/components/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
 import {
   Select,
   SelectContent,
@@ -11,8 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  LinkLinearTeamSchema,
+  type LinkLinearTeamSchemaType,
+} from "./link-team.schema";
 import type { ListAccessibleLinearTeamsOutput } from "./list-accessible-teams.trpc.query";
 
 type TeamPickerProps = {
@@ -32,9 +44,21 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const [teamId, setTeamId] = useState<string>("");
-  const [stateId, setStateId] = useState<string>("");
-  const [priority, setPriority] = useState<0 | 1 | 2 | 3 | 4>(0);
+  const form = useForm<LinkLinearTeamSchemaType>({
+    resolver: zodResolver(LinkLinearTeamSchema),
+    defaultValues: {
+      projectId,
+      teamId: "",
+      teamKey: "",
+      teamName: "",
+      defaultStateId: "",
+      defaultLabelIds: [],
+      defaultPriority: 0,
+      autoCreateIssues: true,
+    },
+  });
+
+  const teamId = form.watch("teamId");
 
   const statesQuery = useQuery(
     trpc.authenticated.projects.linear.listTeamStates.queryOptions(
@@ -53,99 +77,130 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
         });
         toast.success("Team linked.");
       },
-      onError: (error) => toast.error(error.message),
+      onError: (error) => {
+        form.setError("root", { message: error.message });
+        toast.error(error.message);
+      },
     }),
   );
 
-  const handleLink = () => {
-    const team = teams.find((t) => t.id === teamId);
-    if (!team || !stateId) return;
-
-    linkMutation.mutate({
-      projectId,
-      teamId: team.id,
-      teamKey: team.key,
-      teamName: team.name,
-      defaultStateId: stateId,
-      defaultLabelIds: [],
-      defaultPriority: priority,
-      autoCreateIssues: true,
-    });
+  const onSubmit = (data: LinkLinearTeamSchemaType) => {
+    linkMutation.mutate(data);
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label className="text-sm">Team</Label>
-        <Select
-          value={teamId}
-          onValueChange={(v) => {
-            setTeamId(v);
-            setStateId("");
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a team" />
-          </SelectTrigger>
-          <SelectContent>
-            {teams.map((team) => (
-              <SelectItem key={team.id} value={team.id}>
-                {team.key} · {team.name}
-              </SelectItem>
-            ))}
-            {teams.length === 0 && (
-              <SelectItem value="_empty" disabled>
-                No teams available
-              </SelectItem>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {teamId && (
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-sm">Default state for new feedback</Label>
-          <Select value={stateId} onValueChange={setStateId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a state" />
-            </SelectTrigger>
-            <SelectContent>
-              {statesQuery.data?.map((state) => (
-                <SelectItem key={state.id} value={state.id}>
-                  {state.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-1.5">
-        <Label className="text-sm">Default priority</Label>
-        <Select
-          value={String(priority)}
-          onValueChange={(v) => setPriority(Number(v) as 0 | 1 | 2 | 3 | 4)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PRIORITY_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={String(opt.value)}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button
-        onClick={handleLink}
-        disabled={!teamId || !stateId || linkMutation.isPending}
-        className="w-fit"
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
       >
-        Link team
-      </Button>
-    </div>
+        <FormField
+          control={form.control}
+          name="teamId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Team</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  const team = teams.find((t) => t.id === value);
+                  if (!team) return;
+                  field.onChange(team.id);
+                  // Team change invalidates dependent IDs from the previous team.
+                  form.setValue("teamKey", team.key);
+                  form.setValue("teamName", team.name);
+                  form.setValue("defaultStateId", "");
+                  form.setValue("defaultLabelIds", []);
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a team" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {teams.map((team) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.key} · {team.name}
+                    </SelectItem>
+                  ))}
+                  {teams.length === 0 && (
+                    <SelectItem value="_empty" disabled>
+                      No teams available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {teamId && (
+          <FormField
+            control={form.control}
+            name="defaultStateId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default state for new feedback</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a state" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {statesQuery.data?.map((state) => (
+                      <SelectItem key={state.id} value={state.id}>
+                        {state.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <FormField
+          control={form.control}
+          name="defaultPriority"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Default priority</FormLabel>
+              <Select
+                value={String(field.value)}
+                onValueChange={(value) =>
+                  field.onChange(Number(value) as 0 | 1 | 2 | 3 | 4)
+                }
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PRIORITY_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={String(opt.value)}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          disabled={linkMutation.isPending}
+          className="w-fit"
+        >
+          {linkMutation.isPending ? "Linking..." : "Link team"}
+        </Button>
+      </form>
+    </Form>
   );
 }

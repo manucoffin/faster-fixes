@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
+import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 
 export function LinearNotConnected() {
   return (
@@ -10,7 +11,10 @@ export function LinearNotConnected() {
         into Linear as issues with bidirectional status sync.
       </p>
       <Button asChild>
-        <a href="/api/linear/install">Connect to Linear</a>
+        <a href="/api/linear/install">
+          <LinearIcon className="size-4" />
+          Connect to Linear
+        </a>
       </Button>
     </div>
   );

@@ -10,13 +10,13 @@ export const LinearPrioritySchema = z.union([
 
 export const LinkLinearTeamSchema = z.object({
   projectId: z.string(),
-  teamId: z.string(),
-  teamKey: z.string(),
-  teamName: z.string(),
-  defaultStateId: z.string(),
-  defaultLabelIds: z.array(z.string()).default([]),
-  defaultPriority: LinearPrioritySchema.default(0),
-  autoCreateIssues: z.boolean().default(true),
+  teamId: z.string().min(1, "Select a team."),
+  teamKey: z.string().min(1),
+  teamName: z.string().min(1),
+  defaultStateId: z.string().min(1, "Select a default state."),
+  defaultLabelIds: z.array(z.string()),
+  defaultPriority: LinearPrioritySchema,
+  autoCreateIssues: z.boolean(),
 });
 
 export type LinkLinearTeamSchemaType = z.infer<typeof LinkLinearTeamSchema>;

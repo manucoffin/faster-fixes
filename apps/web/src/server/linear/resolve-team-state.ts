@@ -1,6 +1,6 @@
+import type { FeedbackStatus } from "@/types/feedback-status";
 import type { LinearClient } from "@linear/sdk";
 import {
-  type FeedbackStatus,
   type LinearStateType,
   linearStateTypeForFeedbackStatus,
 } from "./state-mapping";

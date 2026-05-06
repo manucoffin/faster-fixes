@@ -1,28 +1,18 @@
 "use client";
 
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 import { GitHubIssueBadge } from "./github-issue-badge.client";
 import { LinearIssueBadge } from "./linear-issue-badge.client";
 
-type GitHubIssueLink = {
-  issueNumber: number;
-  issueUrl: string;
-  issueState: string;
-};
-
-type LinearIssueLink = {
-  issueId: string;
-  issueIdentifier: string;
-  issueUrl: string;
-  issueStateType: string;
-};
+type FeedbackItem = GetFeedbackOutput[number];
 
 type TrackersSectionProps = {
   feedbackId: string;
   projectId: string;
   hasGitHubLink: boolean;
   hasLinearLink: boolean;
-  githubIssueLink: GitHubIssueLink | null;
-  linearIssueLink: LinearIssueLink | null;
+  githubIssueLink: FeedbackItem["issueLink"];
+  linearIssueLink: FeedbackItem["linearIssueLink"];
 };
 
 export function TrackersSection({

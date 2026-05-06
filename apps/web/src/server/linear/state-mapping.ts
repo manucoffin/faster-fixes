@@ -1,3 +1,5 @@
+import type { FeedbackStatus } from "@/types/feedback-status";
+
 // Linear workflow state types are user-customizable in name but the type taxonomy
 // (triage|backlog|unstarted|started|completed|canceled) is fixed by Linear's API.
 // Always map by type, never by name.
@@ -8,10 +10,6 @@ export type LinearStateType =
   | "started"
   | "completed"
   | "canceled";
-
-// Faster Fixes feedback statuses. The literal "closed" is rendered as "Archived" in the UI;
-// see CONTEXT.md for the canonical glossary.
-export type FeedbackStatus = "new" | "in_progress" | "resolved" | "closed";
 
 export function feedbackStatusFromLinearStateType(
   type: LinearStateType,

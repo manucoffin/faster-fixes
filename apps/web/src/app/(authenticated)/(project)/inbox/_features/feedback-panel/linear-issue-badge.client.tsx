@@ -3,17 +3,12 @@
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
+import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { toast } from "sonner";
-
-type LinearIssueLink = {
-  issueId: string;
-  issueIdentifier: string;
-  issueUrl: string;
-  issueStateType: string;
-};
+import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
 
 type LinearIssueBadgeProps = {
-  issueLink: LinearIssueLink | null;
+  issueLink: GetFeedbackOutput[number]["linearIssueLink"];
   feedbackId: string;
   hasLinearLink: boolean;
   projectId: string;
@@ -76,6 +71,7 @@ export function LinearIssueBadge({
       onClick={() => createIssueMutation.mutate({ feedbackId })}
       disabled={createIssueMutation.isPending}
     >
+      <LinearIcon className="mr-1 size-3.5" />
       Create Linear issue
     </Button>
   );
