@@ -16,7 +16,7 @@ const capabilities = [
   },
   {
     title: "Status stays in sync, both ways",
-    body: "Feedback status in Faster Fixes (new → in_progress → resolved → closed) maps directly to GitHub issue state. Close or reopen an issue in GitHub and it reflects back in Faster Fixes. A 30-second deduplication window prevents sync loops.",
+    body: "Status changes flow both ways between Faster Fixes and GitHub. Close or reopen an issue in either system and the other side stays in sync.",
   },
   {
     title: "Issue badge in your feedback inbox",
