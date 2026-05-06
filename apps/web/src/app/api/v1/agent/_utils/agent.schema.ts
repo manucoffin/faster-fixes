@@ -1,11 +1,7 @@
+import { FeedbackStatusEnum } from "@/types/feedback-status";
 import { z } from "zod";
 
-export const FeedbackStatusEnum = z.enum([
-  "new",
-  "in_progress",
-  "resolved",
-  "closed",
-]);
+export { FeedbackStatusEnum };
 
 export const ListFeedbacksQuerySchema = z.object({
   status: FeedbackStatusEnum.optional(),

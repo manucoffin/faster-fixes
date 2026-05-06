@@ -9,6 +9,7 @@ import {
   resolveStateIdForFeedback,
 } from "@/server/linear/resolve-team-state";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
+import type { FeedbackStatus } from "@/types/feedback-status";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 
@@ -64,11 +65,7 @@ export const createLinearIssue = inngest.createFunction(
     const resolved = await resolveStateIdForFeedback({
       client,
       link,
-      feedbackStatus: feedback.status as
-        | "new"
-        | "in_progress"
-        | "resolved"
-        | "closed",
+      feedbackStatus: feedback.status as FeedbackStatus,
     });
 
     if (!resolved) {

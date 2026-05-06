@@ -1,6 +1,7 @@
 import { decryptToken } from "@/server/linear/crypto";
 import { getLinearClient } from "@/server/linear/linear-client";
 import { resolveStateIdForFeedback } from "@/server/linear/resolve-team-state";
+import type { FeedbackStatus } from "@/types/feedback-status";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 
@@ -48,11 +49,7 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
     const resolved = await resolveStateIdForFeedback({
       client,
       link: issueLink.projectLinearLink,
-      feedbackStatus: newStatus as
-        | "new"
-        | "in_progress"
-        | "resolved"
-        | "closed",
+      feedbackStatus: newStatus as FeedbackStatus,
     });
 
     if (!resolved) return { skipped: "no_team_states_available" };
