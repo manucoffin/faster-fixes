@@ -344,29 +344,41 @@ The right tool depends on your team structure and workflow — not on feature ch
 
 ## FAQ
 
-**Is there a free BugHerd alternative?**
-
-Yes. Faster Fixes has a free plan (1 project, 50 feedback items, 1 member) with no time limit. Userback's free plan covers 2 projects with unlimited feedback collection, though feedback expires after 7 days. Atarim and Ruttl also have free tiers. BugHerd itself has no free plan — only a 7-day trial.
-
-**What is the best open-source BugHerd alternative?**
-
-Faster Fixes is the only open-source option in this category. The dashboard, API, and MCP server are licensed under AGPL-3.0; the widget packages are MIT. You can self-host the entire stack at no cost. No other tool on this list offers a comparable self-hosted option.
-
-**Does BugHerd have a free plan?**
-
-No. BugHerd's cheapest plan is $50/mo (or $42/mo billed annually) for up to 5 members. There is a 7-day free trial, but no permanent free tier. If a free plan is a requirement, look at Faster Fixes, Userback, Atarim, or Ruttl instead.
-
-**What's the difference between BugHerd and Marker.io?**
-
-Both capture annotated screenshots with browser metadata. The key differences: Marker.io includes session replay, console logs, and network requests — BugHerd does not. Marker.io's reporter model lets unlimited clients submit feedback for free; BugHerd counts all members against your seat limit. BugHerd has a built-in Kanban task board; Marker.io relies on your existing issue tracker (Jira, Linear, etc.) for task management. Marker.io starts at $59/mo; BugHerd at $50/mo.
-
-**Can I self-host a BugHerd alternative?**
-
-Yes — Faster Fixes is the only tool in this list with a genuine self-hosted option. The full stack (dashboard, API, MCP server) is available under AGPL-3.0 on GitHub. You deploy it on your own infrastructure, connect your own database, and own all your feedback data. No other tool on this list — including BugHerd, Marker.io, Userback, or Gleap — offers a self-hosted deployment.
-
-**Which BugHerd alternative works best with GitHub and Linear?**
-
-Faster Fixes Pro includes native GitHub and Linear integrations at $20/mo. Marker.io has two-way sync with both on its Team plan ($149/mo). Userback supports two-way sync with Linear and GitHub on its Business plan ($15/seat/mo annual). For a small dev team already using Linear as their issue tracker, Faster Fixes Pro is the most cost-efficient path — GitHub and Linear are included at the lowest price point in this comparison.
+<FAQ
+  items={[
+    {
+      question: "Is there a free BugHerd alternative?",
+      answer:
+        "Yes. <strong>Faster Fixes</strong> has a free plan (1 project, 50 feedback items, 1 member) with no time limit. Userback's free plan covers 2 projects with unlimited feedback collection, though feedback expires after 7 days. Atarim and Ruttl also have free tiers. BugHerd itself has no free plan — only a 7-day trial.",
+    },
+    {
+      question: "What is the best open-source BugHerd alternative?",
+      answer:
+        "<strong>Faster Fixes</strong> is the only open-source option in this category. The dashboard, API, and MCP server are licensed under AGPL-3.0; the widget packages are MIT. You can self-host the entire stack at no cost. No other tool on this list offers a comparable self-hosted option.",
+    },
+    {
+      question: "Does BugHerd have a free plan?",
+      answer:
+        "No. BugHerd's cheapest plan is $50/mo (or $42/mo billed annually) for up to 5 members. There is a 7-day free trial, but no permanent free tier. If a free plan is a requirement, look at Faster Fixes, Userback, Atarim, or Ruttl instead.",
+    },
+    {
+      question: "What's the difference between BugHerd and Marker.io?",
+      answer:
+        "Both capture annotated screenshots with browser metadata. The key differences: Marker.io includes session replay, console logs, and network requests — BugHerd does not. Marker.io's reporter model lets unlimited clients submit feedback for free; BugHerd counts all members against your seat limit. BugHerd has a built-in Kanban task board; Marker.io relies on your existing issue tracker (Jira, Linear, etc.) for task management. Marker.io starts at $59/mo; BugHerd at $50/mo.",
+    },
+    {
+      question: "Can I self-host a BugHerd alternative?",
+      answer:
+        "Yes — <strong>Faster Fixes</strong> is the only tool in this list with a genuine self-hosted option. The full stack (dashboard, API, MCP server) is available under AGPL-3.0 on GitHub. You deploy it on your own infrastructure, connect your own database, and own all your feedback data. No other tool on this list — including BugHerd, Marker.io, Userback, or Gleap — offers a self-hosted deployment.",
+    },
+    {
+      question:
+        "Which BugHerd alternative works best with GitHub and Linear?",
+      answer:
+        "<strong>Faster Fixes Pro</strong> includes native GitHub and Linear integrations at $20/mo. Marker.io has two-way sync with both on its Team plan ($149/mo). Userback supports two-way sync with Linear and GitHub on its Business plan ($15/seat/mo annual). For a small dev team already using Linear as their issue tracker, Faster Fixes Pro is the most cost-efficient path — GitHub and Linear are included at the lowest price point in this comparison.",
+    },
+  ]}
+/>
 
 ---
 
