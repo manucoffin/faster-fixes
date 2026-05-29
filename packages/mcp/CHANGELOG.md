@@ -1,5 +1,9 @@
 # @fasterfixes/mcp
 
+## 0.0.5
+
+- `list_feedbacks` tool description now states that captured console logs and network requests (the Diagnostic Trail) are included in the returned feedback. No behavioral change — the trail already flows through from the agent API; this just makes it discoverable to the calling agent.
+
 ## 0.0.4
 
 - `create_feedbacks` tool: bulk-create feedback items from another tool's export (BugHerd, Marker.io, Userback, Usersnap). Atomic batch up to 100 items per call, preserves original timestamps, attributes to a named reviewer, and skips integration fan-out (no GitHub issues auto-opened on import).
