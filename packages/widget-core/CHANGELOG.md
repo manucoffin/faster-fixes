@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.7
+
+### Added
+- Diagnostic Trail capture. `createDiagnosticsRecorder({ apiOrigin })` instruments `console`, `fetch`, and `XMLHttpRequest` to keep a bounded in-memory ring of recent console and network activity, snapshotted into a `DiagnosticTrail` when feedback is submitted. Network entries are metadata-only (method, URL, status, duration); the widget's own traffic to the Faster Fixes API is excluded.
+- `redactUrl` helper (applied internally during capture) that strips the values of sensitive query params (`token`, `key`, `secret`, …) from captured URLs client-side, so secrets never leave the page.
+- New types `DiagnosticTrail`, `ConsoleEntry`, `NetworkEntry`, and `ConsoleLevel`; a new optional `diagnosticTrail` field on `CreateFeedbackData`; and `DIAGNOSTICS_MAX_ENTRIES`, `DIAGNOSTICS_MAX_MESSAGE_BYTES`, and `DIAGNOSTICS_REDACT_PARAMS` constants.
+
 ## 0.0.6
 
 ### Added

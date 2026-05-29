@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.8
+
+### Added
+- `captureDiagnostics` prop on `FeedbackProvider` (default `true`). When enabled, the widget records a Diagnostic Trail — recent console output and network requests — from mount and attaches it to each submitted feedback, giving reviewers the browser context needed to reproduce issues. Capture is invisible to the reviewer. Set `captureDiagnostics={false}` to opt a site out entirely; the widget then never patches `console` or the network. Requires `@fasterfixes/core` 0.0.7+.
+
 ## 0.0.7
 
 ### Added
