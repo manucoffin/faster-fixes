@@ -17,7 +17,7 @@ export function HeroSection() {
           {/* Left column: copy */}
           <div className="flex flex-col items-start">
             <h1 className="max-w-xl text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-              Client feedback that fixes itself.
+              Let your AI coding agent handle client feedback.
             </h1>
 
             <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
