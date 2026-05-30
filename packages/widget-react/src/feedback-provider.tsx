@@ -13,7 +13,13 @@ import type { ClassNames } from "./context.js";
 import { FeedbackProviderCore } from "./feedback-provider-core.js";
 
 type FeedbackProviderProps = {
-  apiKey: string;
+  /** Public Project ID (`proj_...`) from your Faster Fixes project settings. */
+  projectId?: string;
+  /**
+   * @deprecated Use `projectId` instead. Still accepted for backward
+   * compatibility; will be removed in a future major version.
+   */
+  apiKey?: string;
   apiOrigin?: string;
   color?: string;
   position?: WidgetPosition;
@@ -26,6 +32,7 @@ type FeedbackProviderProps = {
 };
 
 export function FeedbackProvider({
+  projectId,
   apiKey,
   apiOrigin,
   color,
@@ -39,9 +46,13 @@ export function FeedbackProvider({
   const [config, setConfig] = useState<WidgetConfig | null>(null);
   const [initialized, setInitialized] = useState(false);
 
+  // Prefer projectId; fall back to the deprecated apiKey. The server resolves
+  // either a `proj_` Project ID or a legacy `ff_` key from the same header.
+  const identifier = projectId ?? apiKey ?? "";
+
   const client = useMemo(
-    () => new FasterFixesClient({ apiKey, apiOrigin }),
-    [apiKey, apiOrigin],
+    () => new FasterFixesClient({ apiKey: identifier, apiOrigin }),
+    [identifier, apiOrigin],
   );
 
   useEffect(() => {
