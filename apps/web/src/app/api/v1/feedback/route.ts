@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
   }
 
-  const allowed = await checkRateLimit(project.apiKeyHash, "submit");
+  const allowed = await checkRateLimit(project.id, "submit");
   if (!allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },
@@ -273,7 +273,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
   }
 
-  const allowed = await checkRateLimit(project.apiKeyHash, "read");
+  const allowed = await checkRateLimit(project.id, "read");
   if (!allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },

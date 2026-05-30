@@ -19,15 +19,15 @@ const RATE_LIMITS = {
 type RateLimitAction = keyof typeof RATE_LIMITS;
 
 /**
- * Checks rate limit per API key for a given action.
- * Returns true if the request is allowed, false if rate-limited.
+ * Checks rate limit per bucket key (project id, agent token hash, or user id)
+ * for a given action. Returns true if allowed, false if rate-limited.
  */
 export async function checkRateLimit(
-  apiKeyHash: string,
+  bucketKey: string,
   action: RateLimitAction,
 ): Promise<boolean> {
   const { max, windowMs } = RATE_LIMITS[action];
-  const key = `v1:${action}:${apiKeyHash}`;
+  const key = `v1:${action}:${bucketKey}`;
   const now = Date.now();
 
   const record = await prisma.rateLimit.upsert({

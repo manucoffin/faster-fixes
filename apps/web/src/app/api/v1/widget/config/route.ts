@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
-  const allowed = await checkRateLimit(project.apiKeyHash, "read");
+  const allowed = await checkRateLimit(project.id, "read");
   if (!allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },

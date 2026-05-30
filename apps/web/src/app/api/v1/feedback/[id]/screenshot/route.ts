@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const allowed = await checkRateLimit(project.apiKeyHash, "submit");
+  const allowed = await checkRateLimit(project.id, "submit");
   if (!allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },
