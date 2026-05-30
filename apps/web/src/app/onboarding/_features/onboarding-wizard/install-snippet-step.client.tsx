@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <FeedbackProvider apiKey="${projectId}">
+        <FeedbackProvider projectId="${projectId}">
           {children}
         </FeedbackProvider>
       </body>
