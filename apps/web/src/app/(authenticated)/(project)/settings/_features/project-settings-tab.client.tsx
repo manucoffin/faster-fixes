@@ -4,10 +4,10 @@ import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dash
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { AlertTriangleIcon } from "lucide-react";
 
+import { ApiKeyMigrationNotice } from "./api-key-migration-notice.client";
 import { DeleteProjectButton } from "./delete/delete-project-button.client";
 import { GitHubSection } from "./github/github-section.client";
 import { LinearSection } from "./linear/linear-section.client";
-import { RegenerateApiKeySection } from "./regenerate-api-key/regenerate-api-key-section.client";
 import { UpdateProjectForm } from "./update/update-project-form.client";
 
 type ProjectSettingsTabProps = {
@@ -27,12 +27,12 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
       </DashboardSection>
 
       <DashboardSection
-        title="API Key"
-        description="Used by the widget to submit feedback. Only the last 4 characters are shown."
-        cardTitle="API Key"
+        title="API key"
+        description="API keys are deprecated. The widget now authenticates with your Project ID."
+        cardTitle="API key (deprecated)"
         cardClassName="lg:max-w-lg"
       >
-        <RegenerateApiKeySection projectId={projectId} />
+        <ApiKeyMigrationNotice projectId={projectId} />
       </DashboardSection>
 
       <DashboardSection
