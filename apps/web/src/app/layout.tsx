@@ -76,9 +76,12 @@ export default function RootLayout({
                 <StopImpersonateButton />
 
                 <FeedbackProvider
-                  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
+                  projectId={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
-                  color="var(--primary)"
+                  classNames={{
+                    button:
+                      "bg-primary text-primary-foreground hover:bg-primary/90",
+                  }}
                   position="bottom-left"
                   captureDiagnostics={true}
                 >
