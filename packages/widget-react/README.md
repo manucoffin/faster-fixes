@@ -10,6 +10,8 @@ React feedback widget for [FasterFixes](https://faster-fixes.com) — collect vi
 npm install @fasterfixes/react
 ```
 
+The `projectId` prop requires `@fasterfixes/react` version 0.0.9 or later.
+
 ## Quick start
 
 Wrap your app with `FeedbackProvider`:
@@ -19,7 +21,7 @@ import { FeedbackProvider } from "@fasterfixes/react";
 
 function App() {
   return (
-    <FeedbackProvider apiKey="your-project-api-key">
+    <FeedbackProvider projectId="proj_your_project_id">
       <YourApp />
     </FeedbackProvider>
   );
@@ -32,7 +34,7 @@ That's it. The widget appears as a floating button. Reviewers with a valid token
 
 ```tsx
 <FeedbackProvider
-  apiKey="your-project-api-key"
+  projectId="proj_your_project_id"
   color="#e63946"
   position="bottom-left"
 >
@@ -43,7 +45,7 @@ That's it. The widget appears as a floating button. Reviewers with a valid token
 `color` accepts any CSS color value, including CSS variables:
 
 ```tsx
-<FeedbackProvider apiKey="your-project-api-key" color="var(--brand-primary)">
+<FeedbackProvider projectId="proj_your_project_id" color="var(--brand-primary)">
 ```
 
 The color is applied as a `--ff-accent` CSS custom property on the widget root. Any `classNames` overrides take precedence.
@@ -61,14 +63,15 @@ The color is applied as a `--ff-accent` CSS custom property on the widget root. 
 
 ### `FeedbackProvider`
 
-| Prop         | Type                  | Required | Description                                                    |
-| ------------ | --------------------- | -------- | -------------------------------------------------------------- |
-| `apiKey`     | `string`              | Yes      | Your FasterFixes project API key                               |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)    |
-| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`) |
-| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)             |
-| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                        |
-| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                          |
+| Prop         | Type                  | Required | Description                                                       |
+| ------------ | --------------------- | -------- | ---------------------------------------------------------------- |
+| `projectId`  | `string`              | Yes      | Your Faster Fixes Project ID (found in project settings)         |
+| `apiKey`     | `string`              | No       | Deprecated alias for `projectId`; removed in a future major.     |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)      |
+| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`)   |
+| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)               |
+| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                          |
+| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                            |
 
 ### `useFeedback` hook
 

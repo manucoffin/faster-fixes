@@ -9,6 +9,8 @@ description: Go from zero to collecting your first feedback in under 5 minutes.
 @fasterfixes/react
 ```
 
+The `projectId` prop requires `@fasterfixes/react` version 0.0.9 or later.
+
 ## 2. Add the provider
 
 Wrap your app with `FeedbackProvider`:
@@ -24,16 +26,16 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <FeedbackProvider apiKey="your-api-key">{children}</FeedbackProvider>
+        <FeedbackProvider projectId="proj_your_project_id">{children}</FeedbackProvider>
       </body>
     </html>
   );
 }
 ```
 
-## 3. Get your API key
+## 3. Get your Project ID
 
-Go to [faster-fixes.com](https://faster-fixes.com), create a project, and copy the API key. Paste it into the `apiKey` prop above.
+Go to [faster-fixes.com](https://faster-fixes.com), create a project, and copy the Project ID from project settings. Paste it into the `projectId` prop above.
 
 ## 4. Collect your first feedback
 

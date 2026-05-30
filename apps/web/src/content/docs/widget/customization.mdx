@@ -9,7 +9,7 @@ Override the default widget styles using the `classNames` prop:
 
 ```tsx
 <FeedbackProvider
-  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY!}
+  projectId="proj_your_project_id"
   classNames={{
     button: "my-custom-button",
     popover: "my-custom-popover",
@@ -40,7 +40,7 @@ Override the default text strings using the `labels` prop:
 
 ```tsx
 <FeedbackProvider
-  apiKey={process.env.NEXT_PUBLIC_FF_API_KEY!}
+  projectId="proj_your_project_id"
   labels={{
     submitButton: "Send feedback",
     cancelButton: "Cancel",
