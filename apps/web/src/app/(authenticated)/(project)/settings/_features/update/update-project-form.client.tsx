@@ -11,6 +11,13 @@ import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import { CopyableText } from "@workspace/ui/components/copyable-text";
 import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldTitle,
+} from "@workspace/ui/components/field";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -142,16 +149,25 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
           name="widgetEnabled"
           render={({ field }) => (
             <FormItem>
-              <div className="flex items-center justify-between">
-                <FormLabel>Widget enabled</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={updateProject.isPending}
-                  />
-                </FormControl>
-              </div>
+              <FieldLabel htmlFor="widget-enabled-switch">
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle>Widget enabled</FieldTitle>
+                    <FieldDescription>
+                      Show the feedback widget on your site. Disable to hide it
+                      without removing the snippet.
+                    </FieldDescription>
+                  </FieldContent>
+                  <FormControl>
+                    <Switch
+                      id="widget-enabled-switch"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={updateProject.isPending}
+                    />
+                  </FormControl>
+                </Field>
+              </FieldLabel>
               <FormMessage />
             </FormItem>
           )}
