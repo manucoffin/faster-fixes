@@ -68,6 +68,12 @@
       "source": "anthropics/skills",
       "sourceType": "github",
       "computedHash": "b122f4d1e91aa1d83027e050b5b37c3156203ee85458d7b1360bc48167c9e02a"
+    },
+    "stripe-best-practices": {
+      "source": "stripe/ai",
+      "sourceType": "github",
+      "skillPath": "skills/stripe-best-practices/SKILL.md",
+      "computedHash": "966d0ce005fb82e1a63ead1ec8c5546a9088c0d8f103f88c382c4cda810857cc"
     }
   }
 }
