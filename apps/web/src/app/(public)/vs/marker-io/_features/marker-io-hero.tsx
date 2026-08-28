@@ -18,10 +18,13 @@ export function MarkerIoHero() {
             The open-source alternative to Marker.io
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is self-hostable, AGPL-3.0 licensed, and ships an MCP
-            server so AI coding agents read and fix client feedback directly
-            from the terminal. Marker.io is a polished QA platform —
-            closed-source, cloud-only, and starting at $59/month.
+            FasterFixes is an open-source, self-hostable alternative to
+            Marker.io, licensed AGPL-3.0 and priced flat rather than per seat.
+            The difference goes beyond price: an MCP server lets Claude Code,
+            Cursor, and Codex fetch and fix client feedback from the terminal,
+            with every report carrying a screenshot, DOM selector, React
+            component tree, console logs, and network requests. Marker.io is
+            closed-source and cloud-only.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

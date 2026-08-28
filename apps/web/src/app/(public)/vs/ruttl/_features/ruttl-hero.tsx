@@ -18,10 +18,11 @@ export function RuttlHero() {
             The open-source Ruttl alternative built for developer teams
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            Ruttl charges $18 per user per month. A 5-person team pays $90 a
-            month — $1,080 a year. FasterFixes is flat-rate: $20 a month
-            hosted, or free if you self-host. AGPL-3.0, MCP server for AI
-            coding agents, no per-seat math.
+            Ruttl charges $18 per user per month — a five-person team pays
+            $1,080 a year. FasterFixes is flat-rate: $20 a month hosted for up
+            to five members, or free if you self-host, with no per-seat math at
+            any scale. AGPL-3.0 licensed, with an MCP server so Claude Code and
+            Cursor can fix feedback from the terminal.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

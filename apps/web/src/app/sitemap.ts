@@ -4,12 +4,17 @@ import { source } from "@/lib/docs/source";
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const docPages = source.getPages().map((page) => ({
-    url: `${APP_URL}${page.url}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
+  // The /docs index is listed explicitly below with a higher priority, and
+  // noindex pages must not be advertised — both would otherwise be emitted here.
+  const docPages = source
+    .getPages()
+    .filter((page) => page.url !== "/docs" && !page.data.noindex)
+    .map((page) => ({
+      url: `${APP_URL}${page.url}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
 
   const blogPages = blogSource.getPages().map((page) => ({
     url: `${APP_URL}${page.url}`,

@@ -18,10 +18,12 @@ export function AtarimHero() {
             The open-source Atarim alternative for dev teams
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is a self-hostable, React-native feedback tool built
-            for development workflows — not agency client review. Open-source
-            (AGPL-3.0 + MIT), flat pricing, and an MCP server that lets Claude
-            Code, Cursor, and Codex read feedback directly from your terminal.
+            FasterFixes is an open-source, self-hostable feedback tool for
+            development teams — AGPL-3.0 licensed, flat-rate priced, and built
+            around structured bug reports rather than an agency review workflow.
+            Every report carries a screenshot, DOM selector, React component
+            tree, console logs, and network requests, and an MCP server lets
+            Claude Code, Cursor, and Codex resolve it from the terminal.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

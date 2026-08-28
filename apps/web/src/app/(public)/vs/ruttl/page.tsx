@@ -9,10 +9,7 @@ import { VsCrossLinks } from "../_features/vs-cross-links";
 import { RuttlBreadcrumb } from "./_features/ruttl-breadcrumb";
 import { RuttlComparisonSection } from "./_features/ruttl-comparison-section";
 import { RuttlCtaSection } from "./_features/ruttl-cta-section";
-import {
-  RuttlFaqSection,
-  ruttlFaqs,
-} from "./_features/ruttl-faq-section";
+import { RuttlFaqSection, ruttlFaqs } from "./_features/ruttl-faq-section";
 import { RuttlFeatureCardsSection } from "./_features/ruttl-feature-cards-section";
 import { RuttlHero } from "./_features/ruttl-hero";
 import { RuttlHonestTakeSection } from "./_features/ruttl-honest-take-section";
@@ -85,7 +82,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/ruttl` },
           { name: "Ruttl alternative", url: pageUrl },
         ]}
       />

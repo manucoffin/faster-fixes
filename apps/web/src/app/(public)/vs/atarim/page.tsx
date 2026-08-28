@@ -12,10 +12,7 @@ import { AtarimCalculatorSection } from "./_features/atarim-calculator-section";
 import { AtarimComparisonSection } from "./_features/atarim-comparison-section";
 import { AtarimCtaSection } from "./_features/atarim-cta-section";
 import { AtarimDeveloperFirstSection } from "./_features/atarim-developer-first-section";
-import {
-  AtarimFaqSection,
-  atarimFaqs,
-} from "./_features/atarim-faq-section";
+import { AtarimFaqSection, atarimFaqs } from "./_features/atarim-faq-section";
 import { AtarimFitSection } from "./_features/atarim-fit-section";
 import { AtarimHero } from "./_features/atarim-hero";
 import { AtarimHonestTakeSection } from "./_features/atarim-honest-take-section";
@@ -99,7 +96,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/atarim` },
           { name: "Atarim alternative", url: pageUrl },
         ]}
       />

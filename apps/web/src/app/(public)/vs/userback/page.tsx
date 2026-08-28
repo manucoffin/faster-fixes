@@ -99,7 +99,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/userback` },
           { name: "Userback alternative", url: pageUrl },
         ]}
       />

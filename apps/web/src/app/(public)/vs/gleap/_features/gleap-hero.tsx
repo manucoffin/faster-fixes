@@ -18,11 +18,12 @@ export function GleapHero() {
             The open-source Gleap alternative built for developer teams
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            Gleap has pivoted to AI customer support — Kai chatbot, ticketing,
-            shared inbox, multichannel messaging. If you need structured bug
-            reports routed to GitHub, Linear, Jira, or your AI coding agent,
-            FasterFixes is built for that workflow. No support platform
-            overhead. No per-seat pricing.
+            Gleap has pivoted to AI customer support — chatbot, ticketing,
+            shared inbox. FasterFixes is built for the opposite workflow:
+            structured bug reports carrying screenshot, DOM selector, React
+            component tree, console logs, and network requests, routed to
+            GitHub, Linear, or Jira and readable by Claude Code or Cursor over
+            MCP. Open-source under AGPL-3.0, self-hostable, and flat-rate.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
