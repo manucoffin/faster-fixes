@@ -1,8 +1,23 @@
-import { defineConfig, defineDocs, frontmatterSchema } from "fumadocs-mdx/config";
+import {
+  defineConfig,
+  defineDocs,
+  frontmatterSchema,
+} from "fumadocs-mdx/config";
 import { z } from "zod";
 
 export const docs = defineDocs({
   dir: "src/content/docs",
+  docs: {
+    // Doc titles are written for in-app navigation ("Introduction"), which makes
+    // poor SERP snippets. metaTitle/metaDescription let a page override the
+    // snippet without changing the sidebar label. noindex keeps retired pages
+    // out of the sitemap and the index.
+    schema: frontmatterSchema.extend({
+      metaTitle: z.string().optional(),
+      metaDescription: z.string().optional(),
+      noindex: z.boolean().optional(),
+    }),
+  },
 });
 
 // YAML 1.2 parses unquoted ISO-like values (2026-05-24) as Date objects.

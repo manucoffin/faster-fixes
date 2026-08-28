@@ -66,22 +66,29 @@ export async function generateMetadata(
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const canonicalPath = page.slugs.length > 0 ? `/docs/${page.slugs.join("/")}` : "/docs";
+  const canonicalPath =
+    page.slugs.length > 0 ? `/docs/${page.slugs.join("/")}` : "/docs";
+
+  // Sidebar labels ("Introduction") make weak SERP snippets, so metaTitle /
+  // metaDescription override the snippet without changing the navigation.
+  const title = page.data.metaTitle ?? page.data.title;
+  const description = page.data.metaDescription ?? page.data.description;
 
   return {
-    title: page.data.title,
-    description: page.data.description,
+    title,
+    description,
+    ...(page.data.noindex && { robots: { index: false, follow: true } }),
     alternates: {
       canonical: `${APP_URL}${canonicalPath}`,
     },
     openGraph: {
-      title: page.data.title,
-      description: page.data.description,
+      title,
+      description,
       url: `${APP_URL}${canonicalPath}`,
     },
     twitter: {
-      title: page.data.title,
-      description: page.data.description,
+      title,
+      description,
     },
   };
 }
