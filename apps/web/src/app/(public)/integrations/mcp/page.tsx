@@ -20,9 +20,12 @@ import { McpSecuritySection } from "./_features/mcp-security-section";
 import { McpToolsSection } from "./_features/mcp-tools-section";
 
 const pageUrl = `${APP_URL}/integrations/mcp`;
-const title = `MCP server for client feedback | ${SITE_NAME}`;
+// CTR here collapsed from 6.1% to 0.75% at roughly the same position. The old
+// description ran 165 chars (truncated in the SERP) and described what the
+// server is; this one names the tool call and the payload the agent receives.
+const title = `MCP server: fix client feedback in Claude Code - ${SITE_NAME}`;
 const description =
-  "Connect Claude Code, Cursor, and other AI coding agents to client feedback. Each report carries a full repro bundle the agent can fix and resolve from the terminal.";
+  "Your agent calls list_feedbacks and gets the screenshot, DOM selector, React tree, console logs and network requests — then fixes it from the terminal.";
 const ogImageAlt =
   "FasterFixes MCP server — an AI coding agent fetching client feedback with a full repro bundle";
 const datePublished = "2026-06-03T00:00:00.000Z";
