@@ -18,10 +18,12 @@ export function UsersnapHero() {
             The open-source Usersnap alternative
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is self-hostable, AGPL-3.0 licensed, and ships an MCP
-            server so AI coding agents read and fix client feedback directly
-            from the terminal. Usersnap is a mature product feedback platform —
-            closed-source, cloud-only, and tiered by seat count.
+            Usersnap is closed-source and tiered by seat count. FasterFixes is
+            the open-source alternative — AGPL-3.0, self-hostable for free, or
+            $20 a month flat for up to five members — built around structured
+            bug reports rather than a product feedback widget. Reports sync to
+            GitHub, Linear, or Jira, and an MCP server makes them readable by
+            Claude Code and Cursor.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

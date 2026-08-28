@@ -18,8 +18,11 @@ export function BugherdHero() {
             The open-source BugHerd alternative built for developer teams
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is self-hostable, flat-rate priced, and connects client
-            feedback directly to your AI coding agent via MCP.
+            FasterFixes is the open-source, self-hostable alternative to BugHerd
+            — flat-rate at $20 a month for up to five members, or free if you
+            self-host. Where BugHerd routes feedback to a Kanban board,
+            FasterFixes routes it to GitHub, Linear, or Jira with a full repro
+            bundle, and exposes every report to Claude Code and Cursor over MCP.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

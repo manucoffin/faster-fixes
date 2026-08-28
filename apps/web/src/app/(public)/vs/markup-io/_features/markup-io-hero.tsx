@@ -19,9 +19,11 @@ export function MarkupIoHero() {
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
             Markup.io raised prices 172% in January 2025 and removed its free
-            plan. FasterFixes is open-source, self-hostable, and flat-rate at
-            $20/mo — with feedback that flows directly to GitHub, Linear, Jira,
-            and your AI coding agent.
+            plan. FasterFixes is the open-source alternative: AGPL-3.0, self-
+            hostable for free, or $20 a month flat for up to five members.
+            Feedback carries a screenshot, DOM selector, React component tree,
+            console logs, and network requests, and syncs to GitHub, Linear, or
+            Jira.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

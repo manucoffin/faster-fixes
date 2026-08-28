@@ -18,10 +18,12 @@ export function UserbackHero() {
             The open-source Userback alternative
           </h1>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is self-hostable, AGPL-3.0 licensed, and ships an MCP
-            server so AI coding agents read and resolve client feedback directly
-            from the terminal. Userback is a mature feedback platform —
-            closed-source, cloud-only, and priced per seat.
+            FasterFixes is an open-source, self-hostable alternative to
+            Userback, licensed AGPL-3.0 and priced flat rather than per seat.
+            Each report captures a screenshot, DOM selector, React component
+            tree, console logs, and network requests — structured for GitHub,
+            Linear, or Jira rather than a support inbox. An MCP server exposes
+            those reports to Claude Code, Cursor, and Codex.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
