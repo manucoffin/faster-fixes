@@ -3,6 +3,7 @@ import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_features/seo/faq-schema";
 import { HowToSchema } from "@/app/_features/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
 import type { Metadata } from "next";
 import { BugherdBreadcrumb } from "./_features/bugherd-breadcrumb";
@@ -75,6 +76,8 @@ export default function Page() {
       <BugherdCtaSection />
       <VsCrossLinks currentSlug="bugherd" />
 
+      <SoftwareApplicationSchema />
+
       <WebPageSchema
         title={title}
         description={description}
@@ -86,7 +89,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/bugherd` },
           { name: "BugHerd alternative", url: pageUrl },
         ]}
       />

@@ -3,6 +3,7 @@ import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_features/seo/faq-schema";
 import { HowToSchema } from "@/app/_features/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
 import type { Metadata } from "next";
 import { MarkerIoBreadcrumb } from "./_features/marker-io-breadcrumb";
@@ -77,6 +78,8 @@ export default function Page() {
       <MarkerIoCtaSection />
       <VsCrossLinks currentSlug="marker-io" />
 
+      <SoftwareApplicationSchema />
+
       <WebPageSchema
         title={title}
         description={description}
@@ -88,7 +91,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/marker-io` },
           { name: "Marker.io alternative", url: pageUrl },
         ]}
       />

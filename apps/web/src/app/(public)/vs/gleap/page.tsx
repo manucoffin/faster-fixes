@@ -9,10 +9,7 @@ import { VsCrossLinks } from "../_features/vs-cross-links";
 import { GleapBreadcrumb } from "./_features/gleap-breadcrumb";
 import { GleapComparisonSection } from "./_features/gleap-comparison-section";
 import { GleapCtaSection } from "./_features/gleap-cta-section";
-import {
-  GleapFaqSection,
-  gleapFaqs,
-} from "./_features/gleap-faq-section";
+import { GleapFaqSection, gleapFaqs } from "./_features/gleap-faq-section";
 import { GleapFeatureCardsSection } from "./_features/gleap-feature-cards-section";
 import { GleapHero } from "./_features/gleap-hero";
 import { GleapPricingSection } from "./_features/gleap-pricing-section";
@@ -81,7 +78,6 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Compare", url: `${APP_URL}/vs/gleap` },
           { name: "Gleap alternative", url: pageUrl },
         ]}
       />
