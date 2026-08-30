@@ -2,6 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
 import { FeedbackProvider } from "@fasterfixes/react";
+import { Analytics } from "@vercel/analytics/next";
 import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
@@ -94,6 +95,7 @@ export default function RootLayout({
           </ConsentProvider>
         </ThemeProvider>
 
+        <Analytics />
         <Script
           defer
           src="https://umami-analytics-swart.vercel.app/script.js"
