@@ -83,7 +83,7 @@ export default function RootLayout({
                     button:
                       "bg-primary text-primary-foreground hover:bg-primary/90",
                   }}
-                  position="bottom-left"
+                  position="bottom-right"
                   captureDiagnostics={true}
                 >
                   <RootProvider>{children}</RootProvider>
