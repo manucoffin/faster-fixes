@@ -39,7 +39,7 @@ Measured on 2026-09-17 at commit `ebd017c`, after the 14 convention rules landed
 | `services-no-bare-error`            | `servicesRulesSeverity` |        0 |            0 | Same. Becomes always-on in step 4.                                        |
 | `no-cross-domain-deep-import`       | `error`, always on      |        0 |            0 | `_domains/` now exists and the hardened rule guards it. See below.        |
 | `require-server-action-suffix`      | `error`, always on      |        0 |            0 | `*.trpc.query.ts` and `*.trpc.mutation.ts` exempt until step 3.           |
-| `no-client-import-of-server-errors` | `off`                   |      n/a |          n/a | Enabled in step 3, when `src/server/errors/` is created.                  |
+| `no-client-import-of-server-errors` | `error`, always on      |      n/a |            0 | Raised from `off` in issue #58, now that `src/server/errors/` exists.     |
 
 The built-in `no-throw-literal` is on as an error outside the gate and reports zero.
 
@@ -189,7 +189,7 @@ Step 3 turns every scope's data and IO code into verb-prefixed functions in `_se
 1. **Create the domain-error vocabulary and the tRPC mapping middleware first.** `src/server/errors/domain-errors.ts` (five subclasses, zero imports) and the `domainErrorMiddleware` on the base procedure in `src/server/trpc/trpc.ts`, both given verbatim in `docs/architecture/migration-kit/03-services.md`. Extracting a procedure that throws `TRPCError({ code: "CONFLICT" })` into a service that throws a bare `Error` silently turns a 409 into a 500. Creating that folder is also what enables `no-client-import-of-server-errors`, which is `off` and unmeasured today.
 2. **Answer the open question on the integration domains** recorded above. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
 3. **Decide the domain of `server/storage`.** Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
-4. **Add the per-scope allowlist to the ESLint config.** The kit's strategy is to migrate one scope at a time and flip `servicesRulesSeverity` from `warn` to `error` for that path as it lands. `packages/eslint-config/next.js` has no `migratedScopes` mechanism yet; without it a scope can only be locked once every scope is done.
+4. ~~**Add the per-scope allowlist to the ESLint config.**~~ Done, see the `migratedScopes` section below.
 5. **Plan the removal of the `require-server-action-suffix` exemption.** The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is marked as a transition in `packages/eslint-config/next.js` and comes out when those files are gone. It is the last transition glob left, since the `no-default-export` one was removed in step 2.
 6. **Decide the two placements step 2 deliberately left open:** which bucket `_domains/feedback/feedback-status.ts` belongs in (amendment 7), and whether a route-agnostic search-params module needs a bucket of its own or whether `_components/dashboard/search-params.ts` stays where it is (amendment 2).
 
@@ -237,6 +237,64 @@ pnpm lint:agent-rules --force 2>&1 | /usr/bin/grep -o 'local/[a-z-]*' | sort | u
 Verified at the same commit: `pnpm typecheck` clean (4 tasks), `pnpm lint` 0 warnings (5 tasks), `pnpm test` 173 ESLint rule and config tests plus the 4 app tests, `pnpm lint:agent-rules` 0 errors.
 
 A fresh clone needs `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and, in `apps/web`, `npx next typegen` before `pnpm typecheck` passes: the generated Prisma client, the widget package builds and the Next.js route types are all untracked. Without them `tsc` reports errors that have nothing to do with the change under test.
+
+## Step 3 prerequisite: the `migratedScopes` lock mechanism (issue #58)
+
+Added on 2026-09-18 in `packages/eslint-config/next.js`. The kit's strategy is to migrate one scope at a time and lock it as it lands; without a per-scope severity the step's rules could only go to `error` once every scope was done, which is the opposite of a burn-down.
+
+### How it works
+
+`migratedScopes` is an array of glob fragments relative to `src/app`, written the way the folder is spelled on disk: `"(public)"`, `"(authenticated)/account"`, `"admin/users"`, `"_domains/auth"`. It starts empty. Each listed scope generates two config blocks through `migratedScopeConfigs(scope, severity)`, appended last in `nextJsConfig` so they override the `warn` ramp above them:
+
+| Block                                           | Rules raised to `error`                                                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `**/src/app/<scope>/**/_services/**/*.{ts,tsx}` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`                                    |
+| `**/src/app/<scope>/**/*.{ts,tsx}`              | `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+
+Two blocks, not three: every rule in the second block already self-guards on the file name it targets, so the wide glob costs nothing. `require-schema-conventions` and `schema-must-be-pure-zod` only look at `*.schema.ts`, `no-feature-nesting` only at a nested `_features/`. The rule options are hoisted into `schemaConventionOptions` and `useClientSuffixOptions` so the locked block and the unlocked ramp cannot drift apart.
+
+`no-default-export` is not in the list: it is scoped to `_domains/**` by design and was already locked there in step 2. A route scope holds `page.tsx` and `layout.tsx`, which must default-export. `no-raw-tailwind-colors` is not in the list either: the spec puts its 88 warnings outside this step's definition of done.
+
+The locked severity reuses the same gate as `_domains/**` (`error` with `ESLINT_AGENT_RULES=1`, `off` without), so a lock never affects `pnpm lint`; only `pnpm lint:agent-rules` enforces it.
+
+`no-client-import-of-server-errors` moved from `off` to always-on `error`, outside the agent gate, as ADR-0012 prescribes. `src/server/errors/` exists since `f2c8d60` and only two files import it (`src/server/trpc/trpc.ts` and its test), neither of them a client module, so zero violations were possible and the rule lands straight at `error` rather than in the burn-down.
+
+### Demonstration
+
+`admin/users` was listed temporarily, then reverted. It is a scope with known warnings, so the flip is visible without writing a violation:
+
+```sh
+pnpm lint:agent-rules --force 2>&1 | /usr/bin/grep -E "admin/users|problems"
+```
+
+**150 problems (10 errors, 140 warnings)**: the 10 warnings inside `admin/users` became errors and the total did not move, which is what "raises severity for this scope alone" means. The 10 are 7 plural `XInputs` aliases, 1 impure schema (the admin Subscription schema) and 2 missing `.client.tsx` suffixes. The `[id]` segment matched: a Next.js dynamic segment is a bracket in the path, not in the pattern, so `**` walks it normally.
+
+The `_services/` block has no files to match yet, so it was verified through the effective config instead, from `apps/web`:
+
+```sh
+ESLINT_AGENT_RULES=1 npx eslint --print-config "src/app/admin/users/_services/get-user.ts"
+```
+
+which reported `2` (error) for all four services rules, while with the array empty `src/app/(authenticated)/organization/_services/get-organization.ts` reported `1` (warn). Route-group parentheses are literal in a glob, confirmed the same way and pinned by a test.
+
+Reverted, the run is back to **150 problems, 0 errors, 150 warnings**, split 88 `no-raw-tailwind-colors`, 58 `require-schema-conventions`, 3 `require-use-client-suffix`, 1 `schema-must-be-pure-zod`: unchanged from the count recorded after the rule fixes.
+
+### Tests
+
+`packages/eslint-config/next-config.test.js` gained six cases, taking the package to 180 tests:
+
+- no scope is locked while the array is empty, and the services rules still live only in the unlocked `**/_services/**` ramp;
+- the `_services/` block carries the four services rules at `error` on the scope's `_services/` glob;
+- the whole-scope block carries the five general rules at `error`, options included;
+- every rule falls back to `off` when the agent gate is off;
+- the globs match through ESLint's own matcher rather than by eye: a file under `admin/users/[id]/` and one under `(public)/blog/[slug]/` resolve to `error`, while `admin/dashboard/` and `(auth)/login/` resolve to no config at all;
+- `no-client-import-of-server-errors` is `error` in a config built with `ESLINT_AGENT_RULES=0`.
+
+The glob test builds an `ESLint` instance over `apps/web` and reads `calculateConfigForFile`, so it exercises the real matcher without a new dependency. A direct `minimatch` devDependency was tried first and reverted: `pnpm install` rewrites `pnpm-lock.yaml` from the committed Prettier quoting into pnpm's own, a 20,000-line diff unrelated to the change.
+
+### Deleted at the final lock
+
+The array, `migratedScopeConfigs`, the `lockedSeverity` constant and the `lockedScopeConfigs` spread all come out in issue #82, when the step's rules go to `error` unconditionally. The hoisted option constants stay.
 
 ## Step 3 prerequisite: the two kit ADRs (issue #56)
 

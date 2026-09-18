@@ -19,6 +19,91 @@ const servicesRulesSeverity = agent;
 // Step 2 locked `_domains/`: the scope is migrated, so a default export there is
 // a regression, not a burn-down item. Still behind the agent gate.
 const domainRulesSeverity = enableAgentRules ? "error" : "off";
+// The severity a scope listed in `migratedScopes` gets: a violation there is a
+// regression on migrated code, not a burn-down item.
+const lockedSeverity = domainRulesSeverity;
+
+// Both options are the repo convention, not opt-in extras: a schema const is
+// PascalCase (`CreateInvoiceSchema`) and its input type is singular
+// (`CreateInvoiceInput`). Wiring them is what makes the plural `Inputs` aliases
+// visible in the burn-down instead of silently passing.
+const schemaConventionOptions = {
+  requirePascalCaseSchema: true,
+  requireSingularInput: true,
+};
+
+const useClientSuffixOptions = {
+  // Ignore Next.js page/layout/route files which need default exports or 'use client' without .client suffix
+  ignorePathPatterns: [
+    "/app/\\(.*\\)/.*page\\.tsx$",
+    "/app/\\(.*\\)/.*layout\\.tsx$",
+    "/app/\\(.*\\)/.*loading\\.tsx$",
+    "/app/\\(.*\\)/.*error\\.tsx$",
+    "/app/\\(.*\\)/.*not-found\\.tsx$",
+    "/app/.*page\\.tsx$",
+    "/app/.*layout\\.tsx$",
+    "/app/.*loading\\.tsx$",
+    "/app/.*error\\.tsx$",
+    "/app/.*not-found\\.tsx$",
+  ],
+};
+
+/**
+ * Scopes under `apps/web/src/app` that step 3 has already migrated, written as
+ * glob fragments relative to `src/app` (route groups keep their parentheses,
+ * e.g. `"(public)"`, `"(authenticated)/account"`, `"_domains/auth"`).
+ *
+ * Listing a scope raises this step's rules from `warn` to `error` for that
+ * scope alone, so a regression on migrated code fails `pnpm lint:agent-rules`
+ * while the rest of the tree keeps burning down as warnings.
+ *
+ * Temporary: the final lock of step 3 deletes this array and sets the rules to
+ * `error` unconditionally.
+ *
+ * @type {string[]}
+ */
+const migratedScopes = [];
+
+/**
+ * The two config blocks a locked scope gets: the services rules on its
+ * `_services/` files, the general convention rules on everything under it.
+ *
+ * Every rule below self-guards on the file name it targets, so the wide glob on
+ * the second block costs nothing: `require-schema-conventions` only looks at
+ * `*.schema.ts`, `no-feature-nesting` only at nested `_features/`.
+ *
+ * @param {string} scope glob fragment relative to `src/app`
+ * @param {"error" | "warn" | "off"} severity
+ * @returns {import("eslint").Linter.Config[]}
+ */
+export function migratedScopeConfigs(scope, severity) {
+  return [
+    {
+      files: [`**/src/app/${scope}/**/_services/**/*.{ts,tsx}`],
+      rules: {
+        "local/services-verb-prefix": severity,
+        "local/services-no-trpc-import": severity,
+        "local/require-trpc-output-type": severity,
+        // Step 4 makes this one always-on; here it is locked per scope.
+        "local/services-no-bare-error": severity,
+      },
+    },
+    {
+      files: [`**/src/app/${scope}/**/*.{ts,tsx}`],
+      rules: {
+        "local/no-client-import-of-services": severity,
+        "local/no-feature-nesting": severity,
+        "local/require-schema-conventions": [severity, schemaConventionOptions],
+        "local/schema-must-be-pure-zod": severity,
+        "local/require-use-client-suffix": [severity, useClientSuffixOptions],
+      },
+    },
+  ];
+}
+
+const lockedScopeConfigs = migratedScopes.flatMap((scope) =>
+  migratedScopeConfigs(scope, lockedSeverity),
+);
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -76,6 +161,10 @@ export const nextJsConfig = [
     files: ["**/*.{ts,tsx}"],
     rules: {
       "local/require-server-action-suffix": "error",
+      // `src/server/errors/` exists since the step 3 prerequisite, and zero
+      // violations are possible today, so ADR-0012 has this one land straight
+      // at `error` rather than in the burn-down.
+      "local/no-client-import-of-server-errors": "error",
     },
   },
   {
@@ -100,8 +189,6 @@ export const nextJsConfig = [
     files: ["**/*.{ts,tsx}"],
     rules: {
       "local/no-client-import-of-services": agent,
-      // Step 3 creates `src/server/errors/`; the rule guards nothing until then.
-      "local/no-client-import-of-server-errors": "off",
     },
   },
   {
@@ -149,39 +236,17 @@ export const nextJsConfig = [
     files: ["**/src/**/*.{ts,tsx}"],
     rules: {
       "local/require-use-client-suffix": enableAgentRules
-        ? [
-            agent,
-            {
-              // Ignore Next.js page/layout/route files which need default exports or 'use client' without .client suffix
-              ignorePathPatterns: [
-                "/app/\\(.*\\)/.*page\\.tsx$",
-                "/app/\\(.*\\)/.*layout\\.tsx$",
-                "/app/\\(.*\\)/.*loading\\.tsx$",
-                "/app/\\(.*\\)/.*error\\.tsx$",
-                "/app/\\(.*\\)/.*not-found\\.tsx$",
-                "/app/.*page\\.tsx$",
-                "/app/.*layout\\.tsx$",
-                "/app/.*loading\\.tsx$",
-                "/app/.*error\\.tsx$",
-                "/app/.*not-found\\.tsx$",
-              ],
-            },
-          ]
+        ? [agent, useClientSuffixOptions]
         : "off",
     },
   },
   {
     files: ["**/*.schema.ts"],
     rules: {
-      // Both options are the repo convention, not opt-in extras: a schema const
-      // is PascalCase (`CreateInvoiceSchema`) and its input type is singular
-      // (`CreateInvoiceInput`). Wiring them is what makes the plural `Inputs`
-      // aliases visible in the burn-down instead of silently passing.
-      "local/require-schema-conventions": [
-        agent,
-        { requirePascalCaseSchema: true, requireSingularInput: true },
-      ],
+      "local/require-schema-conventions": [agent, schemaConventionOptions],
       "local/schema-must-be-pure-zod": agent,
     },
   },
+  // --- Per-scope locks (last, so they override the ramp above) ---
+  ...lockedScopeConfigs,
 ];
