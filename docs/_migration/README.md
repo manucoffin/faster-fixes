@@ -59,16 +59,17 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope                   | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
-| ----------------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_domains/**`           | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
-| `(public)`              | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/organization` | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/user`         | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/subscription` | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `onboarding`            | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `(authenticated)`       | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
-| `admin`                 | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
+| Scope                     | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
+| ------------------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**`             | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
+| `(public)`                | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/organization`   | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/user`           | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/subscription`   | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `onboarding`              | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `(authenticated)`         | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
+| `admin`                   | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
+| `(authenticated)/account` | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                     |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -1414,6 +1415,142 @@ refuses `rmdir`, so it is the maintainer's to remove, like the `admin/users/_uti
 Stripe account, so no user can sign in and no billing screen can render its data. Reading the billing
 page on a free and on a paid plan, opening the billing portal, listing invoices and seeing the trial or
 cancellation banner are on the QA checklist of issue #68.
+
+### `(authenticated)/account`, part 2: settings, and the scope lock (issue #69)
+
+Commit: `6012c44`. The six settings operations become services and the scope is **locked**:
+`migratedScopes` gains `"(authenticated)/account"`, so the step's nine rules report at `error` for
+the whole scope, billing included.
+
+**Files moved.** Ten modules, all with `git mv`, from `settings/_features/*` to
+`settings/_services/`. No file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation       | Before                                                                | After                                |
+| --------------- | --------------------------------------------------------------------- | ------------------------------------ |
+| Account removal | `_features/account-deletion/delete-account.trpc.mutation.ts`          | `_services/delete-account.ts`        |
+| Current email   | `_features/email/get-current-email.trpc.query.ts`                     | `_services/get-current-email.ts`     |
+| Password        | `_features/password/change-password.trpc.mutation.ts`                 | `_services/update-password.ts`       |
+| Profile read    | `_features/profile/get-profile.trpc.query.ts`                         | `_services/get-profile.ts`           |
+| Profile write   | `_features/profile/update-profile.trpc.mutation.ts`                   | `_services/update-profile.ts`        |
+| Avatar          | `_features/profile/update-avatar.trpc.mutation.ts`                    | `_services/update-avatar.ts`         |
+| Schemas         | `delete-account`, `change-email`, `change-password`, `update-profile` | the same four, next to their service |
+
+The four feature folders keep their client components; only the operations and their schemas left.
+
+**Renamed service and procedure key.** One of each, and they are the same operation:
+`changePassword` becomes `updatePassword`, because `change-` is one of the four banned `update`
+synonyms that `services-verb-prefix` rejects, and the key `password.change` follows as
+`password.update`. Its single call site is `password-form.client.tsx`. The other five keys are
+unchanged: `delete`, `profile.get`, `profile.update`, `profile.updateAvatar` and `email.get` each
+already mirror their service verb under a router that carries the noun. `email.get` reads
+`getCurrentEmail`: "current" qualifies the address, it is not a second entity, so the key stays the
+plain verb rather than becoming `email.getCurrent`.
+
+**Schemas.** The four plural `*Inputs` aliases become singular `*Input`, which is what
+`require-schema-conventions` demands once the scope is locked, and `ChangePasswordSchema` follows
+its service to `UpdatePasswordSchema`. `change-email.schema.ts` moves to `_services/` with the
+others even though it has no service: the email change itself is a Better Auth call made from the
+client, and the bucket set puts every `*.schema.ts` in `_services/`. `send-feedback.schema.ts` in
+the `(authenticated)` shell is the same case and the same placement. A client file importing a
+schema from `_services/` is the documented exception to `no-client-import-of-services`, so the four
+forms lint clean.
+
+**Better Auth translation, split by who can answer.** Two services call Better Auth
+(`deleteAccount`, `updatePassword`) and both had a message-matching chain ending in a generic 500.
+The chain is not centralised in this step; it is placed by who can answer the failure:
+
+| Branch                                                            | Where it lives now                                        |
+| ----------------------------------------------------------------- | --------------------------------------------------------- |
+| `deleteAccount` OAuth / provider, "Please contact support…"       | `BadRequestError` in the service, same code, same message |
+| `deleteAccount` wrong password, "Password is incorrect."          | `UNAUTHORIZED` in the procedure                           |
+| `deleteAccount` lost session, "Your session has expired…"         | `UNAUTHORIZED` in the procedure                           |
+| `updatePassword` wrong password, "Current password is incorrect." | `UNAUTHORIZED` in the procedure                           |
+| `updatePassword` lost session, "You must be signed in"            | `UNAUTHORIZED` in the procedure                           |
+
+`UNAUTHORIZED` is absent from the vocabulary on purpose (identity is answered at the transport
+edge), which is the same split `_domains/auth` made for sign-in and password reset. The two
+procedures keep their own copies of the matching because the messages differ per operation, and
+`deleteAccount` matches "password" while `updatePassword` does not.
+
+`deleteAccount` re-tests the identity terms itself before its OAuth branch. That is not a
+duplicated rule: the original chain answered the password and the session **before** the provider,
+so a message mentioning both had to keep resolving to the identity answer. The guard preserves that
+precedence now that the two halves live in different files, and a unit test pins it.
+
+**Removed generic wrappers, the deliberate behaviour change.** Two, both of them user-visible:
+
+| Removed                                                            | What a user sees instead                                          |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `deleteAccount` 500 "An error occurred while deleting the account" | The raw infrastructure message in the confirmation dialog's alert |
+| `updatePassword` 500 "An error occurred while changing password"   | The raw infrastructure message in the password form's alert       |
+
+Both forms render `error.message` in their root alert, so an unexpected Better Auth or database
+failure now reads as its own message. This is the same "meaningful copy still thrown as a 500" the
+step 4 debt note covers: the masking of step 4 restores a stable generic sentence. Neither was
+reclassified, because a catch-all over every Better Auth failure has no accurate domain code.
+
+**Reclassified errors.** None. `deleteAccount`'s `BAD_REQUEST` and `getCurrentEmail`'s `NOT_FOUND`
+became the domain subclass of the same code with the same message.
+
+**Three vestigial identity checks dropped.** `getCurrentEmail`, `getProfile` and `updateProfile`
+each opened with `if (!userId) throw UNAUTHORIZED "You must be signed in"` against
+`ctx.session.user.id`. `protectedProcedure` establishes the session before the body runs and a
+service now receives `userId` as a plain value, so the check could not fire. Same call as
+`revokeUserSessions` in `admin/users`. `updatePassword`'s session branch keeps the same sentence for
+the case that can still happen: Better Auth rejecting the session mid-request.
+
+**Services holding a database client.** One: `getCurrentEmail`, which holds the `NotFoundError`
+branch. `getProfile`, `updateProfile` and `updateAvatar` are pass-throughs with no authorization
+check and no domain error branch, so they take no trailing client; they import `prisma` directly
+instead of reading it from `ctx`. `deleteAccount` and `updatePassword` never touch Prisma and take
+`headers` explicitly, resolved by the router with `await headers()`. No service receives the tRPC
+context or the session.
+
+**Authorization.** Nothing beyond identity. Every operation acts on the caller's own User, so
+`protectedProcedure` answers the whole question and no `ForbiddenError` is needed.
+
+**Output types.** The six `inferProcedureOutput` aliases of the segment are gone. The two reads
+export `GetCurrentEmailOutput` and `GetProfileOutput` derived from their services; the four writes
+owe none. No file imported any of the six, so no consumer changed.
+
+**Tests.** `delete-account.test.ts` (4 cases) pins the `BadRequestError` for a provider account, the
+preserved precedence of an identity failure that also mentions a provider, the propagation of an
+unexpected failure now that the wrapper is gone, and the body passed to Better Auth.
+`get-current-email.test.ts` (2 cases) pins the `NotFoundError` and the returned shape through the
+trailing client. Better Auth is mocked and no tRPC context is built.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 42 app
+tests (6 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **126 problems, 0
+errors, 126 warnings** (88 `no-raw-tailwind-colors` / 37 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 4 from the 130 of part 1, the four being the plural `Inputs`
+aliases this ticket renamed. Zero errors with the scope locked is what makes the lock real.
+`npx next build` compiles and still lists `/account`, `/account/billing` and `/account/settings`;
+`pnpm build` is refused by the sandbox, as the earlier entries record.
+
+**Per-scope "must be gone" checks.** Restricted to `(authenticated)/account`, checks 1 and 3 to 10
+all return nothing: no role-suffixed file, no router in a bucket or a feature, no service importing
+tRPC or holding a `TRPCError`, no `'use server'`, no `prisma.` outside `_services/` and no
+`inferProcedureOutput` left in the scope. Check 2 still returns the empty untracked
+`account/_utils/` folder: `git ls-files` shows it holding nothing and the sandbox refuses `rmdir`,
+so it stays the maintainer's to remove, like the `admin/users/_utils/` one.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                          | Result                                                               |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `POST /api/trpc/authenticated.account.password.update`         | `401 UNAUTHORIZED`, the renamed key resolves                         |
+| `POST /api/trpc/authenticated.account.password.change`         | `404 No procedure found on path`, the old key is gone                |
+| `POST /api/trpc/authenticated.account.delete`                  | `401 UNAUTHORIZED`, the key resolves and `protectedProcedure` guards |
+| `POST /api/trpc/authenticated.account.profile.update`          | `401 UNAUTHORIZED`, same                                             |
+| `POST /api/trpc/authenticated.account.profile.updateAvatar`    | `401 UNAUTHORIZED`, same                                             |
+| `GET /api/trpc/authenticated.account.profile.get`, `email.get` | `401 UNAUTHORIZED`, both reads resolve                               |
+| `GET /api/trpc/authenticated.account.billing.invoices.list`    | `401 UNAUTHORIZED`, part 1 is unaffected by the lock                 |
+| `GET /account/settings` signed out                             | `307` to `/login`, the page guard is unchanged                       |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+mail or storage provider, so no user can sign in and none of the four forms can be rendered with
+data. Updating the profile, uploading an avatar, changing the password with a wrong current
+password, requesting an email change and deleting an account are on the QA checklist of issue #69.
 
 ### Corrections to the recipe found by the pilot
 
