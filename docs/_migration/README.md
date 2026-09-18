@@ -2422,7 +2422,7 @@ is still there: the sandbox refuses `rmdir`.
 
 ### `(authenticated)/(project)`, part 3: reviewers and core settings (issue #76)
 
-Commit: `PENDING`. The five Reviewer operations and the four core Project settings operations become
+Commit: `3e03177`. The five Reviewer operations and the four core Project settings operations become
 services in two new `_services/` folders. The scope is still **not** locked: issues #77 to #79 own
 the remaining 22 operations and the `migratedScopes` entry.
 
