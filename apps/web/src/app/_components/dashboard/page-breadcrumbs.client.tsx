@@ -1,7 +1,9 @@
 "use client";
 
-import { BreadcrumbItem, useSetBreadcrumbs } from "./breadcrumb-provider";
-
+import {
+  BreadcrumbItem,
+  useSetBreadcrumbs,
+} from "./breadcrumb-provider.client";
 
 type PageBreadcrumbsProps = {
   items: BreadcrumbItem[];

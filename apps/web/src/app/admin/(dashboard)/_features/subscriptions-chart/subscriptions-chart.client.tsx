@@ -1,7 +1,7 @@
 "use client";
 
-import { PeriodSelector } from "@/app/_features/core/dashboard/period-selector/period-selector.client";
-import { periodSelectorParsers } from "@/app/_features/core/dashboard/period-selector/search-params";
+import { PeriodSelector } from "@/app/_components/dashboard/period-selector.client";
+import { periodSelectorParsers } from "@/app/_components/dashboard/search-params";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -23,10 +23,12 @@ export function SubscriptionsChart() {
   const trpc = useTRPC();
   const [period] = useQueryStates(periodSelectorParsers);
 
-  const getMonthlyStatsQuery = useQuery(trpc.admin.dashboard.stats.get.queryOptions({
-    from: period.from ? new Date(period.from) : undefined,
-    to: period.to ? new Date(period.to) : undefined,
-  }));
+  const getMonthlyStatsQuery = useQuery(
+    trpc.admin.dashboard.stats.get.queryOptions({
+      from: period.from ? new Date(period.from) : undefined,
+      to: period.to ? new Date(period.to) : undefined,
+    }),
+  );
 
   return matchQueryStatus(getMonthlyStatsQuery, {
     Loading: <SubscriptionsChartLoading />,
@@ -141,7 +143,7 @@ export function SubscriptionsChart() {
 
                   const data = payload[0]!.payload as MonthData;
                   return (
-                    <div className="bg-background rounded-lg border p-3 shadow-md">
+                    <div className="rounded-lg border bg-background p-3 shadow-md">
                       <div className="font-medium">{data.fullLabel}</div>
                       <div className="space-y-1 text-sm">
                         {payload.map((entry, index) => (
@@ -200,9 +202,7 @@ function SubscriptionsChartError() {
         <CardTitle>Subscriptions and users by month</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
-        <p className="text-destructive text-sm">
-          Failed to load statistics
-        </p>
+        <p className="text-sm text-destructive">Failed to load statistics</p>
       </CardContent>
     </Card>
   );

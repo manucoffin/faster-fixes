@@ -12,8 +12,8 @@ import {
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
-import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
+import { BreadcrumbProvider } from "../_components/dashboard/breadcrumb-provider.client";
+import { Breadcrumbs } from "../_components/dashboard/breadcrumbs.client";
 import { ThemeToggle } from "../_components/theme-toggle.client";
 import { FeedbackButton } from "./_features/feedback/feedback-button.client";
 import { HeaderProjectSwitcher } from "./_features/header/header-project-switcher.client";

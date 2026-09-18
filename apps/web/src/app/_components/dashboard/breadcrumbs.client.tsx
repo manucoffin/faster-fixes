@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
 import React from "react";
-import { useBreadcrumbs } from "./breadcrumb-provider";
+import { useBreadcrumbs } from "./breadcrumb-provider.client";
 
 export function Breadcrumbs() {
   const { breadcrumbs } = useBreadcrumbs();

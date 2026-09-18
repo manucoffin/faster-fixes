@@ -1,5 +1,5 @@
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { Separator } from "@workspace/ui/components/separator";
 import { AlertTriangleIcon } from "lucide-react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
 import {
   Empty,
@@ -43,9 +43,7 @@ export function ReviewersPage() {
   }
 
   return (
-    <DashboardPageContent
-      breadcrumbs={[{ label: "Reviewers" }]}
-    >
+    <DashboardPageContent breadcrumbs={[{ label: "Reviewers" }]}>
       <ReviewersTab projectId={activeProject.id} />
     </DashboardPageContent>
   );

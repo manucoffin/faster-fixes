@@ -5,7 +5,7 @@ import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
 import Link from "next/link";
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { AgentTokensSection } from "./_features/agent-tokens/agent-tokens-section.client";
 import { GitHubIntegrationSection } from "./_features/github/github-integration-section.client";
 import { JiraIntegrationSection } from "./_features/jira/jira-integration-section.client";

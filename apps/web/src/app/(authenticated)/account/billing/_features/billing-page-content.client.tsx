@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { PlanSelection } from "@/app/_features/subscription/upgrade-subscription/plan-selection.client";
 import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
 import { CurrentPlanCard } from "./current-plan/current-plan-card.client";
@@ -16,7 +16,7 @@ export function BillingPageContent() {
         title="Subscribe"
         breadcrumbs={[{ label: "My Account" }, { label: "Subscribe" }]}
       >
-        <p className="text-muted-foreground mb-6">
+        <p className="mb-6 text-muted-foreground">
           Select the plan that best fits your needs.
         </p>
         <div className="max-w-3xl">

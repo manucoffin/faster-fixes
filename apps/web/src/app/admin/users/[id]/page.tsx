@@ -1,4 +1,4 @@
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { PageParams } from "@/types/next";
 import { prisma } from "@workspace/db/index";
 import { notFound } from "next/navigation";
@@ -33,7 +33,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
       breadcrumbs={[
         { label: "Dashboard", link: "/admin" },
         { label: "Users", link: "/admin/users" },
-        { label: pageTitle, },
+        { label: pageTitle },
       ]}
     >
       <div className="grid gap-4 lg:grid-cols-3">
@@ -51,9 +51,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
           </Suspense>
         </div>
 
-        <div className="col-span-1 lg:col-span-2">
-
-        </div>
+        <div className="col-span-1 lg:col-span-2"></div>
       </div>
     </DashboardPageContent>
   );
