@@ -2568,6 +2568,161 @@ the Project are on the QA checklist of issue #76.
 **Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
 is still there: the sandbox refuses `rmdir`.
 
+### `(authenticated)/(project)`, part 4: GitHub and Slack link settings (issue #77)
+
+Commit: `3f60bf9`. The five GitHub repository link operations and the four Slack channel link
+operations become services in the existing `settings/_services/` folder. The scope is still **not**
+locked: issues #78 and #79 own the remaining 13 operations and the `migratedScopes` entry.
+
+**Files moved.** Thirteen modules with `git mv`, plus three new schema files and three new test
+files. No file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation            | Before                                                                             | After                                                     |
+| -------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| GitHub link read     | `settings/_features/github/get-project-link.trpc.query.ts`                         | `settings/_services/get-project-github-link.ts`           |
+| GitHub repo lookup   | `settings/_features/github/link-repo/list-accessible-repos.trpc.query.ts`          | `settings/_services/list-accessible-repos.ts`             |
+| GitHub link write    | `settings/_features/github/link-repo/link-repo.trpc.mutation.ts`                   | `settings/_services/link-repo.ts`                         |
+| GitHub link schema   | `settings/_features/github/link-repo/link-repo.schema.ts`                          | `settings/_services/link-repo.schema.ts`                  |
+| GitHub unlink        | `settings/_features/github/unlink-repo/unlink-repo.trpc.mutation.ts`               | `settings/_services/unlink-repo.ts`                       |
+| GitHub link update   | `settings/_features/github/update-link/update-project-link.trpc.mutation.ts`       | `settings/_services/update-project-github-link.ts`        |
+| GitHub update schema | `settings/_features/github/update-link/update-project-link.schema.ts`              | `settings/_services/update-project-github-link.schema.ts` |
+| Slack link read      | `settings/_features/slack/get-project-slack-link.trpc.query.ts`                    | `settings/_services/get-project-slack-link.ts`            |
+| Slack channel lookup | `settings/_features/slack/link-channel/list-slack-channels.trpc.query.ts`          | `settings/_services/list-slack-channels.ts`               |
+| Slack link write     | `settings/_features/slack/link-channel/set-project-slack-channel.trpc.mutation.ts` | `settings/_services/link-slack-channel.ts`                |
+| Slack link schema    | `settings/_features/slack/link-channel/set-project-slack-channel.schema.ts`        | `settings/_services/link-slack-channel.schema.ts`         |
+| Slack link update    | `settings/_features/slack/update-link/update-project-slack-link.trpc.mutation.ts`  | `settings/_services/update-project-slack-link.ts`         |
+| Slack update schema  | `settings/_features/slack/update-link/update-project-slack-link.schema.ts`         | `settings/_services/update-project-slack-link.schema.ts`  |
+
+The nine operations join the four core Project settings services of part 3 in one flat
+`settings/_services/`, the shape the integrations scope already uses for its four trackers: the
+tracker name is carried by the service name, not by a subfolder. The `_features/` subfolders the
+operations left (`link-repo/`, `unlink-repo/`, `update-link/`, `link-channel/`) keep their client
+component, which is what a feature is for.
+
+**Renamed services.** Two, both forced by the naming conventions.
+
+| Before                   | After                     | Why                                                                                                                        |
+| ------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `updateProjectLink`      | `updateProjectGitHubLink` | In a flat `_services/` shared with Slack, Jira and Linear, "project link" names no tracker; the read already said `GitHub` |
+| `setProjectSlackChannel` | `linkSlackChannel`        | `set-` is an `update` synonym in all but spelling, and the operation is the Slack half of the link/unlink pair             |
+
+**Renamed procedure keys.** One. `projects.slack.setProjectChannel` became
+`projects.slack.linkChannel`, mirroring `projects.github.linkRepo` and the renamed service. The
+single call site, `channel-picker.client.tsx`, was updated in the same commit. The other eight keys
+(`github.getLink`, `github.listRepos`, `github.linkRepo`, `github.unlinkRepo`, `github.updateLink`,
+`slack.getLink`, `slack.listChannels`, `slack.updateLink`) already mirror their service once the
+tracker the sub-router carries is dropped, so they are untouched, and `unlinkRepo` stays the precise
+write verb the ticket asks for.
+
+**Plan gating stayed at the transport edge.** Four of the nine operations were
+`planAwareProcedure.use(enforceFeature(...))` and still are: `github.linkRepo`, `github.updateLink`,
+`slack.linkChannel`, `slack.updateLink`. A plan denial is transport policy with no domain-error
+equivalent, so it never entered a service. The five others keep `protectedProcedure`. No
+`UNAUTHORIZED` and no rate limit is involved.
+
+**Authorization, all of it in the services.** Every denial needs a loaded row or the resolved active
+Organization, so none could stay at the transport edge.
+
+| Denial                                                | Where it lives now                                                                                                                       |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| "Project not found."                                  | `NotFoundError` in `getProjectGitHubLink`, `getProjectSlackLink`, `linkRepo`, `unlinkRepo`, `linkSlackChannel`, `updateProjectSlackLink` |
+| "No GitHub link found for this project."              | `NotFoundError` in `updateProjectGitHubLink`                                                                                             |
+| "No Slack workspace connected."                       | `NotFoundError` in `listSlackChannels` and `linkSlackChannel`                                                                            |
+| "No active organization."                             | `BadRequestError` in `listAccessibleRepos` and `listSlackChannels`                                                                       |
+| "No GitHub installation found. Connect GitHub first." | `BadRequestError` in `linkRepo`                                                                                                          |
+| "Access denied."                                      | `ForbiddenError` in the two link reads                                                                                                   |
+| "Only owners and admins can …"                        | `ForbiddenError` in the seven remaining services, each with its original wording                                                         |
+
+The predicate is the one found in the code and is kept: the two link reads accept any member of the
+Project's Organization, the seven other operations require `role: { in: ["owner", "admin"] }`.
+`updateProjectGitHubLink` reaches the Organization through the link's `project` relation, the same
+shape part 3 used for the Reviewer writes.
+
+**Better-Auth in a service.** The two lookups resolved the active Organization from
+`auth.api.getFullOrganization` inside the procedure. They now take `headers` as an explicit named
+value (`{ userId, headers }`), the router passes `await headers()`, and no service sees the tRPC
+context. This follows the shape the Subscription domain and the integrations scope already use.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR` and no generic wrapper.
+Every `TRPCError` became the `DomainError` subclass of the same code with the same message, so no
+toast or form error changes wording. `listAccessibleRepos` still returns `[]` rather than throwing
+when the Organization has no GitHub installation.
+
+**Nothing reachable from an Inngest function throws a `DomainError`.** None of the nine services is
+imported by anything under `src/server/`, and none of them sends an Inngest event.
+
+**Services holding a database client.** All nine: each holds an authorization check and a domain
+error branch, and none is a pass-through read.
+
+**Output types.** The nine `inferProcedureOutput` aliases of the segment are gone. The four reads
+export `<Service>Output` derived from their own function: `GetProjectGitHubLinkOutput` (consumed by
+`linked-repo-view.client.tsx`), `ListAccessibleReposOutput` (`repo-picker.client.tsx`),
+`ListSlackChannelsOutput` (`channel-picker.client.tsx`) and `GetProjectSlackLinkOutput`, which has
+no importer and is kept because the read's return type is the type source of truth. The five write
+aliases are dropped rather than replaced: no file imported any of them. The three client imports
+changed path only; the type names are unchanged.
+
+**Schemas.** Three new pure-Zod schema files for the operations that parsed an inline
+`z.object({ projectId })` in the procedure (`get-project-github-link.schema.ts`,
+`get-project-slack-link.schema.ts`, `unlink-repo.schema.ts`), and four moved with their service.
+`LinkRepoSchemaType` and `UpdateProjectLinkSchemaType` became `LinkRepoInput` and
+`UpdateProjectGitHubLinkInput`, which is the 13 to 9 burn-down of `require-schema-conventions`
+below. `LinkRepoSchema` keeps its two `.default()` calls and needs no `Values` companion: no form
+resolver consumes it, only the tRPC `.input()`.
+
+**Tests.** Three colocated files, eleven cases, all driven through the trailing database client with
+no tRPC context built. `link-repo.test.ts` (4) pins the not-found, the owner/admin predicate, the
+missing-installation `BadRequestError` and the upsert against the Organization's installation.
+`link-slack-channel.test.ts` (4) pins the two not-found branches, the privileged predicate and the
+fact that changing the channel clears a stale health failure. `list-accessible-repos.test.ts` (3)
+pins the no-active-organization and non-privileged denials of the header-taking lookup and the empty
+list returned when GitHub is not installed; it mocks `@/server/github/github-app`, whose module body
+reads `GITHUB_PRIVATE_KEY` at import time.
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| 1 role suffixes                      | 13 files, down from 22, exactly the Jira (#78) and Linear (#79) operations    |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` (#78) |
+| 3 `_constants/` inside a scope       | nothing                                                                       |
+| 4 `*.types.ts`                       | nothing                                                                       |
+| 5 routers in a bucket or a feature   | nothing                                                                       |
+| 6 tRPC imported by a service         | nothing                                                                       |
+| 7 `TRPCError` in a service           | nothing                                                                       |
+| 8 `'use server'` in a service/router | nothing: the thirteen moved modules all dropped the directive                 |
+| 9 Prisma outside a service           | 12 files, down from 21, the same set as check 1 minus the scope router        |
+| 10 `inferProcedureOutput`            | 13 files, down from 22, all owned by the two later parts                      |
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 105 app
+tests (11 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **98 problems, 0
+errors, 98 warnings** (88 `no-raw-tailwind-colors` / 9 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 4 from the 102 of part 3. `npx next build` compiles and still
+lists `/inbox`, `/reviewers` and `/settings`; `pnpm build` is refused by the sandbox, as the earlier
+entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                   | Result                                                                |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET …projects.github.getLink`, `github.listRepos`                      | `401 UNAUTHORIZED`, each key resolves and the auth procedure guards   |
+| `GET …projects.slack.getLink`, `slack.listChannels`                     | `401 UNAUTHORIZED`, same                                              |
+| `POST …projects.github.linkRepo`, `unlinkRepo`, `updateLink`            | `401 UNAUTHORIZED`, same                                              |
+| `POST …projects.slack.linkChannel`, `slack.updateLink`                  | `401 UNAUTHORIZED`, the renamed key resolves                          |
+| `GET …projects.slack.setProjectChannel`                                 | `404 No procedure found on path`, no call site is left on the old key |
+| `GET …` on each of the five mutations                                   | `405` mutation-over-GET, so all five are mounted as mutations         |
+| `GET …projects.jira.getLink`, `projects.linear.getLink`, `projects.get` | `401 UNAUTHORIZED`, the unmigrated and migrated siblings both resolve |
+| `GET /api/v1/agent/feedbacks` with no bearer token                      | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged       |
+| `GET /settings` signed out                                              | `307` to `/login`, the page guard is unchanged                        |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+GitHub App or Slack workspace, so no user can sign in and no Installation exists to link. Linking a
+repository, toggling auto-create, unlinking it, picking a Slack channel and toggling the Slack
+notification switch are on the QA checklist of issue #77.
+
+**Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
+is still there: the sandbox refuses `rmdir`.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
