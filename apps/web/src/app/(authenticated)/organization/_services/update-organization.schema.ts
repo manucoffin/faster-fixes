@@ -5,4 +5,4 @@ export const UpdateOrganizationSchema = z.object({
   name: z.string().trim().min(1, "Le nom est requis"),
 });
 
-export type UpdateOrganizationInputs = z.infer<typeof UpdateOrganizationSchema>;
+export type UpdateOrganizationInput = z.infer<typeof UpdateOrganizationSchema>;

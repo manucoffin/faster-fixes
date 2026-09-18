@@ -48,7 +48,7 @@ function LoadingSkeleton() {
 export function ReceivedInvitationsList() {
   const trpc = useTRPC();
   const invitationsQuery = useQuery(
-    trpc.authenticated.organization.invitation.getReceived.queryOptions(),
+    trpc.authenticated.organization.invitation.listReceived.queryOptions(),
   );
 
   return matchQueryStatus(invitationsQuery, {

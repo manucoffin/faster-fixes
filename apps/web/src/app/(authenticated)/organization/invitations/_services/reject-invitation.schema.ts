@@ -4,4 +4,4 @@ export const RejectInvitationSchema = z.object({
   invitationId: z.string(),
 });
 
-export type RejectInvitationInputs = z.infer<typeof RejectInvitationSchema>;
+export type RejectInvitationInput = z.infer<typeof RejectInvitationSchema>;

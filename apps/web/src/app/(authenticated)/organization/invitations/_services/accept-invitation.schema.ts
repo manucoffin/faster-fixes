@@ -4,4 +4,4 @@ export const AcceptInvitationSchema = z.object({
   invitationId: z.string(),
 });
 
-export type AcceptInvitationInputs = z.infer<typeof AcceptInvitationSchema>;
+export type AcceptInvitationInput = z.infer<typeof AcceptInvitationSchema>;

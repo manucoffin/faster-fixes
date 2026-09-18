@@ -21,7 +21,7 @@ export function RejectInvitationButton({
       onSuccess: () => {
         toast.success("Invitation declined");
         queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.getReceived.queryFilter(),
+          trpc.authenticated.organization.invitation.listReceived.queryFilter(),
         );
       },
       onError: (error) => {

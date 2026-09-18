@@ -20,9 +20,9 @@ import { useForm } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";
 import {
-  UpdateOrganizationInputs,
+  UpdateOrganizationInput,
   UpdateOrganizationSchema,
-} from "./update-organization.schema";
+} from "../../_services/update-organization.schema";
 
 export function UpdateOrganizationForm() {
   const trpc = useTRPC();
@@ -43,7 +43,7 @@ export function UpdateOrganizationForm() {
     }),
   );
 
-  const form = useForm<UpdateOrganizationInputs>({
+  const form = useForm<UpdateOrganizationInput>({
     resolver: zodResolver(UpdateOrganizationSchema),
     defaultValues: {
       organizationId: "",
@@ -60,7 +60,7 @@ export function UpdateOrganizationForm() {
     [nameValue],
   );
 
-  const onSubmit = (data: UpdateOrganizationInputs) => {
+  const onSubmit = (data: UpdateOrganizationInput) => {
     updateOrganization.mutate(data);
   };
 
@@ -71,7 +71,7 @@ export function UpdateOrganizationForm() {
         className="flex flex-col gap-6"
       >
         {form.formState.errors.root && (
-          <p className="text-destructive text-sm">
+          <p className="text-sm text-destructive">
             {form.formState.errors.root.message}
           </p>
         )}
