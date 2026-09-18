@@ -26,13 +26,18 @@ The server/data conventions (`_services/`, verb vocabulary, the root `trpc-route
 src/app/
 ├── layout.tsx
 ├── _components/   # domain-agnostic UI primitives (future package)
-├── _hooks/        # domain-agnostic React hooks (future package)
+│   ├── dashboard/ # sub-library: page shell, page header, breadcrumbs, period selector
+│   ├── mdx/       # sub-library: the MDX component set
+│   └── seo/       # sub-library: the JSON-LD emitters
 ├── _providers/    # domain-agnostic React providers (future package)
 ├── _constants/    # domain-agnostic constants (future package)
-├── _domains/      # all domain-bound code
-│   ├── animal/
-│   ├── professional/
-│   └── ...
+├── _domains/      # all domain-bound code, one folder per glossary term
+│   ├── auth/
+│   ├── feedback/
+│   ├── organization/
+│   ├── project/
+│   ├── subscription/
+│   └── user/
 ├── (auth)/        # route groups
 ├── (authenticated)/
 ├── (public)/
@@ -41,6 +46,10 @@ src/app/
 ```
 
 **Anything at root `_*` is domain-agnostic.** It must not carry domain knowledge — those folders are slated for extraction into shared packages. Domain-bound code lives under `_domains/` or inside a route.
+
+Root `_components/` is **flat** apart from the three sub-libraries above, each flat inside and extractable into a package on its own. Root `_hooks/` is created with the first domain-agnostic hook, like every other lazy bucket.
+
+Layout chrome bound to one route group stays at the route tier: the public header, mobile navigation, footer, launch banner and manage-consent button live in `(public)/_components/`, not at the root.
 
 ## Domain layout
 
@@ -89,7 +98,7 @@ Same buckets, scoped to the route, with the router colocated next to `page.tsx`:
 
 ## Feature folder
 
-A feature folder co-locates the UI for one capability plus its container hooks. Data ops do **not** live here — they live in the scope's `_services/`. Files are named after the operation/component:
+`_features/` exists only **inside a scope**, a domain or a route segment: a feature is a capability slice, never a top-level grouping. A feature folder co-locates the UI for one capability plus its container hooks. Data ops do **not** live here — they live in the scope's `_services/`. Files are named after the operation/component:
 
 ```
 _features/health/
@@ -139,8 +148,9 @@ See [naming.md](naming.md) for the full read/write verb vocabulary.
 - A domain's `index.ts` is its **public API**. Only paths it exports may be imported by another domain.
 - The barrel exports **contracts** (UI components, `*.schema.ts`, domain types, type-only re-exports from `_services/`), **never** service functions or the router.
 - **Other domains** import from `@/app/_domains/<x>` only — never `@/app/_domains/<x>/_services/...`.
-- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals.
-- **No domain cycles.** Soft hierarchy hint (not lint-enforced): low-level domains (`core`, `geo`, `users`) should not depend on high-level ones (`billing`, `conversation`).
+- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` reaches in too today; those imports are inverted and step 3 resolves them by moving the code into its domain.
+- **Every domain barrel is empty today** (`export {}`): no domain imports another yet. Add an export when a real cross-domain import needs it, rather than publishing a surface no caller asked for.
+- **No domain cycles.** Soft hierarchy hint (not lint-enforced): low-level domains (`user`, `auth`) should not depend on high-level ones (`subscription`, `feedback`).
 
 ## Promotion rule
 

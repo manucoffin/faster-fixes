@@ -56,7 +56,7 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 
 - A module-level `'use server'` directive belongs **only** in a `*.server.action.ts` file: it turns every export into a public endpoint. A server component needs no directive, and an infrastructure helper must be called through a service that checks who is asking.
 - A client file (`'use client'` / `*.client.tsx`) must **not** import from a `_services/` path — **except** `*.schema.ts` and **type-only imports** (`import type { … }`): TS erases those at compile time, so they cannot leak server code into the bundle, and the service return type is the type source of truth. For runtime values, use a tRPC hook or a server component instead.
-- Container hooks (`use-*.ts`) own form state + mutation + optimistic update + toast + invalidation, returning `{ form, onSubmit, isPending }`. They live in their owning `_features/` slice. Extract a hook only on real logic or reuse; a trivial single `useQuery` stays inline.
+- Container hooks (`use-*.ts`) own form state + mutation + optimistic update + toast + invalidation, returning `{ form, onSubmit, isPending }`. They live in their owning scope's `_features/` slice, next to the UI they drive. Extract a hook only on real logic or reuse; a trivial single `useQuery` stays inline.
 
 ## Enforced by ESLint
 

@@ -18,7 +18,7 @@ Client code never imports `@/server/errors/*` and never relies on `instanceof Do
 
 ## Boundary conventions
 
-- All `error.tsx` / `global-error.tsx` files render the shared `ErrorScreen` (`@/app/_components/core/error-screen`), passing shell-specific copy and an optional home link. Do not hand-roll a fourth copy of the layout.
+- All `error.tsx` / `global-error.tsx` files render the shared `ErrorScreen` (`@/app/_components/error-screen`), passing shell-specific copy and an optional home link. Do not hand-roll a fourth copy of the layout.
 - A boundary must never render `error.message`: Server Component errors carry a masked digest, and an unexpected message may leak internals. Log the raw error in `useEffect`; show fixed copy to the user.
 - `global-error.tsx` must declare its own `<html>`/`<body>` and import global styles; it has no metadata export (use a plain `<title>`).
 - RSC preferred pattern for "missing" stays `find-` (nullable) + explicit `notFound()` in the page. The `interruptOnDomainError` catch-handler (`@/server/errors/next-interrupts`) is only for throws from deeper service calls.

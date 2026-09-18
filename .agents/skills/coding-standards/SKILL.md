@@ -15,6 +15,12 @@ The web app is moving to the target architecture (`docs/architecture/target-arch
 five steps. The log lives in `docs/_migration/`: it records the convention baseline, which scopes
 are already locked, and what the next step needs.
 
+Steps 1 and 2 are done. `src/app/_domains/` holds the domain-bound code behind a public `index.ts`
+per domain, and root `_components/`, `_providers/` and `_constants/` hold the domain-agnostic code.
+Step 3 reshapes the inside of each domain, so a domain still carries its pre-migration file layout
+(`_utils/`, `_constants/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`) and has no `_services/` folder
+yet. `src/server/**` still holds domain logic that step 3 moves into its domain.
+
 While the migration runs:
 
 - **New code follows the target architecture** described in these rule files.

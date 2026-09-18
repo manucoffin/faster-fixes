@@ -34,7 +34,7 @@ A component is doing too much if it combines any 2+ of:
 
 ## Splitting a god component
 
-The UI split happens inside `_features/`; the data ops it calls live in the scope's `_services/` and do **not** move into the feature folder (see [architecture.md](architecture.md)).
+The UI split happens inside the scope's `_features/`; the data ops it calls live in the scope's `_services/` and do **not** move into the feature folder (see [architecture.md](architecture.md)).
 
 Before: `professional-form.client.tsx`, 678 lines, owning the form + 4 mutations + tabs + layout + every action button.
 
