@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -22,7 +22,7 @@ export function JiraSection({ projectId }: JiraSectionProps) {
   if (!canAccess("jiraIntegration")) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Jira integration is available on paid plans.
         </p>
         <Button className="w-fit" asChild>
@@ -61,7 +61,7 @@ function JiraSectionInner({ orgId, projectId }: JiraSectionInnerProps) {
     ),
     Empty: (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Connect a Jira site in organization settings to link a Jira project.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>
@@ -79,7 +79,7 @@ function JiraSectionInner({ orgId, projectId }: JiraSectionInnerProps) {
         />
       ) : (
         <div className="flex flex-col gap-2">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             The Jira connection needs attention before a Jira project can be
             linked.
           </p>

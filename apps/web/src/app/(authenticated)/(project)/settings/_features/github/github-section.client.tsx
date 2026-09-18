@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
@@ -44,7 +44,7 @@ export function GitHubSection({ projectId }: GitHubSectionProps) {
   if (!canAccess("githubIntegration")) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           GitHub integration is available on paid plans.
         </p>
         <Button className="w-fit" asChild>
@@ -57,7 +57,7 @@ export function GitHubSection({ projectId }: GitHubSectionProps) {
   if (!installation) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Connect GitHub in organization settings to enable issue creation.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>

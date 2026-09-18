@@ -38,8 +38,8 @@ export function PlanCard({
     <Card
       className={`w-full ${
         isHighlighted
-          ? "border-primary border-2 shadow-xl"
-          : "border-muted border-2"
+          ? "border-2 border-primary shadow-xl"
+          : "border-2 border-muted"
       }`}
     >
       <CardContent className="flex h-full flex-col">
@@ -53,14 +53,14 @@ export function PlanCard({
               </Badge>
             )}
           </div>
-          <p className="text-foreground text-start text-sm">{description}</p>
+          <p className="text-start text-sm text-foreground">{description}</p>
         </div>
 
         {/* Price */}
         <div className="mb-2 flex items-baseline gap-4">
           <div className="flex items-end gap-2">
-            <span className="text-foreground text-5xl font-bold">{price}</span>
-            <div className="text-foreground text-lg">
+            <span className="text-5xl font-bold text-foreground">{price}</span>
+            <div className="text-lg text-foreground">
               <span className="font-bold">$</span>
               <br />
               <span className="text-sm">/{isAnnual ? "year" : "month"}</span>
@@ -69,8 +69,9 @@ export function PlanCard({
         </div>
 
         {freeTrialDays && (
-          <div className="text-muted-foreground mb-6 flex items-center gap-2">
-            <Gift className="size-4" /> {freeTrialDays}-day free trial, no commitment
+          <div className="mb-6 flex items-center gap-2 text-muted-foreground">
+            <Gift className="size-4" /> {freeTrialDays}-day free trial, no
+            commitment
           </div>
         )}
 
@@ -86,7 +87,7 @@ export function PlanCard({
                 <span
                   className={`text-sm ${
                     feature.highlighted
-                      ? "text-foreground font-semibold"
+                      ? "font-semibold text-foreground"
                       : "text-muted-foreground"
                   }`}
                 >

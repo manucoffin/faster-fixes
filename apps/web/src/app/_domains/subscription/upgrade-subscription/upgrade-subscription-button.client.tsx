@@ -70,8 +70,7 @@ export function UpgradeSubscriptionButton({
         </>
       ) : (
         <span>
-          Choose{" "}
-          <span className="font-semibold capitalize">{planName}</span>
+          Choose <span className="font-semibold capitalize">{planName}</span>
         </span>
       )}
     </Button>

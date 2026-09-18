@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
 import { isCloud } from "@/utils/environment/env";
 import {
   SidebarGroup,

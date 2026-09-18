@@ -1,6 +1,6 @@
 "use client";
 
-import { SubscriptionStatusTranslation } from "@/app/_features/subscription/_constants/translations";
+import { SubscriptionStatusTranslation } from "@/app/_domains/subscription/_constants/translations";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
@@ -22,19 +22,20 @@ interface SubscriptionCardProps {
 
 export function SubscriptionCard({ userId }: SubscriptionCardProps) {
   const trpc = useTRPC();
-  const { data: subscription, isLoading } =
-    useQuery(trpc.admin.users.subscription.get.queryOptions(
+  const { data: subscription, isLoading } = useQuery(
+    trpc.admin.users.subscription.get.queryOptions(
       { userId },
       {
         enabled: !!userId,
       },
-    ));
+    ),
+  );
 
   if (isLoading) {
     return (
       <Card className="">
         <CardHeader>
-          <p className="text-muted-foreground text-sm">Subscription</p>
+          <p className="text-sm text-muted-foreground">Subscription</p>
           <CardTitle>Loading...</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
@@ -47,16 +48,18 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
   return (
     <Card className="">
       <CardHeader>
-        <p className="text-muted-foreground text-sm">Subscription</p>
+        <p className="text-sm text-muted-foreground">Subscription</p>
 
-        <CardTitle>{subscription ? subscription.plan : "Not subscribed"}</CardTitle>
+        <CardTitle>
+          {subscription ? subscription.plan : "Not subscribed"}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {subscription ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-muted-foreground text-sm">Status</p>
+                <p className="text-sm text-muted-foreground">Status</p>
                 <Badge
                   variant={
                     subscription.status === "active" ? "default" : "secondary"
@@ -64,13 +67,13 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
                 >
                   {subscription.status &&
                     SubscriptionStatusTranslation[
-                    subscription.status as keyof typeof SubscriptionStatusTranslation
+                      subscription.status as keyof typeof SubscriptionStatusTranslation
                     ]}
                 </Badge>
               </div>
               {subscription.periodEnd && (
                 <div>
-                  <p className="text-muted-foreground text-sm">Until</p>
+                  <p className="text-sm text-muted-foreground">Until</p>
                   <p className="font-medium">
                     {format(new Date(subscription.periodEnd), "PPP")}
                   </p>
@@ -80,7 +83,7 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               No active subscription
             </p>
           </div>

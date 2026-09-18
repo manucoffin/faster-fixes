@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -22,7 +22,7 @@ export function LinearSection({ projectId }: LinearSectionProps) {
   if (!canAccess("linearIntegration")) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Linear integration is available on paid plans.
         </p>
         <Button className="w-fit" asChild>
@@ -32,9 +32,7 @@ export function LinearSection({ projectId }: LinearSectionProps) {
     );
   }
 
-  return (
-    <LinearSectionInner orgId={activeOrg?.id} projectId={projectId} />
-  );
+  return <LinearSectionInner orgId={activeOrg?.id} projectId={projectId} />;
 }
 
 type LinearSectionInnerProps = {
@@ -63,7 +61,7 @@ function LinearSectionInner({ orgId, projectId }: LinearSectionInnerProps) {
     ),
     Empty: (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Connect Linear in organization settings to link a team.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>

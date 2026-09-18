@@ -13,9 +13,8 @@ export const getStripeSubscription = protectedProcedure
     const { stripeSubscriptionId } = input;
 
     try {
-      const subscription = await stripeApi.subscriptions.retrieve(
-        stripeSubscriptionId,
-      );
+      const subscription =
+        await stripeApi.subscriptions.retrieve(stripeSubscriptionId);
 
       return {
         id: subscription.id,

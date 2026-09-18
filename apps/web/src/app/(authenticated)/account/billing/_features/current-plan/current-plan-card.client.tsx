@@ -1,6 +1,6 @@
 "use client";
 
-import { UpgradeSubscriptionDialog } from "@/app/_features/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
+import { UpgradeSubscriptionDialog } from "@/app/_domains/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -35,8 +35,9 @@ import { StatusIndicators } from "./status-indicators.client";
 export function CurrentPlanCard() {
   const trpc = useTRPC();
 
-  const getActiveSubscriptionQuery =
-    useQuery(trpc.authenticated.account.billing.subscription.get.queryOptions());
+  const getActiveSubscriptionQuery = useQuery(
+    trpc.authenticated.account.billing.subscription.get.queryOptions(),
+  );
 
   return matchQueryStatus(getActiveSubscriptionQuery, {
     Loading: (
@@ -181,7 +182,7 @@ export function CurrentPlanCard() {
 
           <CardFooter className="flex justify-end">
             {subscription.status === SubscriptionStatus.Active ||
-              subscription.status === SubscriptionStatus.Trialing ? (
+            subscription.status === SubscriptionStatus.Trialing ? (
               <div className="flex gap-2 pt-4">
                 {/* {!subscription.cancelAtPeriodEnd &&
                   subscription.stripeSubscriptionId && (
