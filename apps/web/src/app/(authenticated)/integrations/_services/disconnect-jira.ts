@@ -1,46 +1,38 @@
-"use server";
-
 import { auth } from "@/server/auth";
+import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
 import { deregisterProjectJiraWebhook } from "@/server/jira/webhook-registration";
-import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import { headers } from "next/headers";
+import { prisma } from "@workspace/db";
 
-export const disconnectJira = protectedProcedure.mutation(async ({ ctx }) => {
-  const { prisma, session } = ctx;
-
-  const activeOrganization = await auth.api.getFullOrganization({
-    headers: await headers(),
-  });
+export async function disconnectJira(
+  { headers, userId }: { headers: Headers; userId: string },
+  db: typeof prisma = prisma,
+) {
+  const activeOrganization = await auth.api.getFullOrganization({ headers });
 
   if (!activeOrganization) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active organization.",
-    });
+    throw new BadRequestError("No active organization.");
   }
 
   // Owner-only per ADR 0008: disconnecting drops the org's only Jira link, a
   // heavier action than installing (which admins may also do).
-  const membership = await prisma.member.findFirst({
+  const membership = await db.member.findFirst({
     where: {
       organizationId: activeOrganization.id,
-      userId: session.user.id,
+      userId,
       role: "owner",
     },
   });
 
   if (!membership) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only the organization owner can disconnect Jira.",
-    });
+    throw new ForbiddenError(
+      "Only the organization owner can disconnect Jira.",
+    );
   }
 
   // Deleting the installation cascades the Project links away, taking with them
   // the only record of what to deregister — so the Jira-side webhooks go first,
   // while the credentials to remove them still exist.
-  const links = await prisma.projectJiraLink.findMany({
+  const links = await db.projectJiraLink.findMany({
     where: { jiraInstallation: { organizationId: activeOrganization.id } },
     include: { jiraInstallation: true },
   });
@@ -52,11 +44,9 @@ export const disconnectJira = protectedProcedure.mutation(async ({ ctx }) => {
   // Atlassian has no public 3LO token-revocation endpoint; the user revokes
   // access from their Atlassian account's connected apps. We drop the local
   // installation, which stops all further token use.
-  await prisma.jiraInstallation.deleteMany({
+  await db.jiraInstallation.deleteMany({
     where: { organizationId: activeOrganization.id },
   });
 
   return { success: true };
-});
-
-export type DisconnectJiraOutput = inferProcedureOutput<typeof disconnectJira>;
+}

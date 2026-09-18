@@ -70,6 +70,7 @@ export const migratedScopes = [
   "(public)",
   "(auth)",
   "(authenticated)/account",
+  "(authenticated)/integrations",
   "(authenticated)/organization",
   "_domains/auth",
   "_domains/organization",

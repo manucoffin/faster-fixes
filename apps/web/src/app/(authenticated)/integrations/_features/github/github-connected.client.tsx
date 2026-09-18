@@ -22,7 +22,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import type { GetGitHubInstallationOutput } from "./get-github-installation.trpc.query";
+import type { GetGitHubInstallationOutput } from "../../_services/get-github-installation";
 
 type GitHubConnectedProps = {
   installation: NonNullable<GetGitHubInstallationOutput>;
@@ -64,8 +64,12 @@ export function GitHubConnected({ installation }: GitHubConnectedProps) {
             <span className="font-medium">{installation.accountLogin}</span>
             <Badge variant="secondary">{installation.accountType}</Badge>
           </div>
-          <span className="text-muted-foreground text-sm">
-            Connected{installation.installedByName ? ` by ${installation.installedByName}` : ""} on{" "}
+          <span className="text-sm text-muted-foreground">
+            Connected
+            {installation.installedByName
+              ? ` by ${installation.installedByName}`
+              : ""}{" "}
+            on{" "}
             {new Date(installation.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",

@@ -1,27 +1,29 @@
 import { protectedProcedure, router } from "@/server/trpc/trpc";
-import { disconnectGitHub } from "./_features/github/disconnect-github.trpc.mutation";
-import { getGitHubInstallation } from "./_features/github/get-github-installation.trpc.query";
-import { disconnectJira } from "./_features/jira/disconnect-jira.trpc.mutation";
-import { getJiraInstallation } from "./_features/jira/get-jira-installation.trpc.query";
-import { listAccessibleJiraSites } from "./_features/jira/list-accessible-sites.trpc.query";
-import { selectJiraSite } from "./_features/jira/select-jira-site.trpc.mutation";
-import { disconnectLinear } from "./_features/linear/disconnect-linear.trpc.mutation";
-import { getLinearInstallation } from "./_features/linear/get-linear-installation.trpc.query";
-import { disconnectSlack } from "./_features/slack/disconnect-slack.trpc.mutation";
-import { getSlackInstallation } from "./_features/slack/get-slack-installation.trpc.query";
+import { headers } from "next/headers";
 import { createAgentToken } from "./_services/create-agent-token";
 import { CreateAgentTokenSchema } from "./_services/create-agent-token.schema";
 import { deleteAgentToken } from "./_services/delete-agent-token";
 import { DeleteAgentTokenSchema } from "./_services/delete-agent-token.schema";
+import { disconnectGitHub } from "./_services/disconnect-github";
+import { disconnectJira } from "./_services/disconnect-jira";
+import { disconnectLinear } from "./_services/disconnect-linear";
+import { disconnectSlack } from "./_services/disconnect-slack";
+import { getGitHubInstallation } from "./_services/get-github-installation";
+import { getJiraInstallation } from "./_services/get-jira-installation";
+import { getLinearInstallation } from "./_services/get-linear-installation";
+import { getSlackInstallation } from "./_services/get-slack-installation";
+import { listAccessibleJiraSites } from "./_services/list-accessible-jira-sites";
 import { listAgentTokens } from "./_services/list-agent-tokens";
 import { ListAgentTokensSchema } from "./_services/list-agent-tokens.schema";
 import { revokeAgentToken } from "./_services/revoke-agent-token";
 import { RevokeAgentTokenSchema } from "./_services/revoke-agent-token.schema";
+import { selectJiraSite } from "./_services/select-jira-site";
+import { SelectJiraSiteSchema } from "./_services/select-jira-site.schema";
 
-// Every denial of the agent token operations reads a loaded membership, so all
-// of them live in their service; `protectedProcedure` answers identity alone.
-// The five installation sub-routers still mount pre-migration procedure
-// modules: issue #73 extracts them and locks the scope.
+// Every denial of this scope reads a loaded row (a membership, or the Jira site
+// list), so all of them live in their service; `protectedProcedure` answers
+// identity alone. The installation services resolve the active Organization
+// themselves from the request headers the procedure hands them.
 export const integrationsRouter = router({
   agentToken: router({
     list: protectedProcedure
@@ -62,21 +64,74 @@ export const integrationsRouter = router({
       ),
   }),
   github: router({
-    getInstallation: getGitHubInstallation,
-    disconnect: disconnectGitHub,
+    getInstallation: protectedProcedure.query(async ({ ctx }) =>
+      getGitHubInstallation({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    disconnect: protectedProcedure.mutation(async ({ ctx }) =>
+      disconnectGitHub({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
   }),
   linear: router({
-    getInstallation: getLinearInstallation,
-    disconnect: disconnectLinear,
+    getInstallation: protectedProcedure.query(async ({ ctx }) =>
+      getLinearInstallation({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    disconnect: protectedProcedure.mutation(async ({ ctx }) =>
+      disconnectLinear({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
   }),
   jira: router({
-    getInstallation: getJiraInstallation,
-    listAccessibleSites: listAccessibleJiraSites,
-    selectSite: selectJiraSite,
-    disconnect: disconnectJira,
+    getInstallation: protectedProcedure.query(async ({ ctx }) =>
+      getJiraInstallation({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    listAccessibleSites: protectedProcedure.query(async ({ ctx }) =>
+      listAccessibleJiraSites({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    selectSite: protectedProcedure
+      .input(SelectJiraSiteSchema)
+      .mutation(async ({ input, ctx }) =>
+        selectJiraSite({
+          cloudId: input.cloudId,
+          headers: await headers(),
+          userId: ctx.session.user.id,
+        }),
+      ),
+    disconnect: protectedProcedure.mutation(async ({ ctx }) =>
+      disconnectJira({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
   }),
   slack: router({
-    getInstallation: getSlackInstallation,
-    disconnect: disconnectSlack,
+    getInstallation: protectedProcedure.query(async ({ ctx }) =>
+      getSlackInstallation({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    disconnect: protectedProcedure.mutation(async ({ ctx }) =>
+      disconnectSlack({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
   }),
 });

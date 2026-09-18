@@ -1,36 +1,31 @@
-"use server";
-
 import { auth } from "@/server/auth";
-import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import { headers } from "next/headers";
+import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
+import { prisma } from "@workspace/db";
 
-export const getSlackInstallation = protectedProcedure.query(async ({ ctx }) => {
-  const { prisma, session } = ctx;
-
-  const activeOrganization = await auth.api.getFullOrganization({
-    headers: await headers(),
-  });
+export async function getSlackInstallation(
+  { headers, userId }: { headers: Headers; userId: string },
+  db: typeof prisma = prisma,
+) {
+  const activeOrganization = await auth.api.getFullOrganization({ headers });
 
   if (!activeOrganization) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active organization.",
-    });
+    throw new BadRequestError("No active organization.");
   }
 
-  const membership = await prisma.member.findFirst({
+  // The denial reads the loaded membership, so it belongs here rather than at
+  // the transport edge. Any member may read the installation.
+  const membership = await db.member.findFirst({
     where: {
       organizationId: activeOrganization.id,
-      userId: session.user.id,
+      userId,
     },
   });
 
   if (!membership) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
+    throw new ForbiddenError("Access denied.");
   }
 
-  const installation = await prisma.slackInstallation.findUnique({
+  const installation = await db.slackInstallation.findUnique({
     where: { organizationId: activeOrganization.id },
     include: {
       installedBy: { include: { user: { select: { name: true } } } },
@@ -41,13 +36,13 @@ export const getSlackInstallation = protectedProcedure.query(async ({ ctx }) => 
 
   // The active project is the org's first project, matching how the rest of the
   // integration features resolve the current project.
-  const activeProject = await prisma.project.findFirst({
+  const activeProject = await db.project.findFirst({
     where: { organizationId: activeOrganization.id },
     orderBy: { createdAt: "asc" },
   });
 
   const projectLink = activeProject
-    ? await prisma.projectSlackLink.findUnique({
+    ? await db.projectSlackLink.findUnique({
         where: { projectId: activeProject.id },
         select: {
           channelId: true,
@@ -66,8 +61,8 @@ export const getSlackInstallation = protectedProcedure.query(async ({ ctx }) => 
     createdAt: installation.createdAt,
     projectLink,
   };
-});
+}
 
-export type GetSlackInstallationOutput = inferProcedureOutput<
-  typeof getSlackInstallation
+export type GetSlackInstallationOutput = Awaited<
+  ReturnType<typeof getSlackInstallation>
 >;
