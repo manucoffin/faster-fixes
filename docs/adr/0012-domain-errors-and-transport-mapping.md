@@ -15,7 +15,7 @@ Accepted, committed 2026-09-18 with the step 3 prerequisites, and implemented in
 - **Non-retriable Inngest failures**: `rethrowDomainErrorsAsNonRetriable`. No Inngest function uses a non-retriable error today.
 - **Server actions**: the action client branch. Inert here, since the repo has no `next-safe-action` client and no `*.server.action.ts` module.
 - **Masking and logging**: the `errorFormatter` replaces every `INTERNAL_SERVER_ERROR` message with generic copy and logs the original with its `cause` chain. It ships last, because it hides any meaningful copy still thrown as a 500.
-- **`services-no-bare-error` always on**: step 3 raises it to `error` per locked scope through the `migratedScopes` allowlist; step 4 makes it unconditional and sweeps `src/server/**`.
+- **`services-no-bare-error` always on**: step 3 raised it to `error` behind the agent gate for every `_services/` folder at its final lock; step 4 makes it unconditional and sweeps `src/server/**`.
 - **Retiring the legacy error classes**: the six existing custom classes (four Jira token and request errors, the mailer `EmailError`, the widget client `ApiError`) are outside step 3 and none of them is detected by the kit's legacy-module grep.
 
 `no-client-import-of-server-errors` is raised from `off` to `error` in step 3, once `src/server/errors/` exists.

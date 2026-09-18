@@ -65,6 +65,8 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
 | `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
 | `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `_domains/auth`                | 3    | `dc7a8db` | The same nine. The four `(auth)` mutations moved into the domain in the same commit, so the domain owns the whole authentication surface.                                                                                                                                                                   |
+| `(auth)`                       | 3    | `dc7a8db` | The same nine. The route group keeps only UI features after its four mutations left, so it was locked in the same commit rather than revisited by a later ticket.                                                                                                                                           |
 | `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
 | `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
 | `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                                                                         |
@@ -77,7 +79,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
-The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is still in place. Step 3 removes it when those files move into `_services/`.
+The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` was removed at the step 3 final lock, once the last role-suffixed file was gone. Since that commit the table above is history rather than configuration: the step's rules are declared once, on their own globs, with no per-scope allowlist, so every scope under `src/app` is locked and a new one is locked the moment it is created. See the step 3 exit verification below.
 
 ## Step 2 exit verification
 
@@ -101,6 +103,200 @@ The 22 cases of `no-cross-domain-deep-import.test.js` are the rule's own proof: 
 
 1. **`pnpm build` needs a populated `apps/web/.env.local`.** Without one it fails at "Collecting page data" on missing R2 and `JIRA_TOKEN_ENCRYPTION_KEY` values, which is environment, not anything step 2 changed. A gitignored `.env.local` holding dummy values was written for the smoke test and left in place, because this repo forbids the agent from deleting files. It is untracked, so it never reaches a commit. Remove or replace it when convenient.
 2. **Route rendering is unverified.** The build proves the client/server boundaries of the moved layouts and the MDX registry; it does not prove the pages still render. Home, a `/vs/*` page, a blog article, login, the inbox, project settings, billing and admin are the manual pass.
+
+## Step 3 exit verification
+
+Run on 2026-09-18 at the final lock commit (issue #82), with `--force` everywhere so Turbo served no
+cached result. The per-scope entries of the step 3 scope log below record what each scope moved,
+renamed, reclassified and smoked; this section records what closed the step.
+
+**What the final lock changed in the ESLint config.** `migratedScopes`, `migratedScopeEntry`,
+`migratedScopeConfigs`, the `lockedSeverity` constant and the `lockedScopeConfigs` spread are gone
+from `packages/eslint-config/next.js`. The nine convention rules of the step and
+`services-no-bare-error` now read one `migratedSeverity` constant (`error` under
+`ESLINT_AGENT_RULES=1`, `off` otherwise) and are declared exactly once, on the rule's own glob:
+`services-*` and `require-trpc-output-type` on `**/_services/**`, `no-feature-nesting` on
+`**/_features/**`, the schema rules on `**/*.schema.ts`, `require-use-client-suffix` on `**/src/**`,
+`no-client-import-of-services` everywhere. `servicesRulesSeverity` and `domainRulesSeverity` folded
+into the same constant, so step 2's `no-default-export` lock rides on it too. The consequence worth
+stating: a scope created tomorrow is locked the day it is created, because there is no list to
+forget to update. `agent` (`warn`) now carries `no-raw-tailwind-colors` alone, which is the whole
+remaining burn-down. `next-config.test.js` was rewritten with the mechanism it pinned: it now asserts
+that each rule is declared exactly once, that `next.js` exports `nextJsConfig` and nothing else, that
+every rule resolves to `error` through ESLint's own matcher inside the gate and to `off` outside it,
+and that a `*.trpc.mutation.ts` path is no longer exempt from `require-server-action-suffix`.
+
+**The `'use server'` exemption is gone.** The block that turned `require-server-action-suffix` off
+for `*.trpc.query.{ts,tsx}` and `*.trpc.mutation.{ts,tsx}` was removed. It existed because all 81
+pre-migration procedure modules carried a module-level `"use server"`; none of those files exists
+any more, and a future file with that name is now reported like any other. It was the last transition
+glob in the config.
+
+**One file outside the perimeter was renamed.** `src/lib/trpc/trpc-provider.tsx` became
+`trpc-provider.client.tsx`, and `src/app/layout.tsx` follows the new path. Step 3's perimeter is
+`src/app/**`, so this file was never in scope, but it was the last `require-use-client-suffix`
+warning in the repo and the rule cannot be locked at `error` on `**/src/**` while it stands. The
+alternative was a second severity tier for everything outside `src/app`, which is the allowlist this
+ticket exists to delete. The rename is a file name and one import, with no behaviour change.
+
+### The "must be gone" checks
+
+The ten commands of `03-services.md`, run from the repo root with `/usr/bin/grep`.
+
+| Check                                   | Result                                                             |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| 1 role suffixes                         | nothing, down from 112 files at the baseline                       |
+| 2 old buckets                           | **two `_utils/` folders left**, see below                          |
+| 3 `_constants/` inside a scope          | nothing; the domain-agnostic `src/app/_constants/` stays           |
+| 4 `*.types.ts` files                    | nothing                                                            |
+| 5 routers inside a bucket or a feature  | nothing; all 13 `trpc-router.ts` sit at a scope root               |
+| 6 tRPC imported by a service            | nothing, across 246 files in 21 `_services/` folders               |
+| 7 `TRPCError` in a service              | nothing                                                            |
+| 8 `'use server'` in a service or router | nothing, down from 81 files                                        |
+| 9 Prisma queried outside a service      | nothing outside the deliberately excluded `route.ts` handlers      |
+| 10 procedure output as the type source  | nothing outside `src/lib/trpc/`, down from 190 aliases in 95 files |
+
+Three checks this ticket adds on top of the table, all returning nothing: no `_utils/` folder holding
+a source file, no `mergeRouters` call anywhere in `apps/web/src`, and no router inside a bucket or a
+feature (check 5).
+
+**Check 2 is the one open item, and it is not the agent's to close.** The two folders are
+`(auth)/_utils/` and `(public)/_features/github-stars/_utils/`. Each holds exactly one file, a
+`_deprecated_trpc-router.ts` stub of two comment lines and an `export {}`, because this repo forbids
+the agent from deleting files. `03-services.md` says so in the rules of the game for the table: "a
+stub still sitting in a `_utils/` folder keeps the old-bucket check red", and the checks "clear only
+after the maintainer has deleted the `_deprecated_<name>.ts` stubs". That deletion is issue #81,
+which was still open when this lock landed. Moving the stubs out of `_utils/` would have turned the
+check green without making the statement it checks true, so they were left where they are.
+
+### End state under `src/app`
+
+| Metric                                      | Before step 3    | Now                                       |
+| ------------------------------------------- | ---------------- | ----------------------------------------- |
+| tRPC operation files holding business logic | 111              | 0                                         |
+| `_services/` files                          | 0                | 246, in 21 folders                        |
+| `trpc-router.ts` at a scope root            | 0                | 13                                        |
+| routers living in `_utils/`                 | 14               | 0                                         |
+| `mergeRouters` calls                        | 1                | 0                                         |
+| `TRPCError` throws                          | 208              | 8, all in a router, at the transport edge |
+| `DomainError` subclass throws               | 0                | 224                                       |
+| `INTERNAL_SERVER_ERROR` throws              | 26               | 0                                         |
+| bare `throw new Error(` in a service        | n/a              | 0                                         |
+| `inferProcedureOutput` aliases              | 190, in 95 files | 0                                         |
+| `'use server'` directives                   | 81               | 0                                         |
+| `_helpers/` folders                         | 0                | 5                                         |
+| `_types/` folders                           | 0                | 0, none was needed                        |
+
+`_types/` is in the target bucket set and stayed empty: every hand-written shared type found during
+the step either derived from a service return type (`<Service>Output`) or belonged next to the
+feature that used it. The bucket is documented, not mandatory.
+
+The eight surviving `TRPCError` throws are the transport-edge cases the invariants keep in a
+procedure: two `UNAUTHORIZED` translations of a Better-Auth message plus a rate-limit
+`TOO_MANY_REQUESTS` in `_domains/auth/trpc-router.ts`, one `FORBIDDEN` answerable from the session
+alone in `_domains/organization/trpc-router.ts`, and four in
+`(authenticated)/account/trpc-router.ts`.
+
+Five `eslint-disable` comments remain under `src/app`. Four are `@next/next/no-img-element` on image
+tags that predate the migration. The fifth is the one justified suppression this step introduced,
+`schema-must-be-pure-zod` on `admin/users/_services/create-subscription.schema.ts`, which points at
+step 5.
+
+### Gate
+
+| Check                   | Result                                                                      |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `pnpm typecheck`        | 4 tasks, clean                                                              |
+| `pnpm lint`             | 5 tasks, 0 warnings                                                         |
+| `pnpm test`             | 120 app tests (33 files) plus the ESLint rule and config tests, all passing |
+| `pnpm lint:agent-rules` | **88 problems, 0 errors, 88 warnings**, all `no-raw-tailwind-colors`        |
+| `npx next build` (web)  | compiles, every route still listed                                          |
+
+Warning counts per rule, against the step 2 re-measured baseline of 120:
+
+| Rule                         | After step 2 | Now | Note                                                                      |
+| ---------------------------- | -----------: | --: | ------------------------------------------------------------------------- |
+| `no-raw-tailwind-colors`     |           88 |  88 | Outside this step's definition of done.                                   |
+| `require-schema-conventions` |           28 |   0 | Burned down scope by scope, at `error` now.                               |
+| `require-use-client-suffix`  |            3 |   0 | The last one was the provider renamed above.                              |
+| `schema-must-be-pure-zod`    |            1 |   0 | The one impure schema carries a justified suppression pointing at step 5. |
+| every other step 3 rule      |            0 |   0 | At `error` now, so a zero is enforced rather than vacuous.                |
+
+`pnpm build` is refused by the sandbox, as the earlier entries record; `npx next build` from
+`apps/web` with dummy environment values is the substitute used throughout the step.
+
+### Left for the maintainer
+
+1. **Delete the three `_deprecated_` stubs (issue #81)**, then re-run check 2, which is the only
+   check still red:
+   - `apps/web/src/app/(auth)/_utils/_deprecated_trpc-router.ts`
+   - `apps/web/src/app/(public)/_features/github-stars/_utils/_deprecated_trpc-router.ts`
+   - `apps/web/src/app/(authenticated)/account/billing/_features/current-plan/_deprecated_get-active-subscription.ts`
+
+   The first two are the only contents of their folder, so deleting them removes the last two
+   `_utils/` folders under `src/app`. None of the three is imported by anything, and none of them
+   exports a value: typecheck and the build pass without them.
+
+2. **Walk the smoke checklists of the scope entries below against a real database.** The sandbox has
+   no Postgres, so every authenticated path stopped at the first query throughout the step. Each
+   scope entry lists what was verified and what was left to QA.
+
+3. **The gitignored `apps/web/.env.local` of dummy values is still in place**, as step 2's exit
+   verification records.
+
+### Debt recorded for steps 4 and 5
+
+Found during step 3 and deliberately not fixed here.
+
+**Step 4's legacy error class grep detects none of the six existing classes.** The check in
+`04-domain-errors.md` greps for `lib/errors`, `CustomError`, `ValidationError` and
+`UnauthorizedError`, which is the source project's vocabulary. Run against this repo it returns three
+lines, all of them `isJiraUnauthorizedError`, a predicate function in
+`server/jira/jira-rest-client.ts`, and it misses every class this repo actually has:
+`JiraIssueConfigurationError` and `JiraRequestError` (`server/jira/jira-rest-client.ts`),
+`JiraNotConnectedError` and `JiraReauthRequiredError` (`server/jira/token-access.ts`), `EmailError`
+(`lib/mailer/types.ts`) and `ApiError` (`packages/widget-core/src/client.ts`, which is published and
+outside the migration's perimeter entirely). Step 4 has to rewrite that check against this list
+before it can claim the legacy vocabulary is retired.
+
+**No Inngest function uses a non-retriable error today.** `NonRetriableError` appears nowhere in
+`apps/web/src`. Step 4's `rethrowDomainErrorsAsNonRetriable` therefore has no existing call site to
+convert: every Inngest function currently retries on any failure, expected or not. That is a
+behaviour change step 4 introduces, not a refactor it performs.
+
+**Step 4's masking will hide any meaningful copy still thrown as a 500.** Inside `src/app` this is
+now safe: no service throws a bare `Error` and no `INTERNAL_SERVER_ERROR` is thrown anywhere. The
+exposure is `src/server/**`, which step 3 did not touch and which holds 28 bare `throw new Error(`
+sites, plus one in `src/lib`. Some carry user-facing copy that reaches a client today through a
+procedure that calls into them. Step 4's sweep has to read those 29 sites before the masking
+`errorFormatter` is enabled, not after.
+
+**Twelve inverted imports from `src/server/` into domain internals remain.** The count is unchanged
+from step 2's list, but two paths moved with their bucket during step 3:
+`server/auth/config/database-hooks.ts` now imports
+`_domains/organization/_services/get-unique-organization-slug` (was `_utils/generate-unique-slug`)
+and `server/auth/plugins/organization.tsx` now imports
+`_domains/organization/_helpers/organization-roles` (was `_utils/organization-roles`). The other ten
+are the `feedback-status` and `format-feedback-markdown` imports listed in "`src/server/` imports of
+domain internals" above. They resolve when the importing file joins its domain in step 5. The three
+router mounts in `server/trpc/routers/_app.ts` are by design and are not in this count.
+
+**The plan configuration has to move in step 5.** `@/server/auth/config/subscription-plans` is
+imported by 29 files, 20 of them under `src/app`, including two `_domains/subscription` services, a
+`_helpers/` label function, the `use-plan-gate` client hook and the agent API's `require-agent-auth`.
+It holds the Plan vocabulary of the `subscription` domain, not Better Auth configuration. One
+consequence is visible in the lint config today: the single `schema-must-be-pure-zod` suppression on
+`admin/users/_services/create-subscription.schema.ts` exists only because the schema reads
+`SubscriptionPlanName` and `SubscriptionStatus` from that module, and the config carries a
+`reportUnusedDisableDirectives: "off"` block for that one file so the suppression is not reported as
+unused outside the agent gate. Both come out with the relocation, and anomaly 1 of step 2 (a client
+hook importing `@/server/`) closes with them.
+
+**Twelve route handlers still query Prisma inline.** Check 9 excludes `route.ts` on purpose, as
+`03-services.md` records: five OAuth install and callback routes, three tracker webhooks, the upload
+endpoint and the three public widget endpoints. No step 3 ticket touched them, and the REST agent API
+keeps its own error helper and its `NextResponse` result style until step 4 gives it a mapped
+boundary.
 
 ## Amendments to the kit made during step 1
 
@@ -202,7 +398,7 @@ Step 3 turns every scope's data and IO code into verb-prefixed functions in `_se
 2. **Answer the open question on the integration domains** recorded above. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
 3. **Decide the domain of `server/storage`.** Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
 4. ~~**Add the per-scope allowlist to the ESLint config.**~~ Done, see the `migratedScopes` section below.
-5. **Plan the removal of the `require-server-action-suffix` exemption.** The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is marked as a transition in `packages/eslint-config/next.js` and comes out when those files are gone. It is the last transition glob left, since the `no-default-export` one was removed in step 2.
+5. ~~**Plan the removal of the `require-server-action-suffix` exemption.**~~ Done at the final lock. The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` came out once the last role-suffixed file was gone, and it was the last transition glob in the config.
 6. **Decide the two placements step 2 deliberately left open:** which bucket `_domains/feedback/feedback-status.ts` belongs in (amendment 7), and whether a route-agnostic search-params module needs a bucket of its own or whether `_components/dashboard/search-params.ts` stays where it is (amendment 2).
 
 ## Step 3 prerequisite: the four defective ESLint rules (issue #57)

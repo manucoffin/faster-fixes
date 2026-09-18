@@ -18,26 +18,30 @@ are already locked, and what the next step needs.
 Steps 1 and 2 are done. `src/app/_domains/` holds the domain-bound code behind a public `index.ts`
 per domain, and root `_components/`, `_providers/` and `_constants/` hold the domain-agnostic code.
 
-Step 3 is running. Its prerequisites have landed: the `DomainError` vocabulary exists at
+Step 3 is done. Every scope under `src/app` has the final bucket set: data and IO live in
+verb-prefixed `_services/` functions, routers are thin `trpc-router.ts` files at a scope root,
+schemas are pure Zod in `_services/`, `_utils/` gave way to `_helpers/` and `_types/`, and the
+`*.trpc.query.ts` / `*.trpc.mutation.ts` role suffixes are gone. The `DomainError` vocabulary exists at
 `@/server/errors/domain-errors` and the base tRPC procedure maps it back to a `TRPCError` with the
 same code and message, so **any service you write throws domain errors, not `TRPCError` and not a
 bare `Error`** (see `rules/backend.md` and `rules/errors.md`). The conventions are pinned by
 ADR-0011 (server file conventions) and ADR-0012 (domain errors) in `docs/adr/`.
 
-Step 3 then reshapes the inside of each scope one at a time, so a scope it has not reached still
-carries its pre-migration file layout (`_utils/`, `_constants/`, `*.trpc.query.ts`,
-`*.trpc.mutation.ts`) and has no `_services/` folder. `src/server/**` still holds domain logic that
-step 3 moves into its domain. The remaining error boundaries (route handler responses, Next.js
-interrupts, non-retriable Inngest failures) and the masking of 500 messages arrive in step 4.
+Step 4 has not started. `src/server/**` still holds domain logic that step 5 moves into its domain,
+twelve route handlers still query Prisma inline, and the remaining error boundaries (route handler
+responses, Next.js interrupts, non-retriable Inngest failures) and the masking of 500 messages
+arrive in step 4.
 
 While the migration runs:
 
-- **New code follows the target architecture** described in these rule files.
-- **Inside a scope that has not been migrated yet, follow that folder's existing conventions.** Do
-  not mix the two in one folder: a half-converted scope is harder to finish than either convention
-  applied consistently.
-- `pnpm lint:agent-rules` reports the remaining convention violations as warnings. They are the
-  burn-down metric, not a task list: clear them when you migrate the scope.
+- **All code under `src/app` follows the target architecture** described in these rule files. Since
+  the step 3 final lock, the rules that guard it report at `error` under `ESLINT_AGENT_RULES=1`
+  everywhere, with no per-scope allowlist: a violation is a regression, not a burn-down item.
+- **Inside the `src/server` tree, follow that folder's existing conventions** until step 5
+  relocates it. Do not mix the two in one folder: a half-converted folder is harder to finish than
+  either convention applied consistently.
+- `pnpm lint:agent-rules` is down to the `no-raw-tailwind-colors` warnings, which are outside the
+  migration's definition of done and need their own ticket.
 
 Delete this section when the migration ends.
 

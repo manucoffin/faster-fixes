@@ -148,7 +148,7 @@ See [naming.md](naming.md) for the full read/write verb vocabulary.
 - A domain's `index.ts` is its **public API**. Only paths it exports may be imported by another domain.
 - The barrel exports **contracts** (UI components, `*.schema.ts`, domain types, type-only re-exports from `_services/`), **never** service functions or the router.
 - **Other domains** import from `@/app/_domains/<x>` only — never `@/app/_domains/<x>/_services/...`.
-- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` reaches in too today; those imports are inverted and step 3 resolves them by moving the code into its domain.
+- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` reaches in too today; those twelve imports are inverted and step 5 resolves them by moving the code into its domain.
 - **Every domain barrel is empty today** (`export {}`): no domain imports another yet. Add an export when a real cross-domain import needs it, rather than publishing a surface no caller asked for.
 - **No domain cycles.** Soft hierarchy hint (not lint-enforced): low-level domains (`user`, `auth`) should not depend on high-level ones (`subscription`, `feedback`).
 

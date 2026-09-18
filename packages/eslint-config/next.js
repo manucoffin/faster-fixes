@@ -11,17 +11,13 @@ import { localRulesPlugin } from "./local-rules/index.js";
 
 const enableAgentRules = process.env.ESLINT_AGENT_RULES === "1";
 
-// Convention rules ramp in as warnings: the count per rule is the migration
-// burn-down metric, so they must not fail `lint:agent-rules`.
+// The only convention rule still ramping in as a warning: its count is the
+// remaining burn-down metric, so it must not fail `lint:agent-rules`.
 const agent = enableAgentRules ? "warn" : "off";
-// Step 3 flips this to "error" per migrated `_services/` scope.
-const servicesRulesSeverity = agent;
-// Step 2 locked `_domains/`: the scope is migrated, so a default export there is
-// a regression, not a burn-down item. Still behind the agent gate.
-const domainRulesSeverity = enableAgentRules ? "error" : "off";
-// The severity a scope listed in `migratedScopes` gets: a violation there is a
-// regression on migrated code, not a burn-down item.
-const lockedSeverity = domainRulesSeverity;
+// Steps 2 and 3 are done: every scope under `src/app` has the final bucket set,
+// so a violation of a step 2 or step 3 rule is a regression on migrated code,
+// not a burn-down item. Still behind the agent gate until step 4.
+const migratedSeverity = enableAgentRules ? "error" : "off";
 
 // Both options are the repo convention, not opt-in extras: a schema const is
 // PascalCase (`CreateInvoiceSchema`) and its input type is singular
@@ -47,114 +43,6 @@ const useClientSuffixOptions = {
     "/app/.*not-found\\.tsx$",
   ],
 };
-
-/**
- * Scopes under `apps/web/src/app` that step 3 has already migrated, written as
- * glob fragments relative to `src/app` (route groups keep their parentheses,
- * e.g. `"(public)"`, `"(authenticated)/account"`, `"_domains/auth"`).
- *
- * Listing a scope raises this step's rules from `warn` to `error` for that
- * scope alone, so a regression on migrated code fails `pnpm lint:agent-rules`
- * while the rest of the tree keeps burning down as warnings.
- *
- * A scope whose own tier is migrated while nested scopes are not is listed as
- * `{ scope, ignores }`: the ignore patterns are the nested scopes, each of
- * which is listed here on its own once its ticket locks it.
- *
- * Temporary: the final lock of step 3 deletes this array and sets the rules to
- * `error` unconditionally.
- *
- * @type {(string | { scope: string, ignores: string[] })[]}
- */
-export const migratedScopes = [
-  "(public)",
-  "(auth)",
-  "(authenticated)/(project)",
-  "(authenticated)/account",
-  "(authenticated)/integrations",
-  "(authenticated)/organization",
-  "_domains/auth",
-  "_domains/organization",
-  "_domains/subscription",
-  "_domains/user",
-  "onboarding",
-  // The REST agent API. Its handlers keep their own error helper and their
-  // `NextResponse` result style until step 4; only the bucket names are final.
-  "api/v1/agent",
-  // The admin root (its router), the dashboard route group and the users scope
-  // are all migrated, so the whole tier is locked without an ignore.
-  "admin",
-  {
-    // The shell tier and its four child segments are all migrated now, but each
-    // child is locked under its own entry, so the shell entry keeps ignoring
-    // them rather than matching a scope root that is not its own.
-    scope: "(authenticated)",
-    ignores: [
-      "**/src/app/(authenticated)/(project)/**",
-      "**/src/app/(authenticated)/account/**",
-      "**/src/app/(authenticated)/integrations/**",
-      "**/src/app/(authenticated)/organization/**",
-    ],
-  },
-];
-
-/**
- * Reads an entry of `migratedScopes` in either of its two forms.
- *
- * @param {string | { scope: string, ignores: string[] }} entry
- * @returns {{ scope: string, ignores: string[] }}
- */
-export function migratedScopeEntry(entry) {
-  return typeof entry === "string" ? { scope: entry, ignores: [] } : entry;
-}
-
-/**
- * The two config blocks a locked scope gets: the services rules on its
- * `_services/` files, the general convention rules on everything under it.
- *
- * Every rule below self-guards on the file name it targets, so the wide glob on
- * the second block costs nothing: `require-schema-conventions` only looks at
- * `*.schema.ts`, `no-feature-nesting` only at nested `_features/`.
- *
- * @param {string} scope glob fragment relative to `src/app`
- * @param {"error" | "warn" | "off"} severity
- * @param {string[]} [ignores] nested scopes the lock does not cover yet
- * @returns {import("eslint").Linter.Config[]}
- */
-export function migratedScopeConfigs(scope, severity, ignores = []) {
-  const notYetMigrated = ignores.length > 0 ? { ignores } : {};
-
-  return [
-    {
-      files: [`**/src/app/${scope}/**/_services/**/*.{ts,tsx}`],
-      ...notYetMigrated,
-      rules: {
-        "local/services-verb-prefix": severity,
-        "local/services-no-trpc-import": severity,
-        "local/require-trpc-output-type": severity,
-        // Step 4 makes this one always-on; here it is locked per scope.
-        "local/services-no-bare-error": severity,
-      },
-    },
-    {
-      files: [`**/src/app/${scope}/**/*.{ts,tsx}`],
-      ...notYetMigrated,
-      rules: {
-        "local/no-client-import-of-services": severity,
-        "local/no-feature-nesting": severity,
-        "local/require-schema-conventions": [severity, schemaConventionOptions],
-        "local/schema-must-be-pure-zod": severity,
-        "local/require-use-client-suffix": [severity, useClientSuffixOptions],
-      },
-    },
-  ];
-}
-
-const lockedScopeConfigs = migratedScopes.flatMap((entry) => {
-  const { scope, ignores } = migratedScopeEntry(entry);
-
-  return migratedScopeConfigs(scope, lockedSeverity, ignores);
-});
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -226,15 +114,6 @@ export const nextJsConfig = [
       "local/no-cross-domain-deep-import": "error",
     },
   },
-  // Transition: the pre-migration tRPC procedure files all carry a module-level
-  // `"use server"`. Steps 2 and 3 move them into `_services/`; drop this entry
-  // then so the rule covers them too.
-  {
-    files: ["**/*.trpc.query.{ts,tsx}", "**/*.trpc.mutation.{ts,tsx}"],
-    rules: {
-      "local/require-server-action-suffix": "off",
-    },
-  },
   {
     // The one impure schema of the app suppresses `schema-must-be-pure-zod`
     // inline while step 5 still owns the plan configuration. That rule is
@@ -247,23 +126,23 @@ export const nextJsConfig = [
   {
     files: ["**/*.{ts,tsx}"],
     rules: {
-      "local/no-client-import-of-services": agent,
+      "local/no-client-import-of-services": migratedSeverity,
     },
   },
   {
     files: ["**/_features/**/*.{ts,tsx}"],
     rules: {
-      "local/no-feature-nesting": agent,
+      "local/no-feature-nesting": migratedSeverity,
     },
   },
   {
     files: ["**/_services/**/*.{ts,tsx}"],
     rules: {
-      "local/services-verb-prefix": servicesRulesSeverity,
-      "local/services-no-trpc-import": servicesRulesSeverity,
-      "local/require-trpc-output-type": servicesRulesSeverity,
-      // Step 4 makes this one always-on.
-      "local/services-no-bare-error": servicesRulesSeverity,
+      "local/services-verb-prefix": migratedSeverity,
+      "local/services-no-trpc-import": migratedSeverity,
+      "local/require-trpc-output-type": migratedSeverity,
+      // Step 4 makes this one always-on and sweeps `src/server/**`.
+      "local/services-no-bare-error": migratedSeverity,
     },
   },
   {
@@ -288,24 +167,25 @@ export const nextJsConfig = [
   {
     files: ["**/src/app/_domains/**/*.{ts,tsx}"],
     rules: {
-      "local/no-default-export": domainRulesSeverity,
+      "local/no-default-export": migratedSeverity,
     },
   },
   {
     files: ["**/src/**/*.{ts,tsx}"],
     rules: {
       "local/require-use-client-suffix": enableAgentRules
-        ? [agent, useClientSuffixOptions]
+        ? [migratedSeverity, useClientSuffixOptions]
         : "off",
     },
   },
   {
     files: ["**/*.schema.ts"],
     rules: {
-      "local/require-schema-conventions": [agent, schemaConventionOptions],
-      "local/schema-must-be-pure-zod": agent,
+      "local/require-schema-conventions": [
+        migratedSeverity,
+        schemaConventionOptions,
+      ],
+      "local/schema-must-be-pure-zod": migratedSeverity,
     },
   },
-  // --- Per-scope locks (last, so they override the ramp above) ---
-  ...lockedScopeConfigs,
 ];
