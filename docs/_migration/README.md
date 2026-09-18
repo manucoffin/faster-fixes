@@ -59,17 +59,19 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope                     | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
-| ------------------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_domains/**`             | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
-| `(public)`                | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/organization`   | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/user`           | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/subscription`   | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `onboarding`              | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `(authenticated)`         | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
-| `admin`                   | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
-| `(authenticated)/account` | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                     |
+| Scope                          | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
+| ------------------------------ | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**`                  | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
+| `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
+| `admin`                        | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
+| `(authenticated)/account`      | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                     |
+| `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                       |
+| `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                           |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -1952,6 +1954,151 @@ user can sign in and no Organization can be rendered. Creating a token and copyi
 the list refresh only after the dialog closes, revoking a token and watching it stay listed as
 "Revoked", deleting a token, and the denial seen as a plain member are on the QA checklist of
 issue #72.
+
+### `(authenticated)/integrations`, part 2: installations, and the scope lock (issue #73)
+
+Commit: `ec003fb`. The ten installation operations of GitHub, Jira, Linear and Slack become services,
+the four feature folders keep their client components alone, and the scope is locked.
+
+**Files moved.** Eleven modules, all with `git mv`. No file dissolved, so this segment leaves no
+`_deprecated_` stub either.
+
+| Operation             | Before                                                   | After                                     |
+| --------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| GitHub installation   | `_features/github/get-github-installation.trpc.query.ts` | `_services/get-github-installation.ts`    |
+| GitHub disconnect     | `_features/github/disconnect-github.trpc.mutation.ts`    | `_services/disconnect-github.ts`          |
+| Jira installation     | `_features/jira/get-jira-installation.trpc.query.ts`     | `_services/get-jira-installation.ts`      |
+| Jira accessible sites | `_features/jira/list-accessible-sites.trpc.query.ts`     | `_services/list-accessible-jira-sites.ts` |
+| Jira site selection   | `_features/jira/select-jira-site.trpc.mutation.ts`       | `_services/select-jira-site.ts`           |
+| Jira selection schema | `_features/jira/select-jira-site.schema.ts`              | `_services/select-jira-site.schema.ts`    |
+| Jira disconnect       | `_features/jira/disconnect-jira.trpc.mutation.ts`        | `_services/disconnect-jira.ts`            |
+| Linear installation   | `_features/linear/get-linear-installation.trpc.query.ts` | `_services/get-linear-installation.ts`    |
+| Linear disconnect     | `_features/linear/disconnect-linear.trpc.mutation.ts`    | `_services/disconnect-linear.ts`          |
+| Slack installation    | `_features/slack/get-slack-installation.trpc.query.ts`   | `_services/get-slack-installation.ts`     |
+| Slack disconnect      | `_features/slack/disconnect-slack.trpc.mutation.ts`      | `_services/disconnect-slack.ts`           |
+
+**No renamed procedure key, one renamed file.** All ten keys already mirrored their service verb
+under a router carrying the noun (`github.getInstallation`, `jira.listAccessibleSites`,
+`jira.selectSite`, `slack.disconnect`), so no call site moved and the published packages, which never
+call tRPC, are untouched by construction. The one rename is the file:
+`list-accessible-sites.trpc.query.ts` exported `listAccessibleJiraSites`, so the file becomes
+`list-accessible-jira-sites.ts` to satisfy "match function names to file names". `disconnect` stays a
+precise write verb for all four integrations: it is a distinct domain transition with its own entry
+point and, for GitHub and Jira, its own owner-only authorization, not a field write.
+
+**Authorization, all of it in the services.** Every denial of this segment needs a loaded row, so
+none of them could stay at the transport edge. The active Organization is itself IO: the services
+take the request `headers` and call `auth.api.getFullOrganization` themselves, the pattern the
+billing segment set.
+
+| Denial                                               | Where it lives now                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| "No active organization."                            | `BadRequestError` in all ten services, after the Better-Auth lookup |
+| "Access denied."                                     | `ForbiddenError` in the four installation reads (any member)        |
+| "Only the organization owner can disconnect GitHub." | `ForbiddenError` in `disconnectGitHub`                              |
+| "Only the organization owner can disconnect Jira."   | `ForbiddenError` in `disconnectJira` (owner-only per ADR 0008)      |
+| "Only owners and admins can disconnect Linear."      | `ForbiddenError` in `disconnectLinear`                              |
+| "Only owners and admins can disconnect Slack."       | `ForbiddenError` in `disconnectSlack`                               |
+| "Only owners and admins can configure Jira."         | `ForbiddenError` in `listAccessibleJiraSites` and `selectJiraSite`  |
+| "Selected site is no longer accessible."             | `BadRequestError` in `selectJiraSite`                               |
+
+Same codes, same messages, same three different membership predicates as before: any member reads an
+installation, owners and admins configure Jira and disconnect Linear and Slack, the owner alone
+disconnects GitHub and Jira. No `UNAUTHORIZED`, no rate limit and no plan limit is involved, so
+nothing moved into a procedure and `protectedProcedure` answers the identity question alone.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR`, so there was nothing to
+triage and no generic wrapper to remove. The `BAD_REQUEST` and `FORBIDDEN` throws became the domain
+subclass of the same code with the same message, so no toast changes wording.
+
+**Tracker clients untouched.** `@/server/jira/*`, `@/server/linear/*` and the Jira token and request
+error classes are unchanged: only the `TRPCError` throws of this scope were converted.
+`disconnectLinear` keeps its revoke-then-delete order and its swallowed revoke failure verbatim;
+`disconnectJira` keeps deregistering the Jira-side webhooks before the cascade removes the links;
+`selectJiraSite` keeps re-reading the accessible resources so the stored site never comes from client
+input, and keeps sending `jira/webhooks.refresh-requested`.
+
+**Nothing reachable from an OAuth callback, a webhook or an Inngest function throws a `DomainError`.**
+The ten services are reachable from the tRPC router alone: the install and callback route handlers
+under `src/app/api/{github,jira,linear,slack}/` build their own Prisma writes and never import these
+modules, and `selectJiraSite` only sends an Inngest event rather than being called by one. The shared
+code the services call (`getValidJiraAccessToken`, `getAccessibleResources`,
+`deregisterProjectJiraWebhook`, `revokeAccessToken`) is unchanged and still throws what it threw.
+
+**Services holding a database client.** All ten, since each holds at least the active-Organization
+branch and a membership check. None is a pass-through read. No service receives the tRPC context or
+the session: the router passes `headers`, `userId` and, for the site selection, `cloudId` as plain
+values, and each service imports `prisma` directly instead of reading it from `ctx`.
+
+**Output types.** The ten `inferProcedureOutput` aliases of the segment are gone. The four
+installation reads and the site list export `<Service>Output` derived from their own service; the
+five writes owe none, and their aliases (`DisconnectGitHubOutput`, `DisconnectJiraOutput`,
+`DisconnectLinearOutput`, `DisconnectSlackOutput`, `SelectJiraSiteOutput`) are dropped rather than
+replaced, because no file imported them. The four consumers, one `*-connected.client.tsx` per
+integration, change an import path and keep the type name; the type-only import of a `_services/`
+module is the documented exception to `no-client-import-of-services`.
+
+**Schemas.** One schema file, `select-jira-site.schema.ts`, whose `SelectJiraSiteSchemaType` becomes
+`SelectJiraSiteInput`. That clears both `require-schema-conventions` warnings it carried, the
+misnamed alias and the file-level "must export at least one type ending with `Input`". The other nine
+operations took no input before and take none now.
+
+**The scope lock.** `"(authenticated)/integrations"` joins `migratedScopes`, so the nine step-3 rules
+report at `error` for the scope. The `(authenticated)` entry keeps its `integrations` ignore, exactly
+as it keeps its `account` one, so the lock comes from the new entry; both ignores go away with the
+array itself at the final lock. One child scope of `(authenticated)` is left unmigrated, `(project)`,
+which issues #74 to #79 own.
+
+**Tests.** Two colocated files, six cases, all driven through the trailing database client with a
+mocked `auth.api.getFullOrganization` and no tRPC context built: `disconnect-github.test.ts` (3) pins
+the `BadRequestError` with no active Organization, the `ForbiddenError` for a non-owner with its
+`role: "owner"` predicate, and that the deletion is scoped to the active Organization;
+`get-slack-installation.test.ts` (3) pins the same two denials for a read and that a plain member is
+queried without a role filter. They cover the two authorization shapes of the segment, owner-only
+write and any-member read; the other eight services repeat one of the two, and the rest of their
+bodies is tracker IO the step's policy does not ask to pin.
+
+**Per-scope "must be gone" checks.** All ten, restricted to `(authenticated)/integrations`, return
+nothing: no role-suffixed file, no old bucket, no `_constants/`, no `*.types.ts`, no router in a
+bucket or a feature, no service importing tRPC, no `TRPCError` in a service, no `'use server'`, no
+inline Prisma outside `_services/` and no `inferProcedureOutput` alias. Checks 1, 9 and 10 clear here
+for the first time in this scope: the agent tokens entry recorded them returning exactly the ten
+modules this ticket owns.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 66 app
+tests (6 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **113 problems, 0
+errors, 113 warnings** (88 `no-raw-tailwind-colors` / 24 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 2 from the 115 of the agent tokens segment, the two being the
+`SelectJiraSiteSchemaType` warnings above. `npx next build` compiles and still lists `/integrations`
+and the five public integration pages; `pnpm build` is refused by the sandbox, as the earlier entries
+record.
+
+**Prettier drift left alone.** Five client components of the four integration features
+(`github-not-connected`, `jira-not-connected`, `jira-select-site`, `slack-not-connected`,
+`slack-integration-section`) fail `npx prettier --check` on their untouched `488b409` content, the
+same Tailwind class-order drift the agent tokens entry recorded. This ticket changes none of them, so
+they are left as found rather than reformatted under an unrelated commit. The four
+`*-connected.client.tsx` files it does touch are normalised, which is why their diffs carry a few
+class-order lines beside the import change.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                                 | Result                                                                |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET …github.getInstallation`, `linear.getInstallation`, `slack.getInstallation`      | `401 UNAUTHORIZED`, each key resolves and `protectedProcedure` guards |
+| `GET …jira.getInstallation`, `jira.listAccessibleSites`                               | `401 UNAUTHORIZED`, same                                              |
+| `POST …github.disconnect`, `linear.disconnect`, `slack.disconnect`, `jira.disconnect` | `401 UNAUTHORIZED`, all four resolve with their keys unchanged        |
+| `POST …jira.selectSite`                                                               | `401 UNAUTHORIZED`, the key and its input schema resolve              |
+| `GET …agentToken.list`                                                                | `401 UNAUTHORIZED`, part 1 of the scope still resolves                |
+| `GET …jira.listSites`                                                                 | `404 No procedure found on path`, no stray key was introduced         |
+| `GET /api/v1/agent/feedbacks` with no bearer token                                    | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged       |
+| `GET /integrations` signed out                                                        | `307` to `/login`, the page guard is unchanged                        |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+tracker OAuth application, so no user can sign in, no Organization can be rendered and no Jira,
+Linear, GitHub or Slack grant exists. Viewing each of the four installation states, disconnecting an
+integration and watching the section fall back to its not-connected copy, the denial seen by a plain
+member, and the multi-site Jira picker storing a site are on the QA checklist of issue #73.
 
 ### Corrections to the recipe found by the pilot
 
