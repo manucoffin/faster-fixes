@@ -69,6 +69,7 @@ const useClientSuffixOptions = {
 export const migratedScopes = [
   "(public)",
   "(auth)",
+  "(authenticated)/(project)",
   "(authenticated)/account",
   "(authenticated)/integrations",
   "(authenticated)/organization",
@@ -81,8 +82,9 @@ export const migratedScopes = [
   // are all migrated, so the whole tier is locked without an ignore.
   "admin",
   {
-    // Only the shell tier of the route group is migrated: its four child
-    // segments are scopes of their own that step 3 has not reached yet.
+    // The shell tier and its four child segments are all migrated now, but each
+    // child is locked under its own entry, so the shell entry keeps ignoring
+    // them rather than matching a scope root that is not its own.
     scope: "(authenticated)",
     ignores: [
       "**/src/app/(authenticated)/(project)/**",

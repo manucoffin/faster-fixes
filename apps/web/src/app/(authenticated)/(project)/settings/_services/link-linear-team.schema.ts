@@ -19,4 +19,4 @@ export const LinkLinearTeamSchema = z.object({
   autoCreateIssues: z.boolean(),
 });
 
-export type LinkLinearTeamSchemaType = z.infer<typeof LinkLinearTeamSchema>;
+export type LinkLinearTeamInput = z.infer<typeof LinkLinearTeamSchema>;

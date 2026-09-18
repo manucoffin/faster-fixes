@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LinearPrioritySchema } from "../link-team/link-team.schema";
+import { LinearPrioritySchema } from "./link-linear-team.schema";
 
 // Discriminated union: when the team changes, the dependent IDs (defaultStateId,
 // defaultLabelIds) MUST be re-picked in the same payload to avoid stale-ID corruption.
@@ -31,6 +31,6 @@ export const UpdateProjectLinearLinkSchema = z.discriminatedUnion("kind", [
   PartialUpdateSchema,
 ]);
 
-export type UpdateProjectLinearLinkSchemaType = z.infer<
+export type UpdateProjectLinearLinkInput = z.infer<
   typeof UpdateProjectLinearLinkSchema
 >;

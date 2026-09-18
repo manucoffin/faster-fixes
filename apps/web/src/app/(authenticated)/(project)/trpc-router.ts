@@ -2,13 +2,6 @@ import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
-import { getProjectLinearLink } from "./settings/_features/linear/get-project-linear-link.trpc.query";
-import { linkLinearTeam } from "./settings/_features/linear/link-team/link-team.trpc.mutation";
-import { listAccessibleLinearTeams } from "./settings/_features/linear/link-team/list-accessible-teams.trpc.query";
-import { listLinearTeamLabels } from "./settings/_features/linear/link-team/list-team-labels.trpc.query";
-import { listLinearTeamStates } from "./settings/_features/linear/link-team/list-team-states.trpc.query";
-import { unlinkLinearTeam } from "./settings/_features/linear/unlink-team/unlink-team.trpc.mutation";
-import { updateProjectLinearLink } from "./settings/_features/linear/update-link/update-project-linear-link.trpc.mutation";
 import { createReviewer } from "./reviewers/_services/create-reviewer";
 import { CreateReviewerSchema } from "./reviewers/_services/create-reviewer.schema";
 import { deleteReviewer } from "./reviewers/_services/delete-reviewer";
@@ -41,6 +34,19 @@ import { unlinkJiraProject } from "./settings/_services/unlink-jira-project";
 import { UnlinkJiraProjectSchema } from "./settings/_services/unlink-jira-project.schema";
 import { updateProjectJiraLink } from "./settings/_services/update-project-jira-link";
 import { UpdateProjectJiraLinkSchema } from "./settings/_services/update-project-jira-link.schema";
+import { getProjectLinearLink } from "./settings/_services/get-project-linear-link";
+import { GetProjectLinearLinkSchema } from "./settings/_services/get-project-linear-link.schema";
+import { linkLinearTeam } from "./settings/_services/link-linear-team";
+import { LinkLinearTeamSchema } from "./settings/_services/link-linear-team.schema";
+import { listAccessibleLinearTeams } from "./settings/_services/list-accessible-linear-teams";
+import { listLinearTeamLabels } from "./settings/_services/list-linear-team-labels";
+import { ListLinearTeamLabelsSchema } from "./settings/_services/list-linear-team-labels.schema";
+import { listLinearTeamStates } from "./settings/_services/list-linear-team-states";
+import { ListLinearTeamStatesSchema } from "./settings/_services/list-linear-team-states.schema";
+import { unlinkLinearTeam } from "./settings/_services/unlink-linear-team";
+import { UnlinkLinearTeamSchema } from "./settings/_services/unlink-linear-team.schema";
+import { updateProjectLinearLink } from "./settings/_services/update-project-linear-link";
+import { UpdateProjectLinearLinkSchema } from "./settings/_services/update-project-linear-link.schema";
 import { getProjectSlackLink } from "./settings/_services/get-project-slack-link";
 import { GetProjectSlackLinkSchema } from "./settings/_services/get-project-slack-link.schema";
 import { linkRepo } from "./settings/_services/link-repo";
@@ -84,8 +90,7 @@ import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-
 
 // Every denial of the migrated operations reads a loaded row (the Project, or
 // the Feedback and its Project), so all of them live in their service;
-// `protectedProcedure` answers identity alone. The keys still bound to a
-// procedure module belong to issue #79.
+// `protectedProcedure` answers identity alone.
 export const projectsRouter = router({
   list: protectedProcedure.input(ListProjectsSchema).query(({ input, ctx }) =>
     listProjects({
@@ -324,13 +329,57 @@ export const projectsRouter = router({
       ),
   }),
   linear: router({
-    getLink: getProjectLinearLink,
-    listTeams: listAccessibleLinearTeams,
-    listTeamStates: listLinearTeamStates,
-    listTeamLabels: listLinearTeamLabels,
-    linkTeam: linkLinearTeam,
-    unlinkTeam: unlinkLinearTeam,
-    updateLink: updateProjectLinearLink,
+    getLink: protectedProcedure
+      .input(GetProjectLinearLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectLinearLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listTeams: protectedProcedure.query(async ({ ctx }) =>
+      listAccessibleLinearTeams({
+        userId: ctx.session.user.id,
+        headers: await headers(),
+      }),
+    ),
+    listTeamStates: protectedProcedure
+      .input(ListLinearTeamStatesSchema)
+      .query(({ input, ctx }) =>
+        listLinearTeamStates({
+          teamId: input.teamId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listTeamLabels: protectedProcedure
+      .input(ListLinearTeamLabelsSchema)
+      .query(({ input, ctx }) =>
+        listLinearTeamLabels({
+          teamId: input.teamId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    linkTeam: planAwareProcedure
+      .use(enforceFeature("linearIntegration"))
+      .input(LinkLinearTeamSchema)
+      .mutation(({ input, ctx }) =>
+        linkLinearTeam({ ...input, userId: ctx.session.user.id }),
+      ),
+    // Not plan-gated: a downgraded Organization must always be able to unlink.
+    unlinkTeam: protectedProcedure
+      .input(UnlinkLinearTeamSchema)
+      .mutation(({ input, ctx }) =>
+        unlinkLinearTeam({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateLink: planAwareProcedure
+      .use(enforceFeature("linearIntegration"))
+      .input(UpdateProjectLinearLinkSchema)
+      .mutation(({ input, ctx }) =>
+        updateProjectLinearLink({ ...input, userId: ctx.session.user.id }),
+      ),
   }),
   jira: router({
     getLink: protectedProcedure

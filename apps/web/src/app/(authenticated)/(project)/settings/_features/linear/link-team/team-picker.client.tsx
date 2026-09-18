@@ -23,9 +23,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkLinearTeamSchema,
-  type LinkLinearTeamSchemaType,
-} from "./link-team.schema";
-import type { ListAccessibleLinearTeamsOutput } from "./list-accessible-teams.trpc.query";
+  type LinkLinearTeamInput,
+} from "../../../_services/link-linear-team.schema";
+import type { ListAccessibleLinearTeamsOutput } from "../../../_services/list-accessible-linear-teams";
 
 type TeamPickerProps = {
   projectId: string;
@@ -44,7 +44,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const form = useForm<LinkLinearTeamSchemaType>({
+  const form = useForm<LinkLinearTeamInput>({
     resolver: zodResolver(LinkLinearTeamSchema),
     defaultValues: {
       projectId,
@@ -84,7 +84,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
     }),
   );
 
-  const onSubmit = (data: LinkLinearTeamSchemaType) => {
+  const onSubmit = (data: LinkLinearTeamInput) => {
     linkMutation.mutate(data);
   };
 
