@@ -8,7 +8,8 @@ The migration moves the web app from its current `_features/` layout to the targ
 
 - the **baseline** below records how many convention violations existed before any application code moved, per rule, so each later step can be compared against it;
 - the **locked scopes** table records which scopes have been migrated and which rules were flipped from `warn` to `error` for them, so a regression on migrated code fails the build;
-- the **prerequisites** section records what must be decided or added before the next step starts.
+- the **prerequisites** section records what must be decided or added before the next step starts;
+- the **deferred** and **anomalies** sections record what a step left behind, so "what is left" is a lookup rather than a rediscovery.
 
 The burn-down metric is `pnpm lint:agent-rules`. During the migration it runs without `--max-warnings 0`: errors fail the command, warnings are counted. Count them per rule with:
 
@@ -22,28 +23,36 @@ pnpm lint:agent-rules | grep -o 'local/[a-z-]*' | sort | uniq -c
 
 Measured on 2026-09-17 at commit `ebd017c`, after the 14 convention rules landed and before any application code moved. Command: `pnpm lint:agent-rules` from the repo root (gated ESLint over the web app). Result: **131 problems, 0 errors, 131 warnings**.
 
-| Rule                                | Severity in step 1      | Baseline | Note                                                            |
-| ----------------------------------- | ----------------------- | -------: | --------------------------------------------------------------- |
-| `no-raw-tailwind-colors`            | `agent`                 |       88 | Semantic-token burn-down. Not scoped to a folder.               |
-| `require-schema-conventions`        | `agent`                 |       28 | Over 47 `*.schema.ts` files.                                    |
-| `require-use-client-suffix`         | `agent`                 |       14 | 13 under `src/app/`, 1 under `src/lib/` from the widened scope. |
-| `schema-must-be-pure-zod`           | `agent`                 |        1 |                                                                 |
-| `no-client-import-of-services`      | `agent`                 |        0 | No `_services/` folder to import from yet.                      |
-| `no-feature-nesting`                | `agent`                 |        0 | No `_features/` folder nested inside another.                   |
-| `no-default-export`                 | `domainRulesSeverity`   |        0 | Real zero: the transition glob resolves on `_features/**`.      |
-| `services-verb-prefix`              | `servicesRulesSeverity` |        0 | `_services/` does not exist until step 3.                       |
-| `services-no-trpc-import`           | `servicesRulesSeverity` |        0 | Same.                                                           |
-| `require-trpc-output-type`          | `servicesRulesSeverity` |        0 | Same.                                                           |
-| `services-no-bare-error`            | `servicesRulesSeverity` |        0 | Same. Becomes always-on in step 4.                              |
-| `no-cross-domain-deep-import`       | `error`, always on      |        0 | `_domains/` does not exist until step 2.                        |
-| `require-server-action-suffix`      | `error`, always on      |        0 | `*.trpc.query.ts` and `*.trpc.mutation.ts` exempt until step 3. |
-| `no-client-import-of-server-errors` | `off`                   |      n/a | Enabled in step 3, when `src/server/errors/` is created.        |
+| Rule                                | Severity in step 1      | Baseline | After step 2 | Note                                                                      |
+| ----------------------------------- | ----------------------- | -------: | -----------: | ------------------------------------------------------------------------- |
+| `no-raw-tailwind-colors`            | `agent`                 |       88 |           88 | Untouched by step 2: no moved file changed a class name.                  |
+| `require-schema-conventions`        | `agent`                 |       28 |           28 | Untouched: schemas moved with their folder, unedited.                     |
+| `require-use-client-suffix`         | `agent`                 |       14 |            3 | The 11 files renamed during the move burned down. See amendment 5.        |
+| `schema-must-be-pure-zod`           | `agent`                 |        1 |            1 | Untouched.                                                                |
+| `no-client-import-of-services`      | `agent`                 |        0 |            0 | No `_services/` folder to import from yet.                                |
+| `no-feature-nesting`                | `agent`                 |        0 |            0 | No `_features/` folder nested inside another.                             |
+| `no-default-export`                 | `domainRulesSeverity`   |        0 |            0 | Now `error` on `_domains/**`; the `_features/**` transition glob is gone. |
+| `services-verb-prefix`              | `servicesRulesSeverity` |        0 |            0 | `_services/` does not exist until step 3.                                 |
+| `services-no-trpc-import`           | `servicesRulesSeverity` |        0 |            0 | Same.                                                                     |
+| `require-trpc-output-type`          | `servicesRulesSeverity` |        0 |            0 | Same.                                                                     |
+| `services-no-bare-error`            | `servicesRulesSeverity` |        0 |            0 | Same. Becomes always-on in step 4.                                        |
+| `no-cross-domain-deep-import`       | `error`, always on      |        0 |            0 | `_domains/` now exists and the hardened rule guards it. See below.        |
+| `require-server-action-suffix`      | `error`, always on      |        0 |            0 | `*.trpc.query.ts` and `*.trpc.mutation.ts` exempt until step 3.           |
+| `no-client-import-of-server-errors` | `off`                   |      n/a |          n/a | Enabled in step 3, when `src/server/errors/` is created.                  |
 
 The built-in `no-throw-literal` is on as an error outside the gate and reports zero.
 
 A zero on a rule whose target folder does not exist yet is expected. A zero on a rule that should match existing files means the glob is wrong: verify with `ESLINT_AGENT_RULES=1 npx eslint --print-config <file>` from `apps/web` before trusting it. The `no-default-export` zero was verified this way.
 
 The planning estimate for `require-use-client-suffix` was 11, under the narrower `_domains/**` scope from the kit. Widening the rule to `src/**` raised it to 14.
+
+### Re-measured after step 2
+
+Re-measured on 2026-09-18 at commit `93b5653`, with the root `_features/` folder gone and `_domains/` locked. Same command, run with `--force` so Turbo does not serve a cached run. Result: **120 problems, 0 errors, 120 warnings**, down 11 from the baseline of 131.
+
+The whole burn-down of step 2 is `require-use-client-suffix`, from 14 to 3, because the step renamed every `'use client'` file that reached its final home. The three left are `admin/users/_features/users-table/users-table.tsx`, `admin/users/_features/users-table/users-table-action-dropdown.tsx` and `src/lib/trpc/trpc-provider.tsx`: route-tier and plumbing files that step 2 did not move. The other rules are flat by design, since step 2 moved files and rewrote import paths without editing file bodies.
+
+A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous one: the rule has six domains to guard and reports no violation.
 
 ## Locked scopes
 
@@ -56,16 +65,6 @@ A scope is locked when its files satisfy the target convention and the matching 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
 The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is still in place. Step 3 removes it when those files move into `_services/`.
-
-## Prerequisites for step 2
-
-Step 2 moves domain-bound code from `src/app/_features/` into `src/app/_domains/<domain>/`. Before any folder moves:
-
-1. **Add the missing glossary terms to `CONTEXT.md`.** Domain folder names come from the glossary, not from the current feature folder names. `CONTEXT.md` defines the reporting, lifecycle, integration and diagnostics vocabulary but not the account side. Missing: Organization, User, Member, Invitation, Subscription, Plan, Auth. Use the `domain-modeling` skill.
-2. **Decide the home of the domain-agnostic feature folders.** `src/app/_features/` currently holds 11 folders. Six map to candidate domains (`auth`, `feedback`, `organization`, `project`, `subscription`, `user`). Four are not domains and need a target: `core` (avatar, dashboard, datatable, footer, header, logo, upload), `mdx`, `seo`, `c15t`. The target root layout offers `_components/`, `_hooks/`, `_providers/` and `_constants/` for domain-agnostic code, and `src/lib/` for non-UI plumbing.
-3. **Decide the home of the marketing GitHub stars feature.** `_features/github/` serves the public marketing pages only. It is a route feature candidate, so it belongs in the route tier under `(public)/`, not under `_domains/`.
-4. **Remove the transition globs** from `packages/eslint-config/next.js` once the root `_features/` folder is gone. Two entries are marked as transition in that file: the `no-default-export` glob on `_features/`, and the `require-server-action-suffix` exemption for the `.trpc.query.ts` and `.trpc.mutation.ts` files (that one goes in step 3, not step 2).
-5. **Commit the kit ADR.** `docs/architecture/migration-kit/adrs/app-folder-architecture.md` becomes an ADR under `docs/adr/`, and the `coding-standards` rule files repoint their authority links at it.
 
 ## Amendments to the kit made during step 1
 
@@ -94,3 +93,78 @@ The kit is the source project's playbook. Where this repo diverged, `docs/archit
 7. **`feedback-status.ts` moved out of `src/types/` into the `feedback` domain.** The Feedback lifecycle vocabulary (`FeedbackStatusEnum`, `FeedbackStatus`) sat in a generic `src/types/` folder with ten importers across the admin dashboard, the agent API and five `src/server/` integration modules. It is the Status glossary term of the Feedback entity, so it now lives at the root of `_domains/feedback/` next to the markdown formatter. Which bucket it ends up in is a step 3 decision. `src/types/` keeps only `next.ts`.
 
 8. **No dead-code file survived into a destination folder.** The spec lists eleven files under root `_features/` with no importer, six of them in `subscription`, and instructs the agent to move any survivor as-is rather than delete it. The maintainer removed all eleven in commit `d3449a2` before the first folder moved, so the survivor rule never fired: nothing was carried into `_domains/` or into an agnostic destination only to sit there unreferenced. Recorded here because the rule was part of the plan and its outcome is otherwise invisible.
+
+9. **The `_components/` flatten pass was a no-op.** The kit's step 2 prescribes a separate commit per scope that flattens an existing `_components/` folder into the flat destination, and warns that it rewrites imports across the repo. No `_components/` folder existed anywhere under `src/app/` at the start of step 2: the tree held `(auth)`, `(authenticated)`, `(public)`, `_constants`, `_features`, `admin`, `api`, `llms.txt` and `onboarding`, and the shared UI lived in `_features/core/`. Root `app/_components/` and `(public)/_components/` were therefore created by step 2, not flattened by it, and the three sub-libraries (`dashboard/`, `mdx/`, `seo/`) were flattened on the way in rather than in a pass of their own. Recorded because a skipped step of the kit is otherwise indistinguishable from a forgotten one.
+
+## Deferred to step 3
+
+Step 2 moved domain-bound code out of `src/app/_features/`. It did not touch `src/server/`, because step 3 turns that code into `_services/` inside the scopes that own it and moving it now would move it twice. "All domain-bound code lives under `_domains/`" is therefore not true yet, and this is what is left.
+
+### `src/server/**` folders holding domain logic
+
+| Folder                              | Holds                                                                                 | Presumed domain                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
+| `server/github`                     | GitHub App client, webhook signature check, issue body formatting                     | Tracker (see the open question below)   |
+| `server/linear`                     | Linear client, OAuth state cookie, token crypto, team/state resolution                | Tracker                                 |
+| `server/jira`                       | Jira clients, ADF formatting, transition resolution, webhook registration             | Tracker                                 |
+| `server/slack`                      | Slack client, block building, dashboard and screenshot URLs, token crypto             | Notification channel                    |
+| `server/oauth`                      | The shared OAuth state cookie                                                         | Installation, shared by the trackers    |
+| `server/auth/subscription`          | Feature access, organization and resource limits, plan resolution, denial             | `subscription`                          |
+| `server/auth/plugins/organization`  | The Better Auth organization plugin and its roles                                     | `organization`                          |
+| `server/api`                        | Project resolution, allowed-origin validation, agent scope and token, reviewer        | `project`, with an agent-surface slice  |
+| `server/storage`                    | Asset records, signed URLs, S3/R2 URL resolution                                      | Undecided: Asset is not a glossary term |
+| `server/stripe`                     | The Stripe client                                                                     | `subscription`                          |
+| `server/inngest` (domain-bound fns) | The issue-mirroring, status-sync, webhook-refresh, welcome-mail and segment functions | Tracker, Notification channel, `user`   |
+
+`server/inngest/index.ts` (the client) and `server/trpc/**` (the tRPC setup and the root router) are infrastructure and stay. `server/auth/config` is Better Auth wiring with one domain leak, listed below.
+
+### Open question: one domain per external system, or one `tracker` domain
+
+`CONTEXT.md` defines **Tracker** as "an external issue-tracking system Faster Fixes can mirror Feedback into", with GitHub Issues, Linear and Jira as instances, and **Notification channel** as the one-way announce category whose first instance is Slack. **Installation** is the org-level connection to either. Domain folder names come from the glossary, so both readings are legal:
+
+- one domain per external system (`github`, `linear`, `jira`, `slack`), which matches the code as written, where each folder has its own client, its own token crypto and its own webhook verification, but puts no folder behind the glossary terms;
+- one `tracker` domain holding the three mirroring systems plus a `notification-channel` domain for Slack, which matches the glossary and the Installation and Issue link entities, but forces a per-provider sub-structure inside it.
+
+Decide before any of this code moves, because the answer also decides where Installation, Project link and Issue link live. The `github` folder name is free: the marketing GitHub stars feature was moved to `(public)/_features/github-stars/` and its tRPC router key renamed to `githubStars` in step 2.
+
+### `src/server/` imports of domain internals
+
+These are inverted dependencies: infrastructure reaching into a domain. They resolve on their own when the importing file joins its domain in step 3. Until then they are legal, because `no-cross-domain-deep-import` only constrains importers that live inside `_domains/`.
+
+| Importer                               | Imports                      | From                                                |
+| -------------------------------------- | ---------------------------- | --------------------------------------------------- |
+| `server/auth/config/database-hooks.ts` | `generateUniqueSlug`         | `_domains/organization/_utils/generate-unique-slug` |
+| `server/auth/plugins/organization.tsx` | `ORGANIZATION_ROLES`         | `_domains/organization/_utils/organization-roles`   |
+| `server/api/validate-origin.ts`        | `normalizeDomain`            | `_domains/project/normalize-domain`                 |
+| `server/github/format-issue-body.ts`   | `formatDiagnosticTrailLines` | `_domains/feedback/format-feedback-markdown`        |
+
+Step 2 added eight more, all on the same module, by moving `feedback-status.ts` out of `src/types/` and into the `feedback` domain (amendment 7). They were not inverted dependencies before the move, only imports of a generic types folder, and they are listed here so step 3 sees the real count:
+
+`FeedbackStatus` / `FeedbackStatusEnum` from `_domains/feedback/feedback-status` is imported by `server/inngest/create-linear-issue.ts`, `server/inngest/sync-feedback-status-to-jira.ts`, `server/inngest/sync-feedback-status-to-linear.ts`, `server/inngest/update-slack-feedback-message.ts`, `server/jira/resolve-transition.ts`, `server/linear/resolve-team-state.ts`, `server/linear/state-mapping.ts` and `server/slack/build-feedback-blocks.ts`.
+
+Twelve inverted imports in total. The three remaining `src/server/` references to `_domains/` are the root tRPC router (`server/trpc/routers/_app.ts`) mounting the `auth`, `organization` and `subscription` domain routers by deep import. Those are by design: the composition layer assembles the API surface and the barrels never export a router.
+
+## Anomalies recorded, not fixed
+
+Found while moving the folders. None is caused by the move and none is fixed here, because step 2 changes placement and import paths only. They are written down so they are not rediscovered.
+
+1. **A client hook imports a `@/server/` config module.** `_domains/subscription/use-plan-gate.ts` is `'use client'` and imports `FeatureGate`, `PLAN_LIMITS`, `PlanLimits` and `SubscriptionPlanName` from `@/server/auth/config/subscription-plans`. It works because the module is a plain constants file with no server-only import, but the boundary is wrong: plan limits are the Plan vocabulary of the `subscription` domain, not Better Auth configuration. Resolves when `server/auth/subscription` moves into the domain in step 3.
+
+2. **A client chart component imports a `nuqs/server` parsers module.** `admin/(dashboard)/_features/subscriptions-chart/subscriptions-chart.client.tsx` imports `periodSelectorParsers` from `@/app/_components/dashboard/search-params`, which builds its cache with `createSearchParamsCache` from `nuqs/server`. Same shape as the anomaly above: it survives bundling, but a client file should not reach a `/server` entrypoint. Related to amendment 2, which records why the module stayed in `_components/`.
+
+3. **`getUserActiveSubscription` is named after a User.** `_domains/subscription/get-user-active-subscription.ts` reads the active Subscription, but `CONTEXT.md` attaches a Subscription to an Organization, not to a User. Its single caller is the account billing page. The name should follow the glossary once step 3 turns it into a service.
+
+4. **`_constants/app.ts` holds a French user-facing string and placeholder emails.** `ANONYMOUS_USER_NAME` is `"Utilisateur anonyme"`, which breaks the English-only rule for UI copy, and `SUPPORT_EMAIL` and `CONTACT_EMAIL` are both `@domain.com` placeholders. Not a placement problem, so out of scope for the migration entirely; it needs its own ticket.
+
+5. **The Jira reconnect mail template is the one domain-bound file in `src/lib/`.** `src/lib/mailer/templates/jira-reconnect-required.tsx` knows that a Jira Installation can lose its token and what the user must do about it, while every other template in that folder is generic plumbing. It belongs with the Jira code, wherever the open question above lands it.
+
+## Prerequisites for step 3
+
+Step 3 turns every scope's data and IO code into verb-prefixed functions in `_services/`, dissolves `_utils/`, and makes the routers thin. Before the first procedure is extracted:
+
+1. **Create the domain-error vocabulary and the tRPC mapping middleware first.** `src/server/errors/domain-errors.ts` (five subclasses, zero imports) and the `domainErrorMiddleware` on the base procedure in `src/server/trpc/trpc.ts`, both given verbatim in `docs/architecture/migration-kit/03-services.md`. Extracting a procedure that throws `TRPCError({ code: "CONFLICT" })` into a service that throws a bare `Error` silently turns a 409 into a 500. Creating that folder is also what enables `no-client-import-of-server-errors`, which is `off` and unmeasured today.
+2. **Answer the open question on the integration domains** recorded above. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
+3. **Decide the domain of `server/storage`.** Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
+4. **Add the per-scope allowlist to the ESLint config.** The kit's strategy is to migrate one scope at a time and flip `servicesRulesSeverity` from `warn` to `error` for that path as it lands. `packages/eslint-config/next.js` has no `migratedScopes` mechanism yet; without it a scope can only be locked once every scope is done.
+5. **Plan the removal of the `require-server-action-suffix` exemption.** The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is marked as a transition in `packages/eslint-config/next.js` and comes out when those files are gone. It is the last transition glob left, since the `no-default-export` one was removed in step 2.
+6. **Decide the two placements step 2 deliberately left open:** which bucket `_domains/feedback/feedback-status.ts` belongs in (amendment 7), and whether a route-agnostic search-params module needs a bucket of its own or whether `_components/dashboard/search-params.ts` stays where it is (amendment 2).
