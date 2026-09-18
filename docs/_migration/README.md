@@ -59,10 +59,12 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope         | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
-| ------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_domains/**` | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
-| `(public)`    | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| Scope                   | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
+| ----------------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**`           | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
+| `(public)`              | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/organization` | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/user`         | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -428,6 +430,124 @@ service, `TRPCError` in a service, `'use server'` in a service or a router, Pris
 service, `_constants/` inside a scope and `inferProcedureOutput` all return nothing. Old buckets
 returns the one `_utils/` folder holding the deprecated stub, as expected until the maintainer's
 deletion pass.
+
+### `_domains/organization` (issue #61)
+
+Commit `a9ba3a3`. One operation, one IO helper and one pure helper. First domain of the step, and
+the first scope whose `_utils/` folder disappears entirely rather than surviving as a stub holder.
+
+| Item             | Before                                                 | After                                                     |
+| ---------------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| Operation        | `organization/create-organization.trpc.mutation.ts`    | `organization/_services/create-organization.ts`           |
+| Schema           | `organization/create-organization.schema.ts`           | `organization/_services/create-organization.schema.ts`    |
+| Slug lookup      | `organization/_utils/generate-unique-slug.ts`          | `organization/_services/get-unique-organization-slug.ts`  |
+| Role labels      | `organization/_utils/organization-roles.ts`            | `organization/_helpers/organization-roles.ts`             |
+| Router           | `organization/_utils/trpc-router.ts`                   | `organization/trpc-router.ts`                             |
+| Router export    | `organizationFeatureRouter`                            | `organizationRouter`                                      |
+| App router mount | `organization: organizationFeatureRouter`              | `organization: organizationRouter`                        |
+| Output type      | `CreateOrganizationOutput` from `inferProcedureOutput` | `CreateOrganizationOutput` from the service's return type |
+| Input type       | `CreateOrganizationInputs`                             | `CreateOrganizationInput`                                 |
+
+**Renamed procedure keys.** None. The service is `createOrganization` and the router already carries
+the entity, so the key stays `create` and no client call site changes. `trpc.organization.create` is
+the same path before and after.
+
+**Renamed functions.** `generateUniqueSlug` became `getUniqueOrganizationSlug`. The function queries
+Prisma, so it is IO and belongs in `_services/`, and inside `_services/` the closed read vocabulary
+applies: it performs no write, so it is a computed read and must carry a read verb naming its
+result. The spec's agreed rename list (issue #54) only covered the 111 operation files, so this one
+is decided here. Its three call sites were updated in the same commit:
+`server/auth/config/database-hooks.ts`, the not yet migrated
+`(authenticated)/organization/_features/general/update-organization.trpc.mutation.ts`, and the new
+`create-organization` service. `CreateOrganizationInputs` became `CreateOrganizationInput`, which
+clears one `require-schema-conventions` warning (58 to 57).
+
+**Reclassified errors.** None. The operation's single throw is the plan limit denial from
+`checkOrganizationLimit`, and a plan limit denial is transport policy, not a domain failure, so its
+`FORBIDDEN` `TRPCError` stays in the procedure with its message and its `cause` untouched. No
+`DomainError` enters this domain, and the service holds no authorization check and no domain error
+branch, so it takes no database client parameter.
+
+**Placement calls.** `organization-roles.ts` holds a label record and three predicates that read an
+already-loaded role string, so it is pure behaviour and goes to `_helpers/`, not to a per-domain
+`_constants/` (ADR-0010). `index.ts` stays `export {}`: the barrel exports capabilities, never
+services or routers, and the app router keeps mounting the domain router by deep import, which is
+the composition layer doing its job.
+
+**Deprecated stubs.** None. Both retired files survived as `git mv` moves, the operation file to its
+service name and the router to the domain root, so nothing dissolved and the domain's `_utils/`
+folder is gone rather than left holding a stub.
+
+### `_domains/user` (issue #61)
+
+Commit `ac5a4bb`. No tRPC operation: the work is the bucket fan-out plus the one service that
+removes the last inline Prisma query from the two layouts.
+
+| Item              | Before                                         | After                                        |
+| ----------------- | ---------------------------------------------- | -------------------------------------------- |
+| Display name      | `user/_utils/get-user-display-name.ts`         | `user/_helpers/get-user-display-name.ts`     |
+| Onboarding lookup | inline `prisma.user.findUnique` in two layouts | `user/_services/has-completed-onboarding.ts` |
+| Router            | none                                           | none                                         |
+
+**Renamed procedure keys.** None: the domain exposes no procedure and has no router.
+
+**Reclassified errors.** None. The service is a pass-through read with no authorization check and no
+domain error branch, so it takes no database client parameter and throws nothing.
+
+**The shared lookup.** `(authenticated)/layout.tsx` and `onboarding/layout.tsx` each ran the same
+`prisma.user.findUnique({ where: { id }, select: { onboardingCompleted: true } })` and each tested
+`user?.onboardingCompleted`. The service returns exactly that expression,
+`user?.onboardingCompleted ?? false`, so both branches keep their truth table, including the case
+where the row is missing. `has-` is the read vocabulary's IO-predicate verb: the function queries to
+answer, so it is a service and not a `_helpers/` predicate. Both layouts deep-import it; routes may
+reach into a domain's internals, so the barrel is not involved and stays `export {}`. Neither layout
+imports Prisma any more. The comment explaining why the flag is read from the database rather than
+the session (Better Auth caches the session cookie for five minutes) moved into the service, where
+it is the reason the function exists.
+
+**Deprecated stubs.** None. The one retired file survived as a `git mv` move, and the domain's
+`_utils/` folder is gone.
+
+### Verification of both domains
+
+Walked once over the two commits, since the second is a strict superset of the first for every
+whole-repo command.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 180 ESLint
+rule and config tests plus the 12 app tests; `pnpm lint:agent-rules` 149 problems, 0 errors, 149
+warnings (`no-raw-tailwind-colors` 88, `require-schema-conventions` 57,
+`require-use-client-suffix` 3, `schema-must-be-pure-zod` 1). That is one warning fewer than the
+pilot's 150: the `CreateOrganizationInputs` rename cleared it and nothing new was added.
+`npx next build` passes with dummy environment values.
+
+**Per-scope "must be gone" checks.** All ten commands of the kit document, each restricted to
+`apps/web/src/app/_domains/organization` and then to `apps/web/src/app/_domains/user`, return
+nothing, the old-bucket check included: unlike the pilot, neither domain leaves a stub behind, so
+neither has a `_utils/` folder left and neither is waiting on the maintainer's deletion pass
+(issue #81).
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                  | Result                                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `POST /api/trpc/organization.create?batch=1`           | `401 UNAUTHORIZED`, so the relocated router still serves the unchanged key     |
+| `GET /api/trpc/organization.nope?batch=1&input=%7B%7D` | `404 No procedure found on path`, the control for the check above              |
+| `GET /inbox` signed out                                | `307` to `/login`, the `(authenticated)` layout still guards before the lookup |
+| `GET /onboarding` signed out                           | `307` to `/login`, same for the onboarding layout                              |
+| `GET /open-source`                                     | `200`, the pilot scope is unaffected                                           |
+
+**Not smoked here, and why.** No database is reachable in this environment, so every authenticated
+path stops at the session check. Creating an Organization end to end, the plan limit denial on a
+second Organization, the onboarding redirect actually driven by `hasCompletedOnboarding`, the role
+labels on the members and invitations tabs, and the admin user information card are listed as a QA
+checklist on issue #61 for the maintainer to walk against a real database. Each of them is a pure
+call-site repoint or a same-expression extraction, which is what typecheck covers, but none is
+observed running.
+
+**Debt noted, not fixed.** `CreateOrganizationSchema` carries a French validation message,
+`"Le nom est requis"`, which the migration preserves verbatim because error and form copy must not
+change in this step. It is the same family as anomaly 4 above (`ANONYMOUS_USER_NAME`) and needs its
+own ticket rather than a line in a refactor.
 
 ### Corrections to the recipe found by the pilot
 
