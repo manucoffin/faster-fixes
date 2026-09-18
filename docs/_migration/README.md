@@ -1814,7 +1814,7 @@ issue #71.
 
 ### `(authenticated)/integrations`, part 1: agent tokens (issue #72)
 
-Commit: `PLACEHOLDER`. The scope router leaves `_utils/` for the scope root and the four agent token
+Commit: `d60d149`. The scope router leaves `_utils/` for the scope root and the four agent token
 operations become services. The scope is **not** locked: issue #73 owns the ten installation
 operations of GitHub, Jira, Linear and Slack, and the `migratedScopes` entry.
 
