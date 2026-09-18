@@ -15,16 +15,12 @@ const maxWidthClasses = {
   full: "max-w-none",
 };
 
-export function Prose({
-  children,
-  maxWidth = "md",
-  className,
-}: ProseProps) {
+export function Prose({ children, maxWidth = "md", className }: ProseProps) {
   return (
     <div
       className={cn(
-        "prose dark:prose-invert w-full",
-        "[&>h2]:text-primary [&>h2]:mt-0 [&>h3]:text-primary [&>h3]:mt-0",
+        "dark:prose-invert prose w-full",
+        "[&>h2]:mt-0 [&>h2]:text-primary [&>h3]:mt-0 [&>h3]:text-primary",
         maxWidthClasses[maxWidth],
         maxWidth !== "full" && "mx-auto",
         className,

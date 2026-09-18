@@ -4,20 +4,20 @@ import type { FAQPage, Question, WithContext } from "schema-dts";
 // <strong>, <a>, etc.). For JSON-LD we strip tags and emit plain text —
 // Google's structured-data validators render escaped HTML noisily and a
 // clean text answer is the safest signal.
-type FaqItem = {
+type FaqListItem = {
   question: string;
   answer: string;
 };
 
-type FaqProps = {
-  items: FaqItem[];
+type FaqListProps = {
+  items: FaqListItem[];
 };
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, "");
 }
 
-export function FAQ({ items }: FaqProps) {
+export function FaqList({ items }: FaqListProps) {
   const jsonLd: WithContext<FAQPage> = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -37,12 +37,12 @@ export function FAQ({ items }: FaqProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <dl className="divide-border border-border divide-y border-y">
+      <dl className="divide-y divide-border border-y border-border">
         {items.map((item) => (
           <div key={item.question} className="py-4">
             <dt className="text-lg font-semibold">{item.question}</dt>
             <dd
-              className="text-muted-foreground mt-2 leading-relaxed"
+              className="mt-2 leading-relaxed text-muted-foreground"
               dangerouslySetInnerHTML={{ __html: item.answer }}
             />
           </div>

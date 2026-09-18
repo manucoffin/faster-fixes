@@ -6,16 +6,16 @@ import {
 } from "@workspace/ui/components/accordion";
 import type { ReactNode } from "react";
 
-type FAQItem = {
+type FaqAccordionItem = {
   question: string;
   answer: ReactNode;
 };
 
-type FAQProps = {
-  items: FAQItem[];
+type FaqAccordionProps = {
+  items: FaqAccordionItem[];
 };
 
-export function FAQ({ items }: FAQProps) {
+export function FaqAccordion({ items }: FaqAccordionProps) {
   if (!items || items.length === 0) {
     return null;
   }
@@ -29,10 +29,10 @@ export function FAQ({ items }: FAQProps) {
             value={`faq-${index}`}
             className="border-b"
           >
-            <AccordionTrigger className="hover:text-primary text-left text-base font-medium">
+            <AccordionTrigger className="text-left text-base font-medium hover:text-primary">
               {item.question}
             </AccordionTrigger>
-            <AccordionContent className="prose dark:prose-invert max-w-none pt-4 pb-4">
+            <AccordionContent className="dark:prose-invert prose max-w-none pt-4 pb-4">
               {item.answer}
             </AccordionContent>
           </AccordionItem>

@@ -40,14 +40,14 @@ export function HowTo({ name, description, totalTime, steps }: HowToProps) {
       <header className="mb-4">
         <h3 className="text-2xl font-bold tracking-tight">{name}</h3>
         {description && (
-          <p className="text-muted-foreground mt-1">{description}</p>
+          <p className="mt-1 text-muted-foreground">{description}</p>
         )}
       </header>
       <ol className="list-decimal space-y-3 pl-6">
         {steps.map((step) => (
           <li key={step.name}>
             <span className="font-semibold">{step.name}</span>
-            <p className="text-muted-foreground mt-1 leading-relaxed">
+            <p className="mt-1 leading-relaxed text-muted-foreground">
               {step.text}
             </p>
           </li>

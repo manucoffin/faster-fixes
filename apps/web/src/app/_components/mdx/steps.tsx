@@ -19,11 +19,11 @@ export function Steps({ children }: StepsProps) {
         <div key={index} className="relative flex gap-5">
           {/* Vertical line */}
           <div className="flex flex-col items-center">
-            <div className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
               {index + 1}
             </div>
             {index < items.length - 1 && (
-              <div className="bg-border w-px grow" />
+              <div className="w-px grow bg-border" />
             )}
           </div>
           {/* Content */}
@@ -39,8 +39,8 @@ export function Steps({ children }: StepsProps) {
 export function Step({ title, children }: StepProps) {
   return (
     <div>
-      <p className="text-foreground mb-1.5 text-base font-semibold">{title}</p>
-      <div className="text-muted-foreground text-sm leading-relaxed">
+      <p className="mb-1.5 text-base font-semibold text-foreground">{title}</p>
+      <div className="text-sm leading-relaxed text-muted-foreground">
         {children}
       </div>
     </div>
