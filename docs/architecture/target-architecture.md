@@ -6,17 +6,17 @@ This document is the reference for the migration kit in `migration-kit/`. It des
 
 ## Core files (in this repo)
 
-| File                                                                          | Role                                                                                   |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `docs/architecture/migration-kit/adrs/app-folder-architecture.md`             | Two tiers, buckets, per-domain public API. Becomes an ADR under `docs/adr/` in step 2. |
-| `docs/architecture/migration-kit/adrs/server-file-conventions.md`             | `_services/`, verb prefixes, thin routers. Becomes an ADR in step 3.                   |
-| `docs/architecture/migration-kit/adrs/domain-errors-and-transport-mapping.md` | `DomainError` vocabulary and boundary mapping. Becomes an ADR in step 4.               |
-| `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md`       | When code earns a workspace package. Becomes an ADR in step 5.                         |
-| `.claude/skills/coding-standards/`                                            | The rule files agents load while coding                                                |
-| `packages/eslint-config/next.js`                                              | Rule wiring and severity gating                                                        |
-| `packages/eslint-config/local-rules/`                                         | The custom ESLint rules                                                                |
-| `apps/web/src/server/errors/`                                                 | Domain errors and boundary helpers. Created in step 3.                                 |
-| `apps/web/src/server/trpc/trpc.ts`                                            | tRPC init, procedures, error middleware                                                |
+| File                                                                          | Role                                                                        |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `docs/adr/0010-app-folder-architecture.md`                                    | Two tiers, buckets, per-domain public API. Committed as ADR 0010 in step 2. |
+| `docs/architecture/migration-kit/adrs/server-file-conventions.md`             | `_services/`, verb prefixes, thin routers. Becomes an ADR in step 3.        |
+| `docs/architecture/migration-kit/adrs/domain-errors-and-transport-mapping.md` | `DomainError` vocabulary and boundary mapping. Becomes an ADR in step 4.    |
+| `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md`       | When code earns a workspace package. Becomes an ADR in step 5.              |
+| `.claude/skills/coding-standards/`                                            | The rule files agents load while coding                                     |
+| `packages/eslint-config/next.js`                                              | Rule wiring and severity gating                                             |
+| `packages/eslint-config/local-rules/`                                         | The custom ESLint rules                                                     |
+| `apps/web/src/server/errors/`                                                 | Domain errors and boundary helpers. Created in step 3.                      |
+| `apps/web/src/server/trpc/trpc.ts`                                            | tRPC init, procedures, error middleware                                     |
 
 ## How to read this document
 

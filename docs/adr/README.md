@@ -44,3 +44,4 @@ What changes because of this? What new constraints does it create?
 - [ADR-0007](./0007-agent-api-rate-limit-is-an-abuse-backstop.md) — Agent API rate limit is an abuse backstop keyed per Organization, not an authorization or metering control.
 - [ADR-0008](./0008-jira-oauth-uses-user-bound-3lo-tokens.md) — Jira Cloud authorizes via OAuth 2.0 (3LO) user-bound tokens, a deliberate deviation from ADR-0002.
 - [ADR-0009](./0009-diagnostic-trail-capture.md) — The Widget captures a Diagnostic Trail of recent console and network activity, redacted client-side.
+- [ADR-0010](./0010-app-folder-architecture.md) — App folder architecture: root `_features/` becomes `_domains/`, one bucket set at both tiers, cross-domain access through a per-domain `index.ts`.
