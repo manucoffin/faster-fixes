@@ -2723,6 +2723,177 @@ notification switch are on the QA checklist of issue #77.
 **Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
 is still there: the sandbox refuses `rmdir`.
 
+### `(authenticated)/(project)`, part 5: Jira link settings (issue #78)
+
+Commit: `47c4911`. The six Jira project link operations and the three-step access preamble they share
+become services in the existing `settings/_services/` folder, and the `_utils/` folder that sat
+inside the Jira feature is emptied. The scope is still **not** locked: issue #79 owns the remaining 7
+operations and the `migratedScopes` entry.
+
+**Files moved.** Nine modules with `git mv`, plus four new schema files and one new test file. No
+file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation          | Before                                                                          | After                                                     |
+| ------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Access preamble    | `settings/_features/jira/_utils/require-jira-access.ts`                         | `settings/_services/get-jira-access.ts`                   |
+| Jira link read     | `settings/_features/jira/get-project-jira-link.trpc.query.ts`                   | `settings/_services/get-project-jira-link.ts`             |
+| Jira project list  | `settings/_features/jira/link-project/list-jira-projects.trpc.query.ts`         | `settings/_services/list-accessible-jira-projects.ts`     |
+| Issue type list    | `settings/_features/jira/link-project/list-jira-issue-types.trpc.query.ts`      | `settings/_services/list-jira-issue-types-for-project.ts` |
+| Jira link write    | `settings/_features/jira/link-project/link-jira-project.trpc.mutation.ts`       | `settings/_services/link-jira-project.ts`                 |
+| Jira link schema   | `settings/_features/jira/link-project/link-jira-project.schema.ts`              | `settings/_services/link-jira-project.schema.ts`          |
+| Jira unlink        | `settings/_features/jira/unlink-project/unlink-jira-project.trpc.mutation.ts`   | `settings/_services/unlink-jira-project.ts`               |
+| Jira link update   | `settings/_features/jira/update-link/update-project-jira-link.trpc.mutation.ts` | `settings/_services/update-project-jira-link.ts`          |
+| Jira update schema | `settings/_features/jira/update-link/update-project-jira-link.schema.ts`        | `settings/_services/update-project-jira-link.schema.ts`   |
+
+The six operations join the GitHub and Slack services of part 4 in the same flat
+`settings/_services/`. The `_features/jira/` subfolders the operations left (`link-project/`,
+`unlink-project/`, `update-link/`) keep their client component, which is what a feature is for.
+
+**The feature's `_utils/` fanned out into one shared service.** `requireJiraAccess` was the only
+member of that bucket and it is IO, not a pure helper: it loads the Project, checks the caller's
+membership in the Project's Organization, and returns the Organization's Jira installation, throwing
+on each of the four failures. So `_helpers/` was the wrong home and it became
+`settings/_services/get-jira-access.ts`, a read service that four other services call. That is the
+first service-calling-a-service of the step, and it is the right seam: the only alternative was
+inlining its forty lines four times. It takes the trailing database client and forwards it, so one
+test drives the whole preamble.
+
+**Renamed services.** Two, both forced by the naming conventions.
+
+| Before                     | After                          | Why                                                                                                             |
+| -------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `requireJiraAccess`        | `getJiraAccess`                | `require-` is not in the closed read vocabulary; the function reads and returns, and the throwing is the denial |
+| `listJiraIssueTypes` (own) | `listJiraIssueTypesForProject` | The export already carried the suffix, to avoid colliding with the REST client's `listJiraIssueTypes`           |
+
+The second row is a file rename, not an export rename: `list-jira-issue-types.trpc.query.ts` already
+exported `listJiraIssueTypesForProject`, and a `_services/` file is named after its export.
+`list-jira-projects.trpc.query.ts` is the same case and becomes `list-accessible-jira-projects.ts`,
+matching `list-accessible-jira-sites.ts` in the integrations scope.
+
+**Renamed procedure keys.** None. All six keys (`jira.getLink`, `jira.listProjects`,
+`jira.listIssueTypes`, `jira.linkProject`, `jira.unlinkProject`, `jira.updateLink`) already mirror
+their service once the tracker the sub-router carries is dropped, exactly as the GitHub keys did in
+part 4. No call site changed its key, and the published packages call the `/api/v1/*` REST surface
+and never tRPC.
+
+**Plan gating stayed at the transport edge.** `jira.linkProject` and `jira.updateLink` were
+`planAwareProcedure.use(enforceFeature("jiraIntegration"))` and still are. `jira.unlinkProject` is
+deliberately not plan-gated, so a downgraded Organization can always unlink; the router now carries
+that comment, which used to sit on the procedure module. The three reads keep `protectedProcedure`.
+No `UNAUTHORIZED` and no rate limit is involved.
+
+**Authorization, all of it in the services.** Every denial needs the loaded Project, so none could
+stay at the transport edge.
+
+| Denial                                                        | Where it lives now                                                            |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| "Project not found."                                          | `NotFoundError` in `getJiraAccess`, `getProjectJiraLink`, `unlinkJiraProject` |
+| "Access denied."                                              | `ForbiddenError` in `getJiraAccess` (read path) and `getProjectJiraLink`      |
+| "Only owners and admins can link Jira projects."              | `ForbiddenError` in `getJiraAccess`, called by `linkJiraProject`              |
+| "Only owners and admins can change Jira link settings."       | `ForbiddenError` in `getJiraAccess`, called by `updateProjectJiraLink`        |
+| "Only owners and admins can unlink Jira projects."            | `ForbiddenError` in `unlinkJiraProject`                                       |
+| "Jira is not connected. Connect a Jira site first."           | `BadRequestError` in `getJiraAccess`                                          |
+| "The Jira connection needs to be re-authorized."              | `BadRequestError` in `getJiraAccess`                                          |
+| "This issue type requires fields Faster Fixes cannot fill: …" | `BadRequestError` in `linkJiraProject`                                        |
+| "This project is not linked to a Jira project."               | `NotFoundError` in `updateProjectJiraLink`                                    |
+
+The predicate is the one found in the code and is kept: the two reads accept any member of the
+Project's Organization, the three writes require `role: { in: ["owner", "admin"] }`, and the
+per-caller denial wording travels as the `adminDeniedMessage` argument it already was.
+`getProjectJiraLink` and `unlinkJiraProject` keep their own inline preamble rather than calling
+`getJiraAccess`: both must work when the org-level installation is missing or needs
+re-authorization, which `getJiraAccess` rejects. That was already true before the move, and the
+comments saying so moved with the code.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR` and no generic wrapper.
+Every `TRPCError` became the `DomainError` subclass of the same code with the same message, so no
+toast or form error changes wording. `linkJiraProject` still swallows a failed webhook registration
+with the same `console.error`, because inbound status sync is an enhancement and not a precondition
+for linking.
+
+**Nothing reachable from an Inngest function throws a `DomainError`.** None of the seven services is
+imported by anything under `src/server/`. The three Jira Inngest functions (`create-jira-issue.ts`,
+`sync-jira-issue-status.ts`, `sync-feedback-status-to-jira.ts`) read `ProjectJiraLink` through
+Prisma directly and never call these services.
+
+**Services holding a database client.** All seven. The two lookups (`listAccessibleJiraProjects`,
+`listJiraIssueTypesForProject`) are pass-through reads in their own body, but they hold their
+authorization check transitively through `getJiraAccess` and must forward the client to it, so they
+take the trailing parameter too.
+
+**Output types.** The six `inferProcedureOutput` aliases of the segment are gone. The three reads
+export `<Service>Output` derived from their own function: `GetProjectJiraLinkOutput` (consumed by
+`linked-jira-project-view.client.tsx`), `ListAccessibleJiraProjectsOutput`
+(`jira-project-picker.client.tsx`) and `ListJiraIssueTypesForProjectOutput`, which has no importer
+and is kept because the read's return type is the type source of truth. `GetJiraAccessOutput` is
+added for the same reason. The three write aliases are dropped rather than replaced: no file
+imported any of them. The two client imports changed path only; the type names are unchanged.
+
+**Schemas.** Four new pure-Zod schema files for the operations that parsed an inline `z.object` in
+the procedure (`get-project-jira-link.schema.ts`, `list-accessible-jira-projects.schema.ts`,
+`list-jira-issue-types-for-project.schema.ts`, `unlink-jira-project.schema.ts`), and two moved with
+their service. `LinkJiraProjectSchemaType` and `UpdateProjectJiraLinkSchemaType` became
+`LinkJiraProjectInput` and `UpdateProjectJiraLinkInput`, which is the 9 to 5 burn-down of
+`require-schema-conventions` below. `JiraLabelSchema` stays in `link-jira-project.schema.ts` and the
+update schema keeps importing it from there, one folder closer than before. `LinkJiraProjectSchema`
+has no `.default()` call, so the form resolver in `jira-project-picker.client.tsx` types itself on
+`LinkJiraProjectInput` and needs no `Values` companion.
+
+**Tests.** One colocated file, seven cases, all driven through the trailing database client with no
+tRPC context built. `get-jira-access.test.ts` pins the whole shared preamble: the unknown Project,
+the plain-member denial, the privileged denial with its caller-supplied wording, the fact that the
+owner/admin role predicate is applied only when `requireAdmin` is set, the missing installation, the
+`reconnect_required` installation, and the successful return. The four services that call it inherit
+that coverage; the three branches left (the inline preamble of `getProjectJiraLink` and
+`unlinkJiraProject`, and the missing-link branch of `updateProjectJiraLink`) repeat shapes that part
+3 and part 4 already pin.
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                  |
+| ------------------------------------ | ----------------------------------------------------------------------- |
+| 1 role suffixes                      | 7 files, down from 13, exactly the Linear operations (#79)              |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` |
+| 3 `_constants/` inside a scope       | nothing                                                                 |
+| 4 `*.types.ts`                       | nothing                                                                 |
+| 5 routers in a bucket or a feature   | nothing                                                                 |
+| 6 tRPC imported by a service         | nothing                                                                 |
+| 7 `TRPCError` in a service           | nothing                                                                 |
+| 8 `'use server'` in a service/router | nothing: the six moved procedure modules all dropped the directive      |
+| 9 Prisma outside a service           | 7 files, down from 12, the same set as check 1                          |
+| 10 `inferProcedureOutput`            | 7 files, down from 13, all owned by part 6                              |
+
+The Jira feature's `_utils/` folder is empty: its only file left with `git mv`. It still shows in
+check 2 because the sandbox refuses `rmdir`, the same reason `(project)/_utils/` is still listed.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 112 app
+tests (7 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **94 problems, 0 errors,
+94 warnings** (88 `no-raw-tailwind-colors` / 5 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 4 from the 98 of part 4. `npx next build` compiles and still lists
+`/inbox`, `/reviewers` and `/settings`; `pnpm build` is refused by the sandbox, as the earlier
+entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                      | Result                                                                |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET …projects.jira.getLink`, `jira.listProjects`, `jira.listIssueTypes`   | `401 UNAUTHORIZED`, each key resolves and `protectedProcedure` guards |
+| `POST …projects.jira.linkProject`, `jira.unlinkProject`, `jira.updateLink` | `401 UNAUTHORIZED`, the plan-aware and protected writes both resolve  |
+| `GET …` on each of the three mutations                                     | `405` mutation-over-GET, so all three are mounted as mutations        |
+| `GET …projects.linear.getLink`, `projects.github.getLink`                  | `401 UNAUTHORIZED`, the unmigrated and migrated siblings both resolve |
+| `GET /api/v1/agent/feedbacks` with no bearer token                         | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged       |
+| `GET /settings` signed out                                                 | `307` to `/login`, the page guard is unchanged                        |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+Atlassian app, so no user can sign in and no `JiraInstallation` exists to link against. Picking a Jira
+project and issue type, the required-fields rejection, toggling auto-create, editing the default
+labels and unlinking are on the QA checklist of issue #78.
+
+**Left for the maintainer.** Nothing new beyond one more empty folder:
+`settings/_features/jira/_utils/` joins `(project)/_utils/`, both emptied by `git mv` and both kept
+on disk because the sandbox refuses `rmdir`. Git does not track empty folders, so neither appears in
+the commit.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
