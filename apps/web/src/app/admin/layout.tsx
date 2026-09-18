@@ -12,7 +12,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
 import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
-import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
+import { ThemeToggle } from "../_components/theme-toggle.client";
 import { AdminSidebar } from "./_features/sidebar/admin-sidebar.server";
 
 export const metadata: Metadata = {

@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { AlertCircle, Search } from "lucide-react";
-import { DataTableExportButton } from "./data-table-export-button";
+import { DataTableExportButton } from "./data-table-export-button.client";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -176,7 +176,7 @@ export const DataTable = <TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  <div className="text-destructive flex items-center justify-center">
+                  <div className="flex items-center justify-center text-destructive">
                     <AlertCircle className="mr-2 size-4" />
                     <span>{errorMessage}</span>
                   </div>
@@ -214,7 +214,7 @@ export const DataTable = <TData, TValue>({
 
       {/* Pagination Controls */}
       <div className="flex items-center justify-between px-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
+        <div className="flex-1 text-sm text-muted-foreground">
           Page {currentPage} of {pageCount}
         </div>
         <div className="flex items-center space-x-2">

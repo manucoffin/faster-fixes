@@ -4,7 +4,7 @@ import { AnimatedText } from "@workspace/ui/components/animated-text";
 import { Route } from "next";
 import Link from "next/link";
 import { GitHubStarsButton } from "../../github/github-stars-button.client";
-import { AppLogo } from "../logo/app-logo";
+import { AppLogo } from "@/app/_components/app-logo";
 
 const productLinks: { text: string; href: string; external?: boolean }[] = [
   { text: "Documentation", href: "/docs" },
@@ -51,7 +51,7 @@ export function Footer() {
               <AppLogo />
             </div>
 
-            <p className="text-muted-foreground mx-auto mt-6 max-w-md text-center leading-relaxed sm:mx-0 sm:max-w-xs sm:text-left">
+            <p className="mx-auto mt-6 max-w-md text-center leading-relaxed text-muted-foreground sm:mx-0 sm:max-w-xs sm:text-left">
               {SITE_META_DESCRIPTION}
             </p>
 
@@ -85,14 +85,14 @@ export function Footer() {
                     {external ? (
                       <a
                         href={href}
-                        className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                       >
                         <AnimatedText>{text}</AnimatedText>
                       </a>
                     ) : (
                       <Link
                         href={href as Route}
-                        className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                       >
                         <AnimatedText>{text}</AnimatedText>
                       </Link>
@@ -109,7 +109,7 @@ export function Footer() {
                   <li key={text}>
                     <Link
                       href={href}
-                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                     >
                       <AnimatedText>{text}</AnimatedText>
                     </Link>
@@ -125,7 +125,7 @@ export function Footer() {
                   <li key={text}>
                     <Link
                       href={href}
-                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                     >
                       <AnimatedText>{text}</AnimatedText>
                     </Link>
@@ -141,14 +141,14 @@ export function Footer() {
                   <li key={text}>
                     <Link
                       href={href}
-                      className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                     >
                       <AnimatedText>{text}</AnimatedText>
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <ManageConsentButton className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground h-fit px-0 py-0 font-normal transition-colors hover:no-underline">
+                  <ManageConsentButton className="h-fit px-0 py-0 font-normal text-muted-foreground transition-colors hover:text-foreground hover:no-underline dark:hover:text-primary-foreground">
                     <AnimatedText>Privacy preferences</AnimatedText>
                   </ManageConsentButton>
                 </li>
@@ -158,9 +158,9 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-border/40 mt-12 border-t pt-6 pb-4">
+      <div className="mt-12 border-t border-border/40 pt-6 pb-4">
         <div className="mx-auto px-4">
-          <div className="text-muted-foreground text-center text-sm sm:flex sm:justify-between sm:text-left">
+          <div className="text-center text-sm text-muted-foreground sm:flex sm:justify-between sm:text-left">
             <p>
               Open source under{" "}
               <a

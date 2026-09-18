@@ -18,7 +18,12 @@ export const AppLogo = ({ className, ...props }: Props) => {
 
   if (!isCloud()) {
     return (
-      <a href={EXTERNAL_SITE_URL} target="_blank" rel="noopener noreferrer" className={sharedClassName}>
+      <a
+        href={EXTERNAL_SITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={sharedClassName}
+      >
         /fasterfixes
       </a>
     );
@@ -43,7 +48,12 @@ export const AppLogoMark = ({ className, ...props }: AppLogoMarkProps) => {
 
   if (!isCloud()) {
     return (
-      <a href={EXTERNAL_SITE_URL} target="_blank" rel="noopener noreferrer" className={sharedClassName}>
+      <a
+        href={EXTERNAL_SITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={sharedClassName}
+      >
         /ff
       </a>
     );

@@ -1,5 +1,5 @@
 import { signupUrl } from "@/app/_constants/routes";
-import { AppLogo } from "@/app/_features/core/logo/app-logo";
+import { AppLogo } from "@/app/_components/app-logo";
 import { auth } from "@/server/auth";
 import { isCloud } from "@/utils/environment/env";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
@@ -20,7 +20,7 @@ import {
 import { headers } from "next/headers";
 import Link from "next/link";
 import { MobileNav } from "./mobile-nav.client";
-import { ThemeToggle } from "./theme-toggle.client";
+import { ThemeToggle } from "@/app/_components/theme-toggle.client";
 
 const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 
@@ -82,7 +82,7 @@ export async function Header() {
   });
 
   return (
-    <header className="border-border/40 bg-background sticky top-0 z-40 border-b">
+    <header className="sticky top-0 z-40 border-b border-border/40 bg-background">
       <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
         {/* Left: hamburger on mobile, logo on desktop */}
         <div className="flex items-center">
@@ -126,7 +126,7 @@ export async function Header() {
                         <li key={link.href}>
                           <Link
                             href={link.href as never}
-                            className="hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 flex flex-row items-start gap-3 rounded-sm p-2 outline-none transition-colors focus-visible:ring-[3px]"
+                            className="flex flex-row items-start gap-3 rounded-sm p-2 transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
                           >
                             <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
                               {link.icon}
@@ -135,7 +135,7 @@ export async function Header() {
                               <span className="text-sm font-medium">
                                 {link.label}
                               </span>
-                              <span className="text-muted-foreground line-clamp-2 text-xs leading-snug">
+                              <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                                 {link.description}
                               </span>
                             </span>

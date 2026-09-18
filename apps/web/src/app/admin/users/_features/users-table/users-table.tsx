@@ -1,18 +1,14 @@
 "use client";
 
-import { DataTable } from "@/app/_features/core/datatable/data-table";
-import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header";
+import { DataTable } from "@/app/_components/data-table.client";
+import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionPlanName } from "@/server/auth/config/subscription-plans";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import Link from "next/link";
-import {
-  parseAsInteger,
-  parseAsString,
-  useQueryState
-} from "nuqs";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 import { GetPaginatedUsersOutput } from "./get-paginated-users";
 import { UsersTableActionDropdown } from "./users-table-action-dropdown";
@@ -48,7 +44,7 @@ const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
                 </Badge>
               )}
             </div>
-            <div className="text-muted-foreground text-xs">
+            <div className="text-xs text-muted-foreground">
               {organizationName || "—"}
             </div>
           </Link>
@@ -160,8 +156,8 @@ export const UsersTable = () => {
     parseAsString.withDefault(""),
   );
 
-  const { data, isLoading, isError } =
-    useQuery(trpc.admin.users.list.queryOptions({
+  const { data, isLoading, isError } = useQuery(
+    trpc.admin.users.list.queryOptions({
       search,
       page: currentPage,
       pageSize,
@@ -169,12 +165,15 @@ export const UsersTable = () => {
         (sortBy as "name" | "email" | "createdAt" | "feedbackCount") ||
         undefined,
       sortOrder: (sortOrder as "asc" | "desc") || undefined,
-    }));
+    }),
+  );
 
   // Fetch export data separately (will be fetched on demand by the export button)
-  const { data: exportData } = useQuery(trpc.admin.users.export.queryOptions({
-    search,
-  }));
+  const { data: exportData } = useQuery(
+    trpc.admin.users.export.queryOptions({
+      search,
+    }),
+  );
 
   // Calculate total pages
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;

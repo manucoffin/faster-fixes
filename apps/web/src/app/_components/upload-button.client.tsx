@@ -97,7 +97,7 @@ export function UploadButton({
       </Button>
 
       {description && (
-        <p className="text-muted-foreground text-xs">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       )}
     </div>
   );

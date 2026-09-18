@@ -1,6 +1,6 @@
 "use client";
 
-import { UploadButton } from "@/app/_features/core/upload/upload-button";
+import { UploadButton } from "@/app/_components/upload-button.client";
 import { organization, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";

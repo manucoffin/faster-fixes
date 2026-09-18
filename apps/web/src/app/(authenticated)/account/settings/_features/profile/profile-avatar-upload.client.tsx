@@ -1,6 +1,6 @@
 "use client";
 
-import { UploadButton } from "@/app/_features/core/upload/upload-button";
+import { UploadButton } from "@/app/_components/upload-button.client";
 import { updateUser, useSession } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
@@ -20,8 +20,9 @@ export function ProfileAvatarUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
-  const deleteOldAvatar =
-    useMutation(trpc.authenticated.account.profile.updateAvatar.mutationOptions());
+  const deleteOldAvatar = useMutation(
+    trpc.authenticated.account.profile.updateAvatar.mutationOptions(),
+  );
 
   const userName = session?.user.name ?? "User";
   const userEmail = session?.user.email ?? userName;

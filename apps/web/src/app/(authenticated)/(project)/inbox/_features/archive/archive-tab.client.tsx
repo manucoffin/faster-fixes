@@ -1,14 +1,18 @@
 "use client";
 
 import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
-import { DataTable } from "@/app/_features/core/datatable/data-table";
-import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header";
+import { DataTable } from "@/app/_components/data-table.client";
+import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle } from "lucide-react";
@@ -34,10 +38,16 @@ export function ArchiveTab() {
   const queryClient = useQueryClient();
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");
-  const [sorting, setSorting] = React.useState<Array<{ id: string; desc: boolean }>>([]);
+  const [sorting, setSorting] = React.useState<
+    Array<{ id: string; desc: boolean }>
+  >([]);
 
-  const sortBy = sorting[0]?.id === "createdAt" ? "createdAt" as const : "updatedAt" as const;
-  const sortOrder = sorting[0]?.desc === false ? "asc" as const : "desc" as const;
+  const sortBy =
+    sorting[0]?.id === "createdAt"
+      ? ("createdAt" as const)
+      : ("updatedAt" as const);
+  const sortOrder =
+    sorting[0]?.desc === false ? ("asc" as const) : ("desc" as const);
 
   const archiveQuery = useQuery(
     trpc.authenticated.projects.feedback.listArchived.queryOptions({
@@ -54,7 +64,9 @@ export function ArchiveTab() {
     trpc.authenticated.projects.feedback.hardDelete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId }),
+          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({
+            projectId,
+          }),
         });
         toast.success("Feedback deleted permanently.");
       },
@@ -70,7 +82,9 @@ export function ArchiveTab() {
         accessorKey: "comment",
         header: "Comment",
         cell: ({ row }) => (
-          <p className="max-w-[300px] truncate text-sm">{row.original.comment}</p>
+          <p className="max-w-[300px] truncate text-sm">
+            {row.original.comment}
+          </p>
         ),
       },
       {
@@ -80,12 +94,16 @@ export function ArchiveTab() {
           try {
             const url = new URL(row.original.pageUrl);
             return (
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 {url.hostname + url.pathname.replace(/\/$/, "")}
               </span>
             );
           } catch {
-            return <span className="text-muted-foreground text-xs">{row.original.pageUrl}</span>;
+            return (
+              <span className="text-xs text-muted-foreground">
+                {row.original.pageUrl}
+              </span>
+            );
           }
         },
       },
@@ -101,12 +119,17 @@ export function ArchiveTab() {
         header: "Assignee",
         cell: ({ row }) => {
           const assignee = row.original.assignee;
-          if (!assignee) return <span className="text-muted-foreground text-xs">Unassigned</span>;
+          if (!assignee)
+            return (
+              <span className="text-xs text-muted-foreground">Unassigned</span>
+            );
           return (
             <div className="flex items-center gap-1.5">
               <Avatar className="size-5">
                 <AvatarImage
-                  src={assignee.image ? resolveS3Url(assignee.image) : undefined}
+                  src={
+                    assignee.image ? resolveS3Url(assignee.image) : undefined
+                  }
                   className="object-cover"
                 />
                 <AvatarFallback className="text-[10px]">
@@ -124,8 +147,10 @@ export function ArchiveTab() {
           <DataTableColumnHeader column={column} title="Closed Date" />
         ),
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-xs">
-            {formatDistanceToNow(new Date(row.original.updatedAt), { addSuffix: true })}
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(row.original.updatedAt), {
+              addSuffix: true,
+            })}
           </span>
         ),
       },
@@ -135,7 +160,9 @@ export function ArchiveTab() {
         cell: ({ row }) => (
           <HardDeleteDialog
             count={1}
-            onConfirm={() => hardDeleteMutation.mutate({ feedbackId: row.original.id })}
+            onConfirm={() =>
+              hardDeleteMutation.mutate({ feedbackId: row.original.id })
+            }
             disabled={hardDeleteMutation.isPending}
           />
         ),
@@ -158,7 +185,9 @@ export function ArchiveTab() {
             <AlertCircle />
           </EmptyMedia>
           <EmptyTitle>Failed to load archive</EmptyTitle>
-          <EmptyDescription>Something went wrong. Please try again later.</EmptyDescription>
+          <EmptyDescription>
+            Something went wrong. Please try again later.
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     ),
