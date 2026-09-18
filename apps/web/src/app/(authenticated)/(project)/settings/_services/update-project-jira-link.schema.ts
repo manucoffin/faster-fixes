@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { JiraLabelSchema } from "../link-project/link-jira-project.schema";
+import { JiraLabelSchema } from "./link-jira-project.schema";
 
 // Unlike Linear's update schema, this has no "project change" variant: switching
 // the Jira project or issue type must re-run the required-fields check, so it
@@ -11,6 +11,6 @@ export const UpdateProjectJiraLinkSchema = z.object({
   defaultLabels: z.array(JiraLabelSchema).optional(),
 });
 
-export type UpdateProjectJiraLinkSchemaType = z.infer<
+export type UpdateProjectJiraLinkInput = z.infer<
   typeof UpdateProjectJiraLinkSchema
 >;

@@ -19,4 +19,4 @@ export const LinkJiraProjectSchema = z.object({
   defaultLabels: z.array(JiraLabelSchema),
 });
 
-export type LinkJiraProjectSchemaType = z.infer<typeof LinkJiraProjectSchema>;
+export type LinkJiraProjectInput = z.infer<typeof LinkJiraProjectSchema>;

@@ -2,12 +2,6 @@ import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
-import { getProjectJiraLink } from "./settings/_features/jira/get-project-jira-link.trpc.query";
-import { linkJiraProject } from "./settings/_features/jira/link-project/link-jira-project.trpc.mutation";
-import { listJiraIssueTypesForProject } from "./settings/_features/jira/link-project/list-jira-issue-types.trpc.query";
-import { listAccessibleJiraProjects } from "./settings/_features/jira/link-project/list-jira-projects.trpc.query";
-import { unlinkJiraProject } from "./settings/_features/jira/unlink-project/unlink-jira-project.trpc.mutation";
-import { updateProjectJiraLink } from "./settings/_features/jira/update-link/update-project-jira-link.trpc.mutation";
 import { getProjectLinearLink } from "./settings/_features/linear/get-project-linear-link.trpc.query";
 import { linkLinearTeam } from "./settings/_features/linear/link-team/link-team.trpc.mutation";
 import { listAccessibleLinearTeams } from "./settings/_features/linear/link-team/list-accessible-teams.trpc.query";
@@ -35,6 +29,18 @@ import { updateProject } from "./settings/_services/update-project";
 import { UpdateProjectSchema } from "./settings/_services/update-project.schema";
 import { getProjectGitHubLink } from "./settings/_services/get-project-github-link";
 import { GetProjectGitHubLinkSchema } from "./settings/_services/get-project-github-link.schema";
+import { getProjectJiraLink } from "./settings/_services/get-project-jira-link";
+import { GetProjectJiraLinkSchema } from "./settings/_services/get-project-jira-link.schema";
+import { linkJiraProject } from "./settings/_services/link-jira-project";
+import { LinkJiraProjectSchema } from "./settings/_services/link-jira-project.schema";
+import { listAccessibleJiraProjects } from "./settings/_services/list-accessible-jira-projects";
+import { ListAccessibleJiraProjectsSchema } from "./settings/_services/list-accessible-jira-projects.schema";
+import { listJiraIssueTypesForProject } from "./settings/_services/list-jira-issue-types-for-project";
+import { ListJiraIssueTypesForProjectSchema } from "./settings/_services/list-jira-issue-types-for-project.schema";
+import { unlinkJiraProject } from "./settings/_services/unlink-jira-project";
+import { UnlinkJiraProjectSchema } from "./settings/_services/unlink-jira-project.schema";
+import { updateProjectJiraLink } from "./settings/_services/update-project-jira-link";
+import { UpdateProjectJiraLinkSchema } from "./settings/_services/update-project-jira-link.schema";
 import { getProjectSlackLink } from "./settings/_services/get-project-slack-link";
 import { GetProjectSlackLinkSchema } from "./settings/_services/get-project-slack-link.schema";
 import { linkRepo } from "./settings/_services/link-repo";
@@ -79,7 +85,7 @@ import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-
 // Every denial of the migrated operations reads a loaded row (the Project, or
 // the Feedback and its Project), so all of them live in their service;
 // `protectedProcedure` answers identity alone. The keys still bound to a
-// procedure module belong to issues #75 to #79.
+// procedure module belong to issue #79.
 export const projectsRouter = router({
   list: protectedProcedure.input(ListProjectsSchema).query(({ input, ctx }) =>
     listProjects({
@@ -327,12 +333,57 @@ export const projectsRouter = router({
     updateLink: updateProjectLinearLink,
   }),
   jira: router({
-    getLink: getProjectJiraLink,
-    listProjects: listAccessibleJiraProjects,
-    listIssueTypes: listJiraIssueTypesForProject,
-    linkProject: linkJiraProject,
-    unlinkProject: unlinkJiraProject,
-    updateLink: updateProjectJiraLink,
+    getLink: protectedProcedure
+      .input(GetProjectJiraLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectJiraLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listProjects: protectedProcedure
+      .input(ListAccessibleJiraProjectsSchema)
+      .query(({ input, ctx }) =>
+        listAccessibleJiraProjects({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listIssueTypes: protectedProcedure
+      .input(ListJiraIssueTypesForProjectSchema)
+      .query(({ input, ctx }) =>
+        listJiraIssueTypesForProject({
+          projectId: input.projectId,
+          jiraProjectId: input.jiraProjectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    linkProject: planAwareProcedure
+      .use(enforceFeature("jiraIntegration"))
+      .input(LinkJiraProjectSchema)
+      .mutation(({ input, ctx }) =>
+        linkJiraProject({ ...input, userId: ctx.session.user.id }),
+      ),
+    // Not plan-gated: a downgraded Organization must always be able to unlink.
+    unlinkProject: protectedProcedure
+      .input(UnlinkJiraProjectSchema)
+      .mutation(({ input, ctx }) =>
+        unlinkJiraProject({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateLink: planAwareProcedure
+      .use(enforceFeature("jiraIntegration"))
+      .input(UpdateProjectJiraLinkSchema)
+      .mutation(({ input, ctx }) =>
+        updateProjectJiraLink({
+          projectId: input.projectId,
+          autoCreateIssues: input.autoCreateIssues,
+          defaultLabels: input.defaultLabels,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   slack: router({
     getLink: protectedProcedure

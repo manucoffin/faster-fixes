@@ -24,9 +24,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkJiraProjectSchema,
-  type LinkJiraProjectSchemaType,
-} from "./link-jira-project.schema";
-import type { ListAccessibleJiraProjectsOutput } from "./list-jira-projects.trpc.query";
+  type LinkJiraProjectInput,
+} from "../../../_services/link-jira-project.schema";
+import type { ListAccessibleJiraProjectsOutput } from "../../../_services/list-accessible-jira-projects";
 
 type JiraProjectPickerProps = {
   projectId: string;
@@ -40,7 +40,7 @@ export function JiraProjectPicker({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const form = useForm<LinkJiraProjectSchemaType>({
+  const form = useForm<LinkJiraProjectInput>({
     resolver: zodResolver(LinkJiraProjectSchema),
     defaultValues: {
       projectId,
@@ -93,7 +93,7 @@ export function JiraProjectPicker({
     }),
   );
 
-  const onSubmit = (data: LinkJiraProjectSchemaType) => {
+  const onSubmit = (data: LinkJiraProjectInput) => {
     linkMutation.mutate(data);
   };
 
@@ -188,7 +188,7 @@ export function JiraProjectPicker({
         )}
 
         {form.formState.errors.root && (
-          <p className="text-destructive text-sm">
+          <p className="text-sm text-destructive">
             {form.formState.errors.root.message}
           </p>
         )}
