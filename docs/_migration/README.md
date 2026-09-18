@@ -1041,6 +1041,120 @@ and `sk_test_dummy`, so no card can render a real figure. Signing in as an admin
 the five cards and the chart, the month-range picker on the chart, and the "—" states the null
 branches produce (no churn base, no signups last month) are on the QA checklist of issue #65.
 
+### `admin/users`, part 1 (issue #66)
+
+Commit: `860de52`. The scope router leaves `_utils/` for the scope root and the five account
+operations become services. The scope is **not** locked: issue #67 migrates the remaining
+operations and adds the `migratedScopes` entry.
+
+**Files moved.** Every one with `git mv`, so no stub is owed.
+
+| Operation              | Before                                                                                  | After                                 |
+| ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------- |
+| Create User            | `_features/create-user/create-user.trpc.mutation.ts`                                    | `_services/create-user.ts`            |
+| Delete User            | `[id]/_features/account/delete-user/delete-user.trpc.mutation.ts`                       | `_services/delete-user.ts`            |
+| Impersonate User       | `[id]/_features/account/impersonate-user/impersonate-user.trpc.mutation.ts`             | `_services/impersonate-user.ts`       |
+| Request password reset | `[id]/_features/account/request-password-reset/request-password-reset.trpc.mutation.ts` | `_services/request-password-reset.ts` |
+| Revoke User sessions   | `[id]/_features/account/revoke-user-sessions/revoke-user-sessions.trpc.mutation.ts`     | `_services/revoke-user-sessions.ts`   |
+| Scope router           | `admin/users/_utils/trpc-router.ts`                                                     | `admin/users/trpc-router.ts`          |
+
+Each schema moved next to its service under the same name. The five button and dialog clients stay in
+their features: only `create-user-dialog.client.tsx` changed, for the schema import path, which the
+`*.schema.ts` exception of `no-client-import-of-services` allows.
+
+**Renamed procedure keys.** None. `create`, `delete`, `impersonate`, `sessions.revoke` and
+`password.requestReset` already mirror the service verbs under a router that carries the User entity,
+and the acceptance criteria ask for the precise write verbs (`impersonate`, `revoke`) to be kept. No
+call site changed its key, so the twelve `trpc.admin.users.*` usages are untouched.
+`admin/trpc-router.ts` only changed the import path of `usersRouter`.
+
+**Reclassified errors.** None to a different code. The seven `TRPCError` throws of these five
+operations map one to one: `BAD_REQUEST "Failed to create account"` and
+`BAD_REQUEST "User does not have a credential-based account"` to `BadRequestError`,
+`CONFLICT "This email is already registered"` to `ConflictError`, `NOT_FOUND "User not found"` (twice)
+to `NotFoundError`. Messages are unchanged, so every toast reads as before.
+
+**Removed generic wrappers, the one deliberate behaviour change.** Five `INTERNAL_SERVER_ERROR` throws
+are gone and the infrastructure error now propagates as a 500 with no rewritten message:
+
+| Removed                                                           | Why                                                                                                                                                  |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `createUser` catch-all "Failed to create user. Please try again." | Generic wrapper. The duplicate-email translation it guarded survives as `ConflictError`.                                                             |
+| `impersonateUser` catch-all re-throwing `error.message`           | Generic wrapper that only re-labelled the Better Auth message as a 500.                                                                              |
+| `requestPasswordReset` catch-all re-throwing `error.message`      | Same.                                                                                                                                                |
+| `requestPasswordReset` `if (!response)` guard                     | Better Auth signals a failed request by throwing, so the guard was unreachable; it cannot be restated as a domain error without inventing a meaning. |
+| `revokeUserSessions` `if (!result)` guard and catch-all           | Same.                                                                                                                                                |
+
+Each of the four clients already falls back to its own copy when the message is empty ("Failed to
+revoke user sessions", "Failed to impersonate this user", and so on), so the visible text of an
+unexpected failure is the same or the raw infrastructure message, which step 4 masks.
+
+**One redundant identity check removed.** `revokeUserSessions` opened with `auth.api.getSession()` and
+threw `UNAUTHORIZED "Session not found"` when it came back empty. `adminProcedure` already establishes
+the session and the admin role before the procedure body runs, so the check could not fire; identity
+stays at the transport edge per the step's invariant. The service no longer fetches a session, which
+also drops one round trip per revoke.
+
+**Services holding a database client.** `createUser`, `deleteUser` and `requestPasswordReset` take the
+trailing `db: typeof prisma = prisma` parameter: each has a domain error branch. `impersonateUser` and
+`revokeUserSessions` do not query Prisma at all. All three Better-Auth services take `headers` as an
+explicit parameter, resolved by the router with `await headers()`.
+
+**Authorization.** The admin role check stays on `adminProcedure`. `deleteUser` and
+`requestPasswordReset` throw their `NOT_FOUND` from the service, because the answer needs the loaded
+User.
+
+**Output types.** None owed: all five operations are mutations, and no `inferProcedureOutput` alias
+pointed at them. The five aliases that remain in the scope belong to issue #67.
+
+**Schemas.** The five plural `XInputs` aliases became singular `XInput`, burning down five
+`require-schema-conventions` warnings (48 to 43). `create-user-dialog.client.tsx` is the only consumer
+of one of them.
+
+**Tests.** `create-user.test.ts` (3 cases) pins the duplicate-email translation, the propagation of an
+unexpected failure now that the wrapper is gone, and the returned shape when no profile name is given.
+`delete-user.test.ts` (2 cases) pins `NotFoundError` on an unknown User and the deleted identifiers.
+Both drive the service through its injected client, with no tRPC context.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 29 app tests
+(5 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **135 problems, 0 errors, 135
+warnings** (88 `no-raw-tailwind-colors` / 43 `require-schema-conventions` / 3
+`require-use-client-suffix` / 1 `schema-must-be-pure-zod`), five below the 140 of the `admin` entry;
+`npx next build` compiles and still lists `/admin`, `/admin/users` and `/admin/users/[id]`. `pnpm build`
+itself is refused by the sandbox, so the build was run as `npx next build` from `apps/web`, as the
+`admin` entry did.
+
+**Per-scope "must be gone" checks.** Restricted to `admin/users`, the ten commands return only paths
+issue #67 owns (the seven role-suffixed modules of the `[id]` segment and the users table, their inline
+Prisma and their five `inferProcedureOutput` aliases) plus the now-empty untracked
+`admin/users/_utils/` folder, which the sandbox refuses to `rmdir` and which `git ls-files` shows as
+holding nothing. Checks 3, 4, 5, 6, 7 and 8 return nothing at all: no service imports tRPC, none holds
+a `TRPCError`, and none carries `'use server'`.
+
+**Left for issue #67, beyond its own list.** The users table's two operations, `list`
+(`get-paginated-users.ts`) and `export` (`get-all-users-for-export.ts`), are procedure modules in
+`_features/users-table/` with an `inferProcedureOutput` alias each. Neither appears in the seven
+operations #67 enumerates, but the scope cannot be locked while they sit there, so #67 has to take
+them: nine operations, not seven.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                         | Result                                                           |
+| ------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `POST /api/trpc/admin.users.create` signed out                | `401 UNAUTHORIZED`, the key resolves and `adminProcedure` guards |
+| `POST /api/trpc/admin.users.delete` signed out                | `401 UNAUTHORIZED`, same                                         |
+| `POST /api/trpc/admin.users.impersonate` signed out           | `401 UNAUTHORIZED`, same                                         |
+| `POST /api/trpc/admin.users.sessions.revoke` signed out       | `401 UNAUTHORIZED`, same                                         |
+| `POST /api/trpc/admin.users.password.requestReset` signed out | `401 UNAUTHORIZED`, same                                         |
+| `GET /api/trpc/admin.users.list`, `admin.users.email.get`     | `401`, the operations issue #67 owns still resolve               |
+| `POST /api/trpc/admin.users.passwordReset`                    | `404 No procedure found on path`, a key that does not exist      |
+| `GET /admin/users`, `GET /admin/users/abc` signed out         | `307` to `/login`, the admin layout guard is unaffected          |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+administrator can sign in and no Better Auth call can reach a real user. Creating a user, impersonating
+and stopping, revoking sessions, sending a reset link and deleting a user are on the QA checklist of
+issue #66.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
