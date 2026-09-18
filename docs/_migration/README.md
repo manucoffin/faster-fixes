@@ -1295,6 +1295,126 @@ verified flag and reading the account card are on the QA checklist of issue #67.
 utilisateur" as the account card title), against the English-only rule. No step 3 ticket owns user-facing
 copy and the step is behaviour-preserving, so the strings are left as they are.
 
+### `(authenticated)/account`, part 1: billing (issue #68)
+
+Commit: `2b14b18`. The scope router leaves `_utils/` for the scope root and the four billing
+operations become services.
+The scope is **not** locked: issue #69 migrates the six settings operations and adds the
+`migratedScopes` entry.
+
+**Files moved.**
+
+| Operation           | Before                                                                         | After                                               |
+| ------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Billing portal      | `billing/_features/manage-subscription/create-billing-portal.trpc.mutation.ts` | `billing/_services/create-billing-portal.ts`        |
+| Past invoices       | `billing/_features/past-invoices/get-past-invoices.trpc.query.ts`              | `billing/_services/list-past-invoices.ts`           |
+| Subscription status | `billing/_features/subscription-status/get-subscription-status.trpc.query.ts`  | `billing/_services/get-subscription-status.ts`      |
+| Scope router        | `account/_utils/trpc-router.ts`                                                | `account/trpc-router.ts`                            |
+| Active Subscription | `billing/_features/current-plan/get-active-subscription.trpc.query.ts`         | dissolved, `_deprecated_get-active-subscription.ts` |
+
+Every surviving file moved with `git mv`. Services live in `billing/_services/`, next to the segment's
+UI, while the procedures are inlined in the scope-root `account/trpc-router.ts`: the account scope has
+ten operations in total, so its API surface stays readable in one file and no segment router is
+introduced.
+
+**The one dissolved file.** `get-active-subscription.trpc.query.ts` held a procedure and a generic
+`INTERNAL_SERVER_ERROR` wrapper around a single call to the Subscription domain's
+`getActiveSubscription({ headers })` service. With the wrapper gone nothing was left to move, so the
+procedure calls the domain service directly and the file is a `_deprecated_get-active-subscription.ts`
+stub for the maintainer to delete (issue #81's pass). A route reaching into a domain's internals is the
+established pattern here, as `(authenticated)/layout.tsx` does with `hasCompletedOnboarding`. Writing a
+second `getActiveSubscription` in the billing segment would have duplicated the domain's own read: the
+billing segment displays the active Subscription, it does not own it.
+
+**Renamed procedure keys.** One: `billing.subscription.status` to `billing.subscription.getStatus`, so
+the key mirrors `getSubscriptionStatus` instead of naming a noun. Its single call site,
+`subscription-status-banner.client.tsx`, follows. `billing.subscription.get`, `billing.invoices.list`
+and `billing.portal.create` are unchanged: each is already the verb of its service under a router that
+carries the noun, so `current-plan-card.client.tsx`, `past-invoices-card.client.tsx` and
+`manage-subscription-button.client.tsx` keep their paths.
+
+**Renamed service.** `getPastInvoices` to `listPastInvoices`: it returns a collection, and `list-` is
+the read verb the closed vocabulary forces. The procedure key `invoices.list` already said so.
+
+**Reclassified errors.** None to a different code. The one `FORBIDDEN` of the segment,
+`createBillingPortal`'s "You do not have an active organization", became a `ForbiddenError` with the
+same message. It sits in the service because the answer needs the loaded Organization: the session
+alone does not carry it, the Better Auth `getFullOrganization` call does.
+
+**Removed generic wrappers, the deliberate behaviour change.** Four wrappers are gone and the
+infrastructure error now propagates as a 500 with no rewritten message:
+
+| Removed                                                                                                                | Why                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `getActiveSubscription` catch-all "Failed to fetch active subscription"                                                | Generic wrapper. The domain service catches its own failure and returns `null`, so the wrapper was close to unreachable. |
+| `getSubscriptionStatus` catch-all "Failed to fetch subscription status"                                                | Generic wrapper around two Better Auth calls.                                                                            |
+| `listPastInvoices` catch-all "Failed to retrieve invoices."                                                            | Generic wrapper. The `tryCatch` and immediate re-throw around the Stripe list call went with it: it only re-threw.       |
+| `createBillingPortal` catch-all `new Error("An error occurred while accessing the billing portal. Please try again.")` | Generic wrapper, and a bare `Error` that `services-no-bare-error` forbids in a service.                                  |
+
+The three query wrappers are invisible to the user: the two cards render their own copy on an error
+("An error occurred while loading your plan", "An error occurred while loading your invoices") and the
+status banner renders nothing at all. The fourth is the one visible change of this ticket: the "Manage
+subscription" toast shows `error.message`, so a portal failure now reads as the raw infrastructure
+message instead of "An error occurred while accessing the billing portal. Please try again."
+Reclassifying it was rejected: the catch-all covers any Better Auth or Stripe failure, so no domain
+code is accurate for it. Step 4 masks 500 messages behind a generic copy, which restores a stable
+sentence; until then this is exactly the "meaningful copy still thrown as a 500" the step 4 debt note
+is about.
+
+**Services holding a database client.** None. `listPastInvoices` is the only service of the segment
+that queries Prisma and it is a pass-through read with no authorization check and no domain error
+branch, so it takes no trailing client. `createBillingPortal` has a domain error branch but never
+touches Prisma, like `impersonateUser` in `admin/users`. All three services take `headers` explicitly,
+resolved by the router with `await headers()`; none receives the tRPC context, and `listPastInvoices`
+imports `prisma` directly instead of reading it from `ctx`.
+
+**Authorization.** Identity stays on `protectedProcedure`. The `ForbiddenError` above is the only
+authorization fact in the segment and it lives in the service that loads the Organization.
+
+**Output types.** The three `inferProcedureOutput` aliases of the segment are gone.
+`GetSubscriptionStatusOutput` and `ListPastInvoicesOutput` are now derived from their services,
+`CreateBillingPortalOutput` is not owed (a write), and `GetActiveSubscriptionOutput` already exists on
+the domain service. No file imported any of the three, so no consumer changed.
+
+**Schemas.** None: the four operations take no input.
+
+**Tests.** `create-billing-portal.test.ts` (3 cases) pins the `ForbiddenError` when the session has no
+active Organization, the portal call's `referenceId`, `returnUrl` and `customerType`, and the
+propagation of an unexpected portal failure now that the wrapper is gone. Better Auth is mocked and no
+tRPC context is built.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 36 app tests
+(3 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **130 problems, 0 errors, 130
+warnings** (88 `no-raw-tailwind-colors` / 41 `require-schema-conventions` / 1
+`require-use-client-suffix`), flat against the 130 of `admin/users` part 2 because the billing segment
+holds no schema and no mis-suffixed client file. `npx next build` compiles and still lists `/account`,
+`/account/billing` and `/account/settings`. `pnpm build` itself is refused by the sandbox, so the build
+was run as `npx next build` from `apps/web`, as the earlier entries did.
+
+**Per-scope "must be gone" checks.** Restricted to `(authenticated)/account`, checks 3, 4, 5, 6, 7 and
+8 return nothing: no service imports tRPC, none holds a `TRPCError`, none carries `'use server'`, and
+no router sits in a bucket or a feature. Checks 1, 9 and 10 return only the six settings modules issue
+#69 owns, with their inline Prisma and their `inferProcedureOutput` aliases. Check 2 returns the
+now-empty untracked `account/_utils/` folder: `git ls-files` shows it holding nothing and the sandbox
+refuses `rmdir`, so it is the maintainer's to remove, like the `admin/users/_utils/` one.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                  | Result                                                               |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `GET /api/trpc/authenticated.account.billing.subscription.get`         | `401 UNAUTHORIZED`, the key resolves and `protectedProcedure` guards |
+| `GET /api/trpc/authenticated.account.billing.subscription.getStatus`   | `401 UNAUTHORIZED`, the renamed key resolves                         |
+| `GET /api/trpc/authenticated.account.billing.invoices.list`            | `401 UNAUTHORIZED`, same                                             |
+| `POST /api/trpc/authenticated.account.billing.portal.create`           | `401 UNAUTHORIZED`, same                                             |
+| `GET /api/trpc/authenticated.account.billing.subscription.status`      | `404 No procedure found on path`, the old key is gone                |
+| `GET /api/trpc/authenticated.account.profile.get`, `account.email.get` | `401`, the settings operations issue #69 owns still resolve          |
+| `GET /account/billing` signed out                                      | `307` to `/login`, the page guard is unaffected                      |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+Stripe account, so no user can sign in and no billing screen can render its data. Reading the billing
+page on a free and on a paid plan, opening the billing portal, listing invoices and seeing the trial or
+cancellation banner are on the QA checklist of issue #68.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
