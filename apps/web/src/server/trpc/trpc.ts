@@ -1,4 +1,5 @@
 import { checkRateLimit } from "@/server/api/check-rate-limit";
+import { DomainError } from "@/server/errors/domain-errors";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -32,9 +33,26 @@ export const mergeRouters = t.mergeRouters;
 // Export t.router, t.procedure, t.middleware for creating routers, procedures, and middlewares
 export const router = t.router;
 export const middleware = t.middleware;
-export const publicProcedure = t.procedure.use(async ({ next }) => {
-  return await next();
+
+// Maps the transport-agnostic vocabulary back to tRPC with the same code and
+// message, so an expected failure never surfaces as a 500. It sits on the base
+// procedure, so protected, admin and plan-aware procedures inherit it and no
+// procedure needs a try/catch for translation.
+const domainErrorMiddleware = t.middleware(async (opts) => {
+  const result = await opts.next();
+
+  if (!result.ok && result.error.cause instanceof DomainError) {
+    throw new TRPCError({
+      code: result.error.cause.code,
+      message: result.error.cause.message,
+      cause: result.error.cause,
+    });
+  }
+
+  return result;
 });
+
+export const publicProcedure = t.procedure.use(domainErrorMiddleware);
 
 // Procedure that requires authentication
 export const protectedProcedure = publicProcedure
