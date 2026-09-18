@@ -5,4 +5,6 @@ export const UpdateFeedbackStatusSchema = z.object({
   status: z.enum(["new", "in_progress", "resolved", "closed"]),
 });
 
-export type UpdateFeedbackStatusSchemaType = z.infer<typeof UpdateFeedbackStatusSchema>;
+export type UpdateFeedbackStatusInput = z.infer<
+  typeof UpdateFeedbackStatusSchema
+>;

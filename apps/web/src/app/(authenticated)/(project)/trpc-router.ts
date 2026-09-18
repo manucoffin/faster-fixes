@@ -1,10 +1,4 @@
-import { createIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-issue-for-feedback.trpc.mutation";
-import { createJiraIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-jira-issue-for-feedback.trpc.mutation";
-import { createLinearIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-linear-issue-for-feedback.trpc.mutation";
-import { updateFeedbackAssignee } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-assignee.trpc.mutation";
-import { updateFeedbackStatus } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-status.trpc.mutation";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
-import { getFeedbackDiagnostics } from "./inbox/_features/feedback-panel/get-feedback-diagnostics.trpc.query";
 import { createReviewer } from "./reviewers/_features/create/create-reviewer.trpc.mutation";
 import { deleteReviewer } from "./reviewers/_features/delete/delete-reviewer.trpc.mutation";
 import { getReviewers } from "./reviewers/_features/get-reviewers.trpc.query";
@@ -38,16 +32,28 @@ import { updateProjectSlackLink } from "./settings/_features/slack/update-link/u
 import { updateProject } from "./settings/_features/update/update-project.trpc.mutation";
 import { listProjects } from "./_services/list-projects";
 import { ListProjectsSchema } from "./_services/list-projects.schema";
+import { createGitHubIssueForFeedback } from "./inbox/_services/create-github-issue-for-feedback";
+import { CreateGitHubIssueForFeedbackSchema } from "./inbox/_services/create-github-issue-for-feedback.schema";
+import { createJiraIssueForFeedback } from "./inbox/_services/create-jira-issue-for-feedback";
+import { CreateJiraIssueForFeedbackSchema } from "./inbox/_services/create-jira-issue-for-feedback.schema";
+import { createLinearIssueForFeedback } from "./inbox/_services/create-linear-issue-for-feedback";
+import { CreateLinearIssueForFeedbackSchema } from "./inbox/_services/create-linear-issue-for-feedback.schema";
 import { deleteFeedback } from "./inbox/_services/delete-feedback";
 import { DeleteFeedbackSchema } from "./inbox/_services/delete-feedback.schema";
 import { deleteFeedbacks } from "./inbox/_services/delete-feedbacks";
 import { DeleteFeedbacksSchema } from "./inbox/_services/delete-feedbacks.schema";
+import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnostics";
+import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
 import { listArchivedFeedback } from "./inbox/_services/list-archived-feedback";
 import { ListArchivedFeedbackSchema } from "./inbox/_services/list-archived-feedback.schema";
 import { listDistinctPageUrls } from "./inbox/_services/list-distinct-page-urls";
 import { ListDistinctPageUrlsSchema } from "./inbox/_services/list-distinct-page-urls.schema";
 import { listFeedback } from "./inbox/_services/list-feedback";
 import { ListFeedbackSchema } from "./inbox/_services/list-feedback.schema";
+import { updateFeedbackAssignee } from "./inbox/_services/update-feedback-assignee";
+import { UpdateFeedbackAssigneeSchema } from "./inbox/_services/update-feedback-assignee.schema";
+import { updateFeedbackStatus } from "./inbox/_services/update-feedback-status";
+import { UpdateFeedbackStatusSchema } from "./inbox/_services/update-feedback-status.schema";
 import { updateFeedbacksStatus } from "./inbox/_services/update-feedbacks-status";
 import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-status.schema";
 
@@ -101,9 +107,33 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    getDiagnostics: getFeedbackDiagnostics,
-    updateStatus: updateFeedbackStatus,
-    updateAssignee: updateFeedbackAssignee,
+    getDiagnostics: protectedProcedure
+      .input(GetFeedbackDiagnosticsSchema)
+      .query(({ input, ctx }) =>
+        getFeedbackDiagnostics({
+          projectId: input.projectId,
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateStatus: protectedProcedure
+      .input(UpdateFeedbackStatusSchema)
+      .mutation(({ input, ctx }) =>
+        updateFeedbackStatus({
+          feedbackId: input.feedbackId,
+          status: input.status,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateAssignee: protectedProcedure
+      .input(UpdateFeedbackAssigneeSchema)
+      .mutation(({ input, ctx }) =>
+        updateFeedbackAssignee({
+          feedbackId: input.feedbackId,
+          assigneeId: input.assigneeId,
+          userId: ctx.session.user.id,
+        }),
+      ),
     // The plural services drop the entity the router already carries, so the
     // key keeps only the `Many` that tells the two apart.
     updateManyStatus: protectedProcedure
@@ -131,9 +161,32 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    createIssue: createIssueForFeedback,
-    createLinearIssue: createLinearIssueForFeedback,
-    createJiraIssue: createJiraIssueForFeedback,
+    // The three tracker keys are symmetric now that the GitHub one names its
+    // tracker like its two siblings.
+    createGitHubIssue: protectedProcedure
+      .input(CreateGitHubIssueForFeedbackSchema)
+      .mutation(({ input, ctx }) =>
+        createGitHubIssueForFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    createLinearIssue: protectedProcedure
+      .input(CreateLinearIssueForFeedbackSchema)
+      .mutation(({ input, ctx }) =>
+        createLinearIssueForFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    createJiraIssue: protectedProcedure
+      .input(CreateJiraIssueForFeedbackSchema)
+      .mutation(({ input, ctx }) =>
+        createJiraIssueForFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   github: router({
     getLink: getProjectGitHubLink,

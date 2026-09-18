@@ -12,8 +12,7 @@ export function useOrgMembers() {
   const { data: activeMember } = useActiveMember();
 
   const members: OrgMember[] = React.useMemo(() => {
-    const raw = (activeOrg as Record<string, unknown> | undefined)
-      ?.members as
+    const raw = (activeOrg as Record<string, unknown> | undefined)?.members as
       | Array<{
           id: string;
           userId: string;

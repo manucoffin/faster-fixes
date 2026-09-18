@@ -2266,6 +2266,160 @@ toolbar and a permanent delete from the archive are on the QA checklist of issue
 **Left for the maintainer.** The now-empty `(project)/_utils/` folder: the sandbox refuses `rmdir`,
 as the account and organization entries record for their own scopes.
 
+### `(authenticated)/(project)`, part 2: inbox Feedback panel (issue #75)
+
+Commit: `PENDING`. The six operations of the Feedback panel become services, the shared inbox
+mutations hook becomes a feature of its own, and the single-consumer org-members hook joins the
+feature that uses it. The scope is still **not** locked: issues #76 to #79 own the remaining 31
+operations and the `migratedScopes` entry.
+
+**Files moved.** Ten modules with `git mv`, plus four new schema files and two new test files. No
+file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation                 | Before                                                                      | After                                                          |
+| ------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| GitHub issue creation     | `inbox/_features/feedback-panel/create-issue-for-feedback.trpc.mutation.ts` | `inbox/_services/create-github-issue-for-feedback.ts`          |
+| Jira issue creation       | `…/create-jira-issue-for-feedback.trpc.mutation.ts`                         | `inbox/_services/create-jira-issue-for-feedback.ts`            |
+| Linear issue creation     | `…/create-linear-issue-for-feedback.trpc.mutation.ts`                       | `inbox/_services/create-linear-issue-for-feedback.ts`          |
+| Feedback diagnostics      | `…/get-feedback-diagnostics.trpc.query.ts`                                  | `inbox/_services/get-feedback-diagnostics.ts`                  |
+| Assignee update           | `…/update-feedback-assignee.trpc.mutation.ts`                               | `inbox/_services/update-feedback-assignee.ts`                  |
+| Assignee update schema    | `…/update-feedback-assignee.schema.ts`                                      | `inbox/_services/update-feedback-assignee.schema.ts`           |
+| Status update             | `…/update-feedback-status.trpc.mutation.ts`                                 | `inbox/_services/update-feedback-status.ts`                    |
+| Status update schema      | `…/update-feedback-status.schema.ts`                                        | `inbox/_services/update-feedback-status.schema.ts`             |
+| Shared mutations hook     | `inbox/_features/use-feedback-mutations.ts`                                 | `inbox/_features/feedback-mutations/use-feedback-mutations.ts` |
+| Organization members hook | `inbox/_features/use-org-members.ts`                                        | `inbox/_features/feedback-panel/use-org-members.ts`            |
+
+**The two hooks, placed by the number of their consumers.** `useFeedbackMutations` is read by three
+features (`feedback-panel/status-select`, `feedback-panel/assignee-select`, `kanban/kanban-board`),
+so it becomes a feature of its own, `_features/feedback-mutations/`, exactly as the plan gate hook
+became `subscription/plan-gate/`. No `_hooks/` bucket is created: a hook is a capability, and a
+capability is a feature. `useOrgMembers` has a single consumer, `feedback-panel/assignee-select`, so
+the same rule puts it inside that feature rather than in a folder of its own; it was only sitting
+next to its sibling because the flat `_features/` root was the pre-migration home of both. It is not
+named by the ticket, but leaving one bare hook flat in `_features/` while its neighbour moves is the
+half-converted folder the standards warn about.
+
+**Renamed services.** One. The other five keep the name they had as a procedure.
+
+| Before                   | After                          | Why                                                                                                           |
+| ------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `createIssueForFeedback` | `createGitHubIssueForFeedback` | Its two siblings name their tracker; the unqualified one read as "the" issue tracker, which is no longer true |
+
+**Renamed procedure keys.** One, under `projects.feedback`.
+
+| Before        | After               | Call sites updated                                             |
+| ------------- | ------------------- | -------------------------------------------------------------- |
+| `createIssue` | `createGitHubIssue` | `inbox/_features/feedback-panel/github-issue-badge.client.tsx` |
+
+`getDiagnostics`, `updateStatus` and `updateAssignee` keep their key: each drops the `Feedback` the
+router already carries, which is what the key already said. `createLinearIssue` and `createJiraIssue`
+keep theirs for the same reason. The published packages call the `/api/v1/*` REST surface and never
+tRPC, so the rename cannot reach them.
+
+**Authorization, all of it in the services.** Every denial needs a loaded row, so none of them could
+stay at the transport edge. `protectedProcedure` answers identity alone and no `UNAUTHORIZED`, rate
+limit or plan limit is involved.
+
+| Denial                                                       | Where it lives now                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| "Feedback not found."                                        | `NotFoundError` in all six services                                                   |
+| "Project not found."                                         | `NotFoundError` in `getFeedbackDiagnostics`, which loads the Project first            |
+| "Access denied."                                             | `ForbiddenError` in all six, after the membership lookup                              |
+| "A GitHub/Jira/Linear issue already exists …"                | `ConflictError` in the three tracker services                                         |
+| "No GitHub repository / Jira project / Linear team linked …" | `BadRequestError` in the three tracker services                                       |
+| "Member not found."                                          | `NotFoundError` in `updateFeedbackAssignee`, for an assignee outside the Organization |
+
+The check order of each service is unchanged, so a Feedback that is both already mirrored and in a
+project with no link still reports the conflict first, as it did before.
+
+**Reclassified errors.** None. The ticket anticipates expected tracker failures dressed as
+`INTERNAL_SERVER_ERROR`, and the segment holds none: the three tracker operations only queue an
+Inngest event, and the failures they report (already mirrored, no link, unknown Feedback) were
+already `CONFLICT`, `BAD_REQUEST` and `NOT_FOUND`. The tracker API calls themselves live in the
+Inngest functions under `src/server/`, outside this step's perimeter, so their error handling is
+untouched. Every `TRPCError` became the `DomainError` subclass of the same code with the same
+message, so no toast changes wording.
+
+**Nothing reachable from an Inngest function throws a `DomainError`.** The three tracker services and
+`updateFeedbackStatus` are senders: they publish `feedback/integration-issue-requested` and
+`feedback/status-changed` and are imported by nothing under `src/server/inngest/`. The step bodies
+that consume those events are untouched.
+
+**Services holding a database client.** All six, since each holds at least one authorization check
+and one domain error branch. None is a pass-through read. No service receives the tRPC context or the
+session: the router passes `userId` and the parsed input as plain values, and each service imports
+`prisma` directly instead of reading it from `ctx`.
+
+**Output types.** The five `inferProcedureOutput` aliases of the segment are gone.
+`getFeedbackDiagnostics`, the one read, exports `GetFeedbackDiagnosticsOutput` derived from its own
+function. The four write aliases (`CreateIssueForFeedbackOutput`, `CreateJiraIssueForFeedbackOutput`,
+`CreateLinearIssueForFeedbackOutput`, `UpdateFeedbackStatusOutput`) are dropped rather than replaced:
+no file imported any of them, and the same call was made for `BulkUpdateFeedbackStatusOutput` in
+part 1.
+
+**Schemas.** Four new pure-Zod schema files, two moved. The three tracker operations and the
+diagnostics read parsed an inline `z.object` in the procedure and now own a `*.schema.ts` next to
+their service. `UpdateFeedbackAssigneeSchemaType` and `UpdateFeedbackStatusSchemaType` became
+`UpdateFeedbackAssigneeInput` and `UpdateFeedbackStatusInput`, which is the whole 19 to 15 burn-down
+of `require-schema-conventions` below: each of those two files was reported twice, once for the alias
+and once for exporting no `Input` type at all. The hand-written `z.enum(["new", "in_progress",
+"resolved", "closed"])` of the status schema is kept as it is, matching `UpdateFeedbacksStatusSchema`
+from part 1; `Feedback.status` is a string column, not a Prisma enum, so there is no generated enum
+to import.
+
+**Tests.** Two colocated files, ten cases, all driven through the trailing database client with no
+tRPC context built. `create-github-issue-for-feedback.test.ts` (5) pins the not-found, non-member,
+already-mirrored and no-repository-linked denials and the queued event for a member caller, with
+`inngest.send` mocked and asserted. `update-feedback-assignee.test.ts` (5) pins the two Feedback
+denials, the unknown assignee, the write itself and the fact that clearing an assignee makes no
+second member lookup. Between them they cover the two shapes of this segment: the four-branch tracker
+guard and the second, nested lookup.
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| 1 role suffixes                      | 31 files, down from 37, exactly the operations issues #76 to #79 own          |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` (#78) |
+| 3 `_constants/` inside a scope       | nothing                                                                       |
+| 4 `*.types.ts`                       | nothing                                                                       |
+| 5 routers in a bucket or a feature   | nothing                                                                       |
+| 6 tRPC imported by a service         | nothing                                                                       |
+| 7 `TRPCError` in a service           | nothing                                                                       |
+| 8 `'use server'` in a service/router | nothing: the six moved modules all dropped the directive                      |
+| 9 Prisma outside a service           | 30 files, down from 36, the same set as check 1 minus the scope router        |
+| 10 `inferProcedureOutput`            | 31 files, down from 36, all owned by the later parts                          |
+
+The old-bucket check also answers the ticket's "no `_hooks/` bucket exists": the scope has none, and
+the two hooks moved into features rather than into one.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 83 app
+tests (10 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **104 problems, 0
+errors, 104 warnings** (88 `no-raw-tailwind-colors` / 15 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 4 from the 108 of part 1. `npx next build` compiles and still
+lists `/inbox`, `/reviewers` and `/settings`; `pnpm build` is refused by the sandbox, as the earlier
+entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                      | Result                                                               |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `GET …feedback.getDiagnostics`                                             | `401 UNAUTHORIZED`, the key resolves and `protectedProcedure` guards |
+| `POST …feedback.createGitHubIssue`, `createLinearIssue`, `createJiraIssue` | `401 UNAUTHORIZED`, same                                             |
+| `POST …feedback.updateStatus`, `feedback.updateAssignee`                   | `401 UNAUTHORIZED`, same                                             |
+| `GET …feedback.createIssue`                                                | `404 No procedure found on path`, the old key is gone                |
+| `GET …feedback.createGitHubIssue`                                          | `405` mutation-over-GET, so the key is mounted as a mutation         |
+| `GET /api/v1/agent/feedbacks` with no bearer token                         | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged      |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+user can sign in and no Project can be rendered, and no GitHub, Jira, Linear or Slack Installation
+exists to mirror into. Creating an issue on each linked tracker, changing the assignee and the status
+from the panel and from the kanban board, and opening the diagnostics modal are on the QA checklist
+of issue #75.
+
+**Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
+is still there: the sandbox refuses `rmdir`.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.

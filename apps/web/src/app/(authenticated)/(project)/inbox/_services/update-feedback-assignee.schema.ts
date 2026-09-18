@@ -5,4 +5,6 @@ export const UpdateFeedbackAssigneeSchema = z.object({
   assigneeId: z.string().nullable(),
 });
 
-export type UpdateFeedbackAssigneeSchemaType = z.infer<typeof UpdateFeedbackAssigneeSchema>;
+export type UpdateFeedbackAssigneeInput = z.infer<
+  typeof UpdateFeedbackAssigneeSchema
+>;

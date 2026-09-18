@@ -1,6 +1,6 @@
 "use client";
 
-import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
+import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/feedback-mutations/use-feedback-mutations";
 import {
   closestCorners,
   DndContext,
