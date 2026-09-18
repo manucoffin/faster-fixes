@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";

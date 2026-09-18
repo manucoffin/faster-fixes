@@ -1,11 +1,8 @@
 import { auth } from "@/server/auth";
 import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
-import { headers } from "next/headers";
 
-export async function getUserActiveSubscription() {
-  const activeOrganization = await auth.api.getFullOrganization({
-    headers: await headers(),
-  });
+export async function getActiveSubscription({ headers }: { headers: Headers }) {
+  const activeOrganization = await auth.api.getFullOrganization({ headers });
 
   if (!activeOrganization) return null;
 
@@ -14,7 +11,7 @@ export async function getUserActiveSubscription() {
       query: {
         referenceId: activeOrganization.id,
       },
-      headers: await headers(),
+      headers,
     });
 
     // get the active subscription
@@ -30,3 +27,7 @@ export async function getUserActiveSubscription() {
     return null;
   }
 }
+
+export type GetActiveSubscriptionOutput = Awaited<
+  ReturnType<typeof getActiveSubscription>
+>;

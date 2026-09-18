@@ -1,2 +1,2 @@
-// Public surface of the subscription domain. Empty until another domain imports from it.
-export {};
+// Public surface of the subscription domain.
+export { usePlanGate } from "./plan-gate/use-plan-gate";

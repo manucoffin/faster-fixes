@@ -67,6 +67,7 @@ export const migratedScopes = [
   "(auth)",
   "_domains/auth",
   "_domains/organization",
+  "_domains/subscription",
   "_domains/user",
 ];
 

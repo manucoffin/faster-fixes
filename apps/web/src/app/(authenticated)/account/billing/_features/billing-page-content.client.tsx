@@ -2,7 +2,7 @@
 
 import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { PlanSelection } from "@/app/_domains/subscription/upgrade-subscription/plan-selection.client";
-import { usePlanGate } from "@/app/_domains/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription";
 import { CurrentPlanCard } from "./current-plan/current-plan-card.client";
 import { PastInvoicesCard } from "./past-invoices/past-invoices-card.client";
 import { SubscriptionStatusBanner } from "./subscription-status/subscription-status-banner.client";

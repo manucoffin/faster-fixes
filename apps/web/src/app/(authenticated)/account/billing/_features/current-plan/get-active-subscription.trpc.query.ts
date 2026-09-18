@@ -1,11 +1,14 @@
-import { getUserActiveSubscription } from "@/app/_domains/subscription/get-user-active-subscription";
+import { getActiveSubscription as getActiveSubscriptionForSession } from "@/app/_domains/subscription/_services/get-active-subscription";
 import { protectedProcedure } from "@/server/trpc/trpc";
+import { headers } from "next/headers";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 
 export const getActiveSubscription = protectedProcedure.query(async () => {
   try {
     // Fetch active subscriptions for the organization using better-auth Stripe plugin
-    const activeSubscription = await getUserActiveSubscription();
+    const activeSubscription = await getActiveSubscriptionForSession({
+      headers: await headers(),
+    });
 
     return activeSubscription;
   } catch (error) {

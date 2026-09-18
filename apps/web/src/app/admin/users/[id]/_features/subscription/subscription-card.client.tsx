@@ -1,6 +1,6 @@
 "use client";
 
-import { SubscriptionStatusTranslation } from "@/app/_domains/subscription/_constants/translations";
+import { getSubscriptionStatusLabel } from "@/app/_domains/subscription/_helpers/get-subscription-status-label";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
@@ -66,9 +66,7 @@ export function SubscriptionCard({ userId }: SubscriptionCardProps) {
                   }
                 >
                   {subscription.status &&
-                    SubscriptionStatusTranslation[
-                      subscription.status as keyof typeof SubscriptionStatusTranslation
-                    ]}
+                    getSubscriptionStatusLabel(subscription.status)}
                 </Badge>
               </div>
               {subscription.periodEnd && (
