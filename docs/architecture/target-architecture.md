@@ -69,17 +69,17 @@ packages/
 
 ### `apps/web/src`
 
-| Path                                                                    | Purpose                                                                                                                                             |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/`                                                                  | The Next.js App Router tree **and** the home of all application code. Domains live inside it.                                                       |
-| `app/_domains/`                                                         | All domain-bound code, one folder per domain.                                                                                                       |
-| `app/_components/`, `app/_hooks/`, `app/_providers/`, `app/_constants/` | Domain-**agnostic** UI, hooks, providers, constants. Candidates for extraction into packages, so they must carry no domain knowledge.               |
-| `app/(group)/...`, `app/admin/`, `app/api/`                             | The route tier: the composition layer.                                                                                                              |
-| `server/`                                                               | Cross-cutting **infrastructure only**: `trpc/`, `errors/`, `auth/`, `inngest/`, `cache/`, thin SDK adapters (`stripe/`, ...). No domain logic.      |
-| `lib/`                                                                  | Infra **adapters** with a client or provider flavour: `trpc/` (client, provider, `match-query-status.ts`), `mailer/`, `auth/` (client), `routing/`. |
-| `utils/`                                                                | Domain-agnostic pure utilities grouped by kind (`dates/`, `string/`, `url/`, ...).                                                                  |
-| `config/`, `types/`, `styles/`                                          | Feature flags and static config, global TS types, global CSS.                                                                                       |
-| `content/`                                                              | `[if present]` MDX or static content sources.                                                                                                       |
+| Path                                                                    | Purpose                                                                                                                                        |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`                                                                  | The Next.js App Router tree **and** the home of all application code. Domains live inside it.                                                  |
+| `app/_domains/`                                                         | All domain-bound code, one folder per domain.                                                                                                  |
+| `app/_components/`, `app/_hooks/`, `app/_providers/`, `app/_constants/` | Domain-**agnostic** UI, hooks, providers, constants. Candidates for extraction into packages, so they must carry no domain knowledge.          |
+| `app/(group)/...`, `app/admin/`, `app/api/`                             | The route tier: the composition layer.                                                                                                         |
+| `server/`                                                               | Cross-cutting **infrastructure only**: `trpc/`, `errors/`, `auth/`, `inngest/`, `cache/`, thin SDK adapters (`stripe/`, ...). No domain logic. |
+| `lib/`                                                                  | Infra **adapters** with a client or provider flavour: `trpc/` (client, provider), `mailer/`, `auth/` (client), `routing/`.                     |
+| `utils/`                                                                | Domain-agnostic pure utilities grouped by kind (`dates/`, `string/`, `url/`, `tanstack-query/` with `match-query-status.ts`, ...).             |
+| `config/`, `types/`, `styles/`                                          | Feature flags and static config, global TS types, global CSS.                                                                                  |
+| `content/`                                                              | `[if present]` MDX or static content sources.                                                                                                  |
 
 Everything domain-bound lives under `app/_domains/` or inside a route. Nothing domain-bound lives at `src/` root folders.
 

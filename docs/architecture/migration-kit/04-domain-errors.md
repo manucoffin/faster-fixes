@@ -78,7 +78,7 @@ export function rethrowDomainErrorsAsNonRetriable(error: unknown): never {
 
 - No client module imports `src/server/errors/*`. Client code branches on `error.data.code` (tRPC), never on `instanceof`.
 - **Mutations** toast `error.message`.
-- **Queries** render the `Errored` branch of `matchQueryStatus` (copy `src/lib/trpc/match-query-status.ts` from Tobalgo if no equivalent exists) with `error.message`, never a stack.
+- **Queries** render the `Errored` branch of `matchQueryStatus` (`src/utils/tanstack-query/match-query-status.ts`) with `error.message`, never a stack.
 - **Forms** show Zod field errors inline through the resolver. A `DomainError` from the mutation still toasts.
 - **Boundaries**: `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`, `src/app/forbidden.tsx`, `src/app/unauthorized.tsx` exist. All render one shared `ErrorScreen` component from root `_components/`, pass fixed copy, log the raw error in an effect, and never render `error.message` or `digest`. `global-error.tsx` declares its own `<html>` and `<body>` and imports the global stylesheet.
 
