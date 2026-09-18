@@ -48,7 +48,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
-import { SubscriptionInputs, SubscriptionSchema } from "./subscription.schema";
+import {
+  CreateSubscriptionInput,
+  CreateSubscriptionSchema,
+} from "@/app/admin/users/_services/create-subscription.schema";
 
 interface SubscriptionCreateDialogProps {
   userId: string;
@@ -76,15 +79,13 @@ export function SubscriptionCreateDialog({
         );
       },
       onError: (error) => {
-        toast.error(
-          error.message || "Failed to create subscription",
-        );
+        toast.error(error.message || "Failed to create subscription");
       },
     }),
   );
 
-  const form = useForm<SubscriptionInputs>({
-    resolver: zodResolver(SubscriptionSchema),
+  const form = useForm<CreateSubscriptionInput>({
+    resolver: zodResolver(CreateSubscriptionSchema),
     defaultValues: {
       organizationId: "",
       plan: subscriptionPlans[0]?.name as SubscriptionPlanName,
@@ -100,7 +101,7 @@ export function SubscriptionCreateDialog({
     mode: "onChange",
   });
 
-  const onSubmit = async (data: SubscriptionInputs) => {
+  const onSubmit = async (data: CreateSubscriptionInput) => {
     await createMutation.mutateAsync(data);
   };
 
@@ -397,7 +398,7 @@ export function SubscriptionCreateDialog({
                     <FormLabel>Stripe customer ID</FormLabel>
                     <FormControl>
                       <input
-                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder="Enter Stripe customer ID"
                         {...field}
                       />
@@ -416,7 +417,7 @@ export function SubscriptionCreateDialog({
                     <FormLabel>Stripe subscription ID</FormLabel>
                     <FormControl>
                       <input
-                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder="Enter Stripe subscription ID"
                         {...field}
                       />

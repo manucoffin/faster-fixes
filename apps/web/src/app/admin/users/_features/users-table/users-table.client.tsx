@@ -10,11 +10,11 @@ import { Badge } from "@workspace/ui/components/badge";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
-import { GetPaginatedUsersOutput } from "./get-paginated-users";
-import { UsersTableActionDropdown } from "./users-table-action-dropdown";
+import type { ListUsersOutput } from "@/app/admin/users/_services/list-users";
+import { UsersTableActionDropdown } from "./users-table-action-dropdown.client";
 
 // Define the columns for the Users table
-const columns: ColumnDef<GetPaginatedUsersOutput["users"][number]>[] = [
+const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -170,7 +170,7 @@ export const UsersTable = () => {
 
   // Fetch export data separately (will be fetched on demand by the export button)
   const { data: exportData } = useQuery(
-    trpc.admin.users.export.queryOptions({
+    trpc.admin.users.listForExport.queryOptions({
       search,
     }),
   );

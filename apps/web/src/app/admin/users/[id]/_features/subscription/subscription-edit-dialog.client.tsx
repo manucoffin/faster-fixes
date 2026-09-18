@@ -48,11 +48,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
-import { GetSubscriptionOutput } from "./get-subscription.trpc.query";
+import type { GetSubscriptionOutput } from "@/app/admin/users/_services/get-subscription";
 import {
-  UpdateSubscriptionInputs,
+  UpdateSubscriptionInput,
   UpdateSubscriptionSchema,
-} from "./subscription.schema";
+} from "@/app/admin/users/_services/update-subscription.schema";
 
 interface SubscriptionEditDialogProps {
   userId: string;
@@ -81,14 +81,12 @@ export function SubscriptionEditDialog({
         );
       },
       onError: (error) => {
-        toast.error(
-          error.message || "Failed to update subscription",
-        );
+        toast.error(error.message || "Failed to update subscription");
       },
     }),
   );
 
-  const form = useForm<UpdateSubscriptionInputs>({
+  const form = useForm<UpdateSubscriptionInput>({
     resolver: zodResolver(UpdateSubscriptionSchema),
     defaultValues: {
       id: subscription?.id,
@@ -120,7 +118,7 @@ export function SubscriptionEditDialog({
     mode: "onChange",
   });
 
-  const onSubmit = async (data: UpdateSubscriptionInputs) => {
+  const onSubmit = async (data: UpdateSubscriptionInput) => {
     if (!data.id) {
       toast.error("Missing subscription ID");
       return;

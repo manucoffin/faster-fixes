@@ -74,12 +74,9 @@ export const migratedScopes = [
   "_domains/subscription",
   "_domains/user",
   "onboarding",
-  {
-    // The admin root (its router) and the dashboard route group are migrated;
-    // `admin/users` is a scope of its own that step 3 has not reached yet.
-    scope: "admin",
-    ignores: ["**/src/app/admin/users/**"],
-  },
+  // The admin root (its router), the dashboard route group and the users scope
+  // are all migrated, so the whole tier is locked without an ignore.
+  "admin",
   {
     // Only the shell tier of the route group is migrated: its four child
     // segments are scopes of their own that step 3 has not reached yet.
@@ -229,6 +226,14 @@ export const nextJsConfig = [
     rules: {
       "local/require-server-action-suffix": "off",
     },
+  },
+  {
+    // The one impure schema of the app suppresses `schema-must-be-pure-zod`
+    // inline while step 5 still owns the plan configuration. That rule is
+    // agent-gated, so outside the gate the directive would be reported as
+    // unused. Delete this block with the suppression when the enums move.
+    files: ["**/src/app/admin/users/_services/create-subscription.schema.ts"],
+    linterOptions: { reportUnusedDisableDirectives: "off" },
   },
   // --- Agent rules (enabled via ESLINT_AGENT_RULES=1) ---
   {

@@ -1,30 +1,41 @@
 import { adminProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
-import { createSubscription } from "./[id]/_features/subscription/create-subscription.trpc.mutation";
-import { getSubscription } from "./[id]/_features/subscription/get-subscription.trpc.query";
-import { updateSubscription } from "./[id]/_features/subscription/update-subscription.trpc.mutation";
-import { getUserOrganizations } from "./[id]/_features/organization-select/get-user-organizations.trpc.query";
-import { getUserEmail } from "./[id]/_features/user-information/email/get-user-email.trpc.query";
-import { toggleEmailVerified } from "./[id]/_features/user-information/email/toggle-email-verified.trpc.mutation";
-import { getAllUsersForExport } from "./_features/users-table/get-all-users-for-export";
-import { getPaginatedUsers } from "./_features/users-table/get-paginated-users";
+import { createSubscription } from "./_services/create-subscription";
+import { CreateSubscriptionSchema } from "./_services/create-subscription.schema";
 import { createUser } from "./_services/create-user";
 import { CreateUserSchema } from "./_services/create-user.schema";
 import { deleteUser } from "./_services/delete-user";
 import { DeleteUserSchema } from "./_services/delete-user.schema";
+import { getSubscription } from "./_services/get-subscription";
+import { GetSubscriptionSchema } from "./_services/get-subscription.schema";
+import { getUserEmail } from "./_services/get-user-email";
+import { GetUserEmailSchema } from "./_services/get-user-email.schema";
 import { impersonateUser } from "./_services/impersonate-user";
 import { ImpersonateUserSchema } from "./_services/impersonate-user.schema";
+import { listUserOrganizations } from "./_services/list-user-organizations";
+import { ListUserOrganizationsSchema } from "./_services/list-user-organizations.schema";
+import { listUsers } from "./_services/list-users";
+import { ListUsersSchema } from "./_services/list-users.schema";
+import { listUsersForExport } from "./_services/list-users-for-export";
+import { ListUsersForExportSchema } from "./_services/list-users-for-export.schema";
 import { requestPasswordReset } from "./_services/request-password-reset";
 import { RequestPasswordResetSchema } from "./_services/request-password-reset.schema";
 import { revokeUserSessions } from "./_services/revoke-user-sessions";
 import { RevokeUserSessionsSchema } from "./_services/revoke-user-sessions.schema";
+import { toggleEmailVerified } from "./_services/toggle-email-verified";
+import { ToggleEmailVerifiedSchema } from "./_services/toggle-email-verified.schema";
+import { updateSubscription } from "./_services/update-subscription";
+import { UpdateSubscriptionSchema } from "./_services/update-subscription.schema";
 
 // The admin role check stays on `adminProcedure`: it is answerable from the
-// context alone, so no service of this scope repeats it. The operations still
-// imported from `_features/` are migrated by issue #67.
+// context alone, so no service of this scope repeats it.
 export const usersRouter = router({
-  list: getPaginatedUsers,
-  export: getAllUsersForExport,
+  list: adminProcedure
+    .input(ListUsersSchema)
+    .query(({ input }) => listUsers(input)),
+  listForExport: adminProcedure
+    .input(ListUsersForExportSchema)
+    .query(({ input }) => listUsersForExport(input)),
   create: adminProcedure
     .input(CreateUserSchema)
     .mutation(({ input }) => createUser(input)),
@@ -37,7 +48,9 @@ export const usersRouter = router({
       impersonateUser({ userId: input.userId, headers: await headers() }),
     ),
   organizations: router({
-    list: getUserOrganizations,
+    list: adminProcedure
+      .input(ListUserOrganizationsSchema)
+      .query(({ input }) => listUserOrganizations({ userId: input.userId })),
   }),
   sessions: router({
     revoke: adminProcedure
@@ -57,12 +70,22 @@ export const usersRouter = router({
       ),
   }),
   email: router({
-    get: getUserEmail,
-    toggleVerified: toggleEmailVerified,
+    get: adminProcedure
+      .input(GetUserEmailSchema)
+      .query(({ input }) => getUserEmail({ userId: input.userId })),
+    toggleVerified: adminProcedure
+      .input(ToggleEmailVerifiedSchema)
+      .mutation(({ input }) => toggleEmailVerified(input)),
   }),
   subscription: router({
-    get: getSubscription,
-    create: createSubscription,
-    update: updateSubscription,
+    get: adminProcedure
+      .input(GetSubscriptionSchema)
+      .query(({ input }) => getSubscription({ userId: input.userId })),
+    create: adminProcedure
+      .input(CreateSubscriptionSchema)
+      .mutation(({ input }) => createSubscription(input)),
+    update: adminProcedure
+      .input(UpdateSubscriptionSchema)
+      .mutation(({ input }) => updateSubscription(input)),
   }),
 });

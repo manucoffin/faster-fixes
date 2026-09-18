@@ -1,10 +1,14 @@
+/* eslint-disable local/schema-must-be-pure-zod -- The plan names and statuses
+   live in the server plan configuration, which migration step 5 relocates out
+   of `@/server`. Until then this is the one impure schema of the app: mirroring
+   the enums by hand would let them drift from the source of truth. */
 import {
   SubscriptionPlanName,
   SubscriptionStatus,
 } from "@/server/auth/config/subscription-plans";
 import { z } from "zod";
 
-export const SubscriptionSchema = z.object({
+export const CreateSubscriptionSchema = z.object({
   organizationId: z.string().min(1),
   plan: z.enum(SubscriptionPlanName),
   status: z.enum(SubscriptionStatus),
@@ -17,11 +21,4 @@ export const SubscriptionSchema = z.object({
   stripeSubscriptionId: z.string().optional(),
 });
 
-export type SubscriptionInputs = z.infer<typeof SubscriptionSchema>;
-
-export const UpdateSubscriptionSchema = SubscriptionSchema.omit({
-  stripeCustomerId: true,
-  stripeSubscriptionId: true,
-}).extend({ id: z.string().min(1) });
-
-export type UpdateSubscriptionInputs = z.infer<typeof UpdateSubscriptionSchema>;
+export type CreateSubscriptionInput = z.infer<typeof CreateSubscriptionSchema>;

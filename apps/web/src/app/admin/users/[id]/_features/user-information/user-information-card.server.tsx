@@ -1,7 +1,7 @@
 import { getUserDisplayName } from "@/app/_domains/user/_helpers/get-user-display-name";
 import { Card, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { EmailInformation } from "./email/email-information.client";
-import { getUserInformation } from "./get-user-information.server.query";
+import { getUserInformation } from "@/app/admin/users/_services/get-user-information";
 
 interface UserInformationCardProps {
   userId: string;
@@ -10,7 +10,7 @@ interface UserInformationCardProps {
 export async function UserInformationCard({
   userId,
 }: UserInformationCardProps) {
-  const user = await getUserInformation(userId);
+  const user = await getUserInformation({ userId });
 
   if (!user) {
     return null;

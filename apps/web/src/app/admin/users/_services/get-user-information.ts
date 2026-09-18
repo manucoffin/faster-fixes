@@ -1,6 +1,6 @@
 import { prisma } from "@workspace/db";
 
-export async function getUserInformation(userId: string) {
+export async function getUserInformation({ userId }: { userId: string }) {
   return await prisma.user.findFirst({
     where: { id: userId },
     select: {
