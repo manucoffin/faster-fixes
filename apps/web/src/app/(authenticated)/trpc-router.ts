@@ -1,4 +1,4 @@
-import { projectsRouter } from "@/app/(authenticated)/(project)/_utils/trpc-router";
+import { projectsRouter } from "@/app/(authenticated)/(project)/trpc-router";
 import { accountRouter } from "@/app/(authenticated)/account/trpc-router";
 import { integrationsRouter } from "@/app/(authenticated)/integrations/trpc-router";
 import { organizationRouter } from "@/app/(authenticated)/organization/trpc-router";

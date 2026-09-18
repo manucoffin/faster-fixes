@@ -48,7 +48,7 @@ export function InboxTabs() {
   );
 
   const pageUrlsQuery = useQuery(
-    trpc.authenticated.projects.feedback.distinctPageUrls.queryOptions({
+    trpc.authenticated.projects.feedback.listDistinctPageUrls.queryOptions({
       projectId,
     }),
   );

@@ -14,12 +14,12 @@ import {
 } from "@dnd-kit/core";
 import * as React from "react";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCardOverlay } from "./kanban-card.client";
 import { KanbanColumnBody, KanbanColumnHeader } from "./kanban-column.client";
 import { KanbanMobile } from "./kanban-mobile.client";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanBoardProps = {
   feedback: FeedbackItem[];
@@ -168,7 +168,7 @@ export function KanbanBoard({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {totalCount} {totalCount === 1 ? "item" : "items"}
         </p>
       </div>

@@ -18,8 +18,8 @@ import { formatDistanceToNow } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
-import type { GetArchivedFeedbackOutput } from "./get-archived-feedback.trpc.query";
-import { HardDeleteDialog } from "./hard-delete-dialog.client";
+import type { ListArchivedFeedbackOutput } from "../../_services/list-archived-feedback";
+import { DeleteFeedbackDialog } from "./delete-feedback-dialog.client";
 import {
   Empty,
   EmptyDescription,
@@ -29,7 +29,7 @@ import {
 } from "@workspace/ui/components/empty";
 import { Archive } from "lucide-react";
 
-type ArchivedItem = GetArchivedFeedbackOutput["items"][number];
+type ArchivedItem = ListArchivedFeedbackOutput["items"][number];
 
 export function ArchiveTab() {
   const { activeProject } = useActiveProject();
@@ -60,8 +60,8 @@ export function ArchiveTab() {
     }),
   );
 
-  const hardDeleteMutation = useMutation(
-    trpc.authenticated.projects.feedback.hardDelete.mutationOptions({
+  const deleteMutation = useMutation(
+    trpc.authenticated.projects.feedback.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({
@@ -158,17 +158,17 @@ export function ArchiveTab() {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <HardDeleteDialog
+          <DeleteFeedbackDialog
             count={1}
             onConfirm={() =>
-              hardDeleteMutation.mutate({ feedbackId: row.original.id })
+              deleteMutation.mutate({ feedbackId: row.original.id })
             }
-            disabled={hardDeleteMutation.isPending}
+            disabled={deleteMutation.isPending}
           />
         ),
       },
     ],
-    [hardDeleteMutation],
+    [deleteMutation],
   );
 
   return matchQueryStatus(archiveQuery, {

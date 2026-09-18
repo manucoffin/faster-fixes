@@ -3,9 +3,9 @@
 import { formatFeedbackAsMarkdown } from "@/app/_domains/feedback/format-feedback-markdown";
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { useMemo } from "react";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type CopySelectedMarkdownProps = {
   items: FeedbackItem[];

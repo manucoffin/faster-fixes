@@ -9,10 +9,10 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import * as React from "react";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanMobileProps = {
   columns: readonly { id: string; title: string }[];
@@ -74,7 +74,7 @@ export function KanbanMobile({
                 }
                 onCheckedChange={() => onToggleSelectAll(col.id, itemIds)}
               />
-              <span className="text-muted-foreground text-xs">Select all</span>
+              <span className="text-xs text-muted-foreground">Select all</span>
             </div>
 
             {toolbar}
@@ -82,7 +82,7 @@ export function KanbanMobile({
             <DndContext>
               <div className="flex flex-col gap-2">
                 {items.length === 0 ? (
-                  <div className="text-muted-foreground py-8 text-center text-sm">
+                  <div className="py-8 text-center text-sm text-muted-foreground">
                     No items
                   </div>
                 ) : (

@@ -1,4 +1,4 @@
-import { GetFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_features/get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_services/list-feedback";
 import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +22,7 @@ export function useFeedbackMutations() {
 
         queryClient.setQueryData(
           feedbackQueryKey,
-          (old: GetFeedbackOutput | undefined) =>
+          (old: ListFeedbackOutput | undefined) =>
             old?.map((f) => (f.id === feedbackId ? { ...f, status } : f)),
         );
 
@@ -41,7 +41,7 @@ export function useFeedbackMutations() {
   );
 
   const bulkUpdateStatus = useMutation(
-    trpc.authenticated.projects.feedback.bulkUpdateStatus.mutationOptions({
+    trpc.authenticated.projects.feedback.updateManyStatus.mutationOptions({
       onMutate: async ({ feedbackIds, status }) => {
         await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
         const previous = queryClient.getQueryData(feedbackQueryKey);
@@ -49,7 +49,7 @@ export function useFeedbackMutations() {
 
         queryClient.setQueryData(
           feedbackQueryKey,
-          (old: GetFeedbackOutput | undefined) =>
+          (old: ListFeedbackOutput | undefined) =>
             old?.map((f) => (idSet.has(f.id) ? { ...f, status } : f)),
         );
 

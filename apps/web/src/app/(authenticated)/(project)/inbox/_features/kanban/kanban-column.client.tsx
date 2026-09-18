@@ -4,10 +4,10 @@ import { useDroppable } from "@dnd-kit/core";
 import { Badge } from "@workspace/ui/components/badge";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanColumnHeaderProps = {
   id: string;
@@ -70,7 +70,7 @@ export function KanbanColumnBody({
       )}
     >
       {items.length === 0 ? (
-        <div className="text-muted-foreground py-8 text-center text-sm">
+        <div className="py-8 text-center text-sm text-muted-foreground">
           No items
         </div>
       ) : (

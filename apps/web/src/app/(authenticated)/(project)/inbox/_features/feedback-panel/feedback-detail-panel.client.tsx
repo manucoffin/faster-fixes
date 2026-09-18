@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/sheet";
 import { format, formatDistanceToNow } from "date-fns";
 import { ExternalLink, ImageOff } from "lucide-react";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { AssigneeSelect } from "./assignee-select.client";
 import { CopyFeedbackMarkdown } from "./copy-feedback-markdown.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
@@ -18,7 +18,7 @@ import { StatusSelect } from "./status-select.client";
 import { TrackersSection } from "./trackers-section.client";
 import { ViewDiagnosticsDialog } from "./view-diagnostics-dialog.client";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type FeedbackDetailPanelProps = {
   feedback: FeedbackItem | null;
@@ -74,7 +74,7 @@ export function FeedbackDetailPanel({
               href={feedback.pageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary inline-flex min-w-0 items-center gap-1.5 text-sm font-medium hover:underline"
+              className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
               <span className="truncate">{feedback.pageUrl}</span>
               <ExternalLink className="size-3.5 shrink-0" />
@@ -84,7 +84,7 @@ export function FeedbackDetailPanel({
 
           {/* Comment */}
           <div>
-            <h4 className="text-muted-foreground mb-1 text-xs font-medium uppercase">
+            <h4 className="mb-1 text-xs font-medium text-muted-foreground uppercase">
               Comment
             </h4>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -96,13 +96,13 @@ export function FeedbackDetailPanel({
 
           {/* Screenshot */}
           <div>
-            <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+            <h4 className="mb-2 text-xs font-medium text-muted-foreground uppercase">
               Screenshot
             </h4>
             {feedback.screenshotUrl ? (
               <div className="flex flex-col gap-2">
                 <ScreenshotDialog src={feedback.screenshotUrl} />
-                <div className="text-muted-foreground flex flex-col gap-0.5 text-xs">
+                <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
                   {feedback.clickX != null && feedback.clickY != null && (
                     <span>
                       Click: ({Math.round(feedback.clickX)},{" "}
@@ -115,7 +115,7 @@ export function FeedbackDetailPanel({
                 </div>
               </div>
             ) : (
-              <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-md border border-dashed py-8">
+              <div className="flex flex-col items-center gap-2 rounded-md border border-dashed py-8 text-muted-foreground">
                 <ImageOff className="size-8 opacity-50" />
                 <span className="text-xs">No screenshot captured</span>
               </div>
@@ -127,15 +127,13 @@ export function FeedbackDetailPanel({
             (() => {
               const md = feedback.metadata as Record<string, unknown>;
               const hasContext =
-                md.elementDescription ||
-                md.reactComponentPath ||
-                md.sourceFile;
+                md.elementDescription || md.reactComponentPath || md.sourceFile;
               if (!hasContext) return null;
               return (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="text-muted-foreground mb-1 text-xs font-medium uppercase">
+                    <h4 className="mb-1 text-xs font-medium text-muted-foreground uppercase">
                       Element
                     </h4>
                     <div className="flex flex-col gap-1 text-sm">
@@ -143,12 +141,12 @@ export function FeedbackDetailPanel({
                         <p>{md.elementDescription}</p>
                       )}
                       {typeof md.reactComponentPath === "string" && (
-                        <p className="text-muted-foreground font-mono text-xs">
+                        <p className="font-mono text-xs text-muted-foreground">
                           {md.reactComponentPath}
                         </p>
                       )}
                       {typeof md.sourceFile === "string" && (
-                        <p className="text-muted-foreground font-mono text-xs">
+                        <p className="font-mono text-xs text-muted-foreground">
                           {md.sourceFile}
                         </p>
                       )}
@@ -163,7 +161,7 @@ export function FeedbackDetailPanel({
             <>
               <Separator />
               <div>
-                <h4 className="text-muted-foreground mb-1 text-xs font-medium uppercase">
+                <h4 className="mb-1 text-xs font-medium text-muted-foreground uppercase">
                   Browser
                 </h4>
                 <p className="text-sm">{browserMeta}</p>
@@ -175,7 +173,7 @@ export function FeedbackDetailPanel({
 
           {/* Diagnostics */}
           <div>
-            <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+            <h4 className="mb-2 text-xs font-medium text-muted-foreground uppercase">
               Diagnostics
             </h4>
             <ViewDiagnosticsDialog
@@ -186,10 +184,7 @@ export function FeedbackDetailPanel({
 
           <Separator />
 
-          <StatusSelect
-            feedbackId={feedback.id}
-            value={feedback.status}
-          />
+          <StatusSelect feedbackId={feedback.id} value={feedback.status} />
 
           <TrackersSection
             feedbackId={feedback.id}
@@ -210,7 +205,7 @@ export function FeedbackDetailPanel({
           <Separator />
 
           {/* Timestamps */}
-          <div className="text-muted-foreground flex flex-col gap-1 text-xs">
+          <div className="flex flex-col gap-1 text-xs text-muted-foreground">
             <span>
               Submitted by {feedback.reviewer.name} on{" "}
               {format(new Date(feedback.createdAt), "MMM d, yyyy")}

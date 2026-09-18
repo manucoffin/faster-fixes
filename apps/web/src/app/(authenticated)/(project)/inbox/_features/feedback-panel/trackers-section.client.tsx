@@ -1,11 +1,11 @@
 "use client";
 
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { GitHubIssueBadge } from "./github-issue-badge.client";
 import { JiraIssueBadge } from "./jira-issue-badge.client";
 import { LinearIssueBadge } from "./linear-issue-badge.client";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type TrackersSectionProps = {
   feedbackId: string;
@@ -36,7 +36,7 @@ export function TrackersSection({
 
   return (
     <div className="flex flex-col gap-2">
-      <h4 className="text-muted-foreground text-xs font-medium uppercase">
+      <h4 className="text-xs font-medium text-muted-foreground uppercase">
         Trackers
       </h4>
       <div className="flex flex-col gap-2">

@@ -14,17 +14,17 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Trash2 } from "lucide-react";
 
-type HardDeleteDialogProps = {
+type DeleteFeedbackDialogProps = {
   count: number;
   onConfirm: () => void;
   disabled?: boolean;
 };
 
-export function HardDeleteDialog({
+export function DeleteFeedbackDialog({
   count,
   onConfirm,
   disabled,
-}: HardDeleteDialogProps) {
+}: DeleteFeedbackDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

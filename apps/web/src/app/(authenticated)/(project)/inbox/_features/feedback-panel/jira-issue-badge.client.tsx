@@ -5,10 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { toast } from "sonner";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
 type JiraIssueBadgeProps = {
-  issueLink: GetFeedbackOutput[number]["jiraIssueLink"];
+  issueLink: ListFeedbackOutput[number]["jiraIssueLink"];
   feedbackId: string;
   hasJiraLink: boolean;
   projectId: string;
@@ -53,9 +53,12 @@ export function JiraIssueBadge({
         href={issueLink.issueUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span className={`size-2 rounded-full ${dotColor}`} aria-hidden="true" />
+        <span
+          className={`size-2 rounded-full ${dotColor}`}
+          aria-hidden="true"
+        />
         <span>{issueLink.issueKey}</span>
       </a>
     );

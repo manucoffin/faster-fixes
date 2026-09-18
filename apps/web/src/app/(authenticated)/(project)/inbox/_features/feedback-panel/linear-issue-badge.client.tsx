@@ -5,10 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { toast } from "sonner";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
 type LinearIssueBadgeProps = {
-  issueLink: GetFeedbackOutput[number]["linearIssueLink"];
+  issueLink: ListFeedbackOutput[number]["linearIssueLink"];
   feedbackId: string;
   hasLinearLink: boolean;
   projectId: string;
@@ -54,9 +54,12 @@ export function LinearIssueBadge({
         href={issueLink.issueUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span className={`size-2 rounded-full ${dotColor}`} aria-hidden="true" />
+        <span
+          className={`size-2 rounded-full ${dotColor}`}
+          aria-hidden="true"
+        />
         <span>{issueLink.issueIdentifier}</span>
       </a>
     );

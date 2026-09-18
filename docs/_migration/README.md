@@ -2100,6 +2100,172 @@ Linear, GitHub or Slack grant exists. Viewing each of the four installation stat
 integration and watching the section fall back to its not-connected copy, the denial seen by a plain
 member, and the multi-site Jira picker storing a site are on the QA checklist of issue #73.
 
+### `(authenticated)/(project)`, part 1: scope router, inbox reads and bulk actions (issue #74)
+
+Commit: `PLACEHOLDER`. The scope router leaves `_utils/`, seven operations become services, and the
+inbox filter parsers move to `_helpers/`. The scope is **not** locked: issues #75 to #79 own the
+remaining 37 operations and the `migratedScopes` entry.
+
+**Files moved.** Eleven modules with `git mv`, plus five new schema files and two new test files. No
+file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation               | Before                                                                         | After                                                       |
+| ----------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| Scope router            | `_utils/trpc-router.ts`                                                        | `trpc-router.ts`                                            |
+| Project list            | `_utils/get-projects.trpc.query.ts`                                            | `_services/list-projects.ts`                                |
+| Feedback list           | `inbox/_features/get-feedback.trpc.query.ts`                                   | `inbox/_services/list-feedback.ts`                          |
+| Archived Feedback       | `inbox/_features/archive/get-archived-feedback.trpc.query.ts`                  | `inbox/_services/list-archived-feedback.ts`                 |
+| Distinct page URLs      | `inbox/_features/filters/get-distinct-page-urls.trpc.query.ts`                 | `inbox/_services/list-distinct-page-urls.ts`                |
+| Feedback delete         | `inbox/_features/archive/hard-delete-feedback.trpc.mutation.ts`                | `inbox/_services/delete-feedback.ts`                        |
+| Feedback delete schema  | `inbox/_features/archive/hard-delete-feedback.schema.ts`                       | `inbox/_services/delete-feedback.schema.ts`                 |
+| Bulk Feedback delete    | `inbox/_features/archive/bulk-hard-delete-feedback.trpc.mutation.ts`           | `inbox/_services/delete-feedbacks.ts`                       |
+| Bulk status update      | `inbox/_features/actions-toolbar/bulk-update-feedback-status.trpc.mutation.ts` | `inbox/_services/update-feedbacks-status.ts`                |
+| Feedback filter parsers | `inbox/_features/filters/feedback-filters.schema.ts`                           | `inbox/_helpers/feedback-filters-parsers.ts`                |
+| Permanent-delete dialog | `inbox/_features/archive/hard-delete-dialog.client.tsx`                        | `inbox/_features/archive/delete-feedback-dialog.client.tsx` |
+
+Services sit in `inbox/_services/` next to the segment UI while the procedures stay inlined in the
+scope-root `(project)/trpc-router.ts`, the shape the account scope set: the Project scope has 44
+operations across three segments and one router file keeps its API surface readable.
+
+**Renamed services.** Seven, three of them the renames the ticket lists and four forced by the closed
+read vocabulary.
+
+| Before                     | After                   | Why                                                                                                       |
+| -------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| `hardDeleteFeedback`       | `deleteFeedback`        | There is no soft delete of a Feedback: the reversible state is **Archived**, so "hard" carries no meaning |
+| `bulkHardDeleteFeedback`   | `deleteFeedbacks`       | Same, plus the plural says "many" without a `bulk` prefix                                                 |
+| `bulkUpdateFeedbackStatus` | `updateFeedbacksStatus` | Same                                                                                                      |
+| `getFeedback`              | `listFeedback`          | It returns a collection, and `list-` is the read verb the closed vocabulary forces                        |
+| `getProjects`              | `listProjects`          | Same                                                                                                      |
+| `getArchivedFeedback`      | `listArchivedFeedback`  | Same, behind a pagination envelope                                                                        |
+| `getDistinctPageUrls`      | `listDistinctPageUrls`  | Same                                                                                                      |
+
+The four `list-` renames repeat the `getPastInvoices` to `listPastInvoices` and `getAgentTokens` to
+`listAgentTokens` renames of the billing and agent-token segments: the step spec's rename list names
+the cases it knew about, not the whole set the closed read vocabulary forces.
+
+**Renamed procedure keys.** Four, all under `projects.feedback`.
+
+| Before             | After                  | Call sites updated                                   |
+| ------------------ | ---------------------- | ---------------------------------------------------- |
+| `distinctPageUrls` | `listDistinctPageUrls` | `inbox-tabs.client.tsx`                              |
+| `hardDelete`       | `delete`               | `archive/archive-tab.client.tsx`                     |
+| `bulkHardDelete`   | `deleteMany`           | none: the procedure has no client caller (see below) |
+| `bulkUpdateStatus` | `updateManyStatus`     | `use-feedback-mutations.ts`                          |
+
+`projects.list`, `feedback.list` and `feedback.listArchived` keep their key: each service drops the
+entity the router already carries, which is what the key already said. `listDistinctPageUrls` takes
+the full service name instead, because the entity is the URL list, not the Feedback the router
+carries; that is the same reading that produced `subscription.getStatus` in the billing segment. The
+two plural services collide with their singular siblings once the entity is dropped, so their key
+keeps the `Many` that tells them apart rather than repeating the entity (`feedback.deleteFeedbacks`
+would have been the literal alternative). The published packages call the `/api/v1/*` REST surface
+and never tRPC, so no key rename can reach them.
+
+**An orphan procedure found.** `feedback.bulkHardDelete` has no caller anywhere in `src/`: the
+archive tab deletes one row at a time and the bulk toolbar only changes status. It is migrated as
+`feedback.deleteMany` rather than left behind, because removing a procedure is a behaviour change
+this step does not allow, but it is recorded here as a candidate for deletion by the maintainer.
+
+**Authorization, all of it in the services.** Every denial of this segment needs a loaded row, so
+none of them could stay at the transport edge. `protectedProcedure` answers identity alone and no
+`UNAUTHORIZED`, rate limit or plan limit is involved.
+
+| Denial                                               | Where it lives now                                                                                    |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| "You do not have access to this organization."       | `ForbiddenError` in `listProjects`, after the membership lookup                                       |
+| "Project not found."                                 | `NotFoundError` in the three inbox reads                                                              |
+| "Access denied."                                     | `ForbiddenError` in the three inbox reads and the three writes, after the Project's membership lookup |
+| "Feedback not found."                                | `NotFoundError` in `deleteFeedback`, `deleteFeedbacks` and `updateFeedbacksStatus`                    |
+| "Only archived feedback can be permanently deleted." | `BadRequestError` in `deleteFeedback` and `deleteFeedbacks`                                           |
+
+Membership in the Project's Organization is checked in the service that loads the Project, as the
+ticket asks: the three reads load the Project first, the three writes reach the Organization through
+the Feedback's `project` relation. The seven services each keep the exact predicate, order and
+message they had as procedures.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR` and no generic wrapper, so
+there was nothing to triage. Every `TRPCError` became the `DomainError` subclass of the same code
+with the same message, so no toast or form error changes wording.
+
+**Nothing reachable from an Inngest function throws a `DomainError`.** `updateFeedbacksStatus` keeps
+sending the `feedback/status-changed` fan-out with its swallowed failure, but it is a sender, not a
+step body: no Inngest function imports any of the seven services.
+
+**Services holding a database client.** All seven, since each holds at least one authorization check
+and one domain error branch. None is a pass-through read. No service receives the tRPC context or the
+session: the router passes `userId` and the parsed input as plain values, and each service imports
+`prisma` directly instead of reading it from `ctx`.
+
+**Output types.** The four `inferProcedureOutput` aliases of the segment are gone. `listProjects`,
+`listFeedback`, `listArchivedFeedback` and `listDistinctPageUrls` export `<Service>Output` derived
+from their own function. `BulkUpdateFeedbackStatusOutput` is dropped rather than replaced: it was a
+write and no file imported it. The fourteen consumers of `GetFeedbackOutput` and
+`GetArchivedFeedbackOutput` change an import path and the type name; the type-only import of a
+`_services/` module is the documented exception to `no-client-import-of-services`, and
+`use-feedback-mutations.ts` gains the `type` modifier its import was missing.
+
+**Schemas.** Five new pure-Zod schema files, one moved. `HardDeleteFeedbackSchema` became
+`DeleteFeedbackSchema` and its `HardDeleteFeedbackSchemaType` alias became `DeleteFeedbackInput`; the
+other five operations parsed an inline `z.object` in the procedure and now own a `*.schema.ts` next
+to their service. `list-archived-feedback.schema.ts` exports both `Input` and `Values`, since its
+four defaulted fields make the parsed and caller-facing shapes diverge. That is the whole 24 to 19
+burn-down of `require-schema-conventions` below.
+
+**The filter parsers left their schema file.** `feedbackFiltersParsers` is a `nuqs` parser record,
+not Zod, so `feedback-filters.schema.ts` becomes `inbox/_helpers/feedback-filters-parsers.ts`. It has
+no importer today: `inbox-tabs.client.tsx` builds the same three parsers inline. It is moved rather
+than retired, and folding the duplication into the helper is left to the feature work, not to a
+behaviour-preserving refactor.
+
+**Tests.** Two colocated files, seven cases, all driven through the trailing database client with no
+tRPC context built. `delete-feedback.test.ts` (4) pins the not-found, not-archived and non-member
+denials and the deletion of an archived Feedback, with `deleteAsset` mocked.
+`list-distinct-page-urls.test.ts` (3) pins the two denials of the "load the Project, then its
+membership" read shape and the membership predicate itself. The two files cover the two
+authorization shapes of the segment; the other five services repeat one of the two.
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| 1 role suffixes                      | 37 files, exactly the operations issues #75 to #79 own                        |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` (#78) |
+| 3 `_constants/` inside a scope       | nothing                                                                       |
+| 4 `*.types.ts`                       | nothing                                                                       |
+| 5 routers in a bucket or a feature   | nothing: the scope router now sits at the scope root                          |
+| 6 tRPC imported by a service         | nothing                                                                       |
+| 7 `TRPCError` in a service           | nothing                                                                       |
+| 8 `'use server'` in a service/router | nothing: the seven moved modules all dropped the directive                    |
+| 9 Prisma outside a service           | 36 files, the same set as check 1 minus the scope router                      |
+| 10 `inferProcedureOutput`            | 36 files, all owned by the later parts                                        |
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 73 app
+tests (7 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **108 problems, 0
+errors, 108 warnings** (88 `no-raw-tailwind-colors` / 19 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 5 from the 113 of the integrations lock. `npx next build` compiles
+and still lists `/inbox`, `/reviewers` and `/settings`; `pnpm build` is refused by the sandbox, as
+the earlier entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                                               | Result                                                                |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET …projects.list`, `feedback.list`, `feedback.listArchived`, `feedback.listDistinctPageUrls`     | `401 UNAUTHORIZED`, each key resolves and `protectedProcedure` guards |
+| `POST …feedback.delete`, `feedback.deleteMany`, `feedback.updateManyStatus`                         | `401 UNAUTHORIZED`, same                                              |
+| `GET …feedback.distinctPageUrls`, `POST …feedback.hardDelete`, `bulkHardDelete`, `bulkUpdateStatus` | `404 No procedure found on path`, the four old keys are gone          |
+| `POST …feedback.getDiagnostics`, `…reviewer.list`                                                   | `405` query-over-POST, the unmigrated keys still resolve              |
+| `GET /api/v1/agent/feedbacks` with no bearer token                                                  | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged       |
+| `GET /inbox` signed out                                                                             | `307` to `/login`, the page guard is unchanged                        |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+user can sign in and no Project can be rendered. Walking the inbox list and its board, the page-URL
+and sort filters, the archive tab with its pagination and search, a bulk status change from the
+toolbar and a permanent delete from the archive are on the QA checklist of issue #74.
+
+**Left for the maintainer.** The now-empty `(project)/_utils/` folder: the sandbox refuses `rmdir`,
+as the account and organization entries record for their own scopes.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
