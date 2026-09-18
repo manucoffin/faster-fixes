@@ -1,5 +1,5 @@
-import { generateApiKey } from "@/app/_domains/project/generate-api-key";
-import { generatePublicId } from "@/app/_domains/project/generate-public-id";
+import { generateApiKey } from "@/app/_domains/project/_helpers/generate-api-key";
+import { generatePublicId } from "@/app/_domains/project/_helpers/generate-public-id";
 import { ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 

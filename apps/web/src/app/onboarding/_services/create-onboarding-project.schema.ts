@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { DomainSchema } from "@/app/_domains/project/normalize-domain";
+import { DomainSchema } from "@/app/_domains/project/_services/domain.schema";
 
 export const CreateOnboardingProjectSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),

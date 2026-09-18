@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,

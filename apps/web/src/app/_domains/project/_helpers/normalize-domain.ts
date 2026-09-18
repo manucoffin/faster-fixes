@@ -1,5 +1,3 @@
-import z from "zod";
-
 const LABEL_REGEX = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)$/;
 
 function isValidDomain(value: string): boolean {
@@ -39,19 +37,3 @@ export function normalizeDomain(input: string): string | null {
 
   return isValidDomain(value) ? value : null;
 }
-
-export const DomainSchema = z
-  .string()
-  .trim()
-  .min(1, "Domain is required")
-  .transform((value, ctx) => {
-    const normalized = normalizeDomain(value);
-    if (!normalized) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Enter a valid domain (e.g. example.com).",
-      });
-      return z.NEVER;
-    }
-    return normalized;
-  });

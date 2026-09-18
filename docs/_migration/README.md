@@ -185,12 +185,14 @@ check green without making the statement it checks true, so they were left where
 | bare `throw new Error(` in a service        | n/a              | 0                                         |
 | `inferProcedureOutput` aliases              | 190, in 95 files | 0                                         |
 | `'use server'` directives                   | 81               | 0                                         |
-| `_helpers/` folders                         | 0                | 5                                         |
-| `_types/` folders                           | 0                | 0, none was needed                        |
+| `_helpers/` folders                         | 0                | 7                                         |
+| `_types/` folders                           | 0                | 1, placed by the close-out (issue #54)    |
 
-`_types/` is in the target bucket set and stayed empty: every hand-written shared type found during
-the step either derived from a service return type (`<Service>Output`) or belonged next to the
-feature that used it. The bucket is documented, not mandatory.
+`_types/` stayed empty through every scope ticket: each hand-written shared type found there either
+derived from a service return type (`<Service>Output`) or belonged next to the feature that used it.
+Its one inhabitant, `_domains/feedback/_types/feedback-status.ts`, was placed by the close-out
+(issue #54) below, which also added the `feedback` and `project` `_helpers/` folders. The bucket is
+documented, not mandatory.
 
 The eight surviving `TRPCError` throws are the transport-edge cases the invariants keep in a
 procedure: two `UNAUTHORIZED` translations of a Better-Auth message plus a rate-limit
@@ -299,6 +301,113 @@ endpoint and the three public widget endpoints. No step 3 ticket touched them, a
 keeps its own error helper and its `NextResponse` result style until step 4 gives it a mapped
 boundary.
 
+## Step 3 close-out (issue #54)
+
+The parent ticket of the step. Its twenty-eight children (#55 to #82) shipped the prerequisites, the
+scopes, the REST API buckets and the final lock; this entry records what the close-out pass found
+still open against the step's own statement that **every scope under `src/app` has the final bucket
+set**, and what it decided.
+
+### Two domains no scope ticket reached
+
+`_domains/feedback/` and `_domains/project/` hold no tRPC operation, so they appear in neither the
+order list of the spec nor any child ticket. Step 2 moved them under `_domains/` and left their files
+bare at the domain root, which the target architecture does not allow: a scope owns the buckets and
+nothing else. Seven files were placed, with no change to any function body.
+
+| File                                   | From                 | To                                            | Why                                                                              |
+| -------------------------------------- | -------------------- | --------------------------------------------- | -------------------------------------------------------------------------------- |
+| `feedback-status.ts`                   | `_domains/feedback/` | `_domains/feedback/_types/`                   | The Feedback status vocabulary. See the prerequisite 6 answer below.             |
+| `format-feedback-markdown.ts`          | `_domains/feedback/` | `_domains/feedback/_helpers/`                 | Pure formatting, no IO. Its parameter type stays with it, like a service output. |
+| `generate-api-key.ts`                  | `_domains/project/`  | `_domains/project/_helpers/`                  | Pure: `crypto.randomBytes` is not IO, so it is a helper, not a service.          |
+| `generate-public-id.ts`                | `_domains/project/`  | `_domains/project/_helpers/`                  | Same.                                                                            |
+| `normalize-domain.ts`                  | `_domains/project/`  | `_domains/project/_helpers/`                  | Pure, minus the schema split out of it.                                          |
+| `DomainSchema` (was in the file above) | `_domains/project/`  | `_domains/project/_services/domain.schema.ts` | A Zod schema belongs in `_services/` as `*.schema.ts`.                           |
+| `active-project-provider.client.tsx`   | `_domains/project/`  | `_domains/project/active-project/`            | A capability slice, with its cookie plumbing beside it.                          |
+| `active-project-cookie.ts`             | `_domains/project/`  | `_domains/project/active-project/`            | Browser cookie access used by that provider alone, by no one else.               |
+
+`DomainSchema` was the one placement with a consequence beyond a path. Three migrated `*.schema.ts`
+files (`create-project`, `update-project`, `create-onboarding-project`) imported it from a non-schema
+module at a domain root, which the schema conventions have no name for. It now lives in a
+`*.schema.ts` of its own, exports the `DomainInput` type the convention requires, and imports
+`normalizeDomain` from `_helpers/`, which `schema-must-be-pure-zod` allows. `server/api/validate-origin.ts`
+imports the helper directly, since it wants the function and not the schema. Thirty-two files changed
+an import path; no behaviour changed, and `_types/` stopped being an empty bucket.
+
+### Prerequisite 6 answered
+
+**`feedback-status.ts` goes to `_types/`, not to `_services/` as a `*.schema.ts`.** The file is a Zod
+enum plus the type inferred from it, and it is the runtime validator of a free-form `String` column,
+not the input of a form or a procedure. Naming it `feedback-status.schema.ts` would put it under
+`require-schema-conventions`, which demands an exported type ending in `Input`, `Inputs` or `Values`.
+`FeedbackStatusInput` is a worse name than `FeedbackStatus` for a status union that ten modules use
+as domain vocabulary, and renaming a glossary type to satisfy a rule aimed at input schemas would be
+the tail wagging the dog. `_types/` is "a hand-written, isomorphic shared type": that is what this
+is, and Zod is client-safe, so the validator travels with the type it defines. Both exported names
+are unchanged.
+
+**The search-params module stays in `_components/dashboard/`** (step 2, amendment 2). It is the
+period selector's URL contract, it is domain-agnostic, and its only other consumer is the admin
+subscriptions chart in the same sub-library. The target architecture has no bucket for a
+route-agnostic search-params module and inventing one for a single file would be a bucket with one
+inhabitant. Revisit only if a third consumer appears outside the sub-library.
+
+### Deviations accepted, not fixed
+
+1. **Capability folders sit at a domain root, not under `_features/`.** `auth/send-verification-email-button/`,
+   `auth/stop-impersonate-button/`, `subscription/plan-card/`, `subscription/plan-gate/`,
+   `subscription/upgrade-subscription/` and now `project/active-project/` are capability slices in
+   the target architecture's sense, and it places those under `<scope>/_features/<name>/`. Step 2
+   gave the domains the flat shape and the domain entries of step 3 kept it deliberately, so the
+   close-out kept it too rather than move six folders and rewrite thirty imports for a naming
+   question no rule enforces (`no-feature-nesting` only forbids a feature inside a feature). It is
+   one decision for the maintainer: either the domains gain a `_features/` bucket, or the target
+   architecture records that a domain's capability folders sit at its root. Route scopes are not
+   affected; they all use `_features/`.
+
+2. **The two `index.ts` barrels of these domains stay `export {}`.** Nothing outside either domain
+   imports through the barrel: the consumers of `feedback-status`, the markdown formatter and the
+   active-project provider are routes, `src/server/` and the agent API, all of which the
+   cross-domain rule exempts by design. Step 2, amendment 6 made the same call for all six barrels.
+
+### Carried forward to step 5
+
+Prerequisites 2 and 3 of step 3 were never answered and step 3 never needed them: it did not move a
+single file out of `src/server/`.
+
+- **The open question on the integration domains** (one domain per external system, or one `tracker`
+  domain) still decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`,
+  `server/oauth`, the domain-bound Inngest functions and the Jira mail template.
+- **The domain of `server/storage`** is still undecided, because Asset is still not a glossary term.
+
+Both are step 5 questions, since that is the step that relocates `src/server/**`. The rest of the
+debt is in "Debt recorded for steps 4 and 5" above.
+
+### Re-verification
+
+Run from the repo root at the close-out commit, with `--force` where Turbo caches.
+
+| Check                         | Result                                                                                  |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| The ten "must be gone" checks | Unchanged: nine return nothing, check 2 is still the two stub folders                   |
+| `pnpm typecheck`              | 4 tasks, clean                                                                          |
+| `pnpm lint`                   | 5 tasks, 0 warnings                                                                     |
+| `pnpm test`                   | 120 app tests (33 files), 181 ESLint rule and config tests                              |
+| `pnpm lint:agent-rules`       | 88 problems, 0 errors, 88 warnings, all `no-raw-tailwind-colors`                        |
+| `npx next build` (web)        | compiles, every route still listed                                                      |
+| Bare file at a domain root    | none; every domain root holds buckets, capability folders, `index.ts`, `trpc-router.ts` |
+
+**Smoke checklist for this entry.** Not run against a real database, as everywhere in this step:
+create a Project from the sidebar and from onboarding (both call the two `generate-` helpers and
+`DomainSchema`), change a Project's domain in its settings, switch the active Project in the header
+(the cookie survives a reload), copy a Feedback and a selection as markdown from the inbox, read a
+Feedback through the agent API, and check that the admin dashboard overview still buckets by status.
+
+### Still open at the close-out
+
+Issue #81 only. The three `_deprecated_` stubs listed under "Left for the maintainer" are the last
+red line of the step, and the agent may not delete them.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
@@ -396,11 +505,11 @@ Found while moving the folders. None is caused by the move and none is fixed her
 Step 3 turns every scope's data and IO code into verb-prefixed functions in `_services/`, dissolves `_utils/`, and makes the routers thin. Before the first procedure is extracted:
 
 1. ~~**Create the domain-error vocabulary and the tRPC mapping middleware first.**~~ Done in `f2c8d60`. `src/server/errors/domain-errors.ts` (five subclasses, zero imports) and the `domainErrorMiddleware` on the base procedure in `src/server/trpc/trpc.ts`. Extracting a procedure that throws `TRPCError({ code: "CONFLICT" })` into a service that throws a bare `Error` silently turns a 409 into a 500. Creating that folder is also what enabled `no-client-import-of-server-errors`. The vocabulary came from `docs/architecture/target-architecture.md` and ADR-0012, not from the kit, which ships no runtime file for it; `03-services.md` was corrected to say so.
-2. **Answer the open question on the integration domains** recorded above. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
-3. **Decide the domain of `server/storage`.** Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
+2. **Answer the open question on the integration domains** recorded above. Carried forward to step 5 by the close-out: step 3 never moved a file out of `src/server/`. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
+3. **Decide the domain of `server/storage`.** Carried forward to step 5 for the same reason. Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
 4. ~~**Add the per-scope allowlist to the ESLint config.**~~ Done, see the `migratedScopes` section below.
 5. ~~**Plan the removal of the `require-server-action-suffix` exemption.**~~ Done at the final lock. The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` came out once the last role-suffixed file was gone, and it was the last transition glob in the config.
-6. **Decide the two placements step 2 deliberately left open:** which bucket `_domains/feedback/feedback-status.ts` belongs in (amendment 7), and whether a route-agnostic search-params module needs a bucket of its own or whether `_components/dashboard/search-params.ts` stays where it is (amendment 2).
+6. ~~**Decide the two placements step 2 deliberately left open:**~~ Answered by the close-out (issue #54): `feedback-status.ts` goes to `_domains/feedback/_types/` and `_components/dashboard/search-params.ts` stays where it is (amendment 2). Reasoning in the close-out entry.
 
 ## Step 3 prerequisite: the four defective ESLint rules (issue #57)
 

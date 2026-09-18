@@ -10,7 +10,7 @@ import {
   resolveStateIdForFeedback,
 } from "@/server/linear/resolve-team-state";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import type { FeedbackStatus } from "@/app/_domains/feedback/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

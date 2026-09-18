@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { DomainSchema } from "@/app/_domains/project/normalize-domain";
+import { DomainSchema } from "@/app/_domains/project/_services/domain.schema";
 
 export const CreateProjectSchema = z.object({
   organizationId: z.string(),

@@ -1,4 +1,4 @@
-import { formatFeedbackListAsMarkdown } from "@/app/_domains/feedback/format-feedback-markdown";
+import { formatFeedbackListAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";

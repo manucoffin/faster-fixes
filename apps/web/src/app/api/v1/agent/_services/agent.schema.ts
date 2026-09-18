@@ -1,4 +1,4 @@
-import { FeedbackStatusEnum } from "@/app/_domains/feedback/feedback-status";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback/_types/feedback-status";
 import { z } from "zod";
 
 export { FeedbackStatusEnum };

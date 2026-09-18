@@ -1,4 +1,4 @@
-import { generateApiKey } from "@/app/_domains/project/generate-api-key";
+import { generateApiKey } from "@/app/_domains/project/_helpers/generate-api-key";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import { RegenerateApiKeyInput } from "./regenerate-api-key.schema";

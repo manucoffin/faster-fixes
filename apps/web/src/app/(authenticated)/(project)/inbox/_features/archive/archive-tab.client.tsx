@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { DataTable } from "@/app/_components/data-table.client";
 import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
