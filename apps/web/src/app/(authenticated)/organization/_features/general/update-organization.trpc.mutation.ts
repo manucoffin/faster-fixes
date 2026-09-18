@@ -1,6 +1,6 @@
 "use server";
 
-import { generateUniqueSlug } from "@/app/_domains/organization/_utils/generate-unique-slug";
+import { getUniqueOrganizationSlug } from "@/app/_domains/organization/_services/get-unique-organization-slug";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { UpdateOrganizationSchema } from "./update-organization.schema";
@@ -25,7 +25,10 @@ export const updateOrganization = protectedProcedure
       });
     }
 
-    const slug = await generateUniqueSlug(input.name, input.organizationId);
+    const slug = await getUniqueOrganizationSlug(
+      input.name,
+      input.organizationId,
+    );
 
     const org = await prisma.organization.update({
       where: { id: input.organizationId },

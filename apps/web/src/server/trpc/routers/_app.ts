@@ -2,7 +2,7 @@ import { authRouter } from "@/app/(auth)/_utils/trpc-router";
 import { authenticatedRouter } from "@/app/(authenticated)/_utils/trpc-router";
 import { publicRouter } from "@/app/(public)/trpc-router";
 import { authenticationFeatureRouter } from "@/app/_domains/auth/_utils/trpc-router";
-import { organizationFeatureRouter } from "@/app/_domains/organization/_utils/trpc-router";
+import { organizationRouter } from "@/app/_domains/organization/trpc-router";
 import { subscriptionFeatureRouter } from "@/app/_domains/subscription/_utils/trpc-router";
 import { adminRouter } from "@/app/admin/_utils/trpc-router";
 import { onboardingRouter } from "@/app/onboarding/_utils/trpc-router";
@@ -14,7 +14,7 @@ export const appRouter = router({
   onboarding: onboardingRouter,
   admin: adminRouter,
   public: publicRouter,
-  organization: organizationFeatureRouter,
+  organization: organizationRouter,
   subscription: subscriptionFeatureRouter,
 });
 

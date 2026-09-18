@@ -1,7 +1,10 @@
 import { prisma } from "@workspace/db/index";
 import slugify from "slugify";
 
-export async function generateUniqueSlug(name: string, existingId?: string) {
+export async function getUniqueOrganizationSlug(
+  name: string,
+  existingOrganizationId?: string,
+) {
   const slug = slugify(name, { lower: true, strict: true });
   let counter = 0;
   let finalSlug = slug;
@@ -11,7 +14,10 @@ export async function generateUniqueSlug(name: string, existingId?: string) {
     const existingOrganization = await prisma.organization.findFirst({
       where: {
         slug: finalSlug,
-        ...(existingId ? { id: { not: existingId } } : {}), // Exclude current organization if id provided
+        // Exclude the current organization when one is being renamed.
+        ...(existingOrganizationId
+          ? { id: { not: existingOrganizationId } }
+          : {}),
       },
     });
 
@@ -25,3 +31,7 @@ export async function generateUniqueSlug(name: string, existingId?: string) {
 
   return finalSlug;
 }
+
+export type GetUniqueOrganizationSlugOutput = Awaited<
+  ReturnType<typeof getUniqueOrganizationSlug>
+>;

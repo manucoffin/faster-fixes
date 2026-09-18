@@ -25,9 +25,9 @@ import { Input } from "@workspace/ui/components/input";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
-  CreateOrganizationInputs,
+  CreateOrganizationInput,
   CreateOrganizationSchema,
-} from "@/app/_domains/organization/create-organization.schema";
+} from "@/app/_domains/organization/_services/create-organization.schema";
 
 type CreateOrganizationDialogProps = {
   open: boolean;
@@ -41,7 +41,7 @@ export function CreateOrganizationDialog({
   const trpc = useTRPC();
   const { refetch: refetchOrganizations } = useListOrganizations();
 
-  const form = useForm<CreateOrganizationInputs>({
+  const form = useForm<CreateOrganizationInput>({
     resolver: zodResolver(CreateOrganizationSchema),
     defaultValues: { name: "" },
   });
@@ -69,7 +69,7 @@ export function CreateOrganizationDialog({
     }
   };
 
-  const onSubmit = (data: CreateOrganizationInputs) => {
+  const onSubmit = (data: CreateOrganizationInput) => {
     createOrganization.mutate(data);
   };
 

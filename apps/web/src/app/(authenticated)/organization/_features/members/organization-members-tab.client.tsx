@@ -1,6 +1,6 @@
 "use client";
 
-import { getRoleLabel } from "@/app/_domains/organization/_utils/organization-roles";
+import { getRoleLabel } from "@/app/_domains/organization/_helpers/organization-roles";
 import {
   useActiveMemberRole,
   useActiveOrganization,
