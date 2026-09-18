@@ -13,14 +13,14 @@ import {
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
-import type { GetReviewersOutput } from "./get-reviewers.trpc.query";
+import type { ListReviewersOutput } from "../_services/list-reviewers";
 import { DeleteReviewerButton } from "./delete/delete-reviewer-button.client";
 import { RestoreReviewerButton } from "./restore/restore-reviewer-button.client";
 import { RevokeReviewerButton } from "./revoke/revoke-reviewer-button.client";
 
 type ReviewersTableProps = {
   projectId: string;
-  reviewers: GetReviewersOutput;
+  reviewers: ListReviewersOutput;
 };
 
 export function ReviewersTable({ projectId, reviewers }: ReviewersTableProps) {
@@ -63,7 +63,7 @@ export function ReviewersTable({ projectId, reviewers }: ReviewersTableProps) {
               >
                 {copied === reviewer.id ? (
                   <>
-                    <Check className="text-success size-3" />
+                    <Check className="size-3 text-success" />
                     Copied
                   </>
                 ) : (

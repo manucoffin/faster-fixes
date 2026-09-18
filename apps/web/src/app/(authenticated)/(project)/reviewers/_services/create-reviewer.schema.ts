@@ -5,4 +5,4 @@ export const CreateReviewerSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
 });
 
-export type CreateReviewerInputs = z.infer<typeof CreateReviewerSchema>;
+export type CreateReviewerInput = z.infer<typeof CreateReviewerSchema>;

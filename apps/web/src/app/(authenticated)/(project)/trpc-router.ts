@@ -1,11 +1,4 @@
 import { protectedProcedure, router } from "@/server/trpc/trpc";
-import { createReviewer } from "./reviewers/_features/create/create-reviewer.trpc.mutation";
-import { deleteReviewer } from "./reviewers/_features/delete/delete-reviewer.trpc.mutation";
-import { getReviewers } from "./reviewers/_features/get-reviewers.trpc.query";
-import { restoreReviewer } from "./reviewers/_features/restore/restore-reviewer.trpc.mutation";
-import { revokeReviewer } from "./reviewers/_features/revoke/revoke-reviewer.trpc.mutation";
-import { deleteProject } from "./settings/_features/delete/delete-project.trpc.mutation";
-import { getProject } from "./settings/_features/get-project.trpc.query";
 import { getProjectGitHubLink } from "./settings/_features/github/get-project-link.trpc.query";
 import { linkRepo } from "./settings/_features/github/link-repo/link-repo.trpc.mutation";
 import { listAccessibleRepos } from "./settings/_features/github/link-repo/list-accessible-repos.trpc.query";
@@ -24,12 +17,28 @@ import { listLinearTeamLabels } from "./settings/_features/linear/link-team/list
 import { listLinearTeamStates } from "./settings/_features/linear/link-team/list-team-states.trpc.query";
 import { unlinkLinearTeam } from "./settings/_features/linear/unlink-team/unlink-team.trpc.mutation";
 import { updateProjectLinearLink } from "./settings/_features/linear/update-link/update-project-linear-link.trpc.mutation";
-import { regenerateApiKey } from "./settings/_features/regenerate-api-key/regenerate-api-key.trpc.mutation";
 import { getProjectSlackLink } from "./settings/_features/slack/get-project-slack-link.trpc.query";
 import { listSlackChannels } from "./settings/_features/slack/link-channel/list-slack-channels.trpc.query";
 import { setProjectSlackChannel } from "./settings/_features/slack/link-channel/set-project-slack-channel.trpc.mutation";
 import { updateProjectSlackLink } from "./settings/_features/slack/update-link/update-project-slack-link.trpc.mutation";
-import { updateProject } from "./settings/_features/update/update-project.trpc.mutation";
+import { createReviewer } from "./reviewers/_services/create-reviewer";
+import { CreateReviewerSchema } from "./reviewers/_services/create-reviewer.schema";
+import { deleteReviewer } from "./reviewers/_services/delete-reviewer";
+import { DeleteReviewerSchema } from "./reviewers/_services/delete-reviewer.schema";
+import { listReviewers } from "./reviewers/_services/list-reviewers";
+import { ListReviewersSchema } from "./reviewers/_services/list-reviewers.schema";
+import { restoreReviewer } from "./reviewers/_services/restore-reviewer";
+import { RestoreReviewerSchema } from "./reviewers/_services/restore-reviewer.schema";
+import { revokeReviewer } from "./reviewers/_services/revoke-reviewer";
+import { RevokeReviewerSchema } from "./reviewers/_services/revoke-reviewer.schema";
+import { deleteProject } from "./settings/_services/delete-project";
+import { DeleteProjectSchema } from "./settings/_services/delete-project.schema";
+import { getProject } from "./settings/_services/get-project";
+import { GetProjectSchema } from "./settings/_services/get-project.schema";
+import { regenerateApiKey } from "./settings/_services/regenerate-api-key";
+import { RegenerateApiKeySchema } from "./settings/_services/regenerate-api-key.schema";
+import { updateProject } from "./settings/_services/update-project";
+import { UpdateProjectSchema } from "./settings/_services/update-project.schema";
 import { listProjects } from "./_services/list-projects";
 import { ListProjectsSchema } from "./_services/list-projects.schema";
 import { createGitHubIssueForFeedback } from "./inbox/_services/create-github-issue-for-feedback";
@@ -68,16 +77,83 @@ export const projectsRouter = router({
       userId: ctx.session.user.id,
     }),
   ),
-  get: getProject,
-  update: updateProject,
-  delete: deleteProject,
-  regenerateApiKey,
+  get: protectedProcedure.input(GetProjectSchema).query(({ input, ctx }) =>
+    getProject({
+      projectId: input.projectId,
+      userId: ctx.session.user.id,
+    }),
+  ),
+  update: protectedProcedure
+    .input(UpdateProjectSchema)
+    .mutation(({ input, ctx }) =>
+      updateProject({
+        projectId: input.projectId,
+        name: input.name,
+        domain: input.domain,
+        widgetEnabled: input.widgetEnabled,
+        userId: ctx.session.user.id,
+      }),
+    ),
+  delete: protectedProcedure
+    .input(DeleteProjectSchema)
+    .mutation(({ input, ctx }) =>
+      deleteProject({
+        projectId: input.projectId,
+        userId: ctx.session.user.id,
+      }),
+    ),
+  // The key names the API key, not the Project the router already carries, so
+  // it keeps the full service name.
+  regenerateApiKey: protectedProcedure
+    .input(RegenerateApiKeySchema)
+    .mutation(({ input, ctx }) =>
+      regenerateApiKey({
+        projectId: input.projectId,
+        userId: ctx.session.user.id,
+      }),
+    ),
   reviewer: router({
-    list: getReviewers,
-    create: createReviewer,
-    revoke: revokeReviewer,
-    restore: restoreReviewer,
-    delete: deleteReviewer,
+    list: protectedProcedure
+      .input(ListReviewersSchema)
+      .query(({ input, ctx }) =>
+        listReviewers({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    create: protectedProcedure
+      .input(CreateReviewerSchema)
+      .mutation(({ input, ctx }) =>
+        createReviewer({
+          projectId: input.projectId,
+          name: input.name,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    revoke: protectedProcedure
+      .input(RevokeReviewerSchema)
+      .mutation(({ input, ctx }) =>
+        revokeReviewer({
+          reviewerId: input.reviewerId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    restore: protectedProcedure
+      .input(RestoreReviewerSchema)
+      .mutation(({ input, ctx }) =>
+        restoreReviewer({
+          reviewerId: input.reviewerId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    delete: protectedProcedure
+      .input(DeleteReviewerSchema)
+      .mutation(({ input, ctx }) =>
+        deleteReviewer({
+          reviewerId: input.reviewerId,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   feedback: router({
     list: protectedProcedure.input(ListFeedbackSchema).query(({ input, ctx }) =>

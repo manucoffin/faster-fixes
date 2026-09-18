@@ -2420,6 +2420,154 @@ of issue #75.
 **Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
 is still there: the sandbox refuses `rmdir`.
 
+### `(authenticated)/(project)`, part 3: reviewers and core settings (issue #76)
+
+Commit: `PENDING`. The five Reviewer operations and the four core Project settings operations become
+services in two new `_services/` folders. The scope is still **not** locked: issues #77 to #79 own
+the remaining 22 operations and the `migratedScopes` entry.
+
+**Files moved.** Eleven modules with `git mv`, plus seven new schema files and three new test files.
+No file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation              | Before                                                                      | After                                           |
+| ---------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
+| Reviewer list          | `reviewers/_features/get-reviewers.trpc.query.ts`                           | `reviewers/_services/list-reviewers.ts`         |
+| Reviewer create        | `reviewers/_features/create/create-reviewer.trpc.mutation.ts`               | `reviewers/_services/create-reviewer.ts`        |
+| Reviewer create schema | `reviewers/_features/create/create-reviewer.schema.ts`                      | `reviewers/_services/create-reviewer.schema.ts` |
+| Reviewer revoke        | `reviewers/_features/revoke/revoke-reviewer.trpc.mutation.ts`               | `reviewers/_services/revoke-reviewer.ts`        |
+| Reviewer restore       | `reviewers/_features/restore/restore-reviewer.trpc.mutation.ts`             | `reviewers/_services/restore-reviewer.ts`       |
+| Reviewer delete        | `reviewers/_features/delete/delete-reviewer.trpc.mutation.ts`               | `reviewers/_services/delete-reviewer.ts`        |
+| Project read           | `settings/_features/get-project.trpc.query.ts`                              | `settings/_services/get-project.ts`             |
+| Project update         | `settings/_features/update/update-project.trpc.mutation.ts`                 | `settings/_services/update-project.ts`          |
+| Project update schema  | `settings/_features/update/update-project.schema.ts`                        | `settings/_services/update-project.schema.ts`   |
+| Project delete         | `settings/_features/delete/delete-project.trpc.mutation.ts`                 | `settings/_services/delete-project.ts`          |
+| API key regeneration   | `settings/_features/regenerate-api-key/regenerate-api-key.trpc.mutation.ts` | `settings/_services/regenerate-api-key.ts`      |
+
+The two segments each get their own `_services/` folder next to their UI, and the procedures stay
+inlined in the scope-root `(project)/trpc-router.ts`, as parts 1 and 2 did. The `_features/`
+subfolders the operations left (`create/`, `revoke/`, `restore/`, `delete/`, `update/`,
+`regenerate-api-key/`) keep their client component, which is what a feature is for; none is
+flattened, because flattening them is a placement change no ticket asked for.
+
+The three client files this segment touches (`reviewers-table.client.tsx`,
+`create-reviewer-dialog.client.tsx`, `update-project-form.client.tsx`) carried pre-existing Prettier
+drift and are normalised on the way through, as the integrations entry did for the files it touched,
+so their diffs carry a few Tailwind class-order lines beside the import change.
+
+**Renamed services.** One, forced by the closed read vocabulary.
+
+| Before         | After           | Why                                                                               |
+| -------------- | --------------- | --------------------------------------------------------------------------------- |
+| `getReviewers` | `listReviewers` | It returns a collection, so `list-` is the read verb the closed vocabulary forces |
+
+That is the fifth `get-` to `list-` rename of the step, after `listProjects`, `listFeedback`,
+`listArchivedFeedback` and `listDistinctPageUrls` in part 1.
+
+**Renamed procedure keys.** None. `projects.get`, `update`, `delete` and the five `projects.reviewer`
+keys each already say what their service says once the entity the router carries is dropped, and
+`regenerateApiKey` keeps the full service name because the entity is the API key, not the Project.
+Nine operations move without a single call-site key change.
+
+**Authorization, all of it in the services.** Every denial of this segment needs a loaded row, so
+none of them could stay at the transport edge. `protectedProcedure` answers identity alone and no
+`UNAUTHORIZED`, rate limit or plan limit is involved.
+
+| Denial                | Where it lives now                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| "Project not found."  | `NotFoundError` in `listReviewers`, `createReviewer`, `getProject`, `updateProject`, `deleteProject`, `regenerateApiKey` |
+| "Reviewer not found." | `NotFoundError` in `revokeReviewer`, `restoreReviewer`, `deleteReviewer`                                                 |
+| "Access denied."      | `ForbiddenError` in all nine, after the membership lookup                                                                |
+
+The membership predicate is not uniform and is kept exactly as found: the two reads (`listReviewers`,
+`getProject`) accept any member of the Project's Organization, while the seven writes require
+`role: { in: ["owner", "admin"] }`. The three Reviewer writes reach the Organization through the
+Reviewer's `project` relation, the same shape as the Feedback writes of part 1.
+
+**No plan limit on reviewers.** The ticket asks that plan limit denials on reviewers stay in the
+procedure or a middleware. There are none: `createReviewer` was a plain `protectedProcedure`, nothing
+under `server/auth/subscription` counts Reviewers, and the reviewers UI has no plan gate. The
+criterion is satisfied vacuously and is recorded here so the absence is not read as an omission. If a
+Reviewer limit is added later, it belongs at the transport edge like the other plan denials, not in
+the service.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR` and no generic wrapper.
+Every `TRPCError` became the `DomainError` subclass of the same code with the same message, so no
+toast or form error changes wording.
+
+**Nothing reachable from an Inngest function throws a `DomainError`.** None of the nine services is
+imported by anything under `src/server/`, and none of them sends an Inngest event.
+
+**Services holding a database client.** All nine, since each holds a not-found branch and an
+authorization check. None is a pass-through read. No service receives the tRPC context or the
+session: the router passes `userId` and the parsed input as plain values, and each service imports
+`prisma` directly instead of reading it from `ctx`.
+
+**Output types.** The nine `inferProcedureOutput` aliases of the segment are gone. The two reads
+export `<Service>Output` derived from their own function: `ListReviewersOutput`, consumed by
+`reviewers-table.client.tsx`, which changes an import path and the type name, and `GetProjectOutput`,
+which has no importer and is kept because the read's return type is the type source of truth. The
+seven write aliases are dropped rather than replaced, as parts 1 and 2 did: no file imported any of
+them.
+
+**Schemas.** Seven new pure-Zod schema files, two moved. Six operations parsed an inline
+`z.object({ projectId })` or `z.object({ reviewerId })` in the procedure and now own a `*.schema.ts`
+next to their service; `create-reviewer.schema.ts` and `update-project.schema.ts` moved with their
+service. `CreateReviewerInputs` and `UpdateProjectInputs` became `CreateReviewerInput` and
+`UpdateProjectInput`, which is the whole 15 to 13 burn-down of `require-schema-conventions` below.
+`update-project.schema.ts` keeps its `DomainSchema` import from `_domains/project/normalize-domain`:
+it is a Zod schema with no server-only dependency, so the file stays pure-Zod.
+
+**Tests.** Three colocated files, eleven cases, all driven through the trailing database client with
+no tRPC context built. `create-reviewer.test.ts` (4) pins the not-found and non-privileged denials,
+the owner/admin predicate, and the fact that only the SHA-256 hash of the returned token is
+persisted while the share URL carries the raw one. `revoke-reviewer.test.ts` (3) pins the "load the
+Reviewer, then its Project's Organization" shape. `get-project.test.ts` (4) pins the any-role read
+predicate, the two denials, and the projection that keeps `apiKeyHash` out of the response. Between
+them they cover the three authorization shapes of the segment.
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| 1 role suffixes                      | 22 files, down from 31, exactly the operations issues #77 to #79 own          |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` (#78) |
+| 3 `_constants/` inside a scope       | nothing                                                                       |
+| 4 `*.types.ts`                       | nothing                                                                       |
+| 5 routers in a bucket or a feature   | nothing                                                                       |
+| 6 tRPC imported by a service         | nothing                                                                       |
+| 7 `TRPCError` in a service           | nothing                                                                       |
+| 8 `'use server'` in a service/router | nothing: the eleven moved modules all dropped the directive                   |
+| 9 Prisma outside a service           | 21 files, down from 30, the same set as check 1 minus the scope router        |
+| 10 `inferProcedureOutput`            | 22 files, down from 31, all owned by the later parts                          |
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 94 app
+tests (11 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **102 problems, 0
+errors, 102 warnings** (88 `no-raw-tailwind-colors` / 13 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 2 from the 104 of part 2. `npx next build` compiles and still
+lists `/inbox`, `/reviewers` and `/settings`; `pnpm build` is refused by the sandbox, as the earlier
+entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                   | Result                                                                        |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `GET …projects.get`, `projects.reviewer.list`                           | `401 UNAUTHORIZED`, each key resolves and `protectedProcedure` guards         |
+| `POST …projects.update`, `projects.delete`, `projects.regenerateApiKey` | `401 UNAUTHORIZED`, same                                                      |
+| `POST …projects.reviewer.create`, `revoke`, `restore`, `delete`         | `401 UNAUTHORIZED`, same                                                      |
+| `GET …projects.regenerateApiKey`                                        | `405` mutation-over-GET, so the key is mounted as a mutation                  |
+| `POST …projects.listReviewers`                                          | `404 No procedure found on path`, no stray key was introduced                 |
+| `GET …projects.github.getLink`, `projects.feedback.list`                | `401 UNAUTHORIZED`, the unmigrated and already-migrated siblings both resolve |
+| `GET /api/v1/agent/feedbacks` with no bearer token                      | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged               |
+| `GET /reviewers`, `GET /settings` signed out                            | `307` to `/login`, the page guards are unchanged                              |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+user can sign in and no Project can be rendered. Creating a reviewer and copying its share link,
+revoking and restoring it, deleting it, renaming the Project, regenerating the API key and deleting
+the Project are on the QA checklist of issue #76.
+
+**Left for the maintainer.** Nothing new. The now-empty `(project)/_utils/` folder recorded by part 1
+is still there: the sandbox refuses `rmdir`.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.

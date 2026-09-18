@@ -9,4 +9,4 @@ export const UpdateProjectSchema = z.object({
   widgetEnabled: z.boolean(),
 });
 
-export type UpdateProjectInputs = z.infer<typeof UpdateProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;

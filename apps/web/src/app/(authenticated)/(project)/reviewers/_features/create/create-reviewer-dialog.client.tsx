@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  CreateReviewerInputs,
+  CreateReviewerInput,
   CreateReviewerSchema,
-} from "@/app/(authenticated)/(project)/reviewers/_features/create/create-reviewer.schema";
+} from "@/app/(authenticated)/(project)/reviewers/_services/create-reviewer.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +42,7 @@ export function CreateReviewerDialog({
   const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
 
-  const form = useForm<CreateReviewerInputs>({
+  const form = useForm<CreateReviewerInput>({
     resolver: zodResolver(CreateReviewerSchema),
     defaultValues: { projectId, name: "" },
   });
@@ -63,7 +63,7 @@ export function CreateReviewerDialog({
     }),
   );
 
-  const onSubmit = (data: CreateReviewerInputs) => {
+  const onSubmit = (data: CreateReviewerInput) => {
     createReviewer.mutate(data);
   };
 
@@ -89,7 +89,7 @@ export function CreateReviewerDialog({
             className="flex flex-col gap-4"
           >
             {form.formState.errors.root && (
-              <p className="text-destructive text-sm">
+              <p className="text-sm text-destructive">
                 {form.formState.errors.root.message}
               </p>
             )}

@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  UpdateProjectInputs,
+  UpdateProjectInput,
   UpdateProjectSchema,
-} from "@/app/(authenticated)/(project)/settings/_features/update/update-project.schema";
+} from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -62,7 +62,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
     }),
   );
 
-  const form = useForm<UpdateProjectInputs>({
+  const form = useForm<UpdateProjectInput>({
     resolver: zodResolver(UpdateProjectSchema),
     defaultValues: {
       projectId,
@@ -80,7 +80,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
       : undefined,
   });
 
-  const onSubmit = (data: UpdateProjectInputs) => {
+  const onSubmit = (data: UpdateProjectInput) => {
     updateProject.mutate(data);
   };
 
@@ -100,7 +100,7 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
 
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-medium">Project ID</Label>
-          <CopyableText className="bg-muted w-fit rounded-md px-3 py-1.5 font-mono text-sm">
+          <CopyableText className="w-fit rounded-md bg-muted px-3 py-1.5 font-mono text-sm">
             {project?.publicId ?? "..."}
           </CopyableText>
         </div>
