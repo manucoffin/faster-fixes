@@ -30,3 +30,7 @@ export async function getOrCreateImportReviewer(
     data: { projectId, name, token: tokenHash, isActive: true },
   });
 }
+
+export type GetOrCreateImportReviewerOutput = Awaited<
+  ReturnType<typeof getOrCreateImportReviewer>
+>;

@@ -1,2 +1,2 @@
-export { createFeedbacks as POST } from "./_utils/create-feedbacks";
-export { listFeedbacks as GET } from "./_utils/list-feedbacks";
+export { createFeedbacks as POST } from "./_services/create-feedbacks";
+export { listFeedbacks as GET } from "./_services/list-feedbacks";

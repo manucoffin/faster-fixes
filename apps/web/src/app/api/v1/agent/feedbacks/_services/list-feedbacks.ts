@@ -3,14 +3,18 @@ import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
-import { agentError } from "../../_utils/agent-error";
-import { ListFeedbacksQuerySchema } from "../../_utils/agent.schema";
+import { agentError } from "../../_helpers/agent-error";
+import { resolveProjectId } from "../../_helpers/resolve-project-id";
+import { ListFeedbacksQuerySchema } from "../../_services/agent.schema";
 import {
   isAuthFailure,
   requireAgentAuth,
-} from "../../_utils/require-agent-auth";
-import { resolveProjectId } from "../../_utils/resolve-project-id";
+} from "../../_services/require-agent-auth";
 
+// The agent API answers with a `NextResponse` rather than a data object: its
+// handlers are the transport edge, and step 4 is what gives them a service
+// layer to return plain data from. The derived output type below is still the
+// read's type source of truth, it just describes a response for now.
 export async function listFeedbacks(req: NextRequest) {
   const auth = await requireAgentAuth(
     req.headers.get("authorization"),
@@ -92,3 +96,5 @@ export async function listFeedbacks(req: NextRequest) {
     count: mapped.length,
   });
 }
+
+export type ListFeedbacksOutput = Awaited<ReturnType<typeof listFeedbacks>>;

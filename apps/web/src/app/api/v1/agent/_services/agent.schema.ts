@@ -10,9 +10,18 @@ export const ListFeedbacksQuerySchema = z.object({
   format: z.enum(["json", "markdown"]).default("json"),
 });
 
+export type ListFeedbacksQueryInput = z.infer<typeof ListFeedbacksQuerySchema>;
+
+// `format` carries a default, so a caller may omit it.
+export type ListFeedbacksQueryValues = z.input<typeof ListFeedbacksQuerySchema>;
+
 export const UpdateFeedbackStatusSchema = z.object({
   status: FeedbackStatusEnum,
 });
+
+export type UpdateFeedbackStatusInput = z.infer<
+  typeof UpdateFeedbackStatusSchema
+>;
 
 export const FeedbackIdSchema = z.string().uuid();
 
@@ -41,3 +50,5 @@ export const CreateFeedbacksSchema = z.object({
   source: z.string().trim().min(1).max(50).optional(),
   feedbacks: z.array(FeedbackItemSchema).min(1).max(100),
 });
+
+export type CreateFeedbacksInput = z.infer<typeof CreateFeedbacksSchema>;

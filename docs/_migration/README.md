@@ -73,6 +73,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                                                                               |
 | `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                                                                                   |
 | `(authenticated)/(project)`    | 3    | `f3fca41` | The same nine, on the whole Project scope: the inbox (`4f4a646`, `08563bb`), reviewers and core settings (`3e03177`), the GitHub and Slack links (`3f60bf9`), the Jira links (`47c4911`) and the Linear links. The `(authenticated)` entry keeps its `(project)` ignore, so the lock comes from this entry. |
+| `api/v1/agent`                 | 3    | `PENDING` | The same nine, on the whole REST agent API tier: the three `_utils/` folders became `_services/` and `_helpers/`. The handlers keep their own error helper and their `NextResponse` result style, so no rule had to be disabled for them.                                                                   |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -3054,6 +3055,114 @@ Picking a team with its default state, labels and priority, toggling auto-create
 stale-ID warning by saving again, and unlinking are on the QA checklist of issue #79.
 
 **Left for the maintainer.** Nothing new: the same two empty folders recorded by parts 1 and 5.
+
+### `api/v1/agent`, the REST agent API buckets (issue #80)
+
+Commit `PENDING`. The last scope of step 3 and the only one with no tRPC in it. Nothing was extracted
+and nothing was reclassified: the ticket is a bucket rename, so that the structural checks of the
+final lock clear without the agent API growing a service layer before step 4 gives it one.
+
+**Buckets.** Three `_utils/` folders, ten files, all moved with `git mv`.
+
+| From                                                      | To                                                           | Why                                  |
+| --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------ |
+| `agent/_utils/agent-error.ts`                             | `agent/_helpers/agent-error.ts`                              | pure: builds a `NextResponse`, no IO |
+| `agent/_utils/resolve-project-id.ts`                      | `agent/_helpers/resolve-project-id.ts`                       | pure: matches an ID against a list   |
+| `agent/_utils/agent.schema.ts`                            | `agent/_services/agent.schema.ts`                            | schemas live next to their services  |
+| `agent/_utils/require-agent-auth.ts`                      | `agent/_services/require-agent-auth.ts`                      | IO: token lookup, plan, rate limit   |
+| `agent/feedbacks/_utils/list-feedbacks.ts`                | `agent/feedbacks/_services/list-feedbacks.ts`                | IO                                   |
+| `agent/feedbacks/_utils/create-feedbacks.ts`              | `agent/feedbacks/_services/create-feedbacks.ts`              | IO                                   |
+| `agent/feedbacks/_utils/get-or-create-import-reviewer.ts` | `agent/feedbacks/_services/get-or-create-import-reviewer.ts` | IO                                   |
+| `…/[id]/status/_utils/update-feedback-status.ts`          | `…/[id]/status/_services/update-feedback-status.ts`          | IO                                   |
+
+No file was renamed: every basename already satisfied `services-verb-prefix` (`require-`, `list-`,
+`create-`, `get-`, `update-`). The two `route.ts` files and the four cross-folder imports were
+repointed; nothing outside `src/app/api/v1/agent/` referenced any of the ten files, so the published
+packages and the MCP server are untouched by construction.
+
+**Behaviour.** Unchanged, and deliberately so. `agentError` and the `ResolvedAgentToken | NextResponse`
+result style stay exactly as they were, no `DomainError` is introduced, and no path, payload, status
+code, error code or rate-limit header moved. The only edits inside a file body are import paths, the
+type exports below, one comment, and Prettier reflowing two files that were already unformatted at
+`HEAD` (the `check-agent-scope` import in `require-agent-auth.ts`, the `inngest.send` payload in
+`update-feedback-status.ts`).
+
+**Schemas.** `agent.schema.ts` is the one file the whole scope shares, and it was the last
+`require-schema-conventions` warning in the repo: four exported `*Schema` consts and no `Input` type.
+It gained `ListFeedbacksQueryInput`, `UpdateFeedbackStatusInput` and `CreateFeedbacksInput`, plus
+`ListFeedbacksQueryValues` because `format` carries a `.default("json")`. `FeedbackIdSchema` gets no
+companion: it is a bare `z.string().uuid()` whose input type is `string`. The file was already
+pure-Zod (its only non-Zod import is the Feedback status enum from the `feedback` domain), so
+`schema-must-be-pure-zod` needed nothing. It stays one shared file rather than one schema file per
+service: splitting it is an edit no consumer asks for, and the rule does not require it.
+
+**Output types.** Two files match the read vocabulary of `require-trpc-output-type` and now export a
+derived return type: `GetOrCreateImportReviewerOutput` and `ListFeedbacksOutput`. The first is an
+ordinary Reviewer row. The second is a `NextResponse`, because the agent API answers at the transport
+edge and has no data-returning service under its handler until step 4. That is recorded in a comment
+above `listFeedbacks` rather than hidden behind an exemption: the alias is still the read's type
+source of truth, it just describes a response today. No rule was disabled for this scope.
+
+**Scope lock.** `"api/v1/agent"` is an entry of `migratedScopes`, which raises the nine step 3 rules
+to `error` over the whole tier. Verified rather than assumed, with
+`ESLINT_AGENT_RULES=1 npx eslint --print-config src/app/api/v1/agent/feedbacks/_services/list-feedbacks.ts`
+from `apps/web`: all nine resolve to `2`.
+
+**Per-scope "must be gone" checks**, restricted to `api/v1/agent`:
+
+| Check                                | Result                             |
+| ------------------------------------ | ---------------------------------- |
+| 1 role suffixes                      | nothing                            |
+| 2 old buckets                        | nothing, down from three `_utils/` |
+| 3 `_constants/` inside a scope       | nothing                            |
+| 4 `*.types.ts`                       | nothing                            |
+| 5 routers in a bucket or a feature   | nothing: the scope has no router   |
+| 6 tRPC imported by a service         | nothing                            |
+| 7 `TRPCError` in a service           | nothing                            |
+| 8 `'use server'` in a service/router | nothing                            |
+| 9 Prisma outside a service           | nothing, down from 4               |
+| 10 `inferProcedureOutput`            | nothing                            |
+
+Check 9 run repo-wide now returns nothing as well: these four files were its last entries outside the
+excluded `route.ts` handlers. Check 2 run repo-wide is down to `(auth)/_utils/` and
+`(public)/_features/github-stars/_utils/`, which hold only `_deprecated_trpc-router.ts` stubs and are
+issue #81's to delete.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 120 app
+tests plus the ESLint rule and config tests (33 + 16 files); `pnpm lint:agent-rules` **89 problems, 0
+errors, 89 warnings** (88 `no-raw-tailwind-colors` / 1 `require-use-client-suffix`,
+`src/lib/trpc/trpc-provider.tsx`, outside `src/app`), down 1 from the 90 of the Project scope part 6.
+`require-schema-conventions` is at **0** for the first time since the baseline of 28. Every rule of
+step 3 now reports zero warnings; the 89 left are the two rules outside this step's definition of
+done. `npx next build` compiles and still lists `/api/v1/agent/feedbacks` and
+`/api/v1/agent/feedbacks/[id]/status`; `pnpm build` is refused by the sandbox, as the earlier entries
+record.
+
+**Smoke, walked on 2026-09-18 against `next dev` on port 3111 with dummy environment values:**
+
+| Check                                                                 | Result                                                            |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `GET /api/v1/agent/feedbacks?project=proj_x`, no bearer token         | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged   |
+| `POST /api/v1/agent/feedbacks`, no bearer token                       | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged   |
+| `POST /api/v1/agent/feedbacks/<uuid>/status`, no bearer token         | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged   |
+| `GET /api/v1/agent/feedbacks/<uuid>/status`                           | `405`, the route still exports `POST` only                        |
+| response headers of the 401                                           | `content-type: application/json`, no rate-limit header, as before |
+| `GET …/feedbacks` with a syntactically valid but unknown bearer token | reaches Postgres and fails there, see below                       |
+
+The last row is the useful one for a rename ticket: the server stack trace reads
+`listFeedbacks (src/app/api/v1/agent/feedbacks/_services/list-feedbacks.ts) → requireAgentAuth
+(src/app/api/v1/agent/_services/require-agent-auth.ts) → resolveAgentToken`, so the moved modules
+resolve and the call chain is intact. It ends in `DriverAdapterError: DatabaseNotReachable`.
+
+**Not smoked here, and why.** The sandbox has no Postgres, so no Agent token exists and a real
+`feedbacks:read` listing or a `feedbacks:update_status` write cannot be issued: every authenticated
+path stops at the token lookup. Listing Feedback in both `json` and `markdown` format, the
+`page_url` and `status` filters, a bulk create with its plan-limit rejection, and a status update with
+its `feedback/status-changed` fan-out are on the QA checklist of issue #80.
+
+**Left for the maintainer.** Nothing new. The three `_utils/` folders of the agent API are gone from
+disk, stubs included: every file in them had surviving logic and moved with `git mv`, so this scope
+leaves no `_deprecated_` file behind.
 
 ### Corrections to the recipe found by the pilot
 

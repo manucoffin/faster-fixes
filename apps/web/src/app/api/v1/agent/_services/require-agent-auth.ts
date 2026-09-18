@@ -1,7 +1,4 @@
-import {
-  type AgentScope,
-  hasScope,
-} from "@/server/api/check-agent-scope";
+import { type AgentScope, hasScope } from "@/server/api/check-agent-scope";
 import { checkRateLimit } from "@/server/api/check-rate-limit";
 import {
   type ResolvedAgentToken,
@@ -12,7 +9,7 @@ import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { isCloud } from "@/utils/environment/env";
 import { prisma } from "@workspace/db";
 import { NextResponse } from "next/server";
-import { agentError } from "./agent-error";
+import { agentError } from "../_helpers/agent-error";
 
 type AgentRateLimitKey = "agent:read" | "agent:write";
 

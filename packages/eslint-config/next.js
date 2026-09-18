@@ -78,6 +78,9 @@ export const migratedScopes = [
   "_domains/subscription",
   "_domains/user",
   "onboarding",
+  // The REST agent API. Its handlers keep their own error helper and their
+  // `NextResponse` result style until step 4; only the bucket names are final.
+  "api/v1/agent",
   // The admin root (its router), the dashboard route group and the users scope
   // are all migrated, so the whole tier is locked without an ignore.
   "admin",
