@@ -1,6 +1,6 @@
 # Architecture: app folder structure
 
-Where code goes in `apps/web/src/app/`. Authority: `docs/adr/0010-app-folder-architecture.md` and `docs/architecture/migration-kit/adrs/server-file-conventions.md`. The data/IO layer itself is specified in [backend.md](backend.md).
+Where code goes in `apps/web/src/app/`. Authority: `docs/adr/0010-app-folder-architecture.md` and `docs/adr/0011-server-file-conventions.md`. The data/IO layer itself is specified in [backend.md](backend.md).
 
 `apps/web/src/app/` is organised into **two tiers** with the **same bucket structure** at each tier:
 

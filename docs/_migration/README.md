@@ -237,3 +237,31 @@ pnpm lint:agent-rules --force 2>&1 | /usr/bin/grep -o 'local/[a-z-]*' | sort | u
 Verified at the same commit: `pnpm typecheck` clean (4 tasks), `pnpm lint` 0 warnings (5 tasks), `pnpm test` 173 ESLint rule and config tests plus the 4 app tests, `pnpm lint:agent-rules` 0 errors.
 
 A fresh clone needs `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and, in `apps/web`, `npx next typegen` before `pnpm typecheck` passes: the generated Prisma client, the widget package builds and the Next.js route types are all untracked. Without them `tsc` reports errors that have nothing to do with the change under test.
+
+## Step 3 prerequisite: the two kit ADRs (issue #56)
+
+Committed on 2026-09-18, at the numbers the rule citations already reserved above, so `local-rules/adr-citations.test.js` now checks committed files rather than the reservation table:
+
+| ADR                                                    | Source                                                                | Local addition                                                                                                               |
+| ------------------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `docs/adr/0011-server-file-conventions.md`             | `migration-kit/adrs/server-file-conventions.md`, verbatim             | A "Deviations in this repo" section: the derived read type is `<Service>Output`, and the ADRs this one relates to by number. |
+| `docs/adr/0012-domain-errors-and-transport-mapping.md` | `migration-kit/adrs/domain-errors-and-transport-mapping.md`, verbatim | A "Status in this repo" section: what is live since step 3 (commit `f2c8d60`) and what step 4 adds.                          |
+
+The kit body of each file is copied unchanged, following the precedent of ADR-0010, which is byte-identical to its kit source. The local sections are additive, so a later diff against the kit stays readable.
+
+### Why 0012 lands in step 3 rather than step 4
+
+The kit commits the domain errors ADR with step 4. Here the vocabulary and the tRPC middleware ship in step 3 as a prerequisite, so the document that justifies them has to be local before the first service is extracted. The ADR carries a status note separating what is live from what step 4 adds (route handler responses, Next.js interrupts, non-retriable Inngest failures, the server action branch, 500 masking and logging, always-on `services-no-bare-error`, retiring the six legacy error classes). `04-domain-errors.md` now updates that note instead of creating a second ADR.
+
+### `<Service>Output`, the one naming deviation
+
+The kit names a read service's derived type after the function (`export type ListUsers = ...`). This repo keeps the `Output` suffix all 95 existing `inferProcedureOutput` aliases already use (190 occurrences counting their imports, which is the number the spec quotes) (`GetMrrOutput`, `GetPaginatedUsersOutput`), so a consumer changes an import path and nothing else when step 3 moves the type onto the service. `require-trpc-output-type` inspects the right-hand side, not the name, so both spellings lint clean; the convention is a review concern. Recorded in ADR-0011 and in `rules/backend.md`.
+
+### Documents aligned with the vocabulary landing in step 3
+
+- `docs/architecture/target-architecture.md`: the core-files table points at the two committed ADRs, the status paragraph says `src/server/errors/domain-errors.ts` and the tRPC mapping are live, the services layer spells the derived type `<Service>Output`, and the authorization note stops promising `ForbiddenError` "in step 4".
+- `.agents/skills/coding-standards/SKILL.md`: the migration status section says step 3 is running, its prerequisites have landed, and any service written now throws domain errors.
+- `rules/errors.md`: the "lands in step 4" banner becomes "what exists today", separating the vocabulary and the tRPC mapping from the boundary helpers, the masking and the boundary files.
+- `rules/backend.md` and `rules/architecture.md`: authority links point at `docs/adr/0011-...` and `docs/adr/0012-...`, and the backend example now shows a service throwing `NotFoundError` and exporting `GetAnimalOutput`, with the note that identity, rate limiting and plan limits stay in the procedure.
+
+`CONTEXT.md` is unchanged: Service, Helper and Scope are architecture vocabulary, not glossary terms.

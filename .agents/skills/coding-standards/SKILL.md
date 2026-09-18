@@ -17,9 +17,18 @@ are already locked, and what the next step needs.
 
 Steps 1 and 2 are done. `src/app/_domains/` holds the domain-bound code behind a public `index.ts`
 per domain, and root `_components/`, `_providers/` and `_constants/` hold the domain-agnostic code.
-Step 3 reshapes the inside of each domain, so a domain still carries its pre-migration file layout
-(`_utils/`, `_constants/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`) and has no `_services/` folder
-yet. `src/server/**` still holds domain logic that step 3 moves into its domain.
+
+Step 3 is running. Its prerequisites have landed: the `DomainError` vocabulary exists at
+`@/server/errors/domain-errors` and the base tRPC procedure maps it back to a `TRPCError` with the
+same code and message, so **any service you write throws domain errors, not `TRPCError` and not a
+bare `Error`** (see `rules/backend.md` and `rules/errors.md`). The conventions are pinned by
+ADR-0011 (server file conventions) and ADR-0012 (domain errors) in `docs/adr/`.
+
+Step 3 then reshapes the inside of each scope one at a time, so a scope it has not reached still
+carries its pre-migration file layout (`_utils/`, `_constants/`, `*.trpc.query.ts`,
+`*.trpc.mutation.ts`) and has no `_services/` folder. `src/server/**` still holds domain logic that
+step 3 moves into its domain. The remaining error boundaries (route handler responses, Next.js
+interrupts, non-retriable Inngest failures) and the masking of 500 messages arrive in step 4.
 
 While the migration runs:
 

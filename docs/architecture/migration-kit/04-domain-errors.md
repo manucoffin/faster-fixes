@@ -2,7 +2,7 @@
 
 > End state: expected failures are `DomainError` subclasses thrown by services and mapped exactly once at every transport boundary; unexpected errors are masked and logged; the client displays errors through four fixed channels behind a complete boundary hierarchy; any legacy error vocabulary is gone; the error lint rules are always on.
 
-Authority: `adrs/domain-errors-and-transport-mapping.md` (commit it with this step).
+Authority: `adrs/domain-errors-and-transport-mapping.md`. `[Faster Fixes]` Already committed as `docs/adr/0012-domain-errors-and-transport-mapping.md` with the step 3 prerequisites; this step updates its status note instead of creating a second ADR.
 
 ## Prerequisites
 
@@ -109,4 +109,4 @@ Boundaries first, masking last. Add the helpers and adopt them at every route ha
 - The masking formatter is active and the tRPC `onError` hook logs.
 - All five boundary files exist and render the shared error screen.
 - Every "must be gone" check returns nothing.
-- The ADR `domain-errors-and-transport-mapping.md` is committed in the project's `docs/adr/`.
+- The ADR `docs/adr/0012-domain-errors-and-transport-mapping.md` no longer carries a "step 4 adds" status note: everything it describes is live.

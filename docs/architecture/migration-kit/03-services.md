@@ -2,7 +2,7 @@
 
 > End state: every scope has the final bucket set. All data and IO operations are verb-prefixed functions in `_services/`, tRPC routers are thin files at the scope root composing hierarchically, schemas live in `_services/` as pure Zod, `_utils/` is gone in favour of `_helpers/` and `_types/`, hooks live in their features. Services never import tRPC and throw `DomainError` subclasses. The rules that guard all this are locked to `error`.
 
-Authority: `adrs/server-file-conventions.md` and the vocabulary part of `adrs/domain-errors-and-transport-mapping.md`. Commit the first ADR with this step; the second is committed in step 4 but its **vocabulary and tRPC middleware are a prerequisite of this step**.
+Authority: `adrs/server-file-conventions.md` and the vocabulary part of `adrs/domain-errors-and-transport-mapping.md`. `[Faster Fixes]` Both were committed with this step's prerequisites, as `docs/adr/0011-server-file-conventions.md` and `docs/adr/0012-domain-errors-and-transport-mapping.md`: the second one's **vocabulary and tRPC middleware are a prerequisite of this step**, so its authority has to be local before the first procedure is extracted, and step 4 only adds the remaining boundaries.
 
 ## Prerequisites
 

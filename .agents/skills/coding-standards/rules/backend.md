@@ -1,6 +1,6 @@
 # Backend: services and tRPC layer
 
-The data/IO layer lives in a per-scope `_services/` folder; tRPC is thin transport at the scope root. Authority: `docs/architecture/migration-kit/adrs/server-file-conventions.md`. Folder placement and the bucket set are in [architecture.md](architecture.md). Schema conventions are in [schemas.md](schemas.md).
+The data/IO layer lives in a per-scope `_services/` folder; tRPC is thin transport at the scope root. Authority: `docs/adr/0011-server-file-conventions.md`. Folder placement and the bucket set are in [architecture.md](architecture.md). Schema conventions are in [schemas.md](schemas.md).
 
 ## The `_services/` folder
 
@@ -21,7 +21,25 @@ The **folder** sets the layer (`_services/` = IO); the **verb** sets the directi
 ## Transport-agnostic services (Option B)
 
 - A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`). It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
-- The **type source of truth** is the service's return type: `Awaited<ReturnType<typeof getX>>`, exported from the service file. Do **not** use `inferProcedureOutput` as the canonical output type.
+- The **type source of truth** is the service's return type, exported from the service file as `<Service>Output`: `export type GetUserOutput = Awaited<ReturnType<typeof getUser>>`. Do **not** use `inferProcedureOutput` as the canonical output type.
+- A service **throws a `DomainError` subclass** for an expected failure, never `TRPCError` and never a bare `Error`. The vocabulary lives in `@/server/errors/domain-errors` (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) and exists since migration step 3, so an extracted service throws it from day one. The base tRPC procedure maps the code and the message back to a `TRPCError`, so no procedure try/catches for mapping. Authority: `docs/adr/0012-domain-errors-and-transport-mapping.md`; display channels in [errors.md](errors.md).
+
+```ts
+// _domains/animal/_services/get-animal.ts
+import { prisma } from "@workspace/db";
+
+import { NotFoundError } from "@/server/errors/domain-errors";
+
+export async function getAnimal(id: string) {
+  const animal = await prisma.animal.findUnique({ where: { id } });
+  if (!animal) throw new NotFoundError("Animal not found.");
+  return animal;
+}
+
+export type GetAnimalOutput = Awaited<ReturnType<typeof getAnimal>>;
+```
+
+- **Identity and transport policy stay in the procedure**: `UNAUTHORIZED`, rate limiting (`TOO_MANY_REQUESTS`) and plan-limit denials have no domain-error equivalent. An authorization check that needs a loaded resource (membership, ownership) belongs in the service that loads it, as a `ForbiddenError`.
 
 ## tRPC router
 
@@ -63,5 +81,6 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 `no-client-import-of-services` (exempts `*.schema.ts` and type-only imports), `services-no-trpc-import`,
 `schema-must-be-pure-zod`, `no-feature-nesting`, `services-verb-prefix`,
 `require-trpc-output-type` (inverted: service return-type export),
+`services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`),
 `require-use-client-suffix` (exempts `use-*`),
 `require-server-action-suffix` (always on, not agent-gated). See `packages/eslint-config/local-rules/`.

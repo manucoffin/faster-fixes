@@ -6,17 +6,17 @@ This document is the reference for the migration kit in `migration-kit/`. It des
 
 ## Core files (in this repo)
 
-| File                                                                          | Role                                                                        |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `docs/adr/0010-app-folder-architecture.md`                                    | Two tiers, buckets, per-domain public API. Committed as ADR 0010 in step 2. |
-| `docs/architecture/migration-kit/adrs/server-file-conventions.md`             | `_services/`, verb prefixes, thin routers. Becomes an ADR in step 3.        |
-| `docs/architecture/migration-kit/adrs/domain-errors-and-transport-mapping.md` | `DomainError` vocabulary and boundary mapping. Becomes an ADR in step 4.    |
-| `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md`       | When code earns a workspace package. Becomes an ADR in step 5.              |
-| `.claude/skills/coding-standards/`                                            | The rule files agents load while coding                                     |
-| `packages/eslint-config/next.js`                                              | Rule wiring and severity gating                                             |
-| `packages/eslint-config/local-rules/`                                         | The custom ESLint rules                                                     |
-| `apps/web/src/server/errors/`                                                 | Domain errors and boundary helpers. Created in step 3.                      |
-| `apps/web/src/server/trpc/trpc.ts`                                            | tRPC init, procedures, error middleware                                     |
+| File                                                                    | Role                                                                                                                           |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/adr/0010-app-folder-architecture.md`                              | Two tiers, buckets, per-domain public API. Committed as ADR 0010 in step 2.                                                    |
+| `docs/adr/0011-server-file-conventions.md`                              | `_services/`, verb prefixes, thin routers. Committed as ADR 0011 in step 3.                                                    |
+| `docs/adr/0012-domain-errors-and-transport-mapping.md`                  | `DomainError` vocabulary and boundary mapping. Committed as ADR 0012 in step 3, with the remaining boundaries added in step 4. |
+| `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md` | When code earns a workspace package. Becomes an ADR in step 5.                                                                 |
+| `.claude/skills/coding-standards/`                                      | The rule files agents load while coding                                                                                        |
+| `packages/eslint-config/next.js`                                        | Rule wiring and severity gating                                                                                                |
+| `packages/eslint-config/local-rules/`                                   | The custom ESLint rules                                                                                                        |
+| `apps/web/src/server/errors/`                                           | Domain errors (step 3) and the boundary helpers (step 4).                                                                      |
+| `apps/web/src/server/trpc/trpc.ts`                                      | tRPC init, procedures, error middleware                                                                                        |
 
 ## How to read this document
 
@@ -26,7 +26,7 @@ Every statement falls into one of three classes:
 - **If present**: applies only when the project has the underlying mechanism (marked `[if present]`).
 - **Faster Fixes-specific**: holds here for local reasons and is not part of the exported architecture (marked `[Faster Fixes]`).
 
-**Status.** This is the end state, not the current state of `apps/web`. Steps 1 and 2 of the kit have run: `src/app/_domains/` holds the domain-bound code behind a per-domain `index.ts`, and the root `_components/`, `_providers/` and `_constants/` folders hold the domain-agnostic code. Steps 3 to 5 have not run: the per-scope `_services/` folders and `src/server/errors/` do not exist yet, domains keep their pre-migration internal layout (`_utils/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`), and `src/server/**` still holds domain logic. New code follows this document; inside a scope that has not been migrated, follow the folder's existing conventions and do not mix the two. `docs/_migration/README.md` tracks what is migrated and what is not.
+**Status.** This is the end state, not the current state of `apps/web`. Steps 1 and 2 of the kit have run: `src/app/_domains/` holds the domain-bound code behind a per-domain `index.ts`, and the root `_components/`, `_providers/` and `_constants/` folders hold the domain-agnostic code. Step 3 has started with its prerequisites: `src/server/errors/domain-errors.ts` holds the `DomainError` vocabulary and the tRPC base procedure maps it, so a service may throw a domain error from the first extraction on. The rest of steps 3 to 5 has not run: the per-scope `_services/` folders do not exist yet, the boundary helpers next to `domain-errors.ts` arrive in step 4, domains keep their pre-migration internal layout (`_utils/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`), and `src/server/**` still holds domain logic. New code follows this document; inside a scope that has not been migrated, follow the folder's existing conventions and do not mix the two. `docs/_migration/README.md` tracks what is migrated and what is not.
 
 The frontend and code-shape conventions (React components, `matchQueryStatus`, forms, Tailwind, TypeScript style, file size) are **not** repeated here. They live in the `coding-standards` skill, which is copied alongside this document. This document covers structure, layers, boundaries, and enforcement.
 
@@ -123,7 +123,7 @@ When a route feature gains a second consumer in a different route, **move the wh
 
 ## The services layer
 
-`_services/` is the data/IO layer of a scope. Authority: `docs/architecture/migration-kit/adrs/server-file-conventions.md`.
+`_services/` is the data/IO layer of a scope. Authority: `docs/adr/0011-server-file-conventions.md`.
 
 - **Plain-named after the export, with a verb prefix.** `get-user.ts` exports `getUser`. No role suffixes (`*.server.query.ts`, `*.trpc.mutation.ts` are gone).
 - **All data operations live here, even single-use.** Clutter is controlled by route-tree granularity (each segment owns its own `_services/` and router) and, secondarily, by subfolders when three or more files cluster.
@@ -131,7 +131,7 @@ When a route feature gains a second consumer in a different route, **move the wh
 - **Writes use an open verb set.** Generic CRUD by default (`create-`, `update-`, `delete-`, `upsert-`, `send-`); a precise domain verb (`archive-`, `publish-`, `book-`) when the operation is a distinct domain transition. A write verb never collides with a read verb. Synonyms of `update` (`edit-`, `modify-`, `save-`, `change-`) are banned. `handle-` is reserved for event and webhook orchestrations.
 - **A file is a read iff it performs no writes.** The folder sets the layer, the verb sets the direction.
 - **Transport-agnostic.** A service never imports tRPC. It is callable from a procedure, an Inngest job, a route handler, or a server component without an HTTP round-trip.
-- **The service return type is the type source of truth.** Each read exports `export type GetX = Awaited<ReturnType<typeof getX>>`. `inferProcedureOutput` is never the canonical output type.
+- **The service return type is the type source of truth.** Each read exports its return type as `<Service>Output`: `export type GetXOutput = Awaited<ReturnType<typeof getX>>`. `inferProcedureOutput` is never the canonical output type. `[Faster Fixes]` The `Output` suffix is this repo's spelling of the kit's bare alias, recorded in ADR-0011.
 - **Per-use-case named reads, not one polymorphic read.** Shared `select` fragments factor the column lists. The same `get-user.ts` may exist in two scopes; the folder disambiguates. Add a `-for-<shape>` qualifier only when two shapes of one read coexist in the same `_services/`.
 - **Schemas live in `_services/` as `*.schema.ts`** and must stay pure Zod: no `@/server/` import, no Prisma client, no sibling non-schema service. Generated Prisma enums are allowed via `z.enum(PrismaEnum)`. One schema per file unless tightly coupled. Name: PascalCase `XSchema`, type `XInput` (`z.infer`), plus `XValues` (`z.input`) only when defaults or coercions make input and output diverge.
 - **Helpers versus services.** Pure logic is a helper. Predicates split by IO, not by verb: `isSubscriptionActive(sub)` is a helper, `hasActiveSubscription(userId)` is a service. A pure predicate never fetches its own data.
@@ -167,11 +167,11 @@ export const appRouter = router({
 
 ## Domain errors and transport mapping
 
-Authority: `docs/architecture/migration-kit/adrs/domain-errors-and-transport-mapping.md`. Expected failures are domain facts, not transport facts, and there is exactly one vocabulary for them.
+Authority: `docs/adr/0012-domain-errors-and-transport-mapping.md`. Expected failures are domain facts, not transport facts, and there is exactly one vocabulary for them.
 
 ### The vocabulary
 
-`src/server/errors/domain-errors.ts` is a zero-import module:
+`src/server/errors/domain-errors.ts` is a zero-import module, live since the step 3 prerequisites:
 
 ```ts
 export type DomainErrorCode =
@@ -320,7 +320,7 @@ A rule that cannot yet pass everywhere is introduced at `warn`, then locked to `
 These statements hold in this repo and are **not** part of the exported architecture. A project adopting the architecture decides each one for itself.
 
 - **Inngest is present.** Durable jobs live under `src/server/inngest/`, so the Inngest boundary row of the mapping table and the `*.inngest.ts` service convention are live here rather than `[if present]`.
-- **No authorization library.** There is no Kilpi and no policy layer. Authorization is asserted in the tRPC procedure; a denial becomes a `ForbiddenError` (403) once the vocabulary lands in step 4.
+- **No authorization library.** There is no Kilpi and no policy layer. Authorization is asserted in the tRPC procedure or, when it needs a loaded resource, in the service that loads it; a denial is a `ForbiddenError` (403), available since the vocabulary landed in step 3.
 - **No `next-safe-action`.** There is no action client, so the server-action row of the mapping table has no implementation here. `require-server-action-suffix` still runs as an always-on error, so a module-level `'use server'` cannot appear under an unmarked filename.
 - **No cache tags.** The app uses no `unstable_cache` and no tag-based revalidation, so the "Cache tags" section is inert and `src/server/cache/` does not exist.
 - **English user-facing copy**, professional and understated, no exclamation marks, no em dash character. Identifiers, comments, filenames and schemas are English too.

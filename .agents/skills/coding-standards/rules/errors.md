@@ -1,9 +1,13 @@
 # Error display conventions
 
-How errors surface to the user. Implements `docs/architecture/migration-kit/adrs/domain-errors-and-transport-mapping.md`.
+How errors surface to the user. Implements `docs/adr/0012-domain-errors-and-transport-mapping.md`.
 
-> The `@/server/errors/*` modules below land in migration step 4. Until then this file is the
-> target convention, not the current state of the repo.
+> **What exists today.** The vocabulary (`@/server/errors/domain-errors`) and the tRPC mapping
+> middleware landed with the step 3 prerequisites: a service throws a `DomainError` subclass from
+> its first extraction, and tRPC surfaces the same code and the same message. The other
+> `@/server/errors/*` modules (`http-response`, `next-interrupts`, `non-retriable`), the masking of
+> `INTERNAL_SERVER_ERROR` messages and the full route boundary hierarchy land in migration step 4,
+> so those parts below are the target convention, not the current state of the repo.
 
 Errors travel from a service throw, through a transport boundary, to one of four client display channels. Services throw `DomainError` subclasses (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) from `@/server/errors/domain-errors`; each boundary maps the code to its transport. Unexpected (non-`DomainError`) failures are masked as a generic message and logged server-side.
 
@@ -11,7 +15,7 @@ Client code never imports `@/server/errors/*` and never relies on `instanceof Do
 
 ## The four display channels
 
-- **Mutations (tRPC mutation / server action): toast.** Read the message from the failed mutation/action and show it via the Sonner toast. The message is already final copy for `DomainError`s; `INTERNAL_SERVER_ERROR` arrives pre-masked as the generic masked message (step 4 defines the exact copy).
+- **Mutations (tRPC mutation / server action): toast.** Read the message from the failed mutation/action and show it via the Sonner toast. The message is already final copy for `DomainError`s; `INTERNAL_SERVER_ERROR` arrives pre-masked as the generic masked message once step 4 adds the masking, and carries the raw message until then.
 - **Queries (tRPC query): `matchQueryStatus`.** Handle the `Errored` branch declaratively (see [frontend.md](frontend.md)); render `error.message`, never a raw stack.
 - **Forms (invalid input): zod field errors.** Validation failures surface as per-field messages from the zod schema, not a toast. tRPC `BAD_REQUEST` with a `ZodError` cause is exposed under `error.data.zodError`.
 - **Render crashes and navigation interrupts: route boundaries.** `error.tsx` (render crash), `not-found.tsx` (`notFound()`), `forbidden.tsx` (`forbidden()`), `unauthorized.tsx` (`unauthorized()`). Root `error.tsx` / `global-error.tsx` are the catch-all; per-shell files override copy.
