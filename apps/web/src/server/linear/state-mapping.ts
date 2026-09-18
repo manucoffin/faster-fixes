@@ -1,4 +1,4 @@
-import type { FeedbackStatus } from "@/types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback/feedback-status";
 
 // Linear workflow state types are user-customizable in name but the type taxonomy
 // (triage|backlog|unstarted|started|completed|canceled) is fixed by Linear's API.

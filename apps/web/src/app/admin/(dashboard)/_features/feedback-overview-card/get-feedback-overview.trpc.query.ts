@@ -1,5 +1,5 @@
 import { adminProcedure } from "@/server/trpc/trpc";
-import { FeedbackStatusEnum } from "@/types/feedback-status";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback/feedback-status";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { prisma } from "@workspace/db";
 

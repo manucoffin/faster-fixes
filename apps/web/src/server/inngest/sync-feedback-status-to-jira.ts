@@ -7,7 +7,7 @@ import {
   resolveJiraTransition,
 } from "@/server/jira/resolve-transition";
 import { getValidJiraAccessToken } from "@/server/jira/token-access";
-import type { FeedbackStatus } from "@/types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback/feedback-status";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

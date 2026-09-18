@@ -1,4 +1,4 @@
-import type { FeedbackStatus } from "@/types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback/feedback-status";
 import type { LinearClient } from "@linear/sdk";
 import {
   type LinearStateType,

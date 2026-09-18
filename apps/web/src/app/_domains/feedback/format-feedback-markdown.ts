@@ -117,9 +117,7 @@ export function formatFeedbackListAsMarkdown(
   feedbacks: FeedbackForMarkdown[],
 ): string {
   if (feedbacks.length === 0) return "No feedback items found.";
-  return feedbacks
-    .map((f) => formatFeedbackAsMarkdown(f))
-    .join("\n\n---\n\n");
+  return feedbacks.map((f) => formatFeedbackAsMarkdown(f)).join("\n\n---\n\n");
 }
 
 /**
