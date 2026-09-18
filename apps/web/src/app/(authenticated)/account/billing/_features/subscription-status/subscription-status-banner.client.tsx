@@ -9,8 +9,9 @@ import { ManageSubscriptionButton } from "../manage-subscription/manage-subscrip
 export const SubscriptionStatusBanner = () => {
   const trpc = useTRPC();
 
-  const getSubscriptionStatusQuery =
-    useQuery(trpc.authenticated.account.billing.subscription.status.queryOptions());
+  const getSubscriptionStatusQuery = useQuery(
+    trpc.authenticated.account.billing.subscription.getStatus.queryOptions(),
+  );
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;
@@ -39,9 +40,8 @@ export const SubscriptionStatusBanner = () => {
               <div>
                 <p className="font-semibold">Subscription canceled</p>
                 <p className="text-sm opacity-90">
-                  Your subscription will end on{" "}
-                  <strong>{formattedDate}</strong>. You will lose access to
-                  premium features after this date.
+                  Your subscription will end on <strong>{formattedDate}</strong>
+                  . You will lose access to premium features after this date.
                 </p>
               </div>
 
@@ -67,9 +67,8 @@ export const SubscriptionStatusBanner = () => {
               <div>
                 <p className="font-semibold">Free trial</p>
                 <p className="text-sm opacity-90">
-                  Your free trial ends on{" "}
-                  <strong>{formattedDate}</strong>. Your subscription will
-                  automatically renew on this date.
+                  Your free trial ends on <strong>{formattedDate}</strong>. Your
+                  subscription will automatically renew on this date.
                 </p>
               </div>
 

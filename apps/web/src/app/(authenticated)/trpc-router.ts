@@ -1,5 +1,5 @@
 import { projectsRouter } from "@/app/(authenticated)/(project)/_utils/trpc-router";
-import { accountRouter } from "@/app/(authenticated)/account/_utils/trpc-router";
+import { accountRouter } from "@/app/(authenticated)/account/trpc-router";
 import { integrationsRouter } from "@/app/(authenticated)/integrations/_utils/trpc-router";
 import { organizationRouter } from "@/app/(authenticated)/organization/_utils/trpc-router";
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";

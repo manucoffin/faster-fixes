@@ -1,14 +1,15 @@
-import { getActiveSubscription } from "@/app/(authenticated)/account/billing/_features/current-plan/get-active-subscription.trpc.query";
-import { createBillingPortal } from "@/app/(authenticated)/account/billing/_features/manage-subscription/create-billing-portal.trpc.mutation";
-import { getPastInvoices } from "@/app/(authenticated)/account/billing/_features/past-invoices/get-past-invoices.trpc.query";
-import { getSubscriptionStatus } from "@/app/(authenticated)/account/billing/_features/subscription-status/get-subscription-status.trpc.query";
+import { getActiveSubscription } from "@/app/_domains/subscription/_services/get-active-subscription";
 import { deleteAccount } from "@/app/(authenticated)/account/settings/_features/account-deletion/delete-account.trpc.mutation";
 import { getCurrentEmail } from "@/app/(authenticated)/account/settings/_features/email/get-current-email.trpc.query";
 import { changePassword } from "@/app/(authenticated)/account/settings/_features/password/change-password.trpc.mutation";
 import { getProfile } from "@/app/(authenticated)/account/settings/_features/profile/get-profile.trpc.query";
 import { updateAvatar } from "@/app/(authenticated)/account/settings/_features/profile/update-avatar.trpc.mutation";
 import { updateProfile } from "@/app/(authenticated)/account/settings/_features/profile/update-profile.trpc.mutation";
-import { router } from "@/server/trpc/trpc";
+import { protectedProcedure, router } from "@/server/trpc/trpc";
+import { headers } from "next/headers";
+import { createBillingPortal } from "./billing/_services/create-billing-portal";
+import { getSubscriptionStatus } from "./billing/_services/get-subscription-status";
+import { listPastInvoices } from "./billing/_services/list-past-invoices";
 
 export const accountRouter = router({
   delete: deleteAccount,
@@ -25,14 +26,24 @@ export const accountRouter = router({
   }),
   billing: router({
     subscription: router({
-      get: getActiveSubscription,
-      status: getSubscriptionStatus,
+      // The active Subscription is read from the Subscription domain: the
+      // billing segment displays it, it does not own it.
+      get: protectedProcedure.query(async () =>
+        getActiveSubscription({ headers: await headers() }),
+      ),
+      getStatus: protectedProcedure.query(async () =>
+        getSubscriptionStatus({ headers: await headers() }),
+      ),
     }),
     invoices: router({
-      list: getPastInvoices,
+      list: protectedProcedure.query(async () =>
+        listPastInvoices({ headers: await headers() }),
+      ),
     }),
     portal: router({
-      create: createBillingPortal,
+      create: protectedProcedure.mutation(async () =>
+        createBillingPortal({ headers: await headers() }),
+      ),
     }),
   }),
 });
