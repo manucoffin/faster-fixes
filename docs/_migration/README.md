@@ -79,7 +79,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
-The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` was removed at the step 3 final lock, once the last role-suffixed file was gone. Since that commit the table above is history rather than configuration: the step's rules are declared once, on their own globs, with no per-scope allowlist, so every scope under `src/app` is locked and a new one is locked the moment it is created. See the step 3 exit verification below.
+The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` was removed at the step 3 final lock (`0f9d293`), once the last role-suffixed file was gone. Since that commit the table above is history rather than configuration: the step's rules are declared once, on their own globs, with no per-scope allowlist, so every scope under `src/app` is locked and a new one is locked the moment it is created. See the step 3 exit verification below.
 
 ## Step 2 exit verification
 
@@ -106,7 +106,8 @@ The 22 cases of `no-cross-domain-deep-import.test.js` are the rule's own proof: 
 
 ## Step 3 exit verification
 
-Run on 2026-09-18 at the final lock commit (issue #82), with `--force` everywhere so Turbo served no
+Run on 2026-09-18 at the final lock commit `0f9d293` (issue #82), with `--force` everywhere so Turbo
+served no
 cached result. The per-scope entries of the step 3 scope log below record what each scope moved,
 renamed, reclassified and smoked; this section records what closed the step.
 
