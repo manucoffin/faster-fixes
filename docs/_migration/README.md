@@ -1552,6 +1552,143 @@ mail or storage provider, so no user can sign in and none of the four forms can 
 data. Updating the profile, uploading an avatar, changing the password with a wrong current
 password, requesting an email change and deleting an account are on the QA checklist of issue #69.
 
+### `(authenticated)/organization`, part 1: general, leave, received invitations (issue #70)
+
+Commit: `723c7c1`. The scope router leaves `_utils/` for the scope root and the seven operations of
+the general tab, the leave action and the received-invitations segment become services. The scope is
+**not** locked: issue #71 owns the five member operations and the `migratedScopes` entry.
+
+**Files moved.** Twelve modules, all with `git mv`. No file dissolved, so this segment leaves no
+`_deprecated_` stub.
+
+| Operation            | Before                                                             | After                                                |
+| -------------------- | ------------------------------------------------------------------ | ---------------------------------------------------- |
+| Scope router         | `_utils/trpc-router.ts`                                            | `trpc-router.ts`                                     |
+| Organization details | `_features/general/get-organization-details.trpc.query.ts`         | `_services/get-organization-details.ts`              |
+| Organization update  | `_features/general/update-organization.trpc.mutation.ts`           | `_services/update-organization.ts`                   |
+| Logo update          | `_features/general/update-organization-logo.trpc.mutation.ts`      | `_services/update-organization-logo.ts`              |
+| Leave                | `_features/leave-organization/leave-organization.trpc.mutation.ts` | `_services/leave-organization.ts`                    |
+| Received invitations | `invitations/_features/get-received-invitations.trpc.query.ts`     | `invitations/_services/list-received-invitations.ts` |
+| Accept invitation    | `invitations/_features/accept-invitation/*.trpc.mutation.ts`       | `invitations/_services/accept-invitation.ts`         |
+| Reject invitation    | `invitations/_features/reject-invitation/*.trpc.mutation.ts`       | `invitations/_services/reject-invitation.ts`         |
+| Schemas              | `update-organization`, `leave-organization`, accept, reject        | the same four, next to their service                 |
+
+The three feature folders keep their client components; only the operations and their schemas left.
+Services follow the route tree: the four scope-level operations sit in `organization/_services/`, the
+three received-invitation ones in `organization/invitations/_services/`, while every procedure stays
+inlined in the single scope-root router, as the account scope did for its two segments.
+
+**Renamed service and procedure key.** One of each, and they are the same operation:
+`getReceivedInvitations` becomes `listReceivedInvitations`, because it returns a collection and
+`list-` is the read verb the closed vocabulary forces, the same call as `listPastInvoices` in the
+billing segment. The key `invitation.getReceived` follows as `invitation.listReceived`, and its three
+call sites are `received-invitations-list.client.tsx` plus the accept and reject buttons, which
+invalidate it. The other six keys are unchanged: `get`, `update`, `updateLogo`, `leave`,
+`invitation.accept` and `invitation.reject` each already mirror their service verb under a router
+that carries the noun.
+
+**`updateOrganizationLogo` keeps its name.** The service only purges the replaced object from
+storage: the Better Auth `organization.update` call that writes the new key runs in
+`organization-logo-upload.client.tsx`, after the upload. `update-` is therefore accurate for the
+server-side half of a logo update, the verb rule accepts it, and renaming it would move a key for no
+gain. The client still calls the mutation `deleteOldLogo` locally, which is what it does from there.
+
+**Authorization, all of it in the services.** Every denial of this segment needs a loaded membership,
+so none of them could stay at the transport edge:
+
+| Denial                                                  | Where it lives now                           |
+| ------------------------------------------------------- | -------------------------------------------- |
+| "You do not have access to this organization."          | `ForbiddenError` in `getOrganizationDetails` |
+| "You do not have permission to edit this organization." | `ForbiddenError` in `updateOrganization`     |
+| The same sentence on the logo                           | `ForbiddenError` in `updateOrganizationLogo` |
+| "Organization not found."                               | `NotFoundError` in `getOrganizationDetails`  |
+| "You are not a member of this organization."            | `NotFoundError` in `leaveOrganization`       |
+| "The owner cannot leave the organization. Transfer …"   | `ForbiddenError` in `leaveOrganization`      |
+
+Same codes, same messages. No `UNAUTHORIZED`, no rate limit and no plan limit is involved, so nothing
+moved into a procedure and `protectedProcedure` answers the identity question alone. The owner denial
+is the one business rule of the segment: it reads the role of the membership the service has just
+loaded, which is why it is a service branch rather than a middleware.
+
+**Better Auth translation, moved unchanged.** `acceptInvitation` and `rejectInvitation` are pure
+Better Auth calls. Their `BAD_REQUEST` branch becomes a `BadRequestError` carrying Better Auth's own
+message, which is the copy the toast already showed for an expired, already answered or foreign
+invitation. The chain is not centralised in this step. Both take `headers` explicitly, resolved by
+the router with `await headers()`, so neither reads the tRPC context.
+
+**Removed generic wrappers.** Two, one per invitation service: the
+`INTERNAL_SERVER_ERROR "Error accepting invitation."` and its rejecting twin only fired when Better
+Auth threw a non-`Error` value. That branch is gone and the thrown value propagates, so an
+infrastructure surprise reads as itself rather than as a sentence about invitations. Neither was
+user-visible in practice: every Better Auth failure arrives as an `Error` and takes the
+`BadRequestError` path.
+
+**Reclassified errors.** None. Every `TRPCError` of the segment became the domain subclass of the
+same code with the same message, so no toast and no form error changes wording.
+
+**Services holding a database client.** Four: `getOrganizationDetails`, `updateOrganization`,
+`updateOrganizationLogo` and `leaveOrganization`, each of which holds an authorization check or a
+domain error branch. `listReceivedInvitations` is a pass-through read and takes none; it imports
+`prisma` directly instead of reading it from `ctx`. `acceptInvitation` and `rejectInvitation` never
+touch Prisma. No service receives the tRPC context or the session: the router passes `userId`,
+`email`, `organizationId` and `headers` as plain values.
+
+**Output types.** The seven `inferProcedureOutput` aliases of the segment are gone. The two reads
+export `GetOrganizationDetailsOutput` and `ListReceivedInvitationsOutput` derived from their
+services; the five writes owe none. No file imported any of the seven, so no consumer changed beyond
+the renamed key.
+
+**Schemas.** The four plural `*Inputs` aliases become singular `*Input`, which is what
+`require-schema-conventions` demands once issue #71 locks the scope. The two procedures that declared
+their input inline gain a schema file next to their service, `get-organization-details.schema.ts` and
+`update-organization-logo.schema.ts`. `update-organization-form.client.tsx` follows the schema to
+`_services/` with a type-name change, which is the documented exception to
+`no-client-import-of-services`.
+
+**Debt noted, not fixed.** `UpdateOrganizationSchema` keeps the French validation message "Le nom est
+requis", exactly as `CreateOrganizationSchema` does in `_domains/organization`. It is UI copy, not
+placement, and it belongs to the same ticket as the other French strings recorded in the anomalies
+section.
+
+**Tests.** `leave-organization.test.ts` (3 cases) pins the `NotFoundError` for a non-member, the
+`ForbiddenError` for the owner and the membership deletion for a plain member, through the trailing
+client. No tRPC context is built. The other six services are behaviour-preserving moves with no
+reclassified error, so the step's policy leaves them untested.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 45 app tests
+(3 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **122 problems, 0 errors, 122
+warnings** (88 `no-raw-tailwind-colors` / 33 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 4 from the 126 of the account scope, the four being the plural
+`Inputs` aliases this ticket renamed. `npx next build` compiles and still lists `/organization` and
+`/organization/invitations`; `pnpm build` is refused by the sandbox, as the earlier entries record.
+
+**Per-scope "must be gone" checks.** Restricted to `(authenticated)/organization`, checks 3 to 8
+return nothing: no service imports tRPC, none holds a `TRPCError`, none carries `'use server'`, and
+no router sits in a bucket or a feature. Checks 1, 9 and 10 return only the five member modules issue
+#71 owns, with their inline Prisma and their `inferProcedureOutput` aliases. Check 2 returns the
+now-empty untracked `organization/_utils/` folder: `git ls-files` shows it holding nothing and the
+sandbox refuses `rmdir`, so it stays the maintainer's to remove, like the `account/_utils/` and
+`admin/users/_utils/` ones.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                   | Result                                                               |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `GET /api/trpc/authenticated.organization.get`                          | `401 UNAUTHORIZED`, the key resolves and `protectedProcedure` guards |
+| `GET /api/trpc/authenticated.organization.invitation.listReceived`      | `401 UNAUTHORIZED`, the renamed key resolves                         |
+| `GET /api/trpc/authenticated.organization.invitation.getReceived`       | `404 No procedure found on path`, the old key is gone                |
+| `POST /api/trpc/authenticated.organization.update`, `updateLogo`        | `401 UNAUTHORIZED`, both resolve                                     |
+| `POST /api/trpc/authenticated.organization.leave`                       | `401 UNAUTHORIZED`, same                                             |
+| `POST /api/trpc/authenticated.organization.invitation.accept`, `reject` | `401 UNAUTHORIZED`, both resolve                                     |
+| `invitation.create`, `invitation.get`, `invitation.delete`              | `401 UNAUTHORIZED`, the member keys issue #71 owns still resolve     |
+| `member.updateRole`, `member.delete`                                    | `401 UNAUTHORIZED`, same                                             |
+| `GET /organization`, `/organization/invitations` signed out             | `307` to `/login`, both page guards are unchanged                    |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+mail or storage provider, so no user can sign in, no Organization can be rendered and no invitation
+can be issued. Renaming the Organization, changing the logo, accepting and rejecting an invitation
+and leaving an Organization as a plain member and as the owner are on the QA checklist of issue #70.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
