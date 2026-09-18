@@ -12,7 +12,7 @@ import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
-import { ConsentProvider } from "./_features/c15t/consent-provider";
+import { ConsentProvider } from "./_providers/consent-provider.client";
 
 const fontSans = Space_Grotesk({
   subsets: ["latin"],
