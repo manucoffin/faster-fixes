@@ -59,9 +59,10 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope         | Step | Commit    | Rules locked                                       |
-| ------------- | ---- | --------- | -------------------------------------------------- |
-| `_domains/**` | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export` |
+| Scope         | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
+| ------------- | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**` | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
+| `(public)`    | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -369,3 +370,74 @@ Without the exclusion the check returns 115 lines instead of 103. Recording the 
 ### Prettier
 
 `npx prettier --check docs/architecture/migration-kit/03-services.md` passes, and a `--write` pass changes nothing: the escaped pipe, the escaped `find` parentheses and the `*` globs all survive a reformat, and no row is split. The commands were re-extracted from the formatted file and re-run to produce the counts above, so the table is verified as rendered, not as authored.
+
+## Step 3 scope log
+
+One entry per scope, in the order the scopes were migrated. Each entry records the commit, the
+renamed procedure keys, the reclassified errors, the deprecated stubs left for the maintainer and
+the manual smoke checklist that was walked. Later entries follow the shape of the first.
+
+### `(public)`, the pilot scope (issue #60)
+
+Commit `fb076dd`. One operation, chosen as the pilot because a single procedure is enough to
+prove the recipe, the lock and this log format before anything larger moves.
+
+| Item             | Before                                                             | After                                    |
+| ---------------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| Operation        | `(public)/_features/github-stars/fetch-github-stars.trpc.query.ts` | `(public)/_services/get-github-stars.ts` |
+| Router           | `(public)/_features/github-stars/_utils/trpc-router.ts`            | `(public)/trpc-router.ts`                |
+| Router export    | `githubStarsFeatureRouter`                                         | `publicRouter`                           |
+| App router mount | `githubStars: githubStarsFeatureRouter`                            | `public: publicRouter`                   |
+| Output type      | `FetchGithubStarsOutput` from `inferProcedureOutput`               | `GetGithubStarsOutput` from the service  |
+
+**Renamed procedure key.** `trpc.githubStars.fetchStars` became `trpc.public.getGithubStars`. The
+single call site, `github-stars-button.client.tsx`, was updated in the same commit. `fetch-` is not
+in the read vocabulary, and the `(public)` router does not carry the entity in its key, so the
+procedure key is the full service name.
+
+**Reclassified errors.** None. The operation throws nothing: a non-`ok` GitHub response returns
+`{ stars: null }`, which is unchanged. No `TRPCError`, no `DomainError`, no database client
+parameter, since the service holds no authorization check and no domain-error branch.
+
+**Deprecated stubs.** `(public)/_features/github-stars/_utils/_deprecated_trpc-router.ts`. The
+folder it sits in is the last `_utils/` of the scope, so the old-bucket check stays red for
+`(public)` until the maintainer deletes the stub (issue #81).
+
+**Smoke checklist, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                       | Result                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /api/trpc/public.getGithubStars?batch=1&input=%7B%7D`  | `200`, `[{"result":{"data":{"json":{"stars":34}}}}]`                     |
+| `GET /api/trpc/githubStars.fetchStars?batch=1&input=%7B%7D` | `404 No procedure found on path`, so no call site is left on the old key |
+| `GET /open-source`                                          | `200`, the public header renders with the "Star us on GitHub" button     |
+
+`/` and `/pricing` answer `307` to `/login` under the dummy environment used here, because
+`NEXT_PUBLIC_IS_CLOUD` is unset; `/open-source` is the public page that renders the same header, so
+it stands in for the home page. Rendering the button on the cloud home page is left to the
+maintainer's pass.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 180
+ESLint rule and config tests plus the 12 app tests; `pnpm lint:agent-rules` 150 problems, 0 errors,
+150 warnings, identical per rule to the re-counted baseline above (88 / 58 / 3 / 1), so the pilot
+added no warning and cleared none: the scope had no violation of this step's rules to begin with.
+`npx next build` passes with dummy environment values.
+
+**Per-scope "must be gone" checks**, each command from the kit document restricted to
+`apps/web/src/app/(public)`: role suffixes, routers inside a bucket or a feature, tRPC imported by a
+service, `TRPCError` in a service, `'use server'` in a service or a router, Prisma queried outside a
+service, `_constants/` inside a scope and `inferProcedureOutput` all return nothing. Old buckets
+returns the one `_utils/` folder holding the deprecated stub, as expected until the maintainer's
+deletion pass.
+
+### Corrections to the recipe found by the pilot
+
+The kit's per-scope recipe survived the pilot, with one gap worth writing down.
+
+**The lock mechanism's own test asserted that nothing was locked.** `next-config.test.js` pinned
+`migratedScopes` as empty ("locks no scope while the array is empty") and asserted that the schema
+rules had exactly one config entry each, so listing the first scope turned three passing tests red.
+The tests now track the array instead of its emptiness: `migratedScopes` is exported from
+`next.js`, the schema tests assert the burn-down ramp entry and allow one locked block per listed
+scope, and the lock test asserts that the expansion of `migratedScopes` is appended last, after the
+ramp. Every later scope only edits the array. The final lock deletes the array, its export and the
+three tests together.
