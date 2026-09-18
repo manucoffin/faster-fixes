@@ -1,6 +1,6 @@
 "use server";
 
-import { generateApiKey } from "@/app/_features/project/generate-api-key";
+import { generateApiKey } from "@/app/_domains/project/generate-api-key";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import z from "zod";

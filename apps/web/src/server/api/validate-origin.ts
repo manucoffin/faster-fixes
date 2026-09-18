@@ -1,4 +1,4 @@
-import { normalizeDomain } from "@/app/_features/project/normalize-domain";
+import { normalizeDomain } from "@/app/_domains/project/normalize-domain";
 
 // Checked via URL.hostname — parsed, so "localhost.evil.com" does NOT match.
 const LOCALHOST_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);

@@ -1,5 +1,5 @@
 import { loginUrl, onboardingUrl } from "@/app/_constants/routes";
-import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
+import { ActiveProjectProvider } from "@/app/_domains/project/active-project-provider.client";
 import { auth } from "@/server/auth";
 import { isCloud } from "@/utils/environment/env";
 import { LayoutParams } from "@/types/next";

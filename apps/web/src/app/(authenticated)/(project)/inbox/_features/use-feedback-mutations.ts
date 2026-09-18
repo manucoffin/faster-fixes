@@ -1,5 +1,5 @@
 import { GetFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_features/get-feedback.trpc.query";
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";

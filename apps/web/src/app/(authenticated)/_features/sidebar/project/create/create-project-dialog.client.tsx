@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -134,7 +134,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
               className="flex flex-col gap-6"
             >
               {form.formState.errors.root && (
-                <p className="text-destructive text-sm">
+                <p className="text-sm text-destructive">
                   {form.formState.errors.root.message}
                 </p>
               )}
@@ -202,13 +202,13 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="bg-muted flex items-center gap-2 rounded-md border p-3">
+          <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
             <code className="flex-1 font-mono text-sm break-all">
               {createdProjectId}
             </code>
             <Button variant="ghost" size="icon" onClick={handleCopy}>
               {copied ? (
-                <Check className="text-success size-4" />
+                <Check className="size-4 text-success" />
               ) : (
                 <Copy className="size-4" />
               )}

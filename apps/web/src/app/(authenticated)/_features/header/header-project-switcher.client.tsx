@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -53,10 +53,10 @@ export function HeaderProjectSwitcher() {
                   }}
                   className="flex items-center gap-2"
                 >
-                  <FolderOpen className="text-muted-foreground size-4" />
+                  <FolderOpen className="size-4 text-muted-foreground" />
                   <span className="flex-1 truncate">{project.name}</span>
                   {project.id === activeProject?.id && (
-                    <Check className="text-muted-foreground size-4" />
+                    <Check className="size-4 text-muted-foreground" />
                   )}
                 </DropdownMenuItem>
               ))}

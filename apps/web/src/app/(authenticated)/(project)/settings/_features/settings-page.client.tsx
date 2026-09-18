@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import {
   Empty,
   EmptyDescription,

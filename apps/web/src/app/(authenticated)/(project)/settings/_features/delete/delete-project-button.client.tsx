@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {

@@ -1,7 +1,7 @@
 "use server";
 
-import { generateApiKey } from "@/app/_features/project/generate-api-key";
-import { generatePublicId } from "@/app/_features/project/generate-public-id";
+import { generateApiKey } from "@/app/_domains/project/generate-api-key";
+import { generatePublicId } from "@/app/_domains/project/generate-public-id";
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";

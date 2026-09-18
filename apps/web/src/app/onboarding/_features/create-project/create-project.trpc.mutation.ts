@@ -1,7 +1,7 @@
 "use server";
 
-import { generateApiKey } from "@/app/_features/project/generate-api-key";
-import { generatePublicId } from "@/app/_features/project/generate-public-id";
+import { generateApiKey } from "@/app/_domains/project/generate-api-key";
+import { generatePublicId } from "@/app/_domains/project/generate-public-id";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { CreateOnboardingProjectSchema } from "./create-project.schema";
