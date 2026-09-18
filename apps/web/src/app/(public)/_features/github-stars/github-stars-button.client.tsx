@@ -11,7 +11,7 @@ const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 
 function StarsBadge({ stars }: { stars: number }) {
   return (
-    <span className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium">
+    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
       <StarIcon className="size-3" />
       {stars}
     </span>
@@ -20,7 +20,7 @@ function StarsBadge({ stars }: { stars: number }) {
 
 export function GitHubStarsButton() {
   const trpc = useTRPC();
-  const starsQuery = useQuery(trpc.github.fetchStars.queryOptions());
+  const starsQuery = useQuery(trpc.githubStars.fetchStars.queryOptions());
 
   return (
     <Button asChild variant="outline" size="sm">

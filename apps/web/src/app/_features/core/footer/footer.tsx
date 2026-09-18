@@ -1,9 +1,9 @@
+import { GitHubStarsButton } from "@/app/(public)/_features/github-stars/github-stars-button.client";
 import { SITE_META_DESCRIPTION } from "@/app/_constants/seo";
 import { ManageConsentButton } from "@/app/_features/c15t/manage-consent-button";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
 import { Route } from "next";
 import Link from "next/link";
-import { GitHubStarsButton } from "../../github/github-stars-button.client";
 import { AppLogo } from "@/app/_components/app-logo";
 
 const productLinks: { text: string; href: string; external?: boolean }[] = [
