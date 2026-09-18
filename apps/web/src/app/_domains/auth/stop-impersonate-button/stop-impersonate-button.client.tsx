@@ -24,21 +24,22 @@ export const StopImpersonateButton = () => {
   const router = useRouter();
   const { data: session, refetch: refetchSession } = useSession();
 
-  const stopImpersonateMutation = useMutation(trpc.auth.stopImpersonate.mutationOptions({
-    onSuccess: async () => {
-      toast.success("Success", {
-        description: "You have returned to your admin account",
-      });
-      await refetchSession();
-      router.push("/admin");
-    },
-    onError: (error) => {
-      toast.error("Error", {
-        description:
-          error.message || "Failed to stop impersonation",
-      });
-    },
-  }));
+  const stopImpersonateMutation = useMutation(
+    trpc.auth.stopImpersonate.mutationOptions({
+      onSuccess: async () => {
+        toast.success("Success", {
+          description: "You have returned to your admin account",
+        });
+        await refetchSession();
+        router.push("/admin");
+      },
+      onError: (error) => {
+        toast.error("Error", {
+          description: error.message || "Failed to stop impersonation",
+        });
+      },
+    }),
+  );
 
   const handleStopImpersonate = () => {
     stopImpersonateMutation.mutate();
@@ -66,9 +67,7 @@ export const StopImpersonateButton = () => {
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Stop impersonation?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Stop impersonation?</AlertDialogTitle>
             <AlertDialogDescription>
               You will return to your admin account. Access to the account of
               user {session?.user?.email} will be revoked.

@@ -23,8 +23,9 @@ export function SendVerificationEmailButton({
   size,
 }: SendVerificationEmailButtonProps) {
   const trpc = useTRPC();
-  const sendVerificationEmailMutation =
-    useMutation(trpc.auth.sendVerificationEmail.mutationOptions());
+  const sendVerificationEmailMutation = useMutation(
+    trpc.auth.sendVerificationEmail.mutationOptions(),
+  );
 
   const handleSendVerificationEmail = () => {
     try {
@@ -37,8 +38,7 @@ export function SendVerificationEmailButton({
         },
         onError: (error) => {
           toast.error(
-            error?.message ||
-            "An error occurred while sending the email",
+            error?.message || "An error occurred while sending the email",
           );
         },
       });

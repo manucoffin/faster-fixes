@@ -1,7 +1,7 @@
 import { authRouter } from "@/app/(auth)/_utils/trpc-router";
 import { authenticatedRouter } from "@/app/(authenticated)/_utils/trpc-router";
 import { githubStarsFeatureRouter } from "@/app/(public)/_features/github-stars/_utils/trpc-router";
-import { authenticationFeatureRouter } from "@/app/_features/auth/_utils/trpc-router";
+import { authenticationFeatureRouter } from "@/app/_domains/auth/_utils/trpc-router";
 import { organizationFeatureRouter } from "@/app/_domains/organization/_utils/trpc-router";
 import { subscriptionFeatureRouter } from "@/app/_features/subscription/_utils/trpc-router";
 import { adminRouter } from "@/app/admin/_utils/trpc-router";

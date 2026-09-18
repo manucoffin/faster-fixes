@@ -1,7 +1,7 @@
 "use client";
 
 import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants/routes";
-import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
+import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -127,7 +127,7 @@ export function LoginForm() {
                 <FormLabel>Password</FormLabel>
                 <Link
                   href={forgotPasswordUrl}
-                  className="text-primary text-xs hover:underline"
+                  className="text-xs text-primary hover:underline"
                 >
                   Forgot?
                 </Link>

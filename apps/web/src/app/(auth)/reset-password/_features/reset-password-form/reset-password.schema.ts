@@ -1,4 +1,4 @@
-import { PasswordSchema } from "@/app/_features/auth/_utils/password.schema";
+import { PasswordSchema } from "@/app/_domains/auth/_utils/password.schema";
 import { z } from "zod";
 
 export const ResetPasswordSchema = z

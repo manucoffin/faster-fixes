@@ -1,6 +1,6 @@
 "use client";
 
-import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
+import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,16 +39,18 @@ export function SignupForm() {
     },
   });
 
-  const signupMutation = useMutation(trpc.auth.signup.mutationOptions({
-    onError: (error) => {
-      const message =
-        error.message || "Account creation failed. Please try again.";
-      form.setError("root", { message });
-    },
-    onSuccess: (() => {
-      setSuccess(true);
-    })
-  }));
+  const signupMutation = useMutation(
+    trpc.auth.signup.mutationOptions({
+      onError: (error) => {
+        const message =
+          error.message || "Account creation failed. Please try again.";
+        form.setError("root", { message });
+      },
+      onSuccess: () => {
+        setSuccess(true);
+      },
+    }),
+  );
 
   const onSubmit = async (data: SignupInputs) => {
     signupMutation.mutate(data);

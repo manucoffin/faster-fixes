@@ -11,7 +11,7 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
-import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
+import { StopImpersonateButton } from "./_domains/auth/stop-impersonate-button/stop-impersonate-button.client";
 import { ConsentProvider } from "./_providers/consent-provider.client";
 
 const fontSans = Space_Grotesk({
