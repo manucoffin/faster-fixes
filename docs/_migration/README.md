@@ -2268,7 +2268,7 @@ as the account and organization entries record for their own scopes.
 
 ### `(authenticated)/(project)`, part 2: inbox Feedback panel (issue #75)
 
-Commit: `PENDING`. The six operations of the Feedback panel become services, the shared inbox
+Commit: `08563bb`. The six operations of the Feedback panel become services, the shared inbox
 mutations hook becomes a feature of its own, and the single-consumer org-members hook joins the
 feature that uses it. The scope is still **not** locked: issues #76 to #79 own the remaining 31
 operations and the `migratedScopes` entry.
