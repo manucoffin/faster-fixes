@@ -29,9 +29,9 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import {
-  CreateProjectInputs,
+  CreateProjectInput,
   CreateProjectSchema,
-} from "./create-project.schema";
+} from "@/app/(authenticated)/_services/create-project.schema";
 
 type CreateProjectDialogProps = {
   children?: React.ReactNode;
@@ -50,7 +50,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   );
   const [copied, setCopied] = React.useState(false);
 
-  const form = useForm<CreateProjectInputs>({
+  const form = useForm<CreateProjectInput>({
     resolver: zodResolver(CreateProjectSchema),
     defaultValues: {
       organizationId: activeOrg?.id ?? "",
@@ -60,7 +60,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   });
 
   const createProject = useMutation(
-    trpc.authenticated.projects.create.mutationOptions({
+    trpc.authenticated.createProject.mutationOptions({
       onSuccess: async (result) => {
         setOpen(false);
         setCreatedProjectId(result.publicId);
@@ -77,7 +77,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
     }),
   );
 
-  const onSubmit = (data: CreateProjectInputs) => {
+  const onSubmit = (data: CreateProjectInput) => {
     createProject.mutate(data);
   };
 

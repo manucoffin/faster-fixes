@@ -8,21 +8,25 @@ import { localRulesPlugin } from "./local-rules/index.js";
 // The config reads ESLINT_AGENT_RULES once, at import time, so the gate has to
 // be set before the dynamic import below.
 process.env.ESLINT_AGENT_RULES = "1";
-const { migratedScopeConfigs, migratedScopes, nextJsConfig } =
-  await import("./next.js");
+const {
+  migratedScopeConfigs,
+  migratedScopeEntry,
+  migratedScopes,
+  nextJsConfig,
+} = await import("./next.js");
 
 /**
  * Resolves the severity `require-use-client-suffix` ends up with for a file
  * under `apps/web`, with `scope` locked and nothing else configured, so the
  * glob assertions read the pattern the way ESLint does.
  */
-async function severityResolver(scope) {
+async function severityResolver(scope, ignores = []) {
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
     overrideConfigFile: true,
     overrideConfig: [
       { plugins: { local: localRulesPlugin } },
-      ...migratedScopeConfigs(scope, "error"),
+      ...migratedScopeConfigs(scope, "error", ignores),
     ],
   });
 
@@ -72,21 +76,27 @@ describe("the migratedScopes lock mechanism", () => {
     // The unlocked ramp still covers every `_services/` folder at `warn`.
     expect(ramp.files).toEqual(["**/_services/**/*.{ts,tsx}"]);
     expect(locked.map((entry) => entry.files)).toEqual(
-      migratedScopes.map((scope) => [
-        `**/src/app/${scope}/**/_services/**/*.{ts,tsx}`,
+      migratedScopes.map((entry) => [
+        `**/src/app/${migratedScopeEntry(entry).scope}/**/_services/**/*.{ts,tsx}`,
       ]),
     );
 
     // A locked scope also raises the general convention rules on all its files.
     const [, ...scopeBlocks] = entriesFor("local/no-client-import-of-services");
     expect(scopeBlocks.map((entry) => entry.files)).toEqual(
-      migratedScopes.map((scope) => [`**/src/app/${scope}/**/*.{ts,tsx}`]),
+      migratedScopes.map((entry) => [
+        `**/src/app/${migratedScopeEntry(entry).scope}/**/*.{ts,tsx}`,
+      ]),
     );
 
     // The locks are appended last, so they win over the ramp.
     const lastBlocks = nextJsConfig.slice(-2 * migratedScopes.length);
     expect(lastBlocks).toEqual(
-      migratedScopes.flatMap((scope) => migratedScopeConfigs(scope, "error")),
+      migratedScopes.flatMap((entry) => {
+        const { scope, ignores } = migratedScopeEntry(entry);
+
+        return migratedScopeConfigs(scope, "error", ignores);
+      }),
     );
   });
 
@@ -161,6 +171,30 @@ describe("the migratedScopes lock mechanism", () => {
 
     expect(await severityFor("src/app/(public)/blog/[slug]/page.tsx")).toBe(2);
     expect(await severityFor("src/app/(auth)/login/page.tsx")).toBeUndefined();
+  });
+
+  // A route group whose own tier is migrated locks its shell and leaves its
+  // nested scopes on the burn-down until their own ticket lists them.
+  it("leaves the nested scopes of a partially migrated group unlocked", async () => {
+    const severityFor = await severityResolver("(authenticated)", [
+      "**/src/app/(authenticated)/account/**",
+    ]);
+
+    expect(await severityFor("src/app/(authenticated)/layout.tsx")).toBe(2);
+    expect(
+      await severityFor(
+        "src/app/(authenticated)/_features/feedback/x.client.tsx",
+      ),
+    ).toBe(2);
+    expect(
+      await severityFor("src/app/(authenticated)/account/settings/page.tsx"),
+    ).toBeUndefined();
+  });
+
+  it("omits the ignores key for a scope with no nested exclusion", () => {
+    for (const block of migratedScopeConfigs("(public)", "error")) {
+      expect(block.ignores).toBeUndefined();
+    }
   });
 });
 

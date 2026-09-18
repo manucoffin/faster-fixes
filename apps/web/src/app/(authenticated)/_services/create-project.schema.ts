@@ -8,4 +8,4 @@ export const CreateProjectSchema = z.object({
   domain: DomainSchema,
 });
 
-export type CreateProjectInputs = z.infer<typeof CreateProjectSchema>;
+export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;

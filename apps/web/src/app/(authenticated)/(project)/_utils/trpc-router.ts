@@ -3,7 +3,6 @@ import { createJiraIssueForFeedback } from "@/app/(authenticated)/(project)/inbo
 import { createLinearIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-linear-issue-for-feedback.trpc.mutation";
 import { updateFeedbackAssignee } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-assignee.trpc.mutation";
 import { updateFeedbackStatus } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-status.trpc.mutation";
-import { createProject } from "@/app/(authenticated)/_features/sidebar/project/create/create-project.trpc.mutation";
 import { router } from "@/server/trpc/trpc";
 import { bulkUpdateFeedbackStatus } from "../inbox/_features/actions-toolbar/bulk-update-feedback-status.trpc.mutation";
 import { bulkHardDeleteFeedback } from "../inbox/_features/archive/bulk-hard-delete-feedback.trpc.mutation";
@@ -47,7 +46,6 @@ import { getProjects } from "./get-projects.trpc.query";
 
 export const projectsRouter = router({
   list: getProjects,
-  create: createProject,
   get: getProject,
   update: updateProject,
   delete: deleteProject,

@@ -7,4 +7,4 @@ export const SendFeedbackSchema = z.object({
     .max(2000, "Message must not exceed 2000 characters"),
 });
 
-export type SendFeedbackInputs = z.infer<typeof SendFeedbackSchema>;
+export type SendFeedbackInput = z.infer<typeof SendFeedbackSchema>;

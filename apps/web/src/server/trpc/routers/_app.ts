@@ -1,4 +1,4 @@
-import { authenticatedRouter } from "@/app/(authenticated)/_utils/trpc-router";
+import { authenticatedRouter } from "@/app/(authenticated)/trpc-router";
 import { publicRouter } from "@/app/(public)/trpc-router";
 import { authRouter } from "@/app/_domains/auth/trpc-router";
 import { organizationRouter } from "@/app/_domains/organization/trpc-router";

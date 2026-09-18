@@ -57,10 +57,14 @@ const useClientSuffixOptions = {
  * scope alone, so a regression on migrated code fails `pnpm lint:agent-rules`
  * while the rest of the tree keeps burning down as warnings.
  *
+ * A scope whose own tier is migrated while nested scopes are not is listed as
+ * `{ scope, ignores }`: the ignore patterns are the nested scopes, each of
+ * which is listed here on its own once its ticket locks it.
+ *
  * Temporary: the final lock of step 3 deletes this array and sets the rules to
  * `error` unconditionally.
  *
- * @type {string[]}
+ * @type {(string | { scope: string, ignores: string[] })[]}
  */
 export const migratedScopes = [
   "(public)",
@@ -70,7 +74,28 @@ export const migratedScopes = [
   "_domains/subscription",
   "_domains/user",
   "onboarding",
+  {
+    // Only the shell tier of the route group is migrated: its four child
+    // segments are scopes of their own that step 3 has not reached yet.
+    scope: "(authenticated)",
+    ignores: [
+      "**/src/app/(authenticated)/(project)/**",
+      "**/src/app/(authenticated)/account/**",
+      "**/src/app/(authenticated)/integrations/**",
+      "**/src/app/(authenticated)/organization/**",
+    ],
+  },
 ];
+
+/**
+ * Reads an entry of `migratedScopes` in either of its two forms.
+ *
+ * @param {string | { scope: string, ignores: string[] }} entry
+ * @returns {{ scope: string, ignores: string[] }}
+ */
+export function migratedScopeEntry(entry) {
+  return typeof entry === "string" ? { scope: entry, ignores: [] } : entry;
+}
 
 /**
  * The two config blocks a locked scope gets: the services rules on its
@@ -82,12 +107,16 @@ export const migratedScopes = [
  *
  * @param {string} scope glob fragment relative to `src/app`
  * @param {"error" | "warn" | "off"} severity
+ * @param {string[]} [ignores] nested scopes the lock does not cover yet
  * @returns {import("eslint").Linter.Config[]}
  */
-export function migratedScopeConfigs(scope, severity) {
+export function migratedScopeConfigs(scope, severity, ignores = []) {
+  const notYetMigrated = ignores.length > 0 ? { ignores } : {};
+
   return [
     {
       files: [`**/src/app/${scope}/**/_services/**/*.{ts,tsx}`],
+      ...notYetMigrated,
       rules: {
         "local/services-verb-prefix": severity,
         "local/services-no-trpc-import": severity,
@@ -98,6 +127,7 @@ export function migratedScopeConfigs(scope, severity) {
     },
     {
       files: [`**/src/app/${scope}/**/*.{ts,tsx}`],
+      ...notYetMigrated,
       rules: {
         "local/no-client-import-of-services": severity,
         "local/no-feature-nesting": severity,
@@ -109,9 +139,11 @@ export function migratedScopeConfigs(scope, severity) {
   ];
 }
 
-const lockedScopeConfigs = migratedScopes.flatMap((scope) =>
-  migratedScopeConfigs(scope, lockedSeverity),
-);
+const lockedScopeConfigs = migratedScopes.flatMap((entry) => {
+  const { scope, ignores } = migratedScopeEntry(entry);
+
+  return migratedScopeConfigs(scope, lockedSeverity, ignores);
+});
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
