@@ -16,8 +16,9 @@ const enableAgentRules = process.env.ESLINT_AGENT_RULES === "1";
 const agent = enableAgentRules ? "warn" : "off";
 // Step 3 flips this to "error" per migrated `_services/` scope.
 const servicesRulesSeverity = agent;
-// Step 2 flips this to "error" per migrated `_domains/` scope.
-const domainRulesSeverity = agent;
+// Step 2 locked `_domains/`: the scope is migrated, so a default export there is
+// a regression, not a burn-down item. Still behind the agent gate.
+const domainRulesSeverity = enableAgentRules ? "error" : "off";
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -139,12 +140,7 @@ export const nextJsConfig = [
     },
   },
   {
-    files: [
-      "**/src/app/_domains/**/*.{ts,tsx}",
-      // Transition: `_features/` sits at the app root until step 2 moves it under
-      // `_domains/`. Drop this glob then.
-      "**/src/app/_features/**/*.{ts,tsx}",
-    ],
+    files: ["**/src/app/_domains/**/*.{ts,tsx}"],
     rules: {
       "local/no-default-export": domainRulesSeverity,
     },
