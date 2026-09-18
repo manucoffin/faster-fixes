@@ -17,7 +17,9 @@ export async function getMonthlyChurnRate(): Promise<number | null> {
   const [activeNow, churnedLast30] = await Promise.all([
     prisma.subscription.count({
       where: {
-        status: { in: [SubscriptionStatus.Active, SubscriptionStatus.Trialing] },
+        status: {
+          in: [SubscriptionStatus.Active, SubscriptionStatus.Trialing],
+        },
       },
     }),
     prisma.subscription.count({
@@ -33,3 +35,7 @@ export async function getMonthlyChurnRate(): Promise<number | null> {
 
   return churnedLast30 / baseAtStart;
 }
+
+export type GetMonthlyChurnRateOutput = Awaited<
+  ReturnType<typeof getMonthlyChurnRate>
+>;

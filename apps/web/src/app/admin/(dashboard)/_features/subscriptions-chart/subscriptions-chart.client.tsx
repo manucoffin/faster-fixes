@@ -15,7 +15,7 @@ import { ChartContainer, ChartTooltip } from "@workspace/ui/components/chart";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useQueryStates } from "nuqs";
 import { Area, Bar, ComposedChart, Line, XAxis, YAxis } from "recharts";
-import type { GetMonthlyStatsOutput } from "./get-monthly-stats.trpc.query";
+import type { GetMonthlyStatsOutput } from "../../_services/get-monthly-stats";
 
 type MonthData = GetMonthlyStatsOutput[number];
 
@@ -24,7 +24,7 @@ export function SubscriptionsChart() {
   const [period] = useQueryStates(periodSelectorParsers);
 
   const getMonthlyStatsQuery = useQuery(
-    trpc.admin.dashboard.stats.get.queryOptions({
+    trpc.admin.dashboard.getMonthlyStats.queryOptions({
       from: period.from ? new Date(period.from) : undefined,
       to: period.to ? new Date(period.to) : undefined,
     }),

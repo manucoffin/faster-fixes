@@ -1,8 +1,6 @@
-import { adminProcedure } from "@/server/trpc/trpc";
-import { inferProcedureOutput } from "@trpc/server";
 import { prisma } from "@workspace/db";
 
-export const getUsersOverview = adminProcedure.query(async () => {
+export async function getUsersOverview() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -40,8 +38,8 @@ export const getUsersOverview = adminProcedure.query(async () => {
     newUsersLastMonth,
     monthOverMonthGrowth,
   };
-});
+}
 
-export type GetUsersOverviewOutput = inferProcedureOutput<
-  typeof getUsersOverview
+export type GetUsersOverviewOutput = Awaited<
+  ReturnType<typeof getUsersOverview>
 >;

@@ -75,6 +75,12 @@ export const migratedScopes = [
   "_domains/user",
   "onboarding",
   {
+    // The admin root (its router) and the dashboard route group are migrated;
+    // `admin/users` is a scope of its own that step 3 has not reached yet.
+    scope: "admin",
+    ignores: ["**/src/app/admin/users/**"],
+  },
+  {
     // Only the shell tier of the route group is migrated: its four child
     // segments are scopes of their own that step 3 has not reached yet.
     scope: "(authenticated)",

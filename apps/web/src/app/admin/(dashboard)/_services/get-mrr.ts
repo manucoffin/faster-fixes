@@ -1,8 +1,6 @@
 import { stripeApi } from "@/server/stripe";
-import { adminProcedure } from "@/server/trpc/trpc";
-import { inferProcedureOutput } from "@trpc/server";
 import Stripe from "stripe";
-import { getMonthlyChurnRate } from "../../_utils/get-churn-rate";
+import { getMonthlyChurnRate } from "./get-monthly-churn-rate";
 
 // Stripe exposes no direct "MRR" endpoint — the Dashboard figure is internal
 // billing analytics. We reconstruct it the way Stripe does: each active
@@ -66,7 +64,7 @@ function subscriptionMonthlyCents(subscription: Stripe.Subscription): number {
   return Math.max(0, periodCents);
 }
 
-export const getMrr = adminProcedure.query(async () => {
+export async function getMrr() {
   let totalMrrCents = 0;
   let activeCount = 0;
 
@@ -132,6 +130,6 @@ export const getMrr = adminProcedure.query(async () => {
   const ltv = churnRate && churnRate > 0 ? arpa / churnRate : null;
 
   return { mrr, arr, grossRevenue, netRevenue, ltv };
-});
+}
 
-export type GetMrrOutput = inferProcedureOutput<typeof getMrr>;
+export type GetMrrOutput = Awaited<ReturnType<typeof getMrr>>;

@@ -8,7 +8,9 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function ActiveSubscriptionsCard() {
   const trpc = useTRPC();
-  const query = useQuery(trpc.admin.dashboard.subscriptions.get.queryOptions());
+  const query = useQuery(
+    trpc.admin.dashboard.getActiveSubscriptions.queryOptions(),
+  );
 
   return matchQueryStatus(query, {
     Loading: <ActiveSubscriptionsCardLoading />,
@@ -27,14 +29,14 @@ export function ActiveSubscriptionsCard() {
           <CardContent>
             <div className="flex items-baseline gap-2">
               <div className="text-2xl font-bold">{data?.totalCount}</div>
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 ({data?.conversionRate}% of users)
               </span>
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               Active subscriptions
             </p>
-            <p className="text-muted-foreground mb-4 text-xs">
+            <p className="mb-4 text-xs text-muted-foreground">
               {formattedChurn} monthly churn
             </p>
 
@@ -42,26 +44,26 @@ export function ActiveSubscriptionsCard() {
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-xs">Pro</span>
+                  <span className="text-xs text-muted-foreground">Pro</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">
                     {data?.proCount}
                   </span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     ({data?.proPercentage}%)
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-xs">Agency</span>
+                  <span className="text-xs text-muted-foreground">Agency</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">
                     {data?.agencyCount}
                   </span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     ({data?.agencyPercentage}%)
                   </span>
                 </div>
@@ -82,16 +84,16 @@ function ActiveSubscriptionsCardLoading() {
           <Skeleton className="h-8 w-20" />
           <Skeleton className="h-4 w-24" />
         </div>
-        <p className="text-muted-foreground text-xs">Active subscriptions</p>
-        <Skeleton className="mb-4 mt-1 h-4 w-28" />
+        <p className="text-xs text-muted-foreground">Active subscriptions</p>
+        <Skeleton className="mt-1 mb-4 h-4 w-28" />
 
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">Pro</span>
+            <span className="text-xs text-muted-foreground">Pro</span>
             <Skeleton className="h-5 w-16" />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">Agency</span>
+            <span className="text-xs text-muted-foreground">Agency</span>
             <Skeleton className="h-5 w-16" />
           </div>
         </div>
@@ -104,9 +106,7 @@ function ActiveSubscriptionsCardError() {
   return (
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
-        <p className="text-destructive text-sm">
-          Failed to load statistics
-        </p>
+        <p className="text-sm text-destructive">Failed to load statistics</p>
       </CardContent>
     </Card>
   );
