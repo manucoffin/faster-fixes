@@ -47,11 +47,15 @@ The planning estimate for `require-use-client-suffix` was 11, under the narrower
 
 ## Locked scopes
 
-A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it. Nothing is locked yet.
+A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope | Step | Commit | Rules locked |
-| ----- | ---- | ------ | ------------ |
-|       |      |        |              |
+| Scope         | Step | Commit    | Rules locked                                       |
+| ------------- | ---- | --------- | -------------------------------------------------- |
+| `_domains/**` | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export` |
+
+`no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
+
+The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is still in place. Step 3 removes it when those files move into `_services/`.
 
 ## Prerequisites for step 2
 
