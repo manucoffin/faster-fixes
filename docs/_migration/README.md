@@ -2102,7 +2102,7 @@ member, and the multi-site Jira picker storing a site are on the QA checklist of
 
 ### `(authenticated)/(project)`, part 1: scope router, inbox reads and bulk actions (issue #74)
 
-Commit: `PLACEHOLDER`. The scope router leaves `_utils/`, seven operations become services, and the
+Commit: `4f4a646`. The scope router leaves `_utils/`, seven operations become services, and the
 inbox filter parsers move to `_helpers/`. The scope is **not** locked: issues #75 to #79 own the
 remaining 37 operations and the `migratedScopes` entry.
 
