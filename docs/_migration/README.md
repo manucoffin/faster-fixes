@@ -1689,6 +1689,129 @@ mail or storage provider, so no user can sign in, no Organization can be rendere
 can be issued. Renaming the Organization, changing the logo, accepting and rejecting an invitation
 and leaving an Organization as a plain member and as the owner are on the QA checklist of issue #70.
 
+### `(authenticated)/organization`, part 2: members, and the scope lock (issue #71)
+
+Commit: `b21a3cb`. The five member operations become services and the scope is **locked**:
+`migratedScopes` gains `"(authenticated)/organization"`, so the step's nine rules report at
+`error` for the whole scope, part 1 included.
+
+**Files moved.** Ten modules, all with `git mv`, from `_features/members/*` to `_services/`. No
+file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation        | Before                                                                   | After                                |
+| ---------------- | ------------------------------------------------------------------------ | ------------------------------------ |
+| Invite a member  | `_features/members/create-invitation/create-invitation.trpc.mutation.ts` | `_services/create-invitation.ts`     |
+| Pending list     | `_features/members/get-invitations.trpc.query.ts`                        | `_services/list-invitations.ts`      |
+| Cancel an invite | `_features/members/delete-invitation/delete-invitation.trpc.mutation.ts` | `_services/delete-invitation.ts`     |
+| Remove a member  | `_features/members/delete/delete-member.trpc.mutation.ts`                | `_services/delete-member.ts`         |
+| Change a role    | `_features/members/update-role/update-member-role.trpc.mutation.ts`      | `_services/update-member-role.ts`    |
+| Schemas          | the five, next to their procedure                                        | the same five, next to their service |
+
+The `members` feature keeps its five client components, `invite-member-dialog.client.tsx`
+included. Three of its operation subfolders (`delete/`, `delete-invitation/`, `update-role/`) are
+now empty, like `organization/_utils/`.
+
+**Renamed service and procedure key.** One of each, and they are the same operation:
+`getInvitations` becomes `listInvitations` and the key `invitation.get` becomes `invitation.list`.
+It returns a collection and `list-` is the read verb the closed vocabulary forces, the same call
+`invitation.getReceived` to `invitation.listReceived` made in part 1. Its three call sites follow:
+the members tab's `queryOptions`, and the `queryFilter` of the cancel dropdown and of the invite
+dialog. The other four keys (`invitation.create`, `invitation.delete`, `member.updateRole`,
+`member.delete`) already mirror their service verb under a router that carries the noun.
+
+**A verb deliberately left alone.** `deleteInvitation` marks the Invitation `canceled` rather than
+deleting the row, and the button reads "Cancel invitation", so `cancelInvitation` would read more
+precisely. Neither this ticket nor the step 3 spec lists that rename, and a procedure key rename is
+a behaviour change with call sites; it stays `delete` and is written down here instead.
+
+**Authorization, all of it in the services.** Seven denials, every one of them needing a loaded
+Member, Invitation or membership, so every one moved into the service that loads it. Same codes,
+same messages.
+
+| Service            | Denials now in the service                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `createInvitation` | `ForbiddenError` "You do not have permission to invite members."                                                     |
+| `listInvitations`  | `ForbiddenError` "You do not have permission to view invitations."                                                   |
+| `deleteInvitation` | `NotFoundError` "Invitation not found." and `ForbiddenError` for a caller who is not owner or admin                  |
+| `deleteMember`     | `NotFoundError` "Member not found.", `ForbiddenError` for the caller's role, `ForbiddenError` for removing the owner |
+| `updateMemberRole` | `NotFoundError` "Member not found." and `ForbiddenError` "Only the owner can change member roles."                   |
+
+The one check that stayed at the transport edge is the seat limit: `invitation.create` keeps
+`planAwareProcedure.use(enforceLimit("seats"))`, because a plan limit is answered by the context
+alone and has no domain-error equivalent. That is the same placement the `(authenticated)` shell
+made for `createProject` and its `projects` limit.
+
+**Removed generic wrapper, the deliberate behaviour change.** One. `createInvitation`'s
+`INTERNAL_SERVER_ERROR` "Error sending invitation." sat under a branch that already translated
+every `Error` into a `BAD_REQUEST`, so it could only fire on a non-`Error` throw. It is gone and
+the value propagates untouched; the invite dialog still falls back to the same sentence when a
+message is empty, so the copy a user sees is unchanged in practice. No error is reclassified, which
+is why no service of this segment owes a reclassification test.
+
+**Better Auth.** `createInvitation` is the only caller here. Its try/catch moves unchanged:
+`BadRequestError` carrying Better Auth's own message, which is the copy the dialog's root alert
+shows. The service takes `headers` explicitly, resolved by the router with `await headers()`, the
+same value the tRPC context carries.
+
+**Services holding a database client.** All five, each holding an authorization check. None
+receives the tRPC context or the session: the router passes `userId`, `organizationId`, `memberId`,
+`invitationId`, `role` and `headers` as plain values, and the services import `prisma` directly
+instead of reading it from `ctx`.
+
+**Output types.** The five `inferProcedureOutput` aliases of the segment are gone, and the scope
+now has none. The single read exports `ListInvitationsOutput`; the four writes owe none. No file
+imported any of the five, so no consumer changed beyond the renamed key.
+
+**Schemas.** The five plural `*Inputs` aliases become singular `*Input`, which is what
+`require-schema-conventions` demands now that the scope is locked, and `GetInvitationsSchema`
+follows its service to `ListInvitationsSchema`. `member-actions-dropdown.client.tsx` follows
+`UpdateMemberRoleInput` to `_services/`, which is the documented exception to
+`no-client-import-of-services`.
+
+**Tests.** `delete-member.test.ts` (4 cases) pins the `NotFoundError` for an unknown Member, the
+`ForbiddenError` for a caller who is neither owner nor admin, the `ForbiddenError` for removing the
+owner and the deletion for a plain member. `create-invitation.test.ts` (3 cases) pins the
+`ForbiddenError` before Better Auth is ever called, the `BadRequestError` carrying Better Auth's
+message, and the body and headers passed through on success. Both drive the trailing client; no
+tRPC context is built. The other three services are behaviour-preserving moves whose denials are
+the same shape as `deleteMember`'s, so the step's policy leaves them untested.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 52 app
+tests (7 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **117 problems, 0
+errors, 117 warnings** (88 `no-raw-tailwind-colors` / 28 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 5 from the 122 of part 1, the five being the plural `Inputs`
+aliases this ticket renamed. Zero errors with the scope locked is what makes the lock real.
+`npx next build` compiles and still lists `/organization` and `/organization/invitations`;
+`pnpm build` is refused by the sandbox, as the earlier entries record.
+
+**Per-scope "must be gone" checks.** Restricted to `(authenticated)/organization`, checks 1 and 3
+to 10 all return nothing: no role-suffixed file, no router in a bucket or a feature, no service
+importing tRPC or holding a `TRPCError`, no `'use server'`, no `prisma.` outside `_services/` and
+no `inferProcedureOutput` left in the scope. Check 2 still returns the empty untracked
+`organization/_utils/` folder, joined by the three empty operation subfolders this ticket left in
+`_features/members/`: `git ls-files` shows all four holding nothing and the sandbox refuses
+`rmdir`, so they stay the maintainer's to remove, like the `account/_utils/` and
+`admin/users/_utils/` ones.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                          | Result                                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `GET /api/trpc/authenticated.organization.invitation.list`                     | `401 UNAUTHORIZED`, the renamed key resolves                 |
+| `GET /api/trpc/authenticated.organization.invitation.get`                      | `404 No procedure found on path`, the old key is gone        |
+| `POST /api/trpc/authenticated.organization.invitation.create`                  | `401 UNAUTHORIZED`, the plan-aware procedure still guards it |
+| `POST /api/trpc/authenticated.organization.invitation.delete`                  | `401 UNAUTHORIZED`, the key resolves                         |
+| `POST /api/trpc/authenticated.organization.member.updateRole`, `member.delete` | `401 UNAUTHORIZED`, both resolve                             |
+| `GET /api/trpc/authenticated.organization.get`, `invitation.listReceived`      | `401 UNAUTHORIZED`, part 1 is unaffected by the lock         |
+| `POST /api/trpc/authenticated.organization.leave`                              | `401 UNAUTHORIZED`, same                                     |
+| `GET /organization` signed out                                                 | `307` to `/login`, the page guard is unchanged               |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and
+no mail provider, so no user can sign in, no Organization can be rendered and no invitation can be
+sent. Inviting a member, cancelling an invitation, promoting and demoting a member, removing a
+member, and the denials seen as a plain member and at the seat limit are on the QA checklist of
+issue #71.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
