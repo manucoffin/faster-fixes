@@ -1,41 +1,33 @@
-"use server";
-
 import { auth } from "@/server/auth";
+import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
 import { getInstallationOctokit } from "@/server/github/github-app";
-import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError, inferProcedureOutput } from "@trpc/server";
-import { headers } from "next/headers";
+import { prisma } from "@workspace/db";
 
-export const listAccessibleRepos = protectedProcedure.query(async ({ ctx }) => {
-  const { prisma, session } = ctx;
-
-  const activeOrganization = await auth.api.getFullOrganization({
-    headers: await headers(),
-  });
+export async function listAccessibleRepos(
+  { userId, headers }: { userId: string; headers: Headers },
+  db: typeof prisma = prisma,
+) {
+  const activeOrganization = await auth.api.getFullOrganization({ headers });
 
   if (!activeOrganization) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No active organization.",
-    });
+    throw new BadRequestError("No active organization.");
   }
 
-  const membership = await prisma.member.findFirst({
+  // The privileged-membership denial needs the resolved Organization, so it
+  // lives here rather than at the transport edge.
+  const membership = await db.member.findFirst({
     where: {
       organizationId: activeOrganization.id,
-      userId: session.user.id,
+      userId,
       role: { in: ["owner", "admin"] },
     },
   });
 
   if (!membership) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only owners and admins can list repositories.",
-    });
+    throw new ForbiddenError("Only owners and admins can list repositories.");
   }
 
-  const installation = await prisma.gitHubInstallation.findFirst({
+  const installation = await db.gitHubInstallation.findFirst({
     where: { organizationId: activeOrganization.id },
   });
 
@@ -82,6 +74,8 @@ export const listAccessibleRepos = protectedProcedure.query(async ({ ctx }) => {
   }
 
   return repos;
-});
+}
 
-export type ListAccessibleReposOutput = inferProcedureOutput<typeof listAccessibleRepos>;
+export type ListAccessibleReposOutput = Awaited<
+  ReturnType<typeof listAccessibleRepos>
+>;

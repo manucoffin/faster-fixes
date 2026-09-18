@@ -10,4 +10,4 @@ export const LinkRepoSchema = z.object({
   defaultLabels: z.array(z.string()).default(["faster-fixes"]),
 });
 
-export type LinkRepoSchemaType = z.infer<typeof LinkRepoSchema>;
+export type LinkRepoInput = z.infer<typeof LinkRepoSchema>;

@@ -2,7 +2,7 @@
 
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ExternalLink } from "lucide-react";
-import type { GetProjectGitHubLinkOutput } from "./get-project-link.trpc.query";
+import type { GetProjectGitHubLinkOutput } from "../../_services/get-project-github-link";
 import { UnlinkRepoButton } from "./unlink-repo/unlink-repo-button.client";
 import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.client";
 
@@ -15,7 +15,7 @@ export function LinkedRepoView({ projectId, link }: LinkedRepoViewProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <GithubIcon className="text-muted-foreground size-4" />
+        <GithubIcon className="size-4 text-muted-foreground" />
         <a
           href={`https://github.com/${link.repoFullName}`}
           target="_blank"

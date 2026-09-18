@@ -12,7 +12,7 @@ import {
 } from "@workspace/ui/components/select";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { ListAccessibleReposOutput } from "./list-accessible-repos.trpc.query";
+import type { ListAccessibleReposOutput } from "../../../_services/list-accessible-repos";
 
 type RepoPickerProps = {
   projectId: string;

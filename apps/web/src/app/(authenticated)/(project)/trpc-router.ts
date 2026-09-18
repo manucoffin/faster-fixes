@@ -1,9 +1,7 @@
+import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
+import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
-import { getProjectGitHubLink } from "./settings/_features/github/get-project-link.trpc.query";
-import { linkRepo } from "./settings/_features/github/link-repo/link-repo.trpc.mutation";
-import { listAccessibleRepos } from "./settings/_features/github/link-repo/list-accessible-repos.trpc.query";
-import { unlinkRepo } from "./settings/_features/github/unlink-repo/unlink-repo.trpc.mutation";
-import { updateProjectLink } from "./settings/_features/github/update-link/update-project-link.trpc.mutation";
+import { headers } from "next/headers";
 import { getProjectJiraLink } from "./settings/_features/jira/get-project-jira-link.trpc.query";
 import { linkJiraProject } from "./settings/_features/jira/link-project/link-jira-project.trpc.mutation";
 import { listJiraIssueTypesForProject } from "./settings/_features/jira/link-project/list-jira-issue-types.trpc.query";
@@ -17,10 +15,6 @@ import { listLinearTeamLabels } from "./settings/_features/linear/link-team/list
 import { listLinearTeamStates } from "./settings/_features/linear/link-team/list-team-states.trpc.query";
 import { unlinkLinearTeam } from "./settings/_features/linear/unlink-team/unlink-team.trpc.mutation";
 import { updateProjectLinearLink } from "./settings/_features/linear/update-link/update-project-linear-link.trpc.mutation";
-import { getProjectSlackLink } from "./settings/_features/slack/get-project-slack-link.trpc.query";
-import { listSlackChannels } from "./settings/_features/slack/link-channel/list-slack-channels.trpc.query";
-import { setProjectSlackChannel } from "./settings/_features/slack/link-channel/set-project-slack-channel.trpc.mutation";
-import { updateProjectSlackLink } from "./settings/_features/slack/update-link/update-project-slack-link.trpc.mutation";
 import { createReviewer } from "./reviewers/_services/create-reviewer";
 import { CreateReviewerSchema } from "./reviewers/_services/create-reviewer.schema";
 import { deleteReviewer } from "./reviewers/_services/delete-reviewer";
@@ -39,6 +33,22 @@ import { regenerateApiKey } from "./settings/_services/regenerate-api-key";
 import { RegenerateApiKeySchema } from "./settings/_services/regenerate-api-key.schema";
 import { updateProject } from "./settings/_services/update-project";
 import { UpdateProjectSchema } from "./settings/_services/update-project.schema";
+import { getProjectGitHubLink } from "./settings/_services/get-project-github-link";
+import { GetProjectGitHubLinkSchema } from "./settings/_services/get-project-github-link.schema";
+import { getProjectSlackLink } from "./settings/_services/get-project-slack-link";
+import { GetProjectSlackLinkSchema } from "./settings/_services/get-project-slack-link.schema";
+import { linkRepo } from "./settings/_services/link-repo";
+import { LinkRepoSchema } from "./settings/_services/link-repo.schema";
+import { linkSlackChannel } from "./settings/_services/link-slack-channel";
+import { LinkSlackChannelSchema } from "./settings/_services/link-slack-channel.schema";
+import { listAccessibleRepos } from "./settings/_services/list-accessible-repos";
+import { listSlackChannels } from "./settings/_services/list-slack-channels";
+import { unlinkRepo } from "./settings/_services/unlink-repo";
+import { UnlinkRepoSchema } from "./settings/_services/unlink-repo.schema";
+import { updateProjectGitHubLink } from "./settings/_services/update-project-github-link";
+import { UpdateProjectGitHubLinkSchema } from "./settings/_services/update-project-github-link.schema";
+import { updateProjectSlackLink } from "./settings/_services/update-project-slack-link";
+import { UpdateProjectSlackLinkSchema } from "./settings/_services/update-project-slack-link.schema";
 import { listProjects } from "./_services/list-projects";
 import { ListProjectsSchema } from "./_services/list-projects.schema";
 import { createGitHubIssueForFeedback } from "./inbox/_services/create-github-issue-for-feedback";
@@ -264,12 +274,48 @@ export const projectsRouter = router({
         }),
       ),
   }),
+  // The two plan-gated writes keep `planAwareProcedure` and `enforceFeature`:
+  // a plan denial is transport policy and has no domain-error equivalent.
   github: router({
-    getLink: getProjectGitHubLink,
-    listRepos: listAccessibleRepos,
-    linkRepo,
-    unlinkRepo,
-    updateLink: updateProjectLink,
+    getLink: protectedProcedure
+      .input(GetProjectGitHubLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectGitHubLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listRepos: protectedProcedure.query(async ({ ctx }) =>
+      listAccessibleRepos({
+        userId: ctx.session.user.id,
+        headers: await headers(),
+      }),
+    ),
+    linkRepo: planAwareProcedure
+      .use(enforceFeature("githubIntegration"))
+      .input(LinkRepoSchema)
+      .mutation(({ input, ctx }) =>
+        linkRepo({ ...input, userId: ctx.session.user.id }),
+      ),
+    unlinkRepo: protectedProcedure
+      .input(UnlinkRepoSchema)
+      .mutation(({ input, ctx }) =>
+        unlinkRepo({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateLink: planAwareProcedure
+      .use(enforceFeature("githubIntegration"))
+      .input(UpdateProjectGitHubLinkSchema)
+      .mutation(({ input, ctx }) =>
+        updateProjectGitHubLink({
+          projectId: input.projectId,
+          autoCreateIssues: input.autoCreateIssues,
+          defaultLabels: input.defaultLabels,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   linear: router({
     getLink: getProjectLinearLink,
@@ -289,9 +335,40 @@ export const projectsRouter = router({
     updateLink: updateProjectJiraLink,
   }),
   slack: router({
-    getLink: getProjectSlackLink,
-    listChannels: listSlackChannels,
-    setProjectChannel: setProjectSlackChannel,
-    updateLink: updateProjectSlackLink,
+    getLink: protectedProcedure
+      .input(GetProjectSlackLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectSlackLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listChannels: protectedProcedure.query(async ({ ctx }) =>
+      listSlackChannels({
+        userId: ctx.session.user.id,
+        headers: await headers(),
+      }),
+    ),
+    linkChannel: planAwareProcedure
+      .use(enforceFeature("slackIntegration"))
+      .input(LinkSlackChannelSchema)
+      .mutation(({ input, ctx }) =>
+        linkSlackChannel({
+          projectId: input.projectId,
+          channelId: input.channelId,
+          channelName: input.channelName,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    updateLink: planAwareProcedure
+      .use(enforceFeature("slackIntegration"))
+      .input(UpdateProjectSlackLinkSchema)
+      .mutation(({ input, ctx }) =>
+        updateProjectSlackLink({
+          projectId: input.projectId,
+          enabled: input.enabled,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
 });

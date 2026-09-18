@@ -12,7 +12,7 @@ import {
 } from "@workspace/ui/components/select";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { ListSlackChannelsOutput } from "./list-slack-channels.trpc.query";
+import type { ListSlackChannelsOutput } from "../../../_services/list-slack-channels";
 
 type ChannelPickerProps = {
   projectId: string;
@@ -31,7 +31,7 @@ export function ChannelPicker({
   const [channelId, setChannelId] = useState<string>(selectedChannelId);
 
   const setChannelMutation = useMutation(
-    trpc.authenticated.projects.slack.setProjectChannel.mutationOptions({
+    trpc.authenticated.projects.slack.linkChannel.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.slack.getLink.queryKey({
