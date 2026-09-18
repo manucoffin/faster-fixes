@@ -7,4 +7,4 @@ export const CreateUserSchema = z.object({
   lastName: z.string().max(255).optional().or(z.literal("")),
 });
 
-export type CreateUserInputs = z.infer<typeof CreateUserSchema>;
+export type CreateUserInput = z.infer<typeof CreateUserSchema>;
