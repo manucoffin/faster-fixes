@@ -65,6 +65,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `(public)`              | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `_domains/organization` | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `_domains/user`         | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `_domains/subscription` | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -668,6 +669,126 @@ no operation completes. Signing in with a verified and with an unverified accoun
 a fresh and with a taken address, receiving and consuming a reset link, resending a verification
 email to a known and to an unknown address, and stopping an impersonation are listed as a QA
 checklist on issue #62 for the maintainer to walk against a real database.
+
+### `_domains/subscription` (issue #63)
+
+Commit `71a0b0c`. Three operations plus the domain's own active-Subscription read. The first scope
+whose non-operation code carries the entry: a shared client hook, a constants bucket and a root-level
+IO file all had to find their final bucket before the domain could be locked.
+
+| Item                | Before                                                       | After                                                      |
+| ------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| Plan prices         | `subscription/stripe/get-plans-prices.trpc.query.ts`         | `subscription/_services/get-plans-prices.ts`               |
+| Stripe subscription | `subscription/stripe/get-stripe-subscription.trpc.query.ts`  | `subscription/_services/get-stripe-subscription.ts`        |
+| Upgrade             | `subscription/upgrade-subscription/*.trpc.mutation.ts`       | `subscription/_services/upgrade-subscription.ts`           |
+| Active Subscription | `subscription/get-user-active-subscription.ts` (domain root) | `subscription/_services/get-active-subscription.ts`        |
+| Status labels       | `subscription/_constants/translations.ts`                    | `subscription/_helpers/get-subscription-status-label.ts`   |
+| Plan gate hook      | `subscription/use-plan-gate.ts` (domain root)                | `subscription/plan-gate/use-plan-gate.ts`, barrel-exported |
+| Router              | `subscription/_utils/trpc-router.ts`                         | `subscription/trpc-router.ts`                              |
+| Router export       | `subscriptionFeatureRouter`                                  | `subscriptionRouter`                                       |
+| App router mount    | `subscription: subscriptionFeatureRouter`                    | `subscription: subscriptionRouter`                         |
+| Output type         | `GetPlansPricesOutput` from `inferProcedureOutput`           | `GetPlansPricesOutput` from the service's return type      |
+| Schemas             | inline `z.object` in the three procedures                    | three `*.schema.ts` files next to their service            |
+
+**Renamed procedure keys.** None. `upgradeSubscription` drops the entity the router already carries,
+so its key stays `upgrade`; `getPlansPrices` and `getStripeSubscription` name something other than
+the router's entity, so they keep the full service name as their key. `trpc.subscription.upgrade`,
+`.getPlansPrices` and `.getStripeSubscription` are the same paths before and after, and no client
+call site changed.
+
+**Renamed functions.** `getUserActiveSubscription` became `getActiveSubscription`, which closes
+anomaly 3 above: the function reads the Subscription of the session's active **Organization**, and
+`CONTEXT.md` attaches a Subscription to an Organization, never to a User. Its single caller, the not
+yet migrated `account/billing/_features/current-plan/get-active-subscription.trpc.query.ts`, imports
+it under an alias because that file's own procedure already holds the name; issue #68 dissolves the
+wrapper. The service now takes `headers` explicitly instead of calling `next/headers` twice itself,
+so the Better-Auth IO follows the step's invariant.
+
+**Reclassified errors.**
+
+| Operation                 | Before                                             | After                                               |
+| ------------------------- | -------------------------------------------------- | --------------------------------------------------- |
+| `get-stripe-subscription` | any Stripe failure, `INTERNAL_SERVER_ERROR`, a 500 | `resource_missing` becomes a `NotFoundError`, a 404 |
+| `get-plans-prices`        | generic `"Failed to fetch Stripe prices"` wrapper  | removed, the infrastructure error propagates        |
+
+Stripe answers an identifier it does not know with `resource_missing`, which means the subscription
+record pointing at it is stale: that is a not found, not a server fault, and it was the one expected
+failure of this domain dressed as a 500. It is the service that carries the reclassification, so it
+is the service that carries the unit test the step asks for
+(`get-stripe-subscription.test.ts`, four cases: the reclassified code, an unexpected Stripe failure
+propagating untranslated, the returned shape, and a subscription with no item). To make that test
+possible without reaching for the singleton, the service takes the Stripe client as a trailing
+parameter with a default, which is the recipe's dependency-injection rule applied to an SDK client
+rather than to the database client. Its new message, `"Subscription not found."`, reaches no user
+today: the only consumer, `billing-details-card.client.tsx`, renders its error state from the prices
+query and ignores this one's.
+
+The prices wrapper is the generic kind the recipe removes: every per-plan Stripe failure is already
+caught one level down and reported as a plan without a price, so the outer `catch` could only fire on
+a bug, and it answered with copy no user could act on. Observed on a dev server with a dummy Stripe
+key, the operation still answers `200` with `{"monthly":null,"annual":null}` per plan, so the removal
+changes nothing a client sees.
+
+**Authorization placement.** `upgrade-subscription` keeps its `FORBIDDEN`
+(`"You do not have an active organization"`) as a `ForbiddenError` inside the service. The check needs
+the loaded Organization, which the service is what loads, so the placement rule puts it there rather
+than in the procedure. It is the only `DomainError` this domain throws on a write path.
+
+**Placement calls.** The status translation record became `getSubscriptionStatusLabel`, a pure
+function in `_helpers/`, so the domain has no `_constants/` bucket (ADR-0010). The lookup keeps
+returning nothing for a status this app does not model, which is what the admin subscription card
+rendered before. The plan gate hook became a capability folder of its own, `plan-gate/`, exported
+from the barrel: it is shared by six features across four scopes, and the barrel is now the single
+path its consumers use. The two existing capability folders (`plan-card/`, `upgrade-subscription/`)
+keep the flat shape step 2 gave them, as the auth domain's did; only the operation file moved out of
+`upgrade-subscription/`.
+
+**The barrel stops being empty.** `_domains/subscription/index.ts` is the first domain barrel with a
+real export. It exports `usePlanGate` and nothing else: a hook is a capability, which is what a
+barrel is for, while the services and the router stay internal and the app router keeps mounting the
+router by deep import. Every consumer of the hook now imports `@/app/_domains/subscription`.
+
+**Deprecated stubs.** None. All seven retired files survived as `git mv` moves. Three now-empty
+folders (`_utils/`, `_constants/`, `stripe/`) are left in the working copy because the sandbox
+refuses `rmdir` and git records no directory: `git ls-files` on the domain lists twelve files and
+none of those paths, so a fresh clone has none of the three. Nothing here waits on issue #81.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 180 ESLint
+rule and config tests plus 20 app tests (16 before, 4 added here); `pnpm lint:agent-rules` 143
+problems, 0 errors, 143 warnings (`no-raw-tailwind-colors` 88, `require-schema-conventions` 51,
+`require-use-client-suffix` 3, `schema-must-be-pure-zod` 1), identical per rule to the previous
+entry: the three schemas extracted here already follow the convention, so the burn-down neither
+grew nor shrank. `npx next build` passes with dummy environment values. The lock was verified with
+`ESLINT_AGENT_RULES=1 npx eslint --print-config` on a service file, which reports the four services
+rules and the five general rules at `error`.
+
+**Per-scope "must be gone" checks.** All ten commands, restricted to
+`apps/web/src/app/_domains/subscription`, return nothing except the old-bucket and `_constants/`
+checks, which return the two empty untracked folders described above.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                           | Result                                                                   |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /api/trpc/subscription.getPlansPrices` with two plan names | `200`, `{"monthly":null,"annual":null}` per plan, the dummy Stripe key   |
+| `GET /api/trpc/subscription.getPlansPrices` with an empty input | `400` with the per-field `zodError` the extracted schema produces        |
+| `GET /api/trpc/subscription.getStripeSubscription` signed out   | `401 UNAUTHORIZED`, the protected procedure guards before the service    |
+| `POST /api/trpc/subscription.upgrade` signed out                | `401 UNAUTHORIZED`, same                                                 |
+| `GET /api/trpc/subscription.nope`                               | `404 No procedure found on path`, the control for the three checks above |
+| `GET /account/billing`, `/pricing`, `/inbox` signed out         | `307` to `/login`                                                        |
+| `GET /open-source`                                              | `200`, the pilot scope is unaffected                                     |
+
+**Not smoked here, and why.** No database and no real Stripe account are reachable, so no operation
+completes end to end. Upgrading to a plan and landing on Stripe checkout, the plan gate on a gated
+integration section, the free-plan banner in the sidebar, the billing page on a paid plan (which is
+the only caller of `getStripeSubscription`) and the admin subscription card's status label are listed
+as a QA checklist on issue #63 for the maintainer to walk against a real database.
+
+**Debt noted, not fixed.** The plan gate hook and the status label helper both import
+`@/server/auth/config/subscription-plans`, so a client module still reaches a `@/server/` path
+(anomaly 1 above). It is the plan configuration relocation that step 5 owns, not something this step
+can close: moving the Plan vocabulary into the domain touches billing, the admin subscription schema
+and the Better Auth wiring at once.
 
 ### Corrections to the recipe found by the pilot
 
