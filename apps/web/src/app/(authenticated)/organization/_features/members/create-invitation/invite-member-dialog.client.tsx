@@ -61,7 +61,7 @@ export function InviteMemberDialog({
     trpc.authenticated.organization.invitation.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.get.queryFilter(),
+          trpc.authenticated.organization.invitation.list.queryFilter(),
         );
         toast.success("Invitation sent successfully");
         handleOpenChange(false);
@@ -100,7 +100,7 @@ export function InviteMemberDialog({
             className="flex flex-col gap-4"
           >
             {form.formState.errors.root && (
-              <p className="text-destructive text-sm">
+              <p className="text-sm text-destructive">
                 {form.formState.errors.root.message}
               </p>
             )}

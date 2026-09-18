@@ -63,7 +63,7 @@ export function OrganizationMembersTab() {
   const isOwner = currentRole === "owner";
 
   const invitationsQuery = useQuery(
-    trpc.authenticated.organization.invitation.get.queryOptions(
+    trpc.authenticated.organization.invitation.list.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id && canManage },
     ),

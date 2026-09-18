@@ -1,14 +1,21 @@
-import { createInvitation } from "@/app/(authenticated)/organization/_features/members/create-invitation/create-invitation.trpc.mutation";
-import { deleteInvitation } from "@/app/(authenticated)/organization/_features/members/delete-invitation/delete-invitation.trpc.mutation";
-import { deleteMember } from "@/app/(authenticated)/organization/_features/members/delete/delete-member.trpc.mutation";
-import { getInvitations } from "@/app/(authenticated)/organization/_features/members/get-invitations.trpc.query";
-import { updateMemberRole } from "@/app/(authenticated)/organization/_features/members/update-role/update-member-role.trpc.mutation";
+import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
+import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
+import { createInvitation } from "./_services/create-invitation";
+import { CreateInvitationSchema } from "./_services/create-invitation.schema";
+import { deleteInvitation } from "./_services/delete-invitation";
+import { DeleteInvitationSchema } from "./_services/delete-invitation.schema";
+import { deleteMember } from "./_services/delete-member";
+import { DeleteMemberSchema } from "./_services/delete-member.schema";
 import { getOrganizationDetails } from "./_services/get-organization-details";
 import { GetOrganizationDetailsSchema } from "./_services/get-organization-details.schema";
 import { leaveOrganization } from "./_services/leave-organization";
 import { LeaveOrganizationSchema } from "./_services/leave-organization.schema";
+import { listInvitations } from "./_services/list-invitations";
+import { ListInvitationsSchema } from "./_services/list-invitations.schema";
+import { updateMemberRole } from "./_services/update-member-role";
+import { UpdateMemberRoleSchema } from "./_services/update-member-role.schema";
 import { updateOrganization } from "./_services/update-organization";
 import { updateOrganizationLogo } from "./_services/update-organization-logo";
 import { UpdateOrganizationLogoSchema } from "./_services/update-organization-logo.schema";
@@ -56,8 +63,28 @@ export const organizationRouter = router({
       }),
     ),
   invitation: router({
-    create: createInvitation,
-    get: getInvitations,
+    // The seat limit is a plan fact the context answers, so it stays on the
+    // procedure as the middleware it already was.
+    create: planAwareProcedure
+      .use(enforceLimit("seats"))
+      .input(CreateInvitationSchema)
+      .mutation(async ({ input, ctx }) =>
+        createInvitation({
+          organizationId: input.organizationId,
+          email: input.email,
+          role: input.role,
+          userId: ctx.session.user.id,
+          headers: await headers(),
+        }),
+      ),
+    list: protectedProcedure
+      .input(ListInvitationsSchema)
+      .query(({ input, ctx }) =>
+        listInvitations({
+          organizationId: input.organizationId,
+          userId: ctx.session.user.id,
+        }),
+      ),
     listReceived: protectedProcedure.query(({ ctx }) =>
       listReceivedInvitations({ email: ctx.session.user.email }),
     ),
@@ -77,10 +104,32 @@ export const organizationRouter = router({
           headers: await headers(),
         }),
       ),
-    delete: deleteInvitation,
+    delete: protectedProcedure
+      .input(DeleteInvitationSchema)
+      .mutation(({ input, ctx }) =>
+        deleteInvitation({
+          invitationId: input.invitationId,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   member: router({
-    updateRole: updateMemberRole,
-    delete: deleteMember,
+    updateRole: protectedProcedure
+      .input(UpdateMemberRoleSchema)
+      .mutation(({ input, ctx }) =>
+        updateMemberRole({
+          memberId: input.memberId,
+          role: input.role,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    delete: protectedProcedure
+      .input(DeleteMemberSchema)
+      .mutation(({ input, ctx }) =>
+        deleteMember({
+          memberId: input.memberId,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
 });

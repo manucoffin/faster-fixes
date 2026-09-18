@@ -6,4 +6,4 @@ export const CreateInvitationSchema = z.object({
   role: z.enum(["member", "admin"]).default("member"),
 });
 
-export type CreateInvitationInputs = z.infer<typeof CreateInvitationSchema>;
+export type CreateInvitationInput = z.infer<typeof CreateInvitationSchema>;

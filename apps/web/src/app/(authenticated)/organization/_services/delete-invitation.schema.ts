@@ -4,4 +4,4 @@ export const DeleteInvitationSchema = z.object({
   invitationId: z.string(),
 });
 
-export type DeleteInvitationInputs = z.infer<typeof DeleteInvitationSchema>;
+export type DeleteInvitationInput = z.infer<typeof DeleteInvitationSchema>;
