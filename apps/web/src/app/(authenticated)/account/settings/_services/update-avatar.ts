@@ -1,19 +1,15 @@
-"use server";
-
 import { s3Client } from "@/server/storage";
-import { protectedProcedure } from "@/server/trpc/trpc";
 import { deleteObject } from "@better-upload/server/helpers";
-import { inferProcedureOutput } from "@trpc/server";
+import { prisma } from "@workspace/db";
 
-export const updateAvatar = protectedProcedure.mutation(async ({ ctx }) => {
-  const { prisma, session } = ctx;
-
-  // Delete previous avatar from R2 if one exists
+export async function updateAvatar({ userId }: { userId: string }) {
   const user = await prisma.user.findUniqueOrThrow({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { image: true },
   });
 
+  // An absolute URL is an OAuth provider avatar, which lives outside the
+  // bucket and has nothing to delete.
   if (user.image && !user.image.startsWith("http")) {
     try {
       await deleteObject(s3Client, {
@@ -27,6 +23,4 @@ export const updateAvatar = protectedProcedure.mutation(async ({ ctx }) => {
       );
     }
   }
-});
-
-export type UpdateAvatarOutput = inferProcedureOutput<typeof updateAvatar>;
+}

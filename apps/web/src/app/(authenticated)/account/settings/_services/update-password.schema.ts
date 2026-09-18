@@ -1,7 +1,7 @@
 import { PasswordSchema } from "@/app/_domains/auth/_services/password.schema";
 import z from "zod";
 
-export const ChangePasswordSchema = z
+export const UpdatePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
     newPassword: PasswordSchema,
@@ -12,4 +12,4 @@ export const ChangePasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export type ChangePasswordInputs = z.infer<typeof ChangePasswordSchema>;
+export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;

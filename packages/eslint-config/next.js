@@ -69,6 +69,7 @@ const useClientSuffixOptions = {
 export const migratedScopes = [
   "(public)",
   "(auth)",
+  "(authenticated)/account",
   "_domains/auth",
   "_domains/organization",
   "_domains/subscription",

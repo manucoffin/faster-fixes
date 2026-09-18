@@ -5,4 +5,4 @@ export const UpdateProfileSchema = z.object({
   lastName: z.string().trim().optional(),
 });
 
-export type UpdateProfileInputs = z.infer<typeof UpdateProfileSchema>;
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;

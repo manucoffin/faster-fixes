@@ -24,17 +24,19 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
-  UpdateProfileInputs,
+  UpdateProfileInput,
   UpdateProfileSchema,
-} from "./update-profile.schema";
+} from "@/app/(authenticated)/account/settings/_services/update-profile.schema";
 
 export function ProfileForm() {
   const trpc = useTRPC();
   const { refetch: refetchSession } = useSession();
 
-  const getProfileQuery = useQuery(trpc.authenticated.account.profile.get.queryOptions());
+  const getProfileQuery = useQuery(
+    trpc.authenticated.account.profile.get.queryOptions(),
+  );
 
-  const form = useForm<UpdateProfileInputs>({
+  const form = useForm<UpdateProfileInput>({
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
       firstName: "",
@@ -52,8 +54,8 @@ export function ProfileForm() {
     }
   }, [getProfileQuery.data, form]);
 
-  const updateProfileMutation =
-    useMutation(trpc.authenticated.account.profile.update.mutationOptions({
+  const updateProfileMutation = useMutation(
+    trpc.authenticated.account.profile.update.mutationOptions({
       onSuccess: async () => {
         await refetchSession({ query: { disableCookieCache: true } });
         toast.success("Profile updated successfully");
@@ -62,9 +64,10 @@ export function ProfileForm() {
         const message = error.message || "An error occurred.";
         form.setError("root", { message });
       },
-    }));
+    }),
+  );
 
-  const onSubmit = async (data: UpdateProfileInputs) => {
+  const onSubmit = async (data: UpdateProfileInput) => {
     updateProfileMutation.mutate(data);
   };
 
@@ -117,9 +120,7 @@ export function ProfileForm() {
           disabled={updateProfileMutation.isPending}
           className="self-end"
         >
-          {updateProfileMutation.isPending
-            ? "Updating..."
-            : "Update profile"}
+          {updateProfileMutation.isPending ? "Updating..." : "Update profile"}
         </Button>
       </form>
     </Form>

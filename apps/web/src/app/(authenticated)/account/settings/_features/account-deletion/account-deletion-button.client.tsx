@@ -35,43 +35,45 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
-  DeleteAccountInputs,
+  DeleteAccountInput,
   DeleteAccountSchema,
-} from "./delete-account.schema";
+} from "@/app/(authenticated)/account/settings/_services/delete-account.schema";
 
 export function AccountDeletionButton() {
   const trpc = useTRPC();
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
-  const form = useForm<DeleteAccountInputs>({
+  const form = useForm<DeleteAccountInput>({
     resolver: zodResolver(DeleteAccountSchema),
     defaultValues: {
       password: "",
     },
   });
 
-  const deleteAccountMutation = useMutation(trpc.authenticated.account.delete.mutationOptions({
-    onSuccess: async () => {
-      toast.success("Your account has been deleted successfully");
-      setOpen(false);
+  const deleteAccountMutation = useMutation(
+    trpc.authenticated.account.delete.mutationOptions({
+      onSuccess: async () => {
+        toast.success("Your account has been deleted successfully");
+        setOpen(false);
 
-      // Sign out and redirect
-      await signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.push("/");
+        // Sign out and redirect
+        await signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              router.push("/");
+            },
           },
-        },
-      });
-    },
-    onError: (error) => {
-      const message = error.message || "An error occurred.";
-      form.setError("root", { message });
-    },
-  }));
+        });
+      },
+      onError: (error) => {
+        const message = error.message || "An error occurred.";
+        form.setError("root", { message });
+      },
+    }),
+  );
 
-  const onSubmit = async (data: DeleteAccountInputs) => {
+  const onSubmit = async (data: DeleteAccountInput) => {
     deleteAccountMutation.mutate(data);
   };
 
@@ -94,10 +96,8 @@ export function AccountDeletionButton() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <AlertTriangleIcon className="text-destructive h-5 w-5" />
-            <AlertDialogTitle>
-              Permanently delete your account
-            </AlertDialogTitle>
+            <AlertTriangleIcon className="h-5 w-5 text-destructive" />
+            <AlertDialogTitle>Permanently delete your account</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="pt-2">
             This action is irreversible. All your data will be permanently

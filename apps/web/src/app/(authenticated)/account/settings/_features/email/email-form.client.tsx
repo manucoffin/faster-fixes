@@ -27,16 +27,21 @@ import { AlertCircleIcon, CheckIcon, InfoIcon, MailIcon } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ChangeEmailInputs, ChangeEmailSchema } from "./change-email.schema";
+import {
+  ChangeEmailInput,
+  ChangeEmailSchema,
+} from "@/app/(authenticated)/account/settings/_services/change-email.schema";
 
 export function EmailForm() {
   const trpc = useTRPC();
   const [isPending, setIsPending] = React.useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
 
-  const getCurrentEmailQuery = useQuery(trpc.authenticated.account.email.get.queryOptions());
+  const getCurrentEmailQuery = useQuery(
+    trpc.authenticated.account.email.get.queryOptions(),
+  );
 
-  const form = useForm<ChangeEmailInputs>({
+  const form = useForm<ChangeEmailInput>({
     resolver: zodResolver(ChangeEmailSchema),
     defaultValues: {
       newEmail: "",
@@ -49,7 +54,7 @@ export function EmailForm() {
     }
   }, [getCurrentEmailQuery.data?.currentEmail, form]);
 
-  const onSubmit = async (data: ChangeEmailInputs) => {
+  const onSubmit = async (data: ChangeEmailInput) => {
     try {
       setIsPending(true);
       setShowSuccessMessage(false);
