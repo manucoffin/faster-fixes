@@ -20,7 +20,7 @@ function StarsBadge({ stars }: { stars: number }) {
 
 export function GitHubStarsButton() {
   const trpc = useTRPC();
-  const starsQuery = useQuery(trpc.githubStars.fetchStars.queryOptions());
+  const starsQuery = useQuery(trpc.public.getGithubStars.queryOptions());
 
   return (
     <Button asChild variant="outline" size="sm">

@@ -1,6 +1,6 @@
 import { authRouter } from "@/app/(auth)/_utils/trpc-router";
 import { authenticatedRouter } from "@/app/(authenticated)/_utils/trpc-router";
-import { githubStarsFeatureRouter } from "@/app/(public)/_features/github-stars/_utils/trpc-router";
+import { publicRouter } from "@/app/(public)/trpc-router";
 import { authenticationFeatureRouter } from "@/app/_domains/auth/_utils/trpc-router";
 import { organizationFeatureRouter } from "@/app/_domains/organization/_utils/trpc-router";
 import { subscriptionFeatureRouter } from "@/app/_domains/subscription/_utils/trpc-router";
@@ -13,7 +13,7 @@ export const appRouter = router({
   authenticated: authenticatedRouter,
   onboarding: onboardingRouter,
   admin: adminRouter,
-  githubStars: githubStarsFeatureRouter,
+  public: publicRouter,
   organization: organizationFeatureRouter,
   subscription: subscriptionFeatureRouter,
 });

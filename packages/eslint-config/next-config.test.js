@@ -8,7 +8,8 @@ import { localRulesPlugin } from "./local-rules/index.js";
 // The config reads ESLINT_AGENT_RULES once, at import time, so the gate has to
 // be set before the dynamic import below.
 process.env.ESLINT_AGENT_RULES = "1";
-const { migratedScopeConfigs, nextJsConfig } = await import("./next.js");
+const { migratedScopeConfigs, migratedScopes, nextJsConfig } =
+  await import("./next.js");
 
 /**
  * Resolves the severity `require-use-client-suffix` ends up with for a file
@@ -36,12 +37,19 @@ function entriesFor(ruleName) {
   return nextJsConfig.filter((entry) => entry.rules?.[ruleName] !== undefined);
 }
 
+// A locked scope re-declares the schema rules on its own glob, so the burn-down
+// ramp is the first entry and every later one belongs to a scope in
+// `migratedScopes`.
+function rampEntryFor(ruleName) {
+  const [ramp, ...locked] = entriesFor(ruleName);
+  expect(locked).toHaveLength(migratedScopes.length);
+  return ramp;
+}
+
 describe("the schema rules wiring", () => {
   it("runs require-schema-conventions on *.schema.ts with both convention options", () => {
-    const entries = entriesFor("local/require-schema-conventions");
-    expect(entries).toHaveLength(1);
+    const entry = rampEntryFor("local/require-schema-conventions");
 
-    const [entry] = entries;
     expect(entry.files).toEqual(["**/*.schema.ts"]);
     expect(entry.rules["local/require-schema-conventions"]).toEqual([
       "warn",
@@ -50,25 +58,36 @@ describe("the schema rules wiring", () => {
   });
 
   it("runs schema-must-be-pure-zod on *.schema.ts", () => {
-    const entries = entriesFor("local/schema-must-be-pure-zod");
-    expect(entries).toHaveLength(1);
-    expect(entries[0].files).toEqual(["**/*.schema.ts"]);
-    expect(entries[0].rules["local/schema-must-be-pure-zod"]).toBe("warn");
+    const entry = rampEntryFor("local/schema-must-be-pure-zod");
+
+    expect(entry.files).toEqual(["**/*.schema.ts"]);
+    expect(entry.rules["local/schema-must-be-pure-zod"]).toBe("warn");
   });
 });
 
 describe("the migratedScopes lock mechanism", () => {
-  it("locks no scope while the array is empty", () => {
-    const scopedEntries = nextJsConfig.filter((entry) =>
-      entry.files?.some((glob) => glob.startsWith("**/src/app/(")),
-    );
-    expect(scopedEntries).toEqual([]);
+  it("locks exactly the scopes listed in migratedScopes, after the ramp", () => {
+    const [ramp, ...locked] = entriesFor("local/services-verb-prefix");
 
-    // The unlocked ramp is still the only home of the services rules.
-    expect(entriesFor("local/services-verb-prefix")).toHaveLength(1);
-    expect(entriesFor("local/services-verb-prefix")[0].files).toEqual([
-      "**/_services/**/*.{ts,tsx}",
-    ]);
+    // The unlocked ramp still covers every `_services/` folder at `warn`.
+    expect(ramp.files).toEqual(["**/_services/**/*.{ts,tsx}"]);
+    expect(locked.map((entry) => entry.files)).toEqual(
+      migratedScopes.map((scope) => [
+        `**/src/app/${scope}/**/_services/**/*.{ts,tsx}`,
+      ]),
+    );
+
+    // A locked scope also raises the general convention rules on all its files.
+    const [, ...scopeBlocks] = entriesFor("local/no-client-import-of-services");
+    expect(scopeBlocks.map((entry) => entry.files)).toEqual(
+      migratedScopes.map((scope) => [`**/src/app/${scope}/**/*.{ts,tsx}`]),
+    );
+
+    // The locks are appended last, so they win over the ramp.
+    const lastBlocks = nextJsConfig.slice(-2 * migratedScopes.length);
+    expect(lastBlocks).toEqual(
+      migratedScopes.flatMap((scope) => migratedScopeConfigs(scope, "error")),
+    );
   });
 
   it("raises the services rules on the scope's _services/ glob", () => {
