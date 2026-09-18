@@ -192,3 +192,48 @@ Step 3 turns every scope's data and IO code into verb-prefixed functions in `_se
 4. **Add the per-scope allowlist to the ESLint config.** The kit's strategy is to migrate one scope at a time and flip `servicesRulesSeverity` from `warn` to `error` for that path as it lands. `packages/eslint-config/next.js` has no `migratedScopes` mechanism yet; without it a scope can only be locked once every scope is done.
 5. **Plan the removal of the `require-server-action-suffix` exemption.** The exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is marked as a transition in `packages/eslint-config/next.js` and comes out when those files are gone. It is the last transition glob left, since the `no-default-export` one was removed in step 2.
 6. **Decide the two placements step 2 deliberately left open:** which bucket `_domains/feedback/feedback-status.ts` belongs in (amendment 7), and whether a route-agnostic search-params module needs a bucket of its own or whether `_components/dashboard/search-params.ts` stays where it is (amendment 2).
+
+## Step 3 prerequisite: the four defective ESLint rules (issue #57)
+
+The rules that gate step 3 came from the kit and carried four defects against this repo. Fixed on 2026-09-18, each with a test in the existing rule harness (`packages/eslint-config/local-rules/*.test.js`, run by `pnpm test`).
+
+| Defect                                                                                                                                         | Fix                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema-must-be-pure-zod` banned the source project's database alias (`@repo/db`), which does not exist here, so a schema could import Prisma. | It now bans `@workspace/db`, `@workspace/db/index` and `@workspace/db/generated/prisma/client`, and keeps `@workspace/db/generated/prisma/enums` allowed. Prisma 7 does emit `generated/prisma/enums.ts` here, so the `z.nativeEnum(...)` source stays reachable. |
+| `require-trpc-output-type` omitted `count-` from its read verbs, although the server file conventions list it in the closed read set.          | `count-` added to `READ_VERB_RE`, with a valid and an invalid case. Mirrored into `docs/architecture/migration-kit/local-rules/require-trpc-output-type.js`: this one is a kit defect, not a repo mismatch.                                                       |
+| `require-schema-conventions` was wired with no options, so its PascalCase and singular-`Input` checks never ran.                               | Wired as `[agent, { requirePascalCaseSchema: true, requireSingularInput: true }]` in `packages/eslint-config/next.js`. The rule already had option tests; the wiring itself is now tested by `next-config.test.js`.                                               |
+| Rule comments and the `services-no-bare-error` message cited the source project's ADR numbers (`ADR-0009`, and `ADR-0010` for domain errors).  | Re-cited against this repo's numbering, guarded by `local-rules/adr-citations.test.js`, which fails on any ADR number that is neither committed under `docs/adr/` nor reserved below.                                                                             |
+
+`packages/eslint-config/vitest.config.js` now also collects `*.test.js` at the package root, which is where the config-wiring test lives: it asserts the wiring of `next.js`, not the behaviour of a rule.
+
+### ADR numbers reserved for the two kit ADRs
+
+The rules cite two ADRs that the "commit the two kit ADRs" prerequisite still has to write. Their numbers are reserved here so that prerequisite uses the same ones and the citation test keeps passing:
+
+| Number     | ADR                                 | Cited by                                                                                                                                 |
+| ---------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `ADR-0011` | Server file conventions             | `require-trpc-output-type`, `services-verb-prefix`, `services-no-trpc-import`, `schema-must-be-pure-zod`, `no-client-import-of-services` |
+| `ADR-0012` | Domain errors and transport mapping | `services-no-bare-error` (in its user-facing message), `no-client-import-of-server-errors`                                               |
+
+`ADR-0010` (app folder architecture) is already committed and keeps the bucket-set and feature-nesting citations (`no-feature-nesting`, `require-use-client-suffix`).
+
+### Warning baseline re-counted after the fixes
+
+Counted on 2026-09-18 with the system `grep` binary, since the agent shell wraps `grep`:
+
+```sh
+pnpm lint:agent-rules --force 2>&1 | /usr/bin/grep -o 'local/[a-z-]*' | sort | uniq -c
+```
+
+| Rule                         | After step 2 | After the rule fixes | Note                                                                                                                                                                                                |
+| ---------------------------- | -----------: | -------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-raw-tailwind-colors`     |           88 |                   88 | Unaffected.                                                                                                                                                                                         |
+| `require-schema-conventions` |           28 |                   58 | +30 plural `XInputs` type aliases, surfaced by `requireSingularInput`. PascalCase adds 0.                                                                                                           |
+| `require-use-client-suffix`  |            3 |                    3 | Unaffected.                                                                                                                                                                                         |
+| `schema-must-be-pure-zod`    |            1 |                    1 | The admin Subscription schema, which imports `@/server/...` and was already reported. No schema imports `@workspace/db` today, so retargeting the alias closes a hole rather than burning one down. |
+
+**150 problems, 0 errors, 150 warnings**, up from 120. The 30 new warnings are the plural-`Inputs` renames step 3 performs; they are burn-down items, not regressions.
+
+Verified at the same commit: `pnpm typecheck` clean (4 tasks), `pnpm lint` 0 warnings (5 tasks), `pnpm test` 173 ESLint rule and config tests plus the 4 app tests, `pnpm lint:agent-rules` 0 errors.
+
+A fresh clone needs `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and, in `apps/web`, `npx next typegen` before `pnpm typecheck` passes: the generated Prisma client, the widget package builds and the Next.js route types are all untracked. Without them `tsc` reports errors that have nothing to do with the change under test.

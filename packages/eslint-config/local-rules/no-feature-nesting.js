@@ -1,4 +1,4 @@
-// No feature nested in a feature (ADR-0006 / ADR-0009 decision 11). The tree stays
+// No feature nested in a feature (ADR-0010, app folder architecture). The tree stays
 // two deep (domain/segment -> feature); a grown child capability promotes to a
 // sibling `_features/<x>/`, it does not nest under another feature. A path that
 // contains `_features/` twice is a nested feature.

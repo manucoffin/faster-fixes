@@ -10,7 +10,7 @@
 
 const SERVICES_PATH_RE = /(^|\/)_services\//;
 // Reads only: writes do not need a derived return-type export.
-const READ_VERB_RE = /^(get|list|find|search|has|is)-/;
+const READ_VERB_RE = /^(get|list|find|search|has|is|count)-/;
 // Test files exercise services but are not services themselves.
 const EXEMPT_BASENAME_RE =
   /(?:\.test\.tsx?$|\.spec\.tsx?$|\.schema\.tsx?$|\.inngest\.tsx?$|^index\.tsx?$|^_)/;

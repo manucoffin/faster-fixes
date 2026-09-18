@@ -21,7 +21,7 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
     {
       name: "a file that is not a schema may import server code",
       filename: "/repo/apps/web/src/app/_services/invoice.service.ts",
-      code: `import { db } from "@repo/db";\n`,
+      code: `import { prisma } from "@workspace/db";\n`,
     },
     {
       name: "a schema importing zod",
@@ -41,7 +41,7 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
     {
       name: "a schema importing generated Prisma enums",
       filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
-      code: `import { InvoiceStatus } from "@repo/db/generated/prisma/enums";\n`,
+      code: `import { InvoiceStatus } from "@workspace/db/generated/prisma/enums";\n`,
     },
     {
       name: "a schema with a type-only import of server code",
@@ -56,7 +56,7 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
     {
       name: "a schema matched by ignorePathPatterns",
       filename: "/repo/apps/web/src/app/_services/legacy/invoice.schema.ts",
-      code: `import { db } from "@repo/db";\n`,
+      code: `import { prisma } from "@workspace/db";\n`,
       options: [{ ignorePathPatterns: ["/_services/legacy/"] }],
     },
   ],
@@ -76,7 +76,19 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
     {
       name: "a schema importing the database package root",
       filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
-      code: `import { db } from "@repo/db";\n`,
+      code: `import { prisma } from "@workspace/db";\n`,
+      errors: [{ messageId: "serverImport" }],
+    },
+    {
+      name: "a schema importing the database package through its /index entrypoint",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `import { prisma } from "@workspace/db/index";\n`,
+      errors: [{ messageId: "serverImport" }],
+    },
+    {
+      name: "a schema importing the generated Prisma client",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `import { Prisma } from "@workspace/db/generated/prisma/client";\n`,
       errors: [{ messageId: "serverImport" }],
     },
     {

@@ -1,4 +1,4 @@
-// A `_services/` module is transport-agnostic (ADR-0009 / decision 4, Option B):
+// A `_services/` module is transport-agnostic (ADR-0011, server file conventions):
 // it must be callable from a tRPC procedure, an Inngest job, or a server action
 // without an HTTP round-trip, so it must never import the tRPC layer. The
 // `trpc-router.ts` at the scope root is the only place that wires tRPC, and it

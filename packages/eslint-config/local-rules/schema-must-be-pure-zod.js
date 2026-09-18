@@ -1,5 +1,5 @@
-// A `*.schema.ts` must stay pure-Zod with no server-only imports (ADR-0009 /
-// decision 12 guardrail). Schemas live in `_services/` but are shared with the
+// A `*.schema.ts` must stay pure-Zod with no server-only imports (ADR-0011,
+// server file conventions). Schemas live in `_services/` but are shared with the
 // client form resolver; the bundler resolves per-file, so a schema that pulls in
 // `@/server/`, Prisma, or a sibling (non-schema) service would drag server-only
 // code into the client bundle. Allowed: `zod`, other `*.schema` files, and pure
@@ -14,10 +14,12 @@ const SAME_DIR_IMPORT_RE = /^\.\/[^/]+$/;
 // Server-only import sources a pure schema must never reach for.
 const SERVER_IMPORT_RE = /^@\/server\//;
 // Only the Prisma *client* (server runtime) is forbidden. Generated enums/types
-// (`@repo/db/generated/prisma/enums`) are pure value/type objects, client-safe,
-// and are the standard `z.nativeEnum(...)` source, so they are allowed.
+// (`@workspace/db/generated/prisma/enums`) are pure value/type objects,
+// client-safe, and are the standard `z.nativeEnum(...)` source, so they are
+// allowed. The database package of this repo is `@workspace/db`, reachable both
+// at its root and through its explicit `/index` entrypoint.
 const PRISMA_IMPORT_RE =
-  /^(@prisma\/client(\/|$)|@repo\/db$|@repo\/db\/generated\/prisma\/client(\/|$))/;
+  /^(@prisma\/client(\/|$)|@workspace\/db(\/index)?$|@workspace\/db\/generated\/prisma\/client(\/|$))/;
 
 export const schemaMustBePureZodRule = {
   meta: {

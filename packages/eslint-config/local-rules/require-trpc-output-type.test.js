@@ -36,6 +36,12 @@ ruleTester.run("require-trpc-output-type", requireTrpcOutputTypeRule, {
       code: `export async function findPlan() {\n  return [{ id: "1" }];\n}\nexport type Plan = Awaited<ReturnType<typeof findPlan>>[number];\n`,
     },
     {
+      name: "a count service exporting its awaited return type",
+      filename:
+        "/repo/apps/web/src/app/_domains/billing/_services/count-invoices.ts",
+      code: `export async function countInvoices() { return 1; }\nexport type CountInvoicesOutput = Awaited<ReturnType<typeof countInvoices>>;\n`,
+    },
+    {
       name: "a write service",
       filename:
         "/repo/apps/web/src/app/_domains/billing/_services/cancel-plan.ts",
@@ -70,6 +76,13 @@ ruleTester.run("require-trpc-output-type", requireTrpcOutputTypeRule, {
     },
   ],
   invalid: [
+    {
+      name: "a count service exporting only its function",
+      filename:
+        "/repo/apps/web/src/app/_domains/billing/_services/count-invoices.ts",
+      code: `export async function countInvoices() { return 1; }\n`,
+      errors: [{ messageId: "missing" }],
+    },
     {
       name: "a read service exporting only its function",
       filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",

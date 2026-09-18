@@ -3,11 +3,11 @@
 // Stripe, secrets) that would leak into the client bundle. Two exceptions:
 //   1. `*.schema.ts`: schemas are pure-Zod (enforced by `schema-must-be-pure-zod`)
 //      and are meant to be shared between the tRPC `.input()` and the client form
-//      resolver (ADR-0009 / decision 12).
+//      resolver (ADR-0011, server file conventions).
 //   2. Type-only imports (`import type { … }` or all-`type` specifiers): TS erases
 //      them at compile time, so they never reach the bundler and cannot leak a
 //      runtime dep. The service return type is the type source of truth
-//      (ADR-0009), so a client importing it directly is safe. Only the explicit
+//      (ADR-0011), so a client importing it directly is safe. Only the explicit
 //      `type` marker is exempt — a value import stays blocked.
 
 const SERVICES_IMPORT_RE = /(^|\/)_services\//;

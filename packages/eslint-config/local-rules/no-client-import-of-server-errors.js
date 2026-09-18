@@ -1,5 +1,6 @@
 // A client module (`'use client'` directive or `*.client.tsx` filename) must not
-// import `@/server/errors/*` (ADR-0010). `instanceof DomainError` does not
+// import `@/server/errors/*` (ADR-0012, domain errors). `instanceof DomainError`
+// does not
 // survive serialization across the network boundary, so a client checking it
 // would silently never match. Client code branches on `error.data.code`
 // instead. The DomainError classes also pull server-only code into the bundle.

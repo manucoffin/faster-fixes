@@ -1,24 +1,24 @@
 // A file in `_services/` is named after its export: `<verb>-<entity>.ts`. The
-// verb prefix declares read-vs-write (ADR-0009 / decision 2). This is the
+// verb prefix declares read-vs-write (ADR-0011, server file conventions). This is the
 // filename half of the convention only; the deeper "a read performs no writes"
 // invariant is not cheaply AST-checkable and stays a review-time concern.
 //
 // We deliberately do NOT enumerate write verbs. The write set is OPEN
-// (decision 20: prefer the most precise accurate verb), so an allowlist would
+// (ADR-0011 prefers the most precise accurate verb), so an allowlist would
 // grow without end and contradict its own decision. Instead this rule enforces
 // the two halves that ARE stable:
 //   1. shape       — the basename must start with a lowercase `<verb>-` prefix;
 //   2. no synonyms — `modify-/edit-/save-/change-` are banned, a plain field
 //                    write is `update-`.
 // The closed read set (get/list/find/search/has/is/count) is documented in
-// ADR-0009 and naming.md and remains a review-time concern.
+// ADR-0011 and naming.md and remains a review-time concern.
 
 const SERVICES_PATH_RE = /(^|\/)_services\//;
 
 // The basename must open with a lowercase verb-ish token followed by a dash.
 const VERB_PREFIX_SHAPE_RE = /^[a-z][a-z0-9]*-/;
 
-// Banned `update` synonyms (ADR-0009 / naming.md): a plain field write is `update-`.
+// Banned `update` synonyms (ADR-0011 / naming.md): a plain field write is `update-`.
 const BANNED_VERB_RE = /^(modify|edit|save|change)-/;
 
 // Files in _services/ that are not verb-prefixed operations.

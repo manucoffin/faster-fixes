@@ -173,7 +173,14 @@ export const nextJsConfig = [
   {
     files: ["**/*.schema.ts"],
     rules: {
-      "local/require-schema-conventions": agent,
+      // Both options are the repo convention, not opt-in extras: a schema const
+      // is PascalCase (`CreateInvoiceSchema`) and its input type is singular
+      // (`CreateInvoiceInput`). Wiring them is what makes the plural `Inputs`
+      // aliases visible in the burn-down instead of silently passing.
+      "local/require-schema-conventions": [
+        agent,
+        { requirePascalCaseSchema: true, requireSingularInput: true },
+      ],
       "local/schema-must-be-pure-zod": agent,
     },
   },

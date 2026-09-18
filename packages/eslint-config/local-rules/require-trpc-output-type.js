@@ -1,4 +1,5 @@
-// INVERTED for the services-over-suffix convention (ADR-0009 / decision 3).
+// INVERTED for the services-over-suffix convention (ADR-0011, server file
+// conventions).
 // The service's return type is the type source of truth, NOT inferProcedureOutput.
 // So a read service (`_services/<read-verb>-*.ts`) must export a type alias derived
 // from its own function, e.g. `export type GetUser = Awaited<ReturnType<typeof getUser>>;`
@@ -9,8 +10,9 @@
 // of the original `inferProcedureOutput` requirement.
 
 const SERVICES_PATH_RE = /(^|\/)_services\//;
-// Reads only: writes do not need a derived return-type export.
-const READ_VERB_RE = /^(get|list|find|search|has|is)-/;
+// Reads only: writes do not need a derived return-type export. The verb list is
+// the closed read vocabulary of the server file conventions, `count-` included.
+const READ_VERB_RE = /^(get|list|find|search|has|is|count)-/;
 // Test files exercise services but are not services themselves.
 const EXEMPT_BASENAME_RE =
   /(?:\.test\.tsx?$|\.spec\.tsx?$|\.schema\.tsx?$|\.inngest\.tsx?$|^index\.tsx?$|^_)/;
