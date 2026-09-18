@@ -66,6 +66,8 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `_domains/organization` | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `_domains/user`         | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `_domains/subscription` | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `onboarding`            | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+| `(authenticated)`       | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -790,6 +792,156 @@ as a QA checklist on issue #63 for the maintainer to walk against a real databas
 can close: moving the Plan vocabulary into the domain touches billing, the admin subscription schema
 and the Better Auth wiring at once.
 
+### `onboarding` (issue #64)
+
+Commit `0f67c6a`. Two operations, no key rename and no client call site touched. The smallest scope
+of the step after the pilot, and the first whose `_utils/` held nothing but the router.
+
+| Item           | Before                                                               | After                                                      |
+| -------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Complete       | `_features/complete-onboarding/complete-onboarding.trpc.mutation.ts` | `onboarding/_services/complete-onboarding.ts`              |
+| Create Project | `_features/create-project/create-project.trpc.mutation.ts`           | `onboarding/_services/create-onboarding-project.ts`        |
+| Schema         | `_features/create-project/create-project.schema.ts`                  | `onboarding/_services/create-onboarding-project.schema.ts` |
+| Router         | `onboarding/_utils/trpc-router.ts`                                   | `onboarding/trpc-router.ts`                                |
+| Output types   | `CompleteOnboardingOutput`, `CreateOnboardingProjectOutput`          | dropped: no consumer imported either                       |
+
+**Renamed procedure keys.** None. `createOnboardingProject` and `completeOnboarding` both drop the
+entity the router already carries, which lands on the keys the router already used, so
+`trpc.onboarding.createProject` and `trpc.onboarding.complete` are the same paths before and after
+and `onboarding-wizard.client.tsx` did not change.
+
+**File named after the operation, not the entity.** The service keeps the existing
+`createOnboardingProject` name rather than becoming `create-project`. It is not the sidebar
+operation of the same entity: it finds the owner membership itself, takes no `organizationId`, and
+returns the existing Project with `rawApiKey: null` when the wizard is refreshed. Two services named
+`create-project` in two scopes with different contracts would be a name collision waiting to be
+mistaken for a duplicate.
+
+**Reclassified errors.** None. The one `TRPCError` of the scope, `FORBIDDEN`
+"No organization found.", becomes a `ForbiddenError` with the same code and message. The check needs
+the loaded membership, so the placement rule keeps it in the service that reads it, and that service
+takes the trailing database client with a default. `complete-onboarding` holds no check and no domain
+error branch, so it takes none.
+
+**Deprecated stubs.** None: both operations, the schema and the router survived as `git mv` moves.
+The now-empty `onboarding/_utils/` folder is left in the working copy because the sandbox refuses
+`rmdir`; `git ls-files` on the scope lists twelve files and no such path, so a fresh clone has no
+`onboarding/_utils/` at all. Nothing here waits on issue #81.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 180 ESLint
+rule and config tests plus 20 app tests; `pnpm lint:agent-rules` 143 problems, 0 errors, 143 warnings
+(88 / 51 / 3 / 1), identical per rule to the Subscription entry: the scope had no violation of this
+step's rules before the move and added none. `npx next build` passes with dummy environment values.
+The lock was verified with `ESLINT_AGENT_RULES=1 npx eslint --print-config` on the create service,
+which reports the four services rules and the five general rules at `error`.
+
+**Per-scope "must be gone" checks.** All ten commands, restricted to `apps/web/src/app/onboarding`,
+return nothing except the old-bucket check, which returns the empty untracked `_utils/` folder
+described above.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                | Result                                                                |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/trpc/onboarding.createProject` signed out | `401 UNAUTHORIZED`, the protected procedure guards before the service |
+| `POST /api/trpc/onboarding.complete` signed out      | `401 UNAUTHORIZED`, same                                              |
+| `GET /api/trpc/onboarding.nope`                      | `404 No procedure found on path`, the control for the two above       |
+| `GET /onboarding` signed out                         | `307` to `/login`, the layout's session guard is unaffected           |
+
+**Not smoked here, and why.** No database is reachable, so the wizard cannot be walked end to end.
+The four-step run (name, URL, snippet, finish), the refresh in the middle of it that must return the
+already-created Project, and the redirect to `/inbox` once the flag is set are on the QA checklist of
+issue #64.
+
+### The `(authenticated)` shell (issue #64)
+
+Commit `8b945ba`. Two operations, two renamed procedure keys, one reclassified error. The first scope
+migrated at one tier only: the route group holds four child segments that are scopes of their own,
+and none of them is migrated yet.
+
+| Item           | Before                                                             | After                                                                     |
+| -------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Send feedback  | `_features/feedback/send-feedback.trpc.mutation.tsx`               | `(authenticated)/_services/send-feedback.tsx`                             |
+| Create Project | `_features/sidebar/project/create/create-project.trpc.mutation.ts` | `(authenticated)/_services/create-project.ts`                             |
+| Schemas        | the two `*.schema.ts` next to those files                          | `_services/send-feedback.schema.ts`, `_services/create-project.schema.ts` |
+| Router         | `(authenticated)/_utils/trpc-router.ts`                            | `(authenticated)/trpc-router.ts`                                          |
+| Output type    | `CreateProjectOutput` from `inferProcedureOutput`                  | dropped: no consumer imported it                                          |
+| Input types    | `SendFeedbackInputs`, `CreateProjectInputs`                        | `SendFeedbackInput`, `CreateProjectInput`                                 |
+
+**Renamed procedure keys.** `trpc.authenticated.feedback.send` became
+`trpc.authenticated.sendFeedback`, and `trpc.authenticated.projects.create` became
+`trpc.authenticated.createProject`. The router export already had no `Feature` infix, so only its
+path moved. The two shell operations now sit at the root of the scope's router, beside the four child
+segment routers it mounts, and the one-key `feedback` sub-router is gone. Both call sites
+(`feedback-button.client.tsx`, `create-project-dialog.client.tsx`) were updated in the same commit.
+
+**Why `projects.create` moved out of the `projects` key.** The create-project dialog is a sidebar
+feature, so the shell owns the operation, and no Project-scope ticket of this step lists it. Leaving
+the key where it was would have meant either a service of the shell mounted by the not-yet-migrated
+`(project)` router, or a procedure defined outside the router of the scope that owns it. Both
+contradict the recipe, so the key follows the operation. The old key answers
+`404 No procedure found on path`, which is the proof no call site was missed.
+
+**Reclassified errors.**
+
+| Operation       | Before                                                                       | After                                          |
+| --------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `send-feedback` | `INTERNAL_SERVER_ERROR` "No administrator found to receive feedback.", a 500 | `PreconditionFailedError`, same message, a 412 |
+
+An instance with no administrator account cannot deliver in-app feedback: that is a precondition on
+the instance, not a server fault, and it is the one expected failure of this scope dressed as a 500.
+The message is unchanged, and the feedback popover renders `error.message` in a toast either way, so
+the only observable difference is the status code. Being the reclassified service, it carries the
+unit test the step asks for (`send-feedback.test.tsx`, four cases: the reclassified code, an
+administrator row with no address counting as no administrator, one mail per administrator with the
+sender named in the subject, and the two-step fallback when the session carries no name).
+
+**Authorization placement.** `create-project` keeps its `FORBIDDEN`
+("You do not have permission to create a project.") as a `ForbiddenError` inside the service: the
+check needs the loaded membership of the target Organization, which the service is what loads. The
+plan limit on projects stays on the procedure, in the `enforceLimit("projects")` middleware it
+already used, because a plan denial is transport policy. Both services take the trailing database
+client with a default.
+
+**The service that renders JSX.** `send-feedback` is the `.tsx` procedure module the corrected kit
+table warns about, and it stays `.tsx` as a service: it renders a React Email template to build the
+mail body. Writing its test exposed a gap in the test harness, recorded as a correction below.
+
+**Deprecated stubs.** None: all four files and the router survived as `git mv` moves. The now-empty
+`(authenticated)/_utils/` folder is untracked, as in the scopes before it, so nothing here waits on
+issue #81.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 182 ESLint
+rule and config tests (two added for the lock's new form) plus 24 app tests (20 before, 4 added
+here); `pnpm lint:agent-rules` 141 problems, 0 errors, 141 warnings (`no-raw-tailwind-colors` 88,
+`require-schema-conventions` 49, `require-use-client-suffix` 3, `schema-must-be-pure-zod` 1). The
+burn-down drops by two: the two plural `Inputs` aliases became the singular `Input` the schema
+convention asks for. `npx next build` passes with dummy environment values.
+
+**Per-scope "must be gone" checks.** All ten commands, restricted to the shell tier of
+`apps/web/src/app/(authenticated)` (its root files, `_features/` and `_services/`), return nothing
+except the old-bucket check, which returns the empty untracked `_utils/` folder. Run over the whole
+route group, the router check also returns the four `_utils/trpc-router.ts` files of the child
+segments, which are the subject of issues #68 to #79.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                     | Result                                                  |
+| ------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `POST /api/trpc/authenticated.sendFeedback` signed out                    | `401 UNAUTHORIZED`, so the new key resolves             |
+| `POST /api/trpc/authenticated.createProject` signed out                   | `401 UNAUTHORIZED`, same                                |
+| `POST /api/trpc/authenticated.feedback.send`                              | `404 No procedure found on path`, the old key is gone   |
+| `POST /api/trpc/authenticated.projects.create`                            | `404 No procedure found on path`, same                  |
+| `GET /api/trpc/authenticated.projects.list` signed out                    | `401 UNAUTHORIZED`, the child routers are still mounted |
+| `GET /api/trpc/authenticated.organization.get` signed out                 | `401 UNAUTHORIZED`, same                                |
+| `GET /inbox`, `/settings`, `/account/billing`, `/organization` signed out | `307` to `/login`, the shell layout is unaffected       |
+| `GET /login`                                                              | `200`                                                   |
+
+**Not smoked here, and why.** No database and no mail provider are reachable, so neither operation
+completes end to end. Sending feedback as a signed-in user (and the toast it raises), creating a
+Project from the sidebar and from the header switcher, the project limit denial on the free plan and
+the invalidation of the project list are on the QA checklist of issue #64.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
@@ -802,3 +954,29 @@ The tests now track the array instead of its emptiness: `migratedScopes` is expo
 scope, and the lock test asserts that the expansion of `migratedScopes` is appended last, after the
 ramp. Every later scope only edits the array. The final lock deletes the array, its export and the
 three tests together.
+
+**A scope can be migrated at one tier while its children are not, and the lock had no way to say
+so.** `(authenticated)` is a route group holding the app shell plus four child segments, each a scope
+of its own with its own ticket. Listing `"(authenticated)"` as a plain fragment would have raised the
+general convention rules to `error` over `account/`, `organization/`, `integrations/` and
+`(project)/`, turning about forty burn-down warnings into errors and making
+`pnpm lint:agent-rules` red for work no ticket has started. Listing `"(authenticated)/_features"`
+instead cannot work either: the services block's glob is
+`**/src/app/<scope>/**/_services/**/*.{ts,tsx}`, which needs the fragment to be the scope root.
+So an entry of `migratedScopes` may now be either a string or `{ scope, ignores }`, where `ignores`
+are the nested scopes the lock does not cover; `migratedScopeEntry` reads both forms and
+`migratedScopeConfigs` takes the patterns as a third argument, spreading an `ignores` key into both
+blocks only when there is one. Each ignored path disappears from the entry when its own ticket lists
+it as a scope, and the whole array goes at the final lock. Two tests were added: one resolves the
+severity through ESLint's own matcher to assert the shell is locked while a child segment is not, the
+other asserts no `ignores` key appears for a scope that needs none.
+
+**The web app's vitest could not load a `.tsx` module at all.** The app's tsconfig sets
+`jsx: "preserve"`, because Next.js compiles JSX itself, and `vitest.config.ts` said nothing about
+JSX, so importing any `.tsx` file failed with "Failed to parse source for import analysis because the
+content contains invalid JS syntax". It went unnoticed until the first service that renders JSX
+(`send-feedback.tsx`, which builds a mail body from a React Email template) needed a test. The fix is
+one line in `vitest.config.ts`: `oxc: { jsx: { runtime: "automatic" } }`. Vitest 5 runs on
+rolldown-vite, so the `esbuild` option is ignored with a warning and `oxc` is the one that applies.
+This is not the jsdom question kit amendment 3 deferred: the environment stays `node` and no
+component is rendered, only compiled.
