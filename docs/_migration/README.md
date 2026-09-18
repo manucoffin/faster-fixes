@@ -68,6 +68,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `_domains/subscription` | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `onboarding`            | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `(authenticated)`       | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
+| `admin`                 | 3    | `a7fe9e3` | The same nine, on the admin root and the `(dashboard)` route group: the entry ignores `admin/users` until issues #66 and #67 lock it.                                                                                                               |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -941,6 +942,104 @@ segments, which are the subject of issues #68 to #79.
 completes end to end. Sending feedback as a signed-in user (and the toast it raises), creating a
 Project from the sidebar and from the header switcher, the project limit denial on the free plan and
 the invalidation of the project list are on the QA checklist of issue #64.
+
+### `admin` and `admin/(dashboard)` (issue #65)
+
+Commit `a7fe9e3`. Five operations, five renamed procedure keys, no reclassified error. The admin
+root is migrated at its router tier only: `admin/users` is a scope of its own that issues #66 and #67
+finish.
+
+| Item                 | Before                                                                                   | After                                               |
+| -------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Users overview       | `(dashboard)/_features/users-overview-card/get-users-overview.trpc.query.ts`             | `(dashboard)/_services/get-users-overview.ts`       |
+| Active Subscriptions | `(dashboard)/_features/active-subscriptions-card/get-active-subscriptions.trpc.query.ts` | `(dashboard)/_services/get-active-subscriptions.ts` |
+| MRR                  | `(dashboard)/_features/mrr-card/get-mrr.trpc.query.ts`                                   | `(dashboard)/_services/get-mrr.ts`                  |
+| Feedback overview    | `(dashboard)/_features/feedback-overview-card/get-feedback-overview.trpc.query.ts`       | `(dashboard)/_services/get-feedback-overview.ts`    |
+| Monthly stats        | `(dashboard)/_features/subscriptions-chart/get-monthly-stats.trpc.query.ts`              | `(dashboard)/_services/get-monthly-stats.ts`        |
+| Monthly stats schema | `(dashboard)/_features/subscriptions-chart/get-monthly-stats.schema.ts`                  | `(dashboard)/_services/get-monthly-stats.schema.ts` |
+| Churn rate           | `(dashboard)/_utils/get-churn-rate.ts`                                                   | `(dashboard)/_services/get-monthly-churn-rate.ts`   |
+| Dashboard router     | `(dashboard)/_utils/trpc-router.ts`                                                      | `(dashboard)/trpc-router.ts`                        |
+| Admin root router    | `admin/_utils/trpc-router.ts`                                                            | `admin/trpc-router.ts`                              |
+
+**Renamed procedure keys.** All five. The old router wrapped each operation in a one-key sub-router
+(`dashboard.users.get`, `dashboard.subscriptions.get`, `dashboard.mrr.get`, `dashboard.feedback.get`,
+`dashboard.stats.get`), which read as five entities of a "dashboard" that owns none of them. The keys
+now mirror the service verbs: `dashboard.getUsersOverview`, `dashboard.getActiveSubscriptions`,
+`dashboard.getMrr`, `dashboard.getFeedbackOverview`, `dashboard.getMonthlyStats`. The entity is not
+dropped, because the router carries `dashboard`, not `users` or `mrr`. The five card clients are the
+only call sites and were updated in this commit.
+
+**Churn rate moved to `_services/`, not `_helpers/`.** It counts Subscription rows, so it is IO, and
+the file is renamed to its export (`getMonthlyChurnRate`). It is the one service here consumed by
+another service rather than by a procedure, which is exactly the callability the step is after.
+
+**Reclassified errors.** None. The three `INTERNAL_SERVER_ERROR` throws of this scope
+("Failed to get feedback overview", "Failed to get active subscriptions", "Failed to get monthly
+stats") were generic try/catch wrappers around Prisma and Stripe calls, so the step's triage removes
+them and lets the infrastructure error propagate as a 500 with the same status. No expected failure
+was hiding behind them and no message was reachable by a user, so no `DomainError` is introduced and
+no unit test is owed. `get-mrr` keeps its two `console.error` catches unchanged: they are a
+deliberate degradation (a Stripe outage yields a zero figure, not a failed page), not an error
+wrapper.
+
+**No service takes a database client.** All five are pass-through reads with no authorization check
+and no domain error branch, so the trailing client parameter would be unused.
+
+**Authorization.** The admin role check stays on `adminProcedure`: it is answerable from the context
+alone. No dashboard service repeats it, and none of them receives a session.
+
+**Output types.** The five `inferProcedureOutput` aliases became `Awaited<ReturnType<typeof …>>`
+exports on their services, plus a sixth on `get-monthly-churn-rate` that the read-service rule
+requires. `subscriptions-chart.client.tsx` is the one consumer and only changed its import path.
+`get-monthly-stats.schema.ts` gained the `GetMonthlyStatsInput` type it lacked, which burns down one
+`require-schema-conventions` warning.
+
+**Deprecated stubs.** None: every file survived as a `git mv`. The now-empty `admin/_utils/` and
+`admin/(dashboard)/_utils/` folders are left in the working copy because the sandbox refuses `rmdir`;
+`git ls-files apps/web/src/app/admin` lists no path under either, so nothing here waits on issue #81.
+
+**Lock.** `migratedScopes` gains `{ scope: "admin", ignores: ["**/src/app/admin/users/**"] }`, the
+second entry to use the ignore form after `(authenticated)`. Verified with
+`ESLINT_AGENT_RULES=1 npx eslint --print-config`: `admin/(dashboard)/_services/get-mrr.ts` reports the
+services rules at `error` (severity `2`), `admin/trpc-router.ts` reports the general rules at `error`,
+and `admin/users/_features/users-table/users-table.tsx` still reports `require-use-client-suffix` at
+`warn` (severity `1`).
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 182 ESLint
+rule and config tests plus 24 app tests; `pnpm lint:agent-rules` 140 problems, 0 errors, 140 warnings
+(88 `no-raw-tailwind-colors` / 48 `require-schema-conventions` / 3 `require-use-client-suffix` / 1
+`schema-must-be-pure-zod`), one below the 141 of the `(authenticated)` entry, from the added input
+type. `npx next build` compiles successfully with dummy environment values and still lists `/admin`,
+`/admin/users` and `/admin/users/[id]`.
+
+**Per-scope "must be gone" checks.** All ten commands, restricted to `apps/web/src/app/admin`, return
+either nothing or `admin/users` paths, which issues #66 and #67 own. The only non-`users` lines are
+the two empty untracked `_utils/` folders described above. Restricted to `admin/(dashboard)` and
+`admin/trpc-router.ts`, the ten checks return nothing but those folders.
+
+**No admin page outside the users scope queries Prisma inline.** The acceptance criterion has no
+target here: `admin/layout.tsx` reads the session through Better-Auth, `admin/(dashboard)/page.tsx`
+composes five client cards, and `_features/sidebar/admin-sidebar.server.tsx` renders static links.
+The four inline-Prisma files under `admin/` all sit in `admin/users`, where issue #67 lists them.
+For the same reason no `count-` service exists in this scope: the five reads are all `get-`.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                             | Result                                                                  |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `GET /api/trpc/admin.dashboard.getUsersOverview` signed out       | `401 UNAUTHORIZED`, so the new key resolves and `adminProcedure` guards |
+| `GET /api/trpc/admin.dashboard.getActiveSubscriptions` signed out | `401 UNAUTHORIZED`, same                                                |
+| `GET /api/trpc/admin.dashboard.getMrr` signed out                 | `401 UNAUTHORIZED`, same                                                |
+| `GET /api/trpc/admin.dashboard.getFeedbackOverview` signed out    | `401 UNAUTHORIZED`, same                                                |
+| `GET /api/trpc/admin.dashboard.getMonthlyStats` signed out        | `401 UNAUTHORIZED`, same, with an empty input                           |
+| `GET /api/trpc/admin.dashboard.users.get`                         | `404 No procedure found on path`, the old key is gone                   |
+| `GET /admin` signed out                                           | `307` to `/login`, the admin layout guard is unaffected                 |
+| `GET /login`                                                      | `200`                                                                   |
+
+**Not smoked here, and why.** The `.env.local` of the sandbox holds placeholder Postgres credentials
+and `sk_test_dummy`, so no card can render a real figure. Signing in as an administrator and reading
+the five cards and the chart, the month-range picker on the chart, and the "—" states the null
+branches produce (no churn base, no signups last month) are on the QA checklist of issue #65.
 
 ### Corrections to the recipe found by the pilot
 
