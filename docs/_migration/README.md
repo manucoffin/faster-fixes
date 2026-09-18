@@ -549,6 +549,126 @@ observed running.
 change in this step. It is the same family as anomaly 4 above (`ANONYMOUS_USER_NAME`) and needs its
 own ticket rather than a line in a refactor.
 
+### `_domains/auth` and the `(auth)` route group (issue #62)
+
+Commit `dc7a8db`. Six operations: the four mutations the `(auth)` route group owned plus the
+domain's own two. The largest entry of the step so far, and the first to face identity failures,
+generic 500 wrappers and a router key owned by two scopes at once.
+
+| Item               | Before                                                           | After                                                     |
+| ------------------ | ---------------------------------------------------------------- | --------------------------------------------------------- |
+| Sign in            | `(auth)/login/_features/login-form/login.trpc.mutation.ts`       | `auth/_services/sign-in-user.ts`                          |
+| Registration       | `(auth)/signup/_features/signup-form/signup.trpc.mutation.ts`    | `auth/_services/register-user.ts`                         |
+| Reset request      | `(auth)/forgot-password/.../forgot-password.trpc.mutation.ts`    | `auth/_services/request-password-reset.ts`                |
+| Reset completion   | `(auth)/reset-password/.../reset-password.trpc.mutation.ts`      | `auth/_services/reset-password.ts`                        |
+| Verification mail  | `auth/send-verification-email-button/*.trpc.mutation.ts`         | `auth/_services/send-verification-email.ts`               |
+| Stop impersonating | `auth/stop-impersonate-button/stop-impersonate.trpc.mutation.ts` | `auth/_services/stop-impersonate.ts`                      |
+| Password rule      | `auth/_utils/password.schema.ts`                                 | `auth/_services/password.schema.ts`, plus `PasswordInput` |
+| Domain router      | `auth/_utils/trpc-router.ts` (`authenticationFeatureRouter`)     | `auth/trpc-router.ts` (`authRouter`)                      |
+| Group router       | `(auth)/_utils/trpc-router.ts` (`authRouter`)                    | dissolved into a `_deprecated_` stub                      |
+| App router mount   | `auth: mergeRouters(authRouter, authenticationFeatureRouter)`    | `auth: authRouter`                                        |
+| Output types       | four unused `inferProcedureOutput` aliases                       | dropped: no consumer imported them                        |
+
+**Renamed procedure keys.** `trpc.auth.login` became `trpc.auth.signInUser`, `trpc.auth.signup`
+became `trpc.auth.registerUser`, `trpc.auth.forgotPassword` became
+`trpc.auth.requestPasswordReset`. `resetPassword`, `sendVerificationEmail` and `stopImpersonate`
+already mirrored their service verb and are unchanged. The `auth` router does not carry the `User`
+entity in its key, so the two `-user` services keep the full name as their key. The four form
+clients were updated in the same commit, and the four `Inputs` aliases became the singular `Input`
+their schema convention asks for.
+
+**The key collision.** The route group and the domain both mounted a router under `auth`, which is
+why `mergeRouters` existed. The four mutations now live in the domain that owns them, so the app
+router mounts one `authRouter`, `mergeRouters` has no caller left, and its re-export was removed
+from `server/trpc/trpc.ts` in the same commit rather than left as a retired pattern to copy.
+
+**Identity failures, the case the recipe did not cover.** Two operations translate a Better Auth
+message into `UNAUTHORIZED`: invalid credentials on sign-in, and a rejected token on reset. The
+vocabulary has no `UNAUTHORIZED` member on purpose (identity is answered at the transport edge), so
+this translation cannot move into a service without changing the code a client sees. Both stay in
+their procedure, as the step's invariant prescribes, which is why those two procedures carry a
+`try`/`catch` instead of a single service call. The matching is the original code, moved rather
+than redesigned. Everything else in the router is the thin shape: auth procedure, input schema, one
+service call.
+
+**Reclassified errors.**
+
+| Operation                 | Before                                           | After                                 |
+| ------------------------- | ------------------------------------------------ | ------------------------------------- |
+| `send-verification-email` | bare `Error("This user does not exist.")`, a 500 | `NotFoundError`, same message, a 404  |
+| `stop-impersonate`        | `BAD_REQUEST` swallowed into a 500 by the catch  | `BAD_REQUEST` raised in the procedure |
+
+The first is the one service whose error code changed, so it carries the unit test the step asks
+for: `send-verification-email.test.ts` pins both shapes Better Auth uses for an unknown account
+(message and `statusCode`), the untranslated propagation of an unexpected failure, and the address
+normalisation. The second is a precondition on the session, answerable from the context alone, so
+it belongs in the procedure and has no service to test: the old code threw it inside a `try` whose
+`catch` rewrapped everything as an `INTERNAL_SERVER_ERROR`, so the message reached the client with
+the wrong code.
+
+**Generic 500 wrappers removed.** Four of them: `"Sign in failed. Please try again."`,
+`"Account creation failed. Please try again."`, `"Unable to send reset email. Please try again."`
+and `"Error sending email. Please try again."`. A service cannot express a 500 with custom copy
+(the vocabulary has no member for it and `services-no-bare-error` forbids a bare `Error`), so the
+choice the kit describes is also the only one available: the infrastructure error propagates with
+its own message. Observed against a dev server with no reachable database, the reset request now
+answers `500` with the raw Prisma message where it used to answer `500` with
+`"Unable to send reset email. Please try again."`. Step 4's masking is what closes this, and the
+four form clients already fall back to their own copy when the message is empty.
+
+**Preserved deliberately.** `EMAIL_NOT_VERIFIED` is still a `FORBIDDEN` carrying that exact
+sentinel, thrown by `sign-in-user` as a `ForbiddenError`, so the sign-in form keeps showing the
+verification prompt and its resend button. Sign-in against an unreachable database answers
+`401 Invalid email or password` both before and after, because the Prisma error message contains
+`Invalid` and the matching order is unchanged.
+
+**Placement calls.** `password.schema.ts` is pure Zod shared by two schemas, so it goes to
+`_services/` next to them, and it gained the `PasswordInput` type the schema rule requires (it was
+one of the three schema files missing one). The account settings password schema, in a scope this
+step has not reached, only changed its import path. The two capability folders of the domain
+(`send-verification-email-button/`, `stop-impersonate-button/`) keep the flat shape step 2 gave
+them; only their operation files moved.
+
+**Deprecated stubs.** `(auth)/_utils/_deprecated_trpc-router.ts`. As with the pilot, the folder it
+sits in is the scope's last `_utils/`, so the old-bucket check stays red for `(auth)` until the
+maintainer's deletion pass (issue #81). The domain's own `_utils/` is empty and untracked: `git mv`
+moved both of its files out, and git records no directory, so a fresh clone has no
+`_domains/auth/_utils/` at all. The sandbox refused the `rmdir`, so the working copy that produced
+this entry still shows the empty folder.
+
+**Both scopes are locked.** `migratedScopes` gains `"(auth)"` as well as `"_domains/auth"`: after
+this commit the route group holds only UI features and the deprecated stub, no other ticket
+revisits it, and leaving it unlocked would mean it is never enforced before the final lock.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 180
+ESLint rule and config tests plus 16 app tests (12 before, 4 added here); `pnpm lint:agent-rules`
+143 problems, 0 errors, 143 warnings (`no-raw-tailwind-colors` 88, `require-schema-conventions` 51,
+`require-use-client-suffix` 3, `schema-must-be-pure-zod` 1). Six warnings cleared against the 149
+of the previous entry: the four `Inputs` aliases of the route group, `SendVerificationEmailInputs`
+and the missing input type of `password.schema.ts`. `npx next build` passes with dummy environment
+values.
+
+**Per-scope "must be gone" checks.** All ten commands, run against `apps/web/src/app/_domains/auth`
+and then `apps/web/src/app/(auth)`, return nothing, except the old-bucket check on `(auth)`, which
+returns the `_utils/` folder holding the deprecated stub, as expected until issue #81.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                             | Result                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `GET /login`, `/signup`, `/forgot-password`, `/reset-password`    | `200`, all four forms render on their moved schemas                       |
+| `POST /api/trpc/auth.login`, `auth.signup`, `auth.forgotPassword` | `404 No procedure found on path`, so no call site is left on an old key   |
+| `POST` the six new keys with an empty body                        | `400` with the per-field `zodError` each schema produces                  |
+| `POST /api/trpc/auth.stopImpersonate` signed out                  | `401 UNAUTHORIZED`, the protected procedure still guards before the check |
+| `POST /api/trpc/auth.signInUser` with credentials, no database    | `401 Invalid email or password`, identical to the pre-migration answer    |
+| `POST /api/trpc/auth.requestPasswordReset`, no database           | `500` with the raw infrastructure message, the wrapper removal above      |
+
+**Not smoked here, and why.** No database and no mail provider are reachable in this environment, so
+no operation completes. Signing in with a verified and with an unverified account, registering with
+a fresh and with a taken address, receiving and consuming a reset link, resending a verification
+email to a known and to an unknown address, and stopping an impersonation are listed as a QA
+checklist on issue #62 for the maintainer to walk against a real database.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.
