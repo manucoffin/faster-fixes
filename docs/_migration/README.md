@@ -59,19 +59,20 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope                          | Step | Commit    | Rules locked                                                                                                                                                                                                                                        |
-| ------------------------------ | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_domains/**`                  | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                  |
-| `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
-| `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
-| `admin`                        | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
-| `(authenticated)/account`      | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                     |
-| `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                       |
-| `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                           |
+| Scope                          | Step | Commit    | Rules locked                                                                                                                                                                                                                                                                                                |
+| ------------------------------ | ---- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**`                  | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                                                                          |
+| `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
+| `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                                                                         |
+| `admin`                        | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                                                                         |
+| `(authenticated)/account`      | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                                                                             |
+| `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                                                                               |
+| `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                                                                                   |
+| `(authenticated)/(project)`    | 3    | `f3fca41` | The same nine, on the whole Project scope: the inbox (`4f4a646`, `08563bb`), reviewers and core settings (`3e03177`), the GitHub and Slack links (`3f60bf9`), the Jira links (`47c4911`) and the Linear links. The `(authenticated)` entry keeps its `(project)` ignore, so the lock comes from this entry. |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -2893,6 +2894,166 @@ labels and unlinking are on the QA checklist of issue #78.
 `settings/_features/jira/_utils/` joins `(project)/_utils/`, both emptied by `git mv` and both kept
 on disk because the sandbox refuses `rmdir`. Git does not track empty folders, so neither appears in
 the commit.
+
+### `(authenticated)/(project)`, part 6: Linear link settings, and the scope lock (issue #79)
+
+Commit: `f3fca41`. The seven Linear team link operations become services in the existing
+`settings/_services/` folder, which closes the last segment of the 44-operation Project scope. The
+scope is now listed in `migratedScopes` and its nine rules report at `error`.
+
+**Files moved.** Nine modules with `git mv`, plus four new schema files, one new shared access
+service and two new test files. No file dissolved, so this segment leaves no `_deprecated_` stub.
+
+| Operation          | Before                                                                              | After                                                     |
+| ------------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Linear link read   | `settings/_features/linear/get-project-linear-link.trpc.query.ts`                   | `settings/_services/get-project-linear-link.ts`           |
+| Team list          | `settings/_features/linear/link-team/list-accessible-teams.trpc.query.ts`           | `settings/_services/list-accessible-linear-teams.ts`      |
+| Team state list    | `settings/_features/linear/link-team/list-team-states.trpc.query.ts`                | `settings/_services/list-linear-team-states.ts`           |
+| Team label list    | `settings/_features/linear/link-team/list-team-labels.trpc.query.ts`                | `settings/_services/list-linear-team-labels.ts`           |
+| Team link write    | `settings/_features/linear/link-team/link-team.trpc.mutation.ts`                    | `settings/_services/link-linear-team.ts`                  |
+| Team link schema   | `settings/_features/linear/link-team/link-team.schema.ts`                           | `settings/_services/link-linear-team.schema.ts`           |
+| Team unlink        | `settings/_features/linear/unlink-team/unlink-team.trpc.mutation.ts`                | `settings/_services/unlink-linear-team.ts`                |
+| Link update        | `settings/_features/linear/update-link/update-project-linear-link.trpc.mutation.ts` | `settings/_services/update-project-linear-link.ts`        |
+| Link update schema | `settings/_features/linear/update-link/update-project-linear-link.schema.ts`        | `settings/_services/update-project-linear-link.schema.ts` |
+
+The three `_features/linear/` subfolders (`link-team/`, `unlink-team/`, `update-link/`) keep their
+client component, which is what a feature is for. Linear had no `_utils/` folder of its own.
+
+**Renamed services.** Four file renames, no export renamed: each moved file was named after its
+feature folder rather than after its export, and a `_services/` file is named after what it exports.
+
+| Export                      | Before                                | After                             |
+| --------------------------- | ------------------------------------- | --------------------------------- |
+| `linkLinearTeam`            | `link-team.trpc.mutation.ts`          | `link-linear-team.ts`             |
+| `listAccessibleLinearTeams` | `list-accessible-teams.trpc.query.ts` | `list-accessible-linear-teams.ts` |
+| `listLinearTeamStates`      | `list-team-states.trpc.query.ts`      | `list-linear-team-states.ts`      |
+| `listLinearTeamLabels`      | `list-team-labels.trpc.query.ts`      | `list-linear-team-labels.ts`      |
+
+**One shared preamble extracted: `getLinearAccess`.** `listLinearTeamStates` and
+`listLinearTeamLabels` held the same twenty-line preamble twice (privileged membership, installation
+lookup, decrypt, build the SDK client) and differed only in the resolver they call afterwards. It
+became `settings/_services/get-linear-access.ts`, the Linear twin of part 5's `getJiraAccess`, with
+one difference recorded on the function: it starts from the **caller's** privileged membership, not
+from a Project, because the two pickers run before any team is attached to a Project. That predicate
+is the one found in the code and is preserved as is; a user who administrates several Organizations
+still resolves through `findFirst`, which is pre-existing behaviour and not something this
+behaviour-preserving step changes. `listAccessibleLinearTeams` deliberately does **not** use it: it
+resolves the Organization from the Better-Auth session instead, and returns `[]` rather than throwing
+when no installation exists, so the section can render its connect prompt.
+
+**Renamed procedure keys.** None. All seven keys (`linear.getLink`, `linear.listTeams`,
+`linear.listTeamStates`, `linear.listTeamLabels`, `linear.linkTeam`, `linear.unlinkTeam`,
+`linear.updateLink`) already mirror their service once the `projects` and `linear` nouns the routers
+carry are dropped, exactly as the GitHub and Jira keys did in parts 4 and 5. No call site changed its
+key, and the published packages call the `/api/v1/*` REST surface and never tRPC.
+
+**Reclassified errors.** None. The segment had no `INTERNAL_SERVER_ERROR` throw, so every
+`TRPCError` became the `DomainError` subclass of the same code with the same message.
+
+**Plan gating stayed at the transport edge.** `linear.linkTeam` and `linear.updateLink` keep
+`planAwareProcedure.use(enforceFeature("linearIntegration"))`. `linear.unlinkTeam` is deliberately
+not plan-gated, so a downgraded Organization can always unlink; the comment that used to sit on the
+procedure module now sits on the router key. The four reads keep `protectedProcedure`. No
+`UNAUTHORIZED` and no rate limit is involved.
+
+**Authorization, all of it in the services.** Every denial needs a row the service loads (the
+Project, or the caller's membership), so none could stay at the transport edge.
+
+| Denial                                                | Where it lives now                                               |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| "Project not found."                                  | `NotFoundError` in the four Project-scoped services              |
+| "Access denied."                                      | `ForbiddenError` in `getProjectLinearLink` and `getLinearAccess` |
+| "Only owners and admins can link Linear teams."       | `ForbiddenError` in `linkLinearTeam`                             |
+| "Only owners and admins can unlink Linear teams."     | `ForbiddenError` in `unlinkLinearTeam`                           |
+| "Only owners and admins can update the Linear link."  | `ForbiddenError` in `updateProjectLinearLink`                    |
+| "Only owners and admins can list teams."              | `ForbiddenError` in `listAccessibleLinearTeams`                  |
+| "No active organization."                             | `BadRequestError` in `listAccessibleLinearTeams`                 |
+| "Linear is not connected."                            | `BadRequestError` in `getLinearAccess`                           |
+| "No Linear installation found. Connect Linear first." | `BadRequestError` in `linkLinearTeam`                            |
+
+**Services holding a database client.** All eight. The two team lookups are one call each in their
+own body, but they hold their authorization check transitively through `getLinearAccess` and must
+forward the client to it.
+
+**Output types.** The seven `inferProcedureOutput` aliases of the segment are gone, which clears the
+last ones in the scope. Two reads export a consumed `<Service>Output`: `GetProjectLinearLinkOutput`
+(`linked-team-view.client.tsx`) and `ListAccessibleLinearTeamsOutput` (`team-picker.client.tsx`).
+`ListLinearTeamStatesOutput`, `ListLinearTeamLabelsOutput` and `GetLinearAccessOutput` have no
+importer and are kept because the read's return type is the type source of truth. The three write
+aliases are dropped rather than replaced: no file imported them. The two client imports changed path
+only, plus the one type name below.
+
+**Schemas.** Four new pure-Zod schema files for the operations that parsed an inline `z.object` in
+the procedure (`get-project-linear-link.schema.ts`, `list-linear-team-states.schema.ts`,
+`list-linear-team-labels.schema.ts`, `unlink-linear-team.schema.ts`), and two moved with their
+service. `LinkLinearTeamSchemaType` and `UpdateProjectLinearLinkSchemaType` became
+`LinkLinearTeamInput` and `UpdateProjectLinearLinkInput`, which is the 5 to 1 burn-down of
+`require-schema-conventions` below. `LinearPrioritySchema` stays next to `LinkLinearTeamSchema` and
+the update schema keeps importing it from there, now a sibling instead of a folder away.
+`LinkLinearTeamSchema` has no `.default()` call, so `team-picker.client.tsx` types its form on
+`LinkLinearTeamInput` and needs no `Values` companion. The update schema stays a discriminated union,
+so `updateProjectLinearLink` takes its input as one named argument object rather than destructuring
+it: destructuring would erase the `kind` narrowing the two update branches rely on.
+
+**Tests.** Two colocated files, eight cases, all driven through the trailing database client with no
+tRPC context built. `get-linear-access.test.ts` pins the shared preamble (the denial, the missing
+installation, the owner/admin predicate, and the client built from the decrypted token, with the
+Linear SDK and the token cipher mocked), so both team lookups inherit that coverage.
+`link-linear-team.test.ts` pins the three denials of the link write and the fact that a re-link
+clears `linkHealthIssue`. The branches left (the read's membership check, the unlink denial, the two
+update branches) repeat shapes parts 3 to 5 already pin.
+
+**Scope lock.** `"(authenticated)/(project)"` is now an entry of `migratedScopes`, which raises the
+nine step 3 rules to `error` over the whole scope. The `(authenticated)` shell entry keeps its
+`(project)` ignore: every child segment of the route group is locked under its own entry, and the
+shell entry must not match a scope root that is not its own. All four ignored children now have their
+own entry, and the whole array goes at the final lock (issue #82).
+
+**Per-scope "must be gone" checks**, restricted to `(authenticated)/(project)`:
+
+| Check                                | Result                                                                  |
+| ------------------------------------ | ----------------------------------------------------------------------- |
+| 1 role suffixes                      | nothing, down from 7                                                    |
+| 2 old buckets                        | the now-empty `(project)/_utils/` and `settings/_features/jira/_utils/` |
+| 3 `_constants/` inside a scope       | nothing                                                                 |
+| 4 `*.types.ts`                       | nothing                                                                 |
+| 5 routers in a bucket or a feature   | nothing                                                                 |
+| 6 tRPC imported by a service         | nothing                                                                 |
+| 7 `TRPCError` in a service           | nothing                                                                 |
+| 8 `'use server'` in a service/router | nothing: the seven moved procedure modules all dropped the directive    |
+| 9 Prisma outside a service           | nothing, down from 7                                                    |
+| 10 `inferProcedureOutput`            | nothing, down from 7                                                    |
+
+Both folders in check 2 are empty and untracked: `git mv` emptied them in parts 1 and 5, git does not
+track empty folders, and the sandbox refuses `rmdir`. They are on the maintainer's stub-deletion pass
+(issue #81).
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 120 app
+tests (8 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **90 problems, 0 errors,
+90 warnings** (88 `no-raw-tailwind-colors` / 1 `require-schema-conventions`, the agent API's
+`agent.schema.ts`, owned by issue #80 / 1 `require-use-client-suffix`,
+`src/lib/trpc/trpc-provider.tsx`, outside `src/app`), down 4 from the 94 of part 5 and now with the
+Project scope locked at `error`. `npx next build` compiles and still lists `/inbox`, `/reviewers` and
+`/settings`; `pnpm build` is refused by the sandbox, as the earlier entries record.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                           | Result                                                                     |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `GET …projects.linear.getLink`, `listTeams`, `listTeamStates`, `listTeamLabels` | `401 UNAUTHORIZED`, each key resolves and `protectedProcedure` guards      |
+| `POST …projects.linear.linkTeam`, `unlinkTeam`, `updateLink`                    | `401 UNAUTHORIZED`, the plan-aware and protected writes both resolve       |
+| `GET …` on each of the three mutations                                          | `405` mutation-over-GET, so all three are mounted as mutations             |
+| `GET …projects.linear.doesNotExist`                                             | `404 NOT_FOUND`, so the 401s above are key resolution, not a blanket guard |
+| `GET …projects.jira.getLink`, `github.getLink`, `feedback.list`                 | `401 UNAUTHORIZED`, the sibling segments of the locked scope still resolve |
+| `GET /api/v1/agent/feedbacks` with no bearer token                              | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged            |
+| `GET /settings` signed out                                                      | `307` to `/login`, the page guard is unchanged                             |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials and no
+Linear OAuth application, so no user can sign in and no `LinearInstallation` exists to link against.
+Picking a team with its default state, labels and priority, toggling auto-create, clearing the
+stale-ID warning by saving again, and unlinking are on the QA checklist of issue #79.
+
+**Left for the maintainer.** Nothing new: the same two empty folders recorded by parts 1 and 5.
 
 ### Corrections to the recipe found by the pilot
 
