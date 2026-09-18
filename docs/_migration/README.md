@@ -73,7 +73,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                                                                               |
 | `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                                                                                   |
 | `(authenticated)/(project)`    | 3    | `f3fca41` | The same nine, on the whole Project scope: the inbox (`4f4a646`, `08563bb`), reviewers and core settings (`3e03177`), the GitHub and Slack links (`3f60bf9`), the Jira links (`47c4911`) and the Linear links. The `(authenticated)` entry keeps its `(project)` ignore, so the lock comes from this entry. |
-| `api/v1/agent`                 | 3    | `PENDING` | The same nine, on the whole REST agent API tier: the three `_utils/` folders became `_services/` and `_helpers/`. The handlers keep their own error helper and their `NextResponse` result style, so no rule had to be disabled for them.                                                                   |
+| `api/v1/agent`                 | 3    | `d045ea5` | The same nine, on the whole REST agent API tier: the three `_utils/` folders became `_services/` and `_helpers/`. The handlers keep their own error helper and their `NextResponse` result style, so no rule had to be disabled for them.                                                                   |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -3058,7 +3058,7 @@ stale-ID warning by saving again, and unlinking are on the QA checklist of issue
 
 ### `api/v1/agent`, the REST agent API buckets (issue #80)
 
-Commit `PENDING`. The last scope of step 3 and the only one with no tRPC in it. Nothing was extracted
+Commit `d045ea5`. The last scope of step 3 and the only one with no tRPC in it. Nothing was extracted
 and nothing was reclassified: the ticket is a bucket rename, so that the structural checks of the
 final lock clear without the agent API growing a service layer before step 4 gives it one.
 
