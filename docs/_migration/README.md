@@ -9,6 +9,7 @@ The migration moves the web app from its current `_features/` layout to the targ
 - the **baseline** below records how many convention violations existed before any application code moved, per rule, so each later step can be compared against it;
 - the **locked scopes** table records which scopes have been migrated and which rules were flipped from `warn` to `error` for them, so a regression on migrated code fails the build;
 - the **prerequisites** section records what must be decided or added before the next step starts;
+- the **exit verification** section of a completed step records the commands that closed it and what they returned, plus anything left for the maintainer;
 - the **deferred** and **anomalies** sections record what a step left behind, so "what is left" is a lookup rather than a rediscovery.
 
 The burn-down metric is `pnpm lint:agent-rules`. During the migration it runs without `--max-warnings 0`: errors fail the command, warnings are counted. Count them per rule with:
@@ -65,6 +66,29 @@ A scope is locked when its files satisfy the target convention and the matching 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
 The `require-server-action-suffix` exemption for `*.trpc.query.ts` and `*.trpc.mutation.ts` is still in place. Step 3 removes it when those files move into `_services/`.
+
+## Step 2 exit verification
+
+Re-run on 2026-09-18 at commit `2627a87`, the last commit of the step. Every command was run with `--force` so Turbo served no cached result. Recorded here rather than left in a commit message, so the step's exit state is a lookup like everything else in this log.
+
+| Check                                                                          | Result                                                                     |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `pnpm typecheck`                                                               | 4 tasks, clean                                                             |
+| `pnpm test`                                                                    | 150 ESLint rule tests, 4 app tests, all passing                            |
+| `pnpm lint`                                                                    | 5 tasks, 0 warnings                                                        |
+| `pnpm lint:agent-rules`                                                        | 120 problems, 0 errors, 120 warnings, matching the re-measured table above |
+| `test ! -d apps/web/src/app/_features`                                         | the folder is gone                                                         |
+| `app/_features/` referenced anywhere in `apps/web/src` or `mdx-components.tsx` | no match                                                                   |
+| nested `_components/**/*.tsx`                                                  | only the `dashboard/`, `mdx/` and `seo/` sub-libraries                     |
+| an `index.ts` per domain, exporting nothing                                    | six of six                                                                 |
+| `pnpm build` (web)                                                             | passes with a populated `apps/web/.env.local`                              |
+
+The 22 cases of `no-cross-domain-deep-import.test.js` are the rule's own proof: a relative import into another domain, a relative import of another domain's barrel, and `export { x } from` / `export * from` a deep path are all reported, while same-domain relative and alias imports and any importer outside `_domains/` stay valid.
+
+### Left for the maintainer
+
+1. **`pnpm build` needs a populated `apps/web/.env.local`.** Without one it fails at "Collecting page data" on missing R2 and `JIRA_TOKEN_ENCRYPTION_KEY` values, which is environment, not anything step 2 changed. A gitignored `.env.local` holding dummy values was written for the smoke test and left in place, because this repo forbids the agent from deleting files. It is untracked, so it never reaches a commit. Remove or replace it when convenient.
+2. **Route rendering is unverified.** The build proves the client/server boundaries of the moved layouts and the MDX registry; it does not prove the pages still render. Home, a `/vs/*` page, a blog article, login, the inbox, project settings, billing and admin are the manual pass.
 
 ## Amendments to the kit made during step 1
 
