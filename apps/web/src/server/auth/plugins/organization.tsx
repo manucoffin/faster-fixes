@@ -1,4 +1,4 @@
-import { ORGANIZATION_ROLES } from "@/app/_features/organization/_utils/organization-roles";
+import { ORGANIZATION_ROLES } from "@/app/_domains/organization/_utils/organization-roles";
 import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import { OrganizationInvitation } from "@/lib/mailer/templates/organization-invitation";

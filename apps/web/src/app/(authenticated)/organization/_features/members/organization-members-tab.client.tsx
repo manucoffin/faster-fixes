@@ -1,6 +1,6 @@
 "use client";
 
-import { getRoleLabel } from "@/app/_features/organization/_utils/organization-roles";
+import { getRoleLabel } from "@/app/_domains/organization/_utils/organization-roles";
 import {
   useActiveMemberRole,
   useActiveOrganization,
@@ -177,7 +177,7 @@ export function OrganizationMembersTab() {
                       <Mail className="size-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-muted-foreground font-medium">
+                  <span className="font-medium text-muted-foreground">
                     {invitation.email}
                   </span>
                 </div>
@@ -205,7 +205,7 @@ export function OrganizationMembersTab() {
             <TableRow>
               <TableCell
                 colSpan={5}
-                className="text-muted-foreground py-8 text-center"
+                className="py-8 text-center text-muted-foreground"
               >
                 No members
               </TableCell>

@@ -1,4 +1,4 @@
-import { generateUniqueSlug } from "@/app/_features/organization/_utils/generate-unique-slug";
+import { generateUniqueSlug } from "@/app/_domains/organization/_utils/generate-unique-slug";
 import { checkOrganizationLimit } from "@/server/auth/subscription";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";

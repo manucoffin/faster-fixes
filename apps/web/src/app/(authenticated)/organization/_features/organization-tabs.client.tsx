@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dashboard-section";
-import { canManageMembers } from "@/app/_features/organization/_utils/organization-roles";
+import { canManageMembers } from "@/app/_domains/organization/_utils/organization-roles";
 import { useActiveMemberRole } from "@/lib/auth";
 import {
   Tabs,

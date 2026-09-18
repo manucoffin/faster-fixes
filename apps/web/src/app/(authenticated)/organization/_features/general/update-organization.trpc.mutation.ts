@@ -1,6 +1,6 @@
 "use server";
 
-import { generateUniqueSlug } from "@/app/_features/organization/_utils/generate-unique-slug";
+import { generateUniqueSlug } from "@/app/_domains/organization/_utils/generate-unique-slug";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { UpdateOrganizationSchema } from "./update-organization.schema";
@@ -21,8 +21,7 @@ export const updateOrganization = protectedProcedure
     if (!membership) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message:
-          "You do not have permission to edit this organization.",
+        message: "You do not have permission to edit this organization.",
       });
     }
 

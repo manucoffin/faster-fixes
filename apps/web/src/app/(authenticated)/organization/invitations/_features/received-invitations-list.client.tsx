@@ -1,6 +1,6 @@
 "use client";
 
-import { getRoleLabel } from "@/app/_features/organization/_utils/organization-roles";
+import { getRoleLabel } from "@/app/_domains/organization/_utils/organization-roles";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
