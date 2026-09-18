@@ -1,4 +1,4 @@
-import { getUserDisplayName } from "@/app/_domains/user/_utils/get-user-display-name";
+import { getUserDisplayName } from "@/app/_domains/user/_helpers/get-user-display-name";
 import { Card, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { EmailInformation } from "./email/email-information.client";
 import { getUserInformation } from "./get-user-information.server.query";

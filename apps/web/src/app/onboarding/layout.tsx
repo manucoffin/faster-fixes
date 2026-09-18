@@ -1,7 +1,7 @@
 import { loginUrl } from "@/app/_constants/routes";
+import { hasCompletedOnboarding } from "@/app/_domains/user/_services/has-completed-onboarding";
 import { auth } from "@/server/auth";
 import { LayoutParams } from "@/types/next";
-import { prisma } from "@workspace/db";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -20,18 +20,12 @@ export default async function OnboardingLayout({ children }: LayoutParams) {
     redirect(loginUrl);
   }
 
-  // Direct DB check bypasses better-auth's 5-minute cookie cache
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { onboardingCompleted: true },
-  });
-
-  if (user?.onboardingCompleted) {
+  if (await hasCompletedOnboarding(session.user.id)) {
     redirect("/inbox");
   }
 
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-lg">{children}</div>
     </div>
   );

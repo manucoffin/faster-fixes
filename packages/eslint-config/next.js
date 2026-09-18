@@ -62,7 +62,11 @@ const useClientSuffixOptions = {
  *
  * @type {string[]}
  */
-export const migratedScopes = ["(public)", "_domains/organization"];
+export const migratedScopes = [
+  "(public)",
+  "_domains/organization",
+  "_domains/user",
+];
 
 /**
  * The two config blocks a locked scope gets: the services rules on its
