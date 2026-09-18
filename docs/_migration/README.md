@@ -68,7 +68,7 @@ A scope is locked when its files satisfy the target convention and the matching 
 | `_domains/subscription` | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `onboarding`            | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
 | `(authenticated)`       | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                 |
-| `admin`                 | 3    | `a7fe9e3` | The same nine, on the admin root and the `(dashboard)` route group: the entry ignores `admin/users` until issues #66 and #67 lock it.                                                                                                               |
+| `admin`                 | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                 |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -1154,6 +1154,146 @@ them: nine operations, not seven.
 administrator can sign in and no Better Auth call can reach a real user. Creating a user, impersonating
 and stopping, revoking sessions, sending a reset link and deleting a user are on the QA checklist of
 issue #66.
+
+### `admin/users`, part 2, and the scope lock (issue #67)
+
+Commit: `fb4a72f`. The nine operations left in the scope become services, three modules stop querying
+Prisma inline, and `admin/users` is locked, which lets the `admin` entry of `migratedScopes` drop its
+ignore and cover the whole tier.
+
+**Nine operations, not seven.** Issue #67 enumerates seven. The two the users table owns, `list` and
+`export`, were procedure modules in `_features/users-table/` and had to come along, exactly as the
+part 1 entry predicted: the scope cannot be locked while a procedure module sits in a feature.
+
+**Files moved.** Every one with `git mv`, so no stub is owed.
+
+| Operation                  | Before                                                                         | After                                     |
+| -------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------- |
+| List Users (table)         | `_features/users-table/get-paginated-users.ts`                                 | `_services/list-users.ts`                 |
+| List Users for export      | `_features/users-table/get-all-users-for-export.ts`                            | `_services/list-users-for-export.ts`      |
+| Create Subscription        | `[id]/_features/subscription/create-subscription.trpc.mutation.ts`             | `_services/create-subscription.ts`        |
+| Get Subscription           | `[id]/_features/subscription/get-subscription.trpc.query.ts`                   | `_services/get-subscription.ts`           |
+| Update Subscription        | `[id]/_features/subscription/update-subscription.trpc.mutation.ts`             | `_services/update-subscription.ts`        |
+| Subscription schema        | `[id]/_features/subscription/subscription.schema.ts`                           | `_services/create-subscription.schema.ts` |
+| List User Organizations    | `[id]/_features/organization-select/get-user-organizations.trpc.query.ts`      | `_services/list-user-organizations.ts`    |
+| Get User email             | `[id]/_features/user-information/email/get-user-email.trpc.query.ts`           | `_services/get-user-email.ts`             |
+| Toggle email verified      | `[id]/_features/user-information/email/toggle-email-verified.trpc.mutation.ts` | `_services/toggle-email-verified.ts`      |
+| Get User information (RSC) | `[id]/_features/user-information/get-user-information.server.query.ts`         | `_services/get-user-information.ts`       |
+
+The two client-marked table modules took the `.client.tsx` suffix in the same pass
+(`users-table.tsx`, `users-table-action-dropdown.tsx`), burning down two
+`require-use-client-suffix` warnings. `page.tsx` follows the renamed import.
+
+**Renamed procedure keys.** One: `export` became `listForExport`, so the key mirrors its service verb.
+`users-table.client.tsx` is its only call site. Everything else keeps its key (`list`, `email.get`,
+`email.toggleVerified`, `organizations.list`, `subscription.get`, `subscription.create`,
+`subscription.update`), so the seven other `trpc.admin.users.*` usages are untouched.
+
+**Renamed services.** The read vocabulary is a closed set and bans `getAllX` / `getPaginatedX`, with
+`list-` as the single collection entrypoint taking an options object:
+
+| Before                 | After                   | Why                                                     |
+| ---------------------- | ----------------------- | ------------------------------------------------------- |
+| `getPaginatedUsers`    | `listUsers`             | Collection read; the options object already existed     |
+| `getAllUsersForExport` | `listUsersForExport`    | Same; `export-` is a write verb and this function reads |
+| `getUserOrganizations` | `listUserOrganizations` | Collection read                                         |
+
+`toggleEmailVerified` keeps its precise write verb, as the step allows for `disconnect`, `unlink`,
+`revoke` and `impersonate`.
+
+**Reclassified errors.** None. The two `TRPCError` throws of these operations map one to one:
+`NOT_FOUND "Subscription not found"` and `NOT_FOUND "User not found"` become `NotFoundError` with the
+same message, so both toasts read as before. No operation of this part threw `INTERNAL_SERVER_ERROR`,
+so nothing was triaged and no generic wrapper was removed.
+
+**Services holding a database client.** `updateSubscription` and `toggleEmailVerified` take the
+trailing `db: typeof prisma = prisma` parameter: each loads its resource to decide whether to throw
+`NotFoundError`. The seven pass-through reads and `createSubscription` do not.
+
+**Authorization.** Unchanged: the admin role check stays on `adminProcedure`, and the two not-found
+denials live in the services because they need the loaded resource.
+
+**Output types.** The five `inferProcedureOutput` aliases of the scope are gone, replaced by
+`<Service>Output` exported from the service (`ListUsersOutput`, `ListUsersForExportOutput`,
+`GetSubscriptionOutput`, `GetUserEmailOutput`, `ListUserOrganizationsOutput`). The two client consumers
+(`users-table.client.tsx`, `subscription-edit-dialog.client.tsx`) import them as `import type`, which is
+what `no-client-import-of-services` allows. `GetUserInformationOutput` already derived from its
+function and only changed path.
+
+**Schemas.** `subscription.schema.ts` split in two: `create-subscription.schema.ts` keeps
+`CreateSubscriptionSchema`, and `update-subscription.schema.ts` derives `UpdateSubscriptionSchema` from
+it with `.omit()` + `.extend()`, the create-to-update composition the convention prescribes. The two
+plural `XInputs` aliases became singular `XInput`, and the six inline procedure inputs became their own
+`*.schema.ts` next to their service. `list-users.schema.ts` also exports `ListUsersValues`, since `page`
+and `pageSize` carry a `.default()`.
+
+**The one impure schema.** `create-subscription.schema.ts` still imports `SubscriptionPlanName` and
+`SubscriptionStatus` from `@/server/auth/config/subscription-plans`, behind a file-level
+`eslint-disable local/schema-must-be-pure-zod` whose justification points at step 5, which relocates the
+plan configuration. The disable needs a companion: `schema-must-be-pure-zod` is agent-gated, so outside
+`ESLINT_AGENT_RULES=1` the directive reads as unused and `pnpm lint` fails on it at `--max-warnings 0`.
+The shared config therefore carries a one-file block setting `linterOptions.reportUnusedDisableDirectives`
+to `off` for that path. **Both the suppression and that block are deleted when the enums move in step 5.**
+
+**Inline Prisma removed, three modules.** The ticket lists one (the `[id]` page). Two more sat in the
+scope and blocked the lock, since check 9 covers every `.ts`/`.tsx` outside `_services/`:
+
+| Module                                                             | Now calls                      |
+| ------------------------------------------------------------------ | ------------------------------ |
+| `[id]/page.tsx` (page title)                                       | `findUserName`                 |
+| `[id]/_features/account/account-card.server.tsx`                   | `getUserAccount`               |
+| `[id]/_features/user-information/user-information-card.server.tsx` | the moved `getUserInformation` |
+
+`getUserAccount` returns the email and a `hasCredentialProvider` flag rather than the raw account rows,
+so the card keeps its "only credential accounts can reset a password" rule without knowing the schema.
+
+**Tests.** `update-subscription.test.ts` and `toggle-email-verified.test.ts`, two cases each, pin the
+`NotFoundError` and the returned shape through the injected client, with no tRPC context. The step only
+requires a test for a reclassified error and there is none here; these are cheap insurance on the two
+services that grew a client parameter.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 33 app tests
+(4 new) plus the ESLint rule and config tests (182, including the 11 `migratedScopes` ones);
+`pnpm lint:agent-rules` **130 problems, 0 errors, 130 warnings** (88 `no-raw-tailwind-colors` / 41
+`require-schema-conventions` / 1 `require-use-client-suffix`), five below the 135 of part 1;
+`npx next build` compiles and still lists `/admin`, `/admin/users` and `/admin/users/[id]`. `pnpm build`
+is refused by the sandbox, so the build ran as `npx next build` from `apps/web`.
+
+The burn-down of this entry: two `require-use-client-suffix` (the table modules), two
+`require-schema-conventions` (the plural aliases) and the single `schema-must-be-pure-zod` warning,
+which the suppression retires rather than fixes.
+
+**Per-scope "must be gone" checks.** Restricted to `admin/users`, the ten commands return nothing, with
+one exception: check 2 still lists the empty, untracked `admin/users/_utils/` folder, which the sandbox
+refuses to `rmdir` and in which `git ls-files` shows no file. Deleting the folder is on the maintainer's
+side, like the `_deprecated_` stubs of issue #81.
+
+**Scope lock.** `migratedScopes` no longer needs a separate `admin/users` entry: the `admin` entry drops
+its `ignores` and covers the tier. The nine rules are at `error` for everything under `admin`, and the
+agent-rules run reports zero errors.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                   | Result                                                  |
+| ----------------------------------------------------------------------- | ------------------------------------------------------- |
+| `GET /api/trpc/admin.users.list` signed out                             | `401 UNAUTHORIZED`, the key resolves                    |
+| `GET /api/trpc/admin.users.listForExport` signed out                    | `401 UNAUTHORIZED`, the renamed key resolves            |
+| `GET /api/trpc/admin.users.export` signed out                           | `404 No procedure found on path`, the old key is gone   |
+| `GET /api/trpc/admin.users.email.get`, `admin.users.organizations.list` | `401 UNAUTHORIZED`, both keys resolve                   |
+| `GET /api/trpc/admin.users.subscription.get`                            | `401 UNAUTHORIZED`, same                                |
+| `POST /api/trpc/admin.users.subscription.create`, `.update`             | `401 UNAUTHORIZED`, same                                |
+| `POST /api/trpc/admin.users.email.toggleVerified`                       | `401 UNAUTHORIZED`, same                                |
+| `POST /api/trpc/admin.users.create` (part 1 operation)                  | `401 UNAUTHORIZED`, the locked scope did not regress    |
+| `GET /admin/users`, `GET /admin/users/abc` signed out                   | `307` to `/login`, the admin layout guard is unaffected |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+administrator can sign in and no screen can render its data. Reading the users table with its search,
+sorting and CSV export, opening a user detail, creating and editing a Subscription, toggling the email
+verified flag and reading the account card are on the QA checklist of issue #67.
+
+**Anomaly, not fixed.** The scope's UI copy is partly French ("Utilisateurs" as the page title, "Compte
+utilisateur" as the account card title), against the English-only rule. No step 3 ticket owns user-facing
+copy and the step is behaviour-preserving, so the strings are left as they are.
 
 ### Corrections to the recipe found by the pilot
 
