@@ -1,5 +1,5 @@
 import { APP_URL } from "@/app/_constants/app";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { source } from "@/lib/docs/source";
 import {
   DocsBody,

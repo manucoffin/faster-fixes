@@ -17,7 +17,7 @@ export function FaqSchema({ faqs }: FaqSchemaProps) {
 
   // Filter out FAQs with empty or missing answers
   const validFaqs = faqs.filter(
-    (faq) => faq.answer && faq.answer.trim() !== ""
+    (faq) => faq.answer && faq.answer.trim() !== "",
   );
 
   // If no valid FAQs remain, don't render the schema

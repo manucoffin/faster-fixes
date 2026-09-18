@@ -9,10 +9,10 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { SoftwareApplicationSchema } from "@/app/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { PricingCard } from "./_features/pricing-card";
 import {
   PricingFaqSection,
@@ -59,7 +59,7 @@ export default function Page() {
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h1 className="text-3xl font-bold md:text-5xl">Pricing</h1>
-            <p className="text-muted-foreground mt-4 text-lg">
+            <p className="mt-4 text-lg text-muted-foreground">
               Start free, upgrade when you need more.
             </p>
           </div>

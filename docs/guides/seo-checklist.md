@@ -4,18 +4,18 @@
 
 ## Core Files
 
-| Layer                | Path                                        | Purpose                                            |
-| -------------------- | ------------------------------------------- | -------------------------------------------------- |
-| **Root metadata**    | `apps/web/src/app/layout.tsx`               | Default title template, OG image, Twitter card     |
-| **SEO constants**    | `apps/web/src/app/_constants/seo.ts`        | `SITE_NAME`, `SITE_META_DESCRIPTION`, OG image URL |
-| **App constants**    | `apps/web/src/app/_constants/app.ts`        | `APP_URL`, support/contact emails                  |
-| **Company data**     | `apps/web/src/app/_constants/company.ts`    | Address, social links                              |
-| **Robots**           | `apps/web/src/app/robots.ts`                | Crawl directives, sitemap reference                |
-| **Sitemap (root)**   | `apps/web/src/app/sitemap.ts`               | Static public pages                                |
-| **Sitemap (blog)**   | `apps/web/src/app/(public)/blog/sitemap.ts` | Dynamic blog post sitemap                          |
-| **Manifest**         | `apps/web/src/app/manifest.ts`              | PWA manifest (name, icons, theme)                  |
-| **Security headers** | `apps/web/next.config.mjs`                  | `X-Content-Type-Options`, `X-Frame-Options`, etc.  |
-| **JSON-LD schemas**  | `apps/web/src/app/_features/seo/`           | Organization, Website, Breadcrumb, FAQ, Person     |
+| Layer                | Path                                        | Purpose                                                                     |
+| -------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Root metadata**    | `apps/web/src/app/layout.tsx`               | Default title template, OG image, Twitter card                              |
+| **SEO constants**    | `apps/web/src/app/_constants/seo.ts`        | `SITE_NAME`, `SITE_META_DESCRIPTION`, OG image URL                          |
+| **App constants**    | `apps/web/src/app/_constants/app.ts`        | `APP_URL`, support/contact emails                                           |
+| **Company data**     | `apps/web/src/app/_constants/company.ts`    | Address, social links                                                       |
+| **Robots**           | `apps/web/src/app/robots.ts`                | Crawl directives, sitemap reference                                         |
+| **Sitemap (root)**   | `apps/web/src/app/sitemap.ts`               | Static public pages                                                         |
+| **Sitemap (blog)**   | `apps/web/src/app/(public)/blog/sitemap.ts` | Dynamic blog post sitemap                                                   |
+| **Manifest**         | `apps/web/src/app/manifest.ts`              | PWA manifest (name, icons, theme)                                           |
+| **Security headers** | `apps/web/next.config.mjs`                  | `X-Content-Type-Options`, `X-Frame-Options`, etc.                           |
+| **JSON-LD schemas**  | `apps/web/src/app/_components/seo/`         | Organization, Website, Breadcrumb, FAQ, HowTo, WebPage, SoftwareApplication |
 
 ## Checklist
 
@@ -76,20 +76,20 @@ Checklist per page:
 
 The boilerplate includes ready-to-use schema components. Render them on the appropriate pages:
 
-| Schema               | Where to use               | Component                           |
-| -------------------- | -------------------------- | ----------------------------------- |
-| `OrganizationSchema` | Homepage                   | `_features/seo/organization-schema` |
-| `WebSiteSchema`      | Homepage                   | `_features/seo/website-schema`      |
-| `BreadcrumbSchema`   | Every public page          | `_features/seo/breadcrumb-schema`   |
-| `FAQSchema`          | FAQ / pricing pages        | `_features/seo/faq-schema`          |
-| `ArticleSchema`      | Blog posts (already wired) | `blog/_features/seo/article-schema` |
+| Schema               | Where to use               | Component                             |
+| -------------------- | -------------------------- | ------------------------------------- |
+| `OrganizationSchema` | Homepage                   | `_components/seo/organization-schema` |
+| `WebSiteSchema`      | Homepage                   | `_components/seo/website-schema`      |
+| `BreadcrumbSchema`   | Every public page          | `_components/seo/breadcrumb-schema`   |
+| `FAQSchema`          | FAQ / pricing pages        | `_components/seo/faq-schema`          |
+| `ArticleSchema`      | Blog posts (already wired) | `blog/_features/seo/article-schema`   |
 
 Example for the homepage:
 
 ```tsx
-import { OrganizationSchema } from "@/app/_features/seo/organization-schema";
-import { WebSiteSchema } from "@/app/_features/seo/website-schema";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { OrganizationSchema } from "@/app/_components/seo/organization-schema";
+import { WebSiteSchema } from "@/app/_components/seo/website-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 
 export default function HomePage() {
   return (

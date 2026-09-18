@@ -4,10 +4,10 @@ import {
   SITE_NAME,
   SITE_TAGLINE,
 } from "@/app/_constants/seo";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { OrganizationSchema } from "@/app/_features/seo/organization-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebSiteSchema } from "@/app/_features/seo/website-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { OrganizationSchema } from "@/app/_components/seo/organization-schema";
+import { SoftwareApplicationSchema } from "@/app/_components/seo/software-application-schema";
+import { WebSiteSchema } from "@/app/_components/seo/website-schema";
 import type { Metadata } from "next";
 
 import { BeforeAfterSection } from "./_features/before-after-section";

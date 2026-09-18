@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -48,7 +48,7 @@ export const mcpFaqs: RichFaqItem[] = [
     answer:
       "Export your current tool's data as CSV or JSON, parse it, and call create_feedbacks with up to 100 items per call. The batch is atomic and skips integration fan-out. Tag the source tool for traceability. Full instructions are in the API reference.",
     content: (
-      <p className="text-muted-foreground text-lg md:text-xl">
+      <p className="text-lg text-muted-foreground md:text-xl">
         Export your current tool&apos;s data as CSV or JSON, parse it, and call{" "}
         <code>create_feedbacks</code> with up to 100 items per call. The batch
         is atomic and skips integration fan-out. Tag the source tool for
@@ -65,7 +65,7 @@ export const mcpFaqs: RichFaqItem[] = [
     answer:
       "Yes. The server is open source under the MIT license and published as @fasterfixes/mcp on npm — inspect the source, fork it, or contribute. There are no proprietary dependencies in the server itself.",
     content: (
-      <p className="text-muted-foreground text-lg md:text-xl">
+      <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The server is open source under the MIT license and published as{" "}
         <a
           href="https://www.npmjs.com/package/@fasterfixes/mcp"
@@ -101,7 +101,7 @@ export function McpFaqSection() {
                 </AccordionTrigger>
                 <AccordionContent>
                   {faq.content ?? (
-                    <p className="text-muted-foreground text-lg md:text-xl">
+                    <p className="text-lg text-muted-foreground md:text-xl">
                       {faq.answer}
                     </p>
                   )}

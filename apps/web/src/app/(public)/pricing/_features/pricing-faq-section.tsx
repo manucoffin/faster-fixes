@@ -1,5 +1,5 @@
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -93,7 +93,7 @@ export function PricingFaqSection() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {linkifyAnswer(faq.answer)}
                   </p>
                 </AccordionContent>

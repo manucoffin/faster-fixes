@@ -2,7 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { AUTHOR } from "@/app/_constants/author";
 import { PUBLISHER_LOGO, SITE_LANGUAGE, SITE_NAME } from "@/app/_constants/seo";
 import { MdxLink } from "@/app/_components/mdx/mdx-link";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { blogSource } from "@/lib/blog/source";
 import { getContentMDXComponents } from "mdx-components";
 import type { Metadata } from "next";
