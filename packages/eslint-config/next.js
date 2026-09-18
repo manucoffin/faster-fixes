@@ -69,6 +69,7 @@ export const migratedScopes = [
   "_domains/organization",
   "_domains/subscription",
   "_domains/user",
+  "onboarding",
 ];
 
 /**

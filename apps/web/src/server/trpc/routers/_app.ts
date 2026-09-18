@@ -4,7 +4,7 @@ import { authRouter } from "@/app/_domains/auth/trpc-router";
 import { organizationRouter } from "@/app/_domains/organization/trpc-router";
 import { subscriptionRouter } from "@/app/_domains/subscription/trpc-router";
 import { adminRouter } from "@/app/admin/_utils/trpc-router";
-import { onboardingRouter } from "@/app/onboarding/_utils/trpc-router";
+import { onboardingRouter } from "@/app/onboarding/trpc-router";
 import { router } from "../trpc";
 
 export const appRouter = router({
