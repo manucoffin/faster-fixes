@@ -5,13 +5,9 @@ export const CreateAgentTokenSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   scopes: z
     .array(
-      z.enum([
-        "feedbacks:read",
-        "feedbacks:update_status",
-        "feedbacks:create",
-      ]),
+      z.enum(["feedbacks:read", "feedbacks:update_status", "feedbacks:create"]),
     )
     .min(1, "Select at least one permission"),
 });
 
-export type CreateAgentTokenSchemaType = z.infer<typeof CreateAgentTokenSchema>;
+export type CreateAgentTokenInput = z.infer<typeof CreateAgentTokenSchema>;

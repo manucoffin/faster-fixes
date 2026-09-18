@@ -1812,6 +1812,147 @@ sent. Inviting a member, cancelling an invitation, promoting and demoting a memb
 member, and the denials seen as a plain member and at the seat limit are on the QA checklist of
 issue #71.
 
+### `(authenticated)/integrations`, part 1: agent tokens (issue #72)
+
+Commit: `PLACEHOLDER`. The scope router leaves `_utils/` for the scope root and the four agent token
+operations become services. The scope is **not** locked: issue #73 owns the ten installation
+operations of GitHub, Jira, Linear and Slack, and the `migratedScopes` entry.
+
+**Files moved.** Six modules, all with `git mv`. No file dissolved, so this segment leaves no
+`_deprecated_` stub.
+
+| Operation        | Before                                                       | After                                    |
+| ---------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| Scope router     | `_utils/trpc-router.ts`                                      | `trpc-router.ts`                         |
+| Token list       | `_features/agent-tokens/get-agent-tokens.trpc.query.ts`      | `_services/list-agent-tokens.ts`         |
+| Token creation   | `_features/agent-tokens/create-agent-token.trpc.mutation.ts` | `_services/create-agent-token.ts`        |
+| Token revocation | `_features/agent-tokens/revoke-agent-token.trpc.mutation.ts` | `_services/revoke-agent-token.ts`        |
+| Token deletion   | `_features/agent-tokens/delete-agent-token.trpc.mutation.ts` | `_services/delete-agent-token.ts`        |
+| Creation schema  | `_features/agent-tokens/create-agent-token.schema.ts`        | `_services/create-agent-token.schema.ts` |
+
+The `agent-tokens` feature keeps its three client components; only the four operations and the one
+schema left. `integrations/_utils/` held nothing but the router, so the folder disappears with the
+move rather than surviving as the empty untracked leftover the account, admin users and organization
+scopes each recorded.
+
+**Renamed service, no renamed procedure key.** One service: `getAgentTokens` becomes
+`listAgentTokens`, because it returns a collection and `list-` is the read verb the closed vocabulary
+forces, the same call as `listInvitations` in the organization scope. Its key was already
+`agentToken.list`, so the rename costs no call site: the router key mirrored the intended verb before
+the file name did. The other three keys, `create`, `revoke` and `delete`, each already mirror their
+service verb under a router that carries the noun.
+
+**`revoke` stays distinct from `delete`.** They are two domain transitions, not one verb with a flag.
+`revokeAgentToken` keeps the row and writes `isActive: false` with a `revokedAt` stamp, so the token
+stays listed with a "Revoked" badge and the REST agent API stops accepting it; `deleteAgentToken`
+removes the row and the token leaves the list. The naming rule accepts `revoke-` as a precise write
+verb for a distinct state transition the domain already names, and issue #72 asks for the distinction
+explicitly. `revoke-agent-token.test.ts` pins it: the revoking case asserts the `update` call and
+that `delete` was never reached.
+
+**Authorization, all of it in the services.** Every denial of this segment needs a loaded membership,
+so none of them could stay at the transport edge:
+
+| Denial             | Where it lives now                                                     |
+| ------------------ | ---------------------------------------------------------------------- |
+| "Access denied."   | `ForbiddenError` in `listAgentTokens` (any member of the Organization) |
+| "Access denied."   | `ForbiddenError` in `createAgentToken` (owner or admin)                |
+| "Access denied."   | `ForbiddenError` in `revokeAgentToken` (owner or admin)                |
+| "Access denied."   | `ForbiddenError` in `deleteAgentToken` (owner or admin)                |
+| "Token not found." | `NotFoundError` in `revokeAgentToken`                                  |
+| "Token not found." | `NotFoundError` in `deleteAgentToken`                                  |
+
+Same codes, same messages. The read and the three writes deliberately keep their different membership
+predicates: the list query accepts any member, the three writes require `owner` or `admin`, exactly
+as the procedures did. No `UNAUTHORIZED`, no rate limit and no plan limit is involved, so nothing
+moved into a procedure and `protectedProcedure` answers the identity question alone.
+
+The "Token not found." branch is also the tenancy guard: both writes look the token up with
+`{ id, organizationId }`, so a token id belonging to another Organization reads as not found rather
+than as a denial, which is the behaviour the procedures already had.
+
+**Reclassified errors.** None. The segment held no `INTERNAL_SERVER_ERROR`, so there was nothing to
+triage and no generic wrapper to remove. Every `TRPCError` became the domain subclass of the same
+code with the same message, so no toast changes wording.
+
+**Nothing reachable from the REST agent API throws a `DomainError`.** The agent API never calls these
+four operations: it resolves a bearer token through `@/server/api/resolve-agent-token`, which this
+ticket does not touch and which returns `null` rather than throwing. The four services are reachable
+from the tRPC router alone. Smoked below: `GET /api/v1/agent/feedbacks` with no bearer token still
+answers `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, byte for byte.
+
+**Services holding a database client.** All four, since each holds an authorization check and the two
+token writes hold a domain error branch as well. None is a pass-through read. No service receives the
+tRPC context or the session: the router passes `organizationId`, `tokenId`, `name`, `scopes` and
+`userId` as plain values, and each service imports `prisma` directly instead of reading it from
+`ctx`.
+
+**Output types.** The four `inferProcedureOutput` aliases of the segment are gone. The read exports
+`ListAgentTokensOutput` derived from its service; the three writes owe none, and their aliases
+(`CreateAgentTokenOutput`, `RevokeAgentTokenOutput`, `DeleteAgentTokenOutput`) are dropped rather
+than replaced, because no file imported them. The one consumer, `agent-token-item.client.tsx`,
+changes an import path and a type name; the type-only import of a `_services/` module is the
+documented exception to `no-client-import-of-services`.
+
+**Schemas.** `CreateAgentTokenSchemaType` becomes `CreateAgentTokenInput`, which clears both
+`require-schema-conventions` warnings the file carried: the misnamed alias, and the "must export at
+least one type ending with `Input`" line the same defect raises at file level. The three procedures
+that declared their input inline gain a schema file next to their service:
+`list-agent-tokens.schema.ts`, `revoke-agent-token.schema.ts` and `delete-agent-token.schema.ts`.
+
+**Debt noted, not fixed.** `create-agent-token-dialog.client.tsx` repeats the three scope literals
+twice, once in its own `AVAILABLE_SCOPES` constant and once as an inline cast on
+`createToken.mutate`. Importing `CreateAgentTokenInput` from the schema would remove the cast, but
+the dialog is UI this ticket does not own and the duplication predates the migration. Recorded here
+rather than fixed.
+
+**Tests.** Three colocated files, eight cases, all driven through the trailing database client with
+no tRPC context built: `list-agent-tokens.test.ts` (2) pins the `ForbiddenError` for a non-member and
+that a plain member is queried without a role filter; `revoke-agent-token.test.ts` (3) and
+`delete-agent-token.test.ts` (3) each pin the `ForbiddenError`, the `NotFoundError` for a token of
+another Organization, and the write itself, `update` for one and `delete` for the other.
+`createAgentToken` is left untested: its one branch is the same denial, and the rest of it is
+`crypto.randomBytes`, which the step's policy does not ask to pin.
+
+**Gate.** `pnpm typecheck` clean (4 tasks); `pnpm lint` 0 warnings (5 tasks); `pnpm test` 60 app
+tests (8 new) plus the ESLint rule and config tests; `pnpm lint:agent-rules` **115 problems, 0
+errors, 115 warnings** (88 `no-raw-tailwind-colors` / 26 `require-schema-conventions` / 1
+`require-use-client-suffix`), down 2 from the 117 of the organization scope, the two being the
+`CreateAgentTokenSchemaType` warnings above. `npx next build` compiles and still lists
+`/integrations`; `pnpm build` is refused by the sandbox, as the earlier entries record.
+
+**Prettier drift found, not caused.** `agent-token-item.client.tsx` and
+`create-agent-token-dialog.client.tsx` were already unformatted at `f83a3b1`: four Tailwind class
+lists sat in an order the current `prettier-plugin-tailwindcss` no longer produces, and
+`npx prettier --check` fails on the untouched `f83a3b1` content of both. They are normalised here
+rather than left for the pre-commit hook to reformat under an unrelated commit. The churn is class
+ordering only; no class is added or removed.
+
+**Per-scope "must be gone" checks.** Restricted to `(authenticated)/integrations`, checks 2 to 8
+return nothing: `_utils/` is gone, no service imports tRPC, none holds a `TRPCError`, none carries
+`'use server'`, and no router sits in a bucket or a feature. Checks 1, 9 and 10 return exactly the ten
+installation modules issue #73 owns, with their role suffixes, their inline Prisma and their
+`inferProcedureOutput` aliases.
+
+**Smoke, walked on 2026-09-18 against `next dev` with dummy environment values:**
+
+| Check                                                                            | Result                                                               |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `GET /api/trpc/authenticated.integrations.agentToken.list`                       | `401 UNAUTHORIZED`, the key resolves and `protectedProcedure` guards |
+| `POST …agentToken.create`, `agentToken.revoke`, `agentToken.delete`              | `401 UNAUTHORIZED`, all three resolve with their keys unchanged      |
+| `GET …agentToken.get`                                                            | `404 No procedure found on path`, no stray key was introduced        |
+| `GET …github.getInstallation`, `linear.getInstallation`, `slack.getInstallation` | `401 UNAUTHORIZED`, the keys issue #73 owns still resolve            |
+| `GET …jira.getInstallation`, `jira.listAccessibleSites`                          | `401 UNAUTHORIZED`, same                                             |
+| `POST …jira.selectSite`, `github.disconnect`                                     | `401 UNAUTHORIZED`, same                                             |
+| `GET /api/v1/agent/feedbacks` with no bearer token                               | `401 {"error":"Unauthorized","code":"UNAUTHORIZED"}`, unchanged      |
+| `GET /integrations` signed out                                                   | `307` to `/login`, the page guard is unchanged                       |
+
+**Not smoked here, and why.** The sandbox `.env.local` holds placeholder Postgres credentials, so no
+user can sign in and no Organization can be rendered. Creating a token and copying it once, seeing
+the list refresh only after the dialog closes, revoking a token and watching it stay listed as
+"Revoked", deleting a token, and the denial seen as a plain member are on the QA checklist of
+issue #72.
+
 ### Corrections to the recipe found by the pilot
 
 The kit's per-scope recipe survived the pilot, with one gap worth writing down.

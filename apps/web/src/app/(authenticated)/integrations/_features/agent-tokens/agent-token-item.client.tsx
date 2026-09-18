@@ -18,10 +18,10 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { ShieldOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { GetAgentTokensOutput } from "./get-agent-tokens.trpc.query";
+import type { ListAgentTokensOutput } from "../../_services/list-agent-tokens";
 
 type AgentTokenItemProps = {
-  token: GetAgentTokensOutput[number];
+  token: ListAgentTokensOutput[number];
 };
 
 function formatDate(date: Date | string | null): string {
@@ -89,10 +89,10 @@ export function AgentTokenItem({ token }: AgentTokenItemProps) {
     <div className="flex items-start gap-4 py-3">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate font-medium">{token.name}</span>
-        <code className="text-muted-foreground text-xs">
+        <code className="text-xs text-muted-foreground">
           ff_agent_••••{token.tokenLastFour}
         </code>
-        <div className="text-muted-foreground text-xs">
+        <div className="text-xs text-muted-foreground">
           {formatScopes(token.scopes)} · Last used{" "}
           {formatDate(token.lastUsedAt)}
         </div>

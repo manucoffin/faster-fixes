@@ -1,6 +1,6 @@
 import { projectsRouter } from "@/app/(authenticated)/(project)/_utils/trpc-router";
 import { accountRouter } from "@/app/(authenticated)/account/trpc-router";
-import { integrationsRouter } from "@/app/(authenticated)/integrations/_utils/trpc-router";
+import { integrationsRouter } from "@/app/(authenticated)/integrations/trpc-router";
 import { organizationRouter } from "@/app/(authenticated)/organization/trpc-router";
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";

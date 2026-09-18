@@ -113,14 +113,14 @@ export function CreateAgentTokenDialog() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
               <div className="flex items-center gap-2">
                 <code className="flex-1 font-mono text-sm break-all">
                   {rawToken}
                 </code>
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {copied ? (
-                    <Check className="text-success size-4" />
+                    <Check className="size-4 text-success" />
                   ) : (
                     <Copy className="size-4" />
                   )}
