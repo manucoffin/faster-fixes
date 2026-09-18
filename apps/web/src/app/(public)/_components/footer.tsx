@@ -1,6 +1,6 @@
-import { GitHubStarsButton } from "@/app/(public)/_features/github-stars/github-stars-button.client";
+import { GitHubStarsButton } from "../_features/github-stars/github-stars-button.client";
 import { SITE_META_DESCRIPTION } from "@/app/_constants/seo";
-import { ManageConsentButton } from "@/app/_features/c15t/manage-consent-button";
+import { ManageConsentButton } from "./manage-consent-button.client";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
 import { Route } from "next";
 import Link from "next/link";

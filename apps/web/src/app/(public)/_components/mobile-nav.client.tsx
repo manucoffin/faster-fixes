@@ -46,7 +46,7 @@ export function MobileNav({
             <Link
               key={link.href}
               href={link.href as never}
-              className="text-foreground hover:bg-accent rounded-md px-3 py-2 text-sm transition-colors"
+              className="rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
               onClick={close}
             >
               {link.label}
@@ -55,14 +55,14 @@ export function MobileNav({
 
           {integrationLinks && integrationLinks.length > 0 && (
             <div className="mt-4">
-              <p className="text-muted-foreground px-3 pb-1 text-xs font-semibold tracking-wider uppercase">
+              <p className="px-3 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Integrations
               </p>
               {integrationLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href as never}
-                  className="text-foreground hover:bg-accent flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   onClick={close}
                 >
                   {link.icon && (

@@ -38,7 +38,7 @@ export function LaunchBanner() {
   }
 
   return (
-    <div className="bg-primary text-primary-foreground relative">
+    <div className="relative bg-primary text-primary-foreground">
       <div className="mx-auto flex items-center justify-center gap-2 px-10 py-4 text-center">
         <p>
           We&apos;re launching on TinyLaunch today. If you have 30 seconds, a{" "}
@@ -60,7 +60,7 @@ export function LaunchBanner() {
         className={cn(
           "absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1",
           "opacity-80 transition-opacity hover:opacity-100",
-          "focus-visible:ring-primary-foreground/50 outline-none focus-visible:ring-2",
+          "outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/50",
         )}
       >
         <X className="size-4" />
