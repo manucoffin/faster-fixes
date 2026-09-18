@@ -7,9 +7,9 @@ Authority: `adrs/server-file-conventions.md` and the vocabulary part of `adrs/do
 ## Prerequisites
 
 - Step 2 done: every domain is under `_domains/` with a barrel.
-- **The domain-error vocabulary and the tRPC mapping middleware exist before the first procedure is extracted.** Tobalgo learned this the hard way: extracting a procedure that threw `TRPCError({ code: "CONFLICT" })` into a service that throws bare `Error` turns a 409 into a 500 and loses the code irrecoverably. So, first:
-  1. Create `src/server/errors/domain-errors.ts` (copy it verbatim from the kit README's runtime files list). Zero imports. Five subclasses.
-  2. Add the mapping middleware to the base procedure in `src/server/trpc/trpc.ts`:
+- **The domain-error vocabulary and the tRPC mapping middleware exist before the first procedure is extracted.** Tobalgo learned this the hard way: extracting a procedure that threw `TRPCError({ code: "CONFLICT" })` into a service that throws bare `Error` turns a 409 into a 500 and loses the code irrecoverably. `[Faster Fixes]` Both landed with this step's prerequisites in commit `f2c8d60`, so there is nothing left to copy here:
+  1. `apps/web/src/server/errors/domain-errors.ts` holds the vocabulary: a zero-import module exporting `DomainErrorCode`, the abstract `DomainError` and the five subclasses. `[Faster Fixes]` Its source is `docs/architecture/target-architecture.md` (section "Domain errors and transport mapping", subsection "The vocabulary") together with `docs/adr/0012-domain-errors-and-transport-mapping.md`. The kit ships no runtime file for it: the README's "copy verbatim" list covers skills, lint rules and agent instructions, and its pointer for this module refers to the other project's tree, which is not available here.
+  2. `apps/web/src/server/trpc/trpc.ts` carries the mapping middleware on the base procedure, which was a pass-through before:
 
   ```ts
   const domainErrorMiddleware = t.middleware(async (opts) => {
@@ -28,7 +28,7 @@ Authority: `adrs/server-file-conventions.md` and the vocabulary part of `adrs/do
   export const protectedProcedure = publicProcedure.use(/* auth check */);
   ```
 
-  Every derived procedure inherits the mapping. Nothing else from step 4 is needed yet.
+  Every derived procedure (protected, admin, plan-aware) inherits the mapping. The existing error formatter needs no change: it only flattens causes that are Zod errors, and the middleware only rewrites causes that are domain errors. `apps/web/src/server/trpc/domain-error-mapping.test.ts` pins all three behaviours. Nothing else from step 4 is needed yet.
 
 ## Target state
 
@@ -45,7 +45,7 @@ Authority: `adrs/server-file-conventions.md` and the vocabulary part of `adrs/do
 └── index.ts         # domains only
 ```
 
-No `_trpc/`, `_queries/`, `_mutations/`, `_server/`, `_utils/`, `_hooks/`, `_schemas/`, `_lib/` anywhere under `src/app/`.
+No `_trpc/`, `_queries/`, `_mutations/`, `_server/`, `_utils/`, `_hooks/`, `_schemas/`, `_lib/` anywhere under `src/app/`. `[Faster Fixes]` No `_constants/` inside a scope either: ADR-0010 rejects a per-domain `_constants/` bucket ("constants are helpers or types"), so a scope's constants fold into `_helpers/` as pure functions. The one at the app root (`src/app/_constants/`) is domain-agnostic and stays.
 
 ### Where the old files go
 
@@ -64,6 +64,7 @@ No `_trpc/`, `_queries/`, `_mutations/`, `_server/`, `_utils/`, `_hooks/`, `_sch
 | `<scope>/_utils/*` (IO, schemas)                        | `<scope>/_services/*`                                                                                  |
 | `<scope>/_utils/*` (types)                              | `<scope>/_types/*`                                                                                     |
 | `<scope>/_utils/use-*.ts`, `<scope>/_hooks/use-*.ts`    | The owning `_features/<x>/use-*.ts`                                                                    |
+| `<scope>/_constants/*` `[Faster Fixes]`                 | `<scope>/_helpers/*` as pure functions; only the app root keeps a `_constants/`                        |
 | `*.inngest.ts` `[if present]`                           | `<scope>/_services/*.inngest.ts`                                                                       |
 
 ### Services
@@ -113,25 +114,60 @@ No `_trpc/`, `_queries/`, `_mutations/`, `_server/`, `_utils/`, `_hooks/`, `_sch
 
 ## What must be gone
 
-| Pattern                         | Check                                                                                                                                                                                    |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Role suffixes                   | `grep -rEl "\.(trpc                                                                                                                                                                      | server)\.(query | mutation)\.ts$" apps/web/src`via`find apps/web/src -name "_.trpc._.ts" -o -name "_.server.query.ts" -o -name "_.server.mutation.ts"` returns nothing |
-| Old buckets                     | `find apps/web/src/app -type d \( -name _trpc -o -name _queries -o -name _mutations -o -name _server -o -name _utils -o -name _hooks -o -name _schemas -o -name _lib \)` returns nothing |
-| `*.types.ts` in features        | `find apps/web/src/app -name "*.types.ts"` returns nothing                                                                                                                               |
-| tRPC in services                | `grep -rn "server/trpc\|lib/trpc\|@trpc/server" apps/web/src --include="*.ts" -l \| grep _services/` returns nothing                                                                     |
-| `TRPCError` in services         | `grep -rn "TRPCError" apps/web/src \| grep _services/` returns nothing                                                                                                                   |
-| Procedure output as type source | `grep -rn "inferProcedureOutput\|inferRouterOutputs" apps/web/src` returns nothing outside `src/lib/trpc/`                                                                               |
-| Routers inside buckets          | `find apps/web/src/app -path "*/_*/trpc-router.ts"` returns nothing                                                                                                                      |
+Each row is a command that returns nothing when the step is done. `[Faster Fixes]` The table below replaces the kit's: four of its checks were wrong against this repo, three checks are added, and the rules of the game are written down so the next edit does not break them again.
+
+- A check whose target is a **file name** is a `find`, not a `grep`. The kit's role-suffix check grepped file _contents_ for `"\.(trpc|server)\.(query|mutation)\.ts$"`, which no source line can match, so it passed vacuously while 112 role-suffixed files sat on disk.
+- Every check covers `.tsx`. One procedure module is a `.tsx` file (`(authenticated)/_features/feedback/send-feedback.trpc.mutation.tsx`), and tooling keyed on `.ts` alone misses it.
+- Commands avoid the shell pipe: `grep` takes repeated `-e` patterns instead of `|` alternation, and `find -exec grep -l {} +` replaces `find ... | xargs grep`. Where a pipe is unavoidable it is written `\|` in the cell, otherwise Prettier reads it as a column separator and shreds the row. That is what happened to the first version of this table: the separator row grew to four columns and the commands came back with `_` where their `*` had been, because the leftover asterisks were reformatted as emphasis.
+- These checks clear only after the maintainer has deleted the `_deprecated_<name>.ts` stubs the step leaves behind (the agent never deletes a file). A stub still sitting in a `_utils/` folder keeps the old-bucket check red.
+- An agent runs them with `/usr/bin/grep`: the agent shell wraps `grep`, as the migration log records for the warning-count command.
+
+| Pattern                                 | Check, returns nothing                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Role suffixes                           | `find apps/web/src/app -type f \( -name "*.trpc.query.ts*" -o -name "*.trpc.mutation.ts*" -o -name "*.server.query.ts*" -o -name "*.server.mutation.ts*" \)`             |
+| Old buckets                             | `find apps/web/src/app -type d \( -name _trpc -o -name _queries -o -name _mutations -o -name _server -o -name _utils -o -name _hooks -o -name _schemas -o -name _lib \)` |
+| `_constants/` inside a scope            | `find apps/web/src/app -mindepth 2 -type d -name "_constants"`                                                                                                           |
+| `*.types.ts` files                      | `find apps/web/src/app -type f -name "*.types.ts"`                                                                                                                       |
+| Routers inside a bucket or a feature    | `find apps/web/src/app -type f -name "trpc-router.ts" \( -regex ".*/_[^/]*/trpc-router\.ts" -o -path "*/_features/*" \)`                                                 |
+| tRPC imported by a service              | `find apps/web/src/app -type f -path "*/_services/*" -exec grep -l -e "server/trpc" -e "lib/trpc" -e "@trpc/server" {} +`                                                |
+| `TRPCError` in a service                | `find apps/web/src/app -type f -path "*/_services/*" -exec grep -l "TRPCError" {} +`                                                                                     |
+| `'use server'` in a service or a router | `find apps/web/src/app -type f \( -name "trpc-router.ts" -o -path "*/_services/*" \) -exec grep -l "use server" {} +`                                                    |
+| Prisma queried outside a service        | `find apps/web/src/app -path "*/_services/*" -prune -o -type f -name "*.ts*" -not -name "route.ts" -exec grep -l "prisma\." {} +`                                        |
+| Procedure output as the type source     | `grep -rl --include="*.ts" --include="*.tsx" -e inferProcedureOutput -e inferRouterOutputs apps/web/src \| grep -v "src/lib/trpc/"`                                      |
+
+Four of them need a word of explanation.
+
+**Routers inside a bucket or a feature.** The kit's `find apps/web/src/app -path "*/_*/trpc-router.ts"` is wrong here, because `*` in `find -path` crosses `/`: it matches `_domains/<domain>/trpc-router.ts`, which is exactly where a domain-root router is supposed to live. `-regex ".*/_[^/]*/trpc-router\.ts"` constrains the underscore folder to be the router's **immediate** parent, so `_domains/auth/_services/trpc-router.ts` is flagged and `_domains/auth/trpc-router.ts` is not. The `-path "*/_features/*"` clause catches the other illegitimate home, a router inside a feature, whose parent folder carries no underscore.
+
+**`'use server'` in a service or a router.** No migrated file keeps the directive: an exported service function under `'use server'` is a client-callable server action with no auth procedure in front of it. Today 81 files carry it, all of them role-suffixed procedure modules, so this check is vacuous until the first extraction and meaningful from then on. The ESLint exemption that turns `require-server-action-suffix` off for `*.trpc.query.*` and `*.trpc.mutation.*` comes out at the final lock.
+
+**Prisma queried outside a service.** `route.ts` is excluded on purpose. Twelve route handlers under `src/app/api/**` (five OAuth install and callback routes, three tracker webhooks, the upload endpoint and the three public widget endpoints) query Prisma inline, and no step 3 ticket touches them: the step promises that pages, layouts and server components stop querying Prisma, and that the agent API's buckets are renamed. Their inline Prisma is recorded in the migration log as debt for steps 4 and 5 rather than hidden by a check that silently passes.
+
+**Procedure output as the type source.** `src/lib/trpc/` is the legitimate home of `inferRouterOutputs`: the client type helpers are built from the app router there. Everything else switches to the service's exported `<Service>Output`.
 
 ## Recommended strategy
 
-Migrate one scope at a time, smallest first, and lock as you go. For each scope: create `_services/` with the extracted functions, write the thin router, delete the old files (retire with `_deprecated_*` stubs if the repo forbids deleting), rewrite the client call paths, run the checks, then add the scope to the ESLint `migratedScopes` allowlist that turns the step's rules from `warn` to `error` for that path. One commit per scope, one log line per scope. When every scope is in the allowlist, delete the allowlist and set `servicesRulesSeverity` to `"error"` unconditionally.
+Migrate one scope at a time, smallest first, and lock as you go. For each scope: create `_services/` with the extracted functions, write the thin router, retire the old files, rewrite the client call paths, run the checks, then add the scope to `migratedScopes` so this step's rules go from `warn` to `error` for that path alone. One commit per scope, one log entry per scope.
+
+`[Faster Fixes]` Two things the kit leaves abstract are concrete here.
+
+**Retiring a file.** The repo forbids the agent from deleting files. A file whose logic survives is moved with `git mv` to its service name, so the history follows it. A file that dissolves (an old router, a wrapper helper) becomes a `_deprecated_<name>.ts` stub holding a one-line comment and no role suffix, listed in the log. The maintainer deletes the stubs in one pass before the final lock, which is when the "must be gone" checks are required to clear.
+
+**The lock.** `migratedScopes` lives in `packages/eslint-config/next.js` and is an array of glob fragments relative to `src/app`, spelled the way the folder is spelled on disk: `"(public)"`, `"(authenticated)/account"`, `"admin/users"`, `"_domains/auth"`. Each entry is expanded by `migratedScopeConfigs(scope, severity)` into two config blocks, appended last so they override the `warn` ramp above them:
+
+| Block                                           | Rules raised to `error`                                                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `**/src/app/<scope>/**/_services/**/*.{ts,tsx}` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`                                    |
+| `**/src/app/<scope>/**/*.{ts,tsx}`              | `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix` |
+
+The locked severity sits behind the same `ESLINT_AGENT_RULES` gate as the rest, so a lock never affects `pnpm lint`; only `pnpm lint:agent-rules` enforces it, where a locked scope reports errors and everything else keeps burning down as warnings. `no-default-export` is not in the list (it is scoped to `_domains/**` and was locked there in step 2; a route scope has to default-export its `page.tsx`), and neither is `no-raw-tailwind-colors`, whose 88 warnings are outside this step's definition of done. `packages/eslint-config/next-config.test.js` pins the expansion and the globs. When every scope is listed, the final lock deletes the array, `migratedScopeConfigs`, `lockedSeverity` and `lockedScopeConfigs`, and sets `servicesRulesSeverity` to `"error"` unconditionally.
 
 ## Definition of done
 
 - The shared definition of done from the kit README.
 - These rules are at `error` (agent-gated) with no allowlist left: `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `no-client-import-of-services`, `no-feature-nesting`, `schema-must-be-pure-zod`, `require-schema-conventions`, `no-default-export`, `require-use-client-suffix`.
 - `services-no-bare-error` is at `error` (agent-gated for now; step 4 makes it always on).
-- Every "must be gone" check returns nothing.
+- Every "must be gone" check returns nothing, run after the maintainer has deleted the `_deprecated_` stubs.
+- `[Faster Fixes]` `migratedScopes` and its helpers are deleted, and the ESLint exemption that turns `require-server-action-suffix` off for `*.trpc.query.*` and `*.trpc.mutation.*` is removed.
 - The ADR `server-file-conventions.md` is committed in the project's `docs/adr/`.
-- The migration log lists every scope with its commit.
+- The migration log lists every scope with its commit, `[Faster Fixes]` plus its renamed procedure keys, its reclassified errors, its deprecated stubs and its manual smoke checklist.

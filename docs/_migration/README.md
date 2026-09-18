@@ -186,7 +186,7 @@ Found while moving the folders. None is caused by the move and none is fixed her
 
 Step 3 turns every scope's data and IO code into verb-prefixed functions in `_services/`, dissolves `_utils/`, and makes the routers thin. Before the first procedure is extracted:
 
-1. **Create the domain-error vocabulary and the tRPC mapping middleware first.** `src/server/errors/domain-errors.ts` (five subclasses, zero imports) and the `domainErrorMiddleware` on the base procedure in `src/server/trpc/trpc.ts`, both given verbatim in `docs/architecture/migration-kit/03-services.md`. Extracting a procedure that throws `TRPCError({ code: "CONFLICT" })` into a service that throws a bare `Error` silently turns a 409 into a 500. Creating that folder is also what enables `no-client-import-of-server-errors`, which is `off` and unmeasured today.
+1. ~~**Create the domain-error vocabulary and the tRPC mapping middleware first.**~~ Done in `f2c8d60`. `src/server/errors/domain-errors.ts` (five subclasses, zero imports) and the `domainErrorMiddleware` on the base procedure in `src/server/trpc/trpc.ts`. Extracting a procedure that throws `TRPCError({ code: "CONFLICT" })` into a service that throws a bare `Error` silently turns a 409 into a 500. Creating that folder is also what enabled `no-client-import-of-server-errors`. The vocabulary came from `docs/architecture/target-architecture.md` and ADR-0012, not from the kit, which ships no runtime file for it; `03-services.md` was corrected to say so.
 2. **Answer the open question on the integration domains** recorded above. It decides the home of `server/github`, `server/linear`, `server/jira`, `server/slack`, `server/oauth`, the domain-bound Inngest functions and the Jira mail template, which together are most of what step 3 has to move.
 3. **Decide the domain of `server/storage`.** Asset is not a glossary term. Either add it to `CONTEXT.md` with the `domain-modeling` skill, or place the folder under the domain that owns the files it stores.
 4. ~~**Add the per-scope allowlist to the ESLint config.**~~ Done, see the `migratedScopes` section below.
@@ -323,3 +323,49 @@ The kit names a read service's derived type after the function (`export type Lis
 - `rules/backend.md` and `rules/architecture.md`: authority links point at `docs/adr/0011-...` and `docs/adr/0012-...`, and the backend example now shows a service throwing `NotFoundError` and exporting `GetAnimalOutput`, with the note that identity, rate limiting and plan limits stay in the procedure.
 
 `CONTEXT.md` is unchanged: Service, Helper and Scope are architecture vocabulary, not glossary terms.
+
+## Step 3 prerequisite: the corrected step 3 kit document (issue #59)
+
+Corrected in place on 2026-09-18 in `docs/architecture/migration-kit/03-services.md`. The document is the authority the final lock (issue #82) runs its "must be gone" checks from, so a check that cannot fail is worse than no check at all: it closes the step on a false green.
+
+### What was wrong
+
+| Check                           | Defect                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Role suffixes                   | Grepped file **contents** for `"\.(trpc\|server)\.(query\|mutation)\.ts$"`, which no source line can match. It returned nothing while 112 role-suffixed files sat on disk. The unescaped pipes had also split the cell, so Prettier reformatted the leftover `*` of the companion `find` into `_`: the fallback read `-name "_.trpc._.ts"`. |
+| Routers inside buckets          | `find -path "*/_*/trpc-router.ts"`: `*` crosses `/` in `find -path`, so the pattern also matches `_domains/<domain>/trpc-router.ts`, the one place a router is supposed to live from step 3 on.                                                                                                                                             |
+| Every check                     | Keyed on `.ts` only. `(authenticated)/_features/feedback/send-feedback.trpc.mutation.tsx` is a procedure module in a `.tsx` file and slipped through all of them.                                                                                                                                                                           |
+| tRPC and `TRPCError` in service | `grep ... -l \| grep _services/` piped one grep into another inside a table cell, which is what broke the row formatting in the first place.                                                                                                                                                                                                |
+
+Two statements in the prose were also stale: the prerequisite told the agent to copy `domain-errors.ts` "verbatim from the kit README's runtime files list" (the kit ships no runtime file for it; the list covers skills, lint rules and agent instructions, and the pointer refers to the other project's tree), and the strategy described a `migratedScopes` allowlist in the abstract, without the shape the repo actually built in issue #58.
+
+### The repaired table and its pre-migration output
+
+Ten checks, each a single command that returns nothing when the step is done. Commands are pipe-free wherever possible (repeated `grep -e` instead of `|` alternation, `find -exec grep -l {} +` instead of `find | xargs grep`); the one unavoidable pipe is written `\|` in the cell. Every command below was run from the repo root exactly as the document renders it, at commit `0cf1c04`:
+
+| Check                                   | Lines returned | Note                                                                                                                                              |
+| --------------------------------------- | -------------: | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Role suffixes                           |            112 | 43 `*.trpc.query.ts`, 67 `*.trpc.mutation.ts`, 1 `*.trpc.mutation.tsx`, 1 `*.server.query.ts`                                                     |
+| Old buckets                             |             19 | All 19 are `_utils/`; no `_trpc/`, `_queries/`, `_mutations/`, `_server/`, `_hooks/`, `_schemas/`, `_lib/` exists                                 |
+| `_constants/` inside a scope            |              1 | `_domains/subscription/_constants`; the app-root `_constants/` is excluded by `-mindepth 2`                                                       |
+| `*.types.ts` files                      |              0 | Already clean; step 2 left no `*.types.ts` under `src/app`                                                                                        |
+| Routers inside a bucket or a feature    |             14 | All 14 sit in a `_utils/`, one of them nested inside the `(public)` GitHub stars feature                                                          |
+| tRPC imported by a service              |              0 | Vacuous: no `_services/` folder exists yet                                                                                                        |
+| `TRPCError` in a service                |              0 | Vacuous, same reason. 209 `new TRPCError` sites exist outside `_services/` (the spec's 208, plus the mapping middleware the prerequisite added)   |
+| `'use server'` in a service or a router |              0 | Vacuous for services; the 14 existing routers carry no directive. 81 files under `src/app` carry one, all of them role-suffixed procedure modules |
+| Prisma queried outside a service        |            103 | Excludes `route.ts`, see below                                                                                                                    |
+| Procedure output as the type source     |             95 | The 95 files holding the 190 `inferProcedureOutput` aliases, `src/lib/trpc/` excluded                                                             |
+
+The three checks added by this ticket are the `'use server'` one, the Prisma one and the `_constants/` one. The first two are vacuous today and become meaningful from the first extraction on; the third already has its one target.
+
+### Debt: route handlers excluded from the Prisma check
+
+The Prisma check excludes `route.ts` on purpose. Twelve route handlers under `src/app/api/**` query Prisma inline and no step 3 ticket touches them: the step promises that pages, layouts and server components stop querying Prisma (issue #54, user story 24) and that the agent API's `_utils/` buckets are renamed (issue #80), not that route handlers grow a service layer.
+
+`api/github/setup/route.ts`, `api/jira/install/route.ts`, `api/jira/callback/route.ts`, `api/linear/callback/route.ts`, `api/slack/callback/route.ts`, `api/upload/route.ts`, `api/v1/feedback/route.ts`, `api/v1/feedback/[id]/route.ts`, `api/v1/feedback/[id]/screenshot/route.ts`, `api/webhooks/github/route.ts`, `api/webhooks/jira/[token]/route.ts`, `api/webhooks/linear/route.ts`.
+
+Without the exclusion the check returns 115 lines instead of 103. Recording the twelve here rather than widening the check keeps the final lock honest: "all IO is in `_services/`" holds for the tiers step 3 migrates, and the route handler tier is step 4 and step 5 work, alongside their HTTP error mapping.
+
+### Prettier
+
+`npx prettier --check docs/architecture/migration-kit/03-services.md` passes, and a `--write` pass changes nothing: the escaped pipe, the escaped `find` parentheses and the `*` globs all survive a reformat, and no row is split. The commands were re-extracted from the formatted file and re-run to produce the counts above, so the table is verified as rendered, not as authored.
