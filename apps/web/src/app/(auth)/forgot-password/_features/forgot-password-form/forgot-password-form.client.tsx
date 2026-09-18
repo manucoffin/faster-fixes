@@ -1,6 +1,10 @@
 "use client";
 
 import { loginUrl } from "@/app/_constants/routes";
+import {
+  RequestPasswordResetInput,
+  RequestPasswordResetSchema,
+} from "@/app/_domains/auth/_services/request-password-reset.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -22,22 +26,18 @@ import { Input } from "@workspace/ui/components/input";
 import { AlertCircleIcon, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import {
-  ForgotPasswordInputs,
-  ForgotPasswordSchema,
-} from "./forgot-password.schema";
 
 export function ForgotPasswordForm() {
   const trpc = useTRPC();
-  const form = useForm<ForgotPasswordInputs>({
-    resolver: zodResolver(ForgotPasswordSchema),
+  const form = useForm<RequestPasswordResetInput>({
+    resolver: zodResolver(RequestPasswordResetSchema),
     defaultValues: {
       email: "",
     },
   });
 
   const forgotPasswordMutation = useMutation(
-    trpc.auth.forgotPassword.mutationOptions({
+    trpc.auth.requestPasswordReset.mutationOptions({
       onError: (error) => {
         const message =
           error.message || "Unable to send reset email. Please try again.";
@@ -118,7 +118,7 @@ export function ForgotPasswordForm() {
         <span className="text-muted-foreground">Remember your password? </span>
         <Link
           href={loginUrl}
-          className="text-primary font-medium hover:underline"
+          className="font-medium text-primary hover:underline"
         >
           Sign in
         </Link>

@@ -1,9 +1,9 @@
-import { PasswordSchema } from "@/app/_domains/auth/_utils/password.schema";
 import { z } from "zod";
+import { PasswordSchema } from "./password.schema";
 
-export const SignupSchema = z
+export const ResetPasswordSchema = z
   .object({
-    email: z.email("Invalid email address"),
+    token: z.string().min(1, "Token is required"),
     password: PasswordSchema,
     confirmPassword: z.string(),
   })
@@ -12,4 +12,4 @@ export const SignupSchema = z
     path: ["confirmPassword"],
   });
 
-export type SignupInputs = z.infer<typeof SignupSchema>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;

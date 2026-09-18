@@ -1,6 +1,10 @@
 "use client";
 
 import { resetPasswordUrl } from "@/app/_constants/routes";
+import {
+  ResetPasswordInput,
+  ResetPasswordSchema,
+} from "@/app/_domains/auth/_services/reset-password.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -22,10 +26,6 @@ import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import {
-  ResetPasswordInputs,
-  ResetPasswordSchema,
-} from "./reset-password.schema";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -35,7 +35,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const trpc = useTRPC();
   const router = useRouter();
 
-  const form = useForm<ResetPasswordInputs>({
+  const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(ResetPasswordSchema),
     defaultValues: {
       token,
@@ -57,7 +57,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }),
   );
 
-  const onSubmit = async (data: ResetPasswordInputs) => {
+  const onSubmit = async (data: ResetPasswordInput) => {
     resetPasswordMutation.mutate(data);
   };
 

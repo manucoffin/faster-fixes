@@ -7,7 +7,7 @@ import { buttonVariants } from "@workspace/ui/components/button";
 import { VariantProps } from "class-variance-authority";
 import { ReactNode } from "react";
 import { toast } from "sonner";
-import { SendVerificationEmailSchema } from "./send-verification-email.schema";
+import { SendVerificationEmailSchema } from "../_services/send-verification-email.schema";
 
 type SendVerificationEmailButtonProps = {
   email: string;

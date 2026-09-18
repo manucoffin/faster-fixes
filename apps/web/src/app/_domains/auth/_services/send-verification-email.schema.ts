@@ -4,6 +4,6 @@ export const SendVerificationEmailSchema = z.object({
   email: z.email({ message: "Please enter a valid email address." }),
 });
 
-export type SendVerificationEmailInputs = z.infer<
+export type SendVerificationEmailInput = z.infer<
   typeof SendVerificationEmailSchema
 >;

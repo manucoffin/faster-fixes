@@ -28,7 +28,6 @@ const t = initTRPC.context<Context>().create({
  * @see https://trpc.io/docs/server/server-side-calls
  */
 export const createCallerFactory = t.createCallerFactory;
-export const mergeRouters = t.mergeRouters;
 
 // Export t.router, t.procedure, t.middleware for creating routers, procedures, and middlewares
 export const router = t.router;

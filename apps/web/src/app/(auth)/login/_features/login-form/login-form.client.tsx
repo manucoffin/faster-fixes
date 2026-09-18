@@ -2,6 +2,10 @@
 
 import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants/routes";
 import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
+import {
+  SignInUserInput,
+  SignInUserSchema,
+} from "@/app/_domains/auth/_services/sign-in-user.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -27,7 +31,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { LoginInputs, LoginSchema } from "./login.schema";
 
 export function LoginForm() {
   const trpc = useTRPC();
@@ -36,8 +39,8 @@ export function LoginForm() {
   const nextUrl = searchParams.get("nextUrl");
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
-  const form = useForm<LoginInputs>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<SignInUserInput>({
+    resolver: zodResolver(SignInUserSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -45,7 +48,7 @@ export function LoginForm() {
   });
 
   const loginMutation = useMutation(
-    trpc.auth.login.mutationOptions({
+    trpc.auth.signInUser.mutationOptions({
       onError: (error) => {
         if (error.message === "EMAIL_NOT_VERIFIED") {
           setUnverifiedEmail(form.getValues("email"));
