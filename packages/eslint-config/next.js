@@ -157,8 +157,17 @@ export const nextJsConfig = [
               allowPatterns: [
                 "^fill-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}$",
               ],
-              // Ignore generated or low-priority style surfaces.
-              ignorePathPatterns: ["\\.stories\\.", "/emails/"],
+              // Ignore generated or low-priority style surfaces, plus the
+              // home page illustrations: drawn mock screens keep fixed
+              // colours on purpose, independently of the theme.
+              ignorePathPatterns: [
+                "\\.stories\\.",
+                "/emails/",
+                "/\\(home\\)/_features/hero/hero-flow-animation\\.client\\.tsx$",
+                "/\\(home\\)/_features/how-it-works/flow-animations\\.tsx$",
+                "/\\(home\\)/_features/before-after-section\\.tsx$",
+                "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
+              ],
             },
           ]
         : "off",

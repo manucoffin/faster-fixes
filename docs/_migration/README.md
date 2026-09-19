@@ -543,7 +543,8 @@ issue creation on a transient Atlassian failure. Decision 7 below exists because
     (`red` to `destructive`, `green` and `emerald` to `success`, the neutral hues to `muted`,
     `border`, `foreground`), names the token in its message, and lets hues with no equivalent pass.
     The four home page illustration files join `ignorePathPatterns`: drawn mock screens keep fixed
-    colours on purpose. That leaves 11 sites to fix. No `warning` or `info` token is added; when one
+    colours on purpose. That leaves 11 sites to fix (10 once the split was recounted against the
+    rule: see the #104 entry in the step 4 scope log). No `warning` or `info` token is added; when one
     is, a line in the table makes the rule report the 5 yellow, amber and blue sites.
 17. **`--max-warnings 0` returns to `lint:agent-rules` at the end of step 4,** as the Purpose section
     above promised, once decision 16 brings the rule to `error` at zero.
@@ -1111,6 +1112,82 @@ under issue #88.
       success toast appears, the session is signed out and the browser lands on `/`.
 - [ ] On an account that only has a social provider, open the deletion dialog and confirm: the alert
       reads "Please contact support to delete your account."
+
+### `no-raw-tailwind-colors` reshaped around a hue-to-token table (issue #104)
+
+Decision 16, first half. The rule now reports a raw palette class only when the theme has a
+semantic token for that hue, and its message names the class to write instead. It stays at `warn`;
+the 10 remaining sites and the move to `error` are #105. No theme token was added and no product
+file was touched.
+
+**The table lives in the rule, the paths in the config.** `DEFAULT_HUE_TOKENS` in
+`local-rules/no-raw-tailwind-colors.js` maps `red` to `destructive`, `green` and `emerald` to
+`success`, and the five neutral hues (`slate`, `gray`, `zinc`, `neutral`, `stone`) to `muted`,
+`border` and `foreground`. A hue absent from the table is not reported, so the rule never asks for a
+token that does not exist: adding `warning` and `info` to the theme and a line to the table is what
+unlocks yellow, amber and blue. The table is overridable through a `hueTokens` option, which the
+tests use in both directions; the shared config passes no table and takes the default, so there is
+one source for it. The chart `fill-` allowance and the `.stories.`/`/emails/` ignores are unchanged.
+
+**The message names the replacement.** A hue with a single token yields the utility of the offending
+class plus the token ("Avoid raw Tailwind color class `text-red-500`. Use `text-destructive`
+instead."). A neutral hue, where the right token depends on what the class is for, names the three
+("Use one of the `muted`, `border` or `foreground` token classes instead.").
+
+**The four home page illustration files join `ignorePathPatterns`**, each as its own anchored
+pattern in `next.js`: `hero/hero-flow-animation.client.tsx`, `how-it-works/flow-animations.tsx`,
+`before-after-section.tsx` and `problem/problem-chat-animation.client.tsx`. They are drawn mock
+screens whose fixed colours are the point.
+
+**Correction to the inventory: 10 sites remain, not 11.** The inventory row above splits the 16
+product-screen warnings as 7 green or emerald, 4 red and 5 yellow, amber or blue. The real split is
+6, 4 and 6: green appears 5 times (`current-plan-card.client.tsx`, `pricing-card.tsx`,
+`plan-card.tsx`, and `email-form.client.tsx` twice, once behind a `dark:` variant) and emerald once,
+while the unreported group holds 6 classes (`text-amber-500` in `app-navigation.client.tsx`,
+`border-yellow-800/20` and `bg-yellow-50` on one line of `subscription-status-banner.client.tsx`,
+`border-blue-800/20` and `bg-blue-50` on another, and `text-blue-400` in
+`email-information.client.tsx`). So the count after this ticket is 10 warnings, down from 88, and
+#105 fixes 10 sites rather than 11. Nothing else in decision 16 changes.
+
+**The 10 sites left for #105**, all in product screens:
+
+| File                                                                         | Class                                   |
+| ---------------------------------------------------------------------------- | --------------------------------------- |
+| `(authenticated)/account/billing/.../current-plan-card.client.tsx:164`       | `text-green-600`                        |
+| `(authenticated)/account/settings/_features/email/email-form.client.tsx:131` | `text-green-600`, `dark:text-green-400` |
+| `(public)/pricing/_features/pricing-card.tsx:78`                             | `text-green-600`                        |
+| `_domains/subscription/plan-card/plan-card.tsx:86`                           | `text-green-600`                        |
+| `admin/(dashboard)/.../users-overview-card.client.tsx:46`                    | `text-emerald-600`                      |
+| `admin/_features/sidebar/sidebar-user-dropdown.client.tsx:132`               | `text-red-600`                          |
+| `admin/users/[id]/.../user-organization-select.client.tsx:38`                | `text-red-500`                          |
+| `admin/users/[id]/.../email-information.client.tsx:40` and `:59`             | `text-red-600` twice                    |
+
+**Tests.** `no-raw-tailwind-colors.test.js` keeps its `RuleTester` shape and swaps the hues its
+cases use: a reported hue with the token asserted in the full message, the utility carried into the
+suggestion (`border-emerald-400` to `border-success`), a neutral hue naming its three tokens, a
+reported hue behind a `dark:` prefix, an unreported hue (blue, and amber behind a variant), the
+chart `fill-` allowance and a `fill-gray-500` outside it, and the `hueTokens` option removing a hue
+and adding one. `next-config.test.js` gains a block that lints a mock screen holding `bg-zinc-800`
+and `text-red-500` through the real config at each of the four illustration paths and expects no
+report, with a neighbour file in the same folder reporting both classes so the empty results cannot
+come from the rule being off.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings, down from 88 |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (194 web tests, 188 eslint-config tests, zero warnings) |
+| `npx next build`                           | every route listed                                           |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+No smoke checklist: the ticket changes lint output only, and no rendered pixel moves until #105.
+
+**Debt noticed, not fixed.** `rules/frontend.md` lists `warning` and `info` among the design-system
+colour tokens, and neither exists in `packages/ui/src/styles/globals.css`. Out of scope here, since
+this step adds no token; worth an aligned sentence when one is added.
 
 ## Amendments to the kit made during step 1
 

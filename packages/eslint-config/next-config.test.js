@@ -163,3 +163,46 @@ describe("no-client-import-of-server-errors", () => {
     );
   });
 });
+
+describe("no-raw-tailwind-colors", () => {
+  const ILLUSTRATION_FILES = [
+    "src/app/(public)/(home)/_features/hero/hero-flow-animation.client.tsx",
+    "src/app/(public)/(home)/_features/how-it-works/flow-animations.tsx",
+    "src/app/(public)/(home)/_features/before-after-section.tsx",
+    "src/app/(public)/(home)/_features/problem/problem-chat-animation.client.tsx",
+  ];
+
+  // Two classes the hue-to-token table reports, so an empty result proves the
+  // path was ignored rather than the hues being unreported.
+  const MOCK_SCREEN = `const Mock = () => <span className="bg-zinc-800 text-red-500" />;\n`;
+
+  async function rawColorWarningsFor(file) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(MOCK_SCREEN, { filePath: file });
+
+    return result.messages.filter(
+      (message) => message.ruleId === "local/no-raw-tailwind-colors",
+    );
+  }
+
+  it("ignores the four home page illustration files", async () => {
+    for (const file of ILLUSTRATION_FILES) {
+      expect([file, await rawColorWarningsFor(file)]).toEqual([file, []]);
+    }
+  });
+
+  it("still reports a neighbour of the illustration files", async () => {
+    const messages = await rawColorWarningsFor(
+      "src/app/(public)/(home)/_features/hero/hero-title.tsx",
+    );
+
+    expect(messages.map((message) => message.message)).toEqual([
+      "Avoid raw Tailwind color class `bg-zinc-800`. Use one of the `muted`, `border` or `foreground` token classes instead.",
+      "Avoid raw Tailwind color class `text-red-500`. Use `text-destructive` instead.",
+    ]);
+  });
+});

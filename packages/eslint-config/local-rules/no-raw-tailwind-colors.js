@@ -1,5 +1,64 @@
-const RAW_TAILWIND_COLOR_RE =
-  /^(?:text|bg|border|ring|stroke|fill|from|via|to|decoration|outline|shadow)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}(?:\/\d{1,3})?$/;
+const COLOR_UTILITIES = [
+  "text",
+  "bg",
+  "border",
+  "ring",
+  "stroke",
+  "fill",
+  "from",
+  "via",
+  "to",
+  "decoration",
+  "outline",
+  "shadow",
+];
+
+const PALETTE_HUES = [
+  "slate",
+  "gray",
+  "zinc",
+  "neutral",
+  "stone",
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "pink",
+  "rose",
+];
+
+const RAW_TAILWIND_COLOR_RE = new RegExp(
+  `^(${COLOR_UTILITIES.join("|")})-(${PALETTE_HUES.join("|")})-\\d{2,3}(?:\\/\\d{1,3})?$`,
+);
+
+const NEUTRAL_TOKENS = ["muted", "border", "foreground"];
+
+/**
+ * The hues the theme has a semantic token for. A hue absent from this table is
+ * not reported, so the rule never asks for a token that does not exist: adding
+ * `warning` and `info` to the theme is what unlocks yellow, amber and blue.
+ */
+const DEFAULT_HUE_TOKENS = {
+  red: "destructive",
+  green: "success",
+  emerald: "success",
+  slate: NEUTRAL_TOKENS,
+  gray: NEUTRAL_TOKENS,
+  zinc: NEUTRAL_TOKENS,
+  neutral: NEUTRAL_TOKENS,
+  stone: NEUTRAL_TOKENS,
+};
 
 function getClassTokens(value) {
   return value
@@ -14,17 +73,34 @@ function stripVariantPrefix(token) {
   return parts[parts.length - 1];
 }
 
-function isRawColorClass(token, allowPatterns) {
+/**
+ * Returns the utility and the hue of a raw palette class, or `null` when the
+ * token is not one or is explicitly allowed.
+ */
+function matchRawColorClass(token, allowPatterns) {
   if (allowPatterns.some((pattern) => new RegExp(pattern).test(token))) {
-    return false;
+    return null;
   }
 
   const baseToken = stripVariantPrefix(token);
   if (allowPatterns.some((pattern) => new RegExp(pattern).test(baseToken))) {
-    return false;
+    return null;
   }
 
-  return RAW_TAILWIND_COLOR_RE.test(baseToken);
+  const match = RAW_TAILWIND_COLOR_RE.exec(baseToken);
+  return match ? { utility: match[1], hue: match[2] } : null;
+}
+
+/** Names the replacement so the message says what to write instead. */
+function describeTokens(utility, tokens) {
+  const names = Array.isArray(tokens) ? tokens : [tokens];
+
+  if (names.length === 1) {
+    return `\`${utility}-${names[0]}\``;
+  }
+
+  const quoted = names.map((name) => `\`${name}\``);
+  return `one of the ${quoted.slice(0, -1).join(", ")} or ${quoted[quoted.length - 1]} token classes`;
 }
 
 function collectLiteralClassValues(node, out) {
@@ -109,18 +185,32 @@ export const noRawTailwindColorsRule = {
             type: "array",
             items: { type: "string" },
           },
+          hueTokens: {
+            type: "object",
+            additionalProperties: {
+              anyOf: [
+                { type: "string" },
+                { type: "array", items: { type: "string" } },
+              ],
+            },
+          },
         },
         additionalProperties: false,
       },
     ],
     messages: {
       avoidRawColor:
-        "Avoid raw Tailwind color class `{{className}}`. Prefer semantic token classes (e.g. text-muted-foreground, bg-destructive).",
+        "Avoid raw Tailwind color class `{{className}}`. Use {{suggestion}} instead.",
     },
   },
   create(context) {
-    const [{ allowPatterns = [], ignorePathPatterns = [] } = {}] =
-      context.options;
+    const [
+      {
+        allowPatterns = [],
+        ignorePathPatterns = [],
+        hueTokens = DEFAULT_HUE_TOKENS,
+      } = {},
+    ] = context.options;
     const filename = context.filename;
 
     if (
@@ -131,13 +221,20 @@ export const noRawTailwindColorsRule = {
 
     function reportRawClasses(value, node) {
       for (const token of getClassTokens(value)) {
-        if (isRawColorClass(token, allowPatterns)) {
-          context.report({
-            node,
-            messageId: "avoidRawColor",
-            data: { className: token },
-          });
+        const rawColor = matchRawColorClass(token, allowPatterns);
+        const tokens = rawColor && hueTokens[rawColor.hue];
+        if (!tokens) {
+          continue;
         }
+
+        context.report({
+          node,
+          messageId: "avoidRawColor",
+          data: {
+            className: token,
+            suggestion: describeTokens(rawColor.utility, tokens),
+          },
+        });
       }
     }
 

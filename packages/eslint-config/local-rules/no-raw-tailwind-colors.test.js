@@ -16,7 +16,8 @@ const ruleTester = new RuleTester({
   },
 });
 
-// The options the shared config passes to the rule.
+// The options the shared config passes to the rule. The hue-to-token table is
+// the rule's own default, so the config does not repeat it.
 const configuredOptions = [
   {
     allowPatterns: [
@@ -34,9 +35,25 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       code: `const Badge = () => <span className="bg-destructive text-muted-foreground" />;\n`,
     },
     {
+      name: "a hue with no token in the table: blue stays until an info token exists",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const Badge = () => <span className="bg-blue-50 text-blue-700" />;\n`,
+    },
+    {
+      name: "a hue with no token in the table behind a variant prefix",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const Badge = () => <span className="hover:bg-amber-500" />;\n`,
+    },
+    {
+      name: "a hue removed from the table by an explicit hueTokens option",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const Badge = () => <span className="text-red-500" />;\n`,
+      options: [{ hueTokens: { green: "success" } }],
+    },
+    {
       name: "a chart fill class allowed by allowPatterns",
       filename: "/repo/apps/web/src/components/chart.tsx",
-      code: `const Chart = () => <path className="fill-blue-500" />;\n`,
+      code: `const Chart = () => <path className="fill-green-500" />;\n`,
       options: configuredOptions,
     },
     {
@@ -69,39 +86,65 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
   ],
   invalid: [
     {
-      name: "a raw palette class in a className string",
+      name: "a hue in the table names its token in the message",
       filename: "/repo/apps/web/src/components/badge.tsx",
       code: `const Badge = () => <span className="text-red-500" />;\n`,
-      errors: [{ messageId: "avoidRawColor" }],
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `text-red-500`. Use `text-destructive` instead.",
+        },
+      ],
     },
     {
-      name: "a raw palette class behind a variant prefix",
+      name: "the named token follows the utility of the class",
       filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const Badge = () => <span className="hover:bg-blue-600" />;\n`,
-      errors: [{ messageId: "avoidRawColor" }],
+      code: `const Badge = () => <span className="border-emerald-400" />;\n`,
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `border-emerald-400`. Use `border-success` instead.",
+        },
+      ],
     },
     {
-      name: "a raw palette class with an opacity modifier",
+      name: "a neutral hue names the three tokens that can replace it",
       filename: "/repo/apps/web/src/components/badge.tsx",
       code: `const Badge = () => <span className="bg-slate-900/50" />;\n`,
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `bg-slate-900/50`. Use one of the `muted`, `border` or `foreground` token classes instead.",
+        },
+      ],
+    },
+    {
+      name: "a reported hue behind a variant prefix",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const Badge = () => <span className="dark:text-green-400" />;\n`,
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `dark:text-green-400`. Use `text-success` instead.",
+        },
+      ],
+    },
+    {
+      name: "a reported hue inside a cn() argument",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const classes = cn("bg-card", "hover:bg-red-600");\n`,
       errors: [{ messageId: "avoidRawColor" }],
     },
     {
-      name: "a raw palette class inside a cn() argument",
+      name: "a reported hue as a conditional object key in cn()",
       filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const classes = cn("bg-card", "border-emerald-400");\n`,
+      code: `const classes = cn({ "text-red-600": isError });\n`,
       errors: [{ messageId: "avoidRawColor" }],
     },
     {
-      name: "a raw palette class as a conditional object key in cn()",
+      name: "a reported hue in a template literal className",
       filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const classes = cn({ "text-rose-600": isError });\n`,
-      errors: [{ messageId: "avoidRawColor" }],
-    },
-    {
-      name: "a raw palette class in a template literal className",
-      filename: "/repo/apps/web/src/components/badge.tsx",
-      code: "const Badge = () => <span className={`ring-amber-300 ${extra}`} />;\n",
+      code: "const Badge = () => <span className={`ring-emerald-300 ${extra}`} />;\n",
       errors: [{ messageId: "avoidRawColor" }],
     },
     {
@@ -110,6 +153,18 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       code: `const Chart = () => <path className="fill-gray-500" />;\n`,
       options: configuredOptions,
       errors: [{ messageId: "avoidRawColor" }],
+    },
+    {
+      name: "a hue added to the table by an explicit hueTokens option",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const Badge = () => <span className="bg-amber-50" />;\n`,
+      options: [{ hueTokens: { amber: "warning" } }],
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `bg-amber-50`. Use `bg-warning` instead.",
+        },
+      ],
     },
   ],
 });
