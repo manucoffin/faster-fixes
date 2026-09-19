@@ -7056,6 +7056,68 @@ replacement and the widget config still query Prisma inline: #137 owns both and 
 deleted and no `_deprecated_` stub was created; the published widget packages are untouched, so no
 changeset was written.
 
+### The widget API screenshot replacement and widget config behind services (issue #137)
+
+`PUT /api/v1/feedback/:id/screenshot` and `GET /api/v1/widget/config` lose their inline database
+access, the last two widget API handlers to do so. Both follow the agent API template: services
+colocated under the versioned API scope, the HTTP boundary left whole in the route.
+
+| Piece                                                     | Stays in the route | Moved to a service |
+| --------------------------------------------------------- | ------------------ | ------------------ |
+| `x-api-key` → Project, origin, Reviewer token, rate limit | yes                | no                 |
+| the existence check and the overwrite refusal             | no                 | yes                |
+| `req.formData()`, the file check, the type and size gates | yes                | no                 |
+| the bucket write and the Asset record                     | no                 | yes (already)      |
+| `prisma.feedback.update` and the signed URL               | no                 | yes                |
+| the Plan resolution behind the branding flag              | no                 | yes                |
+
+**The screenshot route reuses #136's services rather than writing its own.**
+`get-feedback-awaiting-screenshot.ts` wraps `get-project-feedback.ts` and adds the one rule the
+route had inline: a Feedback that already carries a screenshot is a `ConflictError`, not a
+replacement, because the stored Asset is referenced by that Feedback alone and a second upload would
+orphan it. `widget-error-response.ts` maps both throws, so the published bodies are unchanged:
+`{"error":"Feedback not found"}` at 404 and `{"error":"Screenshot already attached"}` at 409, with
+no `code` field.
+
+**The read stays ahead of the body, as in #136.** Both the existence check and the overwrite refusal
+run before `req.formData()`, which the characterization test of #130 pins ("prefers not found over
+an unreadable body"). Wrapping them in one read keeps that order in a single call.
+
+**The upload itself was already a service.** #135 extracted `create-feedback-screenshot.ts` for the
+submit path and this route duplicated its body, so the duplicate is gone rather than re-extracted:
+same key shape, same bucket, same `createAsset` arguments. The only observable difference is a log
+line the submit path already writes; no response changes.
+
+**`update-feedback-screenshot.ts`, not `attach-`.** Pointing a Feedback at an Asset is a plain field
+write, so the generic CRUD verb wins over a coined domain verb. It reads the signed URL back from
+the row the write returns rather than from its input, which is what keeps the null-asset case
+answering `{"screenshotUrl":null}` instead of failing.
+
+**`get-widget-config.ts` takes the widget config row, it does not re-read it.** The Project
+resolution already includes it, so the service receives `{ organizationId, widgetConfig }` and only
+owns the IO the route cannot do without a database client: the Plan resolution behind the branding
+flag. Plan resolution itself stays in the server folder, where the parent spec leaves Plan
+enforcement. A Project with no widget config row still counts as enabled.
+
+**The characterization tests pass untouched.** `screenshot/route.test.ts` and
+`widget/config/route.test.ts` (#130, #131) mock `@workspace/db`, `@/server/storage`,
+`@/server/storage/create-asset`, `@/server/storage/get-signed-asset-url` and
+`@better-upload/server/helpers`; the services import all five by the same paths, so no mock path
+changed. Every case answers as before: 401, 403 on a refused origin and on an invalid Reviewer
+token, 429, 404, 409, 400 on an unreadable form, a missing file and a rejected image type, 413 above
+5MB, 200 with the signed URL or with `null`, and the config's enabled/branding matrix on and off
+cloud.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (64 files, 413 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` compiles and lists every route,
+the 22 API routes included.
+
+**What is left.** No widget API route handler imports the database client any more, which closes the
+route-handler line of the parent spec for this API. Nothing was deleted and no `_deprecated_` stub
+was created; the published widget packages are untouched, so no changeset was written. The next
+ticket is the lock (#139), which can now assert the widget API against the "no route handler imports
+the database client" check.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -7206,7 +7268,7 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Disconnect: disconnect Slack from `/integrations` and see the Installation and its Project
       links removed, with no further message posted for a new Feedback.
 
-#### Widget (started by #135, rows added by #136)
+#### Widget (started by #135, rows added by #136 and #137)
 
 Walked from a real test page embedding the widget against a real database, before deploy. The
 widget's own build is untouched by this step: an installed widget must not notice the relocation.
@@ -7224,9 +7286,17 @@ widget's own build is untouched by this step: an installed widget must not notic
       `{"error":"Feedback not found"}` and no `code` field, so an installed widget reads the body it
       has always read (row added by #136).
 - [ ] Replace a screenshot: attach a screenshot to a Feedback submitted without one and see it on
-      the Feedback in the inbox (#137).
-- [ ] Widget config: change the widget appearance in the Project settings and see the test page pick
-      it up on reload (#137).
+      the Feedback in the inbox and in the widget list, with the signed URL answered by the upload.
+- [ ] Refuse a second screenshot: upload again on the same Feedback and see `409` with
+      `{"error":"Screenshot already attached"}`, the first image untouched and no second object left
+      in the bucket (row added by #137).
+- [ ] Screenshot on a Feedback of another Project: call `PUT /api/v1/feedback/:id/screenshot` with a
+      Feedback identifier that belongs to a different Project and see `404` with
+      `{"error":"Feedback not found"}` and no upload attempted (row added by #137).
+- [ ] Widget config: turn the widget off in the Project settings and see the test page stop showing
+      it on reload, then turn it back on.
+- [ ] Branding by Plan: on a Plan with white label, reload the test page and see the Faster Fixes
+      branding gone; on the free Plan see it back (row added by #137).
 - [ ] Refuse a foreign origin: submit from a page whose domain is not the Project's registered one
       and see the request refused rather than recorded.
 - [ ] Plan limit: from an Organization already at its Feedback ceiling, submit and see the refusal
