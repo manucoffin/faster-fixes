@@ -6644,6 +6644,68 @@ import by deep path and are what the lint block has to answer for:
 The organization plugin, listed as a third exemption by the parent spec, now reaches the
 `organization` barrel rather than a deep path, so its exemption can be dropped as the spec foresaw.
 
+### The upload route calls a service for its Member lookup (issue #128)
+
+The smallest route of step 5, and the last one outside the widget API. `POST /api/upload` no longer
+queries Prisma inline: the owner or admin Member lookup behind the organization logo upload moves to
+a service, and the route keeps refusing an upload exactly as it did. Neither upload client changes.
+
+**Characterization tests first.** `api/upload/route.test.ts`, nine cases, committed green against
+the current handler in its own commit (`6b1b144`) before a line of the route moved, and not edited
+by the extraction.
+
+| Route             | Pinned paths                                                                                                                                                                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| organization-logo | `400 rejected` with "Unauthorized" signed out, `400 rejected` with the permission sentence for a plain Member, the accepted body with its `organization-logos/<org>/<ts>.<ext>` key, a webp extension, `400 invalid_request` for metadata with no Organization, `400 invalid_file_type` for a gif |
+| user-avatar       | `400 rejected` signed out, the accepted body with its `user-avatars/<user>/<ts>.png` key and no Member lookup at all                                                                                                                                                                              |
+
+**Two doubles the earlier route tests did not need.** The better-upload router is built at module
+load and reads `STORAGE_BUCKET_NAME` there, so the environment is stubbed before the dynamic import
+rather than in `beforeEach`. And the real R2 client would need credentials to sign, so the test fakes
+`@/server/storage` with a signing double (`buildBucketUrl` plus `s3.sign`); the signed URL is only
+read for the object key the route builds, which is the part the route owns.
+
+**What the route delegates now.**
+
+| Operation     | Where it landed                                      | Why                                                   |
+| ------------- | ---------------------------------------------------- | ----------------------------------------------------- |
+| Member lookup | `api/upload/_services/find-uploading-member.ts`, new | the one reason the route imported the database client |
+
+**Placement: the route scope, not the `organization` domain.** The service is colocated under
+`api/upload/`, the pattern the agent API set and the parent spec restates: nothing is promoted to a
+domain without a second consumer, and the upload route is the only caller. It is the sibling of
+`find-installing-member.ts`, which answers the same shape of question for the six OAuth routes, and
+the two are deliberately not merged: one authorizes connecting an Integration, the other authorizes
+writing an object for the Organization, and merging them would make the `integration` domain a
+dependency of the upload route for no gain. If a third caller appears, the pair is the promotion
+candidate, and the `organization` domain is its home.
+
+**Name, decided by running the rules.** `find-` because the lookup is a nullable read, so
+`require-trpc-output-type` then asks for the derived alias and the file exports
+`FindUploadingMemberOutput`. The owner and admin pair is a named constant inside the service,
+`UPLOADING_ROLES`, as `INSTALLING_ROLES` is in its sibling.
+
+**Storage did not move and Asset is still not a glossary term**, per the parent spec. The route keeps
+instantiating nothing: it reads `s3Client` from `@/server/storage`, which is wiring under condition 1
+of the server folder rule, and the bucket name from the environment. The user avatar route was left
+untouched beyond the tests, because it asks the database nothing.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (63 files, 399 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` lists
+every route, `/api/upload` included.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no R2 bucket, so no upload is signed
+and no object is stored. No external system checklist is opened for this ticket: storage is
+infrastructure rather than an Integration, and the exit verification (#140) expects the six lists
+that are already named. The maintainer sees this route through the Organization logo field and the
+account avatar field, which the issue's QA checklist walks.
+
+**What is left for the lock (#140).** After this ticket, the "no route handler under the API tree
+imports the database client" check has four files left, all of them widget API routes that #134 to
+#137 own: `api/v1/feedback/route.ts`, `api/v1/feedback/[id]/route.ts`,
+`api/v1/feedback/[id]/screenshot/route.ts` and `api/v1/widget/config/route.ts`. No `_deprecated_`
+stub was created: nothing was retired, one query moved.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
