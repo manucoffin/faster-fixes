@@ -2,7 +2,6 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { SubscriptionStatus } from "@/app/_domains/subscription";
-import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
 import { Empty, EmptyHeader, EmptyTitle } from "@workspace/ui/components/empty";
@@ -38,19 +37,6 @@ export function BillingDetailsCard({
     ),
   );
 
-  // Determine billing period based on current price ID
-  const determineBillingPeriod = () => {
-    if (!getStripeSubscriptionQuery.data?.currentPriceId) return "monthly";
-
-    const currentPriceId = getStripeSubscriptionQuery.data.currentPriceId;
-    const plan = SUBSCRIPTION_PLANS.find((p) => p.name === planName);
-
-    if (plan?.annualDiscountPriceId === currentPriceId) {
-      return "annual";
-    }
-    return "monthly";
-  };
-
   return matchQueryStatus(getStripePricesQuery, {
     Loading: (
       <div className="flex flex-col rounded-md border p-4">
@@ -81,7 +67,13 @@ export function BillingDetailsCard({
     dataKey: planName,
     Success: ({ data }) => {
       const priceData = data[planName];
-      const billingPeriod = determineBillingPeriod();
+      // The annual price identifier is server configuration, so the billing
+      // period is told from the prices this read returns.
+      const currentPriceId = getStripeSubscriptionQuery.data?.currentPriceId;
+      const billingPeriod =
+        currentPriceId && priceData?.annual?.id === currentPriceId
+          ? "annual"
+          : "monthly";
       const price =
         billingPeriod === "annual" ? priceData?.annual : priceData?.monthly;
 

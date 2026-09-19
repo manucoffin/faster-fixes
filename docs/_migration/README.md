@@ -5402,3 +5402,42 @@ the fix is to move the hook, not to reopen the barrel rule.
 tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
 with dummy environment values lists every route, `/pricing` and the widget and agent API routes
 included.
+
+### The client components read the Plan vocabulary (issue #111)
+
+The third foundation ticket of step 5. No client file imports `SUBSCRIPTION_PLANS` any more, so no
+client code depends on a price identifier that is `undefined` in the browser. The two importers left
+are server-side: the Better Auth Stripe plugin and `subscription/_services/get-plans-prices.ts`.
+
+**Five client files, not four.** The spec counts four; the fifth is
+`subscription/upgrade-subscription/plan-selection.client.tsx`, which sits inside the domain and was
+already flagged as a candidate by issue #110. All five are rewritten.
+
+**`PAID_PLAN_NAMES` is the replacement.** Four of the five read the Stripe list only for "which Plans
+can be subscribed to, in order". That list is `[Pro, Agency]`, which is Plan vocabulary and not Stripe
+configuration, so it is now a constant in `subscription/_helpers/subscription-plans.ts`, exported by
+the barrel next to the rest of the vocabulary. It is the only symbol this ticket adds.
+
+| File                                                          | Read from the Stripe list                       | Now                                                   |
+| ------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| `admin/users/[id]/.../subscription-create-dialog.client.tsx`  | plan options, default value                     | `PAID_PLAN_NAMES`                                     |
+| `admin/users/[id]/.../subscription-edit-dialog.client.tsx`    | plan options, default value                     | `PAID_PLAN_NAMES`                                     |
+| `subscription/upgrade-subscription/plan-selection.client.tsx` | card list, skeleton count, `planNames` argument | `PAID_PLAN_NAMES`                                     |
+| `account/billing/.../current-plan-card.client.tsx`            | `plan?.name \|\| subscription.plan`             | `subscription.plan`                                   |
+| `account/billing/.../billing-details-card.client.tsx`         | `annualDiscountPriceId`                         | the annual `Stripe.Price.id` of the plans-prices read |
+
+The `id: index + 1` the two admin dialogs built over the Stripe list was never read, and the
+`freeTrial?.days` the plan selection passed to `PlanCard` was always `undefined`, because no entry of
+the Stripe list declares `freeTrial`. Both are dropped rather than carried over.
+
+**One visible difference, and it is the point of the ticket.** `billing-details-card` told an annual
+Subscription from a monthly one by comparing the current Stripe price identifier to
+`plan.annualDiscountPriceId`, which is `process.env.PRO_YEARLY_PRICE_ID`. In a client bundle that is
+`undefined`, so the comparison never matched and an annual subscriber was shown "Monthly price" with
+the monthly amount. Reading the identifier from the plans-prices query, as the ticket requires,
+makes the comparison work: an annual subscriber now sees "Annual price" and the annual amount. Worth
+a look during the manual pass on `/account/billing` with a yearly Subscription.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (52 files, 279 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm build` from `apps/web` with dummy environment values
+lists every route.

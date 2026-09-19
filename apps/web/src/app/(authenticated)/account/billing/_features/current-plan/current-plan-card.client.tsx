@@ -4,7 +4,6 @@ import { UpgradeSubscriptionDialog } from "@/app/_domains/subscription/upgrade-s
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { PLAN_FEATURES, SubscriptionStatus } from "@/app/_domains/subscription";
-import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -111,8 +110,6 @@ export function CurrentPlanCard() {
       </Card>
     ),
     Success: ({ data: subscription }) => {
-      const plan = SUBSCRIPTION_PLANS.find((p) => p.name === subscription.plan);
-
       const formatDate = (date: string | Date) =>
         new Date(date).toLocaleDateString("en-US", {
           day: "numeric",
@@ -131,9 +128,7 @@ export function CurrentPlanCard() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl">
                 Subscription{" "}
-                <span className="capitalize">
-                  {plan?.name || subscription.plan}
-                </span>
+                <span className="capitalize">{subscription.plan}</span>
               </CardTitle>
 
               <StatusIndicators

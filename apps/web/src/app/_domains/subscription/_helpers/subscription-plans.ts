@@ -20,6 +20,14 @@ export enum SubscriptionStatus {
   Paused = "paused",
 }
 
+// The Plans a Subscription can be bought on, in display order. Free is the
+// absence of a Subscription, so it is not one of them. The Stripe plan list
+// carries the same Plans plus their environment-bound price identifiers.
+export const PAID_PLAN_NAMES = [
+  SubscriptionPlanName.Pro,
+  SubscriptionPlanName.Agency,
+] as const;
+
 export const PLAN_LIMITS = {
   [SubscriptionPlanName.Free]: {
     projects: 1,

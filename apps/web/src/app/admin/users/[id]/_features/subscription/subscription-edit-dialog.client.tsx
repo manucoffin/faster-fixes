@@ -2,10 +2,10 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import {
+  PAID_PLAN_NAMES,
   SubscriptionPlanName,
   SubscriptionStatus,
 } from "@/app/_domains/subscription";
-import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
@@ -63,11 +63,6 @@ export function SubscriptionEditDialog({
   userId,
   subscription,
 }: SubscriptionEditDialogProps) {
-  const subscriptionPlans = SUBSCRIPTION_PLANS.map((plan, index) => ({
-    id: index + 1,
-    name: plan.name,
-  }));
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -93,9 +88,7 @@ export function SubscriptionEditDialog({
       organizationId: subscription?.organizationId || "",
       // The subscription plan column is a free-form string in the database, so
       // an admin override can carry a value outside the current plan names.
-      plan:
-        (subscription?.plan as SubscriptionPlanName) ||
-        subscriptionPlans[0]?.name,
+      plan: (subscription?.plan as SubscriptionPlanName) || PAID_PLAN_NAMES[0],
       status:
         (subscription?.status as SubscriptionStatus) ||
         SubscriptionStatus.Active,
@@ -208,9 +201,9 @@ export function SubscriptionEditDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {subscriptionPlans.map((plan) => (
-                        <SelectItem key={plan.name} value={plan.name}>
-                          {plan.name}
+                      {PAID_PLAN_NAMES.map((planName) => (
+                        <SelectItem key={planName} value={planName}>
+                          {planName}
                         </SelectItem>
                       ))}
                     </SelectContent>

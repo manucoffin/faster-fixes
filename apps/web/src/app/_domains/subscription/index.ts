@@ -2,6 +2,7 @@
 export { usePlanGate } from "./plan-gate/use-plan-gate";
 export {
   AGENT_API_RATE_LIMITS,
+  PAID_PLAN_NAMES,
   PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
   PLAN_LIMITS,

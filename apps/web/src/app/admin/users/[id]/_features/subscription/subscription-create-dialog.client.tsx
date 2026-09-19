@@ -2,10 +2,9 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import {
-  SubscriptionPlanName,
+  PAID_PLAN_NAMES,
   SubscriptionStatus,
 } from "@/app/_domains/subscription";
-import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
@@ -60,11 +59,6 @@ interface SubscriptionCreateDialogProps {
 export function SubscriptionCreateDialog({
   userId,
 }: SubscriptionCreateDialogProps) {
-  const subscriptionPlans = SUBSCRIPTION_PLANS.map((plan, index) => ({
-    id: index + 1,
-    name: plan.name,
-  }));
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -88,7 +82,7 @@ export function SubscriptionCreateDialog({
     resolver: zodResolver(CreateSubscriptionSchema),
     defaultValues: {
       organizationId: "",
-      plan: subscriptionPlans[0]?.name as SubscriptionPlanName,
+      plan: PAID_PLAN_NAMES[0],
       status: SubscriptionStatus.Active,
       periodStart: undefined,
       periodEnd: undefined,
@@ -158,9 +152,9 @@ export function SubscriptionCreateDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {subscriptionPlans.map((plan) => (
-                          <SelectItem key={plan.name} value={plan.name}>
-                            {plan.name}
+                        {PAID_PLAN_NAMES.map((planName) => (
+                          <SelectItem key={planName} value={planName}>
+                            {planName}
                           </SelectItem>
                         ))}
                       </SelectContent>

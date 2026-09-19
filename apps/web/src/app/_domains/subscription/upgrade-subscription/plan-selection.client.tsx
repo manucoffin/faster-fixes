@@ -3,11 +3,11 @@
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  PAID_PLAN_NAMES,
   PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
   SubscriptionPlanName,
 } from "../_helpers/subscription-plans";
-import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
@@ -31,7 +31,7 @@ export function PlanSelection() {
 
   const stripePricesQuery = useQuery(
     trpc.subscription.getPlansPrices.queryOptions({
-      planNames: SUBSCRIPTION_PLANS.map((p) => p.name),
+      planNames: [...PAID_PLAN_NAMES],
     }),
   );
 
@@ -75,8 +75,8 @@ export function PlanSelection() {
       {matchQueryStatus(stripePricesQuery, {
         Loading: (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {Array.from({ length: SUBSCRIPTION_PLANS.length }).map((_, i) => (
-              <Skeleton key={i} className="h-96" />
+            {PAID_PLAN_NAMES.map((planName) => (
+              <Skeleton key={planName} className="h-96" />
             ))}
           </div>
         ),
@@ -103,37 +103,31 @@ export function PlanSelection() {
         Success: ({ data: stripePrices }) => {
           return (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {SUBSCRIPTION_PLANS.map((plan) => {
-                const priceData = stripePrices[plan.name];
+              {PAID_PLAN_NAMES.map((planName) => {
+                const priceData = stripePrices[planName];
                 const selectedPrice = isAnnual
                   ? priceData?.annual
                   : priceData?.monthly;
-                const features =
-                  PLAN_FEATURES[plan.name as keyof typeof PLAN_FEATURES] || [];
-                const isHighlighted = plan.name === SubscriptionPlanName.Pro;
+                const features = PLAN_FEATURES[planName];
+                const isHighlighted = planName === SubscriptionPlanName.Pro;
 
                 const price = selectedPrice
                   ? selectedPrice.unit_amount! / 100
                   : 0;
 
-                const freeTrialDays = plan.freeTrial?.days;
-
                 return (
                   <PlanCard
-                    key={plan.name}
-                    title={plan.name}
-                    description={
-                      PLAN_DESCRIPTIONS[plan.name as SubscriptionPlanName]
-                    }
+                    key={planName}
+                    title={planName}
+                    description={PLAN_DESCRIPTIONS[planName]}
                     price={price}
-                    freeTrialDays={freeTrialDays}
                     badge={isHighlighted ? "Most popular" : undefined}
                     features={features}
                     variant={isHighlighted ? "highlighted" : "default"}
                     isAnnual={isAnnual}
                   >
                     <Button
-                      onClick={() => handleUpgrade(plan.name)}
+                      onClick={() => handleUpgrade(planName)}
                       disabled={upgradePlanMutation.isPending}
                       className="w-full"
                       variant={isHighlighted ? "default" : "secondary"}
@@ -147,7 +141,7 @@ export function PlanSelection() {
                         <span>
                           Choose{" "}
                           <span className="font-semibold capitalize">
-                            {plan.name}
+                            {planName}
                           </span>
                         </span>
                       )}
