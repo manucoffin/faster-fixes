@@ -12,6 +12,7 @@ import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { listFeedbacks } from "./_services/list-feedbacks";
 
 const ConsoleEntrySchema = z.object({
   level: z.enum(["log", "info", "warn", "error", "debug"]),
@@ -290,37 +291,10 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const url = searchParams.get("url");
 
-  const feedbackList = await prisma.feedback.findMany({
-    where: {
-      projectId: project.id,
-      ...(url ? { pageUrl: url } : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    // Keep the heavy Diagnostic Trail out of the widget's hot read path.
-    omit: { diagnosticTrail: true },
-    include: {
-      reviewer: { select: { id: true, name: true } },
-      screenshot: { select: { key: true, provider: true, bucket: true } },
-    },
+  const feedback = await listFeedbacks({
+    projectId: project.id,
+    pageUrl: url ?? undefined,
   });
-
-  const feedback = await Promise.all(
-    feedbackList.map(async (f) => ({
-      id: f.id,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      selector: f.selector,
-      screenshotUrl: f.screenshot
-        ? await getSignedAssetUrl(f.screenshot)
-        : null,
-      metadata: f.metadata,
-      reviewer: f.reviewer,
-      createdAt: f.createdAt,
-    })),
-  );
 
   return NextResponse.json({ feedback });
 }

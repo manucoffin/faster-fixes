@@ -6868,6 +6868,56 @@ directly; #134 to #137 own that. ADR 0005 (widget identity) still names `resolve
 `validate-origin.ts`: it records a decision taken when those were the names, and the
 permanent-document alignment (#138) decides whether to repoint it.
 
+### The widget API list read behind a service (issue #134)
+
+`GET /api/v1/feedback` is the first of the four widget API routes to lose its inline database
+access. The read moves whole to
+`app/api/v1/feedback/_services/list-feedbacks.ts`, colocated under the versioned API scope, as the
+agent API template asks. The handler keeps the whole HTTP boundary: Project resolution, the Allowed
+origins match, the Reviewer token check, the rate limit and the `{ feedback }` envelope.
+
+| Piece                                                     | Stays in the route | Moved to the service |
+| --------------------------------------------------------- | ------------------ | -------------------- |
+| `x-api-key` → Project, origin, Reviewer token, rate limit | yes                | no                   |
+| `url` query parameter read from `req.nextUrl`             | yes                | no                   |
+| `prisma.feedback.findMany` and its `omit`/`include`       | no                 | yes                  |
+| the signed screenshot URL and the item mapping            | no                 | yes                  |
+| the `{ feedback }` JSON envelope                          | yes                | no                   |
+
+**Name decided by running the rules.** The read is a collection with an options object, so it is
+`list-`, and `require-trpc-output-type` then asks for the derived alias: the file exports
+`ListFeedbacksOutput`. It shares its name with the agent API's `list-feedbacks.ts` and does not share
+its shape: the agent list resolves a Project from an Agent token's Organization, returns the
+Diagnostic Trail and a flat `reviewerName`, while the widget list omits the trail, nests
+`reviewer: { id, name }` and never resolves anything. Two scopes, two reads, no merge, per the
+second-consumer gate.
+
+**Input, not the request.** The service takes `{ projectId, pageUrl }`, not the `NextRequest`, so it
+stays transport-agnostic: the route turns a missing `url` parameter into an absent `pageUrl` and the
+service spreads it into the `where` exactly as the handler did, which keeps the `findMany` argument
+the characterization test pins byte for byte.
+
+**No domain error mapping added.** The template's `domainErrorResponse` wrapper is not in this route:
+the read throws no `DomainError` (the Project is already resolved, an empty list is a valid answer),
+and a try/catch that can only rethrow is dead code posing as a guarantee. #135 adds the mapping with
+the first service that throws.
+
+**The characterization tests pass untouched.** `route.test.ts` (#129) mocks `@workspace/db`,
+`@/server/storage/get-signed-asset-url` and Inngest, all of which the service imports by the same
+path, so not even a mock path changed. The seven `GET` cases answer as before: 401 on an unknown
+Project, 403 on a refused origin, a missing origin and an invalid Reviewer token, 429 when rate
+limited, `{ feedback: [] }` on an empty Project, the mapped item with its signed screenshot URL, and
+the `pageUrl` narrowing.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (64 files, 413 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` compiles and lists every route,
+the 22 API routes included.
+
+**What is left.** `route.ts` still imports `prisma`, `s3Client`, `createAsset` and `putObject` for
+`POST`: #135 owns the submit path and removes the last database import from this file. The two other
+widget API routes (#136, #137) are untouched. No `_deprecated_` stub was created and nothing was
+deleted.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
