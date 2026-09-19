@@ -31,11 +31,11 @@ import { StatusIndicators } from "./status-indicators.client";
 export function CurrentPlanCard() {
   const trpc = useTRPC();
 
-  const getActiveSubscriptionQuery = useQuery(
+  const getOrganizationSubscriptionQuery = useQuery(
     trpc.authenticated.account.billing.subscription.get.queryOptions(),
   );
 
-  return matchQueryStatus(getActiveSubscriptionQuery, {
+  return matchQueryStatus(getOrganizationSubscriptionQuery, {
     Loading: (
       <Card>
         <CardHeader>

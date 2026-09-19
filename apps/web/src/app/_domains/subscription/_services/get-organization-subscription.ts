@@ -1,7 +1,11 @@
 import { auth } from "@/server/auth";
 import { SubscriptionStatus } from "../_helpers/subscription-plans";
 
-export async function getActiveSubscription({ headers }: { headers: Headers }) {
+export async function getOrganizationSubscription({
+  headers,
+}: {
+  headers: Headers;
+}) {
   const activeOrganization = await auth.api.getFullOrganization({ headers });
 
   if (!activeOrganization) return null;
@@ -14,7 +18,8 @@ export async function getActiveSubscription({ headers }: { headers: Headers }) {
       headers,
     });
 
-    // get the active subscription
+    // The Organization's Subscription is the one Stripe reports as active or
+    // trialing; any other status reads as no Subscription.
     const activeSubscription = subscriptions.find(
       (sub) =>
         sub.status === SubscriptionStatus.Active ||
@@ -28,6 +33,6 @@ export async function getActiveSubscription({ headers }: { headers: Headers }) {
   }
 }
 
-export type GetActiveSubscriptionOutput = Awaited<
-  ReturnType<typeof getActiveSubscription>
+export type GetOrganizationSubscriptionOutput = Awaited<
+  ReturnType<typeof getOrganizationSubscription>
 >;

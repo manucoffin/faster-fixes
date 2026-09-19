@@ -1,4 +1,4 @@
-import { getActiveSubscription } from "@/app/_domains/subscription/_services/get-active-subscription";
+import { getOrganizationSubscription } from "@/app/_domains/subscription/_services/get-organization-subscription";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
 import { createBillingPortal } from "./billing/_services/create-billing-portal";
@@ -58,10 +58,10 @@ export const accountRouter = router({
   }),
   billing: router({
     subscription: router({
-      // The active Subscription is read from the Subscription domain: the
-      // billing segment displays it, it does not own it.
+      // The Organization's Subscription is read from the Subscription domain:
+      // the billing segment displays it, it does not own it.
       get: protectedProcedure.query(async () =>
-        getActiveSubscription({ headers: await headers() }),
+        getOrganizationSubscription({ headers: await headers() }),
       ),
       getStatus: protectedProcedure.query(async () =>
         getSubscriptionStatus({ headers: await headers() }),
