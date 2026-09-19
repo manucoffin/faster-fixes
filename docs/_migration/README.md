@@ -1457,6 +1457,78 @@ under issue #88.
 of it: the boundary files (#99 to #101), the `matchQueryStatus` sweep (#102, #103), the colour fixes
 (#105), then the documentation (#106) and the final lock (#107).
 
+### A render error shows a screen, at the root and inside the dashboard (issue #99)
+
+Decision 14, first half, and the start of the boundary track, which runs beside the closed chain.
+`src/app/error.tsx` and `src/app/(authenticated)/error.tsx` exist and both render one
+`ErrorScreen`, so a render crash no longer shows the framework default.
+
+**The screen.** `_components/error-screen.tsx` is a presentational component at the root, where
+domain-agnostic UI belongs: it takes a `title`, a `description` and its actions as children, and
+carries no `"use client"` directive and no handler of its own. That is what lets the three server
+boundaries of #101 render it as well as the two client boundaries here. Its copy lives in
+`_constants/error-screens.ts`: root `_constants/` is the module home for domain-agnostic constants,
+so the copy sits in the folder beside `_components/` rather than inside it, and root `_components/`
+stays pure UI as `rules/architecture.md` requires. The three remaining boundaries add their own
+consts to the same module.
+
+**Two boundaries, one copy.** `ERROR_BOUNDARY_COPY` is `Something went wrong` /
+`An unexpected error occurred. Try again, or contact support if the problem persists.` with a
+`Try again` button, shared by both files and reused by `global-error.tsx` in #100. No support
+address is rendered: `SUPPORT_EMAIL` in `_constants/app.ts` is still `support@domain.com`, and the
+sentence points at support without naming a dead mailbox.
+
+**Why two files rather than one.** `error.tsx` at the app root replaces every nested layout under
+it, so a crash in the dashboard would otherwise take the sidebar and the header with it and leave a
+user with nothing to click but reload. `(authenticated)/error.tsx` sits inside the authenticated
+layout's `<main>`, so the shell survives and navigation is still there. The root file carries the
+`<main>` landmark itself, for the same reason: no layout is left to provide one.
+
+**`retry`, not `reset`.** Next 16.3.5 passes `error`, `reset` and `retry` to an error component
+(`next/dist/client/components/error-boundary.js`), and its own reference makes `retry()` the
+default choice: it re-fetches and re-renders the boundary's children, where `reset()` only clears
+the error state. The button calls `retry()`.
+
+**Nothing of the error reaches the screen.** Each boundary logs the error object in a `useEffect`
+and renders fixed copy. The props type is `{ error: Error; retry: () => void }`: `digest` is not
+declared, so the "raw messages in boundaries" check of the final lock finds no occurrence of
+`error.message` or `digest` outside a comment in either file. The two logging lines are prefixed
+(`Root render error`, `Authenticated render error`) so the server and browser output says which
+boundary caught the throw.
+
+**Tests.** None, as the step 4 plan records: the repo's vitest harness is `environment: node` with
+no testing-library, and rendering is verified by hand. The build is the automated evidence that the
+files compile and ship: the copy appears in a client chunk and in the SSR chunk of the production
+build.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `error.message` or `digest` in a boundary  | none, one explanatory comment per file aside                     |
+| Boundary files present                     | `error.tsx`, `(authenticated)/error.tsx`, `unauthorized.tsx`     |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (201 web tests, zero warnings)                              |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105, unchanged) |
+| `pnpm --filter web build`                  | every route listed, boundary copy in the client and SSR chunks   |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (`pnpm dev`, both themes):
+
+- [ ] Force a render crash in a public page component (`throw new Error("boom")` in the body of a
+      `(public)` page): the screen reads `Something went wrong` with the sentence above and a
+      `Try again` button, and no stack, message or digest is on screen.
+- [ ] `Try again` on that screen re-renders the page: remove the throw, click the button, the page
+      comes back without a reload.
+- [ ] Force the same crash in an authenticated page (for instance the inbox page component): the
+      sidebar and the header are still there, the breadcrumb bar is still usable, and a sidebar link
+      navigates away from the error.
+- [ ] The browser console carries `Root render error` in the first case and
+      `Authenticated render error` in the second, with the raw error after it.
+- [ ] Both screens are readable in light and dark mode, and the title, the sentence and the button
+      stay centred at a narrow viewport.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
