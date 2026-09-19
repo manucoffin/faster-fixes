@@ -1529,6 +1529,69 @@ under issue #88.
 - [ ] Both screens are readable in light and dark mode, and the title, the sentence and the button
       stay centred at a narrow viewport.
 
+### A root layout failure renders a full styled document (issue #100)
+
+Decision 14 again, for the one boundary that cannot rely on anything above it. `src/app/global-error.tsx`
+replaces the root layout when the layout itself throws, so the file declares everything the layout
+would have provided and renders the same `ErrorScreen` as `error.tsx`.
+
+**What the file declares.** Its own `<html>` and `<body>`, `@workspace/ui/globals.css`, the two
+`next/font/google` families with the `--font-sans` and `--font-mono` variables the theme reads, and a
+`next-themes` `ThemeProvider` configured exactly as the root layout's. Without the font variables
+`font-sans` resolves to an empty custom property, and without the provider the `.dark` class never
+reaches the document: `globals.css` drives dark mode off that class (`@custom-variant dark`), not off
+`prefers-color-scheme`. Reusing the provider rather than hand-rolling a theme script keeps one
+implementation of the resolution.
+
+**No `metadata` export.** A boundary is a Client Component, so Next 16.3.5 supports no `metadata` or
+`generateMetadata` here. The title comes from a plain React `<title>` element carrying
+`ERROR_BOUNDARY_COPY.title`, as `rules/errors.md` prescribes.
+
+**Copy and logging.** `ERROR_BOUNDARY_COPY` from `_constants/error-screens.ts`, unchanged, with the
+`Try again` button calling `retry()`. The props type is `{ error: Error; retry: () => void }`, so
+`digest` is not even declared, and the raw error is read once, in the `useEffect` that logs
+`Global render error`. The "raw messages in boundaries" check of the final lock still finds nothing
+outside the explanatory comment.
+
+**Where the screen appears, and where it does not.** A root layout failure is served as Next's
+minimal `__next_error__` document with a 500 status; the boundary is a Client Component, so the
+screen paints after hydration rather than in the SSR HTML. `curl` therefore shows the framework
+shell, and the check below is that the response ships the chunk holding this boundary. The visible
+result is a browser check, which is why the smoke checklist asks for one.
+
+**Tests.** None, for the reason recorded under issue #99: the vitest harness is `environment: node`
+with no testing-library. The evidence is the build plus the forced-failure run below.
+
+**Checks at this commit.**
+
+| Check                                         | Result                                                                           |
+| --------------------------------------------- | -------------------------------------------------------------------------------- |
+| `error.message` or `digest` in the boundary   | none, one explanatory comment aside                                              |
+| Boundary files present                        | `error.tsx`, `global-error.tsx`, `(authenticated)/error.tsx`, `unauthorized.tsx` |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint`    | pass (201 web tests, zero warnings)                                              |
+| `pnpm lint:agent-rules`                       | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105, unchanged)                 |
+| `pnpm --filter web build`                     | every route listed, `_global-error` prerendered, copy in the client chunk        |
+| Forced root layout failure, production server | `/login` answers 500 and the response ships the global boundary chunk            |
+
+The forced failure was run by guarding a `throw` in `RootLayout` behind an environment variable,
+building without it and starting the server with it set: an unconditional throw fails static
+generation and the build never completes. The guard was removed before the commit. The build was
+again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded under issue
+#88.
+
+**Smoke checklist for the maintainer** (a production build, both themes):
+
+- [ ] Add `throw new Error("boom")` to the body of `src/app/layout.tsx`, run `pnpm --filter web dev`
+      and open any page: after the dev overlay is dismissed, the page reads `Something went wrong`
+      with the root boundary's sentence and a `Try again` button, on the product background and in
+      the product font.
+- [ ] The same page in dark mode stays dark: the document the boundary renders picks up the theme
+      chosen in the app, not the browser default.
+- [ ] No stack, error message or digest is on screen; the browser console carries
+      `Global render error` followed by the raw error.
+- [ ] The tab title reads `Something went wrong`.
+- [ ] Remove the throw: the app renders normally again, and no other boundary changed.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
