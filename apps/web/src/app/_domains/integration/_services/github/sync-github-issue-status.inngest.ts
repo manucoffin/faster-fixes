@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 

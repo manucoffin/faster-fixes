@@ -5441,3 +5441,133 @@ a look during the manual pass on `/account/billing` with a yearly Subscription.
 **Gate.** `pnpm typecheck`, `pnpm test` (52 files, 279 web tests), `pnpm lint` and
 `pnpm lint:agent-rules` all pass at zero. `pnpm build` from `apps/web` with dummy environment values
 lists every route.
+
+### The `integration` domain, GitHub pilot part 1 (issue #113)
+
+The first relocation ticket of step 5, and the one that fixes the pattern the Linear (#116), Jira
+(#120) and Slack (#125) tickets copy. `_domains/integration/` is created per ADR 0014 and receives
+the three GitHub files of the server folder and the three GitHub durable functions. No behaviour
+changed: every edit in the six moved files is an import path.
+
+**Files moved.** Six modules with `git mv`, plus the domain barrel. No file dissolved, so this ticket
+leaves no `_deprecated_` stub.
+
+| Before                                             | After                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `server/github/github-app.ts`                      | `_domains/integration/_services/github/github-app.ts`                             |
+| `server/github/format-issue-body.ts`               | `_domains/integration/_helpers/github/format-issue-body.ts`                       |
+| `server/github/verify-webhook.ts`                  | `_domains/integration/_helpers/github/verify-webhook-signature.ts`                |
+| `server/inngest/create-github-issue.ts`            | `_domains/integration/_services/github/create-github-issue.inngest.ts`            |
+| `server/inngest/sync-github-issue-status.ts`       | `_domains/integration/_services/github/sync-github-issue-status.inngest.ts`       |
+| `server/inngest/sync-feedback-status-to-github.ts` | `_domains/integration/_services/github/sync-feedback-status-to-github.inngest.ts` |
+
+`src/server/github/` is gone. `src/server/inngest/` keeps the client and the fourteen functions the
+later tickets own.
+
+#### The pattern the next providers copy
+
+**Buckets, sub-structured by provider.** `_services/github/` and `_helpers/github/`. No category
+level (Tracker, Notification channel) appears in the tree, and no file sits at a bucket root yet: the
+first shared file is the OAuth state cookie Linear brings in #116. Bucket choice followed the
+existing rule and needed no judgement call: the GitHub App client does IO (it builds an authenticated
+Octokit) and is a service; issue body formatting and webhook signature verification are pure and are
+helpers.
+
+**Durable function files.** `<function-name>.inngest.ts` inside the services bucket, one file per
+function, exporting the same symbol as before. `.inngest.ts` is already exempt from
+`services-verb-prefix` and from `require-trpc-output-type`, so the suffix is not decoration: it is
+what tells the two rules the file is a job and not a read. `services-no-bare-error` still applies to
+it. The three functions kept their identifier (`create-github-issue`, `sync-github-issue-status`,
+`sync-feedback-status-to-github`), their triggers, their concurrency keys and their retries; the
+registration route imports each by deep path and still registers seventeen functions.
+
+**Renames, decided by running the rules, not in advance.** One rename in six files:
+`verify-webhook.ts` became `verify-webhook-signature.ts`, so the helper is named after its export.
+`github-app.ts` **keeps its noun name inside `_services/`**, and this is the correction worth
+carrying: `services-verb-prefix` only checks the `<token>-` shape of the basename, so `github-`
+satisfies it, and `require-trpc-output-type` only fires on the closed read-verb set, which
+`github-app` is not in. Running the rules on the file therefore reports nothing, which is the test
+the spec sets for an SDK client module ("keeps a noun name only if the verb-prefix rule allows it").
+`linear-client.ts`, `jira-client.ts`, `jira-rest-client.ts` and `slack-client.ts` clear the same bar,
+so the following tickets should move them under their noun name rather than invent a `get-` name. A
+file whose basename has no dash at all (`crypto.ts`, `errors.ts`) does **not** clear it and must be
+renamed when it lands in a services bucket.
+
+**Error classes: none created here, by design.** The GitHub files contain no `throw new Error(` and
+no throw at all, so the pilot had no bare error site to convert and creating an unused request or
+configuration class would be dead code. The shape the next ticket creates on its first real site:
+a plain `Error` subclass per provider for an upstream failure (`LinearRequestError`, following the
+existing `JiraRequestError`), and **one** shared configuration error class at the services bucket
+root for a missing environment value or an impossible configuration, since every provider needs the
+same one. Neither is a `DomainError`: they keep surfacing as a masked 500 at a transport and keep
+default retries in a durable function (ADR 0012). Linear (#116) creates both.
+
+**Intra-domain imports are relative, cross-domain imports go through the barrel.** The durable
+functions reach the client with `./github-app` and the formatter with
+`../../_helpers/github/format-issue-body`, following the `_domains/*/` precedent. The formatter
+reaches the Feedback domain through `@/app/_domains/feedback`, the export #109 added, so
+`no-cross-domain-deep-import` has nothing to report on a domain file that formats a Feedback.
+
+**The barrel is empty.** `_domains/integration/index.ts` is `export {}` with a comment: no other
+domain imports the integration domain, and route scopes and route handlers reach its services by deep
+path, exactly as they do for every other domain. Do not publish a service through it.
+
+**Two temporary inverted imports, created on purpose.** `server/inngest/create-linear-issue.ts` and
+`server/jira/format-issue-adf.ts` both reuse the GitHub formatter, so until #116 and #120 move them
+they read `@/app/_domains/integration/_helpers/github/format-issue-body` from the server folder. That
+is two more `src/server` → app-tree deep imports than the three #109 left, and they disappear with
+their own files; the lint lock (#139) lands after both. Once Jira moves, that import becomes the
+intra-domain one #120 asks for.
+
+**Consumers rewritten.** Six files, import paths only: the registration route
+(`api/inngest/route.ts`, three imports), the GitHub setup route, the GitHub webhook route, the
+Project settings repo list service and its test (mock path only), plus the two server-folder files
+above. The locked `(authenticated)/(project)` scope changed one import line and its test changed one
+`vi.mock` path, which is the whole of what a locked scope is allowed to change.
+
+**Still owned by the following tickets.** The setup route still queries Prisma inline for the Member
+check (#115) and the webhook route still owns deduplication, the Installation lookup and the event
+emission (#114). This ticket is the relocation only.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (52 files, 279 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web` with dummy environment
+values lists every route, `/api/github/setup`, `/api/webhooks/github` and `/api/inngest` included.
+
+**Smoke, walked on 2026-09-19 against `next dev` on port 3111 with dummy environment values:**
+
+| Check                                                                     | Result                                                                        |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `GET /api/inngest`                                                        | `200`, `"function_count":17`, so every relocated function is still registered |
+| `POST /api/webhooks/github` with a wrong signature                        | `401 {"error":"Invalid signature"}`, unchanged                                |
+| `POST /api/webhooks/github` with a valid signature and an unhandled event | `200 {"ok":true}`, unchanged                                                  |
+| `POST /api/webhooks/github` with a valid signature and an unparsable body | `400`, unchanged                                                              |
+| `GET /api/github/setup` with no `installation_id`                         | `307` to `/integrations?error=missing_installation_id`, unchanged             |
+| `GET /api/github/setup?installation_id=42` signed out                     | `307` to `/login?nextUrl=…/api/github/setup?installation_id=42…`, unchanged   |
+| `GET …authenticated.projects.github.getLink`, `github.listRepos`          | `401 UNAUTHORIZED`, both keys of the locked scope still resolve               |
+
+**Not smoked here, and why.** The sandbox has no Postgres and no GitHub App, so nothing past the
+signature check and the session check runs. The checklist below is for the maintainer.
+
+### Step 5 smoke checklists, one per external system
+
+Grouped per external system rather than per ticket, so the maintainer walks each system once against
+a real database rather than once per relocation. **Amend this entry in place**: a later ticket that
+touches a system adds its rows here instead of starting a second checklist. Six lists are expected by
+the exit verification (#140): GitHub, Linear, Jira, Slack, the widget, and the MCP server against the
+agent API. Only the systems a landed ticket has touched appear below.
+
+#### GitHub (started by #113, rows added by #114 and #115)
+
+- [ ] Connect: install the GitHub App from `/integrations/github` and land back on `/integrations`
+      with the Installation listed.
+- [ ] Link a Project: pick a repository in the Project settings, save, reload, and see the link with
+      its default labels.
+- [ ] Mirror a Feedback: submit a Feedback on a linked Project and see the issue created in the
+      repository, with the comment, the page link, the screenshot and the diagnostics block.
+- [ ] Status app to GitHub: move the Feedback to Resolved in the inbox and see the issue close as
+      completed; move it to Closed and see `not planned`.
+- [ ] Status GitHub to app: close and reopen the issue in GitHub and see the Feedback status follow
+      (Resolved, then In progress).
+- [ ] Receive a webhook: confirm in the GitHub App delivery log that `issues` and `installation`
+      deliveries answer `200`, and that a replayed delivery answers `200` with the skipped marker.
+- [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.

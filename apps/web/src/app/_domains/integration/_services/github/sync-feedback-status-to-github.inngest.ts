@@ -1,6 +1,6 @@
-import { getInstallationOctokit } from "@/server/github/github-app";
+import { getInstallationOctokit } from "./github-app";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -65,16 +65,13 @@ export const syncFeedbackStatusToGitHub = inngest.createFunction(
       return { skipped: "state_unchanged" };
     }
 
-    await octokit.request(
-      "PATCH /repos/{owner}/{repo}/issues/{issue_number}",
-      {
-        owner: repoOwner,
-        repo: repoName,
-        issue_number: issueLink.issueNumber,
-        state: newIssueState,
-        ...(stateReason && { state_reason: stateReason }),
-      },
-    );
+    await octokit.request("PATCH /repos/{owner}/{repo}/issues/{issue_number}", {
+      owner: repoOwner,
+      repo: repoName,
+      issue_number: issueLink.issueNumber,
+      state: newIssueState,
+      ...(stateReason && { state_reason: stateReason }),
+    });
 
     await prisma.feedbackIssueLink.update({
       where: { id: issueLink.id },

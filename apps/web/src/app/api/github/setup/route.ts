@@ -1,5 +1,5 @@
 import { auth } from "@/server/auth";
-import { getAppOctokit } from "@/server/github/github-app";
+import { getAppOctokit } from "@/app/_domains/integration/_services/github/github-app";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 

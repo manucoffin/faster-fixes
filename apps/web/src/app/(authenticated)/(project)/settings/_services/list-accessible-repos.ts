@@ -1,6 +1,6 @@
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
-import { getInstallationOctokit } from "@/server/github/github-app";
+import { getInstallationOctokit } from "@/app/_domains/integration/_services/github/github-app";
 import { prisma } from "@workspace/db";
 
 export async function listAccessibleRepos(

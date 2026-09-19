@@ -1,5 +1,5 @@
 import { inngest } from "@/server/inngest";
-import { verifyWebhookSignature } from "@/server/github/verify-webhook";
+import { verifyWebhookSignature } from "@/app/_domains/integration/_helpers/github/verify-webhook-signature";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,7 +17,10 @@ export async function POST(req: NextRequest) {
   try {
     payload = JSON.parse(rawBody);
   } catch {
-    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 },
+    );
   }
 
   // Replay protection: reject duplicate deliveries

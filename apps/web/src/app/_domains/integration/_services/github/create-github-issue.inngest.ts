@@ -1,12 +1,12 @@
 import {
   formatIssueBody,
   formatIssueTitle,
-} from "@/server/github/format-issue-body";
-import { getInstallationOctokit } from "@/server/github/github-app";
+} from "../../_helpers/github/format-issue-body";
+import { getInstallationOctokit } from "./github-app";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const createGitHubIssue = inngest.createFunction(
   {

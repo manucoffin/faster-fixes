@@ -1,9 +1,9 @@
 // Atlassian Document Format body for a mirrored Feedback. Mirrors the sections of
-// the Markdown formatter in server/github/format-issue-body.ts, but ADF is a
-// structured JSON tree — Jira's v3 API rejects Markdown — so the two cannot share
-// a renderer. Keep the section order in sync when either side changes.
+// the Markdown formatter of the integration domain (github/format-issue-body),
+// but ADF is a structured JSON tree — Jira's v3 API rejects Markdown — so the
+// two cannot share a renderer. Keep the section order in sync when either side changes.
 
-import { formatIssueTitle } from "@/server/github/format-issue-body";
+import { formatIssueTitle } from "@/app/_domains/integration/_helpers/github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 
 type AdfMark =
@@ -182,9 +182,7 @@ function buildEnvironmentExpand(
   return { type: "expand", attrs: { title: "Environment" }, content: body };
 }
 
-function buildDiagnosticsExpand(
-  trail: DiagnosticTrail | null,
-): AdfNode | null {
+function buildDiagnosticsExpand(trail: DiagnosticTrail | null): AdfNode | null {
   const consoleEntries = trail?.console ?? [];
   const networkEntries = trail?.network ?? [];
   if (consoleEntries.length === 0 && networkEntries.length === 0) return null;

@@ -9,7 +9,7 @@ vi.mock("@/server/auth", () => ({
 
 // The GitHub App client reads its credentials at import time, and no case here
 // reaches the Octokit call.
-vi.mock("@/server/github/github-app", () => ({
+vi.mock("@/app/_domains/integration/_services/github/github-app", () => ({
   getInstallationOctokit: vi.fn(),
 }));
 

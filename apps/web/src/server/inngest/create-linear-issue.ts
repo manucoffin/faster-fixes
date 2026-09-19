@@ -1,7 +1,7 @@
 import {
   formatIssueBody,
   formatIssueTitle,
-} from "@/server/github/format-issue-body";
+} from "@/app/_domains/integration/_helpers/github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { decryptToken } from "@/server/linear/crypto";
 import { getLinearClient } from "@/server/linear/linear-client";
