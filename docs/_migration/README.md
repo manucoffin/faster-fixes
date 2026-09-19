@@ -1316,6 +1316,71 @@ No smoke checklist: the ticket changes lint configuration only, and no shipped b
 and sweeps `src/server/**`". The sweep is deferred to step 5 by decision 3, so the sentence is
 corrected with the rest of the note in #106.
 
+### Every tRPC failure is logged with its cause chain (issue #97)
+
+Decision 13, first half. Masking the message of an `INTERNAL_SERVER_ERROR` (#98) is only safe once
+the original failure is written server-side, so the logging lands first, on its own commit. Nothing
+a client observes changes: the hook returns `void` and runs after the response shape is decided.
+
+**One exported function, not an inline arrow.** `src/server/trpc/log-trpc-error.ts` exports
+`logTRPCError`, and `app/api/trpc/[trpc]/route.ts` passes it as the `onError` of
+`fetchRequestHandler`. The route file is otherwise untouched. Exporting it is what makes the logged
+shape verifiable: the test drives the same function tRPC calls in production, rather than asserting
+on a copy of it.
+
+**What one failure writes.** A single `console.error` call, with a prefix line naming the procedure
+(`tRPC <type> <path> failed with <code>`, `<unknown path>` when tRPC has no path, as on a malformed
+request), then the `TRPCError` itself, then every link of its `cause` chain as a separate argument.
+The chain matters because the reason is rarely the top error: a service's `DomainError` arrives
+wrapped by the base procedure's mapping middleware, and a Jira failure wraps the Atlassian error in
+turn. The walk stops on a cause that has already been seen, so a chain pointing back at itself
+cannot hang a request.
+
+**No logger, no provider.** `console.error` only, as decision 13 requires. No `instrumentation.ts`,
+no monitoring SDK, no log formatting library: `grep -rn "instrumentation" apps/web/src` returns
+nothing and `apps/web/package.json` is unchanged. Choosing a provider is a decision the maintainer
+makes outside the migration; this step only guarantees there is something to send.
+
+**Every failure is logged, including the expected ones.** A `NOT_FOUND` from a service reaches
+`console.error` like a 500 does. Filtering by code was rejected: the volume is low, and an expected
+failure the User reports is exactly the one worth finding in the output. If the noise becomes real,
+the filter belongs in the provider, not in the hook.
+
+**Tests.** `log-trpc-error.test.ts` (5 cases), with `console.error` spied and restored per test.
+Four call the hook directly: the prefix names the procedure, its type and its code; a two-link chain
+(`TRPCError` wrapping a `NotFoundError` wrapping an infrastructure `Error`) logs all three objects in
+order; an error with no cause logs alone and the `<unknown path>` fallback shows; a self-referencing
+chain stops instead of looping. The fifth mounts the hook as the `onError` of a `fetchRequestHandler`
+over a test router whose procedure throws, and asserts the hook received the thrown error under the
+transport wrapper: that is the case that proves the export is wired to tRPC's real signature and not
+only to a hand-built argument.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                                       |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| No monitoring provider added               | `grep -rn "instrumentation" apps/web/src` returns nothing; no new dependency |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (199 web tests, zero warnings)                                          |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105)                        |
+| `pnpm --filter web build`                  | every route listed, `/api/trpc/[trpc]` included                              |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real database, `pnpm dev`, server output in view):
+
+- [ ] Trigger an expected failure (open a Project that does not belong to the Organization): the
+      server output carries one `tRPC query ... failed with NOT_FOUND` line followed by the
+      `TRPCError` and the `NotFoundError`, and the screen still shows the precise message.
+- [ ] Trigger an unexpected failure (stop Postgres, then load the inbox): the line reads
+      `INTERNAL_SERVER_ERROR` and the Prisma error appears as the cause.
+- [ ] Submit a form with invalid input: field errors still render inline, and the logged line names
+      the mutation with `BAD_REQUEST`.
+
+**Next in the chain.** #98 masks the `INTERNAL_SERVER_ERROR` message in the `errorFormatter`. The
+hook above is what keeps that safe, and its second smoke case is the one to re-walk after masking:
+the toast becomes the generic sentence, the logged cause must not.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
