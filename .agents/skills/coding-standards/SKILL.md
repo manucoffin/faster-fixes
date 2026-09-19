@@ -33,19 +33,26 @@ route an expected failure through `rethrowDomainErrorsAsNonRetriable`, every une
 is masked behind one sentence and logged with its `cause` chain, and six boundary files render one
 `ErrorScreen`. `lint:agent-rules` runs with `--max-warnings 0` again and reports nothing.
 
-Step 5 has not started. `src/server/**` still holds domain logic that step 5 moves into its domain,
-twelve route handlers other than the agent API still query Prisma inline, `services-no-bare-error`
-still stops at `**/_services/**`, and `interruptOnDomainError` is not built: no RSC page calls a
-throwing service yet, so the helper lands with its first caller.
+Step 5 is done. `src/server/` holds wiring and cross-cutting abstractions only, and an always-on
+`no-restricted-imports` block stops it reaching into the app tree by deep path. Every Integration
+lives in `src/app/_domains/integration/`, sub-structured by provider inside each bucket (ADR-0014);
+every durable function is a `*.inngest.ts` service in the domain it drives; the Plan vocabulary lives
+in `src/app/_domains/subscription/` and is exported by its barrel; the widget API and the agent API
+both keep their operations in `_services/` under their versioned scope, so no route handler queries
+Prisma inline. `interruptOnDomainError` is still not built: no RSC page calls a throwing service yet,
+so the helper lands with its first caller.
 
 While the migration runs:
 
 - **All code under `src/app` follows the target architecture** described in these rule files. Since
   the step 3 final lock, the rules that guard it report at `error` under `ESLINT_AGENT_RULES=1`
   everywhere, with no per-scope allowlist: a violation is a regression, not a burn-down item.
-- **Inside the `src/server` tree, follow that folder's existing conventions** until step 5
-  relocates it. Do not mix the two in one folder: a half-converted folder is harder to finish than
-  either convention applied consistently.
+- **`src/server/` accepts a new file under two conditions only**: it is wiring (it configures or
+  instantiates a library for the whole application and makes no business decision), or it is a
+  cross-cutting abstraction at least two domains or transports need whose server implementation no
+  barrel can export. Inverse test: a file that makes a business decision for one glossary entity is a
+  domain service, even when it calls an SDK. The rule and its named exemptions are in
+  `docs/architecture/target-architecture.md`, section "The server folder".
 - `no-raw-tailwind-colors` is locked at `error` and reports nothing: use the semantic token
   (`text-destructive`, `text-success`, `text-muted-foreground`) rather than a palette class. Hues
   with no token yet (yellow, amber, blue) are not reported.

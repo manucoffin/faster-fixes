@@ -42,7 +42,7 @@ export type GetAnimalOutput = Awaited<ReturnType<typeof getAnimal>>;
 - **An Inngest function wraps the calls that can throw a `DomainError`.** A business rejection (a disconnected Installation, a link the user must repair) never succeeds on retry, so a function body calling code able to throw one routes the failure through `rethrowDomainErrorsAsNonRetriable` (`@/server/errors/non-retriable`), which rethrows it as Inngest's `NonRetriableError` with the original as `cause`. Infrastructure failures pass through untouched and keep their retries. Only wrap where a `DomainError` can actually arrive: wrapping a function that reaches no throwing service is dead code posing as a guarantee.
 
 ```ts
-// server/inngest/create-jira-issue.ts
+// app/_domains/integration/_services/jira/create-jira-issue.inngest.ts
 const accessToken = await getValidJiraAccessToken(
   installation.organizationId,
 ).catch(rethrowDomainErrorsAsNonRetriable);
@@ -77,7 +77,7 @@ export const animalRouter = router({
 
 ## External libraries
 
-Placement follows the **domain decision, not the dependency**. Thin domain-agnostic SDK adapters → root `@/server/<lib>/` (e.g. `@/server/stripe/`). Domain logic that _happens_ to call the SDK stays in the domain's `_services/`. Test: _"If I swapped the provider, does this file's reason for existing change?"_ Yes → domain service. No → `@/server/<lib>/`.
+Placement follows the **domain decision, not the dependency**. Thin domain-agnostic SDK adapters → root `@/server/<lib>/` (e.g. `@/server/stripe/`). Domain logic that _happens_ to call the SDK stays in the domain's `_services/`. Test: _"If I swapped the provider, does this file's reason for existing change?"_ Yes → domain service. No → `@/server/<lib>/`. `@/server/` takes the adapter only under its own two conditions (wiring, or a cross-cutting abstraction two domains or transports need): every Tracker and Notification channel client failed that test and lives in `@/app/_domains/integration/_services/<provider>/`.
 
 ## Client/server boundary
 

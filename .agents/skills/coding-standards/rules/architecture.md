@@ -34,6 +34,7 @@ src/app/
 ├── _domains/      # all domain-bound code, one folder per glossary term
 │   ├── auth/
 │   ├── feedback/
+│   ├── integration/ # every external system, sub-structured by provider (ADR-0014)
 │   ├── organization/
 │   ├── project/
 │   ├── subscription/
@@ -148,8 +149,8 @@ See [naming.md](naming.md) for the full read/write verb vocabulary.
 - A domain's `index.ts` is its **public API**. Only paths it exports may be imported by another domain.
 - The barrel exports **contracts** (UI components, `*.schema.ts`, domain types, type-only re-exports from `_services/`), **never** service functions or the router.
 - **Other domains** import from `@/app/_domains/<x>` only — never `@/app/_domains/<x>/_services/...`.
-- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` reaches in too today; those twelve imports are inverted and step 5 resolves them by moving the code into its domain.
-- **Every domain barrel is empty today** (`export {}`): no domain imports another yet. Add an export when a real cross-domain import needs it, rather than publishing a surface no caller asked for.
+- **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` may not: an always-on `no-restricted-imports` block forbids a deep import from there into the app tree, so the server folder reads a domain through its barrel. Its exemptions are named file by file in `packages/eslint-config/next.js`.
+- **A barrel exports only what a real cross-domain import asked for.** Live today: `feedback` exports the Feedback `Status` type and enum and the Diagnostic Trail line formatter, `organization` the Organization roles, `subscription` the Plan vocabulary and the plan gate hook. `auth`, `integration`, `project` and `user` are still `export {}`. Add an export when an import needs it, rather than publishing a surface no caller asked for.
 - **No domain cycles.** Soft hierarchy hint (not lint-enforced): low-level domains (`user`, `auth`) should not depend on high-level ones (`subscription`, `feedback`).
 
 ## Promotion rule

@@ -10,7 +10,7 @@ How errors surface to the user. Implements `docs/adr/0012-domain-errors-and-tran
 
 Errors travel from a service throw, through a transport boundary, to one of four client display channels. Services throw `DomainError` subclasses (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) from `@/server/errors/domain-errors`; each boundary maps the code to its transport. Unexpected (non-`DomainError`) failures are masked as `Something went wrong. Please try again.` and logged server-side with their `cause` chain.
 
-A second-level subclass of one of the five is allowed when a caller has to tell cases apart, and then carries its own fields and its own copy: the three expected Jira failures (`JiraNotConnectedError`, `JiraReauthRequiredError`, `JiraIssueConfigurationError` in `@/server/jira/errors`) extend `PreconditionFailedError`, so `instanceof` discriminates them while the transported code stays `PRECONDITION_FAILED`. The five _codes_ remain a closed set: a new code amends ADR 0012.
+A second-level subclass of one of the five is allowed when a caller has to tell cases apart, and then carries its own fields and its own copy: the three expected Jira failures (`JiraNotConnectedError`, `JiraReauthRequiredError`, `JiraIssueConfigurationError` in `@/app/_domains/integration/_services/jira/jira-errors`) extend `PreconditionFailedError`, so `instanceof` discriminates them while the transported code stays `PRECONDITION_FAILED`. The five _codes_ remain a closed set: a new code amends ADR 0012.
 
 Client code never imports `@/server/errors/*` and never relies on `instanceof DomainError` (it does not survive serialization). Branch on the transported code instead: `error.data.code` (tRPC).
 

@@ -6,17 +6,18 @@ This document is the reference for the migration kit in `migration-kit/`. It des
 
 ## Core files (in this repo)
 
-| File                                                                    | Role                                                                                                                           |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/adr/0010-app-folder-architecture.md`                              | Two tiers, buckets, per-domain public API. Committed as ADR 0010 in step 2.                                                    |
-| `docs/adr/0011-server-file-conventions.md`                              | `_services/`, verb prefixes, thin routers. Committed as ADR 0011 in step 3.                                                    |
-| `docs/adr/0012-domain-errors-and-transport-mapping.md`                  | `DomainError` vocabulary and boundary mapping. Committed as ADR 0012 in step 3, with the remaining boundaries added in step 4. |
-| `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md` | When code earns a workspace package. Becomes an ADR in step 5.                                                                 |
-| `.claude/skills/coding-standards/`                                      | The rule files agents load while coding                                                                                        |
-| `packages/eslint-config/next.js`                                        | Rule wiring and severity gating                                                                                                |
-| `packages/eslint-config/local-rules/`                                   | The custom ESLint rules                                                                                                        |
-| `apps/web/src/server/errors/`                                           | Domain errors (step 3) and the boundary helpers (step 4).                                                                      |
-| `apps/web/src/server/trpc/trpc.ts`                                      | tRPC init, procedures, error middleware                                                                                        |
+| File                                                   | Role                                                                                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/adr/0010-app-folder-architecture.md`             | Two tiers, buckets, per-domain public API. Committed as ADR 0010 in step 2.                                                    |
+| `docs/adr/0011-server-file-conventions.md`             | `_services/`, verb prefixes, thin routers. Committed as ADR 0011 in step 3.                                                    |
+| `docs/adr/0012-domain-errors-and-transport-mapping.md` | `DomainError` vocabulary and boundary mapping. Committed as ADR 0012 in step 3, with the remaining boundaries added in step 4. |
+| `docs/adr/0013-package-extraction-boundaries.md`       | When code earns a workspace package, and the real package graph. Committed as ADR 0013 in step 5.                              |
+| `docs/adr/0014-one-integration-domain.md`              | One `integration` domain for every external system, sub-structured by provider. Committed as ADR 0014 in step 5.               |
+| `.claude/skills/coding-standards/`                     | The rule files agents load while coding                                                                                        |
+| `packages/eslint-config/next.js`                       | Rule wiring and severity gating                                                                                                |
+| `packages/eslint-config/local-rules/`                  | The custom ESLint rules                                                                                                        |
+| `apps/web/src/server/errors/`                          | Domain errors (step 3) and the boundary helpers (step 4).                                                                      |
+| `apps/web/src/server/trpc/trpc.ts`                     | tRPC init, procedures, error middleware                                                                                        |
 
 ## How to read this document
 
@@ -26,7 +27,7 @@ Every statement falls into one of three classes:
 - **If present**: applies only when the project has the underlying mechanism (marked `[if present]`).
 - **Faster Fixes-specific**: holds here for local reasons and is not part of the exported architecture (marked `[Faster Fixes]`).
 
-**Status.** Steps 1 to 3 of the kit have run, so everything this document says about `src/app` is now the current state: `_domains/` holds the domain-bound code behind a per-domain `index.ts`, the root `_components/`, `_providers/` and `_constants/` folders hold the domain-agnostic code, every scope has the final bucket set with its data and IO in `_services/` and a thin `trpc-router.ts` at its root, and `src/server/errors/domain-errors.ts` holds the `DomainError` vocabulary the tRPC base procedure maps. Steps 4 and 5 have not run: the boundary helpers next to `domain-errors.ts`, the masking of 500 messages and the error boundary files arrive in step 4, and `src/server/**` still holds domain logic that step 5 moves into its domain. New code follows this document; inside `src/server/**`, follow the folder's existing conventions and do not mix the two. `docs/_migration/README.md` tracks what is migrated and what is not.
+**Status.** All five steps of the kit have run, so this document describes the current state rather than a target. `_domains/` holds the domain-bound code behind a per-domain `index.ts`, the root `_components/`, `_providers/` and `_constants/` folders hold the domain-agnostic code, every scope has the final bucket set with its data and IO in `_services/` and a thin `trpc-router.ts` at its root, `src/server/errors/domain-errors.ts` holds the `DomainError` vocabulary that every boundary existing here maps exactly once, and `src/server/` holds only the wiring and the cross-cutting abstractions that "The server folder" below admits, with an always-on lint block keeping it that way. Every convention rule runs at `error` with nothing to report, so a violation is a regression and not a burn-down item.
 
 The frontend and code-shape conventions (React components, `matchQueryStatus`, forms, Tailwind, TypeScript style, file size) are **not** repeated here. They live in the `coding-standards` skill, which is copied alongside this document. This document covers structure, layers, boundaries, and enforcement.
 
@@ -69,19 +70,32 @@ packages/
 
 ### `apps/web/src`
 
-| Path                                                                    | Purpose                                                                                                                                        |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/`                                                                  | The Next.js App Router tree **and** the home of all application code. Domains live inside it.                                                  |
-| `app/_domains/`                                                         | All domain-bound code, one folder per domain.                                                                                                  |
-| `app/_components/`, `app/_hooks/`, `app/_providers/`, `app/_constants/` | Domain-**agnostic** UI, hooks, providers, constants. Candidates for extraction into packages, so they must carry no domain knowledge.          |
-| `app/(group)/...`, `app/admin/`, `app/api/`                             | The route tier: the composition layer.                                                                                                         |
-| `server/`                                                               | Cross-cutting **infrastructure only**: `trpc/`, `errors/`, `auth/`, `inngest/`, `cache/`, thin SDK adapters (`stripe/`, ...). No domain logic. |
-| `lib/`                                                                  | Infra **adapters** with a client or provider flavour: `trpc/` (client, provider), `mailer/`, `auth/` (client), `routing/`.                     |
-| `utils/`                                                                | Domain-agnostic pure utilities grouped by kind (`dates/`, `string/`, `url/`, `tanstack-query/` with `match-query-status.ts`, ...).             |
-| `config/`, `types/`, `styles/`                                          | Feature flags and static config, global TS types, global CSS.                                                                                  |
-| `content/`                                                              | `[if present]` MDX or static content sources.                                                                                                  |
+| Path                                                                    | Purpose                                                                                                                                                                                                     |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`                                                                  | The Next.js App Router tree **and** the home of all application code. Domains live inside it.                                                                                                               |
+| `app/_domains/`                                                         | All domain-bound code, one folder per domain.                                                                                                                                                               |
+| `app/_components/`, `app/_hooks/`, `app/_providers/`, `app/_constants/` | Domain-**agnostic** UI, hooks, providers, constants. Candidates for extraction into packages, so they must carry no domain knowledge.                                                                       |
+| `app/(group)/...`, `app/admin/`, `app/api/`                             | The route tier: the composition layer.                                                                                                                                                                      |
+| `server/`                                                               | Cross-cutting **infrastructure only**, admitted by the two conditions of "The server folder" below: `trpc/`, `errors/`, `auth/`, `inngest/`, `cache/`, thin SDK adapters (`stripe/`, ...). No domain logic. |
+| `lib/`                                                                  | Infra **adapters** with a client or provider flavour: `trpc/` (client, provider), `mailer/`, `auth/` (client), `routing/`.                                                                                  |
+| `utils/`                                                                | Domain-agnostic pure utilities grouped by kind (`dates/`, `string/`, `url/`, `tanstack-query/` with `match-query-status.ts`, ...).                                                                          |
+| `config/`, `types/`, `styles/`                                          | Feature flags and static config, global TS types, global CSS.                                                                                                                                               |
+| `content/`                                                              | `[if present]` MDX or static content sources.                                                                                                                                                               |
 
 Everything domain-bound lives under `app/_domains/` or inside a route. Nothing domain-bound lives at `src/` root folders.
+
+### The server folder
+
+A file lives in the server folder if and only if it meets one of two conditions.
+
+1. **Wiring**: it configures or instantiates a library for the whole application and makes no business decision. The Better Auth instance and its plugins, the Stripe client, the tRPC init and root router, the durable function client, the S3 client.
+2. **Cross-cutting abstraction**: at least two domains or transports depend on its server implementation, and a barrel cannot export it. The domain error vocabulary and boundary helpers, storage, Plan enforcement.
+
+Inverse test: a file that makes a business decision for one glossary entity is a domain service, even when it calls an SDK.
+
+The rule is enforced rather than merely written down. An always-on `no-restricted-imports` block forbids every deep import from `src/server/**` into the app tree, so a server file that needs a domain's internals fails plain `pnpm lint` and the pre-commit hook; a domain is read through its barrel. Exemptions are named file by file in `packages/eslint-config/next.js`, so an exemption stays a reviewed decision instead of becoming a pattern. `[Faster Fixes]` Three are named: the root tRPC router, which mounts the domain routers a barrel never exports; the Better Auth database hooks, which call the Organization slug service on sign-up; and the tRPC mapping test, a fixture that names a shipped domain error subclass.
+
+`[Faster Fixes]` What the rule admits here: the tRPC setup, middlewares and root router; the domain error vocabulary and its boundary helpers; the durable function client; the Stripe client; storage; the Better Auth wiring; Plan enforcement; the CORS helper the proxy reads; and the agent API rate limit check, which both the agent API and the tRPC context depend on. Everything else left in step 5: every Integration now lives in `app/_domains/integration/`, each durable function is a service of the domain it drives, and the Plan vocabulary lives in `app/_domains/subscription/`.
 
 ## Two tiers, one bucket set
 
@@ -217,6 +231,24 @@ export class PreconditionFailedError extends DomainError {
 | Server actions `[if present]`        | The action client's error handler gains a `DomainError` branch returning `{ message, code }`.                                                                                              |
 | Authorization library `[if present]` | Denials throw `ForbiddenError` (403), not 401.                                                                                                                                             |
 
+### Webhook failure policy `[if present]`
+
+A webhook endpoint answers a calling system, not a user, so the response to a failure is a transport decision taken once and applied to every provider rather than rediscovered per endpoint. The rule for any Tracker webhook:
+
+| Case                                                                                  | Response                                           |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Signature or token invalid, unknown token                                             | 401                                                |
+| Body unreadable                                                                       | 400                                                |
+| Authenticated but not for us (unhandled event type, no Installation, no Organization) | 200 with an `ignored` reason                       |
+| Duplicate delivery                                                                    | 200 with a `skipped` marker                        |
+| Accepted                                                                              | 200                                                |
+| Linear signing secret missing                                                         | 500 (a configuration invariant, Linear only, kept) |
+
+- Each Tracker has exactly one webhook orchestration service, carrying the reserved `handle-` verb. It owns deduplication, the Installation lookup and the event emission, and returns an outcome.
+- The route keeps the signature or token verification and maps that outcome to the HTTP response. Nothing else lives in the route.
+- Answering "no Installation" with a 200 hides a real misconfiguration from the Tracker. That is deliberate: a 4xx buys a retry storm for a state the Tracker cannot repair. The case must stay visible in the server logs instead.
+- `[Faster Fixes]` Linear and Jira echo the ignore reason in the body and GitHub answers an ignored delivery exactly like an accepted one, because those are the bodies the registered webhooks already receive.
+
 ### Unexpected errors: mask and log
 
 The tRPC `errorFormatter` replaces the message of any `INTERNAL_SERVER_ERROR` with generic copy and exposes `data.zodError` for `BAD_REQUEST` with a `ZodError` cause. Every masking point logs the original error with its `cause` chain. Masking is only safe once no legitimate user copy travels through the 500 channel, which is why the vocabulary lands first.
@@ -240,7 +272,7 @@ Client code never imports `src/server/errors/*` and never uses `instanceof Domai
 
 ## Packages
 
-Authority: `docs/architecture/migration-kit/adrs/package-extraction-boundaries.md`, amended below.
+Authority: `docs/adr/0013-package-extraction-boundaries.md`, which records this rule, the real package graph and the two soft leaks in it. Amended below.
 
 - **A package exists to reuse code across consumers, not because it is generic.** The gate is "consumed by two or more apps, or by an external consumer" (see amendment). Create it when the second consumer appears, never speculatively.
 - **Layered, acyclic.** Layer 0 foundations (`db`, `ui`) depend on no internal package. Layer 1 domain packages depend on layer 0. Layer 2 apps depend on anything.
@@ -294,8 +326,9 @@ Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/e
 | `require-server-action-suffix`      | all                   | A module-level `'use server'` only in `*.server.action.ts`.                                                        | always |
 | `no-throw-literal` (built-in)       | all                   | Throw `Error` instances only.                                                                                      | always |
 | `no-raw-tailwind-colors`            | all                   | `[optional]` Semantic color tokens over raw palette classes. Only useful with a token-based design system.         | agent  |
+| `no-restricted-imports` (built-in)  | `src/server/**`       | No deep import into the app tree; a domain is read through its barrel. Exemptions named file by file.              | always |
 
-Fourteen custom rules, exported by `packages/eslint-config/local-rules/index.js`, plus the built-in `no-throw-literal`. Each custom rule has a `RuleTester` test beside it, run by `pnpm test`.
+Fourteen custom rules, exported by `packages/eslint-config/local-rules/index.js`, plus the built-in `no-throw-literal` and the built-in `no-restricted-imports` lock on the server folder. Each custom rule has a `RuleTester` test beside it, run by `pnpm test`.
 
 `require-use-client-suffix` runs on all of `src/**`, wider than the domain tier: the `.client.tsx` naming applies wherever a `'use client'` file lives, and a naming convention that holds in one folder only is half a convention.
 
@@ -319,7 +352,7 @@ A rule that cannot yet pass everywhere is introduced at `warn`, then locked to `
 
 These statements hold in this repo and are **not** part of the exported architecture. A project adopting the architecture decides each one for itself.
 
-- **Inngest is present.** Durable jobs live under `src/server/inngest/`, so the Inngest boundary row of the mapping table and the `*.inngest.ts` service convention are live here rather than `[if present]`.
+- **Inngest is present.** `src/server/inngest/` holds the client and nothing else: each durable function is a `*.inngest.ts` service in the `_services/` bucket of the domain it drives, and `app/api/inngest/route.ts` registers the full list by deep path as route-tier composition. So the Inngest boundary row of the mapping table and the `*.inngest.ts` service convention are live here rather than `[if present]`.
 - **No authorization library.** There is no Kilpi and no policy layer. Authorization is asserted in the tRPC procedure or, when it needs a loaded resource, in the service that loads it; a denial is a `ForbiddenError` (403), available since the vocabulary landed in step 3.
 - **No `next-safe-action`.** There is no action client, so the server-action row of the mapping table has no implementation here. `require-server-action-suffix` still runs as an always-on error, so a module-level `'use server'` cannot appear under an unmarked filename.
 - **No cache tags.** The app uses no `unstable_cache` and no tag-based revalidation, so the "Cache tags" section is inert and `src/server/cache/` does not exist.
