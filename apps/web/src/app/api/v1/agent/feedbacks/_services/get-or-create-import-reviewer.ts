@@ -10,13 +10,14 @@ export const DEFAULT_IMPORT_REVIEWER_NAME = "Imported feedback";
 export async function getOrCreateImportReviewer(
   projectId: string,
   name: string,
+  db: typeof prisma = prisma,
 ) {
-  const existing = await prisma.reviewer.findFirst({
+  const existing = await db.reviewer.findFirst({
     where: { projectId, name },
   });
   if (existing) {
     if (!existing.isActive) {
-      return prisma.reviewer.update({
+      return db.reviewer.update({
         where: { id: existing.id },
         data: { isActive: true },
       });
@@ -26,7 +27,7 @@ export async function getOrCreateImportReviewer(
 
   const rawToken = `imported_${crypto.randomUUID()}`;
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-  return prisma.reviewer.create({
+  return db.reviewer.create({
     data: { projectId, name, token: tokenHash, isActive: true },
   });
 }

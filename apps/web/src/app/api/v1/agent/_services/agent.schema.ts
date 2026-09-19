@@ -42,6 +42,8 @@ const FeedbackItemSchema = z.object({
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
+export type CreateFeedbackItemInput = z.infer<typeof FeedbackItemSchema>;
+
 export const CreateFeedbacksSchema = z.object({
   project: z.string().min(1),
   reviewer_name: z.string().trim().min(1).max(100).optional(),
