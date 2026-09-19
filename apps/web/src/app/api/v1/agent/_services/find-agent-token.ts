@@ -4,10 +4,11 @@ import crypto from "crypto";
 const TOKEN_PREFIX = "ff_agent_";
 
 /**
- * Resolves an agent token from an Authorization: Bearer header.
- * Returns the token with its organization, or null if invalid/revoked.
+ * The agent token carried by an `Authorization: Bearer` header with the
+ * Organization it belongs to, `null` when the header is absent, malformed,
+ * unknown or revoked.
  */
-export async function resolveAgentToken(authHeader: string | null) {
+export async function findAgentToken(authHeader: string | null) {
   if (!authHeader) return null;
 
   const match = authHeader.match(/^Bearer\s+(ff_agent_.+)$/);
@@ -25,7 +26,10 @@ export async function resolveAgentToken(authHeader: string | null) {
     where: { tokenHash: computedHash, isActive: true, revokedAt: null },
     include: {
       organization: {
-        select: { id: true, projects: { select: { id: true, publicId: true } } },
+        select: {
+          id: true,
+          projects: { select: { id: true, publicId: true } },
+        },
       },
     },
   });
@@ -53,6 +57,7 @@ export async function resolveAgentToken(authHeader: string | null) {
   return agentToken;
 }
 
-export type ResolvedAgentToken = NonNullable<
-  Awaited<ReturnType<typeof resolveAgentToken>>
->;
+export type FindAgentTokenOutput = Awaited<ReturnType<typeof findAgentToken>>;
+
+/** The same token, narrowed to the authenticated case. */
+export type AuthenticatedAgentToken = NonNullable<FindAgentTokenOutput>;

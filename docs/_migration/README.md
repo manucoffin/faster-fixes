@@ -6751,6 +6751,52 @@ direction worth machine-checking is the one the kit's grep already covers.
 `pnpm --filter web build` lists every route. Documentation only: two files, the new ADR and the ADR
 index, plus this entry.
 
+### Agent token resolution and the agent scope check move into the agent API scope (issue #132)
+
+Two of the seven files under `src/server/api/` leave for `api/v1/agent/`, their only consumer. The
+agent API answers byte for byte as before: no handler, no response and no test changed.
+
+| Module                   | Landed at                                    | Bucket, and why                                         |
+| ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
+| `resolve-agent-token.ts` | `api/v1/agent/_services/find-agent-token.ts` | it queries the database, so it is IO                    |
+| `check-agent-scope.ts`   | `api/v1/agent/_helpers/has-agent-scope.ts`   | an array membership test on already-loaded scopes, pure |
+
+**Names decided by running the rules, not in advance.** Both carried a banned process verb.
+`resolveAgentToken` is a nullable lookup, so it is `findAgentToken`; `require-trpc-output-type` then
+asks for the derived alias, so the file exports `FindAgentTokenOutput` and, next to it,
+`AuthenticatedAgentToken` for the narrowed case the caller wants. That replaces the old
+`ResolvedAgentToken`, whose name described the process rather than the value. `hasScope` becomes
+`hasAgentScope` to match its file, and the `AgentScope` union travels with the predicate that reads
+it, as `OrganizationRole` travels with `ORGANIZATION_ROLES` in the `organization` domain helpers.
+
+**Neither is promoted to a domain.** `requireAgentAuth` is the only caller of both, and the parent
+spec's gate is a second consumer. They sit in the agent API scope beside it, one bucket apart.
+
+**The rate limit check stays in the server folder, decided by its consumers.** `checkRateLimit` has
+six importers across three transports: `requireAgentAuth`, the four widget API routes, and the base
+tRPC procedure in `src/server/trpc/trpc.ts`. That is condition 2 of the server folder rule, a
+cross-cutting abstraction at least two transports depend on and no barrel can export, so it does not
+move and keeps its `check-` name: `src/server/**` follows its own conventions and the agent rules do
+not reach it. **Note for #133**: the file is still at `src/server/api/check-rate-limit.ts`, and that
+ticket dissolves the request-helper folder, so it needs a new home in the server folder alongside the
+CORS helper. Its placement is settled; only its address is open.
+
+**No behaviour touched.** The constant-time comparison, the fire-and-forget `lastUsedAt` update, the
+`ff_agent_` prefix check and the 401/403/429 bodies and headers of `requireAgentAuth` are the same
+lines in a different folder. The agent API route tests mock `@workspace/db`, not these modules, so
+not even a mock path changed: `api/v1/agent/feedbacks/route.test.ts` and the status route test pass
+untouched.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (63 files, 399 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` lists every route, the 22 API
+routes included.
+
+**Left under `src/server/api/` for #133**: `resolve-project.ts`, `validate-origin.ts`,
+`validate-reviewer.ts` (all three move to the `project` domain), `check-rate-limit.ts` and `cors.ts`
+(both stay in the server folder). Nothing was deleted and no `_deprecated_` stub was created: both
+files moved whole with `git mv`. Earlier entries in this log still name the old paths; they record
+what was true when they were written and are not rewritten.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against

@@ -1,15 +1,15 @@
-import { type AgentScope, hasScope } from "@/server/api/check-agent-scope";
-import { checkRateLimit } from "@/server/api/check-rate-limit";
-import {
-  type ResolvedAgentToken,
-  resolveAgentToken,
-} from "@/server/api/resolve-agent-token";
 import { AGENT_API_RATE_LIMITS } from "@/app/_domains/subscription";
+import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { isCloud } from "@/utils/environment/env";
 import { prisma } from "@workspace/db";
 import { NextResponse } from "next/server";
 import { agentError } from "../_helpers/agent-error";
+import { type AgentScope, hasAgentScope } from "../_helpers/has-agent-scope";
+import {
+  type AuthenticatedAgentToken,
+  findAgentToken,
+} from "./find-agent-token";
 
 type AgentRateLimitKey = "agent:read" | "agent:write";
 
@@ -30,13 +30,13 @@ export async function requireAgentAuth(
   authHeader: string | null,
   scope: AgentScope,
   rateLimitKey: AgentRateLimitKey,
-): Promise<ResolvedAgentToken | NextResponse> {
-  const agentToken = await resolveAgentToken(authHeader);
+): Promise<AuthenticatedAgentToken | NextResponse> {
+  const agentToken = await findAgentToken(authHeader);
   if (!agentToken) {
     return agentError("Unauthorized", "UNAUTHORIZED", 401);
   }
 
-  if (!hasScope(agentToken.scopes, scope)) {
+  if (!hasAgentScope(agentToken.scopes, scope)) {
     return agentError("Insufficient permissions", "FORBIDDEN", 403);
   }
 
@@ -82,7 +82,7 @@ export async function requireAgentAuth(
 }
 
 export function isAuthFailure(
-  result: ResolvedAgentToken | NextResponse,
+  result: AuthenticatedAgentToken | NextResponse,
 ): result is NextResponse {
   return result instanceof NextResponse;
 }
