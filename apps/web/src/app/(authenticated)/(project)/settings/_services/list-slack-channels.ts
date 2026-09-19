@@ -4,8 +4,8 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "@/server/errors/domain-errors";
-import { decryptSlackToken } from "@/server/slack/crypto";
-import { listPublicChannels } from "@/server/slack/slack-client";
+import { decryptSlackToken } from "@/app/_domains/integration/_services/slack/token-crypto";
+import { listPublicChannels } from "@/app/_domains/integration/_services/slack/slack-client";
 import { prisma } from "@workspace/db";
 
 export async function listSlackChannels(

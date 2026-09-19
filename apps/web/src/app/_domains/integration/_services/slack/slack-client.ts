@@ -1,3 +1,6 @@
+import { IntegrationConfigurationError } from "../integration-configuration-error";
+import { SlackRequestError } from "./slack-request-error";
+
 const SLACK_OAUTH_ACCESS_ENDPOINT = "https://slack.com/api/oauth.v2.access";
 const SLACK_CONVERSATIONS_LIST_ENDPOINT =
   "https://slack.com/api/conversations.list";
@@ -33,7 +36,9 @@ export async function exchangeOAuthCode({
   const clientId = process.env.SLACK_CLIENT_ID;
   const clientSecret = process.env.SLACK_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    throw new Error("SLACK_CLIENT_ID / SLACK_CLIENT_SECRET are not set.");
+    throw new IntegrationConfigurationError(
+      "SLACK_CLIENT_ID / SLACK_CLIENT_SECRET are not set.",
+    );
   }
 
   const body = new URLSearchParams({
@@ -58,7 +63,7 @@ export async function exchangeOAuthCode({
 
   // Slack signals OAuth failures via `ok:false` rather than an HTTP error.
   if (!data.ok) {
-    throw new Error(
+    throw new SlackRequestError(
       `Slack OAuth code exchange failed: ${data.error ?? "unknown_error"}`,
     );
   }
@@ -70,7 +75,9 @@ export async function exchangeOAuthCode({
     !data.team?.id ||
     !data.team?.name
   ) {
-    throw new Error("Slack OAuth response is missing required fields.");
+    throw new SlackRequestError(
+      "Slack OAuth response is missing required fields.",
+    );
   }
 
   return {
@@ -115,7 +122,7 @@ export async function listPublicChannels(
 
     // Slack returns 200 with `ok:false` on auth/permission errors.
     if (!data.ok) {
-      throw new Error(
+      throw new SlackRequestError(
         `Slack conversations.list failed: ${data.error ?? "unknown_error"}`,
       );
     }
@@ -166,7 +173,7 @@ export async function postMessage({
 
   // Slack returns 200 with `ok:false` on errors such as channel_not_found.
   if (!data.ok || !data.ts || !data.channel) {
-    throw new Error(
+    throw new SlackRequestError(
       `Slack chat.postMessage failed: ${data.error ?? "unknown_error"}`,
     );
   }
@@ -202,7 +209,7 @@ export async function updateMessage({
 
   // Slack returns 200 with `ok:false` on errors such as message_not_found.
   if (!data.ok) {
-    throw new Error(
+    throw new SlackRequestError(
       `Slack chat.update failed: ${data.error ?? "unknown_error"}`,
     );
   }

@@ -5,7 +5,7 @@ import { createJiraIssue } from "@/app/_domains/integration/_services/jira/creat
 import { createLinearIssue } from "@/app/_domains/integration/_services/linear/create-linear-issue.inngest";
 import { handleJiraOAuthRevoked } from "@/app/_domains/integration/_services/jira/handle-jira-oauth-revoked.inngest";
 import { handleLinearOAuthRevoked } from "@/app/_domains/integration/_services/linear/handle-linear-oauth-revoked.inngest";
-import { notifySlackFeedbackCreated } from "@/server/inngest/notify-slack-feedback-created";
+import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services/slack/notify-slack-feedback-created.inngest";
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
 import { refreshJiraWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-webhooks.inngest";
 import { sendWelcomeEmail } from "@/server/inngest/send-welcome-email";
@@ -15,7 +15,7 @@ import { syncFeedbackStatusToLinear } from "@/app/_domains/integration/_services
 import { syncGitHubIssueStatus } from "@/app/_domains/integration/_services/github/sync-github-issue-status.inngest";
 import { syncJiraIssueStatus } from "@/app/_domains/integration/_services/jira/sync-jira-issue-status.inngest";
 import { syncLinearIssueStatus } from "@/app/_domains/integration/_services/linear/sync-linear-issue-status.inngest";
-import { updateSlackFeedbackMessage } from "@/server/inngest/update-slack-feedback-message";
+import { updateSlackFeedbackMessage } from "@/app/_domains/integration/_services/slack/update-slack-feedback-message.inngest";
 import { serve } from "inngest/next";
 
 // Required by v4 checkpointing: client maxRuntime ("50s") must sit below this.

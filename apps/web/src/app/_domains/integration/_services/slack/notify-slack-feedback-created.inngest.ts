@@ -1,11 +1,11 @@
-import { buildFeedbackBlocks } from "@/server/slack/build-feedback-blocks";
-import { buildFeedbackDashboardUrl } from "@/server/slack/build-feedback-dashboard-url";
-import { decryptSlackToken } from "@/server/slack/crypto";
-import { matchUnhealthySlackError } from "@/server/slack/match-unhealthy-error";
-import { getFreshScreenshotUrl } from "@/server/slack/screenshot-url";
-import { postMessage } from "@/server/slack/slack-client";
+import { buildFeedbackBlocks } from "../../_helpers/slack/build-feedback-blocks";
+import { buildFeedbackDashboardUrl } from "../../_helpers/slack/build-feedback-dashboard-url";
+import { decryptSlackToken } from "./token-crypto";
+import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
+import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
+import { postMessage } from "./slack-client";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const notifySlackFeedbackCreated = inngest.createFunction(
   {
@@ -34,7 +34,8 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
     if (!feedback) return { skipped: "feedback_not_found" };
 
     // Idempotency: never post twice for the same feedback.
-    if (feedback.slackMessage) return { skipped: "slack_message_already_exists" };
+    if (feedback.slackMessage)
+      return { skipped: "slack_message_already_exists" };
 
     const link = feedback.project.slackLink;
     if (!link) return { skipped: "no_slack_link" };

@@ -24,3 +24,7 @@ export async function getFreshScreenshotUrl(
 
   return getSignedAssetUrl(feedback.screenshot);
 }
+
+export type GetFreshScreenshotUrlOutput = Awaited<
+  ReturnType<typeof getFreshScreenshotUrl>
+>;

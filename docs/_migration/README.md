@@ -6362,6 +6362,142 @@ against `next dev` on port 3131 answers `200` with `"function_count":17`.
 **Not smoked here, and why.** The sandbox has no Postgres, no Atlassian site and no mail provider, so
 the mail is never sent. The Jira row below is for the maintainer.
 
+### Slack moves into the `integration` domain, part 1 (issue #125)
+
+The fourth and last provider relocation ticket of step 5, and the only one to move a Notification
+channel rather than a Tracker. The seven Slack modules and the two Slack durable functions leave the server folder
+for `_domains/integration/`, under `slack` subfolders of the services and helpers buckets, following
+the pattern the GitHub pilot (#113) fixed and Linear (#116) and Jira (#120) confirmed. Outside the
+six bare errors that became named classes, every edit is an import path or a file name: no logic
+changed.
+
+**Files moved.** Nine modules with `git mv`. No file dissolved, so this ticket leaves no
+`_deprecated_` stub.
+
+| Before                                            | After                                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `server/slack/slack-client.ts`                    | `_domains/integration/_services/slack/slack-client.ts`                          |
+| `server/slack/crypto.ts`                          | `_domains/integration/_services/slack/token-crypto.ts`                          |
+| `server/slack/screenshot-url.ts`                  | `_domains/integration/_services/slack/get-fresh-screenshot-url.ts`              |
+| `server/slack/build-feedback-blocks.ts`           | `_domains/integration/_helpers/slack/build-feedback-blocks.ts`                  |
+| `server/slack/build-feedback-dashboard-url.ts`    | `_domains/integration/_helpers/slack/build-feedback-dashboard-url.ts`           |
+| `server/slack/match-unhealthy-error.ts`           | `_domains/integration/_helpers/slack/match-unhealthy-error.ts`                  |
+| `server/slack/oauth-state-cookie.ts`              | `_domains/integration/_helpers/slack/oauth-state-cookie.ts`                     |
+| `server/inngest/notify-slack-feedback-created.ts` | `_domains/integration/_services/slack/notify-slack-feedback-created.inngest.ts` |
+| `server/inngest/update-slack-feedback-message.ts` | `_domains/integration/_services/slack/update-slack-feedback-message.inngest.ts` |
+
+`src/server/slack/` holds no file, and `src/server/inngest/` is down to the client and the two `user`
+domain functions #127 owns. The empty directory is left on disk because the agent may not delete
+anything; git tracks nothing in it, so a fresh clone does not have it. It joins `src/server/github/`,
+`src/server/linear/`, `src/server/jira/` and `src/server/oauth/` on the maintainer list.
+
+**Bucket choice needed one judgement call.** The Slack Web API client and the token cipher do IO and
+are services; Block Kit building, the dashboard URL builder, the unhealthy-error classifier and the
+OAuth state constants are pure and are helpers, which is what the parent spec names for Slack.
+The call was `screenshot-url.ts`: it mints a signed asset URL through storage, which is IO, so it
+lands in `_services/` and not next to the block builder that consumes its result. It sits under
+`slack/` because the two Slack functions are its only callers; if a second provider ever needs a
+fresh screenshot URL, it moves to the services bucket root like the shared OAuth state service.
+
+**Two renames, one forced by the rules and one taken on purpose.** `crypto.ts` has no dash in its
+basename, so it does not clear the `services-verb-prefix` shape check and could not land in a
+services bucket unrenamed: it became `token-crypto.ts`, the Linear and Jira name, so the three
+providers read alike. `screenshot-url.ts` does clear the shape check (`screenshot-` satisfies it, as
+`github-app.ts` did for the pilot), so the rules did not force anything; it was renamed
+`get-fresh-screenshot-url.ts` anyway to be named after its single export `getFreshScreenshotUrl`.
+That opens a read verb, so `require-trpc-output-type` then asks for the derived alias, and the file
+exports `GetFreshScreenshotUrlOutput` like the Linear reads #116 split out. `slack-client.ts` keeps
+its noun name, as the pilot predicted for an SDK client module.
+
+**Slack keeps its own OAuth state constants**, per the parent spec. `_helpers/slack/oauth-state-cookie.ts`
+still exports the two plain constants the install and callback routes share, and does **not** adopt
+the `OAuthStateCookie` type of the shared service that Linear and Jira use. Aligning Slack with the
+shared cookie is out of scope and stays on the deferred list for the close-out (#143).
+
+**Six bare errors became named classes, none of them a `DomainError`.** `services-no-bare-error` is
+always on for `**/_services/**`, so the six sites in `slack-client.ts` had to be converted the moment
+the file landed; no disable comment was used. The two durable functions had no `throw new Error(` of
+their own.
+
+| Site                                          | Class                           |
+| --------------------------------------------- | ------------------------------- |
+| `slack-client`, client id or secret unset     | `IntegrationConfigurationError` |
+| `slack-client`, OAuth code exchange refused   | `SlackRequestError`             |
+| `slack-client`, OAuth response missing fields | `SlackRequestError`             |
+| `slack-client`, `conversations.list` refused  | `SlackRequestError`             |
+| `slack-client`, `chat.postMessage` refused    | `SlackRequestError`             |
+| `slack-client`, `chat.update` refused         | `SlackRequestError`             |
+
+`SlackRequestError` is the third provider request class, a plain `Error` subclass like
+`LinearRequestError` and `JiraRequestError`; the shared `IntegrationConfigurationError` at the
+services bucket root is reused rather than a Slack-specific one.
+
+**Why the six conversions change no behaviour, and the one thing to be careful with.** Every message
+string is byte-identical to what the file threw before, which matters more here than for the other
+providers: `matchUnhealthySlackError` decides whether a Slack link is permanently broken by
+substring-matching the error **message** (`channel_not_found`, `not_in_channel`, `is_archived`,
+`invalid_auth`, `account_inactive`, `token_revoked`). A rewording of the `chat.postMessage` or
+`chat.update` message would silently turn a link that should flip unhealthy into an endless retry, or
+the reverse. The classifier itself still takes `unknown` and reads `.message`, so a named subclass is
+matched exactly as a bare `Error` was. Nothing else branches on the class: the callback route catches
+the exchange failure with a bare `catch` and still redirects to `/integrations?slack=error`, and
+`listSlackChannels` lets the failure propagate as before.
+
+**The two durable functions stay unwrapped.** Neither `notify-slack-feedback-created` nor
+`update-slack-feedback-message` routes through `rethrowDomainErrorsAsNonRetriable`: only the three
+Jira functions do (#91), because only Jira raises expected domain errors. A Slack outage therefore
+still raises `SlackRequestError` out of the step and still consumes the three default retries, which
+is what the parent spec asks for.
+
+**Identifiers, triggers and concurrency untouched.** `notify-slack-feedback-created` keeps
+`feedback/created` and `update-slack-feedback-message` keeps `feedback/status-changed`, both with
+`retries: 3` and a `event.data.feedbackId` concurrency key of 1, so an in-flight run is not orphaned
+and the "never post twice for the same feedback" guard still holds.
+
+**Imports rewritten.** Intra-domain imports became relative (`./token-crypto`, `./slack-client`,
+`./get-fresh-screenshot-url`, `../../_helpers/slack/…`), following the pilot. The durable function
+client is reached with `@/server/inngest` rather than the old `./index`, storage stays at
+`@/server/storage/get-signed-asset-url`, and the Feedback Status type still comes through the
+`@/app/_domains/feedback` barrel.
+
+**Consumers rewritten.** Four files, import paths only: the two Slack OAuth routes
+(`api/slack/install`, `api/slack/callback`), the registration route (`api/inngest/route.ts`, two
+imports, still a static list of seventeen functions), and the migrated Project settings service
+`list-slack-channels.ts`. The locked `(authenticated)/(project)` scope changed two import lines and
+nothing else; no test changed, because no Slack test mocks a relocated module.
+
+**Inverted imports, after this ticket.** The four Slack ones are gone with their files. What is left
+under `src/server/` pointing into the app tree: the two `user` domain durable functions #127 moves,
+the three by-design router mounts, the Better Auth hooks and plugin, and
+`server/trpc/domain-error-mapping.test.ts` reaching `JiraReauthRequiredError` by deep path, which
+#139 still has to exempt by name or route around.
+
+**Still owned by the following ticket.** Both Slack OAuth routes still query Prisma inline for the
+Member check and the Installation upsert; that is #126, which reuses the services the GitHub pilot
+placed.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (60 files, 370 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/slack/install`, `/api/slack/callback` and
+`/api/inngest` included. Prettier reformatted one `if` the server folder had left unformatted, in
+`notify-slack-feedback-created.inngest.ts`.
+
+**Smoke, walked on 2026-09-19 against `next dev` on port 3133 with dummy environment values:**
+
+| Check                                                   | Result                                                              |
+| ------------------------------------------------------- | ------------------------------------------------------------------- |
+| `GET /api/inngest`                                      | `200`, `"function_count":17`, both Slack functions still registered |
+| `GET /api/slack/install` signed out                     | `307` to `/login?nextUrl=…/api/slack/install`, unchanged            |
+| `GET /api/slack/callback?error=access_denied`           | `307` to `/integrations?slack=error`, unchanged                     |
+| `GET /api/slack/callback` with no `code`                | `307` to `/integrations?slack=error`, unchanged                     |
+| `GET /api/slack/callback?code=…&state=…` with no cookie | `307` to `/integrations?slack=error`, unchanged                     |
+| `GET …authenticated.projects.slack.listChannels`        | `401 UNAUTHORIZED`, the locked scope key still resolves             |
+| `GET …authenticated.integrations.slack.getInstallation` | `401 UNAUTHORIZED`, the locked scope key still resolves             |
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Slack workspace, so nothing past the
+state check and the session check runs: no message is posted, no channel is listed and no token is
+decrypted. The Slack rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6477,3 +6613,30 @@ agent API. Only the systems a landed ticket has touched appear below.
       Jira button opening `/integrations` (row added by #124).
 - [ ] Disconnect: disconnect Jira from `/integrations` and see the Installation and its Project links
       removed, and the webhook registration gone from the Jira site.
+
+#### Slack (started by #125)
+
+- [ ] Connect: start the install from `/integrations/slack`, approve the Slack consent screen and
+      land on `/integrations?slack=connected` with the workspace listed.
+- [ ] State round-trip on the cookie: start the install, then open the callback URL a second time
+      with a stale `state` and land on `/integrations?slack=error` with no Installation recorded.
+- [ ] Refuse at Slack: press Cancel on the Slack consent screen and land on
+      `/integrations?slack=error`.
+- [ ] Connect without the Plan feature: from an Organization whose Plan has no Slack Integration,
+      open `/api/slack/install` and land on `/integrations?error=upgrade_required`.
+- [ ] Link a channel: open the Project settings, see the workspace public channels listed, pick one,
+      save, reload, and see the link enabled.
+- [ ] Announce a Feedback: submit a Feedback on a linked Project and see one Slack message in the
+      channel with the reviewer name, the comment, the page link, the browser and OS line, the
+      screenshot image and the Open in Faster Fixes button.
+- [ ] Never announce twice: replay the `feedback/created` event for the same Feedback and see the
+      run skip with `slack_message_already_exists` and no second message.
+- [ ] Update the message: move the Feedback to In progress, then Resolved, in the inbox and see the
+      same Slack message edited in place with the status badge following, and an agent resolution
+      showing the agent badge rather than the human one.
+- [ ] Disable the link: turn the Slack link off in the Project settings, submit a Feedback and see
+      no message posted.
+- [ ] Broken channel: archive or leave the linked channel, trigger an announce, and see the link flip
+      to unhealthy with the Slack error code recorded rather than the run retrying forever.
+- [ ] Disconnect: disconnect Slack from `/integrations` and see the Installation and its Project
+      links removed, with no further message posted for a new Feedback.

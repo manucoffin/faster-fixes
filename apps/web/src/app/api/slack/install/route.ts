@@ -3,8 +3,8 @@ import { checkFeatureAccess } from "@/server/auth/subscription";
 import {
   SLACK_OAUTH_STATE_COOKIE,
   SLACK_OAUTH_STATE_COOKIE_MAX_AGE_S,
-} from "@/server/slack/oauth-state-cookie";
-import { SLACK_OAUTH_SCOPES } from "@/server/slack/slack-client";
+} from "@/app/_domains/integration/_helpers/slack/oauth-state-cookie";
+import { SLACK_OAUTH_SCOPES } from "@/app/_domains/integration/_services/slack/slack-client";
 import { prisma } from "@workspace/db";
 import { randomBytes } from "crypto";
 import { type NextRequest, NextResponse } from "next/server";

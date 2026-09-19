@@ -1,7 +1,7 @@
 import { auth } from "@/server/auth";
-import { encryptSlackToken } from "@/server/slack/crypto";
-import { SLACK_OAUTH_STATE_COOKIE } from "@/server/slack/oauth-state-cookie";
-import { exchangeOAuthCode } from "@/server/slack/slack-client";
+import { encryptSlackToken } from "@/app/_domains/integration/_services/slack/token-crypto";
+import { SLACK_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/slack/oauth-state-cookie";
+import { exchangeOAuthCode } from "@/app/_domains/integration/_services/slack/slack-client";
 import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
