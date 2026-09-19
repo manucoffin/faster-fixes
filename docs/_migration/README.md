@@ -6706,6 +6706,51 @@ imports the database client" check has four files left, all of them widget API r
 `api/v1/feedback/[id]/screenshot/route.ts` and `api/v1/widget/config/route.ts`. No `_deprecated_`
 stub was created: nothing was retired, one query moved.
 
+### ADR 0013, the package extraction rule and the real package graph (issue #141)
+
+The one ticket of 5b that could have landed at any time, and the only one that changes no code at
+all. `docs/adr/0013-package-extraction-boundaries.md` is the kit's `package-extraction-boundaries.md`
+committed with its placeholders replaced by this repo's graph, and the ADR index links it instead of
+marking the number as reserved.
+
+**Nothing was extracted, because the gate is a second consumer and there is none.** One app, seven
+packages. The graph was read off the manifests and the imports rather than copied from the kit, and
+three of the parent spec's figures were checked rather than trusted.
+
+| Claim checked                                                                        | Result                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The database package has no `exports` field                                          | confirmed, and no `main` or `types` either                                                                                                                                                                |
+| Seven app files deep-import the generated Prisma client                              | confirmed; two more deep-import `@workspace/db/index` for the client instance, so nine deep imports in all against 150 package-root imports                                                               |
+| The app touches the published React widget through two import sites, one per subpath | confirmed: the root layout on `@fasterfixes/react`, the marketing demo on `@fasterfixes/react/internal`. The other 20 hits of the package name are marketing copy, an MDX snippet or a code sample string |
+| A package imports the app                                                            | none. The kit's `grep -rn "apps/web\|@/app/" packages/*/src` returns nothing                                                                                                                              |
+| The MCP package imports an internal package                                          | none. It `fetch`es the agent API and hand-keeps `api-types.ts` and `schemas.ts`                                                                                                                           |
+
+**Two corrections to what the kit and the log presumed.** The kit writes `@repo/db` and lists
+`@repo/ui` as a layer 0 foundation. Here the alias is `@workspace/db`, and the UI package is recorded
+at layer 1: it imports no internal package, but it is source-exported (`exports` points at `./src/**`
+and the app lists it in `transpilePackages`), so it ships no build output and is a consumer-side
+presentation layer rather than a foundation other packages build on. The ADR says so in the table
+reading rather than leaving the placement unexplained.
+
+**One surprise worth the sentence it got in the ADR.** The kit's grep is scoped to `packages/*/src`,
+and the ESLint config package does name `apps/web` paths outside `src/`: as fixture filenames in the
+local rule tests and as the `cwd` of the config test. Those are strings handed to the linter, not
+imports, so the direction holds; the ADR records it so the next reader who runs a wider grep does not
+think the rule is broken.
+
+**Recorded and not fixed**: the missing `exports` field on the database package (inert while the app
+is the only consumer) and the MCP package's duplicated agent API contract (the decoupling is
+deliberate, the cost is drift). **Declined with a reason each**: the root domain-agnostic components
+and providers (no second app; there is no root `_hooks/` at all), a domain's read side (no second app
+queries it), and a shared contract package between the MCP package and the app.
+
+**No Turborepo boundaries and no cross-package lint.** Seven packages fit in one table, and the only
+direction worth machine-checking is the one the kit's grep already covers.
+
+**Gate.** `pnpm typecheck`, `pnpm test`, `pnpm lint` and `pnpm lint:agent-rules` all pass at zero, and
+`pnpm --filter web build` lists every route. Documentation only: two files, the new ADR and the ADR
+index, plus this entry.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against

@@ -47,5 +47,5 @@ What changes because of this? What new constraints does it create?
 - [ADR-0010](./0010-app-folder-architecture.md) — App folder architecture: root `_features/` becomes `_domains/`, one bucket set at both tiers, cross-domain access through a per-domain `index.ts`.
 - [ADR-0011](./0011-server-file-conventions.md) — Server file conventions: `_services/` is the data/IO layer, verb prefixes declare read versus write, tRPC is thin transport at the scope root.
 - [ADR-0012](./0012-domain-errors-and-transport-mapping.md) — Domain errors: one closed `DomainError` vocabulary thrown by services, mapped exactly once at each transport boundary.
-- ADR-0013: reserved for the package extraction boundaries, written with step 5 of the architecture migration.
+- [ADR-0013](./0013-package-extraction-boundaries.md): Package extraction boundaries are reuse-driven, layered and lazy; nothing is extracted from the app until a second consumer exists.
 - [ADR-0014](./0014-one-integration-domain.md): One `integration` domain holds every external system, with per-provider subfolders.
