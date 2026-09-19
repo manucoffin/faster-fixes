@@ -1,53 +1,35 @@
-import { formatFeedbackListAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
+import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
-import { NextRequest, NextResponse } from "next/server";
-import { agentError } from "../../_helpers/agent-error";
 import { resolveProjectId } from "../../_helpers/resolve-project-id";
-import { ListFeedbacksQuerySchema } from "../../_services/agent.schema";
-import {
-  isAuthFailure,
-  requireAgentAuth,
-} from "../../_services/require-agent-auth";
 
-// The agent API answers with a `NextResponse` rather than a data object: its
-// handlers are the transport edge, and step 4 is what gives them a service
-// layer to return plain data from. The derived output type below is still the
-// read's type source of truth, it just describes a response for now.
-export async function listFeedbacks(req: NextRequest) {
-  const auth = await requireAgentAuth(
-    req.headers.get("authorization"),
-    "feedbacks:read",
-    "agent:read",
-  );
-  if (isAuthFailure(auth)) return auth;
-  const agentToken = auth;
+type ListFeedbacksInput = {
+  /** Public ID or internal ID, as the caller sent it. */
+  project: string;
+  /** The projects the Agent token's Organization owns: the read's whole scope. */
+  organizationProjects: Array<{ id: string; publicId: string }>;
+  status?: FeedbackStatus;
+  pageUrl?: string;
+};
 
-  const { searchParams } = req.nextUrl;
-  const parsed = ListFeedbacksQuerySchema.safeParse({
-    status: searchParams.get("status") ?? undefined,
-    page_url: searchParams.get("page_url") ?? undefined,
-    project: searchParams.get("project") ?? undefined,
-    format: searchParams.get("format") ?? undefined,
-  });
+export async function listFeedbacks(
+  { project, organizationProjects, status, pageUrl }: ListFeedbacksInput,
+  db: typeof prisma = prisma,
+) {
+  const projectId = resolveProjectId(project, organizationProjects);
 
-  if (!parsed.success) {
-    return agentError("Validation failed", "VALIDATION_ERROR", 422);
-  }
-
-  const { status, page_url, project, format } = parsed.data;
-
-  const projectId = resolveProjectId(project, agentToken.organization.projects);
   if (!projectId) {
-    return agentError("Project not found", "NOT_FOUND", 404);
+    // No period: this copy is the published agent API contract.
+    throw new NotFoundError("Project not found");
   }
 
-  const feedbacks = await prisma.feedback.findMany({
+  const feedbacks = await db.feedback.findMany({
     where: {
       projectId,
       ...(status ? { status } : {}),
-      ...(page_url ? { pageUrl: page_url } : {}),
+      ...(pageUrl ? { pageUrl } : {}),
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -56,11 +38,7 @@ export async function listFeedbacks(req: NextRequest) {
     },
   });
 
-  console.info(
-    `[agent-api] feedbacks:list tokenId=${agentToken.id} project=${projectId} count=${feedbacks.length}`,
-  );
-
-  const mapped = await Promise.all(
+  const items = await Promise.all(
     feedbacks.map(async (f) => ({
       id: f.id,
       status: f.status,
@@ -84,17 +62,9 @@ export async function listFeedbacks(req: NextRequest) {
     })),
   );
 
-  if (format === "markdown") {
-    return new NextResponse(formatFeedbackListAsMarkdown(mapped), {
-      status: 200,
-      headers: { "Content-Type": "text/markdown; charset=utf-8" },
-    });
-  }
-
-  return NextResponse.json({
-    feedbacks: mapped,
-    count: mapped.length,
-  });
+  // `projectId` travels back so the boundary can name the resolved Project in
+  // its access log without resolving the identifier a second time.
+  return { projectId, items };
 }
 
 export type ListFeedbacksOutput = Awaited<ReturnType<typeof listFeedbacks>>;
