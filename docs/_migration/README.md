@@ -5806,6 +5806,63 @@ included. The registration route still lists seventeen functions.
 **Not smoked here, and why.** The sandbox has no Postgres and no Linear OAuth app, so nothing past
 the signature check and the session check runs. The rows below are for the maintainer.
 
+### Linear moves into the `integration` domain, part 2: the four durable functions (issue #117)
+
+The four Linear durable functions follow the six modules #116 moved. Nothing in the server folder
+imports the relocated Linear code any more: the three temporary inverted imports #116 created in
+`server/inngest/` are gone with their files, and the remaining two (`server/jira/oauth-state-cookie.ts`
+and the two Jira OAuth routes) are #120's.
+
+**Files moved.** Four modules with `git mv`, under the `.inngest.ts` suffix the pilot fixed. No file
+dissolved, so this ticket leaves no `_deprecated_` stub.
+
+| Before                                             | After                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `server/inngest/create-linear-issue.ts`            | `_domains/integration/_services/linear/create-linear-issue.inngest.ts`            |
+| `server/inngest/sync-linear-issue-status.ts`       | `_domains/integration/_services/linear/sync-linear-issue-status.inngest.ts`       |
+| `server/inngest/sync-feedback-status-to-linear.ts` | `_domains/integration/_services/linear/sync-feedback-status-to-linear.inngest.ts` |
+| `server/inngest/handle-linear-oauth-revoked.ts`    | `_domains/integration/_services/linear/handle-linear-oauth-revoked.inngest.ts`    |
+
+`src/server/inngest/` now holds the client and the ten functions Jira (#121), Slack (#125) and the
+`user` domain (#127) own.
+
+**Identifiers, triggers and wrappers untouched.** `create-linear-issue`, `sync-linear-issue-status`,
+`sync-feedback-status-to-linear` and `handle-linear-oauth-revoked` keep their function identifier,
+their triggering event names (`feedback/created`, `feedback/integration-issue-requested` filtered on
+`target == 'linear'`, `linear/webhook.issue`, `feedback/status-changed`, `linear/oauth.revoked`),
+their concurrency keys and their retry counts, so an in-flight run is not orphaned. None of the four
+gains the non-retriable wrapper: only the three Jira functions #91 wrapped have one, so an upstream
+Linear outage stays retriable, per user story 21 of the parent spec.
+
+**`handle-` on a durable function is not the webhook verb.** `handle-linear-oauth-revoked.inngest.ts`
+keeps the name it had. The `handle-` verb the parent spec reserves is for the one webhook
+orchestration service per Tracker (#118), and `.inngest.ts` is exempt from `services-verb-prefix`
+anyway, so the two do not collide. Jira's `handle-jira-oauth-revoked` makes the same move in #121.
+
+**One bare error converted, on the only site in the four files.**
+`create-linear-issue.inngest.ts` threw a bare `Error` when Linear's `createIssue` mutation returned
+no issue. It now throws the `LinearRequestError` #116 created: Linear answered with something we
+cannot use, which is exactly what that class is for. It stays a plain `Error` subclass, so the
+function keeps its three retries (ADR 0012). The other three files contain no `throw` at all.
+
+**Imports rewritten.** Intra-domain imports became relative (`./token-crypto`, `./linear-client`,
+`./get-feedback-state-id`, `./get-valid-label-ids`, `./linear-request-error`,
+`../../_helpers/linear/state-mapping`, `../../_helpers/github/format-issue-body`), following the
+pilot. The durable function client is reached with `@/server/inngest` rather than the old `./index`,
+storage with `@/server/storage/get-signed-asset-url`, and the Feedback Status type through the
+`@/app/_domains/feedback` barrel, all unchanged in effect.
+
+**Consumers rewritten.** One file: the registration route (`api/inngest/route.ts`, four imports).
+It keeps its static list of seventeen functions.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (54 files, 302 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web` with dummy environment
+values lists every route, `/api/inngest` included. `GET /api/inngest` against `next dev` on port
+3117 answers `200` with `"function_count":17`.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Linear OAuth app, so no function
+body runs. The Linear rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5837,7 +5894,7 @@ agent API. Only the systems a landed ticket has touched appear below.
       that a delivery for an event the app does not handle also answers `200` (row added by #114).
 - [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.
 
-#### Linear (started by #116)
+#### Linear (started by #116, rows added by #117)
 
 - [ ] Connect: start the install from `/integrations/linear`, approve the Linear consent screen and
       land on `/integrations` with the Linear organization listed.
@@ -5856,3 +5913,6 @@ agent API. Only the systems a landed ticket has touched appear below.
       delivery with a tampered `linear-signature` answers `401`.
 - [ ] Disconnect: disconnect Linear from `/integrations` and see the Installation and its Project
       links removed, and the token revoked at Linear.
+- [ ] Revoke from Linear: revoke the application from the Linear workspace settings and see the
+      Installation removed on the next `linear/oauth.revoked` delivery, with the durable function
+      run listed as succeeded (row added by #117).

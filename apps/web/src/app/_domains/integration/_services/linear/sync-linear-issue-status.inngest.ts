@@ -1,7 +1,7 @@
-import { feedbackStatusFromLinearStateType } from "@/app/_domains/integration/_helpers/linear/state-mapping";
-import type { LinearStateType } from "@/app/_domains/integration/_helpers/linear/state-mapping";
+import { feedbackStatusFromLinearStateType } from "../../_helpers/linear/state-mapping";
+import type { LinearStateType } from "../../_helpers/linear/state-mapping";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 const SYNC_LOOP_WINDOW_MS = 60_000;
 

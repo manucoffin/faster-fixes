@@ -1,16 +1,17 @@
 import {
   formatIssueBody,
   formatIssueTitle,
-} from "@/app/_domains/integration/_helpers/github/format-issue-body";
+} from "../../_helpers/github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
-import { decryptToken } from "@/app/_domains/integration/_services/linear/token-crypto";
-import { getLinearClient } from "@/app/_domains/integration/_services/linear/linear-client";
-import { getFeedbackStateId } from "@/app/_domains/integration/_services/linear/get-feedback-state-id";
-import { getValidLabelIds } from "@/app/_domains/integration/_services/linear/get-valid-label-ids";
+import { decryptToken } from "./token-crypto";
+import { getLinearClient } from "./linear-client";
+import { getFeedbackStateId } from "./get-feedback-state-id";
+import { getValidLabelIds } from "./get-valid-label-ids";
+import { LinearRequestError } from "./linear-request-error";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const createLinearIssue = inngest.createFunction(
   {
@@ -117,7 +118,9 @@ export const createLinearIssue = inngest.createFunction(
 
     const issue = await created.issue;
     if (!issue) {
-      throw new Error("Linear createIssue did not return an issue.");
+      throw new LinearRequestError(
+        "Linear createIssue did not return an issue.",
+      );
     }
 
     const stateRef = await issue.state;
