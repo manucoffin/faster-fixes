@@ -5863,6 +5863,73 @@ values lists every route, `/api/inngest` included. `GET /api/inngest` against `n
 **Not smoked here, and why.** The sandbox has no Postgres and no Linear OAuth app, so no function
 body runs. The Linear rows below are for the maintainer.
 
+### The Linear webhook behind a `handle-` service, part 3 (issue #118)
+
+The first Tracker to copy the shape the GitHub pilot fixed in #114.
+`POST /api/webhooks/linear` keeps the signature verification and the JSON parse and delegates
+everything after them to one orchestration service. Linear gets the same responses it got before,
+byte for byte.
+
+**Characterization tests first.** `api/webhooks/linear/route.test.ts`, fourteen cases, committed
+green against the current handler in its own commit (`b701d0d`) before a line of the route moved, and
+not edited by the extraction. Same recipe as GitHub: `POST` called with a `NextRequest`, only
+`@workspace/db` and `@/server/inngest` faked, the `linear-signature` header computed for real with an
+HMAC over the raw body so the verification helper stays inside the covered path, and assertions on
+status and exact JSON body only.
+
+**The rows, and what Linear actually answers today.**
+
+| Policy row                    | Linear's response                                | Covered by                                                                     |
+| ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Signature invalid or missing  | `401 {"error":"Invalid signature"}`              | two tests (wrong signature, no header)                                         |
+| Body unreadable               | `400 {"error":"Invalid JSON"}`                   | one test                                                                       |
+| Authentic but not for us      | `200 {"ok":true,"ignored":"<reason>"}`           | three tests (`no_organization_id`, `no_installation`, `type:<type>`)           |
+| Duplicate delivery            | `200 {"ok":true,"skipped":"duplicate_delivery"}` | one test, plus two on the delivery key written and its body-hash fallback      |
+| Accepted                      | `200 {"ok":true}`                                | four tests (issue delivery, `remove`, `revoke`, another authentication action) |
+| Linear signing secret missing | `500 {"error":"webhook secret not configured"}`  | one test                                                                       |
+
+**Linear's `ignored` bodies carry a reason, GitHub's do not, and both stay as they are.** The parent
+spec's rule for a conflict is that the current response wins, so the route echoes the outcome reason
+verbatim (`no_organization_id`, `no_installation`, `type:Comment`) instead of adopting GitHub's bare
+`{"ok":true}`. A widget or a Tracker never sees a rephrased reason.
+
+**The shared outcome type gained one degree of freedom.** `TrackerWebhookOutcome` typed the `skipped`
+reason as the literal `"duplicate delivery"`, GitHub's wording. Linear's marker is
+`duplicate_delivery`, so the field is now `string`, documented as "the wording the Tracker already
+receives". The `ignored` reason was already a `string`. No other change to the type, and GitHub's
+route is untouched.
+
+**What moved, and what the route kept.** `_domains/integration/_services/linear/handle-linear-webhook.ts`
+exports `handleLinearWebhook({ deliveryId, rawBody, payload })` and owns deduplication, the
+Installation lookup and the two event emissions (`linear/webhook.issue`, `linear/oauth.revoked`). The
+route keeps reading the raw body, the signature check with its 500 on a missing secret, the JSON
+parse and the outcome-to-HTTP mapping. It imports no database client any more, which is the "must be
+gone" check #140 runs over the API tree. `prisma` and `crypto` left the route file with the logic.
+
+**Why the service takes the raw body as well as the parsed payload.** Linear's `linear-delivery`
+header is not always present, and the fallback replay key is a SHA-256 of the raw body. Deduplication
+belongs to the service, so the fallback follows it rather than being computed in the route; the route
+passes the header value as it read it, `null` included. The key prefix `webhook:linear:` is unchanged,
+so a delivery replayed across the deploy is still recognised.
+
+**Order of checks preserved.** Deduplication runs before the Organization id check, as it did in the
+route, so a replayed delivery with no `organizationId` still answers with the skipped marker and not
+with `ignored`. The `LinearWebhookPayload` type moved with the logic.
+
+**No error class, and no new one needed.** The service throws nothing: an unhandled type is an
+outcome, not a failure. The 500 on a missing `LINEAR_WEBHOOK_SIGNING_SECRET` is still raised by the
+verifier as the `IntegrationConfigurationError` #116 created, caught in the route and logged, exactly
+as before.
+
+**Not this ticket.** The Linear install and callback routes still query Prisma inline (#119).
+
+**Gate.** `pnpm typecheck`, `pnpm test` (55 files, 316 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/webhooks/linear` included.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Linear workspace, so no delivery
+past the signature check runs against real data. The Linear rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5894,7 +5961,7 @@ agent API. Only the systems a landed ticket has touched appear below.
       that a delivery for an event the app does not handle also answers `200` (row added by #114).
 - [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.
 
-#### Linear (started by #116, rows added by #117)
+#### Linear (started by #116, rows added by #117 and #118)
 
 - [ ] Connect: start the install from `/integrations/linear`, approve the Linear consent screen and
       land on `/integrations` with the Linear organization listed.
@@ -5911,6 +5978,11 @@ agent API. Only the systems a landed ticket has touched appear below.
       Feedback status follow (Resolved, then New).
 - [ ] Receive a webhook: confirm in Linear's webhook log that a delivery answers `200`, and that a
       delivery with a tampered `linear-signature` answers `401`.
+- [ ] Replay a delivery: resend the same delivery from Linear's webhook log and see `200` with
+      `{"ok":true,"skipped":"duplicate_delivery"}` and no second issue update (row added by #118).
+- [ ] Delivery from an unconnected workspace: after disconnecting, see a still pending delivery
+      answer `200` with `{"ok":true,"ignored":"no_installation"}` rather than a retry (row added by
+      #118).
 - [ ] Disconnect: disconnect Linear from `/integrations` and see the Installation and its Project
       links removed, and the token revoked at Linear.
 - [ ] Revoke from Linear: revoke the application from the Linear workspace settings and see the

@@ -6,7 +6,9 @@
  *
  * The route owns the HTTP mapping: authentication failures (401), an unreadable
  * body (400) and a missing signing secret (500, Linear only) never reach the
- * service, and an `ignored` reason is not part of any current response body.
+ * service. What a route does with a reason is the Tracker's current behaviour:
+ * GitHub answers a bare `{"ok":true}` and keeps the reason in its logs, Linear
+ * echoes it in the body. A reason is therefore never rephrased.
  */
 export type TrackerWebhookOutcome =
   /** The delivery was processed: a write happened or a job was queued. */
@@ -17,5 +19,9 @@ export type TrackerWebhookOutcome =
    * not retry a delivery we will never want.
    */
   | { status: "ignored"; reason: string }
-  /** Already processed. The reason is echoed in the response body. */
-  | { status: "skipped"; reason: "duplicate delivery" };
+  /**
+   * Already processed. The reason is echoed in the response body, in the
+   * wording the Tracker already receives: `duplicate delivery` for GitHub,
+   * `duplicate_delivery` for Linear.
+   */
+  | { status: "skipped"; reason: string };
