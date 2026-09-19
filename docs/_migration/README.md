@@ -1733,6 +1733,102 @@ copy constants are not worth a test of their own.
 - [ ] No regression on the error boundaries of #99 and #100: throwing from a dashboard page still
       shows `Something went wrong` with a working `Try again`.
 
+### The Project scope queries render their failure (issue #102)
+
+Decision 15, first half. Of the 14 querying files that had no `matchQueryStatus`, seven sit in the
+Project scope and all seven are in Project settings: the inbox and the reviewers tab already matched
+every query they own. Five of the seven now render an error state, two are left as they are, and two
+sibling files that already used `matchQueryStatus` gained the branch their picker list was missing.
+
+**The five conversions.**
+
+| File                                               | Query                        | What a failure showed before                          | What it shows now                                          |
+| -------------------------------------------------- | ---------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| `update/update-project-form.client.tsx`            | `projects.get`               | Empty name and domain fields, `...` as the Project ID | `Failed to load the project` with the message              |
+| `api-key-migration-notice.client.tsx`              | `projects.get`               | A copyable snippet carrying `proj_...`                | `Failed to load the migration snippet` with the message    |
+| `github/github-section.client.tsx`                 | `getInstallation`, `getLink` | "Connect GitHub in organization settings", wrongly    | The failure of the installation or of the link, separately |
+| `jira/link-project/jira-project-picker.client.tsx` | `jira.listIssueTypes`        | An issue type select with no option                   | `Failed to load the issue types` with the message          |
+| `linear/link-team/team-picker.client.tsx`          | `linear.listTeamStates`      | A default state select with no option                 | `Failed to load the team states` with the message          |
+
+**The two siblings.** `jira-section.client.tsx` and `linear-section.client.tsx` already matched their
+installation and link queries but passed `jiraProjectsQuery.data ?? []` and `teamsQuery.data ?? []`
+into their picker, so a failed list read rendered "No Jira projects available" or "No teams
+available": an empty state standing in for an error. Both now nest a `matchQueryStatus` around the
+picker, the way `slack-section.client.tsx` already did for its channels. The same nesting is what
+`github-section.client.tsx` gained for `listRepos`. That is decision 15's "a picker is never silently
+empty", and it is the reason two files outside the seven were touched.
+
+**The two left as they are.**
+
+- `delete/delete-project-button.client.tsx` reads `projects.get` for the Project name that the
+  confirmation input must match. It is a value read only to enable a control, the case decision 15
+  names: on a failure the name is empty, the string can never match, and the `Delete` action stays
+  disabled, which is the safe outcome. The card around it still renders its warning, and the same
+  query's failure is already on screen at the top of the page through the Project information card.
+- `regenerate-api-key/regenerate-api-key-section.client.tsx` reads `projects.get` for the last four
+  characters of the API key. No file imports this component: the API key surface was replaced by the
+  Project ID and the section is not mounted anywhere, so the failure has no viewer. Converting it
+  would be writing UI for a screen that does not exist.
+
+**One helper for the message.** `matchQueryStatus` hands its `Errored` branch an `unknown`, so every
+converted site needed the same narrowing to read a message. `src/utils/error/get-error-message.ts`
+does it once: an `Error` with a non-blank message yields that message, anything else yields
+`Something went wrong. Please try again.`, the same sentence the `errorFormatter` of #98 puts on an
+unexpected failure. It is covered by three unit tests. The masking of #98 is what makes rendering
+the message safe: a `DomainError` arrives as final copy, and anything unexpected has already been
+replaced by that sentence server-side.
+
+**`Alert`, not `Empty`.** `rules/frontend.md` asks for an `<Empty>` in the `Errored` branch. Every
+section of this folder renders `<Alert variant="destructive">` instead, from before step 4, so the
+conversions follow the folder rather than the rule file: a settings card whose failures look like
+two different products is worse than a rule file that describes the rest of the app. The pickers'
+inner fields use a `text-muted-foreground` line for their `Empty`, matching the fields around them.
+
+**Two `Empty` branches that never render.** `projects.get` throws `NotFoundError` when the Project is
+missing, so its query never resolves to nothing. The two files that read it still declare an `Empty`
+branch, because the overload of `matchQueryStatus` that narrows `data` to a non-nullable type is the
+one that takes it, and a comment on each says so.
+
+**Checks at this commit.**
+
+| Check                                               | Result                                   |
+| --------------------------------------------------- | ---------------------------------------- |
+| Project scope querying files without a status match | two, both listed above with their reason |
+| Queries outside the Project scope touched           | none                                     |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint`          | pass (204 web tests, zero warnings)      |
+| `pnpm lint:agent-rules`                             | **0 problems**, unchanged since #105     |
+| `pnpm --filter web build`                           | every route listed                       |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Tests.** Only `get-error-message.test.ts`. The rendering is verified by hand: the vitest harness is
+`environment: node` with no testing-library, as recorded under #99.
+
+**Smoke checklist for the maintainer** (`pnpm dev`, a real database, the Project settings page).
+Force a failure per region by throwing at the top of the matching `_services/` function, or by
+blocking `/api/trpc` in the browser devtools:
+
+- [ ] `getProject` throwing: the Project information card reads `Failed to load the project` with the
+      thrown message, and the API key card reads `Failed to load the migration snippet`. No field is
+      empty, and no snippet showing `proj_...` can be copied.
+- [ ] The same failure leaves the Danger zone card usable: the warning and the `Delete project`
+      button are there, and the confirmation input cannot enable `Delete`.
+- [ ] `listAccessibleRepos` throwing with GitHub connected and no repository linked: the GitHub card
+      reads `Failed to load your repositories`, not an empty repository select.
+- [ ] `getInstallation` for GitHub throwing: the GitHub card reads
+      `Failed to load the GitHub integration`, not "Connect GitHub in organization settings".
+- [ ] GitHub connected and loading: the card shows a skeleton before the "Connect GitHub" wording,
+      which used to flash on every load.
+- [ ] `listAccessibleJiraProjects` throwing: the Jira card reads `Failed to load your Jira projects`.
+      With it healthy, pick a Jira project and make `listJiraIssueTypesForProject` throw: the issue
+      type region reads `Failed to load the issue types` and the form cannot be submitted.
+- [ ] `listAccessibleLinearTeams` and `listLinearTeamStates` the same way, on the Linear card.
+- [ ] Nothing regressed on the happy path: update the Project name and domain, toggle the widget
+      switch, link and unlink a GitHub repository, a Jira project and a Linear team.
+- [ ] The Jira issue type still defaults to `Bug` when the chosen Jira project has one.
+- [ ] No regression in the inbox or the reviewers tab, which this ticket did not touch.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

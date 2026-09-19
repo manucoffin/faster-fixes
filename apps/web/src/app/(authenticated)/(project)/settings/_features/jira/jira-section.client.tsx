@@ -3,9 +3,14 @@
 import { usePlanGate } from "@/app/_domains/subscription";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { JiraProjectPicker } from "./link-project/jira-project-picker.client";
@@ -130,10 +135,21 @@ function LinkOrPickJiraProject({
           siteUrl={siteUrl}
         />
       ) : (
-        <JiraProjectPicker
-          projectId={projectId}
-          jiraProjects={jiraProjectsQuery.data ?? []}
-        />
+        matchQueryStatus(jiraProjectsQuery, {
+          Loading: <Skeleton className="h-32 w-full" />,
+          Errored: (error) => (
+            <Alert variant="destructive">
+              <AlertTitle>Failed to load your Jira projects</AlertTitle>
+              <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+            </Alert>
+          ),
+          Success: ({ data: jiraProjects }) => (
+            <JiraProjectPicker
+              projectId={projectId}
+              jiraProjects={jiraProjects ?? []}
+            />
+          ),
+        })
       ),
   });
 }
