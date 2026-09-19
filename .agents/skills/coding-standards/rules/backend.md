@@ -81,6 +81,6 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 `no-client-import-of-services` (exempts `*.schema.ts` and type-only imports), `services-no-trpc-import`,
 `schema-must-be-pure-zod`, `no-feature-nesting`, `services-verb-prefix`,
 `require-trpc-output-type` (inverted: service return-type export),
-`services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`),
+`services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`; always on since step 4, not agent-gated),
 `require-use-client-suffix` (exempts `use-*`),
 `require-server-action-suffix` (always on, not agent-gated). See `packages/eslint-config/local-rules/`.

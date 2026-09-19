@@ -1269,6 +1269,53 @@ no importer and exports no value, so typecheck, tests and the build pass without
 - [ ] In `/admin/users/<id>`, use "Request password reset" with the mailer working: the success toast
       appears and the email arrives.
 
+### `services-no-bare-error` becomes always-on for services (issue #96)
+
+Decision 3, the fifth link of the chain and the last thing to land before masking. The pre-commit
+hook now rejects a bare `Error` in a service: the rule runs at `error` in plain `pnpm lint`, outside
+the agent gate, so lint-staged catches it on staged `ts`/`tsx` files rather than only in
+`lint:agent-rules`.
+
+**One entry, one glob.** The rule moved out of the agent-gated `**/_services/**` block of
+`packages/eslint-config/next.js` into its own always-on block with the same glob and severity
+`"error"`. Nothing about the rule implementation changed, and no option was added. The three other
+service rules (`services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`) stay
+behind the gate: they are convention rules, not a correctness guard on user-visible behaviour.
+
+**The server folder is untouched,** as decision 3 requires. The glob is the rule's whole reach, so the
+28 infrastructure `throw new Error(` sites under the server folder keep surfacing as a 500, with no
+`eslint-disable` line anywhere. They join the sweep in step 5, when those files move into a domain.
+
+**The tree was already clean.** `grep -rn "throw new Error(" apps/web/src | grep _services/` returned
+nothing before the flip and after it, and no suppression was added: the flip cost zero product
+edits. `grep -rn "eslint-disable.*services-no-bare-error" apps/web/src packages` returns nothing too.
+
+**Tests.** `next-config.test.js` loses the rule from `STEP_3_RULES` (whose "stays off outside the
+agent gate" case is now false for it) and gains a `services-no-bare-error` block: the rule is
+declared exactly once for `**/_services/**/*.{ts,tsx}` at `"error"`; with `ESLINT_AGENT_RULES=0` it
+still resolves to `2` for a domain service and for `api/v1/agent/_services/require-agent-auth.ts`;
+and it resolves to `undefined` for `src/server/auth/email-and-password.tsx` and
+`src/server/jira/client.ts`. The last case was checked against a mutant config whose glob is
+`**/*.{ts,tsx}`: it resolves to `2` there, so the `undefined` is the glob and not a dead resolver.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                                        |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| Bare errors in services                    | `grep -rn "throw new Error(" apps/web/src \| grep _services/` returns nothing |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (194 web tests, 191 eslint-config tests, zero warnings)                  |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105)                         |
+| `npx next build`                           | every route listed, both agent routes included                                |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+No smoke checklist: the ticket changes lint configuration only, and no shipped byte moves.
+
+**Debt for the final lock.** ADR 0012's status note still reads that step 4 "makes it unconditional
+and sweeps `src/server/**`". The sweep is deferred to step 5 by decision 3, so the sentence is
+corrected with the rest of the note in #106.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

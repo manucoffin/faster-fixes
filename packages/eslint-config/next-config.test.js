@@ -21,7 +21,6 @@ const STEP_3_RULES = {
   "local/services-verb-prefix": SERVICE,
   "local/services-no-trpc-import": SERVICE,
   "local/require-trpc-output-type": SERVICE,
-  "local/services-no-bare-error": SERVICE,
   "local/no-client-import-of-services": SERVICE,
   "local/require-use-client-suffix": SERVICE,
   "local/no-default-export": SERVICE,
@@ -144,6 +143,44 @@ describe("the step 3 final lock", () => {
       await severityFor("src/app/(public)/_services/get-github-stars.ts"),
     ).toBe(2);
     expect(await severityFor("src/app/(public)/x.trpc.mutation.ts")).toBe(2);
+  });
+});
+
+describe("services-no-bare-error", () => {
+  it("is declared once, for the services glob only", () => {
+    const entry = onlyEntryFor("local/services-no-bare-error");
+
+    expect(entry.files).toEqual(["**/_services/**/*.{ts,tsx}"]);
+    expect(entry.rules["local/services-no-bare-error"]).toBe("error");
+  });
+
+  it("resolves to error for a service with the agent gate off", async () => {
+    vi.resetModules();
+    process.env.ESLINT_AGENT_RULES = "0";
+    const { nextJsConfig: ungated } = await import("./next.js");
+    process.env.ESLINT_AGENT_RULES = "1";
+    vi.resetModules();
+
+    const severityFor = await severityResolver(
+      "local/services-no-bare-error",
+      ungated,
+    );
+
+    expect(await severityFor(SERVICE)).toBe(2);
+    expect(
+      await severityFor("src/app/api/v1/agent/_services/require-agent-auth.ts"),
+    ).toBe(2);
+  });
+
+  // `src/server/**` keeps its 28 infrastructure `throw new Error(` sites until
+  // step 5 relocates those files into a domain.
+  it("does not reach the server folder", async () => {
+    const severityFor = await severityResolver("local/services-no-bare-error");
+
+    expect(
+      await severityFor("src/server/auth/email-and-password.tsx"),
+    ).toBeUndefined();
+    expect(await severityFor("src/server/jira/client.ts")).toBeUndefined();
   });
 });
 

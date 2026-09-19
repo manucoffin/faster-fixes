@@ -107,6 +107,16 @@ export const nextJsConfig = [
     },
   },
   {
+    // Step 4 takes this one out of the agent gate: a service throwing a bare
+    // `Error` is now rejected by plain `pnpm lint`, so the pre-commit hook
+    // catches it. `src/server/**` joins the sweep in step 5, when those files
+    // move into a domain.
+    files: ["**/_services/**/*.{ts,tsx}"],
+    rules: {
+      "local/services-no-bare-error": "error",
+    },
+  },
+  {
     // A deep cross-domain import reaches past a domain's public index.ts, so it
     // is an error even outside agent mode.
     files: ["**/src/app/_domains/**/*.{ts,tsx}"],
@@ -141,8 +151,6 @@ export const nextJsConfig = [
       "local/services-verb-prefix": migratedSeverity,
       "local/services-no-trpc-import": migratedSeverity,
       "local/require-trpc-output-type": migratedSeverity,
-      // Step 4 makes this one always-on and sweeps `src/server/**`.
-      "local/services-no-bare-error": migratedSeverity,
     },
   },
   {
