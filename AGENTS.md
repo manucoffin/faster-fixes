@@ -18,6 +18,7 @@
 - If a file must be retired by you: keep an empty `_deprecated_*.ts(x)` replacement with a short comment.
 - The user MAY delete files. If a file is already deleted (shows as `deleted` in git status), do NOT restore it — include the deletion as-is in the commit.
 - If env vars change, update `.env.example` only.
+- Never run a bare `pnpm install` to "refresh" anything. `pnpm-lock.yaml` is committed with Prettier's quoting (lint-staged reformats it), and pnpm rewrites it with its own, producing a ~20,000-line diff unrelated to your change. Install only when you are deliberately adding or removing a dependency, and check the lockfile diff before committing.
 - Never run production database migrations (`pnpm migrate:prod`).
 - Only run development migrations (`pnpm migrate:dev`); production migration execution is user-managed.
 - Code identifiers, comments, filenames, schemas: English only.
@@ -40,12 +41,14 @@ All coding standards for this project live in the `coding-standards` skill at `.
 
 ## Required checks before done
 
+- **On a fresh clone, generate before you check.** The Prisma client, the published package builds and the Next.js route types are all untracked, so `pnpm typecheck` reports errors unrelated to your change until you have run `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and `npx next typegen` (from `apps/web`).
 - Run from repo root: `pnpm typecheck`.
 - Run from repo root: `pnpm test`.
 - Run both lint commands:
 - `pnpm lint` (all workspaces). Zero warnings tolerated.
 - `pnpm lint:agent-rules` (web project rules only). Zero problems required: it runs with `--max-warnings 0` since the step 4 final lock, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression rather than a burn-down item. The history is in `docs/_migration/`.
 - If DB schema changed: run required `packages/database` generation/migration commands.
+- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `server/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
 - Never declare completion while required checks fail.
 - The pre-commit hook runs the same gate: lint-staged (Prettier on every staged file, plain ESLint with zero warnings on staged `ts`, `tsx`, `js`, `jsx` files), then `pnpm typecheck` and `pnpm test`. The agent-gated rules are not part of the hook, so a fix in a scope that has not been migrated still commits.
 

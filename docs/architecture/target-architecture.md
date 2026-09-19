@@ -124,6 +124,8 @@ Rules that follow:
 - **Structure grows on demand.** A feature is flat until roughly three files of one species accumulate; then they collapse into a `_`-prefixed subfolder inside the feature. Never a feature inside a feature (lint-enforced).
 - **Root `_*` folders are domain-agnostic.** Anything carrying domain knowledge cannot live in `app/_components/`, `app/_hooks/`, `app/_providers/`, `app/_constants/`.
 
+`[Faster Fixes]` **Deviation carried out of the migration, still open:** a domain's capability folders sit at the **domain root**, not under a `_features/` bucket. Six exist (`auth/send-verification-email-button/`, `auth/stop-impersonate-button/`, `subscription/plan-card/`, `subscription/plan-gate/`, `subscription/upgrade-subscription/`, `project/active-project/`). Nothing lint-enforces the choice either way. Either the domains gain a `_features/` bucket or this document records the domain-root shape as the convention; until that decision is taken, a new capability follows the existing tree. Route scopes are unaffected and keep `_features/`.
+
 ### Domain versus route: disambiguation
 
 1. Domain-bound or domain-agnostic? Agnostic goes to a root `_*` folder. Bound continues.
@@ -159,6 +161,7 @@ When a route feature gains a second consumer in a different route, **move the wh
 - **Procedures are inlined and thin**: auth procedure, Zod `.input()`, one service call. A fat procedure is a smell; push the logic into the service.
 - **Transport-policy guards stay in the procedure.** Authentication, authorization asserts, rate limits, and anything whose failure has no domain-error equivalent (a `TOO_MANY_REQUESTS`) belong to the transport, not the service. The counts or facts they need come from a read service.
 - **Routers compose hierarchically following the route tree.** A route-group router mounts its child segment routers. The app router mounts domain routers and route-group routers side by side. No god-router importing dozens of operations.
+- **A child segment may own `_services/` without a router**, its procedures inlined in the nearest ancestor router. The test is whether that router's API surface still reads in one pass, not how many operations it carries; a segment router is introduced when it stops doing so.
 - **tRPC is the API layer.** There is no parallel hand-rolled fetcher, query-options, or hook layer. tRPC generates those from the procedure.
 
 ```ts
@@ -246,6 +249,8 @@ A webhook endpoint answers a calling system, not a user, so the response to a fa
 
 - Each Tracker has exactly one webhook orchestration service, carrying the reserved `handle-` verb. It owns deduplication, the Installation lookup and the event emission, and returns an outcome.
 - The route keeps the signature or token verification and maps that outcome to the HTTP response. Nothing else lives in the route.
+- **Exception when the Tracker authenticates with a stored per-installation token: the Installation lookup _is_ the authentication and stays in the route.** Jira signs nothing (ADR-0008), so the signature row of the table above is its unknown-token row: the route calls `find-jira-installation-by-webhook-token.ts` and answers 401 on a miss, and that lookup never folds into the `handle-` service or into the outcome type. A future Tracker authenticated the same way follows Jira, not the general bullet above.
+- **Deduplication keys and durable function identifiers are part of the running system.** A webhook dedup key prefix (`webhook:<provider>:…`, with a SHA-256-of-raw-body fallback when the delivery header is absent) and an Inngest function `id`, `event` or `cron` string must not change when a file is moved or renamed: editing one resets replay protection across a deploy or orphans in-flight runs. This is why a `handle-` service takes the raw body alongside the parsed payload.
 - Answering "no Installation" with a 200 hides a real misconfiguration from the Tracker. That is deliberate: a 4xx buys a retry storm for a state the Tracker cannot repair. The case must stay visible in the server logs instead.
 - `[Faster Fixes]` Linear and Jira echo the ignore reason in the body and GitHub answers an ignored delivery exactly like an accepted one, because those are the bodies the registered webhooks already receive.
 
@@ -316,7 +321,7 @@ Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/e
 | `require-trpc-output-type`          | `**/_services/**`     | A read service exports `Awaited<ReturnType<typeof x>>` as its type. Tests exempt.                                  | agent  |
 | `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                | always |
 | `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports. | agent  |
-| `no-client-import-of-server-errors` | all                   | Client code never imports `src/server/errors/*`.                                                                   | agent  |
+| `no-client-import-of-server-errors` | all                   | Client code never imports `src/server/errors/*`.                                                                   | always |
 | `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                          | agent  |
 | `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                           | agent  |
 | `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                          | agent  |
@@ -332,6 +337,14 @@ Fourteen custom rules, exported by `packages/eslint-config/local-rules/index.js`
 
 `require-use-client-suffix` runs on all of `src/**`, wider than the domain tier: the `.client.tsx` naming applies wherever a `'use client'` file lives, and a naming convention that holds in one folder only is half a convention.
 
+**Which gate a rule belongs in.** A rule that guards user-visible correctness or a security property goes always-on at `error`, which puts it in lint-staged and the pre-commit hook. A rule that enforces a convention stays behind `ESLINT_AGENT_RULES=1`. `services-no-bare-error` crossed over on that criterion; `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type` and `no-raw-tailwind-colors` deliberately did not, even at `error` with nothing to report, because taking a rule out of the gate is the same as adding it to the commit hook.
+
+**Writing or changing a rule.** Three checks exist beyond the per-rule `RuleTester`, and each catches a failure mode the `RuleTester` cannot see:
+
+- **A zero is not evidence until the glob is verified.** A rule wired with the wrong `files` pattern matches nothing and reports nothing, which is indistinguishable from passing now that the whole tree is expected to be clean. Confirm with `ESLINT_AGENT_RULES=1 npx eslint --print-config <file>` from `apps/web` before trusting a zero.
+- **The wiring itself is tested**, separately from the rules: `packages/eslint-config/next-config.test.js` asserts the shape of the config blocks, and its glob assertions go through ESLint's own `calculateConfigForFile` rather than pulling in a matcher dependency. A rule wired with no options silently never runs.
+- **Every ADR number cited in a rule's comments or messages must be a committed ADR** under `docs/adr/`. `local-rules/adr-citations.test.js` fails the build otherwise, so renumbering or removing an ADR is a two-file change.
+
 ### Severity ramp during a migration
 
 A rule that cannot yet pass everywhere is introduced at `warn`, then locked to `error` per scope as each scope is migrated (an allowlist of migrated scopes in the ESLint config), and finally collapsed to plain `error` with the allowlist deleted. A rule whose violation surface is empty when it lands goes straight to `error`.
@@ -345,6 +358,7 @@ A rule that cannot yet pass everywhere is introduced at `warn`, then locked to `
 - Vitest, colocated `*.test.ts` next to the unit, one test file per unit.
 - Test only pure `_helpers/` and dependency-injected `_services/`. Components, hooks, and routers are out of scope until a real need appears.
 - No module mocks. Inject fakes through parameters. If logic worth testing is trapped behind a singleton, extract it down into a helper or an injectable service.
+- **Exception, the route-handler seam:** a handler serving a contract an outside party already depends on (a public API, a registered webhook) is tested by calling its exported method with a `Request` and asserting status, exact body and headers, with infrastructure modules faked at their boundary. Such tests are written **before** the handler is refactored and must survive it unchanged; a test that has to change is a broken contract. Services extracted behind the handler get no tests of their own.
 
 `[Faster Fixes]` The harness matches that policy and nothing more. `apps/web/vitest.config.ts` runs `environment: "node"`, resolves the `@/*` alias through Vite's native tsconfig path resolution, pins `TZ` to `UTC` so date assertions hold on every machine, and loads no setup file. There is no jsdom and no `@testing-library/*`: they are added the day the first component test exists, not before, so the installed harness and the documented policy stay in agreement. `apps/web/src/utils/crypto/token-cipher.test.ts` is the reference test. The custom ESLint rules have their own Vitest project in `packages/eslint-config`; both run under `pnpm test` through Turbo.
 

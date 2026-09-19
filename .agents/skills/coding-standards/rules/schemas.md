@@ -6,6 +6,7 @@ Shared by the backend (tRPC `.input()`) and the frontend (form resolver), so thi
 
 - A `*.schema.ts` lives in its scope's `_services/` folder (consumed by both the tRPC `.input()` and the client form resolver). See [backend.md](backend.md) and [architecture.md](architecture.md).
 - A schema must stay **pure-Zod**: no server-only imports (`@/server/`, Prisma client, sibling non-schema service). This keeps it safe to import from client forms without leaking server deps into the bundle.
+- **A Zod enum that is domain vocabulary is not a `*.schema.ts`.** When the enum is the runtime validator for a glossary value that many modules read (rather than the input of one operation), it lives in `_types/` and keeps the glossary name: `_domains/feedback/_types/feedback-status.ts` exports `FeedbackStatusEnum` and `FeedbackStatus`. Filing it as a schema would force the `Input` suffix of the section below onto a glossary type. See [architecture.md](architecture.md).
 
 ## File structure
 
@@ -76,8 +77,9 @@ Only add `XValues` when input and output actually diverge. A schema with no `.de
 ## Prisma integration
 
 - Use **`z.enum(PrismaEnum)`** for a Prisma enum. `apps/web` is on zod 4, where `z.enum()` is overloaded to absorb an enum-like object, and **`z.nativeEnum()` is deprecated**.
-- Never hand-write `z.enum(["A", "B"])` to mirror a DB-backed enum: it silently drifts from the schema. Import the enum from `@repo/db/generated/prisma/enums` and pass it to `z.enum()`.
+- Never hand-write `z.enum(["A", "B"])` to mirror a DB-backed enum: it silently drifts from the schema. Import the enum from `@workspace/db/generated/prisma/enums` and pass it to `z.enum()`.
 - `z.enum()` is also how you declare a local const array of string literals (`z.enum(ALLOWED_FILE_TYPES)`) that is not a Prisma enum. Same function, both cases.
+- **`@workspace/db/generated/prisma/enums` is the only database specifier a schema may import.** `schema-must-be-pure-zod` bans `@workspace/db`, `@workspace/db/index` and `@workspace/db/generated/prisma/client`: the enums module is types and string unions, the others pull the client into a module a client form imports.
 
 ## Example
 

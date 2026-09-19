@@ -7492,3 +7492,153 @@ into the agent API scope (#132), the rate limit budget now reads the Plan vocabu
 - [ ] Rate limit on cloud: exceed the Plan's hourly agent read budget and see the error sentence
       naming the limit, the remaining count and the retry delay, with `Retry-After` and the three
       `X-RateLimit-*` headers on the response.
+
+## Close-out harvest (issue #142)
+
+The log was read end to end, once, against the permanent documents, to test its own header
+claim that nothing in it is permanent. It was then read a second time, as an audit of the first
+pass, which found five more durable facts and is folded into the lists below. The claim is
+**mostly** true and not entirely: the
+per-ticket narratives, the burn-down counts, the gate transcripts, the "must be gone" tables
+and the maintainer to-do lists are all migration process and die with the folder, but about
+forty rules, deliberate deviations and pieces of rationale existed **only** here. Those moved.
+Nothing was deleted, and the log was not edited beyond this entry.
+
+### What moved, and where
+
+**`docs/architecture/target-architecture.md`**
+
+- Domain capability folders sit at the **domain root**, not under `_features/`: six live folders,
+  an accepted deviation with the decision still open. Marked `[Faster Fixes]`.
+- Which gate a lint rule belongs in: user-visible correctness or security goes always-on at
+  `error` (and therefore into the pre-commit hook), a convention stays behind the agent gate.
+- Three checks for anyone writing or changing a rule: verify a rule's glob with
+  `--print-config` before trusting a zero, the config **wiring** is tested separately in
+  `next-config.test.js` through `calculateConfigForFile`, and `adr-citations.test.js` requires
+  every ADR number cited in a rule to be a committed ADR.
+- Gate column corrected: `no-client-import-of-server-errors` is always-on, not agent-gated.
+- Webhook policy: the Jira exception (a Tracker authenticated by a stored per-installation
+  token keeps the Installation lookup in the route, as its 401), and the rule that deduplication
+  key prefixes and durable function identifiers survive a file move.
+
+**`docs/adr/0010-app-folder-architecture.md`** — an amendment recording the domain-root
+capability folders and the intra-scope hook promotion trigger.
+
+**`docs/adr/0007-agent-api-rate-limit-is-an-abuse-backstop.md`** — the no-op status skip is
+asymmetric on purpose (the dashboard emits, the agent does not) and why closing the gap either
+way is worse.
+
+**`docs/adr/0012-domain-errors-and-transport-mapping.md`** — two new amendments: a published
+response body outranks the shared mapping helper, which supplies the status only (one scope-local
+mapper per API); and `require-agent-auth.ts` is the one `_services/` file allowed to return a
+`Response`. The "only callers of `domainErrorResponse`" line was corrected.
+
+**`docs/adr/0013-package-extraction-boundaries.md`** — which error-body fields the published
+clients actually read (`@fasterfixes/mcp`: `error`; `@fasterfixes/core`: `error` and `details`;
+`code`: nobody), so a breaking change can be told from a free one.
+
+**`docs/adr/0014-one-integration-domain.md`** — the shared-mechanism-at-the-bucket-root versus
+per-provider-constant split, and that Slack deliberately does not follow it.
+
+**`coding-standards`, `rules/architecture.md`** — helper purity is about IO, not import direction;
+a domain-vocabulary Zod enum goes to `_types/`; capability folders at the domain root; intra-scope
+hook promotion; the barrel must be addressed by its alias and re-exports are checked like imports;
+and a "Recorded placement exceptions" section (provider in the service **name** at the route tier
+versus provider subfolders in the domain tier, two scopes may share a service name only when the
+contract matches, and the `_components/dashboard/search-params.ts` exception with its known
+client-to-`nuqs/server` consequence).
+
+**`coding-standards`, `rules/backend.md`** — the tRPC procedure key naming rule; when a service
+takes `db: typeof prisma = prisma`; services take plain named values and never `ctx` or
+`next/headers`; a service may call another service; a service reads the fact it decides on; a
+service returns what the boundary must report; `require-agent-auth` as the named transport-guard
+exception; the two `update-feedback-status` services kept apart on purpose; SDK client modules may
+keep a noun name when the basename is `<token>-` shaped, while a dash-less basename cannot live in
+`_services/` at all; the `*.inngest.ts` rule exemptions; that a `crypto.randomBytes` generator is a
+helper; and that a durable function's `id`, `event` and `cron` strings must survive a file move.
+
+**`coding-standards`, `rules/errors.md`** — how to choose among the five codes (a rejected input is
+`BAD_REQUEST`, an unmet state of the world is `PRECONDITION_FAILED`); no sentinel messages, reserve
+a code per case instead; an unreachable branch is dropped rather than re-coded; throw your own
+`DomainError` outside the `try` that translates provider messages; the invitation services'
+pass-through of Better Auth copy, recorded as an accepted exception; a full "telling a refusal from
+an outage" section (decrypt before the try, discriminate on provider status, keep the request error
+retriable, and never wrap as non-retriable before the two are distinguishable, plus the Slack
+message-text coupling); the cause-chain logging shape with its cycle guard and the decision to log
+every failure; what masking does **not** touch; and the boundary details (`retry()` not `reset()`,
+`digest` undeclared, the `<main>` landmark rule, per-screen actions, and the fonts plus
+`ThemeProvider` that `global-error.tsx` needs).
+
+**`coding-standards`, `rules/frontend.md`** — the token list corrected (`warning` and `info` do not
+exist; adding one is a CSS variable **and** a hue-table line); how `no-raw-tailwind-colors` works
+and why a hue with no token is never reported; the permanent illustration exemptions; that a
+`dark:` variant disappears rather than being ported; `getErrorMessage` as the narrowing helper for
+the `Errored` branch; the `<Alert variant="destructive">` folder-consistency exception; and the
+safety rules for a failed query (never `data ?? []` into a picker, never a default that enables a
+destructive action, with the two named exemptions and the provider query-state pattern).
+
+**`coding-standards`, `rules/schemas.md`** — `@workspace/db/generated/prisma/enums` is the only
+database specifier a schema may import, replacing the kit's `@repo/db`; and the vocabulary-enum
+placement cross-reference. The `@repo/ui` specifiers in `rules/frontend.md` were corrected the same
+way.
+
+**`AGENTS.md`** — the fresh-clone generation steps before `pnpm typecheck` means anything, the
+`pnpm --filter web build` form and the `GITHUB_PRIVATE_KEY` module-evaluation read, and the warning
+never to run a bare `pnpm install` (it rewrites the lockfile's quoting into a 20,000-line diff).
+
+**`coding-standards`, `rules/testing.md`** — the route-handler seam, which the file previously
+forbade outright while 17 `route.test.ts` files practised it: a handler serving a contract an
+outside party already depends on is tested by calling its exported method with a `Request` and
+asserting status, exact body and headers; only infrastructure is faked, never the scope's own
+services; the tests are written green against the current handler **before** the refactor and must
+survive it untouched; services behind such a route get no tests of their own. The `oxc` JSX line of
+`vitest.config.ts` was added to the config list with the trap that makes it worth writing down
+(Vitest 5 runs on rolldown-vite, so the `esbuild` option looks right and is silently ignored). The
+Testing section of the architecture document carries the same exception in short form.
+
+**`coding-standards`, `rules/backend.md`, second pass** — a child segment may own `_services/` with
+no router of its own, its procedures inlined in the nearest ancestor router, readability of one API
+surface being the criterion rather than the operation count (six such segments today; the Project
+router carries 44 operations on purpose). This contradicted "each segment owns its `_services/` +
+router" as written, in the code and in the architecture document, so both were corrected. And: the
+undo half of a plan-gated capability is never plan-gated, so a downgraded Organization can always
+disconnect what it connected while paying.
+
+**`coding-standards`, `rules/architecture.md`, second pass** — a barrel may export a client hook
+beside server-read vocabulary (`usePlanGate` next to `PLAN_LIMITS`, read by nine `src/server/**`
+files); it is benign, and the fix if it ever costs something is to move the hook, not to split the
+barrel.
+
+**Code** — one comment in `_helpers/slack/match-unhealthy-error.ts`, the only place the coupling
+between its substring list and the `SlackRequestError` messages can usefully be read; and the
+missing third copy of the "not plan-gated" comment on `unlinkRepo`, whose two siblings had one.
+
+### What was judged temporary
+
+Everything else, which is the bulk of the file:
+
+- The baseline table, the per-step re-measures and the whole `lint:agent-rules` burn-down. The
+  surviving fact (zero problems at `--max-warnings 0`, so any report is a regression) is already in
+  the architecture document and the skill.
+- The locked-scopes table and the `migratedScopes` mechanism. Both were deleted at the step 3 final
+  lock, and `next-config.test.js` now asserts their absence.
+- Every exit-verification and re-verification transcript, every "must be gone" check table and
+  every gate output. They record that a command passed at a commit.
+- Every per-ticket narrative (#54 to #141): what moved, what was renamed, how many imports were
+  rewritten, which commit carried it. Git holds this.
+- Point-in-time inventories: file counts per folder, importer counts, bare-`Error` site counts, the
+  pre-step-4 code table. All superseded by the current tree.
+- Every "Left for the maintainer" list and every `_deprecated_` stub inventory. The outstanding ones
+  are re-listed by the close-out ticket (#143) rather than inherited from here.
+- The amendments to the migration kit, which are corrections to a document being deleted. The two
+  that state something about **this** repo rather than about the kit's text (`@workspace/db` over
+  `@repo/db`, and the `<Service>Output` spelling) are now in the rule files and ADR-0011.
+- The deferred debt list. It survives as tracked issues (#144), not as prose.
+- The step 5 smoke checklists above. They are copied out in full by #143 before the folder goes.
+- Sandbox-specific notes: which command the sandbox refused, dummy `.env.local` values, dev-server
+  ports, and "not smoked here, and why".
+
+Four anomalies the log recorded as open were re-checked and are **resolved in the code**: the
+client hook importing the server plan config, the Subscription read named after a User, the Jira
+reconnect mail template living in `src/lib/`, and the twelve route handlers querying Prisma inline.
+They needed no home.

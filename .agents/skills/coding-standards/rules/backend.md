@@ -18,6 +18,15 @@ A file is a **read iff it performs no writes**, and a read may use only read ver
 
 The **folder** sets the layer (`_services/` = IO); the **verb** sets the direction (read vs write).
 
+### Named exceptions to the verb prefix
+
+- **An SDK client module keeps its noun name when the basename already has a `<token>-<token>` shape.** `services-verb-prefix` checks that shape and the banned `update` synonyms, not membership of the verb set, so `github-app.ts`, `linear-client.ts`, `jira-client.ts`, `jira-rest-client.ts`, `slack-client.ts`, `token-access.ts` and `webhook-registration.ts` are correct as they stand. Do not invent a `get-` name for a client factory. A **dash-less** basename cannot live in `_services/` at all, which is what forced `crypto.ts` → `token-crypto.ts` and `errors.ts` → `jira-errors.ts`. The provider token cipher is uniformly `token-crypto.ts`.
+- **`*.inngest.ts`, `*.schema.ts`, `index.ts`, `_`-prefixed and test files are exempt** from `services-verb-prefix` and `require-trpc-output-type`; `services-no-bare-error` still applies to all of them. The suffix is load-bearing, not decoration: it is also why `handle-linear-oauth-revoked.inngest.ts` may carry `handle-` without colliding with the verb reserved for the one webhook orchestration per Tracker.
+
+### A live external identifier survives a file move
+
+Renaming or relocating a `*.inngest.ts` service must not change its Inngest function `id`, its trigger `event` or `cron` strings, its concurrency key, retry count or idempotency key. Those strings are the running system's identity: changing one orphans in-flight runs. The same holds for a webhook deduplication key prefix (`webhook:<provider>:…` rows in `rateLimit`, with the SHA-256-of-raw-body fallback when the delivery header is absent), whose prefix resets replay protection across a deploy if edited. It is also why a `handle-` webhook service takes the raw body alongside the parsed payload. The Inngest client id stays in `src/server/inngest/index.ts`. When you move such a file, diff the identifier lines and confirm they are untouched.
+
 ## Transport-agnostic services (Option B)
 
 - A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`). It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
@@ -49,12 +58,22 @@ const accessToken = await getValidJiraAccessToken(
 ```
 
 - **Identity and transport policy stay in the procedure**: `UNAUTHORIZED`, rate limiting (`TOO_MANY_REQUESTS`) and plan-limit denials have no domain-error equivalent. An authorization check that needs a loaded resource (membership, ownership) belongs in the service that loads it, as a `ForbiddenError`.
+- **A service takes plain named values, never the transport's context.** The router resolves what the service needs and passes it by name (`headers: await headers()`, `userId`, an entity id). A service never reads the tRPC `ctx` and never calls `next/headers` itself. "Transport-agnostic" is wider than "does not import tRPC": taking `ctx` as a parameter would satisfy the lint rule and still bind the service to one transport.
+- **A service reads the fact it decides on rather than receiving it from its caller.** `stopImpersonate` calls `auth.api.getSession` itself instead of taking `impersonatedBy` from the procedure, so the rule it enforces holds for any future transport. The cost is one extra read on a rare action, which is the right trade.
+- **A service may call another service.** A multi-step preamble shared by several services becomes its own read service rather than being inlined N times: `get-jira-access.ts`, `get-linear-access.ts` and `get-monthly-churn-rate.ts` are each consumed by another service. The caller forwards its injected client so one test covers both.
+- **A service returns what the boundary needs to report.** `update-feedback-status` returns `previousStatus` beside the stored row so the route can name the transition without a second read.
+- **Inject the Prisma client only where there is a branch worth pinning.** A service holding an authorization check or a `DomainError` branch takes a trailing `db: typeof prisma = prisma` and is tested with a fake; a pass-through read imports `prisma` directly. A service that delegates its check to another service forwards the client so one test covers both. 83 services carry the parameter today; the criterion, not the count, is the rule.
+- **The same operation may exist twice when the authorization differs.** `inbox/_services/update-feedback-status.ts` and `api/v1/agent/feedbacks/[id]/status/_services/update-feedback-status.ts` are kept apart on purpose: one authorizes a Member of the Organization, the other a Project owned by the token's Organization, and they record a different Status actor. Merging them needs a "caller scope" concept; until that exists, a DRY merge would silently widen authorization across transports. They also diverge on a no-op status set: the dashboard service emits `feedback/status-changed` anyway, the agent service skips the fan-out (ADR-0007). That asymmetry is intended, because an agent re-sets what it just read while a human toggling a Status does not.
+- **The one sanctioned exception to transport agnosticism** is `api/v1/agent/_services/require-agent-auth.ts`, which returns `AuthenticatedAgentToken | NextResponse`. Its 401, 403 and 429 carry headers and body fields no `DomainError` can express, and it does IO, so it lives in `_services/` and is a transport guard by design. It is not a precedent for handlers posing as services: no other service may return a `Response`.
 
 ## tRPC router
 
 - `trpc-router.ts` is **thin transport at the scope root** (sibling of `_services/`; for a route, colocated with `page.tsx`).
 - Procedures are **inlined** in the router when thin: auth procedure + zod `.input()` + one service call. A fat procedure wrapper is a smell → push logic into the service.
 - Routers **compose hierarchically** following the route tree: a parent router mounts child routers. No god-router importing dozens of operations — distribute across sub-segment routers.
+- **A child segment may own `_services/` and no router of its own**, with its procedures inlined in the nearest ancestor router. Readability of one API surface is the criterion, not the file count: the account scope keeps its ten operations in one file, and the Project scope keeps 44 across three segments in `(project)/trpc-router.ts` for the same reason. Six segments have a `_services/` bucket and no `trpc-router.ts` today. Introduce a segment router when the parent stops being readable in one pass, not because a segment exists. The "one router per scope" rule above still holds: what varies is which scope is the router's.
+- **The undo half of a plan-gated capability is never plan-gated.** `linkRepo`, `linkTeam` and `linkProject` sit behind `enforceFeature`; `unlinkRepo`, `unlinkTeam` and `unlinkProject` are plain `protectedProcedure`, so a downgraded Organization can always disconnect what it connected while paying. Gating the undo strands a User in a state they cannot leave without paying. Same rule for any future disconnect, revoke or delete behind a feature gate.
+- **The procedure key drops the entity its router already carries.** `createOrganization` mounted on the organization router is `organization.create`, not `organization.createOrganization`. Two exceptions: when the service names something other than the router's entity, the key is the full service name (`public.getGithubStars`, `billing.subscription.getStatus`, `feedback.listDistinctPageUrls`); and a plural operation colliding with its singular sibling takes a `Many` suffix rather than re-adding the entity (`feedback.deleteMany`, `feedback.updateManyStatus`).
 
 ```ts
 // _domains/animal/trpc-router.ts
@@ -72,6 +91,7 @@ export const animalRouter = router({
 ## Helpers vs services vs types
 
 - **`_helpers/`** = pure **behavioral** functions only (no IO): formatters, label maps, calculators, slug generators, nuqs `search-params` parsers, and **pure predicates** that operate on already-loaded inputs.
+- **Nondeterministic is not the same as IO.** `crypto.randomBytes` is a local call, so a generator built on it is a helper: `project/_helpers/generate-api-key.ts` and `generate-public-id.ts` are helpers, not services.
 - **Predicates split by IO, not verb:** `isSubscriptionActive(sub)` (pure) → `_helpers/`; `hasActiveSubscription(userId)` (queries to answer) → `_services/`. A pure predicate must never fetch its own data; if it needs to, it has become an IO-predicate and moves to `_services/`.
 - **`_types/`** = standalone, hand-written, isomorphic shared types. A type derived from a service stays **in** that service file.
 

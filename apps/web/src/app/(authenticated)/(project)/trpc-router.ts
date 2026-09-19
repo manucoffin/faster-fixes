@@ -308,6 +308,7 @@ export const projectsRouter = router({
       .mutation(({ input, ctx }) =>
         linkRepo({ ...input, userId: ctx.session.user.id }),
       ),
+    // Not plan-gated: a downgraded Organization must always be able to unlink.
     unlinkRepo: protectedProcedure
       .input(UnlinkRepoSchema)
       .mutation(({ input, ctx }) =>

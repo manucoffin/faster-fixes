@@ -63,6 +63,10 @@ Reading of the table:
 - **The database package has no `exports` field**, so any path inside it is importable. Nine app files use that: seven deep-import the generated Prisma client (`@workspace/db/generated/prisma/client`) for its enums and row types, and two import the client instance through `@workspace/db/index` instead of the package root, which 150 other files use. The leak is inert as long as the app is the only consumer, and closing it means declaring an `exports` map with a types subpath and rewriting those nine imports. Tracked separately, out of scope here.
 - **The MCP package hand-maintains a duplicate of the agent API contract** (`src/api-types.ts` and `src/schemas.ts`) rather than importing a shared one. It is the deliberate decoupling that lets a published server stay compatible with a deployed API it does not ship with, and its cost is drift: a field added to the agent API is invisible to the MCP package until someone copies it. Accepted with that cost, not fixed.
 
+### Which response fields the published clients actually read
+
+Audited when the two public APIs moved behind services, and worth keeping because it is the difference between a breaking change and a free one. On an error body, `@fasterfixes/mcp` reads `error` only; `@fasterfixes/core` reads `error` and `details`. **No published client reads `code`**, which is why the widget API's own mapper may answer `{ error }` without one ([ADR-0012](./0012-domain-errors-and-transport-mapping.md), amendment 5) while the agent API keeps sending it. Changing or removing `error` or `details` is a breaking change for a shipped npm client that a customer cannot be made to upgrade; adding a field, or changing `code`, is not. Re-audit this list before changing an error body, because it dates from the day it was written.
+
 ### Candidates considered, all declined
 
 | Candidate                                                                                                                                          | Decision                                                                                                                              |

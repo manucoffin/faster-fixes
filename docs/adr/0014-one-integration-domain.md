@@ -40,5 +40,11 @@ Three practical points weighed in:
   looking for "everything a Tracker does" reads three provider folders.
 - The route scopes `(authenticated)/integrations` and `(authenticated)/(project)` keep their
   own `_services/`; they call into the domain and do not move into it.
-- Slack keeps its own OAuth state constants at the move. Aligning it with the shared cookie
-  is a behaviour change and is tracked separately.
+- **A shared mechanism is a service at the bucket root; each provider's constant configuring
+  it stays a helper under that provider.** `_services/oauth-state-cookie.ts` holds the cookie
+  mechanism, `_helpers/<provider>/oauth-state-cookie.ts` holds the provider's own cookie name
+  and lifetime. A fifth provider follows that split rather than copying the mechanism.
+- Slack keeps its own OAuth state constants at the move and deliberately does **not** adopt
+  `OAuthStateCookie`: it still carries two plain constants. That inconsistency is scoped out,
+  not overlooked. Aligning it with the shared cookie is a behaviour change and is tracked
+  separately.

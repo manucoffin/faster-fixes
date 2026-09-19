@@ -41,3 +41,27 @@ The `src/app/` tree was organised around a root `_features/` folder whose direct
 - Some old feature leaves are pure presentational components. They move to `_components/`.
 - One-time flatten pass on `_components/` wrapper folders.
 - The inside of `_services/` (naming, verb vocabulary, transport agnosticism) is specified by the server file conventions ADR, which amends the bucket set described here.
+
+## Amendment: domain capability folders sit at the domain root
+
+Recorded at the close of the migration, 2026-09-19. The bucket set above puts a capability
+slice under `<scope>/_features/<name>/` at both tiers. In practice the migration left six domain
+capability folders at the **domain root** instead, with no `_features/` bucket in any domain:
+
+- `auth/send-verification-email-button/`, `auth/stop-impersonate-button/`
+- `subscription/plan-card/`, `subscription/plan-gate/`, `subscription/upgrade-subscription/`
+- `project/active-project/`
+
+Route scopes are unaffected and keep `_features/`. `no-feature-nesting` does not catch the
+difference, so nothing enforces the choice either way, and every scope-level rule (one
+capability per folder, UI plus its container hook, no nesting) already holds as written.
+
+This is an accepted deviation, not an oversight, and the decision behind it is still open:
+either the domains gain a `_features/` bucket and the six folders move, or this ADR is amended
+again to make the domain-root shape the convention. Until then a new domain capability follows
+the existing tree rather than creating the seventh exception in a new place.
+
+A hook read by more than one feature **inside one scope** is promoted to a capability folder of
+its own on that second consumer (`subscription/plan-gate/`, `inbox/_features/feedback-mutations/`)
+and barrel-exported when the scope is a domain. That trigger is intra-scope and distinct from
+the cross-route promotion rule, which moves a whole route feature into a domain.
