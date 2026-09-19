@@ -832,6 +832,74 @@ under issue #88.
 - [ ] With the Installation healthy, link a Jira project and create an issue end to end: nothing in
       the happy path changed.
 
+### A Jira failure that cannot be retried away fails on the first attempt (issue #91)
+
+Decision 11, and the last link of the Jira leg. `src/server/errors/non-retriable.ts` holds
+`rethrowDomainErrorsAsNonRetriable(error): never`, the kit's helper verbatim: a `DomainError`
+becomes `NonRetriableError(error.message, { cause: error })`, anything else is rethrown untouched
+and keeps its retries. It lands with its first callers, as the kit asks.
+
+**The three wrapped functions.** `create-jira-issue`, `sync-feedback-status-to-jira` and
+`sync-jira-issue-status` are the three of seventeen Inngest functions that let a Jira `DomainError`
+bubble, all through the same call: `getValidJiraAccessToken`, which throws `JiraNotConnectedError`
+or `JiraReauthRequiredError`. Each now reads
+`getValidJiraAccessToken(...).catch(rethrowDomainErrorsAsNonRetriable)`, one line and one comment
+per function, on the call that can throw rather than around the whole body: the bodies have no other
+domain-error source today, and a `try` around them would only re-indent three long handlers.
+`refresh-jira-installation-webhooks` already catches both errors and reports a `skipped` result, so
+it is untouched, and the other thirteen functions cannot receive a `DomainError`. Wrapping them
+would be dead code posing as a guarantee.
+
+**The configuration error keeps its own handling.** `JiraIssueConfigurationError` never reaches the
+new helper: `create-jira-issue` still catches it around `createIssue`, writes
+`ProjectJiraLink.linkHealthIssue` and returns `jira_configuration_rejected`, so a stale Jira project
+or issue type stays non-retried and still surfaces in the Project's Jira link settings, exactly as
+before.
+
+**Deliberate behaviour change.** A run whose Organization has no Jira Installation, or whose
+Installation is in **Reconnect required**, now fails on the first attempt instead of the fourth, and
+the run history shows `NonRetriableError` with the user copy of the domain error as its message and
+the original error as its `cause`. Nothing else changes: a transient Atlassian failure is an
+infrastructure `Error` since issue #89 and still gets its three retries, which is why that fix had to
+land first. A Feedback mirror is not lost by an outage.
+
+**Tests.** `server/errors/non-retriable.test.ts` (4 cases) drives the helper directly: a
+`NotFoundError` comes out as a `NonRetriableError` with the same message and the original as
+`cause`; a second-level subclass of the vocabulary is recognized through the base class; an
+infrastructure `Error` comes out as the very same object and is not a `NonRetriableError`; a thrown
+non-error value is rethrown as it is. The Inngest function bodies are not tested: the repo has no
+Inngest harness, and the wrapper is one line per function.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                     |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| Functions wrapped                          | exactly three, the fourteen others untouched               |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (176 web tests, zero warnings)                        |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105) |
+| `pnpm --filter web build`                  | every route listed                                         |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real Jira Installation against a real database, watched in
+the Inngest dev server or dashboard):
+
+- [ ] With the Installation flipped to **Reconnect required**, submit a Feedback on a Project whose
+      Jira link auto-creates issues: the `create-jira-issue` run fails once, with no retry, and its
+      error reads "The Jira connection needs to be re-authorized."
+- [ ] With the same Installation state, change a Feedback's Status in the inbox: the
+      `sync-feedback-status-to-jira` run fails once, with no retry, and the Feedback keeps its new
+      Status in the app.
+- [ ] Delete the Jira Installation row of the Organization while a Project Jira link survives, then
+      trigger an export to Jira: the run fails once with "Jira is not connected. Connect a Jira site
+      first."
+- [ ] Block `auth.atlassian.com` with an expired access token and trigger an issue creation: the run
+      still retries three times (the outage path of issue #89) and the Installation stays
+      `connected`.
+- [ ] With everything healthy, create an issue, mirror a Status to Jira, and move the issue in Jira:
+      all three runs succeed as before.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

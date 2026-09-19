@@ -1,3 +1,4 @@
+import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
 import { JiraIssueConfigurationError } from "@/server/jira/errors";
 import {
   formatIssueAdf,
@@ -60,9 +61,11 @@ export const createJiraIssue = inngest.createFunction(
     }
 
     const installation = link.jiraInstallation;
+    // A disconnected or refused Installation is a fact about the data, so the
+    // next attempt reads the same row; an Atlassian outage still retries.
     const accessToken = await getValidJiraAccessToken(
       installation.organizationId,
-    );
+    ).catch(rethrowDomainErrorsAsNonRetriable);
 
     let screenshotUrl: string | null = null;
     if (feedback.screenshot) {

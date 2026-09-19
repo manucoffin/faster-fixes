@@ -1,3 +1,4 @@
+import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
 import { fetchJiraIssueStatus } from "@/server/jira/jira-rest-client";
 import { feedbackStatusFromJiraStatusCategory } from "@/server/jira/resolve-transition";
 import { getValidJiraAccessToken } from "@/server/jira/token-access";
@@ -53,9 +54,11 @@ export const syncJiraIssueStatus = inngest.createFunction(
     if (!issueLink) return { skipped: "no_matching_issue_link" };
 
     const installation = issueLink.projectJiraLink.jiraInstallation;
+    // A disconnected or refused Installation is a fact about the data, so the
+    // next attempt reads the same row; an Atlassian outage still retries.
     const accessToken = await getValidJiraAccessToken(
       installation.organizationId,
-    );
+    ).catch(rethrowDomainErrorsAsNonRetriable);
 
     // Re-fetch before apply: the payload said something changed, Jira says what.
     const issue = await fetchJiraIssueStatus(
@@ -67,7 +70,9 @@ export const syncJiraIssueStatus = inngest.createFunction(
     // Confirmed gone. Detaching rather than cascading to the Feedback keeps the
     // inbox intact and lets the Feedback be exported to Jira again.
     if (!issue) {
-      await prisma.feedbackJiraIssueLink.delete({ where: { id: issueLink.id } });
+      await prisma.feedbackJiraIssueLink.delete({
+        where: { id: issueLink.id },
+      });
       return { feedbackId: issueLink.feedbackId, detached: true };
     }
 

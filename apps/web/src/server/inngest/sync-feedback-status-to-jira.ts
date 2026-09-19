@@ -1,3 +1,4 @@
+import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
 import {
   listJiraTransitions,
   transitionJiraIssue,
@@ -56,9 +57,11 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
     if (wantsDone === isDone) return { skipped: "status_category_unchanged" };
 
     const installation = issueLink.projectJiraLink.jiraInstallation;
+    // A disconnected or refused Installation is a fact about the data, so the
+    // next attempt reads the same row; an Atlassian outage still retries.
     const accessToken = await getValidJiraAccessToken(
       installation.organizationId,
-    );
+    ).catch(rethrowDomainErrorsAsNonRetriable);
 
     const transitions = await listJiraTransitions(
       accessToken,
