@@ -1,53 +1,13 @@
 import { isAllowedOrigin } from "@/app/_domains/project/_helpers/is-allowed-origin";
 import { findProjectByPublicId } from "@/app/_domains/project/_services/find-project-by-public-id";
 import { findReviewerByToken } from "@/app/_domains/project/_services/find-reviewer-by-token";
-import { checkResourceLimit } from "@/server/auth/subscription";
-import { inngest } from "@/server/inngest";
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
-import { s3Client } from "@/server/storage";
-import { createAsset } from "@/server/storage/create-asset";
-import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { putObject } from "@better-upload/server/helpers";
-import { prisma } from "@workspace/db";
-import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { createFeedback } from "./_services/create-feedback";
+import { CreateFeedbackSchema } from "./_services/create-feedback.schema";
+import { createFeedbackScreenshot } from "./_services/create-feedback-screenshot";
+import { getFeedbackCapacity } from "./_services/get-feedback-capacity";
 import { listFeedbacks } from "./_services/list-feedbacks";
-
-const ConsoleEntrySchema = z.object({
-  level: z.enum(["log", "info", "warn", "error", "debug"]),
-  message: z.string(),
-  timestamp: z.number(),
-});
-
-const NetworkEntrySchema = z.object({
-  method: z.string(),
-  url: z.string(),
-  status: z.number(),
-  duration: z.number(),
-  timestamp: z.number(),
-});
-
-// Defensive caps above the widget's 50/stream bound — reject pathological payloads.
-const DiagnosticTrailSchema = z.object({
-  console: z.array(ConsoleEntrySchema).max(200),
-  network: z.array(NetworkEntrySchema).max(200),
-});
-
-const CreateFeedbackSchema = z.object({
-  comment: z.string().trim().min(1),
-  pageUrl: z.string().url(),
-  selector: z.string().optional(),
-  clickX: z.number().optional(),
-  clickY: z.number().optional(),
-  browserName: z.string().optional(),
-  browserVersion: z.string().optional(),
-  os: z.string().optional(),
-  viewportWidth: z.number().int().optional(),
-  viewportHeight: z.number().int().optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
-  diagnosticTrail: DiagnosticTrailSchema.optional(),
-});
 
 const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
@@ -85,19 +45,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const feedbackCheck = await checkResourceLimit(
-    project.organizationId,
-    "feedbacks",
-    prisma,
-  );
-  if (!feedbackCheck.allowed) {
-    const { metadata } = feedbackCheck.denial;
+  // Checked before the body is read, as it always has been: an Organization at
+  // its ceiling is refused without uploading anything.
+  const capacity = await getFeedbackCapacity(project.organizationId);
+  if (!capacity.allowed) {
     return NextResponse.json(
       {
         error: "Feedback limit reached for this organization's plan.",
         code: "RESOURCE_LIMIT_EXCEEDED",
-        current: metadata.current,
-        limit: metadata.limit,
+        current: capacity.current,
+        limit: capacity.limit,
       },
       { status: 403 },
     );
@@ -168,6 +125,8 @@ export async function POST(req: NextRequest) {
       "| size:",
       screenshotField.size,
     );
+    // A storage failure is not a reason to lose the Feedback: the submit goes
+    // on without the screenshot, as it always has.
     try {
       const buffer = Buffer.from(await screenshotField.arrayBuffer());
       console.info("[feedback] screenshot buffer length:", buffer.length);
@@ -179,85 +138,24 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const ext = screenshotField.type.split("/")[1] || "png";
-      const key = `feedback-screenshots/${project.id}/${crypto.randomUUID()}.${ext}`;
-      const bucket = process.env.STORAGE_BUCKET_NAME!;
-      console.info(
-        "[feedback] uploading screenshot — key:",
-        key,
-        "| bucket:",
-        bucket,
-      );
-
-      await putObject(s3Client, {
-        bucket,
-        key,
-        body: buffer,
+      screenshotId = await createFeedbackScreenshot({
+        projectId: project.id,
         contentType: screenshotField.type,
+        body: buffer,
       });
-      const asset = await createAsset({
-        key,
-        bucket,
-        provider: "r2",
-        filename: `screenshot.${ext}`,
-        mimeType: screenshotField.type,
-        size: buffer.length,
-      });
-      screenshotId = asset.id;
     } catch (err) {
       console.error("[feedback] screenshot upload failed:", err);
     }
   }
 
-  const feedback = await prisma.feedback.create({
-    data: {
-      projectId: project.id,
-      reviewerId: reviewer.id,
-      comment: data.comment,
-      pageUrl: data.pageUrl,
-      clickX: data.clickX,
-      clickY: data.clickY,
-      selector: data.selector,
-      browserName: data.browserName,
-      browserVersion: data.browserVersion,
-      os: data.os,
-      viewportWidth: data.viewportWidth,
-      viewportHeight: data.viewportHeight,
-      metadata: data.metadata,
-      diagnosticTrail: data.diagnosticTrail,
-      screenshotId,
-    },
-    include: {
-      reviewer: { select: { id: true, name: true } },
-      screenshot: { select: { key: true, provider: true, bucket: true } },
-    },
+  const feedback = await createFeedback({
+    projectId: project.id,
+    reviewerId: reviewer.id,
+    screenshotId,
+    data,
   });
 
-  // Fire-and-forget: trigger GitHub issue creation if configured
-  inngest
-    .send({ name: "feedback/created", data: { feedbackId: feedback.id } })
-    .catch(() => {});
-
-  const screenshotUrl = feedback.screenshot
-    ? await getSignedAssetUrl(feedback.screenshot)
-    : null;
-
-  return NextResponse.json(
-    {
-      id: feedback.id,
-      status: feedback.status,
-      comment: feedback.comment,
-      pageUrl: feedback.pageUrl,
-      clickX: feedback.clickX,
-      clickY: feedback.clickY,
-      selector: feedback.selector,
-      screenshotUrl,
-      metadata: feedback.metadata,
-      reviewer: feedback.reviewer,
-      createdAt: feedback.createdAt,
-    },
-    { status: 201 },
-  );
+  return NextResponse.json(feedback, { status: 201 });
 }
 
 // GET /api/v1/feedback — fetch feedback for a page

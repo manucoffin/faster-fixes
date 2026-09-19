@@ -6918,6 +6918,80 @@ the 22 API routes included.
 widget API routes (#136, #137) are untouched. No `_deprecated_` stub was created and nothing was
 deleted.
 
+### The widget API submit behind services (issue #135)
+
+`POST /api/v1/feedback` loses the last inline database access of this file. The submit splits into
+three services colocated under the versioned API scope, as the agent API template asks, and the
+handler keeps the whole HTTP boundary: Project resolution, the Allowed origins match, the Reviewer
+token check, the rate limit, the multipart parse, every refusal body and the 201 envelope.
+
+| Piece                                                      | Stays in the route | Moved to a service |
+| ---------------------------------------------------------- | ------------------ | ------------------ |
+| `x-api-key` → Project, origin, Reviewer token, rate limit  | yes                | no                 |
+| the Plan limit call and its `RESOURCE_LIMIT_EXCEEDED` body | the body only      | the call           |
+| `req.formData()`, the `data` field, the JSON parse         | yes                | no                 |
+| the Zod payload schema                                     | no                 | `_services/`       |
+| the screenshot type check (400) and the 5MB check (413)    | yes                | no                 |
+| `putObject` and the Asset record                           | no                 | yes                |
+| `prisma.feedback.create` and its `include`                 | no                 | yes                |
+| the `feedback/created` event                               | no                 | yes                |
+| the signed screenshot URL and the public shape             | no                 | yes                |
+
+**Three services, because the order of the original handler is load-bearing.** The Plan limit is
+checked before the body is read, so an Organization at its ceiling is refused without the widget's
+screenshot ever reaching the bucket. Folding the check into `create-feedback.ts` would have moved it
+after the multipart parse and the upload: a refused submit would leave an orphan Asset behind, and a
+malformed body from an over-limit Organization would answer 400 where it answers 403 today. The
+split keeps the sequence byte for byte:
+
+- `get-feedback-capacity.ts` wraps `checkResourceLimit` with the database client the route no longer
+  imports. A read (`get-` plus the result noun) that answers `{ allowed }` and, on a refusal, the
+  `current` and `limit` counters. A Plan limit is not a `DomainError`, exactly as decided for the
+  agent API's batch create: it comes back as data so the route keeps its published body.
+- `create-feedback-screenshot.ts` owns the bucket key, `putObject` and the Asset record, and returns
+  the Asset id. The caller decides what a failure means, so the route keeps the `try`/`catch` that
+  accepts the Feedback without its screenshot when storage is down.
+- `create-feedback.ts` owns the write, the `feedback/created` event and the public shape, including
+  the signed screenshot URL.
+
+**Validation stayed at the boundary.** The screenshot type check (400) and the size check (413) read
+the multipart field, not the domain: they are request parsing, like the JSON parse above them, and
+413 has no code in the `DomainError` vocabulary. Pushing them behind a service would have turned a
+two-line guard into a third outcome in the service's return union for nothing.
+
+**The payload schema moved, unchanged.** `CreateFeedbackSchema` and the Diagnostic Trail schemas it
+composes now live in `_services/create-feedback.schema.ts`, which is where the agent API keeps its
+own. Not one `z` call was modernised: `z.string().url()` and `parsed.error.flatten()` stay as they
+were, because the 422 body they produce is pinned by the characterization test.
+
+**One type annotation is new.** `putObject` takes a `BodyInit`, and a bare `Buffer` is
+`Buffer<ArrayBufferLike>`, which is not one. The service input names the buffer
+`Buffer<ArrayBuffer>`, the type `Buffer.from` actually returns. Inline in the old handler the
+inference was invisible; behind a parameter it has to be written down.
+
+**No domain error mapping added, still.** None of the three services throws a `DomainError`, so the
+template's `domainErrorResponse` wrapper would be a `catch` that can only rethrow. #136 adds it with
+the first widget service that throws (the Feedback not found path).
+
+**The characterization tests pass untouched.** `route.test.ts` (#129) mocks `@workspace/db`,
+`@/server/storage`, `@/server/storage/create-asset`, `@/server/storage/get-signed-asset-url`,
+`@/server/inngest` and `@better-upload/server/helpers`, and the services import every one of them by
+the same path, so no mock path changed. The seventeen `POST` cases answer as before: 401 on an
+unknown or missing Project identifier, 403 on a refused origin, an invalid Reviewer token and the
+Plan limit (with `current` and `limit`), 429 when rate limited, 400 on an unreadable body, a missing
+`data` field, invalid JSON and a screenshot type outside PNG/JPEG/WebP, 422 on a payload the schema
+rejects, 413 above 5MB, and 201 with the public shape, with the `feedback/created` event, with the
+signed URL after an upload, with `screenshotUrl: null` when the upload fails, and from a localhost
+origin.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (64 files, 413 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` compiles and lists every route,
+the 22 API routes included.
+
+**What is left.** `route.ts` imports no database client for either method. The two other widget API
+routes still query Prisma inline: #136 owns edit and delete, #137 owns the screenshot replacement and
+the widget config. No `_deprecated_` stub was created and nothing was deleted.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -7067,3 +7141,32 @@ agent API. Only the systems a landed ticket has touched appear below.
       to unhealthy with the Slack error code recorded rather than the run retrying forever.
 - [ ] Disconnect: disconnect Slack from `/integrations` and see the Installation and its Project
       links removed, with no further message posted for a new Feedback.
+
+#### Widget (started by #135)
+
+Walked from a real test page embedding the widget against a real database, before deploy. The
+widget's own build is untouched by this step: an installed widget must not notice the relocation.
+
+- [ ] Submit: open the widget on a page of a registered Project, leave a comment and see it appear
+      in the inbox with the page URL, the click position, the browser and OS line and the diagnostics.
+- [ ] Submit with a screenshot: capture the page in the widget, submit, and see the screenshot on the
+      Feedback in the inbox and in the widget list.
+- [ ] List: reload the test page and see the Feedback pinned where it was left, each with its
+      screenshot, its author and its status.
+- [ ] Edit: change the comment of a Feedback from the widget and see the new text in the inbox
+      (#136 moves this path behind a service; the row is walked once, at the end).
+- [ ] Delete: remove a Feedback from the widget and see it gone from the page and from the inbox
+      (#136).
+- [ ] Replace a screenshot: attach a screenshot to a Feedback submitted without one and see it on
+      the Feedback in the inbox (#137).
+- [ ] Widget config: change the widget appearance in the Project settings and see the test page pick
+      it up on reload (#137).
+- [ ] Refuse a foreign origin: submit from a page whose domain is not the Project's registered one
+      and see the request refused rather than recorded.
+- [ ] Plan limit: from an Organization already at its Feedback ceiling, submit and see the refusal
+      naming the current count and the limit, with no Feedback recorded and no screenshot left in
+      the bucket.
+- [ ] Storage down: with the bucket unreachable, submit with a screenshot and see the Feedback
+      recorded without it rather than the submit failing.
+- [ ] Announce: submit on a Project linked to a Tracker or a Notification channel and see the issue
+      or the message created, which proves the `feedback/created` event still fires from the service.
