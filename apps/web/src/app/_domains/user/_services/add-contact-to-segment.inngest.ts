@@ -1,6 +1,6 @@
 import { mailer } from "@/lib/mailer/client";
+import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
 
 export const addContactToSegment = inngest.createFunction(
   {

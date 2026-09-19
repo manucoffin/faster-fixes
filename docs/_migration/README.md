@@ -6570,6 +6570,80 @@ included.
 **Not smoked here, and why.** The sandbox has no Postgres and no Slack workspace, so no Plan is read,
 no Member is looked up and no Installation is written. The Slack rows below are for the maintainer.
 
+### The welcome mail and contact segment functions move to the `user` domain (issue #127)
+
+The last two durable functions leave the server folder, four tickets after the pilot fixed the
+pattern. They are the only pair of step 5 that belongs to no provider: both are triggered by
+`user/email-verified` and both operate on a **User**, so they land in `_domains/user/_services/`
+under the same `.inngest.ts` suffix the fifteen Integration functions use. `src/server/inngest/` now
+holds the client and nothing else, which is what the parent spec asks of it.
+
+**Files moved.** Two modules with `git mv`. No file dissolved, so this ticket leaves no
+`_deprecated_` stub.
+
+| Before                                     | After                                                       |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| `server/inngest/send-welcome-email.ts`     | `_domains/user/_services/send-welcome-email.inngest.ts`     |
+| `server/inngest/add-contact-to-segment.ts` | `_domains/user/_services/add-contact-to-segment.inngest.ts` |
+
+**Identifiers, triggers and idempotency keys untouched.** `send-welcome-email` and
+`add-contact-to-segment` keep their function identifier, their `user/email-verified` trigger, their
+three retries and their `event.data.userId` idempotency key, so an in-flight run is not orphaned and
+neither function starts suppressing the other. Neither gains the non-retriable wrapper: neither body
+reaches a service able to throw a `DomainError`, and a mail or contact provider outage must stay
+retriable.
+
+**No verb rename, and none was available.** `send-` and `add-` are both write verbs of the open set,
+and `.inngest.ts` is exempt from `services-verb-prefix` anyway, so the two files keep the names they
+have had since they were written. The exemption is what allowed `handle-linear-oauth-revoked` to keep
+its name in #117; it applies here for the same reason.
+
+**No bare error converted, because there is none.** The two files contain no `throw` at all: a
+missing User returns `{ skipped: "user_not_found" }`, a self-hosted instance with no segment returns
+`{ skipped: "no_segment_configured" }`, and a contact that already exists is logged with
+`console.warn` and swallowed on purpose. The acceptance criterion "no `throw new Error(` remains in
+the moved files" is met by construction, and nothing about the failure behaviour changed.
+
+**The mail template did not move.** `send-welcome-email.inngest.ts` still renders
+`@/lib/mailer/templates/welcome`. #124 moved the Jira reconnect template into the `integration`
+domain because it is Jira copy; the welcome mail is account lifecycle copy that the mailer folder is
+the right home for, and the parent spec asks for no second template move. The `createElement`
+comment is kept verbatim for the same reason it was kept in `handle-jira-oauth-revoked.inngest.ts`:
+the file still has to stay `.ts`.
+
+**Imports rewritten.** One edit inside the moved files: `add-contact-to-segment.inngest.ts` reached
+the client with `./index` and now reaches it with `@/server/inngest`, the change every relocated
+function made. `send-welcome-email.inngest.ts` already used the alias and changed not one line.
+
+**Consumers rewritten.** One file: the registration route (`api/inngest/route.ts`, two imports). It
+keeps its static list of seventeen functions.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (62 files, 390 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/inngest` included. `GET /api/inngest` against
+`next dev` on port 3127 answers `200` with `"function_count":17`.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no mail provider, so neither function
+body runs: no User is read, no welcome mail is sent and no contact is added to a segment. There is no
+external system checklist to open for this pair, because the provider they call is the mailer rather
+than an Integration; the maintainer sees them through a real sign-up.
+
+**What is left in the server folder for the lock (#139).** After this ticket, fourteen files under
+`src/server/` import the app tree, and ten of them go through a barrel (`@/app/_domains/subscription`
+from the nine Plan enforcement, Better Auth configuration and tRPC middleware files,
+`@/app/_domains/organization` from the Better Auth organization plugin), which the rule allows. Four
+import by deep path and are what the lint block has to answer for:
+
+| File                                | Deep import                                  | Expected disposition                                                       |
+| ----------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| `trpc/routers/_app.ts`              | three router mounts                          | named composition exemption                                                |
+| `auth/config/database-hooks.ts`     | `get-unique-organization-slug`               | named composition exemption                                                |
+| `api/validate-origin.ts`            | `_domains/project/_helpers/normalize-domain` | the file itself moves to the `project` domain in #133                      |
+| `trpc/domain-error-mapping.test.ts` | `JiraReauthRequiredError`                    | a test, not production wiring; #139 exempts it by name or routes around it |
+
+The organization plugin, listed as a third exemption by the parent spec, now reaches the
+`organization` barrel rather than a deep path, so its exemption can be dropped as the spec foresaw.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against

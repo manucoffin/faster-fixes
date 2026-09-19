@@ -1,5 +1,5 @@
 import { inngest } from "@/server/inngest";
-import { addContactToSegment } from "@/server/inngest/add-contact-to-segment";
+import { addContactToSegment } from "@/app/_domains/user/_services/add-contact-to-segment.inngest";
 import { createGitHubIssue } from "@/app/_domains/integration/_services/github/create-github-issue.inngest";
 import { createJiraIssue } from "@/app/_domains/integration/_services/jira/create-jira-issue.inngest";
 import { createLinearIssue } from "@/app/_domains/integration/_services/linear/create-linear-issue.inngest";
@@ -8,7 +8,7 @@ import { handleLinearOAuthRevoked } from "@/app/_domains/integration/_services/l
 import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services/slack/notify-slack-feedback-created.inngest";
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
 import { refreshJiraWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-webhooks.inngest";
-import { sendWelcomeEmail } from "@/server/inngest/send-welcome-email";
+import { sendWelcomeEmail } from "@/app/_domains/user/_services/send-welcome-email.inngest";
 import { syncFeedbackStatusToGitHub } from "@/app/_domains/integration/_services/github/sync-feedback-status-to-github.inngest";
 import { syncFeedbackStatusToJira } from "@/app/_domains/integration/_services/jira/sync-feedback-status-to-jira.inngest";
 import { syncFeedbackStatusToLinear } from "@/app/_domains/integration/_services/linear/sync-feedback-status-to-linear.inngest";
