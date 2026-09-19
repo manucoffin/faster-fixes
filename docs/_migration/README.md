@@ -6174,6 +6174,81 @@ values lists every route, `/api/inngest` included. `GET /api/inngest` against `n
 **Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so no function body
 runs. The Jira rows below are for the maintainer.
 
+### The Jira webhook behind a `handle-` service, part 3 (issue #122)
+
+The third and last Tracker to copy the shape the GitHub pilot fixed in #114.
+`POST /api/webhooks/jira/[token]` keeps the token verification and the JSON parse and delegates
+everything after them to one orchestration service. Jira gets the same responses it got before, byte
+for byte.
+
+**Characterization tests first.** `api/webhooks/jira/[token]/route.test.ts`, eleven cases, committed
+green against the current handler in its own commit (`bcd9641`) before a line of the route moved, and
+not edited by the extraction. Same recipe as GitHub and Linear: `POST` called with a `NextRequest`
+and a resolved `params` promise, only `@workspace/db` and `@/server/inngest` faked, and assertions on
+status and exact JSON body only.
+
+**The rows, and what Jira actually answers today.**
+
+| Policy row                    | Jira's response                                  | Covered by                                                                |
+| ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| Unknown token                 | `401 {"error":"Unknown webhook"}`                | one test, plus one on the lookup key                                      |
+| Body unreadable               | `400 {"error":"Invalid JSON"}`                   | one test                                                                  |
+| Authentic but not for us      | `200 {"ok":true,"ignored":"<reason>"}`           | three tests (`event:<type>`, `event:undefined`, `no_issue_id`)            |
+| Duplicate delivery            | `200 {"ok":true,"skipped":"duplicate_delivery"}` | one test, plus two on the delivery key written and its body-hash fallback |
+| Accepted                      | `200 {"ok":true}`                                | two tests (issue updated, issue deleted)                                  |
+| Linear signing secret missing | not applicable to Jira                           | nothing                                                                   |
+
+**No signature row, because Jira signs nothing.** Jira dynamic webhooks carry no signature (ADR-0008);
+the per-installation token in the path is the whole of the authenticity. The signature row of the
+policy table is therefore the unknown-token row here, and the test that covers it drives the real
+lookup rather than mocking the authentication away.
+
+**`event:undefined` is pinned as it is.** A delivery with no `webhookEvent` gets the template
+literal's rendering of `undefined` in the `ignored` reason. The parent spec's rule for a conflict is
+that the current response wins, so it is characterized and preserved rather than tidied. Jira's
+`ignored` bodies carry a reason like Linear's, unlike GitHub's bare `{"ok":true}`.
+
+**The authentication read is its own service, and that is the correction this ticket adds to the
+pilot shape.** For GitHub and Linear, authentication is a pure signature check and the Installation
+lookup happens after it, inside the `handle-` service. For Jira the Installation lookup _is_ the
+authentication, and `TrackerWebhookOutcome` states that authentication failures never reach the
+service. So the lookup became a second, read-named service,
+`_services/jira/find-jira-installation-by-webhook-token.ts`, which the route calls itself and maps to
+the 401. Slack has no Tracker webhook, so no further Tracker copies this; a future Tracker that
+authenticates with a stored secret should follow it rather than fold the 401 into the outcome type.
+
+**What moved, and what the route kept.** `_services/jira/handle-jira-webhook.ts` exports
+`handleJiraWebhook({ installationId, deliveryId, rawBody, payload })` and owns deduplication, the
+handled-event check, the issue id check and the `jira/webhook.issue` emission. The route keeps
+resolving the `token` route parameter, the authentication read, reading the raw body, the JSON parse
+and the outcome-to-HTTP mapping. It imports no database client any more, which is the "must be gone"
+check #140 runs over the API tree. `prisma`, `crypto` and the `JiraWebhookPayload` type left the
+route file with the logic.
+
+**Why the service takes the raw body as well as the parsed payload.** Jira's
+`x-atlassian-webhook-identifier` header is not always present, and the fallback replay key is a
+SHA-256 of the raw body, exactly as on Linear. Deduplication belongs to the service, so the fallback
+follows it; the route passes the header value as it read it, `null` included. The key prefix
+`webhook:jira:` is unchanged, so a delivery replayed across the deploy is still recognised.
+
+**Order of checks preserved.** The token lookup runs before the body is read, deduplication before
+the event-type check, and the event-type check before the issue id check, exactly as in the route. A
+replayed delivery of an unhandled event still answers with the skipped marker and not with `ignored`.
+
+**No error class, and none needed.** The service throws nothing: an unhandled event is an outcome,
+not a failure. The three expected Jira error classes #120 relocated are raised by the sync path, not
+by the webhook receiver, and are untouched here.
+
+**Not this ticket.** The Jira install and callback routes still query Prisma inline (#123), and the
+reconnect mail template still lives in the mailer folder (#124).
+
+**Gate.** `pnpm typecheck`, `pnpm test` (58 files, 346 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/webhooks/jira/[token]` included.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so no delivery past
+the token check runs against real data. The Jira rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
