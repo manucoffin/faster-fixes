@@ -6992,6 +6992,70 @@ the 22 API routes included.
 routes still query Prisma inline: #136 owns edit and delete, #137 owns the screenshot replacement and
 the widget config. No `_deprecated_` stub was created and nothing was deleted.
 
+### The widget API edit and delete behind services (issue #136)
+
+`PUT` and `DELETE /api/v1/feedback/:id` lose their inline database access. Three services colocated
+under the versioned API scope take the data and IO, and the handler keeps the whole HTTP boundary:
+Project resolution, the Allowed origins match, the Reviewer token check, the rate limit, the JSON
+parse, the payload schema and every response body.
+
+| Piece                                                     | Stays in the route | Moved to a service |
+| --------------------------------------------------------- | ------------------ | ------------------ |
+| `x-api-key` → Project, origin, Reviewer token, rate limit | yes                | no                 |
+| the existence check scoped to the Project                 | no                 | yes                |
+| `req.json()` and the `UpdateFeedbackSchema` parse         | yes                | no                 |
+| `prisma.feedback.update` and the answered shape           | no                 | yes                |
+| `prisma.feedback.delete`                                  | no                 | yes                |
+| the 404 body                                              | the body only      | the throw          |
+
+**Three services, because the order of the original handler is load-bearing here too.** The
+existence check runs before the body is read, so an unknown Feedback with a broken payload answers
+404 rather than 400 — a case the characterization test of #129 pins explicitly. Folding the check
+into `update-feedback-comment.ts` would have moved it after the JSON parse and flipped that answer.
+So the read stands alone and both methods open the same way:
+
+- `get-project-feedback.ts` reads one Feedback scoped to the Project and throws `NotFoundError` when
+  there is none. The Project scope is the whole access rule: any active Reviewer of a Project may
+  edit or delete any of its Feedback, not only the ones they submitted. The `findFirst` argument is
+  unchanged, `select`-less as it was, because the test pins it.
+- `update-feedback-comment.ts` writes the comment and returns the three fields the route answers
+  with. Named `update-`, not `edit-`: `edit-` is a banned synonym in the verb vocabulary, and the
+  operation is a plain field write, not a domain transition.
+- `delete-feedback.ts` removes the row and returns nothing, so it exports no `Output` alias (the
+  derived return type is required of reads only).
+
+**The first widget service that throws, so the mapping arrives — with a widget-shaped body.** #134
+and #135 both deferred the `domainErrorResponse` wrapper because a `catch` that can only rethrow is
+dead code. `getProjectFeedback` throws, so the wrapper lands here, but not the agent API's version of
+it: `domainErrorResponse` answers `{ error, code }` and the widget API's published 404 body is
+`{ error: "Feedback not found" }` alone. Per the parent spec, where the current response differs from
+what the helper would produce, the current response wins. `_helpers/widget-error-response.ts` keeps
+the helper as the single source of the status (`NOT_FOUND` → 404, ADR 0012) and answers the published
+body, so the widget contract and the error vocabulary stay in one relationship rather than two. A
+non-`DomainError` still yields `null` and the route rethrows, so an unexpected failure keeps its 500.
+
+**Why a helper and not a second mapping in each route.** #137 has the same constraint on the
+screenshot replacement (a 404 with the same shape), so the mapper is written once for the scope, next
+to the test doubles the widget routes already share.
+
+**The characterization tests pass untouched.** `[id]/route.test.ts` (#129) mocks `@workspace/db` and
+the services import it by the same path, so no mock path changed. The twenty cases answer as before:
+401 on an unknown or missing Project identifier, 403 on a refused origin, a missing origin and an
+invalid Reviewer token, 429 when rate limited, 404 for a Feedback outside the Project (including in
+preference to an unreadable body), 400 on a body that is not JSON, 422 on a payload the schema
+rejects, 200 with `{ id, comment, updatedAt }` on an edit, and 204 with an empty body and no
+`content-type` on a delete.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (64 files, 413 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` compiles and lists every route,
+the 22 API routes included.
+
+**What is left.** `[id]/route.ts` imports no database client for either method. The screenshot
+replacement and the widget config still query Prisma inline: #137 owns both and can reuse
+`get-project-feedback.ts` and `widget-error-response.ts` rather than writing its own. Nothing was
+deleted and no `_deprecated_` stub was created; the published widget packages are untouched, so no
+changeset was written.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -7142,7 +7206,7 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Disconnect: disconnect Slack from `/integrations` and see the Installation and its Project
       links removed, with no further message posted for a new Feedback.
 
-#### Widget (started by #135)
+#### Widget (started by #135, rows added by #136)
 
 Walked from a real test page embedding the widget against a real database, before deploy. The
 widget's own build is untouched by this step: an installed widget must not notice the relocation.
@@ -7153,10 +7217,12 @@ widget's own build is untouched by this step: an installed widget must not notic
       Feedback in the inbox and in the widget list.
 - [ ] List: reload the test page and see the Feedback pinned where it was left, each with its
       screenshot, its author and its status.
-- [ ] Edit: change the comment of a Feedback from the widget and see the new text in the inbox
-      (#136 moves this path behind a service; the row is walked once, at the end).
-- [ ] Delete: remove a Feedback from the widget and see it gone from the page and from the inbox
-      (#136).
+- [ ] Edit: change the comment of a Feedback from the widget and see the new text in the inbox.
+- [ ] Delete: remove a Feedback from the widget and see it gone from the page and from the inbox.
+- [ ] Edit or delete a Feedback of another Project: call `PUT` and `DELETE /api/v1/feedback/:id`
+      with a Feedback identifier that belongs to a different Project and see `404` with
+      `{"error":"Feedback not found"}` and no `code` field, so an installed widget reads the body it
+      has always read (row added by #136).
 - [ ] Replace a screenshot: attach a screenshot to a Feedback submitted without one and see it on
       the Feedback in the inbox (#137).
 - [ ] Widget config: change the widget appearance in the Project settings and see the test page pick
