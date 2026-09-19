@@ -1,90 +1,69 @@
+import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import { NotFoundError } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { NextRequest, NextResponse } from "next/server";
-import { agentError } from "../../../../_helpers/agent-error";
-import {
-  FeedbackIdSchema,
-  UpdateFeedbackStatusSchema,
-} from "../../../../_services/agent.schema";
-import {
-  isAuthFailure,
-  requireAgentAuth,
-} from "../../../../_services/require-agent-auth";
 
-type RouteContext = { params: Promise<{ id: string }> };
+type UpdateFeedbackStatusInput = {
+  feedbackId: string;
+  status: FeedbackStatus;
+  /** The projects the Agent token's Organization owns: the write's whole scope. */
+  organizationProjects: Array<{ id: string }>;
+};
 
+/**
+ * Sets a Feedback's Status on behalf of an Agent token. The dashboard has its
+ * own `updateFeedbackStatus`: that one authorizes on Membership of the
+ * Feedback's Organization and records a `user` Status actor, this one on the
+ * Project belonging to the token's Organization and records an `agent` actor.
+ */
 export async function updateFeedbackStatus(
-  req: NextRequest,
-  context: RouteContext,
+  { feedbackId, status, organizationProjects }: UpdateFeedbackStatusInput,
+  db: typeof prisma = prisma,
 ) {
-  const auth = await requireAgentAuth(
-    req.headers.get("authorization"),
-    "feedbacks:update_status",
-    "agent:write",
-  );
-  if (isAuthFailure(auth)) return auth;
-  const agentToken = auth;
-
-  const { id } = await context.params;
-  const idParsed = FeedbackIdSchema.safeParse(id);
-  if (!idParsed.success) {
-    return agentError("Invalid feedback ID", "VALIDATION_ERROR", 422);
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return agentError("Invalid JSON body", "VALIDATION_ERROR", 422);
-  }
-
-  const parsed = UpdateFeedbackStatusSchema.safeParse(body);
-  if (!parsed.success) {
-    return agentError("Validation failed", "VALIDATION_ERROR", 422);
-  }
-
-  // Verify the feedback belongs to a project in the token's organization.
-  const orgProjectIds = agentToken.organization.projects.map((p) => p.id);
-  const feedback = await prisma.feedback.findFirst({
-    where: { id: idParsed.data, projectId: { in: orgProjectIds } },
+  const feedback = await db.feedback.findFirst({
+    where: {
+      id: feedbackId,
+      projectId: { in: organizationProjects.map((p) => p.id) },
+    },
     select: { id: true, status: true },
   });
 
   if (!feedback) {
-    return agentError("Feedback not found", "NOT_FOUND", 404);
+    // No period: this copy is the published agent API contract.
+    throw new NotFoundError("Feedback not found");
   }
 
   const previousStatus = feedback.status;
-  const updated = await prisma.feedback.update({
+  const updated = await db.feedback.update({
     where: { id: feedback.id },
-    data: { status: parsed.data.status },
+    data: { status },
     select: { id: true, status: true, updatedAt: true },
   });
 
-  console.info(
-    `[agent-api] feedbacks:update_status tokenId=${agentToken.id} feedbackId=${feedback.id} ${previousStatus} -> ${parsed.data.status}`,
-  );
-
-  // Fire-and-forget: sync status to GitHub if linked. Skip on no-op — a
-  // redundant status set (common when an agent loops over a queue) shouldn't
-  // re-fan-out to external trackers, which is the costly part of a write.
-  if (parsed.data.status !== previousStatus) {
+  // Fire-and-forget: sync status to the linked tracker if there is one. Skip on
+  // no-op — a redundant status set (common when an agent loops over a queue)
+  // shouldn't re-fan-out to external trackers, which is the costly part of a
+  // write. The dashboard service does fan out on a no-op; see the migration log.
+  if (status !== previousStatus) {
     inngest
       .send({
         name: "feedback/status-changed",
-        // actor "agent": this endpoint is only reachable with an agent token.
-        data: {
-          feedbackId: feedback.id,
-          newStatus: parsed.data.status,
-          actor: "agent",
-        },
+        // actor "agent": this service is only reachable with an agent token.
+        data: { feedbackId: feedback.id, newStatus: status, actor: "agent" },
       })
       .catch(() => {});
   }
 
-  return NextResponse.json({
+  // `previousStatus` travels back so the boundary can name the transition in
+  // its access log without reading the row a second time.
+  return {
     id: updated.id,
     status: updated.status,
     updatedAt: updated.updatedAt,
-  });
+    previousStatus,
+  };
 }
+
+export type UpdateFeedbackStatusOutput = Awaited<
+  ReturnType<typeof updateFeedbackStatus>
+>;

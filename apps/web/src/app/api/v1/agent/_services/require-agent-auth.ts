@@ -18,6 +18,9 @@ type AgentRateLimitKey = "agent:read" | "agent:write";
  * Returns the resolved token on success, or a `NextResponse` to short-circuit
  * the handler with the appropriate error.
  *
+ * The one agent API service allowed to return a response: its 401, 403 and 429
+ * carry headers and extra body fields a `DomainError` cannot express.
+ *
  * The rate limit is an abuse backstop, not authorization (see docs/adr/0007):
  * keyed per organization (not per token — minting tokens must not multiply the
  * budget), tiered by plan, and skipped entirely off cloud (self-hosted runs on

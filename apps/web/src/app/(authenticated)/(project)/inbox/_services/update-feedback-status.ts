@@ -35,7 +35,10 @@ export async function updateFeedbackStatus(
     data: { status },
   });
 
-  // Fire-and-forget: sync status to the linked tracker if there is one.
+  // Fire-and-forget: sync status to the linked tracker if there is one. Fans
+  // out even on a no-op, unlike the agent API's service, which skips it: a
+  // human in the inbox does not re-set the same status in a loop. See the
+  // migration log, decision 10.
   inngest
     .send({
       name: "feedback/status-changed",

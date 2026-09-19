@@ -617,6 +617,84 @@ classes.
 | Missing boundaries                          | `ls apps/web/src/app/{error,global-error,not-found,forbidden,unauthorized}.tsx "apps/web/src/app/(authenticated)/error.tsx"` lists six files                               |
 | Warnings                                    | `pnpm lint:agent-rules` runs with `--max-warnings 0` and reports 0 problems                                                                                                |
 
+## Step 4 scope log
+
+### `api/v1/agent` status update, and the no-op decision (issue #88)
+
+Closes the agent API conversion of decisions 8 to 10. `POST
+/api/v1/agent/feedbacks/[id]/status` now has the boundary-plus-service shape the two `feedbacks`
+handlers got in #86 and #87: for an Agent-token caller the responses are unchanged, byte for byte,
+and the ten characterization tests of #85 pass untouched.
+
+**What moved.** `_services/update-feedback-status.ts` was the handler, re-exported as `POST` by a
+one-line `route.ts`. It is now a transport-agnostic service: it takes `{ feedbackId, status,
+organizationProjects }` and an injectable `db`, imports nothing from `next/server`, and throws
+`NotFoundError("Feedback not found")` (no trailing period: this copy is the published contract) for
+a Feedback outside the token's Organization. `route.ts` is the boundary and owns agent auth, the
+422 paths (`Invalid feedback ID`, `Invalid JSON body`, `Validation failed`), the access log and
+`domainErrorResponse` in its `catch`, with the non-domain branch rethrown so a bug still surfaces as
+a 500. The service returns `previousStatus` alongside the stored row so the boundary names the
+transition in its log line without reading the row a second time.
+
+**The no-op emission gap stays open, deliberately.** The dashboard's `updateFeedbackStatus` emits
+`feedback/status-changed` on a redundant status set; the agent one does not, and keeps not doing so.
+The two transports have different traffic: an agent looping over a queue re-sets the status it just
+read, and the fan-out (a tracker write per linked integration) is the costly half of the operation,
+while a human toggling a Status in the inbox does not repeat the same value in a loop. Closing the
+gap in the agent's direction would mean emitting events no Reviewer's customer can observe; closing
+it in the dashboard's direction would change inbox behaviour, which is outside step 4's chain. Both
+services now carry a comment pointing at this decision, and the gap is part of the "caller scope"
+deepening candidate of decision 10. The pinned characterization test keeps asserting no event, with
+its comment rewritten from "shows up as a diff" to the settled reason.
+
+**Why the agent API still keeps its own service.** Unchanged from decision 10: authorization is
+Project-owned-by-the-token's-Organization rather than Membership, and the Status actor is `agent`
+rather than `user`.
+
+**Tests.** `_services/update-feedback-status.test.ts` (4 cases) drives the service through an
+injected database fake with `@/server/inngest` mocked at the module boundary: a Feedback outside the
+Organization rejects with `NotFoundError` and writes nothing, a real change stores the status and
+returns the transition, a real change fans out with `actor: "agent"`, a no-op writes but sends no
+event. `route.test.ts` (10 cases, unchanged since #85) keeps proving the HTTP contract.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                                 |
+| ------------------------------------------ | ---------------------------------------------------------------------- |
+| Handlers posing as services                | returns `require-agent-auth.ts` only                                   |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (163 tests, zero warnings)                                        |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (the #104/#105 backlog) |
+| `pnpm --filter web build`                  | every route listed, both agent routes included                         |
+
+`requireAgentAuth` keeps its `token | NextResponse` result style and gained the one-line comment
+decision 9 asked for: it is the one agent API service allowed to return a response, because its 401,
+403 and 429 carry headers and extra body fields a `DomainError` cannot express.
+
+**Build note for the sandbox.** `next build` fails at "collect page data" for `/api/github/setup`
+unless `GITHUB_PRIVATE_KEY` is set: `server/github/github-app.ts` reads it at module evaluation. The
+build above was run with a placeholder value. This is an environment gap, not a regression, and it
+predates step 4.
+
+**Smoke checklist for the maintainer** (a real Agent token against a real database, decision 8's
+"byte for byte" promise):
+
+- [ ] `GET /api/v1/agent/feedbacks?project=<publicId>` returns the Project's Feedbacks with their
+      signed screenshot URLs, and `&format=markdown` returns the Markdown rendering.
+- [ ] `GET /api/v1/agent/feedbacks?project=<another organization's publicId>` returns 404
+      `{ "error": "Project not found", "code": "NOT_FOUND" }`.
+- [ ] `POST /api/v1/agent/feedbacks` with a small batch creates the Feedbacks, returns 201 with
+      `created`, `feedbacks`, `reviewer` and `atLimit`, and opens no tracker Issue.
+- [ ] `POST /api/v1/agent/feedbacks/<id>/status` with `{"status":"resolved"}` returns 200
+      `{ id, status, updatedAt }` and mirrors the Status to the linked Tracker.
+- [ ] The same call repeated returns 200 again and mirrors nothing the second time (the no-op
+      decision above).
+- [ ] `POST /api/v1/agent/feedbacks/<a Feedback of another Organization>/status` returns 404
+      `{ "error": "Feedback not found", "code": "NOT_FOUND" }`.
+- [ ] A token without `feedbacks:update_status` returns 403 `Insufficient permissions`, and no token
+      returns 401 `Unauthorized`.
+- [ ] The MCP server (`@fasterfixes/mcp`) lists, creates and resolves a Feedback against this build
+      with no change of its own.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
