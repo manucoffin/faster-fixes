@@ -408,6 +408,215 @@ Feedback through the agent API, and check that the admin dashboard overview stil
 Issue #81 only. The three `_deprecated_` stubs listed under "Left for the maintainer" are the last
 red line of the step, and the agent may not delete them.
 
+## Prerequisites and decisions for step 4
+
+Settled on 2026-09-19 in a design session held before the step's spec was written, against an
+inventory of the code at commit `c1b47bd`. This section is the input of that spec: the facts the
+decisions rest on, the decisions, the deviations from `04-domain-errors.md`, and the "must be gone"
+checks rewritten for this repo.
+
+### Inventory the decisions rest on
+
+| Surface                              | State at `c1b47bd`                                                                                                                                                                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/server/errors/`                 | `domain-errors.ts` only. Five subclasses, no `UNAUTHORIZED` by design.                                                                                                                                                                                 |
+| tRPC mapping                         | `domainErrorMiddleware` on `publicProcedure`, inherited by every procedure. `enforce-feature`, `enforce-limit` and `with-plan-context` throw `TRPCError` directly.                                                                                     |
+| tRPC `errorFormatter`                | Exposes `zodError`. No masking.                                                                                                                                                                                                                        |
+| tRPC route handler                   | No `onError`. `lib/trpc/handle-trpc-error.ts` has no caller.                                                                                                                                                                                           |
+| Route handlers                       | 23 `route.ts`. None reaches code that throws a `DomainError`. Only the agent API has a `_services/` folder, and its three files are the handlers themselves (`NextRequest` in, `agentError(...)` out), re-exported by `route.ts`.                      |
+| Published error contract             | `packages/mcp` reads `body.error` only. `packages/widget-core` reads `body.error` and `body.details`. `code` is never read by a published client.                                                                                                      |
+| Inngest                              | 17 functions. None imports `_services/` or `DomainError`. No `NonRetriableError` anywhere. Four call `getValidJiraAccessToken`; `refresh-jira-installation-webhooks` already catches its errors, the other three let them bubble.                      |
+| Server actions                       | None. No action client.                                                                                                                                                                                                                                |
+| `authInterrupts`                     | Already enabled. `forbidden()` and `unauthorized()` are never called.                                                                                                                                                                                  |
+| Boundary files                       | `app/unauthorized.tsx` only, static copy. No shared error screen component.                                                                                                                                                                            |
+| RSC pages                            | 0 pages call a service that can throw `NotFoundError`. Not-found is a nullable `find-` everywhere.                                                                                                                                                     |
+| Error classes outside the vocabulary | `JiraIssueConfigurationError`, `JiraRequestError`, `JiraNotConnectedError`, `JiraReauthRequiredError`, `EmailError`. Five tRPC-reachable services call `getValidJiraAccessToken` without catching, so both token errors are a 500 today.               |
+| Bare `throw new Error(`              | 28 in `src/server/**`, 1 in `src/lib`. 28 are infrastructure. One carries user copy: `server/auth/config/email-and-password.tsx:28`. None in any `_services/`.                                                                                         |
+| Routers                              | 2 of 13 contain a `catch` that matches Better Auth `error.message` and throws `TRPCError UNAUTHORIZED` (`account/trpc-router.ts`, `_domains/auth/trpc-router.ts`). 2 more `throw new TRPCError` sit in routers without a catch.                        |
+| Client                               | No import of `@/server/errors`, no `instanceof DomainError`, no read of `error.data.code`. `login-form` matches `error.message === "EMAIL_NOT_VERIFIED"`. 42 toasts pass `error.message`. `matchQueryStatus` is used by 28 of the 42 files that query. |
+| Logging                              | `console.*` only. No logger, no monitoring provider, no `instrumentation.ts`.                                                                                                                                                                          |
+| `no-raw-tailwind-colors`             | 88 warnings. 72 in four home page illustration files, mostly `zinc`. 16 in product screens: 7 green or emerald (`success` exists), 4 red (`destructive` exists), 5 yellow, amber or blue (no token).                                                   |
+
+**The Jira refresh trap.** `refreshUnderLock` in `server/jira/token-access.ts` wraps
+`refreshAccessToken` in a bare `catch {}` that turns any failure, an Atlassian 5xx and a network
+error included, into `JiraReauthRequiredError`, flips the Installation to `reconnect_required` and
+triggers the reconnect email. Today the Inngest retries paper over it: the next attempt refreshes
+and writes `connected` back. Making that error non-retriable without fixing the catch would lose an
+issue creation on a transient Atlassian failure. Decision 7 below exists because of this.
+
+### Decisions
+
+**Scope**
+
+1. **Step 4 changes behaviour in place; step 5 only relocates.** Error conversions under
+   `src/server/**` happen where the files are today.
+2. **Only user copy is converted under the server folder.** `email-and-password.tsx:28` becomes a
+   `DomainError`. The 28 infrastructure sites of `src/server/**` stay bare `Error`: they must surface
+   as a 500.
+3. **`services-no-bare-error` becomes always-on for services only,** under the `**/_services/**`
+   glob. Its extension to `src/server/**` waits for step 5, when those files join a domain, rather
+   than landing 28 `eslint-disable` lines that the relocation would revisit.
+4. **Out of scope, recorded as debt:** Better Auth messages passed through as
+   `BadRequestError(error.message)` in the three invitation services; the twelve route handlers with
+   inline Prisma other than the agent API (step 5); `warning` and `info` theme tokens; anomalies 3
+   and 4; deviation 1 of the step 3 close-out. Anomaly 4 gets its own ticket outside the migration.
+
+**Vocabulary**
+
+5. **The three expected Jira errors join the vocabulary as second-level subclasses.**
+   `JiraNotConnectedError`, `JiraReauthRequiredError` and `JiraIssueConfigurationError` extend
+   `PreconditionFailedError` and keep their names, so the existing `instanceof` checks in Inngest
+   keep working, tRPC maps them for free and the five uncaught services stop returning a 500. A
+   second-level subclass is allowed when a caller must tell cases apart; its code is still one of
+   the five. `JiraRequestError` and `EmailError` are infrastructure and stay plain `Error`.
+6. **No `UnauthorizedError`.** The Better Auth translations in the two routers move down into their
+   services as `BadRequestError` with the current copy: a wrong password is a rejected input, not a
+   missing session. The unverified email case becomes a `PreconditionFailedError` with real copy,
+   reserved for that case in `sign-in-user`, and `login-form` branches on
+   `error.data.code === "PRECONDITION_FAILED"`. The two remaining `throw new TRPCError` in routers
+   (`_domains/organization/trpc-router.ts`, `stopImpersonate` in `_domains/auth/trpc-router.ts`) move
+   into their services in the same ticket. The `enforce-*` middlewares keep throwing `TRPCError`:
+   they are the tRPC boundary, not services.
+7. **The Jira refresh discriminates before anything becomes non-retriable.** Only an explicit
+   refusal from Atlassian (a 4xx such as `invalid_grant` or `unauthorized_client`) raises
+   `JiraReauthRequiredError` and sets `reconnect_required`. A 5xx or a network error stays an
+   infrastructure `Error`, leaves the Installation untouched and is retried. This also fixes the
+   existing bug where a transient failure sends the reconnect email. "Reconnect required" is now a
+   glossary term in `CONTEXT.md` with that rule.
+
+**Boundaries**
+
+8. **The agent API gets the HTTP boundary; no other route handler does in this step.** `route.ts`
+   becomes the boundary (auth, parsing, transport codes, `domainErrorResponse` in its `catch`), and
+   the three files in `_services/` become transport-agnostic services that throw `NotFoundError`.
+   Transport codes are unchanged and stay in the boundary: `UNAUTHORIZED`, `FORBIDDEN` (scope),
+   `RATE_LIMITED` with its headers, `VALIDATION_ERROR` as 422, `RESOURCE_LIMIT_EXCEEDED` with its
+   extra fields. The kit's 1:1 status table is unchanged, since no `DomainError` yields a 422. Bodies
+   are byte-compatible (`{ error, code }`), so no changeset. The ticket starts with characterization
+   tests of today's bodies and statuses: `api/v1` has no test today.
+9. **`requireAgentAuth` stays a transport guard.** It keeps its `token | NextResponse` result style
+   and its place in `_services/` (it does IO). Its 401, 403 and 429 carry headers a `DomainError`
+   cannot. It is the one agent API service allowed to return a `NextResponse`, with a one-line
+   comment saying why.
+10. **The agent API keeps its own services.** `update-feedback-status` exists on both transports
+    with different authorization (Member of the Organization versus Project owned by the token's
+    Organization) and a different Status actor. Merging them needs a "caller scope" concept that is
+    not an error question. Recorded as a deepening candidate for after the migration. One
+    behavioural gap for the ticket to settle: the dashboard service emits `feedback/status-changed`
+    on a no-op status set; the agent one does not.
+11. **Non-retriable wrapping is targeted.** `rethrowDomainErrorsAsNonRetriable` wraps the three
+    Inngest functions that let a Jira `DomainError` bubble (`create-jira-issue`,
+    `sync-feedback-status-to-jira`, `sync-jira-issue-status`). The other fourteen cannot receive one.
+    The rule goes into `rules/backend.md`: an Inngest function body that calls code able to throw a
+    `DomainError` wraps it. Effect: a disconnected or refused Installation fails on the first
+    attempt instead of the fourth; transient failures still retry, thanks to decision 7.
+12. **Webhooks, OAuth routes, widget endpoints and the upload route are untouched.** They reach no
+    service, so the kit's per-endpoint 4xx-or-swallowed-2xx decision has nothing to decide yet.
+13. **Masking copy:** `Something went wrong. Please try again.` The tRPC route handler gains an
+    `onError` that `console.error`s the original error with its `cause` chain. No monitoring
+    provider is introduced. `handle-trpc-error.ts` becomes a `_deprecated_` stub.
+
+**Client**
+
+14. **Six boundary files, one screen.** The five root files plus `(authenticated)/error.tsx`, so a
+    render error keeps the sidebar and the header. All render one `ErrorScreen` from root
+    `_components/` with fixed copy from one constants module beside it. No support address is
+    rendered while `SUPPORT_EMAIL` is a placeholder.
+
+    | File               | Title                  | Body                                                                                   |
+    | ------------------ | ---------------------- | -------------------------------------------------------------------------------------- |
+    | `error.tsx`        | `Something went wrong` | `An unexpected error occurred. Try again, or contact support if the problem persists.` |
+    | `not-found.tsx`    | `Page not found`       | `The page you are looking for does not exist or has been moved.`                       |
+    | `forbidden.tsx`    | `Access denied`        | `You do not have permission to view this page.`                                        |
+    | `unauthorized.tsx` | `Sign in required`     | `Sign in to access this page.` with a link to `/login`                                 |
+
+    `error.tsx` carries a `Try again` button. `global-error.tsx` reuses the `error.tsx` copy.
+
+15. **The `matchQueryStatus` sweep covers only queries that show, or should show, an error state.**
+    Of the 14 files that query without it, a query whose failure is invisible by design stays as it
+    is, and the ticket lists the cases it kept.
+
+**Lint**
+
+16. **`no-raw-tailwind-colors` is reshaped around its intent:** forbid a raw palette class when a
+    semantic token exists for it. The rule takes a configurable hue-to-token table
+    (`red` to `destructive`, `green` and `emerald` to `success`, the neutral hues to `muted`,
+    `border`, `foreground`), names the token in its message, and lets hues with no equivalent pass.
+    The four home page illustration files join `ignorePathPatterns`: drawn mock screens keep fixed
+    colours on purpose. That leaves 11 sites to fix. No `warning` or `info` token is added; when one
+    is, a line in the table makes the rule report the 5 yellow, amber and blue sites.
+17. **`--max-warnings 0` returns to `lint:agent-rules` at the end of step 4,** as the Purpose section
+    above promised, once decision 16 brings the rule to `error` at zero.
+
+### Deviations from `04-domain-errors.md`
+
+| Kit                                                               | Here                                                               | Why                                                                            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `next-interrupts.ts` exists                                       | Not created                                                        | No RSC page calls a throwing service. It lands with its first caller.          |
+| Every Inngest function wraps its service calls                    | Three functions wrap                                               | Decision 11. Wrapping fourteen functions that cannot receive one is dead code. |
+| Every route handler calls `domainErrorResponse` first             | The agent API only                                                 | Decisions 8 and 12. The rest reach no service until step 5.                    |
+| Legacy vocabulary retired, ban rule `no-deprecated-error-imports` | Three classes re-parented, two left as infrastructure, no ban rule | Decision 5. There is no legacy module to ban.                                  |
+| Server actions branch                                             | Not applicable                                                     | No action client in this repo.                                                 |
+| `services-no-bare-error` always on                                | Always on for `_services/**`; `src/server/**` in step 5            | Decision 3.                                                                    |
+| Five boundary files                                               | Six                                                                | Decision 14.                                                                   |
+
+The ADR amendment (second-level subclasses, `interruptOnDomainError` deferred, the agent API's
+transport codes, removal of the "Added by step 4" status note) is written at the final lock, when
+the code matches it, not before.
+
+### Order
+
+Strictly ordered:
+
+1. `http-response.ts`, `non-retriable.ts`, and the agent API conversion (decisions 8 to 10).
+2. Jira: the refresh discrimination, then the re-parenting, then the three wrappers (7, 5, 11).
+3. The two auth routers and the two stray `TRPCError` (6).
+4. The one user-copy site under `src/server`, and the `handle-trpc-error` stub (2, 13).
+5. `services-no-bare-error` always on (3).
+6. Masking and `onError` (13). Starts only after 4 is done and the 28 infrastructure sites have been
+   re-read against the list above.
+
+Independent of that chain and of each other: the boundary files (14), the `matchQueryStatus` sweep
+(15), the Tailwind rule (16). The final lock (17, the ADR amendment, the checks below, the log
+entry) closes the step.
+
+### Tests and verification
+
+Step 4 changes behaviour, unlike steps 2 and 3. Minimum automated coverage:
+
+- unit tests for `domainErrorResponse` and `rethrowDomainErrorsAsNonRetriable`;
+- `domain-error-mapping.test.ts` extended: a 500 is masked, a `DomainError` is not, `zodError`
+  survives;
+- the Jira refresh, both branches of decision 7;
+- the agent API characterization tests of decision 8, written before the conversion;
+- the hue-to-token table of the Tailwind rule;
+- the auth services: wrong password to `BadRequestError`, unverified email to
+  `PreconditionFailedError`.
+
+Nothing automated for the boundary files or the `matchQueryStatus` sweep: rendering, checked by
+hand. Smoke checklists are written per ticket and walked by the maintainer, as in step 3. The four
+risky tickets (Jira, auth routers, masking, agent API) cannot close unless their automated tests
+cover the changed branch.
+
+### "Must be gone" checks for this repo
+
+These replace the table in `04-domain-errors.md`, whose legacy grep matches none of this repo's
+classes.
+
+| Pattern                                     | Check                                                                                                                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bare errors in services                     | `grep -rn "throw new Error(" apps/web/src \| grep _services/` returns nothing                                                                                              |
+| Expected Jira errors outside the vocabulary | `grep -n "class Jira.*Error extends" apps/web/src/server/jira/*.ts` shows `PreconditionFailedError` for the three expected classes and `Error` for `JiraRequestError` only |
+| Blind refresh catch                         | `refreshUnderLock` no longer holds a bare `catch {` around `refreshAccessToken`                                                                                            |
+| Per-procedure mapping                       | `grep -rn "catch" apps/web/src --include="trpc-router.ts"` returns nothing                                                                                                 |
+| Transport errors in routers                 | `grep -rn "new TRPCError" apps/web/src/app --include="trpc-router.ts"` returns nothing                                                                                     |
+| Sentinel messages                           | `grep -rn "EMAIL_NOT_VERIFIED" apps/web/src` returns nothing                                                                                                               |
+| Handlers posing as services                 | `grep -rln "NextResponse\|NextRequest" apps/web/src/app/api/v1/agent --include="*.ts" \| grep _services/` returns `require-agent-auth.ts` only                             |
+| Server errors in client code                | `pnpm lint:agent-rules` passes with `no-client-import-of-server-errors` at `error`                                                                                         |
+| Raw messages in boundaries                  | `grep -n "error.message\|digest"` over the six boundary files returns only the logging line                                                                                |
+| Missing boundaries                          | `ls apps/web/src/app/{error,global-error,not-found,forbidden,unauthorized}.tsx "apps/web/src/app/(authenticated)/error.tsx"` lists six files                               |
+| Warnings                                    | `pnpm lint:agent-rules` runs with `--max-warnings 0` and reports 0 problems                                                                                                |
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
