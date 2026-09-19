@@ -1,8 +1,8 @@
 /**
  * Shared doubles for the public widget API route tests. They live here, next to
- * the routes they serve, so the submit/list, edit/delete and screenshot route
- * tests drive the same database, storage and Inngest fakes through the same
- * defaults.
+ * the routes they serve, so the submit/list, edit/delete, screenshot and widget
+ * config route tests drive the same database, storage and Inngest fakes through
+ * the same defaults.
  *
  * Only the database client and the external modules (storage, Inngest) are
  * faked. The request helpers (Project resolution, Allowed origins matching,
@@ -29,13 +29,14 @@ export const SIGNED_ASSET_URL = "https://assets.example.test/signed";
 export const SCREENSHOT_ASSET_ID = "asset_1";
 export const STORAGE_BUCKET = "feedback-assets";
 
-export function projectRow() {
+export function projectRow(overrides: Record<string, unknown> = {}) {
   return {
     id: PROJECT_ID,
     publicId: PROJECT_PUBLIC_ID,
     organizationId: ORGANIZATION_ID,
     domain: PROJECT_DOMAIN,
     widgetConfig: null,
+    ...overrides,
   };
 }
 
@@ -55,6 +56,18 @@ export function feedbackRow(overrides: Record<string, unknown> = {}) {
     projectId: PROJECT_ID,
     reviewerId: REVIEWER_ID,
     comment: "The submit button does nothing",
+    ...overrides,
+  };
+}
+
+/** An active paid Subscription, as the Plan resolution reads it back. */
+export function subscriptionRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "subscription_1",
+    referenceId: ORGANIZATION_ID,
+    plan: "pro",
+    status: "active",
+    periodEnd: null,
     ...overrides,
   };
 }
