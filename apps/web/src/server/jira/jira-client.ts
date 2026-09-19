@@ -1,6 +1,8 @@
 // Atlassian OAuth 2.0 (3LO) endpoints. Authorization and token exchange happen on
 // auth.atlassian.com; every resource call (including accessible-resources) goes
 // through the api.atlassian.com gateway. See ADR 0008.
+import { JiraRequestError } from "./jira-rest-client";
+
 export const JIRA_OAUTH_AUTHORIZE_URL = "https://auth.atlassian.com/authorize";
 const JIRA_OAUTH_TOKEN_URL = "https://auth.atlassian.com/oauth/token";
 const JIRA_ACCESSIBLE_RESOURCES_URL =
@@ -85,7 +87,9 @@ export async function refreshAccessToken(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Jira token refresh failed (${res.status}): ${text}`);
+    // The status travels with the error rather than inside its message: the
+    // refresh path has to tell an explicit refusal (4xx) from an outage (5xx).
+    throw new JiraRequestError(res.status, text, "/oauth/token");
   }
 
   return (await res.json()) as JiraTokenResponse;

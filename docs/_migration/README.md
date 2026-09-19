@@ -695,6 +695,73 @@ predates step 4.
 - [ ] The MCP server (`@fasterfixes/mcp`) lists, creates and resolves a Feedback against this build
       with no change of its own.
 
+### The Jira token refresh tells a refusal from an outage (issue #89)
+
+Decision 7, and the fix of the bug the inventory called "the Jira refresh trap". `refreshUnderLock`
+in `server/jira/token-access.ts` wrapped `refreshAccessToken` in a bare `catch {}`: an Atlassian
+5xx, a network failure and an explicit `invalid_grant` all ended as `JiraReauthRequiredError`, all
+flipped the Installation to **Reconnect required** and all triggered the reconnect email. Only the
+Inngest retries hid it, by refreshing successfully on the next attempt and writing `connected` back.
+
+**What changed.** `refreshAccessToken` in `server/jira/jira-client.ts` now throws
+`JiraRequestError(status, body, "/oauth/token")` instead of a bare `Error` whose message carried the
+status as text, so the caller can discriminate. `refreshUnderLock` catches with a predicate,
+`isRefusedByAtlassian`: a 4xx (`invalid_grant`, `unauthorized_client`) keeps today's behaviour
+(write **Reconnect required**, throw `JiraReauthRequiredError`, which `getValidJiraAccessToken`
+turns into the `jira/oauth.revoked` event); anything else is rethrown untouched, writes nothing,
+emits nothing and is retried by the caller. The refresh token is decrypted before the `try` on
+purpose: a key or payload problem is ours, not a refusal, and must not flip an Installation.
+
+No new error class was introduced: `JiraRequestError` already carries the status and is the
+infrastructure error decision 5 leaves as a plain `Error`, so the "expected Jira errors outside the
+vocabulary" check that #90 has to pass still sees one `extends Error` in `server/jira/*.ts`.
+
+**Deliberate behaviour change.** A transient Atlassian failure during a refresh no longer marks a
+healthy Installation as **Reconnect required** and no longer emails the Organization to reconnect;
+the run fails with an infrastructure error and retries, as an outage should.
+`refresh-jira-installation-webhooks` is unchanged and still skips on the two Jira domain errors,
+so a transient failure now makes that run retry instead of reporting
+`skipped: "reauthorization_required"`. This is the prerequisite of #91: wrapping the three Jira
+Inngest functions as non-retriable before this fix would have lost a Feedback mirror on a brief
+Atlassian outage.
+
+**Tests.** `server/jira/token-access.test.ts` (8 cases) drives `getValidJiraAccessToken` with
+`@workspace/db` and `@/server/inngest` mocked at the module boundary and `fetch` stubbed, so the
+real `refreshAccessToken` and the real cipher run: fresh token takes the fast path with no lock and
+no fetch; no Installation rejects with `JiraNotConnectedError`; a successful refresh stores the
+rotated token, `connected` and a cleared `reconnectNotifiedAt`; a 400 `invalid_grant` writes
+**Reconnect required** and emits `jira/oauth.revoked`; a 503 and a network `TypeError` write nothing
+and emit nothing; a missing refresh token still asks for a reconnect; the loser of the lock race
+returns the token the winner just wrote. The two outage cases fail against the previous `catch {}`,
+which is what makes them worth their lines.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                          |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| Blind refresh catch                        | `grep -n "catch {" server/jira/token-access.ts` returns nothing |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (171 web tests, zero warnings)                             |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105)      |
+| `pnpm --filter web build`                  | every route listed                                              |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason
+recorded under issue #88.
+
+**Smoke checklist for the maintainer** (a real Jira Installation against a real database):
+
+- [ ] With Atlassian reachable, let an access token expire (or set `tokenExpiresAt` in the past) and
+      open Jira settings: the page loads, the Installation stays `connected`, and the row shows a new
+      `tokenExpiresAt` and a rotated `refreshToken`.
+- [ ] Point the token endpoint at an unreachable host (or block `auth.atlassian.com`) with an expired
+      token, then trigger a Jira sync: the run fails and retries, `healthState` stays `connected`,
+      `reconnectNotifiedAt` is untouched, and no reconnect email arrives.
+- [ ] Revoke the app from the Atlassian account (or corrupt the stored refresh token so Atlassian
+      answers `invalid_grant`) and trigger a Jira sync: `healthState` becomes `reconnect_required`,
+      `jira/oauth.revoked` fires once, the reconnect email arrives, and Jira settings prompts to
+      reconnect.
+- [ ] Reconnect the Installation: `healthState` returns to `connected` and `reconnectNotifiedAt` is
+      cleared, so a later revocation can notify again.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

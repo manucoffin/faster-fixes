@@ -2,6 +2,7 @@ import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
 import { decryptToken, encryptToken } from "./crypto";
 import { refreshAccessToken } from "./jira-client";
+import { JiraRequestError } from "./jira-rest-client";
 
 // Refresh slightly before the real expiry so a token isn't handed out moments
 // before it dies mid-request.
@@ -14,9 +15,10 @@ export class JiraNotConnectedError extends Error {
   }
 }
 
-// Thrown when the refresh token no longer works (revoked user access). The
+// Thrown when Atlassian refuses the grant itself (revoked user access). The
 // installation is flipped to `reconnect_required` so the UI can prompt a
-// re-authorization instead of failing silently (ADR 0008).
+// re-authorization instead of failing silently (ADR 0008). An outage is never
+// this error: see `isRefusedByAtlassian`.
 export class JiraReauthRequiredError extends Error {
   constructor(readonly installationId: string) {
     super("Jira installation requires re-authorization.");
@@ -33,6 +35,21 @@ type LockedRow = {
 
 function isFresh(expiresAt: Date | null): boolean {
   return !!expiresAt && expiresAt.getTime() - EXPIRY_SKEW_MS > Date.now();
+}
+
+/**
+ * Atlassian answers a dead grant with a 4xx (`invalid_grant`,
+ * `unauthorized_client`): the refresh token will never work again. A 5xx or a
+ * network failure says nothing about the grant, so it must leave the
+ * installation connected and be retried instead of asking the Organization to
+ * reconnect a healthy Jira Installation.
+ */
+function isRefusedByAtlassian(error: unknown): boolean {
+  return (
+    error instanceof JiraRequestError &&
+    error.status >= 400 &&
+    error.status < 500
+  );
 }
 
 /**
@@ -101,10 +118,15 @@ function refreshUnderLock(organizationId: string): Promise<string> {
       throw new JiraReauthRequiredError(row.id);
     }
 
+    // Decrypted outside the try: a key or payload problem is ours, not a
+    // refusal from Atlassian, and must not flip the installation.
+    const currentRefreshToken = decryptToken(row.refreshToken);
+
     let refreshed;
     try {
-      refreshed = await refreshAccessToken(decryptToken(row.refreshToken));
-    } catch {
+      refreshed = await refreshAccessToken(currentRefreshToken);
+    } catch (error) {
+      if (!isRefusedByAtlassian(error)) throw error;
       await tx.jiraInstallation.update({
         where: { id: row.id },
         data: { healthState: "reconnect_required" },
