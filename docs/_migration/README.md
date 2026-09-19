@@ -7642,3 +7642,67 @@ Four anomalies the log recorded as open were re-checked and are **resolved in th
 client hook importing the server plan config, the Subscription read named after a User, the Jira
 reconnect mail template living in `src/lib/`, and the twelve route handlers querying Prisma inline.
 They needed no home.
+
+## Close-out: references removed (issue #143)
+
+The last agent ticket of the migration. It removes every pointer to this folder and to
+`docs/architecture/migration-kit/` from the agent instructions, the permanent documents and the
+source tree, so that nothing dangles when the maintainer deletes both folders in #145. It deletes
+nothing itself.
+
+### What pointed here, and what it says now
+
+| Site                                                         | Was                                                                         | Is                                                                                              |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `AGENTS.md`, required checks                                 | "The history is in `docs/_migration/`."                                     | The sentence is gone; the surviving fact (any report is a regression) already precedes it.      |
+| `SKILL.md`, "Migration in progress"                          | Five step-by-step status paragraphs, a link to this log, "delete me" footer | "Where the architecture is written down": the three facts that settle a placement question      |
+| `docs/adr/0011`, Status                                      | "`docs/_migration/README.md` records which scopes are locked"               | The rollout finished with step 3 and the pre-migration layout is gone from the tree             |
+| `docs/adr/0011`, Deviations                                  | "This ADR is the kit document committed as-is"                              | "adopted from another project's architecture playbook"                                          |
+| `docs/adr/0013`, context and consequences                    | "the kit's `@repo/db`", "the kit's check"                                   | The naming note and the check stand on their own                                                |
+| `docs/architecture/target-architecture.md`, intro and Status | "the reference for the migration kit", "all five steps of the kit have run" | "where things are, not how they got there", "the architecture refactor is complete"             |
+| `adr-citations.test.js`, two comments                        | "the kit rules", "the numbers are reserved in `docs/_migration/README.md`"  | Same reasoning, no folder reference. `RESERVED` still asserts 0011 and 0012 hold the right ADRs |
+| Four status-service comments and tests                       | "See the migration log, decision 10."                                       | "See ADR-0007", which is where #142 harvested the asymmetry to                                  |
+
+The four source comments were the only references in the code rather than in a document. They
+cite a permanent ADR now, which is a better citation than the one they lost: ADR-0007's
+consequences carry the same argument at more length, and `rules/backend.md` repeats it for the
+agent writing either service.
+
+### The `SKILL.md` section
+
+It was the one site where removing the reference meant rewriting rather than deleting. The section
+carried a rule that exists nowhere else in the skill (the two conditions `src/server/` admits a
+file under) alongside a step-by-step history that is now noise and a Tailwind bullet that
+`rules/frontend.md` covers in more detail. The rewrite keeps the admission rule with its pointer to
+"The server folder", keeps the always-on lint block and the domain-error throw rule, keeps the note
+that `interruptOnDomainError` is unbuilt, and drops the rest. Its heading no longer claims a
+migration is in progress, and it no longer asks to be deleted.
+
+### Checks
+
+| Check                                                                                                                              | Result                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `grep -rn "_migration\|migration-kit" --include="*.md" --include="*.ts" --include="*.tsx" --include="*.js" .` outside both folders | one hit, `_prisma_migrations` in a seed       |
+| `grep -rni "\bkit\b\|migration log" .` outside both folders                                                                        | `@dnd-kit` imports and Slack "Block Kit" only |
+| `find apps packages -name "_deprecated_*" -not -path "*/node_modules/*"`                                                           | nothing                                       |
+| `pnpm typecheck`                                                                                                                   | 4 tasks, clean                                |
+| `pnpm test`                                                                                                                        | 413 web tests (64 files), 197 config tests    |
+| `pnpm lint`                                                                                                                        | 5 tasks, 0 warnings                           |
+| `pnpm lint:agent-rules`                                                                                                            | 0 problems, with `--max-warnings 0`           |
+| `pnpm --filter web build`                                                                                                          | compiles, 67 routes listed                    |
+
+### Left for the maintainer
+
+Posted in full as a comment on the parent issue (#108), where it survives the deletion of this
+folder, and actioned by #145:
+
+1. `docs/_migration/`, this folder.
+2. `docs/architecture/migration-kit/`.
+3. No `_deprecated_` stub. The four the earlier steps created were deleted by the maintainer in
+   `c1b47bd` and `78d11da`; step 5 created none. Two marketing files emptied to `export {}` carry
+   the word in a comment and are unrelated to the migration:
+   `(public)/vs/gleap/_features/gleap-alternatives-section.tsx` and
+   `(public)/integrations/linear/_features/linear-agencies-callout.tsx`.
+4. Five untracked empty folders under `apps/web/src/server/` (`api/`, `jira/`, `linear/`, `oauth/`,
+   `slack/`), left behind by `git mv` in this working tree only.
+5. The six smoke checklists, copied verbatim onto #108.

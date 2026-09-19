@@ -32,12 +32,12 @@ The folder architecture ADR gave each scope a server bucket but left its inside 
 
 ## Deviations in this repo
 
-This ADR is the kit document committed as-is. Two points are settled locally.
+This ADR was adopted from another project's architecture playbook and committed as-is. Two points are settled locally.
 
-- **A read service exports `<Service>Output`, not `<Service>`.** The kit names the derived alias after the function (`export type ListUsers = Awaited<ReturnType<typeof listUsers>>`). Here it keeps the `Output` suffix the app already uses: `export type ListUsersOutput = Awaited<ReturnType<typeof listUsers>>`. All 95 existing aliases are already named `<Procedure>Output` (`GetMrrOutput`, `GetPaginatedUsersOutput`), so a consumer changes an import path and nothing else, and `ListUsers` reads like an entity type rather than one operation's return shape. `require-trpc-output-type` checks the right-hand side, not the name, so both spellings lint clean and the convention is a review concern.
+- **A read service exports `<Service>Output`, not `<Service>`.** The source document names the derived alias after the function (`export type ListUsers = Awaited<ReturnType<typeof listUsers>>`). Here it keeps the `Output` suffix the app already uses: `export type ListUsersOutput = Awaited<ReturnType<typeof listUsers>>`. All 95 existing aliases are already named `<Procedure>Output` (`GetMrrOutput`, `GetPaginatedUsersOutput`), so a consumer changes an import path and nothing else, and `ListUsers` reads like an entity type rather than one operation's return shape. `require-trpc-output-type` checks the right-hand side, not the name, so both spellings lint clean and the convention is a review concern.
 - **The ADR set this one amends is numbered here**: the folder architecture ADR is [ADR-0010](./0010-app-folder-architecture.md), and the answer to "what does a transport-agnostic service throw?" is [ADR-0012](./0012-domain-errors-and-transport-mapping.md).
 
-**Status.** Accepted, committed 2026-09-18 with the step 3 prerequisites. The conventions are the target for `apps/web/src/app/**`; step 3 applies them scope by scope, and `docs/_migration/README.md` records which scopes are locked. Inside a scope that step 3 has not reached, the pre-migration layout (`_utils/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`) still stands.
+**Status.** Accepted, committed 2026-09-18 with the step 3 prerequisites. The conventions are live in every scope of `apps/web/src/app/**`: the scope-by-scope rollout finished with step 3, and the pre-migration layout (`_utils/`, `*.trpc.query.ts`, `*.trpc.mutation.ts`) is gone from the tree.
 
 ## Consequences
 

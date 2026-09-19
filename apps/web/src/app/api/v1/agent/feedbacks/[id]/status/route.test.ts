@@ -233,9 +233,9 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
   /**
    * The gap with the dashboard service (which does emit here) was settled in
    * favour of keeping it: an agent looping over a queue re-sets the status it
-   * already read, and the fan-out is the costly half of the write. See the
-   * migration log, decision 10. The fan-out is not visible in the response, so
-   * this one assertion looks past it.
+   * already read, and the fan-out is the costly half of the write. See
+   * ADR-0007. The fan-out is not visible in the response, so this one assertion
+   * looks past it.
    */
   it("answers a no-op status set with the row and sends no event", async () => {
     seedFeedback({ status: "resolved" });

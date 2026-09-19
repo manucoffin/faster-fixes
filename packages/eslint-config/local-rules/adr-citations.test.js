@@ -11,8 +11,8 @@ const adrDir = join(localRulesDir, "..", "..", "..", "docs", "adr");
 
 const ADR_CITATION_RE = /ADR-(\d{4})/g;
 
-// The ADR each rule derives from, by this repo's numbering. The kit rules
-// arrived citing the source project's numbers, where the folder architecture is
+// The ADR each rule derives from, by this repo's numbering. These rules arrived
+// from another project citing its numbers, where the folder architecture is
 // ADR-0009; here it is ADR-0010 and ADR-0009 is the Diagnostic Trail, so a
 // citation that merely points at an existing file is not enough. This table is
 // the assertion: a rule may cite these numbers and no others.
@@ -33,9 +33,10 @@ const EXPECTED_CITATIONS = {
   "services-verb-prefix.js": ["0011"],
 };
 
-// `0011` (server file conventions) and `0012` (domain errors) are written by the
-// "commit the two kit ADRs" prerequisite of step 3. The numbers are reserved in
-// docs/_migration/README.md so the rules can cite them before the files land.
+// `0011` (server file conventions) and `0012` (domain errors) were committed as a
+// step 3 prerequisite, after the rules below already cited them. The mapping is
+// kept so a later renumbering cannot point a citation at an unrelated ADR that
+// took the slot.
 const RESERVED = {
   "0011": "server-file-conventions",
   "0012": "domain-errors",

@@ -43,7 +43,7 @@ export async function updateFeedbackStatus(
   // Fire-and-forget: sync status to the linked tracker if there is one. Skip on
   // no-op — a redundant status set (common when an agent loops over a queue)
   // shouldn't re-fan-out to external trackers, which is the costly part of a
-  // write. The dashboard service does fan out on a no-op; see the migration log.
+  // write. The dashboard service does fan out on a no-op; see ADR-0007.
   if (status !== previousStatus) {
     inngest
       .send({

@@ -46,7 +46,7 @@ All coding standards for this project live in the `coding-standards` skill at `.
 - Run from repo root: `pnpm test`.
 - Run both lint commands:
 - `pnpm lint` (all workspaces). Zero warnings tolerated.
-- `pnpm lint:agent-rules` (web project rules only). Zero problems required: it runs with `--max-warnings 0` since the step 4 final lock, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression rather than a burn-down item. The history is in `docs/_migration/`.
+- `pnpm lint:agent-rules` (web project rules only). Zero problems required: it runs with `--max-warnings 0` since the step 4 final lock, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression rather than a burn-down item.
 - If DB schema changed: run required `packages/database` generation/migration commands.
 - A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `server/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
 - Never declare completion while required checks fail.

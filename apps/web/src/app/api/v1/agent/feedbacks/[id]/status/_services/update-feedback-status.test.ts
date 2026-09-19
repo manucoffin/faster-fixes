@@ -111,7 +111,7 @@ describe("updateFeedbackStatus", () => {
   /**
    * The settled gap with the dashboard service, which does fan out on a no-op:
    * an agent looping over a queue re-sets the status it already read, and the
-   * fan-out is the costly half of the write. See the migration log, decision 10.
+   * fan-out is the costly half of the write. See ADR-0007.
    */
   it("writes a no-op status set but sends no event", async () => {
     const db = fakeDb({ status: "resolved" });

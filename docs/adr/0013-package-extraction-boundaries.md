@@ -6,7 +6,7 @@ A monorepo invites moving code out of the app into workspace packages "because i
 
 Accepted, committed 2026-09-19 with step 5b of the architecture migration. **Nothing was extracted**, and no package or manifest changed: the gate is a second consumer and there is none. The repo holds one app (`apps/web`) and seven packages, four of them internal tooling or data foundations and three published to npm. The graph below was read off the package manifests and the actual imports on the day it was written, and it is the state of the repo, not a target.
 
-One naming note for a reader coming from the migration kit: the workspace alias of the database package here is `@workspace/db`, not the kit's `@repo/db`, and the internal packages use the `@workspace/*` scope while the published ones use `@fasterfixes/*`. The kit's package names are placeholders.
+One naming note: the workspace alias of the database package here is `@workspace/db`, the internal packages use the `@workspace/*` scope, and the published ones use `@fasterfixes/*`.
 
 ## Decisions
 
@@ -52,7 +52,7 @@ One naming note for a reader coming from the migration kit: the workspace alias 
 Reading of the table:
 
 - **No cycle and no upward import.** The only internal runtime edges are `@fasterfixes/react` to `@fasterfixes/core` (layer 1 to layer 0) and the four edges out of the app (layer 2 to layers 0 and 1).
-- **No package imports the app.** The kit's check, `grep -rn "apps/web\|@/app/" packages/*/src`, returns nothing. Outside `src/`, the ESLint config package names `apps/web` paths in its rule tests as fixture filenames and as the working directory of its config test; those are strings passed to the linter, not imports, and the dependency direction is unaffected.
+- **No package imports the app.** The check, `grep -rn "apps/web\|@/app/" packages/*/src`, returns nothing. Outside `src/`, the ESLint config package names `apps/web` paths in its rule tests as fixture filenames and as the working directory of its config test; those are strings passed to the linter, not imports, and the dependency direction is unaffected.
 - **The two config packages carry no runtime code.** They are listed at layer 0 for completeness; being a dev dependency of every package, they are excluded from the cycle question.
 - **The UI package sits at layer 1 although it imports no internal package.** It is the app's presentation primitives, consumed by an app and never by another package, and it is source-exported: its `exports` map points at `./src/**` and the app lists it in `transpilePackages`, so it ships no build output of its own.
 - **The MCP package is detached on purpose.** It talks to the agent API over HTTP and imports no internal package, so it sits outside the layer graph rather than at layer 0.

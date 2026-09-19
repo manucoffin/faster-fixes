@@ -9,55 +9,31 @@ Conventions live as focused rule files in `rules/` next to this file. This skill
 **router**: read only the rule file(s) that match what you are about to do, then apply
 them. **Do not read every rule file.**
 
-## Migration in progress
+## Where the architecture is written down
 
-The web app is moving to the target architecture (`docs/architecture/target-architecture.md`) in
-five steps. The log lives in `docs/_migration/`: it records the convention baseline, which scopes
-are already locked, and what the next step needs.
+`docs/architecture/target-architecture.md` describes the live structure of `apps/web`: two tiers
+sharing one bucket set, transport-agnostic services under thin tRPC routers, and one domain-error
+vocabulary mapped exactly once per boundary. ADR-0010 to ADR-0014 in `docs/adr/` pin the decisions
+behind it. The rule files under `rules/` are the working form of all of it, so read those first.
 
-Steps 1 and 2 are done. `src/app/_domains/` holds the domain-bound code behind a public `index.ts`
-per domain, and root `_components/`, `_providers/` and `_constants/` hold the domain-agnostic code.
+Three facts settle most placement questions:
 
-Step 3 is done. Every scope under `src/app` has the final bucket set: data and IO live in
-verb-prefixed `_services/` functions, routers are thin `trpc-router.ts` files at a scope root,
-schemas are pure Zod in `_services/`, `_utils/` gave way to `_helpers/` and `_types/`, and the
-`*.trpc.query.ts` / `*.trpc.mutation.ts` role suffixes are gone. The `DomainError` vocabulary exists at
-`@/server/errors/domain-errors` and the base tRPC procedure maps it back to a `TRPCError` with the
-same code and message, so **any service you write throws domain errors, not `TRPCError` and not a
-bare `Error`** (see `rules/backend.md` and `rules/errors.md`). The conventions are pinned by
-ADR-0011 (server file conventions) and ADR-0012 (domain errors) in `docs/adr/`.
-
-Step 4 is done. The error model of ADR-0012 is live at every boundary that exists here: the agent
-API route handlers map a `DomainError` with `domainErrorResponse`, the three Jira Inngest functions
-route an expected failure through `rethrowDomainErrorsAsNonRetriable`, every unexpected tRPC failure
-is masked behind one sentence and logged with its `cause` chain, and six boundary files render one
-`ErrorScreen`. `lint:agent-rules` runs with `--max-warnings 0` again and reports nothing.
-
-Step 5 is done. `src/server/` holds wiring and cross-cutting abstractions only, and an always-on
-`no-restricted-imports` block stops it reaching into the app tree by deep path. Every Integration
-lives in `src/app/_domains/integration/`, sub-structured by provider inside each bucket (ADR-0014);
-every durable function is a `*.inngest.ts` service in the domain it drives; the Plan vocabulary lives
-in `src/app/_domains/subscription/` and is exported by its barrel; the widget API and the agent API
-both keep their operations in `_services/` under their versioned scope, so no route handler queries
-Prisma inline. `interruptOnDomainError` is still not built: no RSC page calls a throwing service yet,
-so the helper lands with its first caller.
-
-While the migration runs:
-
-- **All code under `src/app` follows the target architecture** described in these rule files. Since
-  the step 3 final lock, the rules that guard it report at `error` under `ESLINT_AGENT_RULES=1`
-  everywhere, with no per-scope allowlist: a violation is a regression, not a burn-down item.
+- **All code under `src/app` follows these rule files.** The rules that guard the structure report at
+  `error` under `ESLINT_AGENT_RULES=1` everywhere, with no per-scope allowlist, and report nothing
+  today: a violation is a regression, not a burn-down item.
 - **`src/server/` accepts a new file under two conditions only**: it is wiring (it configures or
   instantiates a library for the whole application and makes no business decision), or it is a
   cross-cutting abstraction at least two domains or transports need whose server implementation no
   barrel can export. Inverse test: a file that makes a business decision for one glossary entity is a
   domain service, even when it calls an SDK. The rule and its named exemptions are in
-  `docs/architecture/target-architecture.md`, section "The server folder".
-- `no-raw-tailwind-colors` is locked at `error` and reports nothing: use the semantic token
-  (`text-destructive`, `text-success`, `text-muted-foreground`) rather than a palette class. Hues
-  with no token yet (yellow, amber, blue) are not reported.
+  `docs/architecture/target-architecture.md`, section "The server folder", and an always-on
+  `no-restricted-imports` block stops the folder reaching into the app tree by deep path.
+- **A service throws a domain error**, never a `TRPCError` and never a bare `Error`. The vocabulary
+  is at `@/server/errors/domain-errors` and every boundary maps it back into its own dialect (see
+  `rules/backend.md` and `rules/errors.md`).
 
-Delete this section when the migration ends.
+`interruptOnDomainError` is the one piece of the error model that is not built: no RSC page calls a
+throwing service yet, so the helper lands with its first caller.
 
 ## How to use
 
