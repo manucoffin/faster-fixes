@@ -1,6 +1,6 @@
 # Faster Fixes
 
-A widget that lets a website's end-users report bugs and feedback in-page; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear), and announced to notification channels (Slack).
+A widget that lets a website's end-users report bugs and feedback in-page; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira), and announced to notification channels (Slack).
 
 ## Language
 
@@ -77,7 +77,7 @@ _Avoid_: Closed, Dismissed, Rejected.
 ### Integrations
 
 **Tracker**:
-An external issue-tracking system Faster Fixes can mirror Feedback into. Currently GitHub Issues and Linear.
+An external issue-tracking system Faster Fixes can mirror Feedback into. Currently GitHub Issues, Linear and Jira.
 _Avoid_: Integration target, Sink.
 
 **Notification channel**:
@@ -85,7 +85,11 @@ A category of external connection where Faster Fixes _announces_ Feedback one-wa
 _Avoid_: Webhook (implementation detail), Sink.
 
 **Installation**:
-The org-level connection to an external system — a **Tracker** (`GitHubInstallation`, `LinearInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × external system).
+The org-level connection to an external system — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × external system).
+
+**Reconnect required**:
+The state of an **Installation** whose authorization the external system has explicitly refused or revoked. Only a User re-authorizing the connection clears it. A transient failure of the external system never puts an Installation in this state.
+_Avoid_: Disconnected (an Organization with no Installation at all), Broken, Expired.
 
 **Jira site**:
 The Jira Cloud instance an Organization connects to (e.g. `acme.atlassian.net`), identified by an Atlassian `cloudId`. The org-level scope of a Jira Installation — the analog of a Linear workspace or a GitHub account. One per Organization.
@@ -98,7 +102,7 @@ A project inside a Jira site (e.g. `PAY`). The per-Project tracker scope a Faste
 The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × external system).
 
 **Issue link**:
-The per-Feedback record connecting a single Feedback to its mirrored issue in a Tracker. A Feedback can have at most one issue link per Tracker, but may have one for GitHub _and_ one for Linear simultaneously.
+The per-Feedback record connecting a single Feedback to its mirrored issue in a Tracker. A Feedback can have at most one issue link per Tracker, but may have one for each Tracker simultaneously.
 
 ### Diagnostics
 
@@ -122,7 +126,7 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - A **Feedback** has zero or one **Diagnostic Trail**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
-- A **Project** has zero or one **Project link** per **Tracker** (GitHub, Linear)
+- A **Project** has zero or one **Project link** per **Tracker** (GitHub, Linear, Jira)
 - A **Feedback** has zero or one **Issue link** per **Tracker**
 - A **Reviewer** submits **Feedback** through the widget; Reviewers are not authenticated app users
 - An **Installation** is owned by an Organization and shared across all Projects in that Organization
