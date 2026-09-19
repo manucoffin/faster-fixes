@@ -1,10 +1,8 @@
-import { DomainError } from "@/server/errors/domain-errors";
 import {
   protectedProcedure,
   publicProcedure,
   router,
 } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { registerUser } from "./_services/register-user";
 import { RegisterUserSchema } from "./_services/register-user.schema";
@@ -35,34 +33,13 @@ export const authRouter = router({
 
   resetPassword: publicProcedure
     .input(ResetPasswordSchema)
-    .mutation(async ({ input }) => {
-      try {
-        return await resetPassword({
-          token: input.token,
-          password: input.password,
-          headers: await headers(),
-        });
-      } catch (error) {
-        if (error instanceof DomainError) {
-          throw error;
-        }
-
-        // Same rule as sign-in: a rejected reset token is an identity failure.
-        if (
-          error instanceof Error &&
-          (error.message.includes("Invalid") ||
-            error.message.includes("token") ||
-            error.message.includes("expired"))
-        ) {
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "The reset link is invalid or has expired.",
-          });
-        }
-
-        throw error;
-      }
-    }),
+    .mutation(async ({ input }) =>
+      resetPassword({
+        token: input.token,
+        password: input.password,
+        headers: await headers(),
+      }),
+    ),
 
   sendVerificationEmail: publicProcedure
     .input(SendVerificationEmailSchema)
@@ -70,15 +47,7 @@ export const authRouter = router({
       sendVerificationEmail({ email: input.email, headers: await headers() }),
     ),
 
-  stopImpersonate: protectedProcedure.mutation(async ({ ctx }) => {
-    // Answerable from the session alone, so it stays at the transport edge.
-    if (!ctx.session?.session?.impersonatedBy) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "User is not currently impersonating",
-      });
-    }
-
-    return stopImpersonate({ headers: await headers() });
-  }),
+  stopImpersonate: protectedProcedure.mutation(async () =>
+    stopImpersonate({ headers: await headers() }),
+  ),
 });

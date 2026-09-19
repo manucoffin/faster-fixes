@@ -957,6 +957,85 @@ under issue #88.
 - [ ] Sign in with correct credentials on a verified account: the redirect to the dashboard, or to
       `nextUrl` when present, still happens.
 
+### The reset link, the Organization limit and the stop-impersonation rule move into services (issue #93)
+
+Decision 6, second link of the router leg. `_domains/auth/trpc-router.ts` and
+`_domains/organization/trpc-router.ts` are wiring only: no `catch`, no `new TRPCError`, no import of
+`DomainError` or `TRPCError` left in either file. Three rules moved down, each keeping today's copy,
+so a User sees no change.
+
+**The reset link translation.** `resetPassword` now owns the Better Auth message matching the
+`resetPassword` procedure held. A refused token throws
+`BadRequestError("The reset link is invalid or has expired.")` instead of the router's
+`TRPCError UNAUTHORIZED`, for the same reason sign-in dropped its own: a rejected token is a rejected
+input, not a missing session, so the vocabulary still has no `UNAUTHORIZED`. The transported code
+moves from 401 to 400, which no client reads: `reset-password-form.client.tsx` renders
+`error.message` in its destructive alert. The service's own `BadRequestError("Missing token. Invalid
+reset link.")` is thrown before the `try`, so it can no longer be caught and re-translated by its own
+matcher, which is why the router's `error instanceof DomainError` rethrow is gone rather than moved.
+
+**The stop-impersonation rule.** `stopImpersonate` reads the session itself, with
+`auth.api.getSession({ headers })`, and throws `BadRequestError("User is not currently
+impersonating")` when `session.session.impersonatedBy` is empty. The procedure no longer touches
+`ctx`. The alternative was to pass `impersonatedBy` in from the procedure, which keeps the extra
+session read out of a rare admin action but leaves the service depending on its caller for the fact
+it is deciding on. The service reads it, so the rule holds for any transport that calls it later
+(an Inngest job, a route handler), which is the point of Option B.
+
+**The Organization limit of the Plan.** `createOrganization` calls `checkOrganizationLimit` itself
+and throws `ForbiddenError` with the message the procedure used to build, down to the counters
+(`(current/limit)`). It gained the injected `db: typeof prisma = prisma` parameter the other
+converted services use, and passes it to the limit check, so the check and the write see the same
+client. The `cause: organizationCheck.denial` that the old `TRPCError` carried is dropped: the
+`domainErrorMiddleware` overwrites `cause` with the `DomainError` anyway, and no client reads the
+denial. The dialog keeps rendering `error.message` as a root form error.
+
+Not the `enforce-limit` and `enforce-feature` middlewares: they are the tRPC boundary, they keep
+throwing `TRPCError`, and they are untouched by this ticket.
+
+**Tests.** Three new files, Better Auth and the limit check mocked at module level as
+`sign-in-user.test.ts` does:
+
+- `_domains/auth/_services/reset-password.test.ts` (5 cases): a missing token refuses before Better
+  Auth is called, an invalid token and an expired token both yield the new copy, an unrelated failure
+  comes out as the same object, a successful reset returns Better Auth's answer with the body and
+  headers passed through.
+- `_domains/auth/_services/stop-impersonate.test.ts` (3 cases): no impersonation and no session at
+  all both yield `BadRequestError` without calling `stopImpersonating`, an active impersonation
+  returns `{ success: true, session }`.
+- `_domains/organization/_services/create-organization.test.ts` (2 cases): a reached limit yields
+  `ForbiddenError` with the counters in the copy and writes nothing (not even a slug lookup), an
+  allowed owner gets the Organization created with the `owner` membership.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                     |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `catch` in `trpc-router.ts`                | `account/trpc-router.ts` only, which is issue #94          |
+| `new TRPCError` in `trpc-router.ts`        | `account/trpc-router.ts` only, which is issue #94          |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (190 web tests, zero warnings)                        |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105) |
+| `npx next build`                           | every route listed, `/reset-password` included             |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real database):
+
+- [ ] Open a password reset link that was already used, or edit its token, and submit two matching
+      passwords: the destructive alert reads "The reset link is invalid or has expired." and no stack
+      detail or code appears.
+- [ ] Open `/reset-password` with no `token` query parameter and submit: the alert reads "Missing
+      token. Invalid reset link."
+- [ ] Complete a real password reset from a fresh email link: the form redirects to the success
+      screen and the new password signs in.
+- [ ] As an admin impersonating a User, press the impersonation button and confirm: the admin
+      account is restored and the redirect to `/admin` still happens.
+- [ ] On a free Plan with one Organization, create a second one from the sidebar dialog: the form
+      shows "You've reached the organizations limit for your plan (1/1). Upgrade to get more."
+- [ ] On a paid Plan, create a second Organization: it is created, becomes active, and appears in the
+      sidebar.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

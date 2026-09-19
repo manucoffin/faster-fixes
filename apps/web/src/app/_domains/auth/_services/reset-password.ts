@@ -14,13 +14,26 @@ export async function resetPassword({
     throw new BadRequestError("Missing token. Invalid reset link.");
   }
 
-  // An invalid or expired token is an identity failure, which the vocabulary
-  // does not cover: the procedure maps it to UNAUTHORIZED.
-  return auth.api.resetPassword({
-    body: {
-      newPassword: password,
-      token,
-    },
-    headers,
-  });
+  try {
+    return await auth.api.resetPassword({
+      body: {
+        newPassword: password,
+        token,
+      },
+      headers,
+    });
+  } catch (error) {
+    // Better Auth reports a rejected reset token through its message, not a
+    // code. A refused token is a rejected input, not a missing session.
+    if (
+      error instanceof Error &&
+      (error.message.includes("Invalid") ||
+        error.message.includes("token") ||
+        error.message.includes("expired"))
+    ) {
+      throw new BadRequestError("The reset link is invalid or has expired.");
+    }
+
+    throw error;
+  }
 }
