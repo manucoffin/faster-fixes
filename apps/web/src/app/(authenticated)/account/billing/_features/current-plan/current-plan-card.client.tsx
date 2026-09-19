@@ -3,11 +3,8 @@
 import { UpgradeSubscriptionDialog } from "@/app/_domains/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PLAN_FEATURES,
-  SUBSCRIPTION_PLANS,
-  SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+import { PLAN_FEATURES, SubscriptionStatus } from "@/app/_domains/subscription";
+import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
 import {

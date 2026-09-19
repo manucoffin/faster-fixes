@@ -2,7 +2,7 @@ import {
   PLAN_LIMITS,
   type PlanLimits,
   SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { prisma } from "@workspace/db";
 import { customSession } from "better-auth/plugins";

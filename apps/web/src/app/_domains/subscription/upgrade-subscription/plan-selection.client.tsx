@@ -5,9 +5,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
-  SUBSCRIPTION_PLANS,
   SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "../_helpers/subscription-plans";
+import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";

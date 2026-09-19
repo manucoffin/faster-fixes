@@ -1,4 +1,4 @@
-import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "./subscription-plans";
 
 const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.Incomplete]: "Incomplete",

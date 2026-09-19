@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   SubscriptionPlanName,
   SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 
 const { updateSubscription } = await import("./update-subscription");
 

@@ -1,4 +1,4 @@
-import { PLAN_PRICES } from "@/server/auth/config/subscription-plans";
+import { PLAN_PRICES } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -75,9 +75,11 @@ export function FaqSection() {
           <Accordion type="single" collapsible>
             {faqs.map((faq) => (
               <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">{faq.question}</AccordionTrigger>
+                <AccordionTrigger className="text-lg md:text-xl">
+                  {faq.question}
+                </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {faq.answer}
                   </p>
                   {faq.footer}

@@ -121,14 +121,6 @@ export const nextJsConfig = [
       "local/no-cross-domain-deep-import": "error",
     },
   },
-  {
-    // The one impure schema of the app suppresses `schema-must-be-pure-zod`
-    // inline while step 5 still owns the plan configuration. That rule is
-    // agent-gated, so outside the gate the directive would be reported as
-    // unused. Delete this block with the suppression when the enums move.
-    files: ["**/src/app/admin/users/_services/create-subscription.schema.ts"],
-    linterOptions: { reportUnusedDisableDirectives: "off" },
-  },
   // --- Agent rules (enabled via ESLINT_AGENT_RULES=1) ---
   {
     files: ["**/*.{ts,tsx}"],

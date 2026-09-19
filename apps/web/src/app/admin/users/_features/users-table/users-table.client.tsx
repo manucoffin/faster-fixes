@@ -5,7 +5,7 @@ import { DataTableColumnHeader } from "@/app/_components/data-table-column-heade
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { getErrorMessage } from "@/utils/error/get-error-message";
 import { useQuery } from "@tanstack/react-query";
-import { SubscriptionPlanName } from "@/server/auth/config/subscription-plans";
+import { SubscriptionPlanName } from "@/app/_domains/subscription";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import Link from "next/link";

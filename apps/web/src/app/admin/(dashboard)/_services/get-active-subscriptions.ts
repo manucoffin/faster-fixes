@@ -1,7 +1,7 @@
 import {
   SubscriptionPlanName,
   SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { prisma } from "@workspace/db";
 import { getMonthlyChurnRate } from "./get-monthly-churn-rate";
 

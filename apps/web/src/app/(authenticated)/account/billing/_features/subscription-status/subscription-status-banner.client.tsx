@@ -2,7 +2,7 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
-import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "@/app/_domains/subscription";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { ManageSubscriptionButton } from "../manage-subscription/manage-subscription-button.client";
 

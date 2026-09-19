@@ -1,4 +1,4 @@
-import type { LimitableResource } from "@/server/auth/config/subscription-plans";
+import type { LimitableResource } from "@/app/_domains/subscription";
 import { checkResourceLimit } from "@/server/auth/subscription";
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";

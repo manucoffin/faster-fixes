@@ -2,11 +2,10 @@
 
 import { useSession } from "@/lib/auth";
 import {
-  type FeatureGate,
   PLAN_LIMITS,
-  type PlanLimits,
   SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "../_helpers/subscription-plans";
+import type { FeatureGate, PlanLimits } from "../_types/plan-limits";
 
 export function usePlanGate() {
   const { data: session } = useSession();

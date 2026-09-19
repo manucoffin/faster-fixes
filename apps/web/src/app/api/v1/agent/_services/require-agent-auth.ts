@@ -4,7 +4,7 @@ import {
   type ResolvedAgentToken,
   resolveAgentToken,
 } from "@/server/api/resolve-agent-token";
-import { AGENT_API_RATE_LIMITS } from "@/server/auth/config/subscription-plans";
+import { AGENT_API_RATE_LIMITS } from "@/app/_domains/subscription";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { isCloud } from "@/utils/environment/env";
 import { prisma } from "@workspace/db";

@@ -1,4 +1,4 @@
-import type { FeatureGate } from "@/server/auth/config/subscription-plans";
+import type { FeatureGate } from "@/app/_domains/subscription";
 import { checkFeatureAccess } from "@/server/auth/subscription";
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";

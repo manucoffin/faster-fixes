@@ -2,10 +2,10 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import {
-  SUBSCRIPTION_PLANS,
   SubscriptionPlanName,
   SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
+import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";

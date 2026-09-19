@@ -1,10 +1,8 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import {
-  SUBSCRIPTION_PLANS,
-  SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "@/app/_domains/subscription";
+import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
 import { Empty, EmptyHeader, EmptyTitle } from "@workspace/ui/components/empty";
@@ -67,8 +65,8 @@ export function BillingDetailsCard({
       </div>
     ),
     Errored: (
-      <div className="border-destructive/50 bg-destructive/10 rounded-md border p-4">
-        <p className="text-destructive text-sm font-medium">
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-sm font-medium text-destructive">
           Error loading billing information
         </p>
       </div>
@@ -110,7 +108,7 @@ export function BillingDetailsCard({
 
           <div className="flex flex-col gap-3 p-4">
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">
+              <span className="text-sm text-muted-foreground">
                 {billingLabel}
               </span>
               <span className="text-sm font-medium">
@@ -119,7 +117,7 @@ export function BillingDetailsCard({
             </div>
 
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">VAT (20%)</span>
+              <span className="text-sm text-muted-foreground">VAT (20%)</span>
               <span className="text-sm font-medium">
                 {(priceValue * 0.2).toFixed(2)} {price.currency?.toUpperCase()}
               </span>
@@ -127,7 +125,7 @@ export function BillingDetailsCard({
 
             {subscriptionStatus === SubscriptionStatus.Trialing && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sm text-muted-foreground">
                   Free trial
                 </span>
                 <span className="text-sm font-medium">

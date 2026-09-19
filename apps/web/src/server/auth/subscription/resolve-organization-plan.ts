@@ -3,9 +3,12 @@ import {
   type PlanLimits,
   SubscriptionPlanName,
   SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { isCloud } from "@/utils/environment/env";
-import type { PrismaClient, Subscription } from "@workspace/db/generated/prisma/client";
+import type {
+  PrismaClient,
+  Subscription,
+} from "@workspace/db/generated/prisma/client";
 
 export type ResolvedPlan = {
   planName: SubscriptionPlanName;
@@ -81,8 +84,10 @@ function buildPaidPlan(
   subscription: Subscription,
   status: SubscriptionStatus,
 ): ResolvedPlan {
-  const planName = (subscription.plan as SubscriptionPlanName) || SubscriptionPlanName.Free;
-  const limits = PLAN_LIMITS[planName] ?? PLAN_LIMITS[SubscriptionPlanName.Free];
+  const planName =
+    (subscription.plan as SubscriptionPlanName) || SubscriptionPlanName.Free;
+  const limits =
+    PLAN_LIMITS[planName] ?? PLAN_LIMITS[SubscriptionPlanName.Free];
 
   return {
     planName,

@@ -1,5 +1,5 @@
 import { auth } from "@/server/auth";
-import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "../_helpers/subscription-plans";
 
 export async function getActiveSubscription({ headers }: { headers: Headers }) {
   const activeOrganization = await auth.api.getFullOrganization({ headers });

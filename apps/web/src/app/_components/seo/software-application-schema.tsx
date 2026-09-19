@@ -1,8 +1,5 @@
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
-import {
-  PLAN_PRICES,
-  SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { getAppUrl } from "@/utils/url/get-app-url";
 import type { SoftwareApplication, WithContext } from "schema-dts";
 

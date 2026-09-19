@@ -5357,3 +5357,48 @@ all pass at zero. `npx next build` from `apps/web` with dummy environment values
 the three widget API routes and the two agent API routes included. `pnpm build` is still refused by
 the sandbox, and `next build` still needs placeholder values for `GITHUB_PRIVATE_KEY`, the three
 token encryption keys and the R2 credentials, as earlier entries record.
+
+### The Plan vocabulary moves into the `subscription` domain (issue #110)
+
+The second foundation ticket of step 5. `@/server/auth/config/subscription-plans` is split: the
+vocabulary is now owned by `_domains/subscription`, the Stripe plan list stays with the Better Auth
+configuration.
+
+**What moved, and into which bucket.**
+
+| Symbol                                                                                                                                    | New home                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `SubscriptionPlanName`, `SubscriptionStatus`, `PLAN_LIMITS`, `AGENT_API_RATE_LIMITS`, `PLAN_PRICES`, `PLAN_DESCRIPTIONS`, `PLAN_FEATURES` | `subscription/_helpers/subscription-plans.ts`       |
+| `PlanLimits`, `LimitableResource`, `FeatureGate`                                                                                          | `subscription/_types/plan-limits.ts`                |
+| `SUBSCRIPTION_PLANS`                                                                                                                      | stays in `server/auth/config/subscription-plans.ts` |
+
+Bucket choice: runtime values in `_helpers/`, following the `ORGANIZATION_ROLES` precedent; the three
+type-only declarations in `_types/`, following `feedback/_types/feedback-status.ts`. The types read
+`typeof PLAN_LIMITS` through an `import type`, so the types file adds no runtime edge.
+
+The server module now imports the vocabulary through the domain barrel, so the Stripe list is built
+from the same constants as before and no price identifier leaves `@/server`.
+
+**Importers rewritten.** Twenty-three files outside the domain now import the vocabulary from
+`@/app/_domains/subscription`; the four files inside the domain that read the vocabulary use
+relative paths, since a domain does not import its own barrel. The four client components that also read `SUBSCRIPTION_PLANS` keep
+that one import pointed at `@/server/auth/config/subscription-plans`: switching them is issue #111,
+which this ticket unblocks. `plan-selection.client.tsx`, inside the domain, reads the Stripe list too
+and is a fifth candidate for #111, which speaks of four.
+
+**The schema purity suppression is gone.** `admin/users/_services/create-subscription.schema.ts` now
+imports the two enums from the barrel, so it is pure by the rule's own definition and needs no
+`eslint-disable`. The dedicated config block in `packages/eslint-config/next.js` that turned
+`reportUnusedDisableDirectives` off for that one file is deleted with it, and
+`next-config.test.js` asserts that no per-file block of that kind is left in the config (seam 2).
+
+**One consequence worth knowing.** The barrel also exports `usePlanGate`, a `'use client'` hook, so a
+server file that imports the vocabulary now pulls the hook module into its graph. Next replaces it
+with a client reference, and vitest loads `@/lib/auth` without executing a hook, so the agent API
+route tests and the production build are unaffected. If a future ticket makes that pull expensive,
+the fix is to move the hook, not to reopen the barrel rule.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (52 files, 279 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/pricing` and the widget and agent API routes
+included.

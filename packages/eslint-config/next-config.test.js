@@ -77,6 +77,14 @@ describe("the schema rules wiring", () => {
     expect(entry.files).toEqual(["**/*.schema.ts"]);
     expect(entry.rules["local/schema-must-be-pure-zod"]).toBe("error");
   });
+
+  it("carries no per-file block turning unused disable directives off", () => {
+    const suppressions = nextJsConfig.filter(
+      (entry) => entry.linterOptions?.reportUnusedDisableDirectives === "off",
+    );
+
+    expect(suppressions).toEqual([]);
+  });
 });
 
 describe("the step 3 final lock", () => {

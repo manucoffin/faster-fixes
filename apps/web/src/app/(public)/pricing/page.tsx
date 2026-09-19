@@ -5,7 +5,7 @@ import {
   PLAN_FEATURES,
   PLAN_PRICES,
   SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { Button } from "@workspace/ui/components/button";
 import type { Metadata } from "next";
 import Link from "next/link";
