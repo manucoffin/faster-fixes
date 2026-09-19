@@ -1,6 +1,7 @@
+import { findInstallingMember } from "@/app/_domains/integration/_services/find-installing-member";
+import { findGitHubInstallationAccount } from "@/app/_domains/integration/_services/github/find-github-installation-account";
+import { upsertGitHubInstallation } from "@/app/_domains/integration/_services/github/upsert-github-installation";
 import { auth } from "@/server/auth";
-import { getAppOctokit } from "@/app/_domains/integration/_services/github/github-app";
-import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -34,56 +35,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${orgSettingsUrl}?error=no_active_org`);
   }
 
-  const activeOrgId = activeOrganization.id;
-
-  // Only owner/admin can install
-  const membership = await prisma.member.findFirst({
-    where: {
-      organizationId: activeOrgId,
-      userId: session.user.id,
-      role: { in: ["owner", "admin"] },
-    },
+  const installingMember = await findInstallingMember({
+    organizationId: activeOrganization.id,
+    userId: session.user.id,
   });
 
-  if (!membership) {
+  if (!installingMember) {
     return NextResponse.redirect(`${orgSettingsUrl}?error=insufficient_role`);
   }
 
-  // Verify the installation exists on GitHub
   const numericInstallationId = parseInt(installationId, 10);
-  let installationData: {
-    account: { login: string; type: string; avatar_url?: string };
-  };
+  const account = await findGitHubInstallationAccount(numericInstallationId);
 
-  try {
-    const appOctokit = getAppOctokit();
-    const response = await appOctokit.request(
-      "GET /app/installations/{installation_id}",
-      { installation_id: numericInstallationId },
-    );
-    installationData = response.data as typeof installationData;
-  } catch {
+  if (!account) {
     return NextResponse.redirect(
       `${orgSettingsUrl}?error=installation_not_found`,
     );
   }
 
-  // Upsert: update if installation already exists for this org
-  await prisma.gitHubInstallation.upsert({
-    where: { installationId: numericInstallationId },
-    update: {
-      accountLogin: installationData.account.login,
-      accountType: installationData.account.type,
-      accountAvatarUrl: installationData.account.avatar_url ?? null,
-    },
-    create: {
-      organizationId: activeOrgId,
-      installationId: numericInstallationId,
-      accountLogin: installationData.account.login,
-      accountType: installationData.account.type,
-      accountAvatarUrl: installationData.account.avatar_url ?? null,
-      installedById: membership.id,
-    },
+  await upsertGitHubInstallation({
+    organizationId: activeOrganization.id,
+    installationId: numericInstallationId,
+    installedById: installingMember.id,
+    account,
   });
 
   return NextResponse.redirect(`${orgSettingsUrl}?github=connected`);

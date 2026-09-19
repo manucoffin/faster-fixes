@@ -5624,6 +5624,83 @@ still owns creating the first provider request error class and the shared config
 tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
 with dummy environment values lists every route, `/api/webhooks/github` included.
 
+### The GitHub setup route behind services, pilot part 3 (issue #115)
+
+The third pilot ticket, and the one that fixes where the Member authorization check and the
+Installation upsert live for the Linear (#119), Jira (#123) and Slack (#126) OAuth tickets.
+`GET /api/github/setup` keeps the session, the Organization and the redirect mapping and delegates
+every read and write behind them to three services. It imports no database client, and a User coming
+back from the GitHub App installation lands exactly where they landed before.
+
+**Characterization tests first.** `api/github/setup/route.test.ts`, nine cases, committed green
+against the current handler in its own commit (`579d5ac`) before a line of the route moved, and not
+edited by the extraction. They call `GET` with a `NextRequest`, fake `@workspace/db`, `@/server/auth`
+and the GitHub App client, and assert the status and the `location` header only: the missing
+installation id redirect, the signed out redirect to the login screen with its callback url and its
+defaulted setup action, the no active Organization redirect, the insufficient role refusal, the
+installation GitHub does not know, and the two accepted paths (an account with and without an
+avatar). Every one of them is a redirect target the integrations screen reads back as a query
+parameter, so a test that has to change is a broken contract.
+
+#### The placement decision the three OAuth tickets reuse
+
+| Operation                  | Where it landed                                                                | Why                                                     |
+| -------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| Member authorization check | `_services/find-installing-member.ts`, at the **bucket root**                  | the same query, verbatim, in all four providers         |
+| Installation upsert        | `_services/github/upsert-github-installation.ts`, **under the provider**       | it writes `GitHubInstallation`, a table only GitHub has |
+| GitHub App account read    | `_services/github/find-github-installation-account.ts`, **under the provider** | it speaks the GitHub REST API                           |
+
+The rule behind it, and the one the next tickets apply rather than rediscover: **a file whose body
+would be identical for another provider sits at the bucket root; a file that names a provider's
+table, SDK or API sits under the provider subfolder.** `findInstallingMember` is the second file at a
+bucket root of the domain, after the webhook outcome type, and the first shared _service_.
+
+The four call sites were compared before the move and are identical, down to the role list:
+`prisma.member.findFirst({ where: { organizationId, userId, role: { in: ["owner", "admin"] } } })` in
+the GitHub setup route, both Jira routes, the Linear callback and the Slack callback. So #119, #123
+and #126 import `findInstallingMember` unchanged and only write their own
+`upsert-<provider>-installation`. Slack's callback redirects to `?slack=error` where the others use
+`?error=insufficient_role`: that is the route's mapping, not the service's, and it stays as it is.
+
+**The upload route (#128) is not a fifth caller.** Its Member lookup is the same query but it guards
+modifying an Organization's assets, not connecting an Integration, so importing an `integration`
+service there would be a cross-domain import justified by a coincidence of shape. If it ever needs a
+shared home, that home is the `organization` domain.
+
+#### What else this ticket settled
+
+**The GitHub App read became a service too, not just the database work.** The acceptance criterion
+only asks that the route import no database client, but a route that still builds an Octokit and
+issues a request is not the shape the agent API template sets. `findGitHubInstallationAccount`
+returns `null` for both an unknown installation id and an unreachable GitHub, which is precisely what
+the route's `try`/`catch` already did: either way the only thing the caller can do is send the User
+back to install the App again.
+
+**Names, decided by running the rules.** `find-` for the two nullable reads, `upsert-` for the write,
+no process verb anywhere. Both reads export their `<Service>Output` alias, which
+`require-trpc-output-type` requires of a read-verb file; the write needs none.
+
+**The role list stays a literal in the service.** `ORGANIZATION_ROLES` in the `organization` barrel is
+a role-to-label map for the UI, not a "may connect an Integration" list, so deriving the filter from
+it would read as sharing where there is none. The two roles sit in one named constant in
+`find-installing-member.ts` with a one-line comment.
+
+**The account shape lives in the read service.** `GitHubInstallationAccount` is exported from
+`find-github-installation-account.ts` and imported as a type by the upsert. A `_types/github/` folder
+for three fields would cost more than the coupling it removes, and the type is the read's own return
+shape.
+
+**No error class, again.** Every refusal on this route is a redirect carrying an error query
+parameter, not a throw, so the pilot still creates none. Linear (#116) owns the first provider
+request error class and the shared configuration error class.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (54 files, 302 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/github/setup` included.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no GitHub App, so nothing past the
+session check runs. The rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5636,6 +5713,12 @@ agent API. Only the systems a landed ticket has touched appear below.
 
 - [ ] Connect: install the GitHub App from `/integrations/github` and land back on `/integrations`
       with the Installation listed.
+- [ ] Reconnect the same App: install it a second time and see the Installation refreshed rather
+      than duplicated, with the account login and avatar up to date (row added by #115).
+- [ ] Connect signed out: open the setup URL in a signed out browser and see the login screen, then
+      land on the Installation after signing in (row added by #115).
+- [ ] Connect as a plain Member: with a `member` role account, open the setup URL and land on
+      `/integrations?error=insufficient_role` with no Installation recorded (row added by #115).
 - [ ] Link a Project: pick a repository in the Project settings, save, reload, and see the link with
       its default labels.
 - [ ] Mirror a Feedback: submit a Feedback on a linked Project and see the issue created in the
