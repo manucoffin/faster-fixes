@@ -15,7 +15,7 @@ The end-user of the customer's site who submitted a Feedback through the widget.
 _Avoid_: Reporter, Submitter, User.
 
 **Project**:
-A Faster Fixes container scoped to one website (one widget install). Holds Feedback, settings, and at most one tracker link per integration.
+A Faster Fixes container scoped to one website (one widget install). Holds Feedback, settings, and at most one **Project link** per **Integration**.
 _Avoid_: Site, App, Workspace.
 
 ### Identity & access
@@ -76,19 +76,23 @@ _Avoid_: Closed, Dismissed, Rejected.
 
 ### Integrations
 
+**Integration**:
+An external system Faster Fixes connects to through an **Installation**. Comes in two categories: a **Tracker** (two-way mirror) or a **Notification channel** (one-way announce). Currently GitHub Issues, Linear, Jira and Slack.
+_Avoid_: Connector, Plugin, External system.
+
 **Tracker**:
-An external issue-tracking system Faster Fixes can mirror Feedback into. Currently GitHub Issues, Linear and Jira.
+A category of **Integration**: an external issue-tracking system Faster Fixes can mirror Feedback into, converging its state with the Feedback's. Currently GitHub Issues, Linear and Jira. The category is defined by the mirroring behaviour, not by the product type.
 _Avoid_: Integration target, Sink.
 
 **Notification channel**:
-A category of external connection where Faster Fixes _announces_ Feedback one-way, holding no mirror and creating no Issue. First instance: Slack. Distinct from a **Tracker** (two-way, mirrors Feedback as an Issue and converges its state). Not to be confused with a Slack _channel_ (the specific room a Project posts into).
+A category of **Integration** where Faster Fixes _announces_ Feedback one-way, holding no mirror and creating no Issue. First instance: Slack. Distinct from a **Tracker** (two-way, mirrors Feedback as an Issue and converges its state). Not to be confused with a Slack _channel_ (the specific room a Project posts into).
 _Avoid_: Webhook (implementation detail), Sink.
 
 **Installation**:
-The org-level connection to an external system — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × external system).
+The org-level connection to an **Integration** — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × Integration).
 
 **Reconnect required**:
-The state of an **Installation** whose authorization the external system has explicitly refused or revoked. Only a User re-authorizing the connection clears it. A transient failure of the external system never puts an Installation in this state.
+The state of an **Installation** whose authorization the **Integration** has explicitly refused or revoked. Only a User re-authorizing the connection clears it. A transient failure of the Integration never puts an Installation in this state.
 _Avoid_: Disconnected (an Organization with no Installation at all), Broken, Expired.
 
 **Jira site**:
@@ -99,7 +103,7 @@ _Avoid_: Jira instance, Jira workspace.
 A project inside a Jira site (e.g. `PAY`). The per-Project tracker scope a Faster Fixes Project links to — the analog of a GitHub repo or a Linear team. Always written "Jira project" in full; bare "project" means a Faster Fixes Project.
 
 **Project link**:
-The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × external system).
+The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × Integration).
 
 **Issue link**:
 The per-Feedback record connecting a single Feedback to its mirrored issue in a Tracker. A Feedback can have at most one issue link per Tracker, but may have one for each Tracker simultaneously.
@@ -126,7 +130,8 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - A **Feedback** has zero or one **Diagnostic Trail**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
-- A **Project** has zero or one **Project link** per **Tracker** (GitHub, Linear, Jira)
+- An **Integration** is either a **Tracker** or a **Notification channel**
+- A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
 - A **Reviewer** submits **Feedback** through the widget; Reviewers are not authenticated app users
 - An **Installation** is owned by an Organization and shared across all Projects in that Organization
@@ -146,4 +151,5 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - **"Closed" vs "Archived"** — historically used interchangeably. Resolved: the canonical user-facing term is **Archived**. The DB literal `"closed"` is retained for now to avoid a migration; rename is deferred.
 - **"Issue"** — refers exclusively to a tracker-side artifact (GitHub Issue, Linear Issue). Internal app records are **Feedback**, never "issues".
 - **"logs"** — used loosely for the captured browser data. Resolved: the canonical term is **Diagnostic Trail** (console + network), distinct from server-side logs.
+- **"Integration" vs "external system"**: the glossary said "external system" while the UI and the team said "integration". Resolved: **Integration** is the canonical umbrella term; **Tracker** and **Notification channel** are its two categories, and **Installation** and **Project link** apply to both.
 - **"API key"** — the widget historically embedded an `apiKey` stored like a secret (SHA-256 hash, last-4 shown, "regenerate" flow). Resolved: the widget surface has **no secret**. It embeds the public **Project public ID**, secured by the **allowed origins** (domain + subdomains) + **Reviewer token**. Genuine secrets exist only on the agent surface (**Agent token**). The widget `apiKey` is being removed.
