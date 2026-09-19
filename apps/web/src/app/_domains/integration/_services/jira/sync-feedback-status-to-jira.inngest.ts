@@ -1,16 +1,13 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
-import {
-  listJiraTransitions,
-  transitionJiraIssue,
-} from "@/app/_domains/integration/_services/jira/jira-rest-client";
+import { listJiraTransitions, transitionJiraIssue } from "./jira-rest-client";
 import {
   CATEGORY_DONE,
   resolveJiraTransition,
-} from "@/app/_domains/integration/_helpers/jira/transition-mapping";
-import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
+} from "../../_helpers/jira/transition-mapping";
+import { getValidJiraAccessToken } from "./token-access";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 

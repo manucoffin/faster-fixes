@@ -6117,6 +6117,63 @@ functions. Prettier reformatted one call the server folder had left unformatted,
 **Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so nothing past the
 session check runs. The Jira rows below are for the maintainer.
 
+### Jira moves into the `integration` domain, part 2: the six durable functions (issue #121)
+
+The six Jira durable functions follow the modules #120 relocated. `src/server/inngest/` now holds
+the client and the four functions Slack (#125) and the `user` domain (#127) own.
+
+**Files moved.** Six modules with `git mv`, under the `.inngest.ts` suffix the pilot fixed. No file
+dissolved, so this ticket leaves no `_deprecated_` stub.
+
+| Before                                                 | After                                                                               |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `server/inngest/create-jira-issue.ts`                  | `_domains/integration/_services/jira/create-jira-issue.inngest.ts`                  |
+| `server/inngest/sync-jira-issue-status.ts`             | `_domains/integration/_services/jira/sync-jira-issue-status.inngest.ts`             |
+| `server/inngest/sync-feedback-status-to-jira.ts`       | `_domains/integration/_services/jira/sync-feedback-status-to-jira.inngest.ts`       |
+| `server/inngest/handle-jira-oauth-revoked.ts`          | `_domains/integration/_services/jira/handle-jira-oauth-revoked.inngest.ts`          |
+| `server/inngest/refresh-jira-webhooks.ts`              | `_domains/integration/_services/jira/refresh-jira-webhooks.inngest.ts`              |
+| `server/inngest/refresh-jira-installation-webhooks.ts` | `_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest.ts` |
+
+**Identifiers, triggers and schedules untouched.** `create-jira-issue`, `sync-jira-issue-status`,
+`sync-feedback-status-to-jira`, `handle-jira-oauth-revoked`, `refresh-jira-webhooks` and
+`refresh-jira-installation-webhooks` keep their function identifier, their triggering event names
+(`feedback/created`, `feedback/integration-issue-requested` filtered on `target == 'jira'`,
+`jira/webhook.issue`, `feedback/status-changed`, `jira/oauth.revoked`,
+`jira/webhooks.refresh-requested`), their concurrency keys and their retry counts, so an in-flight
+run is not orphaned. The weekly refresh keeps its `0 4 * * 1` cron, and keeps fanning out one
+`jira/webhooks.refresh-requested` event per connected Installation rather than calling Jira inline.
+
+**The three wrappers stay exactly where they were.** `create-jira-issue`, `sync-jira-issue-status`
+and `sync-feedback-status-to-jira` still `.catch(rethrowDomainErrorsAsNonRetriable)` on the step
+that can raise an expected Jira error (#90, #91). The other three functions stay unwrapped, so an
+Atlassian outage still retries. The helper stays at `@/server/errors/non-retriable`: it is the
+cross-cutting boundary helper of ADR 0012 and does not move.
+
+**No bare error to convert.** Unlike Linear (#117), the six Jira files contain no `throw new Error(`
+at all: the failure paths already raise the Jira classes #120 relocated, or return a skip marker.
+
+**Imports rewritten.** Intra-domain imports became relative (`./jira-errors`, `./jira-rest-client`,
+`./token-access`, `./webhook-registration`, `../../_helpers/jira/format-issue-adf`,
+`../../_helpers/jira/transition-mapping`), following the pilot. The durable function client is
+reached with `@/server/inngest` rather than the old `./index`, storage with
+`@/server/storage/get-signed-asset-url`, and the Feedback Status type through the
+`@/app/_domains/feedback` barrel, all unchanged in effect.
+
+**The reconnect mail template stays put for now.** `handle-jira-oauth-revoked.inngest.ts` still
+imports `@/lib/mailer/templates/jira-reconnect-required`; moving that template next to the Jira code
+is #124, the last Jira ticket. Nothing about the rendered mail changed here.
+
+**Consumers rewritten.** One file: the registration route (`api/inngest/route.ts`, six imports). It
+keeps its static list of seventeen functions.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (57 files, 335 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web` with dummy environment
+values lists every route, `/api/inngest` included. `GET /api/inngest` against `next dev` on port
+3121 answers `200` with `"function_count":17`.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so no function body
+runs. The Jira rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6185,7 +6242,7 @@ agent API. Only the systems a landed ticket has touched appear below.
       Installation removed on the next `linear/oauth.revoked` delivery, with the durable function
       run listed as succeeded (row added by #117).
 
-#### Jira (started by #120)
+#### Jira (started by #120, rows added by #121)
 
 - [ ] Connect: start the install from `/integrations/jira`, approve the Atlassian consent screen and
       land on `/integrations` with the Jira site listed as connected.
@@ -6216,5 +6273,8 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Refresh the registrations: run the weekly `jira/webhooks.refresh` function by hand and see each
       link's expiry pushed back, and a link whose registration Jira no longer knows re-registered
       rather than taking the others down.
+- [ ] Revoked at Atlassian, by event: after a `jira/oauth.revoked` delivery, see the durable function
+      run listed as succeeded, the Installation flipped to Reconnect required and exactly one
+      reconnect mail sent even when several syncs report the same revocation (row added by #121).
 - [ ] Disconnect: disconnect Jira from `/integrations` and see the Installation and its Project links
       removed, and the webhook registration gone from the Jira site.

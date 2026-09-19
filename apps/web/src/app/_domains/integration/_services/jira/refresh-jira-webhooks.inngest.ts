@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 /**
  * Jira expires dynamic webhook registrations 30 days after they are created, and

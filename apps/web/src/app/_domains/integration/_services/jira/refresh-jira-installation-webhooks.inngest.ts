@@ -1,12 +1,9 @@
-import {
-  JiraNotConnectedError,
-  JiraReauthRequiredError,
-} from "@/app/_domains/integration/_services/jira/jira-errors";
-import { isJiraUnauthorizedError } from "@/app/_domains/integration/_services/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
-import { refreshProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
+import { JiraNotConnectedError, JiraReauthRequiredError } from "./jira-errors";
+import { isJiraUnauthorizedError } from "./jira-rest-client";
+import { getValidJiraAccessToken } from "./token-access";
+import { refreshProjectJiraWebhook } from "./webhook-registration";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const refreshJiraInstallationWebhooks = inngest.createFunction(
   {

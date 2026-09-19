@@ -1,15 +1,15 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
-import { JiraIssueConfigurationError } from "@/app/_domains/integration/_services/jira/jira-errors";
+import { JiraIssueConfigurationError } from "./jira-errors";
 import {
   formatIssueAdf,
   formatJiraSummary,
-} from "@/app/_domains/integration/_helpers/jira/format-issue-adf";
-import { createJiraIssue as createIssue } from "@/app/_domains/integration/_services/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
+} from "../../_helpers/jira/format-issue-adf";
+import { createJiraIssue as createIssue } from "./jira-rest-client";
+import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const createJiraIssue = inngest.createFunction(
   {

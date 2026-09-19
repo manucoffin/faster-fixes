@@ -8,7 +8,7 @@ import { getAppUrl } from "@/utils/url/get-app-url";
 import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";
 import { createElement } from "react";
-import { inngest } from "./index";
+import { inngest } from "@/server/inngest";
 
 export const handleJiraOAuthRevoked = inngest.createFunction(
   {
@@ -47,7 +47,8 @@ export const handleJiraOAuthRevoked = inngest.createFunction(
       });
     }
 
-    if (installation.reconnectNotifiedAt) return { skipped: "already_notified" };
+    if (installation.reconnectNotifiedAt)
+      return { skipped: "already_notified" };
 
     // Only owners and admins can complete the OAuth flow (/api/jira/install
     // rejects everyone else), so notifying members would be a dead end.
