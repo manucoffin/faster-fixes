@@ -1,7 +1,7 @@
 import { decryptToken } from "@/server/linear/crypto";
 import { getLinearClient } from "@/server/linear/linear-client";
 import { resolveStateIdForFeedback } from "@/server/linear/resolve-team-state";
-import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

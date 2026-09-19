@@ -1,4 +1,4 @@
-import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 
 // Block Kit blocks are loosely typed; we model only the shapes we emit rather
 // than depending on the full Block Kit type surface.

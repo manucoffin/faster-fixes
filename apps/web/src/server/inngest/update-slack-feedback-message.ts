@@ -4,7 +4,7 @@ import { decryptSlackToken } from "@/server/slack/crypto";
 import { matchUnhealthySlackError } from "@/server/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "@/server/slack/screenshot-url";
 import { updateMessage } from "@/server/slack/slack-client";
-import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

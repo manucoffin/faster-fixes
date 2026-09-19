@@ -3,7 +3,7 @@
 // per-project and arbitrary, so the mapping keys on the status category — the one
 // primitive every workflow shares (ADR 0008 / PRD #7).
 
-import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 import type { JiraTransition } from "./jira-rest-client";
 
 const CATEGORY_TODO = "new";

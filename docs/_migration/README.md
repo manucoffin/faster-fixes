@@ -5297,3 +5297,63 @@ one line in `vitest.config.ts`: `oxc: { jsx: { runtime: "automatic" } }`. Vitest
 rolldown-vite, so the `esbuild` option is ignored with a warning and `oxc` is the one that applies.
 This is not the jsdom question kit amendment 3 deferred: the environment stays `node` and no
 component is rendered, only compiled.
+
+## Step 5 scope log
+
+### The `feedback` and `organization` barrels start exporting (issue #109)
+
+The first foundation ticket of step 5. No file moved, no logic changed: two barrels gained an export
+and ten files under `src/server/**` were repointed from a deep path into the app tree to the barrel
+address, which is what the lint lock of issue #139 will require.
+
+**Exports added.**
+
+| Barrel                           | Export                                        | Bucket of origin                       |
+| -------------------------------- | --------------------------------------------- | -------------------------------------- |
+| `_domains/feedback/index.ts`     | `FeedbackStatusEnum`, `type FeedbackStatus`   | `_types/feedback-status.ts`            |
+| `_domains/feedback/index.ts`     | `formatDiagnosticTrailLines`                  | `_helpers/format-feedback-markdown.ts` |
+| `_domains/organization/index.ts` | `ORGANIZATION_ROLES`, `type OrganizationRole` | `_helpers/organization-roles.ts`       |
+
+Contracts only, per ADR-0010 and the architecture rules: a constant, a Zod enum, two types and one
+pure formatter. No service function and no router is exported. `formatFeedbackAsMarkdown` and
+`formatFeedbackListAsMarkdown` stay internal, since no file outside the domain asks for them.
+`getRoleLabel`, `canManageMembers` and `canManageInvitations` stay internal for the same reason: the
+Better Auth plugin only needs the label map.
+
+**Deep imports rewritten** (ten files, import path only):
+
+| File under `src/server/`                    | Was                                                   | Now                           |
+| ------------------------------------------- | ----------------------------------------------------- | ----------------------------- |
+| `inngest/create-linear-issue.ts`            | `_domains/feedback/_types/feedback-status`            | `@/app/_domains/feedback`     |
+| `inngest/sync-feedback-status-to-jira.ts`   | same                                                  | `@/app/_domains/feedback`     |
+| `inngest/sync-feedback-status-to-linear.ts` | same                                                  | `@/app/_domains/feedback`     |
+| `inngest/update-slack-feedback-message.ts`  | same                                                  | `@/app/_domains/feedback`     |
+| `jira/resolve-transition.ts`                | same                                                  | `@/app/_domains/feedback`     |
+| `linear/resolve-team-state.ts`              | same                                                  | `@/app/_domains/feedback`     |
+| `linear/state-mapping.ts`                   | same                                                  | `@/app/_domains/feedback`     |
+| `slack/build-feedback-blocks.ts`            | same                                                  | `@/app/_domains/feedback`     |
+| `github/format-issue-body.ts`               | `_domains/feedback/_helpers/format-feedback-markdown` | `@/app/_domains/feedback`     |
+| `auth/plugins/organization.tsx`             | `_domains/organization/_helpers/organization-roles`   | `@/app/_domains/organization` |
+
+**The Better Auth organization plugin no longer needs an exemption.** The question issue #109 was
+asked to answer for the lint lock (#139): `src/server/auth/plugins/organization.tsx` had exactly one
+import into the app tree, `ORGANIZATION_ROLES`, and it now reads the barrel. Verified with
+`grep -rn 'from "@/app/' src/server` from `apps/web`: the file's only remaining app-tree import is
+the barrel address. **The lint lock must name two exemptions, not three**: the root router
+(`trpc/routers/_app.ts`, seven router mounts) and the Better Auth database hooks
+(`auth/config/database-hooks.ts`, which calls `getUniqueOrganizationSlug`, a service a barrel may not
+export). The organization plugin exemption is dropped.
+
+**What is left inverted after this ticket**, for the tickets that own it:
+
+| Remaining deep import                                                                   | Owner                                         |
+| --------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `api/validate-origin.ts` → `project/_helpers/normalize-domain`                          | #133 moves the file into the `project` domain |
+| `auth/config/database-hooks.ts` → `organization/_services/get-unique-organization-slug` | #139, named exemption                         |
+| `trpc/routers/_app.ts` → seven routers                                                  | #139, named exemption (composition)           |
+
+**Gate.** `pnpm typecheck`, `pnpm test` (52 files, 279 tests), `pnpm lint` and `pnpm lint:agent-rules`
+all pass at zero. `npx next build` from `apps/web` with dummy environment values lists every route,
+the three widget API routes and the two agent API routes included. `pnpm build` is still refused by
+the sandbox, and `next build` still needs placeholder values for `GITHUB_PRIVATE_KEY`, the three
+token encryption keys and the R2 credentials, as earlier entries record.

@@ -1,4 +1,4 @@
-import { formatDiagnosticTrailLines } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
+import { formatDiagnosticTrailLines } from "@/app/_domains/feedback";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 
 type FeedbackForIssue = {

@@ -1,2 +1,3 @@
-// Public surface of the organization domain. Empty until another domain imports from it.
-export {};
+// Public surface of the organization domain.
+export { ORGANIZATION_ROLES } from "./_helpers/organization-roles";
+export type { OrganizationRole } from "./_helpers/organization-roles";
