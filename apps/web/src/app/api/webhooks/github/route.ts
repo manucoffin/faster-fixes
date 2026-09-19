@@ -1,7 +1,5 @@
-import { inngest } from "@/server/inngest";
+import { handleGitHubWebhook } from "@/app/_domains/integration/_services/github/handle-github-webhook";
 import { verifyWebhookSignature } from "@/app/_domains/integration/_helpers/github/verify-webhook-signature";
-import { prisma } from "@workspace/db";
-import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -23,93 +21,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Replay protection: reject duplicate deliveries
-  const deliveryId = req.headers.get("x-github-delivery");
-  if (deliveryId) {
-    try {
-      await prisma.rateLimit.create({
-        data: {
-          id: crypto.randomUUID(),
-          key: `webhook:github:${deliveryId}`,
-          count: 1,
-          lastRequest: BigInt(Date.now()),
-        },
-      });
-    } catch {
-      // Unique constraint violation — already processed this delivery
-      return NextResponse.json({ ok: true, skipped: "duplicate delivery" });
-    }
-  }
-
-  const event = req.headers.get("x-github-event");
-
-  if (event === "installation") {
-    await handleInstallationEvent(payload as InstallationPayload);
-  }
-
-  if (event === "issues") {
-    await handleIssuesEvent(payload as IssuesPayload);
-  }
-
-  return NextResponse.json({ ok: true });
-}
-
-type InstallationPayload = {
-  action: string;
-  installation: {
-    id: number;
-    account: { login: string; type: string; avatar_url?: string };
-  };
-};
-
-async function handleInstallationEvent(payload: InstallationPayload) {
-  const { action, installation } = payload;
-
-  if (action === "deleted") {
-    await prisma.gitHubInstallation.deleteMany({
-      where: { installationId: installation.id },
-    });
-  }
-
-  // "created" is handled by the setup URL callback, but handle as fallback
-  if (action === "created") {
-    const existing = await prisma.gitHubInstallation.findUnique({
-      where: { installationId: installation.id },
-    });
-    if (!existing) {
-      // Cannot create without org context — the setup URL is the primary path.
-      // Log for debugging only.
-      console.warn(
-        `[github-webhook] installation.created for ${installation.id} but no matching record found. User should complete setup via the app.`,
-      );
-    }
-  }
-}
-
-type IssuesPayload = {
-  action: string;
-  issue: {
-    number: number;
-    state: string;
-    state_reason?: string | null;
-    node_id?: string;
-  };
-  repository: { full_name: string };
-  installation?: { id: number };
-};
-
-async function handleIssuesEvent(payload: IssuesPayload) {
-  const { action, issue, repository } = payload;
-
-  if (action !== "closed" && action !== "reopened") return;
-
-  await inngest.send({
-    name: "github/webhook.issues",
-    data: {
-      action,
-      issueNumber: issue.number,
-      issueState: issue.state,
-      repoFullName: repository.full_name,
-    },
+  const outcome = await handleGitHubWebhook({
+    event: req.headers.get("x-github-event"),
+    deliveryId: req.headers.get("x-github-delivery"),
+    payload,
   });
+
+  if (outcome.status === "skipped") {
+    return NextResponse.json({ ok: true, skipped: outcome.reason });
+  }
+
+  // An ignored delivery answers exactly like an accepted one: GitHub is told
+  // the delivery arrived, and the reason stays in the outcome rather than the
+  // body. A 4xx here would start a retry storm on a delivery we never want.
+  return NextResponse.json({ ok: true });
 }

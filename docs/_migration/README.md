@@ -5548,6 +5548,82 @@ values lists every route, `/api/github/setup`, `/api/webhooks/github` and `/api/
 **Not smoked here, and why.** The sandbox has no Postgres and no GitHub App, so nothing past the
 signature check and the session check runs. The checklist below is for the maintainer.
 
+### The GitHub webhook behind a `handle-` service, pilot part 2 (issue #114)
+
+The second pilot ticket, and the one that fixes the webhook shape the Linear (#118) and Jira (#122)
+tickets copy. `POST /api/webhooks/github` keeps the signature verification and the JSON parse and
+delegates everything after them to one orchestration service. GitHub gets the same responses it got
+before, byte for byte.
+
+**Characterization tests first.** `api/webhooks/github/route.test.ts`, fourteen cases, committed
+green against the current handler in its own commit (`39e7769`) before a line of the route moved, and
+not edited by the extraction. They call `POST` with a `NextRequest`, fake only `@workspace/db` and
+`@/server/inngest`, and assert status and exact JSON body. The signature is computed for real with an
+HMAC over the raw body, so the verification helper stays inside the covered path rather than being
+mocked away. Nothing asserts which function the route calls, which is why the extraction left them
+untouched.
+
+**The rows, and what GitHub actually answers today.**
+
+| Policy row                    | GitHub's response                                | Covered by                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Signature invalid or missing  | `401 {"error":"Invalid signature"}`              | two tests (wrong signature, no header)                                                                                                     |
+| Body unreadable               | `400 {"error":"Invalid JSON payload"}`           | one test                                                                                                                                   |
+| Authentic but not for us      | `200 {"ok":true}`                                | five tests (unknown event, no event header, unhandled `issues` and `installation` actions, `installation.created` with no matching record) |
+| Duplicate delivery            | `200 {"ok":true,"skipped":"duplicate delivery"}` | one test, plus one on the delivery key written                                                                                             |
+| Accepted                      | `200 {"ok":true}`                                | four tests (closed, reopened, uninstall, no delivery id)                                                                                   |
+| Linear signing secret missing | not applicable to GitHub                         | nothing                                                                                                                                    |
+
+**The `ignored` row has no reason in the body, and that is deliberate.** The parent spec's table says
+"200 with an `ignored` reason"; GitHub's current body is a bare `{"ok":true}`. The spec's own rule for
+a conflict is that the current response wins, so the reason lives in the service's outcome and in the
+logs, not in the response. Linear and Jira should check their own current bodies the same way rather
+than copy this one.
+
+#### The shape the next Trackers copy
+
+**One service per Tracker, named with the reserved `handle-` verb.**
+`_domains/integration/_services/github/handle-github-webhook.ts` exports
+`handleGitHubWebhook({ event, deliveryId, payload })`. It owns deduplication, the Installation lookup
+and the event emission; the route owns authentication and the HTTP mapping. `handle-` is the
+write-orchestration verb of ADR-0011 for exactly this, so `services-verb-prefix` accepts the file
+with no rename.
+
+**One shared outcome type, at the domain's `_types/` bucket root.**
+`_domains/integration/_types/webhook-outcome.ts` exports `TrackerWebhookOutcome`:
+
+```ts
+export type TrackerWebhookOutcome =
+  | { status: "accepted" }
+  | { status: "ignored"; reason: string }
+  | { status: "skipped"; reason: "duplicate delivery" };
+```
+
+It sits at the bucket root, not under `github/`, because the three Trackers differ in what they
+authenticate and not in what they decide once a delivery is authentic: Linear and Jira return this
+type unchanged. This is the first file at a bucket root of the domain, ahead of the OAuth state
+cookie #116 brings. The route maps it, and only it: `skipped` becomes the body with the marker,
+`accepted` and `ignored` both become `{"ok":true}`.
+
+**What the route keeps.** Reading the raw body, the signature or token check, the JSON parse and the
+outcome-to-HTTP mapping above. Everything that needs the database is behind the service, so the route
+imports no database client: that is the "must be gone" check #140 runs over the API tree.
+
+**Replay protection stays a `rateLimit` row.** `isFirstDelivery` is a private function of the service
+file: it writes `webhook:github:<delivery id>` and reads a unique constraint violation as "already
+processed". Moving it did not change the key, so a delivery replayed across the deploy is still
+recognised. A delivery with no `x-github-delivery` header skips deduplication, as before.
+
+**No error class, again.** The service throws nothing: an unhandled event is an outcome, not a
+failure, and an infrastructure failure propagates to Next as it did from the route. Linear (#116)
+still owns creating the first provider request error class and the shared configuration error class.
+
+**Not this ticket.** The setup route still queries Prisma inline for the Member check (#115).
+
+**Gate.** `pnpm typecheck`, `pnpm test` (53 files, 293 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/webhooks/github` included.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5569,5 +5645,6 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Status GitHub to app: close and reopen the issue in GitHub and see the Feedback status follow
       (Resolved, then In progress).
 - [ ] Receive a webhook: confirm in the GitHub App delivery log that `issues` and `installation`
-      deliveries answer `200`, and that a replayed delivery answers `200` with the skipped marker.
+      deliveries answer `200`, that a replayed delivery answers `200` with the skipped marker, and
+      that a delivery for an event the app does not handle also answers `200` (row added by #114).
 - [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.
