@@ -21,31 +21,7 @@ import { stopImpersonate } from "./_services/stop-impersonate";
 export const authRouter = router({
   signInUser: publicProcedure
     .input(SignInUserSchema)
-    .mutation(async ({ input }) => {
-      try {
-        return await signInUser(input);
-      } catch (error) {
-        if (error instanceof DomainError) {
-          throw error;
-        }
-
-        // Identity failures have no domain error: they are answered at the
-        // transport edge, where the credentials were presented.
-        if (
-          error instanceof Error &&
-          (error.message.includes("Invalid") ||
-            error.message.includes("password"))
-        ) {
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Invalid email or password",
-          });
-        }
-
-        console.error("[sign-in-user] Unexpected error:", error);
-        throw error;
-      }
-    }),
+    .mutation(({ input }) => signInUser(input)),
 
   registerUser: publicProcedure
     .input(RegisterUserSchema)

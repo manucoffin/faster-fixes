@@ -50,7 +50,9 @@ export function LoginForm() {
   const loginMutation = useMutation(
     trpc.auth.signInUser.mutationOptions({
       onError: (error) => {
-        if (error.message === "EMAIL_NOT_VERIFIED") {
+        // PRECONDITION_FAILED is reserved by the sign-in service for an
+        // unverified email, so the branch never reads the copy.
+        if (error.data?.code === "PRECONDITION_FAILED") {
           setUnverifiedEmail(form.getValues("email"));
           return;
         }

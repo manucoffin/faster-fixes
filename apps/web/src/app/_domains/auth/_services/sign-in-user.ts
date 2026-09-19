@@ -1,5 +1,8 @@
 import { auth } from "@/server/auth";
-import { ForbiddenError } from "@/server/errors/domain-errors";
+import {
+  BadRequestError,
+  PreconditionFailedError,
+} from "@/server/errors/domain-errors";
 
 export async function signInUser({
   email,
@@ -18,16 +21,28 @@ export async function signInUser({
 
     return data.user;
   } catch (error) {
+    // Better Auth reports both refusals through the message, not a code.
     if (
       error instanceof Error &&
       error.message.includes("Email not verified")
     ) {
-      // The sign-in form keys its verification prompt off this exact sentinel.
-      throw new ForbiddenError("EMAIL_NOT_VERIFIED");
+      // PRECONDITION_FAILED is reserved for this case here, so the login form
+      // can offer to resend the verification email without matching on copy.
+      throw new PreconditionFailedError(
+        "Verify your email address before signing in.",
+      );
     }
 
-    // Invalid credentials are an identity failure, which the vocabulary does not
-    // cover: the procedure maps it to UNAUTHORIZED.
+    if (
+      error instanceof Error &&
+      (error.message.includes("Invalid") || error.message.includes("password"))
+    ) {
+      // Rejected credentials are a rejected input, not a missing session.
+      throw new BadRequestError("Invalid email or password");
+    }
+
     throw error;
   }
 }
+
+export type SignInUserOutput = Awaited<ReturnType<typeof signInUser>>;

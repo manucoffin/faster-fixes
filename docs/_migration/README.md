@@ -900,6 +900,63 @@ the Inngest dev server or dashboard):
 - [ ] With everything healthy, create an issue, mirror a Status to Jira, and move the issue in Jira:
       all three runs succeed as before.
 
+### Sign-in errors move into the service, the login form branches on the code (issue #92)
+
+Decision 6, and the first link of the router leg. `signInUser` now owns both translations Better
+Auth reports through its message text, and `signInUser` in `_domains/auth/trpc-router.ts` is one
+line: the auth procedure, the schema and the service call.
+
+**Rejected credentials become `BadRequestError`.** The router's `TRPCError UNAUTHORIZED` is gone. A
+wrong password is a rejected input, not a missing session, so the vocabulary still has no
+`UNAUTHORIZED`. The copy is unchanged, "Invalid email or password", and the form still renders it in
+its destructive alert: the transported code moved from 401 to 400, which no client reads.
+
+**The sentinel is gone.** `ForbiddenError("EMAIL_NOT_VERIFIED")` became
+`PreconditionFailedError("Verify your email address before signing in.")`, real copy safe to show in
+any channel. `PRECONDITION_FAILED` is reserved for that one case in `signInUser`, so
+`login-form.client.tsx` branches on `error.data?.code === "PRECONDITION_FAILED"` and keeps rendering
+the "Email not verified" alert with the resend button. `EMAIL_NOT_VERIFIED` appears nowhere under
+`apps/web/src` any more.
+
+**What this ticket did not touch.** `resetPassword` and `stopImpersonate` keep their router-level
+`TRPCError` and their `catch`: they are issue #93. The `DomainError` and `TRPCError` imports of the
+router therefore stay until that ticket lands. The router's `console.error` on an unexpected sign-in
+failure was dropped rather than moved into the service: central logging of every tRPC failure is
+issue #97, which lands before masking (#98), so no window exists where an unexpected failure is both
+masked and unlogged.
+
+**Tests.** `_domains/auth/_services/sign-in-user.test.ts` (4 cases), Better Auth mocked at module
+level as the existing `send-verification-email.test.ts` does: a rejected password yields a
+`BadRequestError` carrying today's copy, an unverified email yields a `PreconditionFailedError`
+carrying the new copy, an unrelated failure comes out as the very same object, and a successful
+sign-in returns the Better Auth user with the credentials passed through unchanged.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                     |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `EMAIL_NOT_VERIFIED` under `apps/web/src`  | no match                                                   |
+| `catch` / `new TRPCError` in `signInUser`  | none, in the service and in the procedure                  |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (180 web tests, zero warnings)                        |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105) |
+| `npx next build`                           | every route listed, `/login` included                      |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real database, at `/login`):
+
+- [ ] Sign in with a verified account and a wrong password: the destructive alert reads "Invalid
+      email or password", and no toast or stack detail appears.
+- [ ] Sign in with an unknown email address: the same alert and the same copy, so the form still
+      does not reveal whether the address exists.
+- [ ] Sign in with an account whose email is not verified: the "Email not verified" alert appears
+      with the resend button, not the destructive alert, and the copy never shows a code.
+- [ ] Press "Resend verification email" from that alert: the email arrives and the button reports
+      success, unchanged from before.
+- [ ] Sign in with correct credentials on a verified account: the redirect to the dashboard, or to
+      `nextUrl` when present, still happens.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
