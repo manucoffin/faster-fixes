@@ -24,6 +24,7 @@ export const ALLOWED_ORIGIN = "https://client.test";
 export const REVIEWER_ID = "reviewer_1";
 export const REVIEWER_NAME = "Dana";
 export const REVIEWER_TOKEN = "reviewer_token_characterization";
+export const FEEDBACK_ID = "feedback_1";
 export const SIGNED_ASSET_URL = "https://assets.example.test/signed";
 export const SCREENSHOT_ASSET_ID = "asset_1";
 export const STORAGE_BUCKET = "feedback-assets";
@@ -44,6 +45,17 @@ export function reviewerRow() {
     projectId: PROJECT_ID,
     name: REVIEWER_NAME,
     isActive: true,
+  };
+}
+
+/** A stored Feedback, as the edit and delete routes read it back. */
+export function feedbackRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: FEEDBACK_ID,
+    projectId: PROJECT_ID,
+    reviewerId: REVIEWER_ID,
+    comment: "The submit button does nothing",
+    ...overrides,
   };
 }
 
@@ -80,6 +92,7 @@ export function resetWidgetApiDoubles() {
   widgetApiPrisma.reviewer.findFirst.mockResolvedValue(reviewerRow());
   widgetApiPrisma.subscription.findFirst.mockResolvedValue(null);
   widgetApiPrisma.feedback.count.mockResolvedValue(0);
+  widgetApiPrisma.feedback.findFirst.mockResolvedValue(feedbackRow());
   widgetApiPrisma.feedback.findMany.mockResolvedValue([]);
   allowRateLimit();
 
