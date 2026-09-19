@@ -2,6 +2,8 @@
 
 import { useSession } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -19,8 +21,8 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { AlertCircleIcon } from "lucide-react";
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -30,29 +32,58 @@ import {
 
 export function ProfileForm() {
   const trpc = useTRPC();
-  const { refetch: refetchSession } = useSession();
 
-  const getProfileQuery = useQuery(
+  const profileQuery = useQuery(
     trpc.authenticated.account.profile.get.queryOptions(),
   );
 
+  return matchQueryStatus(profileQuery, {
+    Loading: (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-9 w-32 self-end" />
+      </div>
+    ),
+    Errored: (error) => (
+      <Alert variant="destructive">
+        <AlertCircleIcon />
+        <AlertTitle>Failed to load your profile</AlertTitle>
+        <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+      </Alert>
+    ),
+    // The service always returns both keys, so this branch only narrows the
+    // loaded data for the fields below.
+    Empty: (
+      <p className="text-sm text-muted-foreground">
+        Your profile is unavailable.
+      </p>
+    ),
+    Success: ({ data }) => (
+      <ProfileFields
+        firstName={data.firstName ?? ""}
+        lastName={data.lastName ?? ""}
+      />
+    ),
+  });
+}
+
+type ProfileFieldsProps = {
+  firstName: string;
+  lastName: string;
+};
+
+function ProfileFields({ firstName, lastName }: ProfileFieldsProps) {
+  const trpc = useTRPC();
+  const { refetch: refetchSession } = useSession();
+
   const form = useForm<UpdateProfileInput>({
     resolver: zodResolver(UpdateProfileSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
+    values: {
+      firstName,
+      lastName,
     },
   });
-
-  // Reset form when user data is available
-  React.useEffect(() => {
-    if (getProfileQuery.data) {
-      form.reset({
-        firstName: getProfileQuery.data.firstName ?? "",
-        lastName: getProfileQuery.data.lastName ?? "",
-      });
-    }
-  }, [getProfileQuery.data, form]);
 
   const updateProfileMutation = useMutation(
     trpc.authenticated.account.profile.update.mutationOptions({

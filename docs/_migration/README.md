@@ -1829,6 +1829,128 @@ blocking `/api/trpc` in the browser devtools:
 - [ ] The Jira issue type still defaults to `Bug` when the chosen Jira project has one.
 - [ ] No regression in the inbox or the reviewers tab, which this ticket did not touch.
 
+### The queries outside the Project scope render their failure (issue #103)
+
+Decision 15, second half. The other seven of the 14 querying files without `matchQueryStatus` sit
+outside the Project scope: two in account settings, two in the Organization scope, two in admin and
+one in the active Project provider. Six now render an error state, one keeps the error state it
+already had with a real message, and two shell files that consume the provider gained the branch
+their list was missing.
+
+**The six conversions.**
+
+| File                                                         | Query                    | What a failure showed before                                     | What it shows now                                                    |
+| ------------------------------------------------------------ | ------------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `account/settings/_features/email/email-form.client.tsx`     | `account.email.get`      | An empty email field and a submit button ready to send it        | `Failed to load your email address` with the message                 |
+| `account/settings/_features/profile/profile-form.client.tsx` | `account.profile.get`    | Empty first and last name fields, ready to be saved as blanks    | `Failed to load your profile` with the message                       |
+| `organization/_features/general/delete-organization-section` | `organization.get`       | The irreversible-deletion warning and an enabled `Delete` button | `Failed to load the organization` with the message, and no button    |
+| `organization/_features/members/organization-members-tab`    | `invitation.list`        | The member rows alone: pending invitations silently disappeared  | A row reading `Failed to load the pending invitations` plus the copy |
+| `admin/users/[id]/_features/subscription/subscription-card`  | `users.subscription.get` | `Not subscribed` and an offer to create a Subscription           | `Failed to load the subscription` with the message                   |
+| `_domains/project/active-project/active-project-provider`    | `projects.list`          | `No projects yet` in the sidebar and an empty switcher list      | The failure, in both places (see below)                              |
+
+The two riskiest of those are behaviour changes worth naming. A failed `organization.get` no longer
+offers a `Delete organization` button at all: the button used to appear enabled because `isDefault`
+fell back to `false`, so a failed read pointed the destructive path at a default Organization. And a
+failed `users.subscription.get` no longer reads `Not subscribed`, which invited an admin to create a
+second Subscription for a User who may already have one.
+
+**The provider, and the two shell files.** `ActiveProjectProvider` wraps the whole authenticated
+shell and must render its children whatever the query does, so it cannot itself return an error
+state. It now publishes the read as `projectsQuery`, a four-field `ProjectsQueryState` shaped like
+what `matchQueryStatus` consumes, next to the `projects`, `activeProject` and `isPending` values it
+already published. Its `isLoading` follows the query's `isPending` rather than react-query's
+`isLoading`, because the read is disabled until the active Organization is known and an idle read
+must count as loading, not as empty.
+
+Two consumers outside the Project scope match on it:
+
+- `sidebar/project/project-navigation.client.tsx` rendered `NoProjectsCard` ("No projects yet.
+  Create your first project.") whenever the list was not a non-empty array, so a failed read told a
+  User with Projects that they had none. `Empty` keeps that card, `Errored` states the failure with
+  its message, and `Loading` now renders skeleton rows where the component used to render `null`.
+- `header/header-project-switcher.client.tsx` rendered its dropdown with no Project item and no
+  explanation. `Errored` names the failure inside the dropdown, so the `Create project` item stays
+  reachable. Its `Loading` branch is unreachable while the component keeps its own `isPending`
+  early return for the trigger; a comment says so.
+
+The four Project scope consumers of the provider (`inbox-content`, `inbox-tabs`, `reviewers-page`,
+`settings-page`) were deliberately left untouched: the ticket forbids touching the scope, and they
+read `activeProject` and `isPending`, which did not change.
+
+**The one left with its own error state.** `admin/users/_features/users-table/users-table.client.tsx`
+already passed `isError` to `DataTable`, which renders an error row inside the table while keeping
+the search field and the pagination. Replacing that with `matchQueryStatus` would have removed the
+search field on a failure, so the table keeps its own branch and only its copy changed: the fixed
+`"An error occurred"` became `getErrorMessage(error)`, the same sentence every converted site shows.
+
+**The queries left as they are, with their reason.**
+
+- `admin.users.listForExport` in the same file feeds the CSV export button. Its failure exports an
+  empty file rather than filling a region, and the list read beside it already reports a failure of
+  the same router.
+- The two Project scope files recorded under #102 (`delete-project-button`,
+  `regenerate-api-key-section`) are unchanged, as is every other Project scope query.
+
+**Conventions followed.** `Alert variant="destructive"` in account settings and in the Organization
+general tab, where every neighbouring card already uses it; a destructive table row in the members
+table; the `Card` shell in the admin subscription card; and the sidebar's dashed-border card shape
+for the sidebar failure. As under #102, this follows the folder rather than `rules/frontend.md`'s
+`<Empty>`, which no file in these folders uses. Each `Errored` branch reads its message through
+`getErrorMessage`, the helper added by #102.
+
+**Two forms split.** The email and profile forms fetched their values and then pushed them into
+`react-hook-form` from a `useEffect`, which `rules/frontend.md` forbids. Both are now a fetching
+wrapper plus a fields component taking the loaded values as props and passing them to `values`, the
+shape `update-project-form.client.tsx` took under #102. The effects are gone.
+
+**Checks at this commit.**
+
+| Check                                            | Result                                    |
+| ------------------------------------------------ | ----------------------------------------- |
+| Querying files without a status match, whole app | three, all listed above with their reason |
+| Queries inside the Project scope touched         | none                                      |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint`       | pass (204 web tests, zero warnings)       |
+| `pnpm lint:agent-rules`                          | **0 problems**, unchanged since #105      |
+| `pnpm --filter web build`                        | every route listed                        |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Tests.** None added. The rendering is verified by hand: the vitest harness is `environment: node`
+with no testing-library, as recorded under #99. `getErrorMessage` keeps its three unit tests.
+
+**Smoke checklist for the maintainer** (`pnpm dev`, a real database). Force a failure per region by
+throwing at the top of the matching `_services/` function, or by blocking `/api/trpc` in the browser
+devtools:
+
+- [ ] `getCurrentEmail` throwing, on `/account/settings`: the email card reads `Failed to load your
+  email address` with the message. No empty email field and no `Change email` button are shown.
+- [ ] `getProfile` throwing: the profile card reads `Failed to load your profile`, and no blank name
+      can be saved over the stored one.
+- [ ] `getOrganizationDetails` throwing, on `/organization`: the general tab reads `Failed to load
+  the organization` and offers no `Delete organization` button.
+- [ ] `listInvitations` throwing, as an owner or an admin on the members tab: a row reads `Failed to
+  load the pending invitations` and the member rows are still listed above it.
+- [ ] As a plain member, the same tab lists the members with no invitation row, no skeleton and no
+      error: the read is not run for a member who cannot manage invitations.
+- [ ] `getSubscription` throwing, on `/admin/users/<id>`: the subscription card reads `Failed to
+  load the subscription` and offers neither `Create` nor `Edit`.
+- [ ] A User with no Subscription still sees `Not subscribed`, `No active subscription` and the
+      create dialog; a User with one still sees the plan, the status badge and the edit dialog.
+- [ ] `listUsers` throwing, on `/admin/users`: the table body shows the thrown message instead of
+      `An error occurred`, and the search field and pagination are still usable.
+- [ ] `listProjects` throwing: the sidebar reads `Failed to load your projects` with the message
+      instead of `No projects yet`, and the header switcher says the same inside its dropdown, where
+      `Create project` still works.
+- [ ] An Organization with no Project still shows `No projects yet` in the sidebar and a switcher
+      with only `Create project`.
+- [ ] On a slow connection, the sidebar shows skeleton rows while the Project list loads, where it
+      used to show nothing, and no `No projects yet` card flashes before the list arrives.
+- [ ] Nothing regressed on the happy path: change the email address, update the profile, invite and
+      revoke a member, switch Projects from the header, and create, edit and delete a Subscription
+      from the admin user page.
+- [ ] No regression inside the Project scope, which this ticket did not touch.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

@@ -3,6 +3,7 @@
 import { DataTable } from "@/app/_components/data-table.client";
 import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionPlanName } from "@/server/auth/config/subscription-plans";
 import { ColumnDef } from "@tanstack/react-table";
@@ -156,7 +157,7 @@ export const UsersTable = () => {
     parseAsString.withDefault(""),
   );
 
-  const { data, isLoading, isError } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     trpc.admin.users.list.queryOptions({
       search,
       page: currentPage,
@@ -205,7 +206,7 @@ export const UsersTable = () => {
       setSearch={setSearchInput}
       isLoading={isLoading}
       isError={isError}
-      errorMessage="An error occurred"
+      errorMessage={getErrorMessage(error)}
       searchInputPlaceholder="Search for a user..."
       onSortingChange={handleSortingChange}
       exportConfig={{

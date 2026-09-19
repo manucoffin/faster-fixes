@@ -25,10 +25,25 @@ type Project = {
   feedbackCount: number;
 };
 
+/**
+ * The shape `matchQueryStatus` reads, so that a consumer renders the failure of
+ * the Project list itself rather than an empty list standing in for it.
+ *
+ * `isLoading` follows the query's `isPending`: the read waits for the active
+ * Organization, and while it is idle the shell is still loading.
+ */
+export type ProjectsQueryState = {
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  data: Project[] | undefined;
+};
+
 type ActiveProjectContextType = {
   activeProject: Project | null;
   projects: Project[];
   isPending: boolean;
+  projectsQuery: ProjectsQueryState;
   setActiveProject: (projectId: string) => void;
   clearActiveProject: () => void;
 };
@@ -45,12 +60,14 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
   );
   const prevOrgIdRef = useRef<string | undefined>(activeOrg?.id);
 
-  const { data: projects, isPending } = useQuery(
+  const projectsQuery = useQuery(
     trpc.authenticated.projects.list.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id },
     ),
   );
+
+  const { data: projects, isPending } = projectsQuery;
 
   // Clear active project when organization changes
   useEffect(() => {
@@ -92,6 +109,12 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
         activeProject: validatedProject,
         projects: projects ?? [],
         isPending,
+        projectsQuery: {
+          isLoading: isPending,
+          isError: projectsQuery.isError,
+          error: projectsQuery.error,
+          data: projects,
+        },
         setActiveProject,
         clearActiveProject: clearActiveProjectFn,
       }}
