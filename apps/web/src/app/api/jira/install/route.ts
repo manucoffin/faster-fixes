@@ -1,4 +1,5 @@
 import { auth } from "@/server/auth";
+import { findInstallingMember } from "@/app/_domains/integration/_services/find-installing-member";
 import {
   JIRA_OAUTH_AUTHORIZE_URL,
   JIRA_OAUTH_SCOPES,
@@ -9,7 +10,6 @@ import {
   createOAuthState,
   setOAuthStateCookie,
 } from "@/app/_domains/integration/_services/oauth-state-cookie";
-import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -30,14 +30,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${integrationsUrl}?error=no_active_org`);
   }
 
-  const membership = await prisma.member.findFirst({
-    where: {
-      organizationId: activeOrganization.id,
-      userId: session.user.id,
-      role: { in: ["owner", "admin"] },
-    },
+  const installingMember = await findInstallingMember({
+    organizationId: activeOrganization.id,
+    userId: session.user.id,
   });
-  if (!membership) {
+  if (!installingMember) {
     return NextResponse.redirect(`${integrationsUrl}?error=insufficient_role`);
   }
 

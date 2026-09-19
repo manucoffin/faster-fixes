@@ -6249,6 +6249,77 @@ with dummy environment values lists every route, `/api/webhooks/jira/[token]` in
 **Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so no delivery past
 the token check runs against real data. The Jira rows below are for the maintainer.
 
+### The Jira OAuth routes behind services, part 4 (issue #123)
+
+The second OAuth pair to reuse the placement the GitHub pilot fixed in #115, after Linear (#119).
+`GET /api/jira/install` and `GET /api/jira/callback` keep every redirect target, query parameter and
+cookie they have today; neither queries Prisma inline any more, and the callback stops handling
+tokens in clear. The OAuth app registered at Atlassian needs no reconfiguration.
+
+**Characterization tests first.** `api/jira/install/route.test.ts` (seven cases) and
+`api/jira/callback/route.test.ts` (seventeen cases), committed green against the current handlers in
+their own commit (`c2d2b6f`) before a line of either route moved, and not edited by the extraction.
+Same recipe as Linear, with `@/server/inngest` faked as well, because the Jira callback is the only
+OAuth callback that emits an event.
+
+| Route    | Pinned paths                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| install  | signed out to `/login?nextUrl=…`, `?error=no_active_org`, `?error=insufficient_role`, `?error=jira_not_configured`, the authorize url with its seven parameters, the httpOnly `jira_oauth_state` cookie echoing the state                                                                                                                                                                                                 |
+| callback | `?error=jira_oauth_<provider error>`, `?error=jira_missing_code_or_state`, `?error=jira_state_mismatch` (wrong cookie and no cookie), `?error=not_authenticated`, `?error=no_active_org`, `?error=insufficient_role`, `?error=jira_token_exchange_failed`, `?error=jira_sites_fetch_failed`, `?error=jira_no_sites`, `?jira=connected` with the full upsert payload and the refresh event, `?jira=select_site` without it |
+
+**Unlike Linear, the install route did need an extraction.** Jira's `/install` refuses a plain Member
+before it mints a state, so it carried its own `prisma.member.findFirst`. Linear's did not, which is
+why #119 reported "the install route needed no extraction" and this one cannot. Both routes now call
+the same bucket-root service, the third and fourth caller of it.
+
+**What the pair delegates now.**
+
+| Operation                  | Where it landed                                  | Why                                                          |
+| -------------------------- | ------------------------------------------------ | ------------------------------------------------------------ |
+| Member authorization check | `_services/find-installing-member.ts`, unchanged | the pilot's shared service, imported verbatim on both routes |
+| Installation upsert        | `_services/jira/upsert-jira-installation.ts`     | it writes `JiraInstallation`, a table only Jira has          |
+
+**The site choice moved into the write, with the redirect left behind.** The route used to pick the
+provisional site, derive `healthState`, encrypt both tokens, compute the expiry and decide whether to
+ask for a webhook refresh. `upsertJiraInstallation` takes the accessible sites as Atlassian returned
+them and owns all five, returning one `siteSelectionPending` flag. The route maps that flag to
+`?jira=connected` or `?jira=select_site`, which is the only part of it a User sees, and therefore
+route work. The stored columns are identical, asserted field by field against a frozen clock.
+
+**Why the refresh event went with the write rather than staying in the route.** Renewing the webhook
+registrations is a consequence of a connection becoming live, not of a redirect being chosen:
+`selectJiraSite` already writes then sends the same event for the multi-site half of the same flow,
+and its comment calls itself "the second half of the reconnect flow … the same webhook renewal the
+single-site callback does". Keeping the two halves shaped alike is worth more than keeping the route
+symmetrical with Linear's, which has no event to send. A provisional selection still sends nothing;
+the picker owes it.
+
+**The service takes a non-empty list, and the route guards it.** `?error=jira_no_sites` is a refusal
+the User reads, mapped like the other refusals, so the empty-grant check stayed in the route and the
+service documents the precondition rather than re-deriving a refusal it cannot render.
+
+**Both `try`/`catch` blocks kept their place in the route**, for the reason #119 recorded: the code
+exchange and the accessible-sites read fail to two different query parameters, and mapping two
+outcomes to two targets is route work. `exchangeOAuthCode` and `getAccessibleResources` already throw
+the named classes #120 relocated.
+
+**Names, decided by running the rules.** `upsert-` for the write, matching GitHub and Linear. No
+output alias is exported: `require-trpc-output-type` asks one of read-verb files only, and the two
+sibling upsert services export none either.
+
+**No file retired, no stub.** Everything here is an addition or an edit in place.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (60 files, 370 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/jira/install` and `/api/jira/callback`
+included.
+
+**Not this ticket.** The Jira reconnect mail template still lives in the mailer folder (#124), which
+is the last Jira ticket.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so nothing past the
+session check runs. The Jira rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6317,7 +6388,7 @@ agent API. Only the systems a landed ticket has touched appear below.
       Installation removed on the next `linear/oauth.revoked` delivery, with the durable function
       run listed as succeeded (row added by #117).
 
-#### Jira (started by #120, rows added by #121)
+#### Jira (started by #120, rows added by #121 and #123)
 
 - [ ] Connect: start the install from `/integrations/jira`, approve the Atlassian consent screen and
       land on `/integrations` with the Jira site listed as connected.
@@ -6328,6 +6399,14 @@ agent API. Only the systems a landed ticket has touched appear below.
       with a stale `state` and land on `/integrations?error=jira_state_mismatch`.
 - [ ] Refuse at Atlassian: press Cancel on the consent screen and land on `/integrations` with a
       `jira_oauth_*` error parameter.
+- [ ] Reconnect: connect Jira a second time from an Organization that already has an Installation
+      and see the same row refreshed with the current site and a new token, not duplicated, and its
+      Project links still in place (row added by #123).
+- [ ] Connect signed out: open `/api/jira/install` in a signed out browser, see the login screen,
+      sign in and land back on the install (row added by #123).
+- [ ] Connect as a plain Member: with a `member` role account, open `/api/jira/install` and land on
+      `/integrations?error=insufficient_role` before the consent screen, with no Installation
+      recorded (row added by #123).
 - [ ] Link a Project: pick a Jira project and issue type in the Project settings, save, reload, and
       see the link, with a required field the app cannot fill blocking the pick rather than failing
       later.
