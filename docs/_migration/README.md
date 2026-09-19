@@ -59,23 +59,24 @@ A zero on `no-cross-domain-deep-import` is now a real zero rather than a vacuous
 
 A scope is locked when its files satisfy the target convention and the matching rules are raised from `warn` to `error` for it.
 
-| Scope                          | Step | Commit    | Rules locked                                                                                                                                                                                                                                                                                                |
-| ------------------------------ | ---- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_domains/**`                  | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                                                                          |
-| `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
-| `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
-| `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
-| `_domains/auth`                | 3    | `dc7a8db` | The same nine. The four `(auth)` mutations moved into the domain in the same commit, so the domain owns the whole authentication surface.                                                                                                                                                                   |
-| `(auth)`                       | 3    | `dc7a8db` | The same nine. The route group keeps only UI features after its four mutations left, so it was locked in the same commit rather than revisited by a later ticket.                                                                                                                                           |
-| `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
-| `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                         |
-| `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                                                                         |
-| `admin`                        | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                                                                         |
-| `(authenticated)/account`      | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                                                                             |
-| `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                                                                               |
-| `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                                                                                   |
-| `(authenticated)/(project)`    | 3    | `f3fca41` | The same nine, on the whole Project scope: the inbox (`4f4a646`, `08563bb`), reviewers and core settings (`3e03177`), the GitHub and Slack links (`3f60bf9`), the Jira links (`47c4911`) and the Linear links. The `(authenticated)` entry keeps its `(project)` ignore, so the lock comes from this entry. |
-| `api/v1/agent`                 | 3    | `d045ea5` | The same nine, on the whole REST agent API tier: the three `_utils/` folders became `_services/` and `_helpers/`. The handlers keep their own error helper and their `NextResponse` result style, so no rule had to be disabled for them.                                                                   |
+| Scope                          | Step | Commit    | Rules locked                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------ | ---- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_domains/**`                  | 2    | `930f233` | `no-cross-domain-deep-import`, `no-default-export`                                                                                                                                                                                                                                                                                                  |
+| `(public)`                     | 3    | `fb076dd` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                                                                 |
+| `_domains/organization`        | 3    | `a9ba3a3` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                                                                 |
+| `_domains/user`                | 3    | `ac5a4bb` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                                                                 |
+| `_domains/auth`                | 3    | `dc7a8db` | The same nine. The four `(auth)` mutations moved into the domain in the same commit, so the domain owns the whole authentication surface.                                                                                                                                                                                                           |
+| `(auth)`                       | 3    | `dc7a8db` | The same nine. The route group keeps only UI features after its four mutations left, so it was locked in the same commit rather than revisited by a later ticket.                                                                                                                                                                                   |
+| `_domains/subscription`        | 3    | `71a0b0c` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                                                                 |
+| `onboarding`                   | 3    | `0f67c6a` | `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type`, `services-no-bare-error`, `no-client-import-of-services`, `no-feature-nesting`, `require-schema-conventions`, `schema-must-be-pure-zod`, `require-use-client-suffix`                                                                                                 |
+| `(authenticated)`              | 3    | `8b945ba` | The same nine, on the shell tier only: the entry ignores the four child segments until their own tickets lock them.                                                                                                                                                                                                                                 |
+| `admin`                        | 3    | `fb4a72f` | The same nine, on the whole admin tier: the admin root, the `(dashboard)` route group (`a7fe9e3`) and `admin/users` (`860de52`, `fb4a72f`). The `admin/users` ignore is gone, so the entry is a plain string again.                                                                                                                                 |
+| `(authenticated)/account`      | 3    | `6012c44` | The same nine, on the whole account scope: the billing segment (`2b14b18`) and the settings segment. The `(authenticated)` entry keeps its `account` ignore, so the lock comes from this entry.                                                                                                                                                     |
+| `(authenticated)/organization` | 3    | `b21a3cb` | The same nine, on the whole organization scope: the general, leave and received invitations segment (`723c7c1`) and the members segment. Row added in the integrations part 2 commit, which found it missing.                                                                                                                                       |
+| `(authenticated)/integrations` | 3    | `ec003fb` | The same nine, on the whole integrations scope: the agent tokens segment (`d60d149`) and the ten installation operations. The `(authenticated)` entry keeps its `integrations` ignore, so the lock comes from this entry.                                                                                                                           |
+| `(authenticated)/(project)`    | 3    | `f3fca41` | The same nine, on the whole Project scope: the inbox (`4f4a646`, `08563bb`), reviewers and core settings (`3e03177`), the GitHub and Slack links (`3f60bf9`), the Jira links (`47c4911`) and the Linear links. The `(authenticated)` entry keeps its `(project)` ignore, so the lock comes from this entry.                                         |
+| `api/v1/agent`                 | 3    | `d045ea5` | The same nine, on the whole REST agent API tier: the three `_utils/` folders became `_services/` and `_helpers/`. The handlers keep their own error helper and their `NextResponse` result style, so no rule had to be disabled for them.                                                                                                           |
+| `src/server/**`                | 5    | `bed750e` | `no-restricted-imports`, always on and outside the agent gate: a deep import from the server folder into the app tree fails plain `pnpm lint` and the pre-commit hook. A domain barrel stays allowed; three files are exempted by name. This is the only step 5 lock, and the only scope whose rule is an import boundary rather than a convention. |
 
 `no-cross-domain-deep-import` is always on, outside the agent gate, and was hardened in `51998d2` before the first domain moved. `no-default-export` stays behind `ESLINT_AGENT_RULES=1` but reports at `error` there, so a default export inside a domain fails `pnpm lint:agent-rules` instead of adding a warning to the burn-down. The `_features/**` transition glob was removed from that rule in the same commit: it only ever matched the root folder, which no longer exists, and the route-tier `_features/` folders never matched it. No file under `_domains/` had a default export, so the lock needed no fix.
 
@@ -571,6 +572,153 @@ Recorded by the step's tickets, not fixed here:
   "caller scope" concept is a deepening candidate for after the migration, not a migration task.
 - **Whether a password-reset mailer outage should be visible to the User at all** is a product
   question #95 recorded rather than decided.
+
+## Step 5 exit verification
+
+Run on 2026-09-19 at the final lock (issue #140), with `--force` everywhere so Turbo served no
+cached result. The per-ticket entries of the step 5 scope log below record what each ticket moved
+and what it left to smoke; this section records what closed the step, and with it the last
+code-facing ticket of the migration.
+
+**What the lock changed: no source file.** The two tickets in front of it did the work. #139 added
+the always-on `no-restricted-imports` block on the server folder (`bed750e`) together with its seam
+2 assertions, and #138 rewrote the architecture document, ADR 0012 and the coding-standards skill
+around the live folder (`5767822`). Every check below passed on its first run, so this ticket adds
+the exit record, the sixth smoke checklist and the locked-scope row above, and fixes nothing: the
+lock is a recording of a state rather than a change to it, as the step 4 lock was.
+
+### The eight "must be gone" checks
+
+The list of the parent spec (#108), section "'Must be gone' checks for the lock ticket", run from the
+repo root. All eight pass.
+
+| #   | Check                                                    | Command                                                                                                                         | Result                                                                                                                                                  |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | No provider, OAuth or request-helper folder              | `git ls-files apps/web/src/server \| cut -d/ -f5 \| sort -u`                                                                    | eight folders: `auth`, `cors`, `errors`, `inngest`, `rate-limit`, `storage`, `stripe`, `trpc`. No `github`, `jira`, `linear`, `slack`, `oauth` or `api` |
+| 2   | The durable function folder holds only the client        | `git ls-files apps/web/src/server/inngest`                                                                                      | `index.ts` alone, down from 18 files                                                                                                                    |
+| 3   | No deep import from the server folder into the app tree  | `grep -rn "@/app/" apps/web/src/server --include="*.ts" --include="*.tsx"`                                                      | 19 hits: 10 go through a domain barrel, the 9 deep ones sit in exactly the 3 exempted files                                                             |
+| 4   | The old Plan configuration path and the Stripe plan list | `grep -rn "server/auth/config/subscription-plans" apps/web/src`                                                                 | 2 hits, both server-side: the Better Auth Stripe plugin and `subscription/_services/get-plans-prices.ts`. No client file, no vocabulary import          |
+| 5   | Bare errors in services                                  | `grep -rn "throw new Error(" apps/web/src \| grep _services/`                                                                   | nothing, across the 63 files of the `integration` domain included                                                                                       |
+| 6   | Route handlers importing the database client             | `grep -rln "@workspace/db" apps/web/src/app/api --include="route.ts"`                                                           | nothing, down from the 14 the step 5 baseline had                                                                                                       |
+| 7   | The schema purity suppression and its config block       | `grep -rn "schema-must-be-pure-zod" apps/web/src` and `grep -rn "reportUnusedDisableDirectives" packages/eslint-config/next.js` | nothing in either; `next-config.test.js` asserts no per-file block of that kind is left                                                                 |
+| 8   | A package importing the app                              | `grep -rn "apps/web\|@/app/" packages/*/src`                                                                                    | nothing, the kit's own grep                                                                                                                             |
+
+Four of them need a word on how they were read.
+
+**Check 1 reads the index, not the working tree.** `ls apps/web/src/server` still shows `api/`,
+`jira/`, `linear/`, `oauth/` and `slack/` in this sandbox: `git mv` empties a folder but git tracks
+no empty folder, so what is left is untracked residue of the moves, present in no commit and in no
+fresh clone. `git ls-files` is therefore the form of the check, and `find apps/web/src/server -type d -empty`
+is the form that lists the residue for the maintainer (see below).
+
+**Check 3 counts the barrels as passing, which is the rule.** Of the 19 hits, 10 import a domain
+barrel (`@/app/_domains/<domain>`), which the server folder rule allows and the lint block permits.
+The nine deep ones fall in three files, exactly the exemptions named in
+`packages/eslint-config/next.js` and asserted by the config test: the root router mounting seven
+routers, the Better Auth database hooks calling the Organization slug service, and the tRPC mapping
+test naming a real Jira subclass as a fixture.
+The organization plugin the parent spec expected to need a fourth exemption does not: it reads
+`ORGANIZATION_ROLES` through the barrel since #109, so #139 never added it.
+
+**Check 4 is two checks in one line.** The spec asks that no file under the app tree import the old
+Plan configuration path, and that no client file import the Stripe plan list. Both importers left
+are server-side, and the one under the app tree (`get-plans-prices.ts`) is the deliberate read the
+spec kept for the field only the Stripe list has. Neither file carries `'use client'`.
+
+**Check 6 has no exemption left to use.** The spec excuses the auth, tRPC and durable function
+registration routes; none of the three imports the database client anyway, so the grep is run over
+all 22 route handlers without a filter and still returns nothing.
+
+### Two invariants of the step, checked rather than trusted
+
+**Every durable function identifier, event name and schedule is unchanged.** The 27 `id:`, `event:`
+and `cron:` lines of the seventeen function files are byte for byte what they were before the first
+relocation:
+
+```sh
+git grep -h -E '^\s*(id|event|cron):' 60e67a0 -- "apps/web/src/server/inngest/*.ts" | tr -d ' ' | sort > before
+grep -rh -E '^\s*(id|event|cron):' apps/web/src/app/_domains --include="*.inngest.ts" | tr -d ' ' | sort > after
+diff before after
+```
+
+The only line in `before` and not in `after` is `id: "faster-fixes"`, the client identifier, which
+stayed in `src/server/inngest/index.ts` where the rule puts it. No in-flight run is orphaned.
+
+**The registration route still registers all seventeen.** `api/inngest/route.ts` imports each
+function by deep path, route-tier composition rather than a barrel read, and lists the same
+seventeen: three GitHub, four Linear, six Jira, two Slack and the two `user` functions.
+
+### End state of the server folder
+
+| Metric                                                | Before step 5 (`60e67a0`)                                                | Now                                                                                                                         |
+| ----------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Tracked files under `src/server/`                     | 88, 5 of them tests                                                      | 39, 4 of them tests                                                                                                         |
+| Top-level folders under `src/server/`                 | 12                                                                       | 8, all of them wiring or a cross-cutting abstraction                                                                        |
+| Files in `_domains/integration/`                      | 0, the domain did not exist                                              | 63                                                                                                                          |
+| Durable function files under `src/server/inngest/`    | 17, plus the client                                                      | 0, plus the client                                                                                                          |
+| Route handlers importing the database client          | 14                                                                       | 0                                                                                                                           |
+| Named infrastructure error classes in the moved files | 1 (`JiraRequestError`)                                                   | 4, with `LinearRequestError`, `SlackRequestError`, `IntegrationConfigurationError`                                          |
+| Domain barrels exporting a contract                   | 1 of 6, and it was a hook                                                | 3 of 7: `feedback`, `organization`, `subscription`. `auth`, `integration`, `project` and `user` stay placeholders by design |
+| Lint rules watching `src/server/`                     | none                                                                     | `no-restricted-imports`, always on, outside the agent gate                                                                  |
+| Web test files                                        | 52, the three widget API characterization files of #129 to #131 included | 64, 413 tests                                                                                                               |
+
+### `_deprecated_` stubs
+
+**Step 5 created none.** Every relocation was a `git mv` of a whole file or an extraction into a new
+one, so no file was retired and no stub was written. Fourteen of the twenty-seven scope log entries
+below say so explicitly; the rest moved or added files only.
+
+The four stubs the earlier steps left are already gone, deleted by the maintainer rather than by an
+agent, so no stub is outstanding at the close of the migration:
+
+| Stub                                                                            | Created by | Deleted in |
+| ------------------------------------------------------------------------------- | ---------- | ---------- |
+| `app/(public)/_features/github-stars/_utils/_deprecated_trpc-router.ts`         | `fb076dd`  | `c1b47bd`  |
+| `app/(auth)/_utils/_deprecated_trpc-router.ts`                                  | `dc7a8db`  | `c1b47bd`  |
+| `account/billing/_features/current-plan/_deprecated_get-active-subscription.ts` | `2b14b18`  | `c1b47bd`  |
+| `lib/trpc/_deprecated_handle-trpc-error.ts`                                     | `18f7303`  | `78d11da`  |
+
+`find apps packages -name "_deprecated_*" -not -path "*/node_modules/*"` returns nothing.
+
+Two files carry the marker in a comment rather than in their name, and neither comes from the
+migration: `(public)/vs/gleap/_features/gleap-alternatives-section.tsx` and
+`(public)/integrations/linear/_features/linear-agencies-callout.tsx`, both emptied to `export {}`
+by content work on the marketing pages, both with "safe to delete" in effect written on them. They
+belong on the maintainer's list for the same reason the migration's own stubs did:
+`grep -rn "_deprecated_" apps/web/src` is the command that finds them.
+
+### Gate
+
+| Check                           | Result                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| `pnpm typecheck --force`        | 4 tasks, clean                                                               |
+| `pnpm test --force`             | 413 web tests (64 files) and 197 `@workspace/eslint-config` tests (16 files) |
+| `pnpm lint --force`             | 5 tasks, 0 warnings                                                          |
+| `pnpm lint:agent-rules --force` | **0 problems, 0 errors, 0 warnings**, with `--max-warnings 0`                |
+| `pnpm --filter web build`       | compiles, every route listed, the 22 API routes included                     |
+
+The build runs from the repo root through the filter rather than from `apps/web`, which is what
+resolves the workspace packages. Earlier entries in this log record `npx next build` from `apps/web`
+with placeholder environment values; both forms compile, and the filtered one is the recorded gate
+since #113.
+
+### Left for the maintainer
+
+The close-out ticket (#143) publishes the full list on the parent issue, with the smoke checklists
+copied in. What this ticket found and did not touch:
+
+1. **Five untracked empty folders** under `apps/web/src/server/`: `api/`, `jira/`, `linear/`,
+   `oauth/` and `slack/`. `git mv` left them behind; they are in no commit, so a fresh clone does
+   not have them. `find apps/web/src/server -type d -empty` lists them. Removing them is a
+   working-tree cleanup, not a commit. `github/` is not among them, which is a reminder that the
+   residue is a property of this working tree and not of the repository.
+2. **The six smoke checklists** at the end of this log. Nothing in step 5 was smoked against a real
+   database, a real bucket or a real Tracker: the sandbox has neither Postgres nor credentials. The
+   checklists are the whole of the manual verification the step asks for.
+3. **Two emptied files marked deprecated in a comment**, listed in the stubs section above. They
+   predate step 5 and nothing imports them.
+4. **The two temporary folders**, `docs/_migration/` and `docs/architecture/migration-kit/`, once
+   #142 has harvested this log and #143 has removed the references to both.
 
 ## Prerequisites and decisions for step 4
 
@@ -7124,7 +7272,8 @@ Grouped per external system rather than per ticket, so the maintainer walks each
 a real database rather than once per relocation. **Amend this entry in place**: a later ticket that
 touches a system adds its rows here instead of starting a second checklist. Six lists are expected by
 the exit verification (#140): GitHub, Linear, Jira, Slack, the widget, and the MCP server against the
-agent API. Only the systems a landed ticket has touched appear below.
+agent API. All six are below and complete, the last one written by #140 itself; none has been walked,
+because the sandbox has no Postgres, no bucket and no credentials for any external system.
 
 #### GitHub (started by #113, rows added by #114 and #115)
 
@@ -7306,3 +7455,40 @@ widget's own build is untouched by this step: an installed widget must not notic
       recorded without it rather than the submit failing.
 - [ ] Announce: submit on a Project linked to a Tracker or a Notification channel and see the issue
       or the message created, which proves the `feedback/created` event still fires from the service.
+
+#### MCP server against the agent API (started by #140)
+
+The published `@fasterfixes/mcp` package is untouched by step 5, and so is the agent API's wire
+contract. This list is the proof of that from the outside: an editor already configured with the
+MCP server must see no difference after the relocation. Walked against a deployed environment, with
+an Agent token and a Project public ID from a real Organization, since the sandbox has no Postgres.
+
+What the step did touch behind those responses: Agent token resolution and the scope check moved
+into the agent API scope (#132), the rate limit budget now reads the Plan vocabulary from the
+`subscription` barrel (#110), and the markdown list formatter is exported by the `feedback` barrel
+(#109).
+
+- [ ] Connect: configure the server with `FASTER_FIXES_TOKEN` and `FASTER_FIXES_PROJECT`, restart
+      the editor, and see `list_feedbacks`, `create_feedbacks` and `update_feedback_status` offered.
+- [ ] List as JSON: run `list_feedbacks` with no argument and see the Project's Feedback, each with
+      its status, comment, page URL, reviewer name, diagnostics and a signed screenshot URL that
+      opens.
+- [ ] List as markdown: run `list_feedbacks` with `format: "markdown"` and see the rendered list
+      rather than JSON, which proves the formatter the `feedback` barrel now exports is the one the
+      route calls.
+- [ ] Filter: run `list_feedbacks` with `status: "new"`, then with a `page_url`, and see the list
+      narrow to each.
+- [ ] Update a status: run `update_feedback_status` to `in_progress`, then to `resolved`, and see
+      the inbox follow, the Slack message edited and the linked Tracker issue transition, which
+      proves the status events still reach the durable functions from the agent API.
+- [ ] Create: run `create_feedbacks` with two items, a `reviewer_name` and a `source`, and see both
+      in the inbox under the import reviewer, with any `createdAt` preserved.
+- [ ] Bad token: set `FASTER_FIXES_TOKEN` to a value that is not a token, restart, and see the tool
+      answer `Error: Unauthorized` rather than a stack trace or a generic HTTP message.
+- [ ] Missing scope: mint an Agent token without `feedbacks:update_status`, run the status tool and
+      see `Error: Insufficient permissions`; the read tools keep working with the same token.
+- [ ] Foreign Project: set `FASTER_FIXES_PROJECT` to a Project public ID of another Organization and
+      see `Error: Project not found`, with no data from that Project.
+- [ ] Rate limit on cloud: exceed the Plan's hourly agent read budget and see the error sentence
+      naming the limit, the remaining count and the retry delay, with `Retry-After` and the three
+      `X-RateLimit-*` headers on the response.
