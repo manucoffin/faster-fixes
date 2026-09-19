@@ -264,12 +264,12 @@ The architecture holds because it is enforced, not because it is documented.
 
 ### Commands and required checks
 
-| Command                 | What it runs                                                                                                                                                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm typecheck`        | `tsc --noEmit` in every workspace                                                                                                                                                                                |
-| `pnpm lint`             | ESLint with `--max-warnings 0`, always-on rules only                                                                                                                                                             |
-| `pnpm lint:agent-rules` | Same, with `ESLINT_AGENT_RULES=1`, enabling the convention rules. `[Faster Fixes]` It drops `--max-warnings 0` until the end of step 4: zero errors required, warnings counted per rule as the burn-down metric. |
-| `pnpm test`             | Vitest in every workspace                                                                                                                                                                                        |
+| Command                 | What it runs                                                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`        | `tsc --noEmit` in every workspace                                                                                                                                                                 |
+| `pnpm lint`             | ESLint with `--max-warnings 0`, always-on rules only                                                                                                                                              |
+| `pnpm lint:agent-rules` | Same, with `ESLINT_AGENT_RULES=1`, enabling the convention rules. `[Faster Fixes]` It dropped `--max-warnings 0` from step 1 to the step 4 final lock, which restored it: zero problems required. |
+| `pnpm test`             | Vitest in every workspace                                                                                                                                                                         |
 
 The pre-commit hook runs typecheck, tests, and lint-staged. An agent never declares work done while any required check fails.
 

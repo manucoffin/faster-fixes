@@ -27,10 +27,16 @@ same code and message, so **any service you write throws domain errors, not `TRP
 bare `Error`** (see `rules/backend.md` and `rules/errors.md`). The conventions are pinned by
 ADR-0011 (server file conventions) and ADR-0012 (domain errors) in `docs/adr/`.
 
-Step 4 has not started. `src/server/**` still holds domain logic that step 5 moves into its domain,
-twelve route handlers still query Prisma inline, and the remaining error boundaries (route handler
-responses, Next.js interrupts, non-retriable Inngest failures) and the masking of 500 messages
-arrive in step 4.
+Step 4 is done. The error model of ADR-0012 is live at every boundary that exists here: the agent
+API route handlers map a `DomainError` with `domainErrorResponse`, the three Jira Inngest functions
+route an expected failure through `rethrowDomainErrorsAsNonRetriable`, every unexpected tRPC failure
+is masked behind one sentence and logged with its `cause` chain, and six boundary files render one
+`ErrorScreen`. `lint:agent-rules` runs with `--max-warnings 0` again and reports nothing.
+
+Step 5 has not started. `src/server/**` still holds domain logic that step 5 moves into its domain,
+twelve route handlers other than the agent API still query Prisma inline, `services-no-bare-error`
+still stops at `**/_services/**`, and `interruptOnDomainError` is not built: no RSC page calls a
+throwing service yet, so the helper lands with its first caller.
 
 While the migration runs:
 

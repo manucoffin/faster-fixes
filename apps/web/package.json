@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --fix .",
-    "lint:agent-rules": "ESLINT_AGENT_RULES=1 eslint .",
+    "lint:agent-rules": "ESLINT_AGENT_RULES=1 eslint --max-warnings 0 .",
     "typecheck": "tsc --noEmit",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
     "inngest": "pnpm dlx inngest-cli@latest dev",

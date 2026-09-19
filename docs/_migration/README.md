@@ -12,13 +12,13 @@ The migration moves the web app from its current `_features/` layout to the targ
 - the **exit verification** section of a completed step records the commands that closed it and what they returned, plus anything left for the maintainer;
 - the **deferred** and **anomalies** sections record what a step left behind, so "what is left" is a lookup rather than a rediscovery.
 
-The burn-down metric is `pnpm lint:agent-rules`. During the migration it runs without `--max-warnings 0`: errors fail the command, warnings are counted. Count them per rule with:
+The burn-down metric was `pnpm lint:agent-rules`. From step 1 to the end of step 4 it ran without `--max-warnings 0`: errors failed the command, warnings were counted per rule with:
 
 ```sh
 pnpm lint:agent-rules | grep -o 'local/[a-z-]*' | sort | uniq -c
 ```
 
-`--max-warnings 0` returns to `lint:agent-rules` at the end of step 4, once every scope is migrated and every convention rule is locked to `error`. Until then, a non-zero warning count is expected and is not a failure; a non-zero **error** count is a regression on a locked scope or on an always-on rule.
+`--max-warnings 0` returned at the step 4 final lock (issue #107), once every scope was migrated and every convention rule was locked to `error` at zero. The burn-down is over: the command now reports 0 problems, and any report at all, warning or error, is a regression. The counting recipe above is kept because the entries below quote it.
 
 ## Baseline
 
@@ -407,6 +407,170 @@ Feedback through the agent API, and check that the admin dashboard overview stil
 
 Issue #81 only. The three `_deprecated_` stubs listed under "Left for the maintainer" are the last
 red line of the step, and the agent may not delete them.
+
+## Step 4 exit verification
+
+Run on 2026-09-19 at the final lock commit (issue #107), with `--force` everywhere so Turbo served
+no cached result. The per-ticket entries of the step 4 scope log below record what each ticket
+changed and what it left to smoke; this section records what closed the step.
+
+**What the final lock changed.** One script and three status paragraphs:
+
+- `apps/web/package.json`: `lint:agent-rules` is now `ESLINT_AGENT_RULES=1 eslint --max-warnings 0 .`.
+  A convention warning fails the command again, as the Purpose section above promised at the start of
+  the migration. Nothing else in the command changed, so `pnpm lint:agent-rules` from the repo root
+  still forwards through Turbo to the web app alone.
+- The Purpose section of this log, `AGENTS.md` and `docs/architecture/target-architecture.md` no
+  longer say the command drops `--max-warnings 0` for the duration of the migration.
+- The coding-standards skill's migration block says step 4 is done and what step 5 still owns.
+
+No source file was touched. Every convention rule was already at `error` and already at zero before
+the flag went back: #104 and #105 closed the last one (`no-raw-tailwind-colors`), and #106 wrote the
+documentation. The lock is therefore a recording of a state, not a change to it.
+
+### The eleven "must be gone" checks
+
+The table of "'Must be gone' checks for this repo" below, run from the repo root. All eleven pass.
+
+| #   | Check                                       | Command                                                                                                                      | Result                                                                                                                               |
+| --- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Bare errors in services                     | `grep -rn "throw new Error(" apps/web/src \| grep _services/`                                                                | nothing                                                                                                                              |
+| 2   | Expected Jira errors outside the vocabulary | `grep -n "class Jira.*Error extends" apps/web/src/server/jira/*.ts`                                                          | the three expected classes extend `PreconditionFailedError` in `jira/errors.ts`; `JiraRequestError` is the only `extends Error` left |
+| 3   | Blind refresh catch                         | `grep -n "catch {" apps/web/src/server/jira/token-access.ts`                                                                 | nothing                                                                                                                              |
+| 4   | Per-procedure mapping                       | `grep -rn "catch" apps/web/src --include="trpc-router.ts"`                                                                   | nothing, across the 13 routers                                                                                                       |
+| 5   | Transport errors in routers                 | `grep -rn "new TRPCError" apps/web/src/app --include="trpc-router.ts"`                                                       | nothing, down from the 8 the step 3 close-out recorded                                                                               |
+| 6   | Sentinel messages                           | `grep -rn "EMAIL_NOT_VERIFIED" apps/web/src`                                                                                 | nothing                                                                                                                              |
+| 7   | Handlers posing as services                 | `grep -rln "NextResponse\|NextRequest" apps/web/src/app/api/v1/agent --include="*.ts" \| grep _services/`                    | `require-agent-auth.ts` only, the one documented exception                                                                           |
+| 8   | Server errors in client code                | `pnpm lint:agent-rules`                                                                                                      | passes with `no-client-import-of-server-errors` at `error`, declared outside the agent gate in `packages/eslint-config/next.js`      |
+| 9   | Raw messages in boundaries                  | `grep -n "error.message\|digest"` over the six boundary files                                                                | three hits, all the same comment line saying `digest` is left out on purpose; no boundary renders either value                       |
+| 10  | Missing boundaries                          | `ls apps/web/src/app/{error,global-error,not-found,forbidden,unauthorized}.tsx "apps/web/src/app/(authenticated)/error.tsx"` | six files                                                                                                                            |
+| 11  | Warnings                                    | `pnpm lint:agent-rules --force`                                                                                              | runs with `--max-warnings 0` and reports **0 problems**                                                                              |
+
+Two of them need a word on how they were read.
+
+Check 9 turned out stricter than its own wording. The table expected "only the logging line"; the
+boundaries log the error object itself (`console.error("Root render error", error)`), so the pattern
+does not match the logging line either, and the only three hits are the comment, repeated in
+`error.tsx`, `global-error.tsx` and `(authenticated)/error.tsx`, that says `digest` is deliberately
+not rendered.
+
+Check 3 asks for the absence of a _bare_ catch, not of every catch. `refreshUnderLock` still has a
+`catch (error)` around `refreshAccessToken`, which is the point of #89: it rethrows unless
+`isRefusedByAtlassian(error)` is true, and only then writes **Reconnect required**. The outer
+`catch (error)` in `getValidJiraAccessToken` is the revocation event emitter, also added by #89.
+The `catch {` grep is what distinguishes the two shapes, so that is the form recorded here.
+
+### End state of the error model
+
+| Metric                                         | Before step 4          | Now                                                                               |
+| ---------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------- |
+| Modules in `src/server/errors/`                | 1 (`domain-errors.ts`) | 3, with a test file for each of the two new ones                                  |
+| Route handlers mapping a `DomainError`         | 0                      | 2, both agent API routes                                                          |
+| Inngest functions with a non-retriable wrapper | 0                      | 3 (`create-jira-issue`, `sync-feedback-status-to-jira`, `sync-jira-issue-status`) |
+| Expected Jira errors inside the vocabulary     | 0 of 3                 | 3 of 3, all `PreconditionFailedError`                                             |
+| `new TRPCError` under `src/app`                | 8, in 3 routers        | 0; the three plan and feature middlewares keep theirs by design                   |
+| `catch` in a `trpc-router.ts`                  | 2                      | 0                                                                                 |
+| Masked `INTERNAL_SERVER_ERROR` messages        | none                   | all, behind `UNEXPECTED_FAILURE_MESSAGE`, with `logTRPCError` as `onError`        |
+| Boundary files                                 | 1 (`unauthorized.tsx`) | 6, all rendering one `ErrorScreen`                                                |
+| `no-raw-tailwind-colors` warnings              | 88                     | 0, rule at `error`                                                                |
+| `services-no-bare-error`                       | agent-gated            | always on for `**/_services/**`                                                   |
+| Web tests                                      | 120 (33 files)         | 204 (48 files)                                                                    |
+
+### Gate
+
+| Check                           | Result                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| `pnpm typecheck --force`        | 4 tasks, clean                                                               |
+| `pnpm lint --force`             | 5 tasks, 0 warnings                                                          |
+| `pnpm test --force`             | 204 web tests (48 files) and 191 `@workspace/eslint-config` tests (16 files) |
+| `pnpm lint:agent-rules --force` | **0 problems, 0 errors, 0 warnings**, now with `--max-warnings 0`            |
+| `npx next build` (web)          | compiles, every route still listed, the two agent API routes included        |
+
+Warning counts per rule, against the 88 that step 3 handed over:
+
+| Rule                     | After step 3 | Now | Note                                                                     |
+| ------------------------ | -----------: | --: | ------------------------------------------------------------------------ |
+| `no-raw-tailwind-colors` |           88 |   0 | 72 exempted as illustrations (#104), the rest rewritten to tokens (#105) |
+| every other rule         |            0 |   0 | At `error`, so a zero is enforced rather than vacuous.                   |
+
+The build was run as `npx next build` from `apps/web` with a placeholder `GITHUB_PRIVATE_KEY`, for
+the environment reason recorded under issue #88: `server/github/github-app.ts` reads that variable at
+module evaluation, so page-data collection for `/api/github/setup` fails without it. `pnpm build` is
+refused by the sandbox, as every earlier entry records.
+
+### The deliberate behaviour changes of the step
+
+Step 4 is the first step of the migration that changes what a User sees. What changed, and where it
+is recorded:
+
+1. **Every unexpected server error now reads "Something went wrong. Please try again."** (#98). An
+   expected failure keeps its message and `zodError` still reaches the form. The original is logged
+   with its `cause` chain by `logTRPCError` (#97), so masking costs no debuggability.
+2. **A transient Atlassian failure no longer marks a Jira Installation "Reconnect required"** and no
+   longer emails the Organization to reconnect (#89). Only an explicit 4xx refusal does.
+3. **A Jira run that cannot succeed fails on the first attempt** (#91). A disconnected or refused
+   Installation is a `NonRetriableError` in the three functions that let it bubble, so the run
+   history stops filling with retries that cannot work.
+4. **Five Jira screens answer with copy instead of a 500** (#90), because the three expected Jira
+   errors now transport as `PRECONDITION_FAILED`.
+5. **An unverified email at sign-in gets a real sentence** instead of the `EMAIL_NOT_VERIFIED`
+   sentinel, and the login form branches on `error.data.code` to keep offering the resend (#92).
+6. **A render error shows a product screen** rather than the framework default, at the root, inside
+   the dashboard shell and for the three interrupt destinations (#99, #100, #101).
+7. **A failed query in a visible region shows its error state** rather than an empty panel (#102,
+   #103).
+
+The agent API is the deliberate non-change: #84 and #85 froze its contract in characterization tests
+before #86, #87 and #88 converted its three handlers into services, and those tests pass unchanged,
+so the published MCP server and widget clients need no release.
+
+### Left for the maintainer
+
+1. **Delete the `_deprecated_` stub this step created:**
+   - `apps/web/src/lib/trpc/_deprecated_handle-trpc-error.ts`
+
+   It is the retired `handleTRPCError` helper (#95), which had no caller before the step and has none
+   now that `logTRPCError` is the transport's single logging path. The file exports no value, so
+   typecheck, test and the build pass without it. The agent may not delete files, which is why the
+   stub is listed here rather than gone.
+
+   The three stubs of the step 3 lock (issue #81) are still listed under "Left for the maintainer" of
+   that entry and are untouched by this step.
+
+2. **Walk the smoke checklists of the step 4 scope log entries against a real database.** The sandbox
+   still has no Postgres, so every authenticated path stops at the first query. The ones nothing
+   automated covers: the six boundary files and the `matchQueryStatus` sweep (#99 to #103), the login
+   form's branch on the error code (#92), the colour rewrites in both themes (#105), and the agent
+   API's "byte for byte" promise against a real Agent token (#88).
+
+3. **The gitignored `apps/web/.env.local` of dummy values is still in place**, and
+   `GITHUB_PRIVATE_KEY` still has to be passed on the command line for a build.
+
+### Debt carried into step 5
+
+Recorded by the step's tickets, not fixed here:
+
+- **`services-no-bare-error` does not reach `src/server/` yet** (decision 3). The infrastructure
+  `throw new Error(` sites there are deliberate and stay bare; the rule follows them when those files
+  join a domain in step 5, rather than landing an `eslint-disable` line per site that the relocation
+  would revisit.
+- **`interruptOnDomainError` was not created** (deviation 1). No RSC page calls a throwing service,
+  so the helper lands with its first caller. `forbidden.tsx` and `unauthorized.tsx` are already in
+  place as its destinations.
+- **Twelve route handlers still query Prisma inline.** The agent API is the only mapped boundary; the
+  OAuth install and callback routes, the tracker webhooks, the upload route and the public widget
+  endpoints reach no service until step 5, which also owns the kit's per-webhook "4xx or swallowed
+  2xx" decision.
+- **The three invitation services still pass Better Auth's own messages through** as
+  `BadRequestError(error.message)` (decision 4).
+- **`warning` and `info` tokens do not exist.** `rules/frontend.md` lists them among the design-system
+  colours and `packages/ui/src/styles/globals.css` does not define them (#104). Until one is added,
+  the five yellow, amber and blue sites stay unreported: one line in the rule's hue-to-token table
+  turns them on.
+- **The agent API and the dashboard keep two status-update services** (#88). Merging them behind one
+  "caller scope" concept is a deepening candidate for after the migration, not a migration task.
+- **Whether a password-reset mailer outage should be visible to the User at all** is a product
+  question #95 recorded rather than decided.
 
 ## Prerequisites and decisions for step 4
 

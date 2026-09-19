@@ -44,7 +44,7 @@ All coding standards for this project live in the `coding-standards` skill at `.
 - Run from repo root: `pnpm test`.
 - Run both lint commands:
 - `pnpm lint` (all workspaces). Zero warnings tolerated.
-- `pnpm lint:agent-rules` (web project rules only). Zero errors required: an error means a regression on an always-on rule or on a scope already migrated. The convention rules report as warnings for the duration of the architecture migration, so the command exits 0 with warnings left. Count them per rule with `pnpm lint:agent-rules | grep -o 'local/[a-z-]*' | sort | uniq -c`, and compare against the baseline recorded in `docs/_migration/`.
+- `pnpm lint:agent-rules` (web project rules only). Zero problems required: it runs with `--max-warnings 0` since the step 4 final lock, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression rather than a burn-down item. The history is in `docs/_migration/`.
 - If DB schema changed: run required `packages/database` generation/migration commands.
 - Never declare completion while required checks fail.
 - The pre-commit hook runs the same gate: lint-staged (Prettier on every staged file, plain ESLint with zero warnings on staged `ts`, `tsx`, `js`, `jsx` files), then `pnpm typecheck` and `pnpm test`. The agent-gated rules are not part of the hook, so a fix in a scope that has not been migrated still commits.
