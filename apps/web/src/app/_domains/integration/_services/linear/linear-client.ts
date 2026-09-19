@@ -10,7 +10,8 @@ export function getLinearClient(accessToken: string): LinearClient {
   return new LinearClient({ accessToken });
 }
 
-type OAuthTokenResponse = {
+/** The token payload Linear returns from an OAuth code exchange or refresh. */
+export type LinearOAuthTokenResponse = {
   access_token: string;
   refresh_token?: string;
   token_type: string;
@@ -21,7 +22,7 @@ type OAuthTokenResponse = {
 export async function exchangeOAuthCode(
   code: string,
   redirectUri: string,
-): Promise<OAuthTokenResponse> {
+): Promise<LinearOAuthTokenResponse> {
   const clientId = process.env.LINEAR_CLIENT_ID;
   const clientSecret = process.env.LINEAR_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -51,12 +52,12 @@ export async function exchangeOAuthCode(
     );
   }
 
-  return (await res.json()) as OAuthTokenResponse;
+  return (await res.json()) as LinearOAuthTokenResponse;
 }
 
 export async function refreshAccessToken(
   refreshToken: string,
-): Promise<OAuthTokenResponse> {
+): Promise<LinearOAuthTokenResponse> {
   const clientId = process.env.LINEAR_CLIENT_ID;
   const clientSecret = process.env.LINEAR_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -85,7 +86,7 @@ export async function refreshAccessToken(
     );
   }
 
-  return (await res.json()) as OAuthTokenResponse;
+  return (await res.json()) as LinearOAuthTokenResponse;
 }
 
 export async function revokeAccessToken(accessToken: string): Promise<void> {

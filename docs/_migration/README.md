@@ -5930,6 +5930,77 @@ with dummy environment values lists every route, `/api/webhooks/linear` included
 **Not smoked here, and why.** The sandbox has no Postgres and no Linear workspace, so no delivery
 past the signature check runs against real data. The Linear rows below are for the maintainer.
 
+### The Linear OAuth routes behind services, part 4 (issue #119)
+
+The first OAuth pair to reuse the placement the GitHub pilot fixed in #115. `GET /api/linear/install`
+and `GET /api/linear/callback` keep every redirect target, query parameter and cookie they have
+today; the callback stops querying Prisma inline and stops handling tokens in clear. The OAuth app
+registered at Linear needs no reconfiguration.
+
+**Characterization tests first.** `api/linear/install/route.test.ts` (five cases) and
+`api/linear/callback/route.test.ts` (fourteen cases), committed green against the current handlers in
+their own commit (`6d516d8`) before a line of either route moved, and not edited by the extraction.
+Same recipe as the setup route: `GET` called with a `NextRequest`, `@workspace/db`, `@/server/auth`,
+the Linear client and the token cipher faked, assertions on status, the `location` header and the
+cookies only.
+
+| Route    | Pinned paths                                                                                                                                                                                                                                                                                                                                                                 |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| install  | signed out to `/login?nextUrl=…`, `?error=no_active_org`, `?error=linear_not_configured`, the authorize url with its six parameters, the httpOnly `linear_oauth_state` cookie echoing the state                                                                                                                                                                              |
+| callback | `?error=linear_oauth_<provider error>`, `?error=linear_missing_code_or_state`, `?error=linear_state_mismatch` (wrong cookie and no cookie), `?error=not_authenticated`, `?error=no_active_org`, `?error=insufficient_role`, `?error=linear_token_exchange_failed`, `?error=linear_org_fetch_failed`, `?linear=connected` with the full upsert payload and the cleared cookie |
+
+**The install route needed no extraction.** It reads the session and the active Organization through
+Better Auth, mints a state and redirects; it never touched a database client. Its tests are here
+because the acceptance criteria ask for both routes to be pinned, and because the state cookie is the
+callback's CSRF defence and deserved a recorded shape before the pair was reopened.
+
+**What the callback delegates now.**
+
+| Operation                  | Where it landed                                  | Why                                                             |
+| -------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| Member authorization check | `_services/find-installing-member.ts`, unchanged | the pilot's shared service, imported verbatim as #115 predicted |
+| Linear organization read   | `_services/linear/find-linear-organization.ts`   | it speaks the Linear SDK                                        |
+| Installation upsert        | `_services/linear/upsert-linear-installation.ts` | it writes `LinearInstallation`, a table only Linear has         |
+
+`findInstallingMember` was taken as it stands: the Linear callback's inline query was the same
+`prisma.member.findFirst` with the same role list, so the second caller changed nothing in the
+service. That is the first confirmation that the pilot's bucket-root call was right.
+
+**The token encryption moved into the write, not into the route.** The route used to call
+`encryptToken` twice and compute the expiry itself. `upsertLinearInstallation` takes the token
+response as Linear returned it and owns the encryption, the optional refresh token and the expiry
+arithmetic, so the access token never exists in clear inside a route handler. The stored columns are
+identical, which the accepted-path test asserts field by field against a frozen clock.
+
+**`findLinearOrganization` collapses two failures into `null`, as the pilot's GitHub read does.** A
+revoked token and an unreachable Linear both leave the User with the same single option, so the
+service returns `null` and the route keeps mapping it to `?error=linear_org_fetch_failed`.
+
+**The code exchange kept its `try`/`catch` in the route, deliberately.** `exchangeOAuthCode` already
+lives in the domain and already throws the two named classes #116 created
+(`IntegrationConfigurationError`, `LinearRequestError`). Turning it into a nullable read would erase
+a distinction the route needs: its failure maps to `?error=linear_token_exchange_failed`, a different
+query parameter from the organization read's. The route maps two outcomes to two targets, which is
+route work.
+
+**One type became public.** `OAuthTokenResponse` in `linear-client.ts` is now exported as
+`LinearOAuthTokenResponse`, because the upsert service takes it as its input. No field changed and
+the two internal uses follow the rename.
+
+**Names, decided by running the rules.** `find-` for the nullable read, `upsert-` for the write, no
+process verb. The read exports its `FindLinearOrganizationOutput` alias as
+`require-trpc-output-type` demands of a read-verb file; the write needs none.
+
+**No file retired, no stub.** Everything here is an addition or an edit in place.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (57 files, 335 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/linear/install` and `/api/linear/callback`
+included.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Linear workspace, so nothing past
+the session check runs. The Linear rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5961,12 +6032,21 @@ agent API. Only the systems a landed ticket has touched appear below.
       that a delivery for an event the app does not handle also answers `200` (row added by #114).
 - [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.
 
-#### Linear (started by #116, rows added by #117 and #118)
+#### Linear (started by #116, rows added by #117, #118 and #119)
 
 - [ ] Connect: start the install from `/integrations/linear`, approve the Linear consent screen and
       land on `/integrations` with the Linear organization listed.
 - [ ] State round-trip on the cookie: start the install, then open the callback URL a second time
       with a stale `state` and land on `/integrations?error=linear_state_mismatch`.
+- [ ] Reconnect: connect Linear a second time from an Organization that already has an Installation
+      and see the same row refreshed with the current workspace and a new token, not duplicated (row
+      added by #119).
+- [ ] Connect signed out: open `/api/linear/install` in a signed out browser, see the login screen,
+      sign in and land back on the install (row added by #119).
+- [ ] Connect as a plain Member: with a `member` role account, walk the consent screen and land on
+      `/integrations?error=insufficient_role` with no Installation recorded (row added by #119).
+- [ ] Refuse at Linear: press Cancel on the Linear consent screen and land on
+      `/integrations?error=linear_oauth_access_denied` (row added by #119).
 - [ ] Link a Project: pick a Linear team in the Project settings, see the team states and labels
       offered, save, reload, and see the link with its default state.
 - [ ] Mirror a Feedback: submit a Feedback on a linked Project and see the issue created in the
