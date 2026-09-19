@@ -39,6 +39,15 @@ export async function getAnimal(id: string) {
 export type GetAnimalOutput = Awaited<ReturnType<typeof getAnimal>>;
 ```
 
+- **An Inngest function wraps the calls that can throw a `DomainError`.** A business rejection (a disconnected Installation, a link the user must repair) never succeeds on retry, so a function body calling code able to throw one routes the failure through `rethrowDomainErrorsAsNonRetriable` (`@/server/errors/non-retriable`), which rethrows it as Inngest's `NonRetriableError` with the original as `cause`. Infrastructure failures pass through untouched and keep their retries. Only wrap where a `DomainError` can actually arrive: wrapping a function that reaches no throwing service is dead code posing as a guarantee.
+
+```ts
+// server/inngest/create-jira-issue.ts
+const accessToken = await getValidJiraAccessToken(
+  installation.organizationId,
+).catch(rethrowDomainErrorsAsNonRetriable);
+```
+
 - **Identity and transport policy stay in the procedure**: `UNAUTHORIZED`, rate limiting (`TOO_MANY_REQUESTS`) and plan-limit denials have no domain-error equivalent. An authorization check that needs a loaded resource (membership, ownership) belongs in the service that loads it, as a `ForbiddenError`.
 
 ## tRPC router

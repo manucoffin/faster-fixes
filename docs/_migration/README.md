@@ -1924,17 +1924,17 @@ throwing at the top of the matching `_services/` function, or by blocking `/api/
 devtools:
 
 - [ ] `getCurrentEmail` throwing, on `/account/settings`: the email card reads `Failed to load your
-  email address` with the message. No empty email field and no `Change email` button are shown.
+email address` with the message. No empty email field and no `Change email` button are shown.
 - [ ] `getProfile` throwing: the profile card reads `Failed to load your profile`, and no blank name
       can be saved over the stored one.
 - [ ] `getOrganizationDetails` throwing, on `/organization`: the general tab reads `Failed to load
-  the organization` and offers no `Delete organization` button.
+the organization` and offers no `Delete organization` button.
 - [ ] `listInvitations` throwing, as an owner or an admin on the members tab: a row reads `Failed to
-  load the pending invitations` and the member rows are still listed above it.
+load the pending invitations` and the member rows are still listed above it.
 - [ ] As a plain member, the same tab lists the members with no invitation row, no skeleton and no
       error: the read is not run for a member who cannot manage invitations.
 - [ ] `getSubscription` throwing, on `/admin/users/<id>`: the subscription card reads `Failed to
-  load the subscription` and offers neither `Create` nor `Edit`.
+load the subscription` and offers neither `Create` nor `Edit`.
 - [ ] A User with no Subscription still sees `Not subscribed`, `No active subscription` and the
       create dialog; a User with one still sees the plan, the status badge and the edit dialog.
 - [ ] `listUsers` throwing, on `/admin/users`: the table body shows the thrown message instead of
@@ -1950,6 +1950,88 @@ devtools:
       revoke a member, switch Projects from the header, and create, edit and delete a Subscription
       from the admin user page.
 - [ ] No regression inside the Project scope, which this ticket did not touch.
+
+### ADR 0012 and the two rule files describe what is live (issue #106)
+
+Written after the chain closed, so every sentence added was checked against the code at this commit
+rather than against the plan.
+
+**ADR 0012.** The "Added by step 4" status note is gone. `## Status in this repo` now reads as three
+lists: what step 3 made live, what step 4 made live (the HTTP mapping helper and its two agent API
+callers, the six boundary files, the three wrapped Inngest functions, the masking sentence with
+`logTRPCError` as the handler's `onError`, `services-no-bare-error` at `error` for `**/_services/**`,
+the three re-parented Jira classes) and what was deliberately not built (`interruptOnDomainError`,
+the server actions branch). A new `### Amendments` subsection states the three amendments, and each
+is repeated inline on the decision it changes, so a reader of the decision list is never left with
+the pre-step-4 wording:
+
+| Amendment                                                              | Decision it annotates                                                                        |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| A second-level subclass is allowed when a caller must tell cases apart | "Services throw `DomainError` subclasses", whose "no per-case subclasses" clause is replaced |
+| RSC interrupts are deferred to their first caller                      | "React Server Components: Next.js interrupts"                                                |
+| The agent API keeps its transport codes at its boundary                | "Route handlers: a `DomainError` to `Response` helper"                                       |
+
+Four further statements were corrected because step 4 made them false, none of them an amendment to
+the model: "The set is closed at five" became "The set of codes is closed at five", since the codes
+are closed and the classes are not; legacy absorption now says an infrastructure class stays a plain
+`Error` (`JiraRequestError`, `EmailError`), which is why nothing was deprecated; the boundary
+hierarchy lists a per-shell `error.tsx` alongside the five root files; and the legacy-import ban and
+the `services-no-bare-error` glob are marked with what actually landed. `Consequences` drops "three
+lint rules" for the two that exist.
+
+**`rules/backend.md`.** One bullet in "Transport-agnostic services", after the `DomainError` bullet
+it depends on: an Inngest function body calling code able to throw a `DomainError` routes the
+failure through `rethrowDomainErrorsAsNonRetriable`, infrastructure failures keep their retries, and
+wrapping a function that reaches no throwing service is dead code posing as a guarantee. The snippet
+is the live call from `create-jira-issue.ts`, not an invented one.
+
+**`rules/errors.md`.** The "What exists today" blockquote no longer describes step 4 as pending: it
+names the three modules that exist and the one that does not, with the reason. The masking sentence
+is quoted verbatim, the second-level subclass allowance gets a paragraph naming the three Jira
+classes and the code they transport, the mutation-toast bullet drops its "carries the raw message
+until then" tail, the boundary bullet names `ErrorScreen`, the `_constants/error-screens` module and
+the six files, and a new bullet states the route handler convention (map with `domainErrorResponse`,
+rethrow on `null`, transport codes stay at the boundary).
+
+**`CONTEXT.md`.** Unchanged, as decision 7 expected: **Reconnect required** carries the refusal rule
+and **Tracker** already covers Jira.
+
+**Verified before writing, at this commit.**
+
+| Statement                                            | How it was checked                                                                                                   |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Three modules in `src/server/errors/`, no interrupts | `ls src/server/errors/`: `domain-errors`, `http-response`, `non-retriable`, plus two test files                      |
+| Two agent API route handlers map domain errors       | `domainErrorResponse` in `feedbacks/route.ts` and `feedbacks/[id]/status/route.ts` only                              |
+| Three wrapped Inngest functions                      | `rethrowDomainErrorsAsNonRetriable` in `create-jira-issue`, `sync-feedback-status-to-jira`, `sync-jira-issue-status` |
+| Three Jira classes extend `PreconditionFailedError`  | `src/server/jira/errors.ts`; `JiraRequestError` still `extends Error` in `jira-rest-client.ts`                       |
+| Six boundary files, one screen, one copy module      | All six import `ErrorScreen` and a constant from `@/app/_constants/error-screens`                                    |
+| Masking sentence and `onError`                       | `UNEXPECTED_FAILURE_MESSAGE` in `server/trpc/trpc.ts`; `onError: logTRPCError` in the tRPC route                     |
+| `services-no-bare-error` outside the agent gate      | `packages/eslint-config/next.js`, `**/_services/**` block                                                            |
+| `handleTRPCError` retired                            | `src/lib/trpc/_deprecated_handle-trpc-error.ts`                                                                      |
+
+**Checks at this commit.**
+
+| Check                                      | Result                               |
+| ------------------------------------------ | ------------------------------------ |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (204 web tests, zero warnings)  |
+| `pnpm lint:agent-rules`                    | **0 problems**, unchanged since #105 |
+| `pnpm --filter web build`                  | every route listed                   |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Tests.** None: documentation only. No source file was touched.
+
+**Left for #107.** The coding-standards skill's own status block still reads "Step 4 has not
+started" in `SKILL.md`. That line is the final lock's to flip, so it was left alone rather than
+edited twice.
+
+**Smoke checklist for the maintainer.** Reading only, no runtime behaviour changed:
+
+- [ ] ADR 0012's status section matches `ls apps/web/src/server/errors/` and the six boundary files.
+- [ ] The three amendments read as decisions, and each is findable from the decision it changes.
+- [ ] `rules/backend.md`'s Inngest snippet is the call that is in `create-jira-issue.ts`.
+- [ ] `rules/errors.md` quotes the masking sentence that `server/trpc/trpc.ts` sends.
 
 ## Amendments to the kit made during step 1
 
