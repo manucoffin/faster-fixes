@@ -1189,6 +1189,86 @@ No smoke checklist: the ticket changes lint output only, and no rendered pixel m
 colour tokens, and neither exists in `packages/ui/src/styles/globals.css`. Out of scope here, since
 this step adds no token; worth an aligned sentence when one is added.
 
+### The reset email failure becomes a domain error, `handleTRPCError` retired (issue #95)
+
+Decisions 2 and 13, the fourth link of the chain and the last thing that has to be true before
+masking can land. Nothing reachable by a User carries copy inside a bare `Error` any more, and the
+tRPC transport has one logging path left to fill in #97.
+
+**The one user-copy site is converted.** `server/auth/config/email-and-password.tsx` caught a mailer
+failure and rethrew `new Error("Failed to send the password reset email. Please try again.")`. It
+now throws `PreconditionFailedError` with the same sentence and the mailer failure as its `cause`.
+`PRECONDITION_FAILED` rather than `BAD_REQUEST`: the request was well formed and permitted, and what
+failed is a state of the world outside the User's input, the same reading that puts
+`JiraReauthRequiredError` under that code. No second-level subclass: no caller has to tell this case
+from another `PreconditionFailedError`, and the ADR asks for the information to sit in the message.
+The `console.error` line above the throw stays, since it is the only place the underlying mailer
+error is named.
+
+**The copy is not user-visible today, and the conversion does not make it so.** Better Auth 1.5.4
+calls `sendResetPassword` through `runInBackgroundOrAwait`, and `server/auth/index.ts` configures
+`advanced.backgroundTasks.handler` with Next's `after`. Both branches of that helper swallow the
+rejection into `logger.error("Failed to run background task:", e)`; the endpoint has already decided
+to answer `{ status: true, message: "If this email exists in our system, check your email for the
+reset link" }` whether the send succeeded or not, which is the usual anti-enumeration answer. So
+neither `auth.requestPasswordReset` (the forgot-password form) nor `admin.users.requestPasswordReset`
+can surface this sentence, before or after this commit. The user story behind the ticket ("the User
+still sees that sentence") describes a path that better-auth closed; the conversion is still the
+right move, because the sentence would otherwise be masked the moment it did travel, and because a
+bare `Error` carrying final copy is the pattern #98 is allowed to assume is absent. Whether the
+background hand-off should be reversed so a mailer outage is visible at all is a product question,
+not an error-model one: recorded here as debt, not decided.
+
+**Re-count of the bare `Error` sites under `src/server`, for #98.** The inventory at `c1b47bd` read
+28 infrastructure sites plus this one. At this commit `grep -rn "throw new Error(" apps/web/src/server`
+returns 26, of which one is the assertion helper inside `trpc/domain-error-mapping.test.ts`: 25
+infrastructure sites in production code. The drift is #89, which replaced the bare refresh failures
+of `jira/token-access.ts` with a status-carrying error. All 25 are missing environment variables,
+failed provider calls and protocol violations (`linear-client`, `jira-client`, `jira-rest-client`,
+`slack-client`, `webhook-registration`, `verify-webhook`, `build-asset-url`, `create-linear-issue`,
+`check-resource-limit`, `auth/plugins/stripe`). None carries user copy, and one bare `throw Error(`
+(no `new`) in `auth/config/email-verification.tsx`, "This user does not exist.", is an internal
+consistency check on a user Better Auth has just looked up, not a sentence meant for a screen. They
+stay bare, so they surface as a 500 and are logged. #98 re-reads this paragraph rather than the
+`c1b47bd` count.
+
+**`handleTRPCError` is retired.** `lib/trpc/handle-trpc-error.ts` had no importer and threw a
+hand-rolled `INTERNAL_SERVER_ERROR` with its own generic copy, which would have been a second
+masking path competing with the `errorFormatter` of #98. It is now
+`lib/trpc/_deprecated_handle-trpc-error.ts`, two comment lines and an `export {}`, following the
+stub convention of step 3.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                                        |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| Bare errors in services                    | `grep -rn "throw new Error(" apps/web/src \| grep _services/` returns nothing |
+| `handleTRPCError` importers                | `grep -rn "handleTRPCError" apps/web/src packages` returns nothing            |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (194 web tests, zero warnings)                                           |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105)                         |
+| `npx next build`                           | every route listed, `/forgot-password` and `/reset-password` included         |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+No automated test: the changed file is a Better Auth options object, not a service, and the testing
+policy covers `_services/` and `_helpers/`. The behaviour it guards is unobservable through the
+transport for the reason given above.
+
+**Left for the maintainer.** Delete `apps/web/src/lib/trpc/_deprecated_handle-trpc-error.ts`. It has
+no importer and exports no value, so typecheck, tests and the build pass without it.
+
+**Smoke checklist for the maintainer** (a real database):
+
+- [ ] On `/forgot-password`, submit a registered email with the mailer working: the confirmation
+      message appears and the reset email arrives.
+- [ ] Break the mailer (an invalid `RESEND_API_KEY` or an unreachable SMTP host) and submit the same
+      form: the page still shows the neutral confirmation, and the server log holds
+      "Error sending reset password email:" followed by "Failed to run background task:". No stack
+      and no internal wording reaches the browser.
+- [ ] In `/admin/users/<id>`, use "Request password reset" with the mailer working: the success toast
+      appears and the email arrives.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
