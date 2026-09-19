@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
+import { IntegrationConfigurationError } from "../../_services/integration-configuration-error";
+
 export function verifyLinearWebhookSignature(
   rawBody: string,
   signatureHeader: string | null,
@@ -8,7 +10,7 @@ export function verifyLinearWebhookSignature(
 
   const secret = process.env.LINEAR_WEBHOOK_SIGNING_SECRET;
   if (!secret) {
-    throw new Error(
+    throw new IntegrationConfigurationError(
       "LINEAR_WEBHOOK_SIGNING_SECRET is not set. Configure it in .env.local with the value from Linear's OAuth app settings.",
     );
   }

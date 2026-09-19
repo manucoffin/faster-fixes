@@ -1,5 +1,8 @@
 import { LinearClient } from "@linear/sdk";
 
+import { IntegrationConfigurationError } from "../integration-configuration-error";
+import { LinearRequestError } from "./linear-request-error";
+
 const LINEAR_OAUTH_TOKEN_URL = "https://api.linear.app/oauth/token";
 const LINEAR_OAUTH_REVOKE_URL = "https://api.linear.app/oauth/revoke";
 
@@ -22,7 +25,9 @@ export async function exchangeOAuthCode(
   const clientId = process.env.LINEAR_CLIENT_ID;
   const clientSecret = process.env.LINEAR_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    throw new Error("LINEAR_CLIENT_ID / LINEAR_CLIENT_SECRET are not set.");
+    throw new IntegrationConfigurationError(
+      "LINEAR_CLIENT_ID / LINEAR_CLIENT_SECRET are not set.",
+    );
   }
 
   const body = new URLSearchParams({
@@ -41,7 +46,9 @@ export async function exchangeOAuthCode(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Linear token exchange failed (${res.status}): ${text}`);
+    throw new LinearRequestError(
+      `Linear token exchange failed (${res.status}): ${text}`,
+    );
   }
 
   return (await res.json()) as OAuthTokenResponse;
@@ -53,7 +60,9 @@ export async function refreshAccessToken(
   const clientId = process.env.LINEAR_CLIENT_ID;
   const clientSecret = process.env.LINEAR_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    throw new Error("LINEAR_CLIENT_ID / LINEAR_CLIENT_SECRET are not set.");
+    throw new IntegrationConfigurationError(
+      "LINEAR_CLIENT_ID / LINEAR_CLIENT_SECRET are not set.",
+    );
   }
 
   const body = new URLSearchParams({
@@ -71,7 +80,9 @@ export async function refreshAccessToken(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Linear token refresh failed (${res.status}): ${text}`);
+    throw new LinearRequestError(
+      `Linear token refresh failed (${res.status}): ${text}`,
+    );
   }
 
   return (await res.json()) as OAuthTokenResponse;
@@ -89,10 +100,12 @@ export async function revokeAccessToken(accessToken: string): Promise<void> {
   if (res.status === 400) {
     const text = await res.text().catch(() => "");
     if (text.includes("invalid_token")) return;
-    throw new Error(`Linear token revoke failed (400): ${text}`);
+    throw new LinearRequestError(`Linear token revoke failed (400): ${text}`);
   }
   const text = await res.text().catch(() => "");
-  throw new Error(`Linear token revoke failed (${res.status}): ${text}`);
+  throw new LinearRequestError(
+    `Linear token revoke failed (${res.status}): ${text}`,
+  );
 }
 
 export function getLinearOAuthRedirectUri(): string {
@@ -100,7 +113,7 @@ export function getLinearOAuthRedirectUri(): string {
   if (explicit) return explicit;
   const base = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL;
   if (!base) {
-    throw new Error(
+    throw new IntegrationConfigurationError(
       "Cannot resolve Linear OAuth redirect URI: set LINEAR_OAUTH_REDIRECT_URI or BETTER_AUTH_URL.",
     );
   }

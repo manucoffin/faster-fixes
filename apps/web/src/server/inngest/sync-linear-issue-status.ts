@@ -1,5 +1,5 @@
-import { feedbackStatusFromLinearStateType } from "@/server/linear/state-mapping";
-import type { LinearStateType } from "@/server/linear/state-mapping";
+import { feedbackStatusFromLinearStateType } from "@/app/_domains/integration/_helpers/linear/state-mapping";
+import type { LinearStateType } from "@/app/_domains/integration/_helpers/linear/state-mapping";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

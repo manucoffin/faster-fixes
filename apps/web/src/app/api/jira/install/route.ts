@@ -8,7 +8,7 @@ import { JIRA_OAUTH_STATE_COOKIE } from "@/server/jira/oauth-state-cookie";
 import {
   createOAuthState,
   setOAuthStateCookie,
-} from "@/server/oauth/state-cookie";
+} from "@/app/_domains/integration/_services/oauth-state-cookie";
 import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -43,7 +43,9 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.JIRA_CLIENT_ID;
   if (!clientId) {
-    return NextResponse.redirect(`${integrationsUrl}?error=jira_not_configured`);
+    return NextResponse.redirect(
+      `${integrationsUrl}?error=jira_not_configured`,
+    );
   }
 
   const state = createOAuthState();

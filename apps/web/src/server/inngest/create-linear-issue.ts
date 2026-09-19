@@ -3,12 +3,10 @@ import {
   formatIssueTitle,
 } from "@/app/_domains/integration/_helpers/github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
-import { decryptToken } from "@/server/linear/crypto";
-import { getLinearClient } from "@/server/linear/linear-client";
-import {
-  filterValidLabelIds,
-  resolveStateIdForFeedback,
-} from "@/server/linear/resolve-team-state";
+import { decryptToken } from "@/app/_domains/integration/_services/linear/token-crypto";
+import { getLinearClient } from "@/app/_domains/integration/_services/linear/linear-client";
+import { getFeedbackStateId } from "@/app/_domains/integration/_services/linear/get-feedback-state-id";
+import { getValidLabelIds } from "@/app/_domains/integration/_services/linear/get-valid-label-ids";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
@@ -63,7 +61,7 @@ export const createLinearIssue = inngest.createFunction(
     const accessToken = decryptToken(link.linearInstallation.accessToken);
     const client = getLinearClient(accessToken);
 
-    const resolved = await resolveStateIdForFeedback({
+    const resolved = await getFeedbackStateId({
       client,
       link,
       feedbackStatus: feedback.status as FeedbackStatus,
@@ -73,7 +71,7 @@ export const createLinearIssue = inngest.createFunction(
       return { skipped: "no_team_states_available" };
     }
 
-    const { valid: validLabels, droppedCount } = await filterValidLabelIds(
+    const { valid: validLabels, droppedCount } = await getValidLabelIds(
       client,
       link.teamId,
       link.defaultLabelIds,

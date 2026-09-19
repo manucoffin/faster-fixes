@@ -5,7 +5,9 @@ import type { NextRequest, NextResponse } from "next/server";
 // CSRF: `/install` mints a random value, stores it in an httpOnly cookie and
 // echoes it to the provider; `/callback` only proceeds when the returned
 // `state` matches the cookie. Shared verbatim across Tracker integrations
-// (Linear, Jira, …) so the CSRF check stays identical everywhere.
+// (Linear, Jira, …) so the CSRF check stays identical everywhere, which is
+// why it sits at the bucket root rather than under a provider: only the
+// cookie name and lifetime differ, and those are the provider's constant.
 export type OAuthStateCookie = {
   name: string;
   maxAgeSeconds: number;

@@ -1,5 +1,5 @@
 import { inngest } from "@/server/inngest";
-import { verifyLinearWebhookSignature } from "@/server/linear/verify-webhook";
+import { verifyLinearWebhookSignature } from "@/app/_domains/integration/_helpers/linear/verify-webhook-signature";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import { type NextRequest, NextResponse } from "next/server";

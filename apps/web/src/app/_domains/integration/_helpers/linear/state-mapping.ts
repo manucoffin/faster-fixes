@@ -29,7 +29,7 @@ export function feedbackStatusFromLinearStateType(
 }
 
 // The state TYPE we want to write when the app is the source of the change.
-// The actual state ID is resolved by resolve-team-state.ts using this preferred type
+// The actual state ID is read by get-feedback-state-id.ts using this preferred type
 // plus the project link's defaultStateId for "new".
 export function linearStateTypeForFeedbackStatus(
   status: FeedbackStatus,

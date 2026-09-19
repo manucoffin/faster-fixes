@@ -1,10 +1,10 @@
 import { auth } from "@/server/auth";
-import { getLinearOAuthRedirectUri } from "@/server/linear/linear-client";
-import { LINEAR_OAUTH_STATE_COOKIE } from "@/server/linear/oauth-state-cookie";
+import { getLinearOAuthRedirectUri } from "@/app/_domains/integration/_services/linear/linear-client";
+import { LINEAR_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/linear/oauth-state-cookie";
 import {
   createOAuthState,
   setOAuthStateCookie,
-} from "@/server/oauth/state-cookie";
+} from "@/app/_domains/integration/_services/oauth-state-cookie";
 import { type NextRequest, NextResponse } from "next/server";
 
 const LINEAR_OAUTH_AUTHORIZE_URL = "https://linear.app/oauth/authorize";

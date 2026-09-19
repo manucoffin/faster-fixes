@@ -1,4 +1,4 @@
-import { getTeamStates } from "@/server/linear/resolve-team-state";
+import { getTeamStates } from "@/app/_domains/integration/_services/linear/get-team-states";
 import { prisma } from "@workspace/db";
 import { getLinearAccess } from "./get-linear-access";
 import { ListLinearTeamStatesInput } from "./list-linear-team-states.schema";

@@ -1,15 +1,15 @@
 import { auth } from "@/server/auth";
-import { encryptToken } from "@/server/linear/crypto";
+import { encryptToken } from "@/app/_domains/integration/_services/linear/token-crypto";
 import {
   exchangeOAuthCode,
   getLinearClient,
   getLinearOAuthRedirectUri,
-} from "@/server/linear/linear-client";
-import { LINEAR_OAUTH_STATE_COOKIE } from "@/server/linear/oauth-state-cookie";
+} from "@/app/_domains/integration/_services/linear/linear-client";
+import { LINEAR_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/linear/oauth-state-cookie";
 import {
   clearOAuthStateCookie,
   isValidOAuthState,
-} from "@/server/oauth/state-cookie";
+} from "@/app/_domains/integration/_services/oauth-state-cookie";
 import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isValidOAuthState(req, LINEAR_OAUTH_STATE_COOKIE, stateParam)) {
-    return NextResponse.redirect(`${integrationsUrl}?error=linear_state_mismatch`);
+    return NextResponse.redirect(
+      `${integrationsUrl}?error=linear_state_mismatch`,
+    );
   }
 
   const session = await auth.api.getSession({ headers: req.headers });

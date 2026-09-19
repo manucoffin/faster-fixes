@@ -10,7 +10,7 @@ import { JIRA_OAUTH_STATE_COOKIE } from "@/server/jira/oauth-state-cookie";
 import {
   clearOAuthStateCookie,
   isValidOAuthState,
-} from "@/server/oauth/state-cookie";
+} from "@/app/_domains/integration/_services/oauth-state-cookie";
 import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isValidOAuthState(req, JIRA_OAUTH_STATE_COOKIE, stateParam)) {
-    return NextResponse.redirect(`${integrationsUrl}?error=jira_state_mismatch`);
+    return NextResponse.redirect(
+      `${integrationsUrl}?error=jira_state_mismatch`,
+    );
   }
 
   const session = await auth.api.getSession({ headers: req.headers });

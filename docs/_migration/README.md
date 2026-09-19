@@ -5701,6 +5701,111 @@ with dummy environment values lists every route, `/api/github/setup` included.
 **Not smoked here, and why.** The sandbox has no Postgres and no GitHub App, so nothing past the
 session check runs. The rows below are for the maintainer.
 
+### Linear moves into the `integration` domain, part 1 (issue #116)
+
+The second relocation ticket of step 5, and the first to apply the pilot pattern rather than fix it.
+The six Linear modules and the shared OAuth state cookie leave the server folder for
+`_domains/integration/`. No behaviour changed: every edit outside the two new error classes is an
+import path, a file name or a function name.
+
+**Files moved.** Seven modules with `git mv`. No file dissolved, so this ticket leaves no
+`_deprecated_` stub.
+
+| Before                                | After                                                                         |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| `server/linear/linear-client.ts`      | `_domains/integration/_services/linear/linear-client.ts`                      |
+| `server/linear/crypto.ts`             | `_domains/integration/_services/linear/token-crypto.ts`                       |
+| `server/linear/resolve-team-state.ts` | `_domains/integration/_services/linear/get-team-states.ts` (split, see below) |
+| `server/linear/state-mapping.ts`      | `_domains/integration/_helpers/linear/state-mapping.ts`                       |
+| `server/linear/verify-webhook.ts`     | `_domains/integration/_helpers/linear/verify-webhook-signature.ts`            |
+| `server/linear/oauth-state-cookie.ts` | `_domains/integration/_helpers/linear/oauth-state-cookie.ts`                  |
+| `server/oauth/state-cookie.ts`        | `_domains/integration/_services/oauth-state-cookie.ts`                        |
+
+`src/server/linear/` and `src/server/oauth/` hold no file. The two directories are left empty on
+disk because the agent may not delete anything; git tracks nothing in them, so a fresh clone does
+not have them. They are on the maintainer list with the rest.
+
+#### What this ticket decided, for Jira (#120) and Slack (#125) to copy
+
+**The shared cookie is a service at the bucket root, the provider constant is a helper under the
+provider.** `_services/oauth-state-cookie.ts` keeps the four functions and the `OAuthStateCookie`
+type: it mints a random value, reads and writes cookies on a request and a response, so it is IO.
+`LINEAR_OAUTH_STATE_COOKIE` is a two-field constant with no behaviour, so it follows the precedent of
+the Organization roles and lands in `_helpers/linear/oauth-state-cookie.ts`, importing the type.
+Jira's constant makes the same move in #120; Slack keeps its own two string constants, out of scope
+by the parent spec.
+
+**A process verb renames to a read verb plus the result noun, and the file splits to match.**
+`resolve-team-state.ts` exported four functions, which is what let a banned verb hide in the file
+name. It became four files named after their export, each with the `<Service>Output` alias
+`require-trpc-output-type` asks of a read-verb file:
+
+| Export before               | Export after         | File                                        |
+| --------------------------- | -------------------- | ------------------------------------------- |
+| `getTeamStates`             | unchanged            | `_services/linear/get-team-states.ts`       |
+| `getTeamLabels`             | unchanged            | `_services/linear/get-team-labels.ts`       |
+| `resolveStateIdForFeedback` | `getFeedbackStateId` | `_services/linear/get-feedback-state-id.ts` |
+| `filterValidLabelIds`       | `getValidLabelIds`   | `_services/linear/get-valid-label-ids.ts`   |
+
+The two already-read-verb exports kept their names on purpose: the two migrated Project settings
+services that call them (`list-linear-team-states.ts`, `list-linear-team-labels.ts`) then change
+only an import path, which is what the ticket allows a locked scope to change. The two renamed
+exports have no caller outside the server folder.
+
+**`linear-client.ts` keeps its noun name**, as the pilot predicted: `services-verb-prefix` only
+checks the `<token>-` shape and `require-trpc-output-type` only fires on the closed read set.
+`crypto.ts` has no dash and does not clear that bar, so the module moved unchanged under the name
+`token-crypto.ts` rather than being split into `encrypt-` and `decrypt-` files: factoring the four
+token cipher modules is out of scope.
+
+**The two infrastructure error classes the pilot specified now exist.** Both are plain `Error`
+subclasses, never a `DomainError`, so they keep surfacing as a masked 500 at a transport and keep
+their retries in a durable function (ADR 0012), while `services-no-bare-error` sees a named class.
+
+- `_services/linear/linear-request-error.ts` exports `LinearRequestError`, following the existing
+  `JiraRequestError`: Linear answered a request with something we cannot use. Five sites (token
+  exchange, token refresh, two revoke paths).
+- `_services/integration-configuration-error.ts` exports `IntegrationConfigurationError` at the
+  bucket root, for a missing environment value or an impossible configuration: three sites in the
+  client (missing client id or secret, twice; no base URL to derive the redirect URI from) and one
+  in the webhook signature helper (`LINEAR_WEBHOOK_SIGNING_SECRET` unset). Jira and Slack reuse this
+  one class rather than adding their own.
+
+Telling a refusal from an outage for Linear, as #89 did for Jira, stays out of scope: none of the
+nine sites becomes a `DomainError` here.
+
+**One cross-bucket import, and why it is allowed.** `_helpers/linear/verify-webhook-signature.ts`
+imports `IntegrationConfigurationError` from the services bucket root. The class is shared
+vocabulary rather than IO, and the alternative, a second configuration error class per bucket,
+contradicts the "one shared configuration error class" the pilot wrote down. The helper stays pure
+in the sense the rule cares about: it performs no IO, it reads its secret from the environment as it
+did before the move.
+
+**Consumers rewritten.** Thirteen files, import paths only, plus the two renamed call sites:
+`app/api/linear/install`, `app/api/linear/callback`, `app/api/webhooks/linear`, `app/api/jira/install`,
+`app/api/jira/callback`, `server/jira/oauth-state-cookie.ts`, the three Linear durable functions in
+`server/inngest/`, `integrations/_services/disconnect-linear.ts`, and the four `(project)/settings`
+services (`get-linear-access.ts` and its test's mock paths,
+`list-accessible-linear-teams.ts`, `list-linear-team-states.ts`, `list-linear-team-labels.ts`).
+
+**Three temporary inverted imports, created on purpose**, on top of the two the pilot left. The four
+Linear durable functions still in `server/inngest/`, `server/jira/oauth-state-cookie.ts` and the two
+Jira OAuth routes now read the relocated modules from the app tree. #117 moves the functions and
+#120 moves the Jira cookie, both before the lint lock (#139), so none of them survives to meet it.
+
+**Still owned by the following tickets.** The four Linear durable functions (#117), the webhook route
+and its `handle-` service (#118), the install and callback routes and their services (#119). The
+webhook route still owns deduplication, the Installation lookup and the event emission, and both
+OAuth routes still query Prisma inline.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (54 files, 302 web tests), `pnpm lint` and
+`pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web` with dummy environment
+values lists every route, `/api/linear/install`, `/api/linear/callback` and `/api/webhooks/linear`
+included. The registration route still lists seventeen functions.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Linear OAuth app, so nothing past
+the signature check and the session check runs. The rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -5731,3 +5836,23 @@ agent API. Only the systems a landed ticket has touched appear below.
       deliveries answer `200`, that a replayed delivery answers `200` with the skipped marker, and
       that a delivery for an event the app does not handle also answers `200` (row added by #114).
 - [ ] Disconnect: uninstall the App and see the Installation and its Project links removed.
+
+#### Linear (started by #116)
+
+- [ ] Connect: start the install from `/integrations/linear`, approve the Linear consent screen and
+      land on `/integrations` with the Linear organization listed.
+- [ ] State round-trip on the cookie: start the install, then open the callback URL a second time
+      with a stale `state` and land on `/integrations?error=linear_state_mismatch`.
+- [ ] Link a Project: pick a Linear team in the Project settings, see the team states and labels
+      offered, save, reload, and see the link with its default state.
+- [ ] Mirror a Feedback: submit a Feedback on a linked Project and see the issue created in the
+      team, with the body, the page link, the screenshot and the diagnostics block, and only the
+      labels that still exist on the team.
+- [ ] Status app to Linear: move the Feedback to In progress, then Resolved, in the inbox and see
+      the Linear issue follow into a started, then a completed, workflow state.
+- [ ] Status Linear to app: move the issue to Done, then back to Todo, in Linear and see the
+      Feedback status follow (Resolved, then New).
+- [ ] Receive a webhook: confirm in Linear's webhook log that a delivery answers `200`, and that a
+      delivery with a tampered `linear-signature` answers `401`.
+- [ ] Disconnect: disconnect Linear from `/integrations` and see the Installation and its Project
+      links removed, and the token revoked at Linear.

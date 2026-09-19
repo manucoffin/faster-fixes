@@ -1,6 +1,6 @@
-import { decryptToken } from "@/server/linear/crypto";
-import { getLinearClient } from "@/server/linear/linear-client";
-import { resolveStateIdForFeedback } from "@/server/linear/resolve-team-state";
+import { decryptToken } from "@/app/_domains/integration/_services/linear/token-crypto";
+import { getLinearClient } from "@/app/_domains/integration/_services/linear/linear-client";
+import { getFeedbackStateId } from "@/app/_domains/integration/_services/linear/get-feedback-state-id";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
@@ -46,7 +46,7 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
     );
     const client = getLinearClient(accessToken);
 
-    const resolved = await resolveStateIdForFeedback({
+    const resolved = await getFeedbackStateId({
       client,
       link: issueLink.projectLinearLink,
       feedbackStatus: newStatus as FeedbackStatus,

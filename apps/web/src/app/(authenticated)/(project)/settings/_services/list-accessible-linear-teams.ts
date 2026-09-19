@@ -1,7 +1,7 @@
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
-import { decryptToken } from "@/server/linear/crypto";
-import { getLinearClient } from "@/server/linear/linear-client";
+import { decryptToken } from "@/app/_domains/integration/_services/linear/token-crypto";
+import { getLinearClient } from "@/app/_domains/integration/_services/linear/linear-client";
 import { prisma } from "@workspace/db";
 
 export async function listAccessibleLinearTeams(

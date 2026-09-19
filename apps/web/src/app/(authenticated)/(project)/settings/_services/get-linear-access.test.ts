@@ -4,8 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 const decryptToken = vi.fn((payload: string) => `plain:${payload}`);
 const getLinearClient = vi.fn((accessToken: string) => ({ accessToken }));
 
-vi.mock("@/server/linear/crypto", () => ({ decryptToken }));
-vi.mock("@/server/linear/linear-client", () => ({ getLinearClient }));
+vi.mock("@/app/_domains/integration/_services/linear/token-crypto", () => ({
+  decryptToken,
+}));
+vi.mock("@/app/_domains/integration/_services/linear/linear-client", () => ({
+  getLinearClient,
+}));
 
 const { getLinearAccess } = await import("./get-linear-access");
 
