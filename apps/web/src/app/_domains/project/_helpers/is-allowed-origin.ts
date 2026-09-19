@@ -1,4 +1,4 @@
-import { normalizeDomain } from "@/app/_domains/project/_helpers/normalize-domain";
+import { normalizeDomain } from "./normalize-domain";
 
 // Checked via URL.hostname — parsed, so "localhost.evil.com" does NOT match.
 const LOCALHOST_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -12,9 +12,9 @@ function isLocalhostOrigin(origin: string): boolean {
 }
 
 /**
- * Validates that the request origin's host matches the project's registered
- * domain, or any subdomain of it, after normalization (lowercased, www.
- * stripped). Protocol, port, and path are ignored, so https://acme.com,
+ * Tells whether the request origin is one of the Project's Allowed origins: its
+ * registered domain, or any subdomain of it, after normalization (lowercased,
+ * www. stripped). Protocol, port, and path are ignored, so https://acme.com,
  * http://www.acme.com, and https://staging.acme.com all match a project
  * domain of "acme.com".
  *
@@ -30,7 +30,7 @@ function isLocalhostOrigin(origin: string): boolean {
  * a localhost origin. The project identifier (X-API-Key header) is still
  * required to resolve the project.
  */
-export function validateOrigin(
+export function isAllowedOrigin(
   headers: Headers,
   projectDomain: string,
 ): boolean {

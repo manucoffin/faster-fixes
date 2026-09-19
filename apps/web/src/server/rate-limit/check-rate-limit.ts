@@ -54,9 +54,7 @@ export async function checkRateLimit(
   const windowStart = now - windowMs;
   const id = crypto.randomUUID();
 
-  const rows = await prisma.$queryRaw<
-    { count: number; lastRequest: bigint }[]
-  >`
+  const rows = await prisma.$queryRaw<{ count: number; lastRequest: bigint }[]>`
     INSERT INTO "rateLimit" ("id", "key", "count", "lastRequest")
     VALUES (${id}, ${key}, 1, ${BigInt(now)})
     ON CONFLICT ("key") DO UPDATE SET

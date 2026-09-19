@@ -1,4 +1,4 @@
-import { checkRateLimit } from "@/server/api/check-rate-limit";
+import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { DomainError } from "@/server/errors/domain-errors";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";

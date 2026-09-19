@@ -1,9 +1,9 @@
-import { checkRateLimit } from "@/server/api/check-rate-limit";
-import { resolveProject } from "@/server/api/resolve-project";
-import { validateOrigin } from "@/server/api/validate-origin";
-import { validateReviewer } from "@/server/api/validate-reviewer";
+import { isAllowedOrigin } from "@/app/_domains/project/_helpers/is-allowed-origin";
+import { findProjectByPublicId } from "@/app/_domains/project/_services/find-project-by-public-id";
+import { findReviewerByToken } from "@/app/_domains/project/_services/find-reviewer-by-token";
 import { checkResourceLimit } from "@/server/auth/subscription";
 import { inngest } from "@/server/inngest";
+import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { s3Client } from "@/server/storage";
 import { createAsset } from "@/server/storage/create-asset";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
@@ -57,20 +57,23 @@ export async function POST(req: NextRequest) {
     req.headers.get("content-type"),
   );
 
-  const project = await resolveProject(req.headers.get("x-api-key"));
+  const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
     console.warn("[feedback] unauthorized — invalid API key");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.domain)) {
+  if (!isAllowedOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
-  const reviewer = await validateReviewer(reviewerToken, project.id);
+  const reviewer = await findReviewerByToken(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");
@@ -258,19 +261,22 @@ export async function POST(req: NextRequest) {
 
 // GET /api/v1/feedback — fetch feedback for a page
 export async function GET(req: NextRequest) {
-  const project = await resolveProject(req.headers.get("x-api-key"));
+  const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.domain)) {
+  if (!isAllowedOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
-  const reviewer = await validateReviewer(reviewerToken, project.id);
+  const reviewer = await findReviewerByToken(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "read");

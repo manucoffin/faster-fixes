@@ -2,11 +2,12 @@ import { prisma } from "@workspace/db";
 import crypto from "crypto";
 
 /**
- * Validates that a reviewer token belongs to an active reviewer in the given project.
- * Tokens are stored as SHA-256 hashes. During migration, plaintext fallback is supported.
- * Returns the reviewer record or null if invalid/inactive.
+ * The active Reviewer the token belongs to in the given Project, or null when
+ * the token is absent, unknown or belongs to a deactivated Reviewer. Tokens are
+ * stored as SHA-256 hashes, with a plaintext fallback for tokens not yet
+ * migrated.
  */
-export async function validateReviewer(
+export async function findReviewerByToken(
   token: string | null,
   projectId: string,
 ) {
@@ -23,3 +24,7 @@ export async function validateReviewer(
     where: { token, projectId, isActive: true },
   });
 }
+
+export type FindReviewerByTokenOutput = Awaited<
+  ReturnType<typeof findReviewerByToken>
+>;

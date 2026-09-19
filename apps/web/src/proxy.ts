@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { corsHeaders } from "@/server/api/cors";
+import { corsHeaders } from "@/server/cors";
 import { isCloud } from "@/utils/environment/env";
 
 // Routes only available on the official cloud-hosted instance.
@@ -59,8 +59,7 @@ function isCloudOnlyRoute(pathname: string): boolean {
   // Exact match or prefix match for nested routes (e.g. /docs/getting-started)
   return CLOUD_ONLY_ROUTES.some(
     (route) =>
-      pathname === route ||
-      (route !== "/" && pathname.startsWith(`${route}/`)),
+      pathname === route || (route !== "/" && pathname.startsWith(`${route}/`)),
   );
 }
 

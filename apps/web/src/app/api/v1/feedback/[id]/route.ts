@@ -1,7 +1,7 @@
-import { checkRateLimit } from "@/server/api/check-rate-limit";
-import { resolveProject } from "@/server/api/resolve-project";
-import { validateOrigin } from "@/server/api/validate-origin";
-import { validateReviewer } from "@/server/api/validate-reviewer";
+import { isAllowedOrigin } from "@/app/_domains/project/_helpers/is-allowed-origin";
+import { findProjectByPublicId } from "@/app/_domains/project/_services/find-project-by-public-id";
+import { findReviewerByToken } from "@/app/_domains/project/_services/find-reviewer-by-token";
+import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { prisma } from "@workspace/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -16,19 +16,22 @@ const UpdateFeedbackSchema = z.object({
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
 
-  const project = await resolveProject(req.headers.get("x-api-key"));
+  const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.domain)) {
+  if (!isAllowedOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
-  const reviewer = await validateReviewer(reviewerToken, project.id);
+  const reviewer = await findReviewerByToken(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");
@@ -78,19 +81,22 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
 
-  const project = await resolveProject(req.headers.get("x-api-key"));
+  const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!validateOrigin(req.headers, project.domain)) {
+  if (!isAllowedOrigin(req.headers, project.domain)) {
     return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
   }
 
   const reviewerToken = req.headers.get("x-reviewer-token");
-  const reviewer = await validateReviewer(reviewerToken, project.id);
+  const reviewer = await findReviewerByToken(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");

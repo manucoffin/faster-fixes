@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_HEADERS = [
-  "X-API-Key",
-  "X-Reviewer-Token",
-  "Content-Type",
-].join(", ");
+const ALLOWED_HEADERS = ["X-API-Key", "X-Reviewer-Token", "Content-Type"].join(
+  ", ",
+);
 
 const ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS";
 

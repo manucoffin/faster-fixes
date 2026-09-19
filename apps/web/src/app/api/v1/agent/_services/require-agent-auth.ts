@@ -1,5 +1,5 @@
 import { AGENT_API_RATE_LIMITS } from "@/app/_domains/subscription";
-import { checkRateLimit } from "@/server/api/check-rate-limit";
+import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { isCloud } from "@/utils/environment/env";
 import { prisma } from "@workspace/db";

@@ -2,17 +2,16 @@ import { prisma } from "@workspace/db";
 import crypto from "crypto";
 
 /**
- * Resolves a Project from the identifier in the X-API-Key header.
+ * The Project the identifier in the X-API-Key header belongs to, with its
+ * widget config, or null when no Project matches.
  *
- * New installs send the public Project ID (`proj_...`), resolved directly by
+ * New installs send the Project public ID (`proj_...`), resolved directly by
  * publicId (indexed). Legacy installs send a `ff_...` API key, resolved by
  * SHA-256 hash; legacy resolutions are logged so the fallback — and the
  * apiKeyHash/apiKeyLastFour columns — can be retired once legacy usage reaches
  * zero. See docs/adr/0005-widget-identity-public-id-origin-auth.md.
- *
- * Returns the project with its widget config, or null if not found.
  */
-export async function resolveProject(token: string | null) {
+export async function findProjectByPublicId(token: string | null) {
   if (!token) return null;
 
   if (token.startsWith("proj_")) {
@@ -30,8 +29,12 @@ export async function resolveProject(token: string | null) {
   });
   if (project) {
     console.warn(
-      `[resolve-project] legacy ff_ API key resolved for project ${project.id} — migrate to publicId`,
+      `[find-project-by-public-id] legacy ff_ API key resolved for project ${project.id} — migrate to publicId`,
     );
   }
   return project;
 }
+
+export type FindProjectByPublicIdOutput = Awaited<
+  ReturnType<typeof findProjectByPublicId>
+>;

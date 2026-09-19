@@ -6797,6 +6797,77 @@ routes included.
 files moved whole with `git mv`. Earlier entries in this log still name the old paths; they record
 what was true when they were written and are not rewritten.
 
+### Project resolution, Allowed origins and the Reviewer token move to the `project` domain (issue #133)
+
+The last three request helpers leave `src/server/api/`, and the folder is empty. The four widget API
+routes now read a Project, match an origin and check a Reviewer token through the `project` domain;
+the two files that stay in the server folder moved to a folder that says what they are.
+
+| Module                 | Landed at                                                 | Bucket, and why                                     |
+| ---------------------- | --------------------------------------------------------- | --------------------------------------------------- |
+| `resolve-project.ts`   | `_domains/project/_services/find-project-by-public-id.ts` | it queries the database, so it is IO                |
+| `validate-reviewer.ts` | `_domains/project/_services/find-reviewer-by-token.ts`    | same, one nullable lookup with a plaintext fallback |
+| `validate-origin.ts`   | `_domains/project/_helpers/is-allowed-origin.ts`          | a pure string match on headers, no IO               |
+| `check-rate-limit.ts`  | `src/server/rate-limit/check-rate-limit.ts`               | stays: condition 2, three transports depend on it   |
+| `cors.ts`              | `src/server/cors/index.ts`                                | stays: read by the proxy, which is not in a domain  |
+
+**Names decided by running the rules, not in advance.** All three carried a banned process verb
+(`resolve-`, `validate-`). The two reads are nullable lookups, so they are `find-`, and
+`require-trpc-output-type` then asks for the derived alias: the files export
+`FindProjectByPublicIdOutput` and `FindReviewerByTokenOutput`. The origin matcher is a pure
+predicate, so it is `is-` and lands in `_helpers/`, named after the glossary term it decides:
+**Allowed origins**. `find-project-by-public-id` is named after the identifier new installs send; the
+legacy `ff_` API key branch stays inside it, documented, and its `console.warn` prefix follows the
+new filename (`[find-project-by-public-id]`), the one observable line this ticket changes and the
+only one no client can see.
+
+**One inverted import closed.** `validate-origin.ts` imported
+`@/app/_domains/project/_helpers/normalize-domain` from the server folder. The matcher now sits in
+that same folder and imports its sibling relatively, so the server folder no longer reaches into the
+`project` domain for it. That is one fewer exemption for the lint lock (#139) to argue about.
+
+**The barrel exports nothing new.** `_domains/project/index.ts` is still the empty placeholder: no
+other domain needs these three, and the widget API routes import them by deep path, as every other
+route scope does. A barrel never exports a service.
+
+**Nothing is promoted beyond the domain, and nothing is merged.** `findProjectByPublicId` and
+`findReviewerByToken` are about the Project and its Reviewers, so they belong to `project` rather
+than to the route scope: they have four callers across three routes, which is the second consumer
+the parent spec asks for. `checkRateLimit` keeps its `check-` name and its six importers, and the
+CORS helper keeps `handlePreflight` and `withCors` exported although only `corsHeaders` has a caller
+today: retiring an export is not this ticket's scope and no route gains an `OPTIONS` export.
+
+**The unit test, seam 3, the only unit-level exception of step 5.**
+`_domains/project/_helpers/is-allowed-origin.test.ts`, fourteen cases: the registered domain, its
+`www.` form, a subdomain and a nested subdomain, scheme/port/path indifference, a registered domain
+that itself needs normalizing, localhost on any port, the referer fallback, and the near-misses that
+must fail — `localhost.evil.com`, `evil-acme.com`, `notacme.com`, `acme.com.evil.com`, an unrelated
+domain, no origin header at all, and an unparseable origin.
+
+**Anomaly recorded, not fixed.** `URL.hostname` keeps the brackets of an IPv6 literal, so the `"::1"`
+entry of the localhost set never matches and `http://[::1]:3000` is refused today. The test pins the
+behaviour as it stands rather than correcting it: this ticket relocates the matcher and changes no
+behaviour, and a developer testing the widget locally reaches it through `localhost` or `127.0.0.1`,
+both of which pass. Fixing it is a one-line change for whoever wants it.
+
+**The widget API characterization tests pass untouched.** The four route tests (#129, #130, #131)
+mock `@workspace/db`, not these modules, so not even a mock path changed, and the routes answer
+exactly as before on every path they pin. No `_deprecated_` stub was created: all five files moved
+whole with `git mv` and nothing was retired.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (64 files, 413 web tests, the 14 new ones included),
+`pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `pnpm --filter web build` compiles and
+lists every route, the 22 API routes included.
+
+**What is left for the lock (#140).** `src/server/api/` holds no file and git tracks nothing under
+it, so the "no request-helper folder remains under the server folder" check is satisfied. Like
+`jira/`, `linear/`, `oauth/` and `slack/`, emptied by the provider tickets, it survives as an empty
+directory on the working copy only, because git tracks no empty directory; the close-out (#143) lists
+them for the maintainer to remove. The four widget API routes still import the database client
+directly; #134 to #137 own that. ADR 0005 (widget identity) still names `resolveProject` and
+`validate-origin.ts`: it records a decision taken when those were the names, and the
+permanent-document alignment (#138) decides whether to repoint it.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
