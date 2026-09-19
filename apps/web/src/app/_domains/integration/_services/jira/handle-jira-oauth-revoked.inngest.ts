@@ -3,7 +3,7 @@ import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import {
   JiraReconnectRequired,
   type JiraReconnectRequiredProps,
-} from "@/lib/mailer/templates/jira-reconnect-required";
+} from "../../_components/jira/jira-reconnect-required";
 import { getAppUrl } from "@/utils/url/get-app-url";
 import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";

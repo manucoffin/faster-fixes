@@ -6320,6 +6320,48 @@ is the last Jira ticket.
 **Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so nothing past the
 session check runs. The Jira rows below are for the maintainer.
 
+### The Jira reconnect mail template moves next to the Jira code (issue #124)
+
+The last Jira ticket, and the one file `src/lib/` still held that knows a product rule.
+`lib/mailer/templates/jira-reconnect-required.tsx` moved to
+`_domains/integration/_components/jira/jira-reconnect-required.tsx`. The mail a Jira Installation
+sends when it enters the **Reconnect required** state is unchanged.
+
+**Bucket, decided by the placement rules.** The template is JSX, so `_helpers/` is closed to it
+(pure, no JSX) and `_services/` is for data and IO. `_components/` is what is left, and it fits its
+definition: pure UI bound to the scope, no schema, no server. It is the first `_components/` bucket
+in `_domains/integration/` and follows the domain's provider sub-structure, `jira/`, like the
+services and helpers buckets. The file name and the exported `JiraReconnectRequired` are unchanged;
+no verb rule reaches a component.
+
+**Two import paths edited, nothing else.** The template reads the email Tailwind config by
+`@/lib/mailer/templates/tailwind.config` instead of `./tailwind.config`: that config is shared by
+the five remaining templates and is the generic plumbing the mailer folder keeps.
+`handle-jira-oauth-revoked.inngest.ts` reaches the template with the intra-domain relative path
+`../../_components/jira/jira-reconnect-required`, the convention #120 set. The subject
+(`Action required: reconnect Jira`), the recipients query, the `reconnectNotifiedAt` guard and the
+`render`/`createElement` call all stayed in the durable function.
+
+**The rendered mail is proven unchanged, not assumed.** The component was rendered with
+`@react-email/components` before and after the move with the same props
+(`organizationName`, `siteName`, `integrationsLink`): 3550 bytes of HTML, md5
+`d7bdedce8313ed7bd84f61046087e0ea`, identical. The scratch script lives outside the repo; no test was
+added, per the step 5 testing decisions.
+
+**Anomaly 5 of step 2 is closed.** That entry called this template "the one domain-bound file in
+`src/lib/`". `lib/mailer/` now holds the client, the constants, the provider factory, the two
+provider adapters, the shared types and five templates, none of which knows an Integration.
+
+**No file retired, no stub.** A `git mv` with two import edits; nothing dissolved.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (60 files, 370 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists all 67 routes, `/api/inngest` included, and `GET /api/inngest`
+against `next dev` on port 3131 answers `200` with `"function_count":17`.
+
+**Not smoked here, and why.** The sandbox has no Postgres, no Atlassian site and no mail provider, so
+the mail is never sent. The Jira row below is for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6388,7 +6430,7 @@ agent API. Only the systems a landed ticket has touched appear below.
       Installation removed on the next `linear/oauth.revoked` delivery, with the durable function
       run listed as succeeded (row added by #117).
 
-#### Jira (started by #120, rows added by #121 and #123)
+#### Jira (started by #120, rows added by #121, #123 and #124)
 
 - [ ] Connect: start the install from `/integrations/jira`, approve the Atlassian consent screen and
       land on `/integrations` with the Jira site listed as connected.
@@ -6430,5 +6472,8 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Revoked at Atlassian, by event: after a `jira/oauth.revoked` delivery, see the durable function
       run listed as succeeded, the Installation flipped to Reconnect required and exactly one
       reconnect mail sent even when several syncs report the same revocation (row added by #121).
+- [ ] Read the reconnect mail: open the delivered message and see the subject "Action required:
+      reconnect Jira", the Organization name and the Jira site name in the body, and the Reconnect
+      Jira button opening `/integrations` (row added by #124).
 - [ ] Disconnect: disconnect Jira from `/integrations` and see the Installation and its Project links
       removed, and the webhook registration gone from the Jira site.

@@ -11,7 +11,7 @@ import {
   Text,
 } from "@react-email/components";
 
-import { emailTailwindConfig } from "./tailwind.config";
+import { emailTailwindConfig } from "@/lib/mailer/templates/tailwind.config";
 
 export interface JiraReconnectRequiredProps {
   organizationName?: string;
