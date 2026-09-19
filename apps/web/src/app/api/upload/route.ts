@@ -2,8 +2,8 @@ import { auth } from "@/server/auth";
 import { s3Client } from "@/server/storage";
 import { RejectUpload, route, type Router } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
-import { prisma } from "@workspace/db";
 import { z } from "zod";
+import { findUploadingMember } from "./_services/find-uploading-member";
 
 const router: Router = {
   client: s3Client,
@@ -24,15 +24,12 @@ const router: Router = {
           throw new RejectUpload("Unauthorized");
         }
 
-        const membership = await prisma.member.findFirst({
-          where: {
-            organizationId: clientMetadata.organizationId,
-            userId: session.user.id,
-            role: { in: ["owner", "admin"] },
-          },
+        const uploadingMember = await findUploadingMember({
+          organizationId: clientMetadata.organizationId,
+          userId: session.user.id,
         });
 
-        if (!membership) {
+        if (!uploadingMember) {
           throw new RejectUpload(
             "You do not have permission to modify this organization.",
           );
