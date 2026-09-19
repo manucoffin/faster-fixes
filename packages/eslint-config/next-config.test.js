@@ -191,15 +191,102 @@ describe("services-no-bare-error", () => {
     ).toBe(2);
   });
 
-  // `src/server/**` keeps its 28 infrastructure `throw new Error(` sites until
-  // step 5 relocates those files into a domain.
+  // Step 5 relocated every domain-bound file into a `_services` bucket, where
+  // the rule reaches it. What is left in the server folder is infrastructure,
+  // and its bare `throw new Error(` sites stay as they are (ADR 0012).
   it("does not reach the server folder", async () => {
     const severityFor = await severityResolver("local/services-no-bare-error");
 
     expect(
-      await severityFor("src/server/auth/email-and-password.tsx"),
+      await severityFor("src/server/auth/config/email-and-password.tsx"),
     ).toBeUndefined();
-    expect(await severityFor("src/server/jira/client.ts")).toBeUndefined();
+    expect(
+      await severityFor("src/server/storage/create-asset.ts"),
+    ).toBeUndefined();
+  });
+});
+
+describe("the server folder import lock", () => {
+  const DEEP = "@/app/_domains/integration/_services/jira/jira-errors";
+  const BARREL = "@/app/_domains/subscription";
+
+  async function restrictedImportsFor(file, specifier, config = nextJsConfig) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: config,
+    });
+    const [result] = await eslint.lintText(
+      `import x from "${specifier}";\nexport default x;\n`,
+      { filePath: file },
+    );
+
+    return result.messages.filter(
+      (message) => message.ruleId === "no-restricted-imports",
+    );
+  }
+
+  it("is declared once, for the server folder, with its exemptions named", () => {
+    const entry = onlyEntryFor("no-restricted-imports");
+
+    expect(entry.files).toEqual(["**/src/server/**/*.{ts,tsx}"]);
+    expect(entry.ignores).toEqual([
+      "**/src/server/trpc/routers/_app.ts",
+      "**/src/server/auth/config/database-hooks.ts",
+      "**/src/server/trpc/domain-error-mapping.test.ts",
+    ]);
+    expect(entry.rules["no-restricted-imports"][0]).toBe("error");
+  });
+
+  it("rejects a deep import into the app tree with the agent gate off", async () => {
+    vi.resetModules();
+    process.env.ESLINT_AGENT_RULES = "0";
+    const { nextJsConfig: ungated } = await import("./next.js");
+    process.env.ESLINT_AGENT_RULES = "1";
+    vi.resetModules();
+
+    const messages = await restrictedImportsFor(
+      "src/server/trpc/context.ts",
+      DEEP,
+      ungated,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("Import a domain through its barrel");
+  });
+
+  it("allows a domain barrel but not a route group deep path", async () => {
+    expect(
+      await restrictedImportsFor("src/server/trpc/context.ts", BARREL),
+    ).toEqual([]);
+    expect(
+      await restrictedImportsFor(
+        "src/server/trpc/context.ts",
+        "@/app/(public)/trpc-router",
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("lets the three exempted files reach the app tree by deep path", async () => {
+    for (const file of [
+      "src/server/trpc/routers/_app.ts",
+      "src/server/auth/config/database-hooks.ts",
+      "src/server/trpc/domain-error-mapping.test.ts",
+    ]) {
+      expect([file, await restrictedImportsFor(file, DEEP)]).toEqual([
+        file,
+        [],
+      ]);
+    }
+  });
+
+  it("leaves the app tree itself alone", async () => {
+    expect(
+      await restrictedImportsFor(
+        "src/app/(authenticated)/trpc-router.ts",
+        DEEP,
+      ),
+    ).toEqual([]);
   });
 });
 

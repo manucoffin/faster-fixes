@@ -41,6 +41,42 @@ const useClientSuffixOptions = {
   ],
 };
 
+// The server folder holds wiring and cross-cutting abstractions only, so it
+// never reaches into the app tree by deep path. A domain is imported through
+// its barrel; everything else below is a reviewed exception, named file by
+// file so it cannot grow into a pattern.
+const serverDeepImportExemptions = [
+  // Composition: the root router mounts the domain and route-group routers,
+  // which a barrel never exports.
+  "**/src/server/trpc/routers/_app.ts",
+  // Composition: the Better Auth database hooks call the Organization slug
+  // service on sign-up.
+  "**/src/server/auth/config/database-hooks.ts",
+  // Fixture, not production coupling: the mapping test names a real
+  // second-level domain error so the assertion holds for a shipped subclass.
+  "**/src/server/trpc/domain-error-mapping.test.ts",
+];
+
+const serverDeepImportMessage =
+  "The server folder holds wiring and cross-cutting abstractions only. Import a domain through its barrel (`@/app/_domains/<domain>`) rather than reaching into the app tree.";
+
+// Two groups rather than one: these globs follow gitignore semantics, where a
+// negation cannot re-include a path whose parent the group already excluded.
+// So the domains are carved out of the first group and their insides are
+// forbidden by the second.
+const serverDeepImportPatterns = [
+  {
+    group: ["@/app/*/**", "!@/app/_domains/**"],
+    message: serverDeepImportMessage,
+  },
+  {
+    // `@/app/_domains/<domain>` is the barrel and stays allowed; anything below
+    // it does not.
+    group: ["@/app/_domains/*/**"],
+    message: serverDeepImportMessage,
+  },
+];
+
 /**
  * A custom ESLint configuration for libraries that use Next.js.
  *
@@ -106,8 +142,7 @@ export const nextJsConfig = [
   {
     // Step 4 takes this one out of the agent gate: a service throwing a bare
     // `Error` is now rejected by plain `pnpm lint`, so the pre-commit hook
-    // catches it. `src/server/**` joins the sweep in step 5, when those files
-    // move into a domain.
+    // catches it.
     files: ["**/_services/**/*.{ts,tsx}"],
     rules: {
       "local/services-no-bare-error": "error",
@@ -119,6 +154,19 @@ export const nextJsConfig = [
     files: ["**/src/app/_domains/**/*.{ts,tsx}"],
     rules: {
       "local/no-cross-domain-deep-import": "error",
+    },
+  },
+  {
+    // The server folder rule of the architecture document, enforced: a deep
+    // import from here into the app tree fails plain `pnpm lint`, and so the
+    // pre-commit hook.
+    files: ["**/src/server/**/*.{ts,tsx}"],
+    ignores: serverDeepImportExemptions,
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: serverDeepImportPatterns },
+      ],
     },
   },
   // --- Agent rules (enabled via ESLINT_AGENT_RULES=1) ---
