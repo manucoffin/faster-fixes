@@ -5,6 +5,12 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { Context } from "./context";
 
+// The one sentence a User reads for a failure nobody planned for. Every
+// expected failure travels as a `DomainError` and is remapped below, off
+// `INTERNAL_SERVER_ERROR`, so masking that code can no longer swallow copy a
+// User needs to act on.
+const UNEXPECTED_FAILURE_MESSAGE = "Something went wrong. Please try again.";
+
 // Initialize tRPC
 const t = initTRPC.context<Context>().create({
   transformer: superjson, // allows for more complex data types (like Dates) to be serialized/deserialized properly between client and server.
@@ -12,6 +18,14 @@ const t = initTRPC.context<Context>().create({
     const { shape, error } = opts;
     return {
       ...shape,
+      // ADR 0012: an internal message (a Prisma failure, a provider's wording,
+      // a missing secret) must never reach a client. `logTRPCError` has
+      // already written the original with its `cause` chain, so nothing is
+      // lost server-side.
+      message:
+        error.code === "INTERNAL_SERVER_ERROR"
+          ? UNEXPECTED_FAILURE_MESSAGE
+          : shape.message,
       data: {
         ...shape.data,
         zodError:

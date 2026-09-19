@@ -1381,6 +1381,82 @@ under issue #88.
 hook above is what keeps that safe, and its second smoke case is the one to re-walk after masking:
 the toast becomes the generic sentence, the logged cause must not.
 
+### Every unexpected failure answers with one sentence (issue #98)
+
+Decision 13, second half, and the last link of the chain. The tRPC `errorFormatter` replaces the
+message of any `INTERNAL_SERVER_ERROR` with `Something went wrong. Please try again.` Everything
+else in the shape is untouched: the code, the HTTP status, `zodError`, and the message of every
+other code.
+
+**Why this could only land last.** Masking is safe exactly when no legitimate message still travels
+as a 500. #86 to #95 moved every one of them: the Jira errors (#90), the Better Auth translations
+(#92, #94), the Organization limit and stop-impersonation rules (#93), the reset email failure
+(#95). Had masking landed first, each of those would have read "Something went wrong" until its own
+ticket shipped.
+
+**The inventory re-read, as the ticket required.** `grep -rn "throw new Error(" apps/web/src/server`
+returns 27 sites today against 28 at `c1b47bd`: `email-and-password.tsx` became a `DomainError`
+(#95), the `Jira token refresh failed` throw became the status-carrying error of #89, and
+`log-trpc-error.test.ts` added one (a test fixture, as `domain-error-mapping.test.ts` already had).
+All 25 production sites were re-read one by one and all 25 are still infrastructure: 6 unset
+environment variables (`STRIPE_WEBHOOK_SIGNING_SECRET`, the Jira, Linear and Slack client
+credentials, the Linear webhook signing secret), 3 unresolvable callback or webhook URLs, 14
+provider calls that failed (`Jira token exchange failed (<status>)`,
+`Slack chat.postMessage failed: <error>`, `Linear createIssue did not return an issue.`), one
+programming error (`Use checkOrganizationLimit for organizations`) and one unreachable default
+branch (`Unsupported storage provider`). No new user-copy site was found, so nothing was converted
+in this ticket and decision 2 stands as written.
+
+**What a User sees change.** The Slack and Linear settings queries let their provider's wording
+bubble (`list-slack-channels` returns `listPublicChannels` directly, the three Linear pickers call
+their client the same way), so a refused token used to reach the channel picker as
+`Slack conversations.list failed: invalid_auth` and now reads the generic sentence. That is the
+intent: those strings name an API method, not something a User can act on, and the operator keeps
+the original in the server output through #97's hook. The failures worth reading kept their copy,
+because they are `DomainError`s and never carried the masked code.
+
+**What is not masked.** `shape.data.stack`, which tRPC adds itself when `config.isDev` is true, so it
+is absent from a production build and left alone in development where it is the point. The
+`errorFormatter` masks a message, not a shape: the client still branches on `error.data.code`, as
+`login-form` does since #92.
+
+**Tests.** `domain-error-mapping.test.ts` gained two cases and two throwing procedures, next to the
+two that already covered `zodError` and a mapped `DomainError`, so the four claims of the ticket sit
+in one file and are asserted through the fetch adapter rather than a server-side caller (the
+formatter never runs in a caller). A bare `Error` carrying a connection string comes back as a 500
+whose message is the generic sentence and whose code is still `INTERNAL_SERVER_ERROR`; a
+`JiraReauthRequiredError` comes back as a 412 with its own copy. The masking case fails without the
+change, with the raw message in the diff.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                        |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| Masking copy                               | `Something went wrong. Please try again.`, asserted literally |
+| Bare `Error` under `src/server`            | 27 sites, 25 production, all still infrastructure             |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (201 web tests, zero warnings)                           |
+| `pnpm lint:agent-rules`                    | 0 errors, 10 `no-raw-tailwind-colors` warnings (#105)         |
+| `pnpm --filter web build`                  | every route listed                                            |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real database, `pnpm dev`, server output in view):
+
+- [ ] An expected failure keeps its copy: open a Project of another Organization, the screen still
+      reads the precise message and no toast says "Something went wrong".
+- [ ] A validation failure keeps its field errors: submit a form with an invalid field, the error
+      still renders inline under the field and not as a toast.
+- [ ] A forced 500 is masked: stop Postgres, then load the inbox. The screen and any toast read
+      `Something went wrong. Please try again.`, and the server output still carries the Prisma
+      error as the cause of the logged `INTERNAL_SERVER_ERROR` line.
+- [ ] A Jira screen with a disconnected Installation still reads its own copy, not the generic
+      sentence.
+
+**The chain is closed.** Steps 1 to 6 of the order are done. What remains of step 4 is independent
+of it: the boundary files (#99 to #101), the `matchQueryStatus` sweep (#102, #103), the colour fixes
+(#105), then the documentation (#106) and the final lock (#107).
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

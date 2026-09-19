@@ -30,6 +30,12 @@ const testRouter = router({
   missing: publicProcedure.query(() => {
     throw new NotFoundError("Project not found");
   }),
+  unexpected: publicProcedure.query(() => {
+    throw new Error("Prisma connection refused at postgres://user:hunter2@db");
+  }),
+  jira: publicProcedure.query(() => {
+    throw new JiraReauthRequiredError("jira_installation_1");
+  }),
 });
 
 const caller = createCallerFactory(testRouter)({} as Context);
@@ -143,5 +149,26 @@ describe("the error formatter next to the mapping middleware", () => {
     expect(status).toBe(404);
     expect(body.error.json.message).toBe("Project not found");
     expect(body.error.json.data.zodError).toBeNull();
+  });
+
+  it("masks the message of an unexpected failure", async () => {
+    const { status, body } = await fetchProcedure("unexpected");
+
+    expect(status).toBe(500);
+    expect(body.error.json.data.code).toBe("INTERNAL_SERVER_ERROR");
+    expect(body.error.json.message).toBe(
+      "Something went wrong. Please try again.",
+    );
+  });
+
+  // A precondition failure is the case masking would hurt most: the five Jira
+  // screens answer with it, and their copy is the whole point of decision 5.
+  it("leaves the copy of a second-level subclass untouched", async () => {
+    const { status, body } = await fetchProcedure("jira");
+
+    expect(status).toBe(412);
+    expect(body.error.json.message).toBe(
+      "The Jira connection needs to be re-authorized.",
+    );
   });
 });
