@@ -1663,6 +1663,76 @@ under issue #88.
 - [ ] `/admin/users/<id>` with the organizations query forced to fail (offline tab): the message is
       red rather than plain text; same for the email block's `Failed to retrieve email`.
 
+### Page not found, access denied and sign in required (issue #101)
+
+Decision 14, last third, and the close of the boundary track. `not-found.tsx`, `forbidden.tsx` and
+`unauthorized.tsx` sit at the app root beside the three error boundaries, all six render one
+`ErrorScreen`, and the six-file check of the final lock passes.
+
+**The three screens.** Each is a Server Component with no props, as Next 16.3.5 requires for these
+conventions, and each reads its copy from `_constants/error-screens.ts`:
+`NOT_FOUND_BOUNDARY_COPY` (`Page not found` / `The page you are looking for does not exist or has
+been moved.`), `FORBIDDEN_BOUNDARY_COPY` (`Access denied` / `You do not have permission to view this
+page.`) and `UNAUTHORIZED_BOUNDARY_COPY` (`Sign in required` / `Sign in to access this page.`, plus
+its `Sign in` label). The constants module is unchanged otherwise, so the six boundaries share one
+home for every word a user reads about a failure.
+
+**Only the unauthorized screen carries an action.** A `Button asChild` wrapping a `next/link` to
+`loginUrl` from `_constants/routes.ts`, the pattern the signup page already uses, so a signed-out
+visitor has one click to the recovery path. The table of decision 14 gives an action to `error.tsx`
+(`Try again`) and to `unauthorized.tsx` only; not found and access denied stay copy-only rather than
+inventing a "Return home" link the decision did not ask for.
+
+**No `<main>` landmark in these three, unlike the error boundaries.** An error boundary replaces
+every nested layout below it, so root `error.tsx` has to carry the landmark itself. These three
+render _inside_ the nearest layout instead, and two layouts already own a `<main>` (`admin` and
+`(authenticated)`), and `notFound()` is called from `admin/users/[id]` today, so a `<main>` here would
+nest inside theirs. They return the `ErrorScreen` directly, which is already a full-width flex
+column. The one case left without a landmark is an unmatched URL under the root layout, which the
+framework default did not provide either.
+
+**`unauthorized.tsx` replaced, not extended.** The old file was the Next example markup (`401 -
+Unauthorized` / `You are not authorized to access this page.`), the last framework-flavoured copy in
+the app. `forbidden()` and `unauthorized()` are still never called (`authInterrupts` has been on
+since before step 4); these two files are the destinations step 5 needs before it can start calling
+them.
+
+**Checks at this commit.**
+
+| Check                                                       | Result                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Missing boundaries (`ls` of the six files)                  | six files listed                                                                |
+| Raw messages in boundaries (`grep "error.message\|digest"`) | three hits, all the `digest` comment in the three error boundaries; no render   |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint`                  | pass (201 web tests, zero warnings)                                             |
+| `pnpm lint:agent-rules`                                     | **0 problems**, unchanged since #105                                            |
+| `pnpm --filter web build`                                   | every route listed, `/_not-found` prerendered                                   |
+| Copy in the build output                                    | the three titles and bodies and the `/login` href are in `_not-found.html/.rsc` |
+
+The two boundary checks of the final lock therefore both pass now: #100 had already landed the
+global boundary, so the six-file list was complete the moment these three files existed. The build
+was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded under
+issue #88.
+
+**Tests.** None, for the reason recorded under #99: the vitest harness is `environment: node` with
+no testing-library, so these are verified by the build output above and by the smoke checklist. The
+copy constants are not worth a test of their own.
+
+**Smoke checklist for the maintainer** (each screen in light and dark mode):
+
+- [ ] An unknown URL while signed out (`/does-not-exist`): `Page not found` with the product's
+      fonts and colours, not the framework default, and the response is a 404.
+- [ ] The same URL while signed in: same screen; the public layout, not the dashboard shell.
+- [ ] An unknown URL under the dashboard (`/inbox/does-not-exist`) and under admin
+      (`/admin/users/<unknown-id>`): the screen renders inside the shell, the sidebar and the header
+      are still there, and there is exactly one `<main>` in the document.
+- [ ] Temporarily call `unauthorized()` from a page: `Sign in required`, and the `Sign in` button
+      lands on `/login`.
+- [ ] Temporarily call `forbidden()` from a page: `Access denied`, no action button.
+- [ ] Keyboard only: on the unauthorized screen the `Sign in` button takes focus and shows its focus
+      ring in both themes.
+- [ ] No regression on the error boundaries of #99 and #100: throwing from a dashboard page still
+      shows `Something went wrong` with a working `Try again`.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:
