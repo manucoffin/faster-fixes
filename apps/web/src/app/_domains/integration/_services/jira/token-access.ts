@@ -1,7 +1,7 @@
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { decryptToken, encryptToken } from "./crypto";
-import { JiraNotConnectedError, JiraReauthRequiredError } from "./errors";
+import { decryptToken, encryptToken } from "./token-crypto";
+import { JiraNotConnectedError, JiraReauthRequiredError } from "./jira-errors";
 import { refreshAccessToken } from "./jira-client";
 import { JiraRequestError } from "./jira-rest-client";
 

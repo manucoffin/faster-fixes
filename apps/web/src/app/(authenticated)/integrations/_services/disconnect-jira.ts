@@ -1,6 +1,6 @@
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
-import { deregisterProjectJiraWebhook } from "@/server/jira/webhook-registration";
+import { deregisterProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
 
 export async function disconnectJira(

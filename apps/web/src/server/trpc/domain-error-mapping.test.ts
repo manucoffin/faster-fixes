@@ -6,7 +6,7 @@ import {
   NotFoundError,
   PreconditionFailedError,
 } from "@/server/errors/domain-errors";
-import { JiraReauthRequiredError } from "@/server/jira/errors";
+import { JiraReauthRequiredError } from "@/app/_domains/integration/_services/jira/jira-errors";
 import { TRPCError } from "@trpc/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { describe, expect, it } from "vitest";

@@ -1,10 +1,10 @@
 import {
   JiraNotConnectedError,
   JiraReauthRequiredError,
-} from "@/server/jira/errors";
-import { isJiraUnauthorizedError } from "@/server/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
-import { refreshProjectJiraWebhook } from "@/server/jira/webhook-registration";
+} from "@/app/_domains/integration/_services/jira/jira-errors";
+import { isJiraUnauthorizedError } from "@/app/_domains/integration/_services/jira/jira-rest-client";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
+import { refreshProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";
 

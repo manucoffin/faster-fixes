@@ -1,6 +1,7 @@
 // Atlassian OAuth 2.0 (3LO) endpoints. Authorization and token exchange happen on
 // auth.atlassian.com; every resource call (including accessible-resources) goes
 // through the api.atlassian.com gateway. See ADR 0008.
+import { IntegrationConfigurationError } from "../integration-configuration-error";
 import { JiraRequestError } from "./jira-rest-client";
 
 export const JIRA_OAUTH_AUTHORIZE_URL = "https://auth.atlassian.com/authorize";
@@ -37,7 +38,9 @@ function getClientCredentials(): { clientId: string; clientSecret: string } {
   const clientId = process.env.JIRA_CLIENT_ID;
   const clientSecret = process.env.JIRA_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    throw new Error("JIRA_CLIENT_ID / JIRA_CLIENT_SECRET are not set.");
+    throw new IntegrationConfigurationError(
+      "JIRA_CLIENT_ID / JIRA_CLIENT_SECRET are not set.",
+    );
   }
   return { clientId, clientSecret };
 }
@@ -63,7 +66,7 @@ export async function exchangeOAuthCode(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Jira token exchange failed (${res.status}): ${text}`);
+    throw new JiraRequestError(res.status, text, "/oauth/token");
   }
 
   return (await res.json()) as JiraTokenResponse;
@@ -107,8 +110,10 @@ export async function getAccessibleResources(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Jira accessible-resources fetch failed (${res.status}): ${text}`,
+    throw new JiraRequestError(
+      res.status,
+      text,
+      "/oauth/token/accessible-resources",
     );
   }
 
@@ -120,7 +125,7 @@ export function getJiraOAuthRedirectUri(): string {
   if (explicit) return explicit;
   const base = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL;
   if (!base) {
-    throw new Error(
+    throw new IntegrationConfigurationError(
       "Cannot resolve Jira OAuth redirect URI: set JIRA_OAUTH_REDIRECT_URI or BETTER_AUTH_URL.",
     );
   }

@@ -41,9 +41,9 @@ const inngestSend = vi.fn();
 vi.mock("@workspace/db", () => ({ prisma: prismaDouble }));
 vi.mock("@/server/inngest", () => ({ inngest: { send: inngestSend } }));
 
-const { encryptToken } = await import("./crypto");
+const { encryptToken } = await import("./token-crypto");
 const { JiraNotConnectedError, JiraReauthRequiredError } =
-  await import("./errors");
+  await import("./jira-errors");
 const { getValidJiraAccessToken } = await import("./token-access");
 
 const ORGANIZATION_ID = "organization_1";

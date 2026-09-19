@@ -1,12 +1,12 @@
 import { auth } from "@/server/auth";
 import { inngest } from "@/server/inngest";
-import { encryptToken } from "@/server/jira/crypto";
+import { encryptToken } from "@/app/_domains/integration/_services/jira/token-crypto";
 import {
   exchangeOAuthCode,
   getAccessibleResources,
   getJiraOAuthRedirectUri,
-} from "@/server/jira/jira-client";
-import { JIRA_OAUTH_STATE_COOKIE } from "@/server/jira/oauth-state-cookie";
+} from "@/app/_domains/integration/_services/jira/jira-client";
+import { JIRA_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/jira/oauth-state-cookie";
 import {
   clearOAuthStateCookie,
   isValidOAuthState,

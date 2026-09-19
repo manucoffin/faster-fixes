@@ -2,12 +2,12 @@ import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable
 import {
   listJiraTransitions,
   transitionJiraIssue,
-} from "@/server/jira/jira-rest-client";
+} from "@/app/_domains/integration/_services/jira/jira-rest-client";
 import {
   CATEGORY_DONE,
   resolveJiraTransition,
-} from "@/server/jira/resolve-transition";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
+} from "@/app/_domains/integration/_helpers/jira/transition-mapping";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "./index";

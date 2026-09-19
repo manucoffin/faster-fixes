@@ -1,5 +1,5 @@
-import { listJiraIssueTypes } from "@/server/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
+import { listJiraIssueTypes } from "@/app/_domains/integration/_services/jira/jira-rest-client";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
 import { ListJiraIssueTypesForProjectInput } from "./list-jira-issue-types-for-project.schema";

@@ -3,8 +3,8 @@ import {
   JIRA_OAUTH_AUTHORIZE_URL,
   JIRA_OAUTH_SCOPES,
   getJiraOAuthRedirectUri,
-} from "@/server/jira/jira-client";
-import { JIRA_OAUTH_STATE_COOKIE } from "@/server/jira/oauth-state-cookie";
+} from "@/app/_domains/integration/_services/jira/jira-client";
+import { JIRA_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/jira/oauth-state-cookie";
 import {
   createOAuthState,
   setOAuthStateCookie,

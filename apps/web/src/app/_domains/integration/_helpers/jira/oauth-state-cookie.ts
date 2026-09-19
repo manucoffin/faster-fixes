@@ -1,4 +1,4 @@
-import type { OAuthStateCookie } from "@/app/_domains/integration/_services/oauth-state-cookie";
+import type { OAuthStateCookie } from "../../_services/oauth-state-cookie";
 
 // Shared between the Jira OAuth `/install` (sets) and `/callback` (reads,
 // deletes) routes. The two MUST agree, so the config lives in one place.

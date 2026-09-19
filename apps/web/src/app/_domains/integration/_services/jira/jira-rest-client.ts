@@ -3,8 +3,8 @@
 // installation's cloudId in the path (ADR 0008). Kept separate from jira-client.ts,
 // which only handles the auth.atlassian.com token dance.
 
-import { JiraIssueConfigurationError } from "./errors";
-import type { AdfDocument } from "./format-issue-adf";
+import { JiraIssueConfigurationError } from "./jira-errors";
+import type { AdfDocument } from "../../_helpers/jira/format-issue-adf";
 
 const JIRA_API_GATEWAY = "https://api.atlassian.com/ex/jira";
 
@@ -342,8 +342,13 @@ export async function registerJiraWebhook(
   // Jira reports per-webhook failures inside a 200 response rather than a 4xx,
   // so an unchecked result would silently leave the link without inbound sync.
   if (!result?.createdWebhookId) {
-    throw new Error(
+    // The call itself succeeded, so there is no failing HTTP status to carry:
+    // 200 is the status Jira actually answered with, and the refusal is in the
+    // body.
+    throw new JiraRequestError(
+      200,
       `Jira refused the webhook registration: ${result?.errors?.join(", ") ?? "no webhook id returned"}`,
+      "/rest/api/3/webhook",
     );
   }
 
@@ -374,8 +379,10 @@ export async function refreshJiraWebhook(
   const expiresAt = new Date(response.expirationDate);
 
   if (Number.isNaN(expiresAt.getTime())) {
-    throw new Error(
+    throw new JiraRequestError(
+      200,
       `Jira returned an unparseable webhook expiry: ${response.expirationDate}`,
+      "/rest/api/3/webhook/refresh",
     );
   }
 

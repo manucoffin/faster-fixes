@@ -1,11 +1,11 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
-import { JiraIssueConfigurationError } from "@/server/jira/errors";
+import { JiraIssueConfigurationError } from "@/app/_domains/integration/_services/jira/jira-errors";
 import {
   formatIssueAdf,
   formatJiraSummary,
-} from "@/server/jira/format-issue-adf";
-import { createJiraIssue as createIssue } from "@/server/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
+} from "@/app/_domains/integration/_helpers/jira/format-issue-adf";
+import { createJiraIssue as createIssue } from "@/app/_domains/integration/_services/jira/jira-rest-client";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";

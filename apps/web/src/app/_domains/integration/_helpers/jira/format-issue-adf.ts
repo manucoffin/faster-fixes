@@ -3,7 +3,7 @@
 // but ADF is a structured JSON tree — Jira's v3 API rejects Markdown — so the
 // two cannot share a renderer. Keep the section order in sync when either side changes.
 
-import { formatIssueTitle } from "@/app/_domains/integration/_helpers/github/format-issue-body";
+import { formatIssueTitle } from "../github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 
 type AdfMark =

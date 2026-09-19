@@ -6001,6 +6001,122 @@ included.
 **Not smoked here, and why.** The sandbox has no Postgres and no Linear workspace, so nothing past
 the session check runs. The Linear rows below are for the maintainer.
 
+### Jira moves into the `integration` domain, part 1 (issue #120)
+
+The third relocation ticket of step 5. The ten Jira modules leave the server folder for
+`_domains/integration/`, under `jira` subfolders of the services and helpers buckets, following the
+pattern the GitHub pilot (#113) fixed and Linear (#116) confirmed. Outside the seven bare errors that
+became named classes, every edit is an import path or a file name: no logic changed.
+
+**Files moved.** Ten modules with `git mv`, the colocated token access test included. No file
+dissolved, so this ticket leaves no `_deprecated_` stub.
+
+| Before                                | After                                                         |
+| ------------------------------------- | ------------------------------------------------------------- |
+| `server/jira/jira-client.ts`          | `_domains/integration/_services/jira/jira-client.ts`          |
+| `server/jira/jira-rest-client.ts`     | `_domains/integration/_services/jira/jira-rest-client.ts`     |
+| `server/jira/errors.ts`               | `_domains/integration/_services/jira/jira-errors.ts`          |
+| `server/jira/token-access.ts`         | `_domains/integration/_services/jira/token-access.ts`         |
+| `server/jira/token-access.test.ts`    | `_domains/integration/_services/jira/token-access.test.ts`    |
+| `server/jira/crypto.ts`               | `_domains/integration/_services/jira/token-crypto.ts`         |
+| `server/jira/webhook-registration.ts` | `_domains/integration/_services/jira/webhook-registration.ts` |
+| `server/jira/format-issue-adf.ts`     | `_domains/integration/_helpers/jira/format-issue-adf.ts`      |
+| `server/jira/resolve-transition.ts`   | `_domains/integration/_helpers/jira/transition-mapping.ts`    |
+| `server/jira/oauth-state-cookie.ts`   | `_domains/integration/_helpers/jira/oauth-state-cookie.ts`    |
+
+`src/server/jira/` holds no file. The empty directory is left on disk because the agent may not
+delete anything; git tracks nothing in it, so a fresh clone does not have it. It is on the maintainer
+list with `src/server/linear/` and `src/server/oauth/`.
+
+#### What this ticket decided, for Slack (#125) to copy
+
+**Bucket choice needed no judgement call.** The two clients, token access, the token cipher and
+webhook registration all do IO and are services; ADF formatting and transition mapping are pure and
+are helpers. The Jira OAuth state constant follows the Linear precedent and is a helper under the
+provider, importing the `OAuthStateCookie` type from the shared service at the services bucket root.
+
+**Two renames, both forced by the rules, neither touching an export.** `crypto.ts` and `errors.ts`
+have no dash in their basename, so they do not clear the `services-verb-prefix` shape check and could
+not land in a services bucket unrenamed: they became `token-crypto.ts` (the Linear name, so the two
+providers read alike) and `jira-errors.ts`. `jira-client.ts`, `jira-rest-client.ts`,
+`token-access.ts` and `webhook-registration.ts` all clear the shape check, and none of them opens
+with a read verb, so `require-trpc-output-type` does not ask them for an `<Service>Output` alias.
+They moved under their own names, which is what the pilot predicted for an SDK client module.
+
+**`resolve-transition.ts` became `transition-mapping.ts`, and its exports did not move.** The file
+lands in `_helpers/`, where neither naming rule reaches it, so the parent spec does not require the
+rename. It is done anyway to take the banned process verb `resolve-` out of a filename and to match
+the Linear counterpart `_helpers/linear/state-mapping.ts`. The exported `resolveJiraTransition` and
+`feedbackStatusFromJiraStatusCategory` keep their names: renaming them would churn the four Jira
+durable functions that #121 has yet to move, for no rule.
+
+**The three expected Jira error classes moved unchanged**, still extending `PreconditionFailedError`,
+still carrying their final user copy and their fields (ADR 0012, #90). `JiraRequestError` stays a
+plain `Error` in `jira-rest-client.ts`. The ADR 0012 line that named `src/server/jira/errors.ts` now
+names the new path; the rest of the ADR is #138's.
+
+**Seven bare errors became named classes, none of them a `DomainError`.** `services-no-bare-error` is
+always on for `**/_services/**`, so the five sites in the two clients and the one in webhook
+registration had to be converted the moment the files landed; no disable comment was used.
+
+| Site                                                  | Class                           |
+| ----------------------------------------------------- | ------------------------------- |
+| `jira-client`, client id or secret unset              | `IntegrationConfigurationError` |
+| `jira-client`, redirect URI cannot be derived         | `IntegrationConfigurationError` |
+| `jira-client`, token exchange refused                 | `JiraRequestError`              |
+| `jira-client`, accessible-resources fetch refused     | `JiraRequestError`              |
+| `jira-rest-client`, webhook registration refused      | `JiraRequestError`              |
+| `jira-rest-client`, unparseable webhook expiry        | `JiraRequestError`              |
+| `webhook-registration`, webhook URL cannot be derived | `IntegrationConfigurationError` |
+
+The shared `IntegrationConfigurationError` Linear created at the services bucket root is reused
+rather than a Jira-specific one, as the pilot specified. The two `jira-rest-client` sites pass status
+`200`: the HTTP call itself succeeded and Jira put the refusal in the body, and `200` is what it
+actually answered with.
+
+**Why converting those four sites to `JiraRequestError` changes no behaviour.** Three code paths
+branch on the class, and all three keep their answer. `isRefusedByAtlassian` in `token-access` only
+sees the refresh path, which already threw `JiraRequestError`. `isJiraUnauthorizedError` tests for
+status `401`, which none of the four new sites carries. The unknown-registration branch of
+`refreshProjectJiraWebhook` tests for `400` or `404`, so an unparseable expiry is still rethrown
+rather than re-registered. The two OAuth callback sites are caught with a bare `catch`, so the
+redirect query parameters are unchanged. What does change is the message text of the four sites,
+which is server-log-only: a transport masks it and a durable function logs it.
+
+**The GitHub formatter is now an intra-domain import.** `_helpers/jira/format-issue-adf.ts` reaches
+`formatIssueTitle` with `../github/format-issue-body` instead of the absolute app-tree path #113 left
+it with. One of the two temporary inverted imports the pilot created is gone.
+
+**Consumers rewritten.** Fourteen files, import paths only. Two route handlers (`api/jira/install`,
+`api/jira/callback`), seven already migrated route services (`integrations/_services/` for the site
+list, the site selection and the disconnect; `(project)/settings/_services/` for the link, the
+unlink, the project list and the issue-type list), the four Jira durable functions still in
+`server/inngest/`, and `server/trpc/domain-error-mapping.test.ts`. The locked scopes changed import
+lines and nothing else. The colocated `token-access.test.ts` changed the two dynamic `import()`
+paths its renamed siblings forced and passes otherwise untouched.
+
+**Inverted imports, after this ticket.** The Jira cookie constant no longer reads the app tree from
+the server folder: it is in the app tree. Four new ones appear in `server/inngest/` (the four Jira
+durable functions), and they disappear with their files in #121. One is worth flagging for the lint
+lock (#139): `server/trpc/domain-error-mapping.test.ts` imports `JiraReauthRequiredError` by deep
+path to assert the tRPC mapping. It is a test rather than composition, so #139 has to either exempt
+it by name or let the test reach the class another way.
+
+**Still owned by the following tickets.** The six Jira durable functions (#121), the webhook route
+and its `handle-` service (#122), the install and callback routes and their services (#123), the
+reconnect mail template (#124). The webhook route still owns deduplication and the event emission,
+and both OAuth routes still query Prisma inline.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (57 files, 335 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/jira/install`, `/api/jira/callback` and
+`/api/webhooks/jira/[token]` included. The registration route still lists seventeen durable
+functions. Prettier reformatted one call the server folder had left unformatted, in
+`webhook-registration.ts`.
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Atlassian site, so nothing past the
+session check runs. The Jira rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6068,3 +6184,37 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Revoke from Linear: revoke the application from the Linear workspace settings and see the
       Installation removed on the next `linear/oauth.revoked` delivery, with the durable function
       run listed as succeeded (row added by #117).
+
+#### Jira (started by #120)
+
+- [ ] Connect: start the install from `/integrations/jira`, approve the Atlassian consent screen and
+      land on `/integrations` with the Jira site listed as connected.
+- [ ] Multi-site grant: approve the consent screen for an account with several accessible sites, land
+      on `/integrations?jira=select_site`, pick a site and see it stored with the health state back to
+      connected.
+- [ ] State round-trip on the cookie: start the install, then open the callback URL a second time
+      with a stale `state` and land on `/integrations?error=jira_state_mismatch`.
+- [ ] Refuse at Atlassian: press Cancel on the consent screen and land on `/integrations` with a
+      `jira_oauth_*` error parameter.
+- [ ] Link a Project: pick a Jira project and issue type in the Project settings, save, reload, and
+      see the link, with a required field the app cannot fill blocking the pick rather than failing
+      later.
+- [ ] Register the webhook: confirm after linking that the Jira site lists a dynamic webhook pointing
+      at `/api/webhooks/jira/<token>`, with an expiry about 30 days out.
+- [ ] Mirror a Feedback: submit a Feedback on a linked Project and see the issue created with the
+      summary, the ADF body, the page link, the screenshot link and the diagnostics expand block.
+- [ ] Status app to Jira: move the Feedback to In progress, then Resolved, in the inbox and see the
+      Jira issue transition into an in-progress, then a done-category status, with a resolution the
+      transition screen offers.
+- [ ] Status Jira to app: move the issue to Done, then back to To Do, in Jira and see the Feedback
+      status follow (Resolved, then In progress).
+- [ ] Reconnect required: revoke the Faster Fixes grant from the Atlassian account settings, trigger
+      any Jira read, and see the Installation flip to Reconnect required with the reconnect mail sent
+      once and the Jira screens showing the copy rather than a 500.
+- [ ] Outage is not a refusal: with the grant healthy, confirm a transient Atlassian 5xx leaves the
+      Installation connected and the durable function retrying.
+- [ ] Refresh the registrations: run the weekly `jira/webhooks.refresh` function by hand and see each
+      link's expiry pushed back, and a link whose registration Jira no longer knows re-registered
+      rather than taking the others down.
+- [ ] Disconnect: disconnect Jira from `/integrations` and see the Installation and its Project links
+      removed, and the webhook registration gone from the Jira site.

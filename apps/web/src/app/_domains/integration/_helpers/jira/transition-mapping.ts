@@ -4,7 +4,7 @@
 // primitive every workflow shares (ADR 0008 / PRD #7).
 
 import type { FeedbackStatus } from "@/app/_domains/feedback";
-import type { JiraTransition } from "./jira-rest-client";
+import type { JiraTransition } from "../../_services/jira/jira-rest-client";
 
 const CATEGORY_TODO = "new";
 const CATEGORY_IN_PROGRESS = "indeterminate";

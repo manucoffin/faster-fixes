@@ -1,7 +1,7 @@
 import { BadRequestError } from "@/server/errors/domain-errors";
-import { findUnfulfillableRequiredFields } from "@/server/jira/jira-rest-client";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
-import { registerProjectJiraWebhook } from "@/server/jira/webhook-registration";
+import { findUnfulfillableRequiredFields } from "@/app/_domains/integration/_services/jira/jira-rest-client";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
+import { registerProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
 import { LinkJiraProjectInput } from "./link-jira-project.schema";

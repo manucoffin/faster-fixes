@@ -7,6 +7,7 @@ import {
   registerJiraWebhook,
 } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
+import { IntegrationConfigurationError } from "../integration-configuration-error";
 
 // Jira expires dynamic webhook registrations 30 days after creation and does not
 // report the expiry on the create response, so it is derived here. The refresh
@@ -29,7 +30,7 @@ export function getJiraWebhookUrl(webhookToken: string): string {
     process.env.BASE_URL;
 
   if (!base) {
-    throw new Error(
+    throw new IntegrationConfigurationError(
       "Cannot resolve the Jira webhook URL: set JIRA_WEBHOOK_BASE_URL or BETTER_AUTH_URL.",
     );
   }
@@ -74,7 +75,9 @@ export async function registerProjectJiraWebhook(
   if (!link) return;
 
   const { jiraInstallation: installation } = link;
-  const accessToken = await getValidJiraAccessToken(installation.organizationId);
+  const accessToken = await getValidJiraAccessToken(
+    installation.organizationId,
+  );
 
   // A re-link may point at a different Jira project, which would leave the old
   // JQL-scoped registration delivering issues we no longer mirror.

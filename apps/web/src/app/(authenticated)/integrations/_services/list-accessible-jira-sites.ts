@@ -1,7 +1,7 @@
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
-import { getAccessibleResources } from "@/server/jira/jira-client";
-import { getValidJiraAccessToken } from "@/server/jira/token-access";
+import { getAccessibleResources } from "@/app/_domains/integration/_services/jira/jira-client";
+import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
 
 // Backs the multi-site picker. Reads the live accessible-resources with the

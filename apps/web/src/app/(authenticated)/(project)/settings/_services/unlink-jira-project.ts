@@ -1,5 +1,5 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { deregisterProjectJiraWebhook } from "@/server/jira/webhook-registration";
+import { deregisterProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
 import { UnlinkJiraProjectInput } from "./unlink-jira-project.schema";
 
