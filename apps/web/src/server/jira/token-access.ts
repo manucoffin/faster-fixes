@@ -1,30 +1,13 @@
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
 import { decryptToken, encryptToken } from "./crypto";
+import { JiraNotConnectedError, JiraReauthRequiredError } from "./errors";
 import { refreshAccessToken } from "./jira-client";
 import { JiraRequestError } from "./jira-rest-client";
 
 // Refresh slightly before the real expiry so a token isn't handed out moments
 // before it dies mid-request.
 const EXPIRY_SKEW_MS = 60_000;
-
-export class JiraNotConnectedError extends Error {
-  constructor() {
-    super("No Jira installation for this organization.");
-    this.name = "JiraNotConnectedError";
-  }
-}
-
-// Thrown when Atlassian refuses the grant itself (revoked user access). The
-// installation is flipped to `reconnect_required` so the UI can prompt a
-// re-authorization instead of failing silently (ADR 0008). An outage is never
-// this error: see `isRefusedByAtlassian`.
-export class JiraReauthRequiredError extends Error {
-  constructor(readonly installationId: string) {
-    super("Jira installation requires re-authorization.");
-    this.name = "JiraReauthRequiredError";
-  }
-}
 
 type LockedRow = {
   id: string;

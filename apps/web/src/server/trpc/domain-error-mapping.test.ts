@@ -6,6 +6,7 @@ import {
   NotFoundError,
   PreconditionFailedError,
 } from "@/server/errors/domain-errors";
+import { JiraReauthRequiredError } from "@/server/jira/errors";
 import { TRPCError } from "@trpc/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { describe, expect, it } from "vitest";
@@ -69,6 +70,21 @@ describe("domain error mapping on the base procedure", () => {
       expect(error.cause).toBe(domainError);
     },
   );
+
+  // A second-level subclass is what lets the five Jira screens answer with copy
+  // instead of a 500, and it must map on the code it inherits, not on its own
+  // name.
+  it("surfaces a second-level subclass on the code it inherits", async () => {
+    const jiraError = new JiraReauthRequiredError("jira_installation_1");
+
+    const error = await catchProcedureError(jiraError);
+
+    expect(error.code).toBe("PRECONDITION_FAILED");
+    expect(error.message).toBe(
+      "The Jira connection needs to be re-authorized.",
+    );
+    expect(error.cause).toBe(jiraError);
+  });
 
   it("leaves a bare error as an internal server error", async () => {
     const bare = new Error("Prisma connection refused");

@@ -1,11 +1,9 @@
+import { JiraIssueConfigurationError } from "@/server/jira/errors";
 import {
   formatIssueAdf,
   formatJiraSummary,
 } from "@/server/jira/format-issue-adf";
-import {
-  createJiraIssue as createIssue,
-  JiraIssueConfigurationError,
-} from "@/server/jira/jira-rest-client";
+import { createJiraIssue as createIssue } from "@/server/jira/jira-rest-client";
 import { getValidJiraAccessToken } from "@/server/jira/token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";

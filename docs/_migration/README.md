@@ -762,6 +762,76 @@ recorded under issue #88.
 - [ ] Reconnect the Installation: `healthState` returns to `connected` and `reconnectNotifiedAt` is
       cleared, so a later revocation can notify again.
 
+### The expected Jira errors join the vocabulary (issue #90)
+
+Decision 5. `JiraNotConnectedError`, `JiraReauthRequiredError` and `JiraIssueConfigurationError` now
+extend `PreconditionFailedError`, so the five tRPC-reachable services that read the Jira access token
+answer `PRECONDITION_FAILED` with copy instead of a 500, with no per-service `catch` added anywhere.
+`JiraRequestError` and `EmailError` are infrastructure and stay plain `Error`.
+
+**Where they live.** The three classes moved into a new `server/jira/errors.ts`, which imports the
+vocabulary and nothing else. They were split between `token-access.ts` (database client, token
+cipher, Inngest client at module load) and `jira-rest-client.ts`, so naming one in a test meant
+stubbing three env vars and mocking two modules. The transport test needs to name a real
+second-level subclass rather than a local lookalike, which is what forced the move. The four
+importers (`token-access.ts`, `jira-rest-client.ts`, the two Inngest functions) and
+`token-access.test.ts` were repointed; no name and no field changed, so every `instanceof` check
+behaves as before. The "expected Jira errors outside the vocabulary" check still greps
+`server/jira/*.ts` and now sees three `PreconditionFailedError` and one `Error`.
+
+**The messages became user copy.** `JiraNotConnectedError` reads
+`Jira is not connected. Connect a Jira site first.` and `JiraReauthRequiredError` reads
+`The Jira connection needs to be re-authorized.`, word for word the two sentences the
+`get-jira-access` pre-check already throws for the same two facts, so a screen reads identically
+whichever of the two fires. `JiraIssueConfigurationError` carried the raw Jira response body in its
+message; the body stays on its `detail` field and the message is now one sentence per reason
+("The linked Jira project is no longer available. …" / "The linked Jira issue type no longer accepts
+this issue. …"), both pointing at the Project settings. Nothing read `detail` or that message
+before, and `create-jira-issue` still stores `error.reason` verbatim in `linkHealthIssue`.
+
+**Behaviour change.** The five Jira screens (Organization Jira settings and site selection, and the
+three Project Jira link procedures) answer 412 with a sentence where they previously answered 500
+with a masked framework message. The two Inngest catch sites are untouched:
+`refresh-jira-installation-webhooks` still skips on the two token errors and `create-jira-issue`
+still records the link health issue.
+
+**Tests.** `server/trpc/domain-error-mapping.test.ts` gains one case: a real
+`JiraReauthRequiredError` thrown from a procedure comes out as `PRECONDITION_FAILED` with its copy
+and the original as `cause`, proving the middleware maps on the inherited code rather than on the
+class. No test was written for "the subclass extends the base class": `token-access.test.ts` already
+pins the two token errors through `instanceof`, and a third assertion would only restate the
+`extends` clause.
+
+**Checks at this commit.**
+
+| Check                                       | Result                                                                    |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| Expected Jira errors outside the vocabulary | three `PreconditionFailedError`, `JiraRequestError` the only `Error`      |
+| Per-service catch in the five Jira services | only the pre-existing webhook-registration swallow in `link-jira-project` |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint`  | pass (172 web tests, zero warnings)                                       |
+| `pnpm lint:agent-rules`                     | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105)                |
+| `pnpm --filter web build`                   | every route listed                                                        |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real Jira Installation against a real database):
+
+- [ ] With no Jira Installation on the Organization, open Organization integrations and start the
+      Jira site selection: the screen shows "Jira is not connected. Connect a Jira site first."
+      rather than a generic failure.
+- [ ] With the Installation in **Reconnect required**, open the Project's Jira link settings and
+      open the project and issue-type pickers: each shows "The Jira connection needs to be
+      re-authorized." and the network response is 412, not 500.
+- [ ] Set `tokenExpiresAt` in the past and revoke the grant on the Atlassian side, then open Jira
+      site selection: the same re-authorization sentence appears and the Installation is flipped to
+      **Reconnect required** once.
+- [ ] Delete the linked Jira project on the Atlassian side and trigger an issue creation for a
+      Feedback: the run still reports `jira_configuration_rejected`, `ProjectJiraLink.linkHealthIssue`
+      is `stale_project`, and the Jira link settings still surface the ill-health badge.
+- [ ] With the Installation healthy, link a Jira project and create an issue end to end: nothing in
+      the happy path changed.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

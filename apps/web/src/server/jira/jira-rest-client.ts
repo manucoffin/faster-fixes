@@ -3,6 +3,7 @@
 // installation's cloudId in the path (ADR 0008). Kept separate from jira-client.ts,
 // which only handles the auth.atlassian.com token dance.
 
+import { JiraIssueConfigurationError } from "./errors";
 import type { AdfDocument } from "./format-issue-adf";
 
 const JIRA_API_GATEWAY = "https://api.atlassian.com/ex/jira";
@@ -108,24 +109,6 @@ type CreateMetaFieldsResponse = {
     hasDefaultValue?: boolean;
   }[];
 };
-
-/**
- * Jira rejected the create payload itself — a required field appeared after the
- * link was made, or the issue type / project no longer accepts it. Retrying the
- * same payload can never succeed, so callers surface this as link ill-health
- * instead of burning the retry budget.
- */
-export class JiraIssueConfigurationError extends Error {
-  constructor(
-    // Matches the ProjectJiraLink.linkHealthIssue vocabulary so callers can
-    // store it verbatim.
-    readonly reason: "stale_issue_type" | "stale_project",
-    readonly detail: string,
-  ) {
-    super(`Jira rejected the issue payload (${reason}): ${detail}`);
-    this.name = "JiraIssueConfigurationError";
-  }
-}
 
 export class JiraRequestError extends Error {
   constructor(
