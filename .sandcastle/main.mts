@@ -25,7 +25,7 @@ const ISSUES: number[] = [];
  * One issue per iteration, so this needs headroom above `ISSUES.length`: a
  * failed or half-finished iteration burns a slot without closing anything.
  */
-const MAX_ITERATIONS = 20;
+const MAX_ITERATIONS = 30;
 
 const AGENT = claudeCode("claude-opus-5");
 const COMPLETION_SIGNAL = "<promise>NO MORE TASKS</promise>";
