@@ -40,8 +40,9 @@ While the migration runs:
 - **Inside the `src/server` tree, follow that folder's existing conventions** until step 5
   relocates it. Do not mix the two in one folder: a half-converted folder is harder to finish than
   either convention applied consistently.
-- `pnpm lint:agent-rules` is down to the `no-raw-tailwind-colors` warnings, which are outside the
-  migration's definition of done and need their own ticket.
+- `no-raw-tailwind-colors` is locked at `error` and reports nothing: use the semantic token
+  (`text-destructive`, `text-success`, `text-muted-foreground`) rather than a palette class. Hues
+  with no token yet (yellow, amber, blue) are not reported.
 
 Delete this section when the migration ends.
 

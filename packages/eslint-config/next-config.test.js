@@ -111,10 +111,14 @@ describe("the step 3 final lock", () => {
     ).toBe(2);
   });
 
-  it("keeps no-raw-tailwind-colors on the burn-down ramp as a warning", () => {
+  it("locks no-raw-tailwind-colors at error, the last rule off the ramp", async () => {
     const entry = onlyEntryFor("local/no-raw-tailwind-colors");
 
-    expect(entry.rules["local/no-raw-tailwind-colors"][0]).toBe("warn");
+    expect(entry.rules["local/no-raw-tailwind-colors"][0]).toBe("error");
+
+    const severityFor = await severityResolver("local/no-raw-tailwind-colors");
+
+    expect(await severityFor(FEATURE)).toBe(2);
   });
 
   it("stays off outside the agent gate", async () => {
@@ -129,6 +133,13 @@ describe("the step 3 final lock", () => {
 
       expect([rule, await severityFor(file)]).toEqual([rule, 0]);
     }
+
+    const rawColorSeverityFor = await severityResolver(
+      "local/no-raw-tailwind-colors",
+      ungated,
+    );
+
+    expect(await rawColorSeverityFor(FEATURE)).toBe(0);
   });
 
   // The pre-migration procedure modules all carried a module-level
@@ -241,5 +252,6 @@ describe("no-raw-tailwind-colors", () => {
       "Avoid raw Tailwind color class `bg-zinc-800`. Use one of the `muted`, `border` or `foreground` token classes instead.",
       "Avoid raw Tailwind color class `text-red-500`. Use `text-destructive` instead.",
     ]);
+    expect(messages.map((message) => message.severity)).toEqual([2, 2]);
   });
 });

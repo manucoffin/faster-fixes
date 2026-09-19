@@ -1592,6 +1592,77 @@ again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason re
 - [ ] The tab title reads `Something went wrong`.
 - [ ] Remove the throw: the app renders normally again, and no other boundary changed.
 
+### The last raw colour sites use the tokens, and the rule locks at error (issue #105)
+
+Decision 16, second half, and the last convention rule to leave the burn-down. The 10 sites the #104
+entry listed now use a semantic token, and `no-raw-tailwind-colors` reports at `error` with nothing
+to report.
+
+**The 10 classes, one token each.** Six green or emerald classes became `text-success` and four red
+ones `text-destructive`, with no `eslint-disable` anywhere:
+
+| File                                                                         | Was                                     | Now                |
+| ---------------------------------------------------------------------------- | --------------------------------------- | ------------------ |
+| `(authenticated)/account/billing/.../current-plan-card.client.tsx:164`       | `text-green-600`                        | `text-success`     |
+| `(authenticated)/account/settings/_features/email/email-form.client.tsx:131` | `text-green-600`, `dark:text-green-400` | `text-success`     |
+| `(public)/pricing/_features/pricing-card.tsx:78`                             | `text-green-600`                        | `text-success`     |
+| `_domains/subscription/plan-card/plan-card.tsx:86`                           | `text-green-600`                        | `text-success`     |
+| `admin/(dashboard)/.../users-overview-card.client.tsx:46`                    | `text-emerald-600`                      | `text-success`     |
+| `admin/_features/sidebar/sidebar-user-dropdown.client.tsx:132`               | `text-red-600`                          | `text-destructive` |
+| `admin/users/[id]/.../user-organization-select.client.tsx:38`                | `text-red-500`                          | `text-destructive` |
+| `admin/users/[id]/.../email-information.client.tsx:40` and `:59`             | `text-red-600` twice                    | `text-destructive` |
+
+**The `dark:` variant goes away rather than moving to a token.** `email-form.client.tsx` lifted its
+check icon to `green-400` in dark mode because `green-600` is too dark on a dark surface. A token
+carries its own light and dark values, so the pair collapses to one class. `--success` happens to
+hold the same `oklch(0.6 0.19 145)` in both blocks of `globals.css` today, so the dark icon is
+marginally darker than it was; that is a theme question, not a class question, and it is the same
+green every other `text-success` in the app already renders. The smoke checklist below asks for a
+look at it.
+
+**Severity.** `no-raw-tailwind-colors` moved from the `agent` (`warn`) constant to
+`migratedSeverity` (`error` inside the gate, `off` outside). `agent` had no other user and is gone,
+and the comment above `migratedSeverity` now says the ramp is over. The rule stays behind the agent
+gate: decision 16 asks for `error` at zero, not for a new always-on rule, and taking it out of the
+gate would put it in the pre-commit hook, which is a step 5 call like the rest of `src/server`.
+
+**Tests.** `next-config.test.js` swaps its "keeps it on the burn-down ramp as a warning" case for the
+lock: the single config entry carries `error`, the severity resolved for a real `.tsx` under
+`apps/web` is `2`, and the same resolver returns `0` outside the agent gate. The neighbour-of-the-
+illustrations case additionally asserts both its reports come out at severity `2`, so the lock is
+read through ESLint rather than off the config object alone. The `RuleTester` file is untouched.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `pnpm lint:agent-rules`                    | **0 problems**, down from 10 warnings and from 88 at step 3  |
+| Raw palette classes left outside `(home)`  | none for a hue the table maps                                |
+| `eslint-disable` for the rule              | none                                                         |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (201 web tests, 191 eslint-config tests, zero warnings) |
+| `pnpm --filter web build`                  | every route listed                                           |
+
+`--max-warnings 0` on `lint:agent-rules` is deliberately not added here: it is the final lock, #107.
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (each screen in light and dark mode):
+
+- [ ] `/pricing`, signed out: every feature check mark is green and legible on both backgrounds.
+- [ ] `/account/billing`, current plan card: the same green check marks, matching `/pricing`.
+- [ ] Any screen rendering the shared plan card (upgrade dialogs, onboarding): green check marks,
+      unchanged layout.
+- [ ] `/account/settings`, email field with a verified address: the trailing check icon is green in
+      both themes and still readable on the dark surface, where it used to be a lighter green.
+- [ ] `/admin`, users overview card: a positive growth figure is green, a negative one red, zero and
+      unknown stay muted.
+- [ ] `/admin` sidebar, account dropdown: the `Sign out` item reads red and still turns to the
+      hover/focus style on the way in.
+- [ ] `/admin/users/<id>`: an unverified email shows a red badge beside the address, a verified one
+      the unchanged blue badge.
+- [ ] `/admin/users/<id>` with the organizations query forced to fail (offline tab): the message is
+      red rather than plain text; same for the email block's `Failed to retrieve email`.
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

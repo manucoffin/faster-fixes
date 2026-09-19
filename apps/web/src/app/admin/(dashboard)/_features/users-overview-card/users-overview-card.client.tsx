@@ -43,7 +43,7 @@ export function UsersOverviewCard() {
                   className={cn(
                     "text-xs font-medium",
                     growth == null && "text-muted-foreground",
-                    growth != null && growth > 0 && "text-emerald-600",
+                    growth != null && growth > 0 && "text-success",
                     growth != null && growth < 0 && "text-destructive",
                     growth === 0 && "text-muted-foreground",
                   )}

@@ -71,7 +71,7 @@ export function SidebarUserDropdown() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 {profilePicture ? (
@@ -103,7 +103,10 @@ export function SidebarUserDropdown() {
                     <AvatarImage src={session.user.image} alt={userName} />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
-                    <Facehash name={session?.user.email ?? userName} size={32} />
+                    <Facehash
+                      name={session?.user.email ?? userName}
+                      size={32}
+                    />
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -129,7 +132,7 @@ export function SidebarUserDropdown() {
 
             <DropdownMenuItem
               onSelect={handleSignOut}
-              className="text-red-600"
+              className="text-destructive"
             >
               <LogOut className="mr-2 size-4" />
               Sign out

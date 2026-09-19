@@ -161,7 +161,7 @@ export function CurrentPlanCard() {
                       .filter((feature) => feature.id !== "kylo_features")
                       .map((feature, index) => (
                         <div key={index} className="flex items-start gap-3">
-                          <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
+                          <Check className="mt-0.5 size-4 shrink-0 text-success" />
                           <p className="text-sm">{feature.label}</p>
                         </div>
                       ))}

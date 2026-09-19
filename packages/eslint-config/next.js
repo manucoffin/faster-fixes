@@ -11,12 +11,9 @@ import { localRulesPlugin } from "./local-rules/index.js";
 
 const enableAgentRules = process.env.ESLINT_AGENT_RULES === "1";
 
-// The only convention rule still ramping in as a warning: its count is the
-// remaining burn-down metric, so it must not fail `lint:agent-rules`.
-const agent = enableAgentRules ? "warn" : "off";
-// Steps 2 and 3 are done: every scope under `src/app` has the final bucket set,
-// so a violation of a step 2 or step 3 rule is a regression on migrated code,
-// not a burn-down item. Still behind the agent gate until step 4.
+// Steps 2 and 3 are done and step 4 closed the last burn-down: every convention
+// rule now reports at `error`, so any report is a regression on migrated code.
+// Still behind the agent gate; step 5 decides which ones leave it.
 const migratedSeverity = enableAgentRules ? "error" : "off";
 
 // Both options are the repo convention, not opt-in extras: a schema const is
@@ -159,7 +156,7 @@ export const nextJsConfig = [
     rules: {
       "local/no-raw-tailwind-colors": enableAgentRules
         ? [
-            agent,
+            migratedSeverity,
             {
               // Allow explicit palette classes for charting or third-party styling edge-cases.
               allowPatterns: [
