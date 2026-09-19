@@ -6498,6 +6498,78 @@ with dummy environment values lists every route, `/api/slack/install`, `/api/sla
 state check and the session check runs: no message is posted, no channel is listed and no token is
 decrypted. The Slack rows below are for the maintainer.
 
+### The Slack OAuth routes behind services, part 2 (issue #126)
+
+The last OAuth pair of step 5, and the fourth to reuse the placement the GitHub pilot fixed in #115,
+after Linear (#119) and Jira (#123). `GET /api/slack/install` and `GET /api/slack/callback` keep
+every redirect target, query parameter and cookie they have today; neither queries Prisma inline any
+more, and the callback stops handling the bot token in clear. The Slack app needs no reconfiguration.
+
+**Characterization tests first.** `api/slack/install/route.test.ts` (seven cases) and
+`api/slack/callback/route.test.ts` (thirteen cases), committed green against the current handlers in
+their own commit (`5d671b9`) before a line of either route moved, and not edited by the extraction.
+
+| Route    | Pinned paths                                                                                                                                                                                                                                                                       |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| install  | signed out to `/login?nextUrl=…`, `?error=no_active_org`, `?error=upgrade_required`, `?error=slack_not_configured`, the authorize url with its four parameters, the httpOnly `slack_oauth_state` cookie echoing the state                                                          |
+| callback | `?slack=error` for a refusal at Slack, a missing code, a missing state, a state that does not match the cookie, no cookie at all, no session, no active Organization, a plain Member and a failed exchange; `?slack=connected` with the full upsert payload and the cleared cookie |
+
+**Slack refuses everything to the same target, and that is kept.** Unlike Linear and Jira, whose
+callbacks map nine refusals to nine `?error=…` parameters, the Slack callback answers every one of
+them with `?slack=error`. The tests keep the cases separate anyway, so a later ticket that tells a
+refusal from an outage (deferred, see the Out of scope list) changes visible rows rather than
+inventing them.
+
+**What the pair delegates now.**
+
+| Operation                  | Where it landed                                   | Why                                                            |
+| -------------------------- | ------------------------------------------------- | -------------------------------------------------------------- |
+| Member authorization check | `_services/find-installing-member.ts`, unchanged  | the pilot's shared service, now on its fifth and sixth caller  |
+| Installation upsert        | `_services/slack/upsert-slack-installation.ts`    | it writes `SlackInstallation`, a table only Slack has          |
+| Plan feature check         | `_services/slack/has-slack-integration-access.ts` | the only reason the install route still held a database client |
+
+**The Plan check needed a service the other three providers do not have.** Slack is the one
+Integration gated on a Plan feature at install time, and `checkFeatureAccess` takes the Prisma client
+as an argument, so the route imported `@workspace/db` for that argument alone. Plan enforcement
+itself does not move (parent spec: it stays in the server folder so both transports and the
+`organization` domain can depend on it); the new service is the one question the route asks of it.
+It returns the boolean the route branches on and drops the denial metadata, which the route never
+rendered: every denial maps to `?error=upgrade_required`.
+
+**Names, decided by running the rules.** `upsert-` for the write, matching GitHub, Linear and Jira.
+`has-` for the Plan check: it performs no write and answers a yes/no after a query, which is the
+IO-predicate row of the read vocabulary, so `require-trpc-output-type` then asks for the derived
+alias and the file exports `HasSlackIntegrationAccessOutput`. The upsert exports none, like its three
+siblings.
+
+**One type was exported rather than duplicated.** `slack-client.ts` had a local
+`ExchangeOAuthCodeResult`; it is now the exported `SlackOAuthGrant`, named after the data (the
+workspace, the bot identity, the scope) rather than after the function that returns it, and the
+upsert takes it as its `grant` argument. Nothing else in the client changed.
+
+**The `try`/`catch` kept its place in the route**, for the reason #119 and #123 recorded: the code
+exchange failing is a redirect target, and mapping an outcome to a target is route work.
+
+**No file retired, no stub.** Everything here is an addition or an edit in place.
+
+**Gate.** `pnpm typecheck`, `pnpm test` (62 files, 390 web tests; 192 `@workspace/eslint-config`
+tests), `pnpm lint` and `pnpm lint:agent-rules` all pass at zero. `npx next build` from `apps/web`
+with dummy environment values lists every route, `/api/slack/install` and `/api/slack/callback`
+included.
+
+**Smoke, walked on 2026-09-19 against `next dev` on port 3134 with dummy environment values:**
+
+| Check                                                   | Result                                                   |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| `GET /api/inngest`                                      | `200`, `"function_count":17`, still every function       |
+| `GET /api/slack/install` signed out                     | `307` to `/login?nextUrl=…/api/slack/install`, unchanged |
+| `GET /api/slack/callback?error=access_denied`           | `307` to `/integrations?slack=error`, unchanged          |
+| `GET /api/slack/callback` with no `code`                | `307` to `/integrations?slack=error`, unchanged          |
+| `GET /api/slack/callback?code=…&state=…` with no cookie | `307` to `/integrations?slack=error`, unchanged          |
+
+**Not smoked here, and why.** The sandbox has no Postgres and no Slack workspace, so no Plan is read,
+no Member is looked up and no Installation is written. The Slack rows below are for the maintainer.
+
 ### Step 5 smoke checklists, one per external system
 
 Grouped per external system rather than per ticket, so the maintainer walks each system once against
@@ -6614,7 +6686,7 @@ agent API. Only the systems a landed ticket has touched appear below.
 - [ ] Disconnect: disconnect Jira from `/integrations` and see the Installation and its Project links
       removed, and the webhook registration gone from the Jira site.
 
-#### Slack (started by #125)
+#### Slack (started by #125, rows added by #126)
 
 - [ ] Connect: start the install from `/integrations/slack`, approve the Slack consent screen and
       land on `/integrations?slack=connected` with the workspace listed.
@@ -6624,6 +6696,13 @@ agent API. Only the systems a landed ticket has touched appear below.
       `/integrations?slack=error`.
 - [ ] Connect without the Plan feature: from an Organization whose Plan has no Slack Integration,
       open `/api/slack/install` and land on `/integrations?error=upgrade_required`.
+- [ ] Reconnect: connect Slack a second time from an Organization that already has an Installation
+      and see the same row refreshed with the current workspace and a new bot token, not duplicated,
+      and its Project links still in place (row added by #126).
+- [ ] Connect signed out: open `/api/slack/install` in a signed out browser, see the login screen,
+      sign in and land back on the install (row added by #126).
+- [ ] Connect as a plain Member: with a `member` role account, walk the Slack consent screen and land
+      on `/integrations?slack=error` with no Installation recorded (row added by #126).
 - [ ] Link a channel: open the Project settings, see the workspace public channels listed, pick one,
       save, reload, and see the link enabled.
 - [ ] Announce a Feedback: submit a Feedback on a linked Project and see one Slack message in the

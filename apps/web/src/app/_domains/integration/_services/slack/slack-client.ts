@@ -21,7 +21,9 @@ type ExchangeOAuthCodeParams = {
   redirectUri: string;
 };
 
-type ExchangeOAuthCodeResult = {
+/** What Slack grants at the end of the OAuth round-trip: the workspace it is
+ * for, and the bot identity the app posts with. */
+export type SlackOAuthGrant = {
   botToken: string;
   botUserId: string;
   scope: string;
@@ -32,7 +34,7 @@ type ExchangeOAuthCodeResult = {
 export async function exchangeOAuthCode({
   code,
   redirectUri,
-}: ExchangeOAuthCodeParams): Promise<ExchangeOAuthCodeResult> {
+}: ExchangeOAuthCodeParams): Promise<SlackOAuthGrant> {
   const clientId = process.env.SLACK_CLIENT_ID;
   const clientSecret = process.env.SLACK_CLIENT_SECRET;
   if (!clientId || !clientSecret) {

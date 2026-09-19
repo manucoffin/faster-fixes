@@ -1,11 +1,10 @@
 import { auth } from "@/server/auth";
-import { checkFeatureAccess } from "@/server/auth/subscription";
 import {
   SLACK_OAUTH_STATE_COOKIE,
   SLACK_OAUTH_STATE_COOKIE_MAX_AGE_S,
 } from "@/app/_domains/integration/_helpers/slack/oauth-state-cookie";
+import { hasSlackIntegrationAccess } from "@/app/_domains/integration/_services/slack/has-slack-integration-access";
 import { SLACK_OAUTH_SCOPES } from "@/app/_domains/integration/_services/slack/slack-client";
-import { prisma } from "@workspace/db";
 import { randomBytes } from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -29,12 +28,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${integrationsUrl}?error=no_active_org`);
   }
 
-  const featureAccess = await checkFeatureAccess(
+  const planAllowsSlack = await hasSlackIntegrationAccess(
     activeOrganization.id,
-    "slackIntegration",
-    prisma,
   );
-  if (!featureAccess.allowed) {
+  if (!planAllowsSlack) {
     return NextResponse.redirect(`${integrationsUrl}?error=upgrade_required`);
   }
 
