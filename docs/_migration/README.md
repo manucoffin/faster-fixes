@@ -1036,6 +1036,82 @@ under issue #88.
 - [ ] On a paid Plan, create a second Organization: it is created, becomes active, and appears in the
       sidebar.
 
+### The account router error translations move into services (issue #94)
+
+Decision 6, third and last link of the router leg. `(authenticated)/account/trpc-router.ts` is
+wiring only, and with it the repo-wide checks are green: no `trpc-router.ts` under `apps/web/src`
+holds a `catch` or a `new TRPCError` any more. Both moved translations keep today's copy, so a User
+sees no change.
+
+**The two wrong-password translations.** `updatePassword` throws
+`BadRequestError("Current password is incorrect.")` and `deleteAccount` throws
+`BadRequestError("Password is incorrect.")`, in place of the procedures' `TRPCError UNAUTHORIZED`,
+for the reason sign-in and the reset link already dropped theirs: a rejected password is a rejected
+input, not a missing session. The transported code moves from 401 to 400, which no client reads.
+`password-form.client.tsx` and `account-deletion-button.client.tsx` both set `error.message` as a
+root form error and render it in a destructive alert.
+
+**Precedence inside `deleteAccount` is preserved.** Its OAuth branch
+("Please contact support to delete your account.") used to be guarded by a negated identity match,
+because the router answered a password failure first. The guard is gone: the password branch now
+throws before the OAuth branch is reached, so a Better Auth message naming both a password and a
+provider still yields "Password is incorrect." A test pins that order.
+
+**The "session expired" branch is dropped as unreachable, not re-coded.** Both procedures held a
+second `TRPCError UNAUTHORIZED` branch, matching `session` or `Session` in the Better Auth message
+("Your session has expired. Please sign in again." for the deletion, "You must be signed in" for the
+password change). Both are `protectedProcedure`, and `createContext` resolves the session from the
+very headers the services then pass to Better Auth: a caller with no session is already refused by
+the `protectedProcedure` middleware with `UNAUTHORIZED`, before the service runs. The only way to
+reach the branch is a revocation landing between the context read and the Better Auth call, in the
+same request. Translating that race would mean either inventing an `UNAUTHORIZED` the vocabulary
+deliberately does not have, or filing it under a code that does not describe it
+(`BadRequestError` on a session that vanished is not a rejected input). So it is dropped: the race
+surfaces as an unexpected error, which is a 500 today and the generic masked sentence from #98 on,
+and the User's next request is refused at the transport edge and sent back to the login page, which
+is the outcome the copy was asking for anyway. The `deleteAccount` service also stops matching
+`session` and `Session` to shield its OAuth branch, since there is no longer a session branch to
+give precedence to.
+
+**Tests.** Better Auth mocked at module level, as in `sign-in-user.test.ts`:
+
+- `account/settings/_services/update-password.test.ts` (3 cases, new): a rejected current password
+  yields `BadRequestError` with today's copy, an unrelated failure comes out as the same object, a
+  successful change calls Better Auth with `revokeOtherSessions: true` and returns
+  `{ success: true }`.
+- `account/settings/_services/delete-account.test.ts` (5 cases, 3 rewritten): a rejected password
+  yields `BadRequestError("Password is incorrect.")`, a social-only account still gets the support
+  copy, a message naming both answers the password first, an unrelated failure propagates
+  untranslated, a successful deletion passes the presented password through. The old "lets an
+  identity failure through for the procedure to answer" case is replaced by the precedence case: the
+  procedure no longer answers anything.
+
+**Checks at this commit.**
+
+| Check                                      | Result                                                                                 |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Per-procedure mapping                      | `grep -rn "catch" --include="trpc-router.ts"` returns nothing                          |
+| Transport errors in routers                | `grep -rn "new TRPCError" apps/web/src/app --include="trpc-router.ts"` returns nothing |
+| `pnpm typecheck`, `pnpm test`, `pnpm lint` | pass (194 web tests, zero warnings)                                                    |
+| `pnpm lint:agent-rules`                    | 0 errors, 88 `no-raw-tailwind-colors` warnings (#104/#105)                             |
+| `npx next build`                           | every route listed, `/settings` included                                               |
+
+The build was again run with a placeholder `GITHUB_PRIVATE_KEY`, for the environment reason recorded
+under issue #88.
+
+**Smoke checklist for the maintainer** (a real database):
+
+- [ ] In `/settings`, submit the password form with a wrong current password and a valid new one: the
+      destructive alert reads "Current password is incorrect." and nothing else changes.
+- [ ] Submit the password form with the right current password: the success toast appears, the form
+      resets, and the new password signs in on a fresh browser session.
+- [ ] In `/settings`, open the account deletion dialog and confirm with a wrong password: the alert
+      inside the dialog reads "Password is incorrect." and the account still exists.
+- [ ] Confirm the deletion with the right password on an account created with email and password: the
+      success toast appears, the session is signed out and the browser lands on `/`.
+- [ ] On an account that only has a social provider, open the deletion dialog and confirm: the alert
+      reads "Please contact support to delete your account."
+
 ## Amendments to the kit made during step 1
 
 The kit is the source project's playbook. Where this repo diverged, `docs/architecture/migration-kit/01-tooling.md` was amended to match reality:

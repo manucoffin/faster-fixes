@@ -19,19 +19,20 @@ export async function deleteAccount({
     return { success: true };
   } catch (error) {
     if (error instanceof Error) {
-      // Identity failures have no domain error: the procedure answers them at
-      // the transport edge. They are matched here only to keep the original
-      // order of precedence, in which they win over the OAuth branch.
-      const isIdentityFailure =
+      // Better Auth reports a rejected password through the message, not a
+      // code, and it keeps winning over the OAuth branch below: a message
+      // naming both tells the User which of the two to act on.
+      if (
         error.message.includes("Invalid") ||
         error.message.includes("incorrect") ||
-        error.message.includes("password") ||
-        error.message.includes("session") ||
-        error.message.includes("Session");
+        error.message.includes("password")
+      ) {
+        throw new BadRequestError("Password is incorrect.");
+      }
 
       if (
-        !isIdentityFailure &&
-        (error.message.includes("OAuth") || error.message.includes("provider"))
+        error.message.includes("OAuth") ||
+        error.message.includes("provider")
       ) {
         throw new BadRequestError(
           "Please contact support to delete your account.",

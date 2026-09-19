@@ -1,7 +1,5 @@
 import { getActiveSubscription } from "@/app/_domains/subscription/_services/get-active-subscription";
-import { DomainError } from "@/server/errors/domain-errors";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { createBillingPortal } from "./billing/_services/create-billing-portal";
 import { getSubscriptionStatus } from "./billing/_services/get-subscription-status";
@@ -19,45 +17,12 @@ import { UpdateProfileSchema } from "./settings/_services/update-profile.schema"
 export const accountRouter = router({
   delete: protectedProcedure
     .input(DeleteAccountSchema)
-    .mutation(async ({ input }) => {
-      try {
-        return await deleteAccount({
-          password: input.password,
-          headers: await headers(),
-        });
-      } catch (error) {
-        if (error instanceof DomainError) {
-          throw error;
-        }
-
-        // Identity failures have no domain error: they are answered here, at
-        // the transport edge, with the messages the form already displays.
-        if (error instanceof Error) {
-          if (
-            error.message.includes("Invalid") ||
-            error.message.includes("incorrect") ||
-            error.message.includes("password")
-          ) {
-            throw new TRPCError({
-              code: "UNAUTHORIZED",
-              message: "Password is incorrect.",
-            });
-          }
-
-          if (
-            error.message.includes("session") ||
-            error.message.includes("Session")
-          ) {
-            throw new TRPCError({
-              code: "UNAUTHORIZED",
-              message: "Your session has expired. Please sign in again.",
-            });
-          }
-        }
-
-        throw error;
-      }
-    }),
+    .mutation(async ({ input }) =>
+      deleteAccount({
+        password: input.password,
+        headers: await headers(),
+      }),
+    ),
   profile: router({
     get: protectedProcedure.query(({ ctx }) =>
       getProfile({ userId: ctx.session.user.id }),
@@ -83,41 +48,13 @@ export const accountRouter = router({
   password: router({
     update: protectedProcedure
       .input(UpdatePasswordSchema)
-      .mutation(async ({ input }) => {
-        try {
-          return await updatePassword({
-            currentPassword: input.currentPassword,
-            newPassword: input.newPassword,
-            headers: await headers(),
-          });
-        } catch (error) {
-          // Same rule as the account deletion above: a wrong password and a
-          // lost session are identity failures, answered at the edge.
-          if (error instanceof Error) {
-            if (
-              error.message.includes("Invalid") ||
-              error.message.includes("incorrect")
-            ) {
-              throw new TRPCError({
-                code: "UNAUTHORIZED",
-                message: "Current password is incorrect.",
-              });
-            }
-
-            if (
-              error.message.includes("session") ||
-              error.message.includes("Session")
-            ) {
-              throw new TRPCError({
-                code: "UNAUTHORIZED",
-                message: "You must be signed in",
-              });
-            }
-          }
-
-          throw error;
-        }
-      }),
+      .mutation(async ({ input }) =>
+        updatePassword({
+          currentPassword: input.currentPassword,
+          newPassword: input.newPassword,
+          headers: await headers(),
+        }),
+      ),
   }),
   billing: router({
     subscription: router({

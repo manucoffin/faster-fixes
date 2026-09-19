@@ -16,6 +16,15 @@ describe("deleteAccount", () => {
     deleteUser.mockReset();
   });
 
+  it("reports a rejected password as a bad request, not a missing session", async () => {
+    deleteUser.mockRejectedValue(new Error("Invalid password"));
+
+    await expect(deleteAccount(input)).rejects.toThrow(
+      new BadRequestError("Password is incorrect."),
+    );
+    await expect(deleteAccount(input)).rejects.toBeInstanceOf(BadRequestError);
+  });
+
   it("asks a social account holder to contact support", async () => {
     deleteUser.mockRejectedValue(new Error("OAuth accounts cannot be removed"));
 
@@ -24,13 +33,16 @@ describe("deleteAccount", () => {
     );
   });
 
-  it("lets an identity failure through for the procedure to answer", async () => {
-    // The message mentions both a provider and a password: the original chain
-    // answered the password first, and so does this one.
-    const identityFailure = new Error("Invalid password for this provider");
-    deleteUser.mockRejectedValue(identityFailure);
+  it("answers a password first when the message names a provider too", async () => {
+    // The original chain answered the password before the provider, and so
+    // does this one.
+    deleteUser.mockRejectedValue(
+      new Error("Invalid password for this provider"),
+    );
 
-    await expect(deleteAccount(input)).rejects.toBe(identityFailure);
+    await expect(deleteAccount(input)).rejects.toThrow(
+      new BadRequestError("Password is incorrect."),
+    );
   });
 
   it("lets an unexpected failure propagate untranslated", async () => {
