@@ -48,7 +48,7 @@ All coding standards for this project live in the `coding-standards` skill at `.
 - `pnpm lint` (all workspaces). Zero warnings tolerated.
 - `pnpm lint:agent-rules` (web project rules only). Zero problems required: it runs with `--max-warnings 0` since the step 4 final lock, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression rather than a burn-down item.
 - If DB schema changed: run required `packages/database` generation/migration commands.
-- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `server/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
+- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `_domains/integration/_services/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
 - Never declare completion while required checks fail.
 - The pre-commit hook runs the same gate: lint-staged (Prettier on every staged file, plain ESLint with zero warnings on staged `ts`, `tsx`, `js`, `jsx` files), then `pnpm typecheck` and `pnpm test`. The agent-gated rules are not part of the hook, so a fix in a scope that has not been migrated still commits.
 
