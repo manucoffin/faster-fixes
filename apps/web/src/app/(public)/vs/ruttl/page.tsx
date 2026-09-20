@@ -2,7 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
-import { SoftwareApplicationSchema } from "@/app/_components/seo/software-application-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { VsCrossLinks } from "../_features/vs-cross-links";

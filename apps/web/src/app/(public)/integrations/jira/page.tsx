@@ -1,6 +1,6 @@
 import { APP_URL } from "@/app/_constants/app";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
-import { SoftwareApplicationSchema } from "@/app/_components/seo/software-application-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { JiraBreadcrumb } from "./_features/jira-breadcrumb";

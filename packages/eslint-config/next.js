@@ -189,6 +189,14 @@ const rawTailwindColorOptions = {
 //
 // Every pattern is a regular expression over the posix path or the specifier,
 // which is how the other rules of this package match paths.
+//
+// The rows fall into two halves. The first six scope themselves to one bucket
+// and say what that bucket is for: a barrel publishes capabilities, a router is
+// transport, a helper is pure, a service is transport-agnostic, the root
+// buckets are domain-agnostic, and the infrastructure folders are imported by
+// the app tree rather than importing it. The last three watch the whole source
+// tree for a specifier that belongs to one layer only. The bucket rows come
+// first so that a file inside a bucket gets the message written for it.
 const layerImportRows = [
   {
     name: "a domain barrel exports capabilities, not server implementations",
@@ -206,6 +214,68 @@ const layerImportRows = [
     forbiddenPatterns: ["^@workspace/db(/|$)", "^@prisma/client(/|$)"],
     message:
       "A tRPC router validates input and calls a service (ADR-0011). Move the Prisma query into a `_services/` module of the same scope and call it from the procedure.",
+  },
+  {
+    name: "a helper is pure",
+    sourcePathPattern: "(^|/)_helpers/",
+    // The five modules that build a response or a request rather than doing
+    // IO. `_helpers/` purity is about IO, and `NextResponse.json(…)` is a value
+    // constructor, so each of these is a pure function that happens to name a
+    // framework type. Named file by file so the exception cannot grow into a
+    // pattern.
+    //
+    // The three mappers are the scope-local error responses of the published
+    // APIs: the widget and agent contracts are bodies that installed clients
+    // already parse, so they are written once per scope rather than per route
+    // (ADR-0012). The two test-double modules build a `NextRequest` fixture and
+    // nothing under `src/` imports them at runtime.
+    exemptPathPatterns: [
+      "/src/app/api/v1/agent/_helpers/agent-error\\.ts$",
+      "/src/app/api/v1/agent/_helpers/is-auth-failure\\.ts$",
+      "/src/app/api/v1/agent/_helpers/agent-api-test-doubles\\.ts$",
+      "/src/app/api/v1/feedback/_helpers/widget-error-response\\.ts$",
+      "/src/app/api/v1/feedback/_helpers/widget-api-test-doubles\\.ts$",
+    ],
+    forbiddenPatterns: [
+      "^@workspace/db(/|$)",
+      "^@prisma/client(/|$)",
+      "^next(/|$)",
+      "^react(-dom)?(/|$)",
+    ],
+    message:
+      "`_helpers/` holds pure behavioral functions: no IO, no JSX, no React state (ADR-0011). A function that queries the database or reads the request is a service and belongs in `_services/`; UI belongs in `_components/` or a feature.",
+  },
+  {
+    name: "a service is transport-agnostic",
+    // `require-agent-auth.ts` is the one sanctioned exception, recorded in the
+    // backend standard: it returns `AuthenticatedAgentToken | NextResponse`
+    // because its 401, 403 and 429 carry headers and body fields no
+    // `DomainError` can express, and it does IO, so it is a transport guard by
+    // design. It is not a precedent: no other service may return a `Response`.
+    sourcePathPattern: "(^|/)_services/",
+    exemptPathPatterns: [
+      "/src/app/api/v1/agent/_services/require-agent-auth\\.ts$",
+    ],
+    forbiddenPatterns: ["^next/(server|headers|navigation)$"],
+    // A service typed against `NextRequest` still takes plain named values at
+    // runtime; it is the call into the request that binds it to a transport.
+    runtimeOnly: true,
+    message:
+      "A service is transport-agnostic: it takes plain named values and never reaches for the request or the response itself (ADR-0011). Let the route or the procedure read `next/headers` and pass what the service needs by name, and throw a `DomainError` rather than returning a response.",
+  },
+  {
+    name: "the root buckets are domain-agnostic",
+    sourcePathPattern: "/src/app/_(components|providers|constants)/",
+    forbiddenPatterns: ["^@/app/_domains(/|$)"],
+    message:
+      "Root `_components/`, `_providers/` and `_constants/` are domain-agnostic and slated for extraction into shared packages (ADR-0010), so they carry no domain knowledge. Move this module into the domain it reads, or into the route scope that uses it.",
+  },
+  {
+    name: "the shared infrastructure folders do not reach into the app tree",
+    sourcePathPattern: "/src/(lib|utils)/",
+    forbiddenPatterns: ["^@/app(/|$)"],
+    message:
+      "`src/lib/` and `src/utils/` are infrastructure adapters and pure utilities that the app tree imports, never the other way round (ADR-0011). Move the app-specific part into the scope that needs it, or pass it in as a parameter.",
   },
   {
     name: "`TRPCError` is transport, not domain",
@@ -396,6 +466,10 @@ export const nextJsConfig = [
         clientServerImportOptions,
       ],
       "local/no-client-import-of-services": "error",
+      // The serialization half of the same boundary: an import rule cannot see
+      // a `DomainError` a client reaches by any other route, and the test is
+      // always false either way (ADR-0012).
+      "local/no-client-domain-error-instanceof": "error",
     },
   },
   {
@@ -435,6 +509,10 @@ export const nextJsConfig = [
       // scopes itself to a read service, the consumer half forbids inferring
       // the same type from the router wherever a consumer lives.
       "local/require-service-output-type": "error",
+      // Not import-shaped, so not a row of the table above: one half looks at
+      // a call expression and the other at a filename. The whole source tree,
+      // because both halves are about a file being in the wrong place.
+      "local/require-inngest-function-placement": "error",
     },
   },
   {

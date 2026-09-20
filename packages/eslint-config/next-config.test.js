@@ -27,6 +27,8 @@ const CONVENTION_RULES = {
   "local/schema-must-be-pure-zod": SCHEMA,
   "local/no-raw-tailwind-colors": FEATURE,
   "local/no-client-import-of-server-folder": FEATURE,
+  "local/no-client-domain-error-instanceof": FEATURE,
+  "local/require-inngest-function-placement": SERVICE,
   "local/no-cross-domain-deep-import": SERVICE,
   "local/no-cross-layer-import": SERVICE,
   "local/require-server-action-suffix": SERVICE,
@@ -639,6 +641,10 @@ describe("the layer import table", () => {
     expect(options.rows.map((row) => row.name)).toEqual([
       "a domain barrel exports capabilities, not server implementations",
       "a tRPC router is thin transport, not a query",
+      "a helper is pure",
+      "a service is transport-agnostic",
+      "the root buckets are domain-agnostic",
+      "the shared infrastructure folders do not reach into the app tree",
       "`TRPCError` is transport, not domain",
       "database access lives in a services folder or the server folder",
       "the database package has public entry points",
@@ -779,6 +785,230 @@ describe("the layer import table", () => {
         ]).toEqual([specifier, []]);
       }
     });
+  });
+
+  describe("a helper is pure", () => {
+    const HELPER = "src/app/_domains/billing/_helpers/format-plan.ts";
+
+    it("rejects the database, Next.js and React", async () => {
+      for (const specifier of ["@workspace/db", "next/headers", "react"]) {
+        const messages = await layerMessagesFor(HELPER, importing(specifier));
+
+        expect([specifier, messages.map((m) => m.severity)]).toEqual([
+          specifier,
+          [2],
+        ]);
+        expect(messages[0].message).toContain("pure behavioral");
+      }
+    });
+
+    it("accepts a sibling helper, a type and a pure package", async () => {
+      for (const specifier of [
+        "./plan-labels",
+        "@/utils/dates/format",
+        "zod",
+      ]) {
+        expect([
+          specifier,
+          await layerMessagesFor(HELPER, importing(specifier)),
+        ]).toEqual([specifier, []]);
+      }
+    });
+
+    // The published APIs answer with a body their installed clients already
+    // parse, so each writes one scope-local mapper (ADR-0012). Building a
+    // response is not IO, and the exemption is written file by file.
+    it("accepts the named API response mappers", async () => {
+      for (const file of [
+        "src/app/api/v1/agent/_helpers/agent-error.ts",
+        "src/app/api/v1/feedback/_helpers/widget-error-response.ts",
+      ]) {
+        expect([
+          file,
+          await layerMessagesFor(file, importing("next/server")),
+        ]).toEqual([file, []]);
+      }
+    });
+  });
+
+  describe("a service is transport-agnostic", () => {
+    const SERVICE_FILE = "src/app/_domains/billing/_services/get-plan.ts";
+
+    it("rejects the request and response APIs", async () => {
+      for (const specifier of [
+        "next/server",
+        "next/headers",
+        "next/navigation",
+      ]) {
+        const messages = await layerMessagesFor(
+          SERVICE_FILE,
+          importing(specifier),
+        );
+
+        expect([specifier, messages.map((m) => m.severity)]).toEqual([
+          specifier,
+          [2],
+        ]);
+        expect(messages[0].message).toContain("transport-agnostic");
+      }
+    });
+
+    it("accepts a type-only reference and the named agent API guard", async () => {
+      expect(
+        await layerMessagesFor(
+          SERVICE_FILE,
+          `import type { NextRequest } from "next/server";\nexport type X = NextRequest;\n`,
+        ),
+      ).toEqual([]);
+      expect(
+        await layerMessagesFor(
+          "src/app/api/v1/agent/_services/require-agent-auth.ts",
+          importing("next/server"),
+        ),
+      ).toEqual([]);
+    });
+  });
+
+  describe("the root buckets are domain-agnostic", () => {
+    it("rejects a domain import from a root bucket", async () => {
+      for (const file of [
+        "src/app/_components/seo/software-application-schema.tsx",
+        "src/app/_providers/consent-provider.client.tsx",
+        "src/app/_constants/seo.ts",
+      ]) {
+        const messages = await layerMessagesFor(
+          file,
+          importing("@/app/_domains/subscription"),
+        );
+
+        expect([file, messages.map((m) => m.severity)]).toEqual([file, [2]]);
+        expect(messages[0].message).toContain("domain-agnostic");
+      }
+    });
+
+    it("accepts a domain import from a route scope", async () => {
+      expect(
+        await layerMessagesFor(
+          "src/app/(public)/_components/seo/software-application-schema.tsx",
+          importing("@/app/_domains/subscription"),
+        ),
+      ).toEqual([]);
+    });
+  });
+
+  describe("the shared infrastructure folders do not reach into the app tree", () => {
+    it("rejects an app import from lib and from utils", async () => {
+      for (const file of [
+        "src/lib/mailer/plunk.ts",
+        "src/utils/url/get-app-url.ts",
+      ]) {
+        const messages = await layerMessagesFor(
+          file,
+          importing("@/app/_domains/user"),
+        );
+
+        expect([file, messages.map((m) => m.severity)]).toEqual([file, [2]]);
+        expect(messages[0].message).toContain("infrastructure adapters");
+      }
+    });
+
+    // The relative spelling of the same module, which the shared import helper
+    // resolves back to its alias form, so a `../` path is not a way round it.
+    it("rejects the relative spelling of the same import", async () => {
+      const messages = await layerMessagesFor(
+        "src/utils/url/get-app-url.ts",
+        importing("../../app/_domains/user"),
+      );
+
+      expect(messages.map((m) => m.severity)).toEqual([2]);
+    });
+
+    it("accepts a sibling utility and a pure package", async () => {
+      for (const specifier of ["../string/slugify", "zod"]) {
+        expect([
+          specifier,
+          await layerMessagesFor(
+            "src/utils/url/get-app-url.ts",
+            importing(specifier),
+          ),
+        ]).toEqual([specifier, []]);
+      }
+    });
+  });
+});
+
+describe("require-inngest-function-placement", () => {
+  const RULE = "local/require-inngest-function-placement";
+
+  it("is declared once, for the whole web app source", () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+    expect(entry.rules[RULE]).toBe("error");
+  });
+
+  it("reports a durable function minted outside an inngest service", async () => {
+    const messages = await messagesFor(
+      "src/app/api/inngest/route.ts",
+      `import { inngest } from "@/server/inngest";\nexport const sync = inngest.createFunction({ id: "sync" }, { event: "a/b" }, async () => {});\n`,
+      RULE,
+    );
+
+    expect(messages.map((m) => m.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("*.inngest.ts");
+  });
+
+  it("reports an inngest file outside a services folder", async () => {
+    const messages = await messagesFor(
+      "src/app/_domains/integration/_helpers/sync-issue.inngest.ts",
+      `export const syncIssue = null;\n`,
+      RULE,
+    );
+
+    expect(messages.map((m) => m.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("_services/");
+  });
+
+  it("leaves a real inngest service alone", async () => {
+    expect(
+      await messagesFor(
+        "src/app/_domains/integration/_services/jira/create-jira-issue.inngest.ts",
+        `import { inngest } from "@/server/inngest";\nexport const createJiraIssue = inngest.createFunction({ id: "create-jira-issue" }, { event: "a/b" }, async () => {});\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe("no-client-domain-error-instanceof", () => {
+  const RULE = "local/no-client-domain-error-instanceof";
+
+  it("is declared with the other client boundary rules, for every ts file", () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/*.{ts,tsx}"]);
+    expect(entry.rules[RULE]).toBe("error");
+  });
+
+  it("reports the test in a client module", async () => {
+    const messages = await messagesFor(
+      "src/app/(authenticated)/_features/inbox/inbox.client.tsx",
+      `export function map(error) {\n  return error instanceof DomainError;\n}\n`,
+      RULE,
+    );
+
+    expect(messages.map((m) => m.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("error.data.code");
+  });
+
+  it("leaves the test in a server module alone", async () => {
+    expect(
+      await messagesFor(
+        "src/server/errors/non-retriable.ts",
+        `export function map(error) {\n  return error instanceof DomainError;\n}\n`,
+        RULE,
+      ),
+    ).toEqual([]);
   });
 });
 

@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
-import { SoftwareApplicationSchema } from "@/app/_components/seo/software-application-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { PricingCard } from "./_features/pricing-card";
 import {

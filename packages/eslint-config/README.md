@@ -74,13 +74,36 @@ reaches a runtime, where a type import is erased and so does not cross the
 boundary. Patterns are regular expressions over the posix path or the
 specifier, as in every other rule here.
 
-The five rows today: a domain barrel exports capabilities and not services or
-routers (a type-only re-export of a service's output type stays free); a tRPC
-router does not import Prisma; `TRPCError` is confined to routers and
-`src/server/trpc/`; runtime database imports are confined to `_services/` and
-`src/server/`; and the database package is reached through `@workspace/db`,
-`@workspace/db/types` and `@workspace/db/generated/prisma/enums`, which closes
-the deep-import leak ADR-0013 records.
+The nine rows today fall into two halves. Six scope themselves to one bucket
+and say what that bucket is for: a domain barrel exports capabilities and not
+services or routers (a type-only re-export of a service's output type stays
+free); a tRPC router does not import Prisma; a helper imports neither the
+database, nor Next.js, nor React; a service does not reach for the request or
+the response itself; root `_components/`, `_providers/` and `_constants/` do
+not import a domain; and `src/lib/` and `src/utils/` do not import the app
+tree. Three watch the whole source tree for a specifier that belongs to one
+layer only: `TRPCError` is confined to routers and `src/server/trpc/`; runtime
+database imports are confined to `_services/` and `src/server/`; and the
+database package is reached through `@workspace/db`, `@workspace/db/types` and
+`@workspace/db/generated/prisma/enums`, which closes the deep-import leak
+ADR-0013 records.
+
+Two rows carry a named path exemption rather than a specifier allowlist,
+because the exception is a whole file and not an import. The helper row spares
+the three scope-local API error mappers and the two `NextRequest` test-double
+modules: purity is about IO, and `NextResponse.json(…)` is a value
+constructor. The service row spares
+`api/v1/agent/_services/require-agent-auth.ts`, the one sanctioned exception to
+transport agnosticism the backend standard records.
+
+`require-inngest-function-placement` and `no-client-domain-error-instanceof`
+are the two conventions of the same lot that are not import-shaped, so neither
+is a row of the table and neither is a block of the core `no-restricted-syntax`
+rule. The first reports `createFunction` called outside a `*.inngest.ts(x)`
+file and a `*.inngest.ts(x)` file outside a `_services/` folder; the Inngest
+client in `src/server/inngest/` is wiring and is untouched. The second reports
+`instanceof DomainError` in a client module, where the prototype does not
+survive serialization and the branch is therefore always false (ADR-0012).
 
 `require-service-output-type` carries both halves of the output type
 convention, which is why it is wired on the whole source tree rather than on

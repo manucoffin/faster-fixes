@@ -19,12 +19,18 @@
 // does not cross the layer. A row without it judges an import by where it
 // points, whatever its kind.
 //
-// The rows the shared config carries today draw four boundaries: a domain
-// barrel exposes capabilities and not server implementations (ADR-0010), a
-// tRPC router is thin transport over services and database access lives in
-// `_services/` or the server folder (ADR-0011), `TRPCError` belongs to the
-// transport layer and a service throws a `DomainError` (ADR-0012), and the
-// database package is reached through its public entry points (ADR-0013).
+// The rows the shared config carries today fall into two halves. Six scope
+// themselves to one bucket and say what that bucket is for: a domain barrel
+// exposes capabilities and not server implementations (ADR-0010), a tRPC
+// router is thin transport over services, a helper is pure, a service is
+// transport-agnostic (ADR-0011), the root buckets are domain-agnostic
+// (ADR-0010) and the infrastructure folders are imported by the app tree
+// rather than importing it. Three watch the whole source tree for a specifier
+// that belongs to one layer only: `TRPCError` is transport and a service
+// throws a `DomainError` (ADR-0012), database access lives in `_services/` or
+// the server folder (ADR-0011), and the database package is reached through
+// its public entry points (ADR-0013).
+//
 // This is a boundary rule: it is on the not-disableable list, so a row is
 // lifted by a named allowlist entry in the shared config, in front of a
 // reviewer, not by a comment inside the module the row guards.
