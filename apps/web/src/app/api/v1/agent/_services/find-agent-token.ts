@@ -46,14 +46,6 @@ export async function findAgentToken(authHeader: string | null) {
     return null;
   }
 
-  // Fire-and-forget lastUsedAt update
-  prisma.agentToken
-    .update({
-      where: { id: agentToken.id },
-      data: { lastUsedAt: new Date() },
-    })
-    .catch(() => {});
-
   return agentToken;
 }
 

@@ -32,7 +32,9 @@
 const SERVICES_PATH_RE = /(^|\/)_services\//;
 
 // Reads never write, so this set may not be extended (ADR-0011, backend.md).
-const DEFAULT_READ_VERBS = [
+// Exported because the read-never-writes rule holds the same verbs to the
+// promise they make: one list, two rules.
+export const SERVICE_READ_VERBS = [
   "count",
   "find",
   "get",
@@ -167,7 +169,7 @@ export const servicesVerbPrefixRule = {
     if (EXEMPT_BASENAME_RE.test(basename)) return {};
 
     const options = context.options[0] || {};
-    const readVerbs = options.readVerbs || DEFAULT_READ_VERBS;
+    const readVerbs = options.readVerbs || SERVICE_READ_VERBS;
     const writeVerbs = options.writeVerbs || DEFAULT_WRITE_VERBS;
     const exemptSuffixes = options.exemptSuffixes || DEFAULT_EXEMPT_SUFFIXES;
 

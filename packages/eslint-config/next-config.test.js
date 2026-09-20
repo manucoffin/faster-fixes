@@ -20,6 +20,7 @@ const SERVICE_TEST =
 const CONVENTION_RULES = {
   "local/services-verb-prefix": SERVICE,
   "local/services-no-trpc-import": SERVICE,
+  "local/services-read-never-writes": SERVICE,
   "local/require-service-output-type": SERVICE,
   "local/no-client-import-of-services": SERVICE,
   "local/require-use-client-suffix": SERVICE,
@@ -451,6 +452,48 @@ describe("services-verb-prefix", () => {
     ]) {
       expect([file, await verbMessagesFor(file)]).toEqual([file, []]);
     }
+  });
+});
+
+describe("services-read-never-writes", () => {
+  const RULE = "local/services-read-never-writes";
+
+  async function writeMessagesFor(file, code) {
+    return messagesFor(file, code, RULE);
+  }
+
+  it("is declared once, with the read verbs the verb prefix rule reads", () => {
+    const entry = onlyEntryFor(RULE);
+    const [severity, options] = entry.rules[RULE];
+    const [, verbOptions] = onlyEntryFor("local/services-verb-prefix").rules[
+      "local/services-verb-prefix"
+    ];
+
+    expect(entry.files).toEqual(["**/_services/**/*.{ts,tsx}"]);
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual(["readVerbs"]);
+    expect(options.readVerbs).toBe(verbOptions.readVerbs);
+  });
+
+  it("reports a read-verb service that updates a row", async () => {
+    const messages = await writeMessagesFor(
+      "src/app/_domains/subscription/_services/get-active-subscription.ts",
+      `export function getActiveSubscription() {\n  return prisma.subscription.update({});\n}\n`,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain(
+      "Rename the service with a write verb",
+    );
+  });
+
+  it("leaves a write-verb service that writes alone", async () => {
+    const messages = await writeMessagesFor(
+      "src/app/_domains/subscription/_services/update-subscription.ts",
+      `export function updateSubscription() {\n  return prisma.subscription.update({});\n}\n`,
+    );
+
+    expect(messages).toEqual([]);
   });
 });
 

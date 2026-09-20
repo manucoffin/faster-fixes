@@ -477,6 +477,13 @@ export const nextJsConfig = [
     rules: {
       "local/services-no-bare-error": "error",
       "local/services-verb-prefix": ["error", serviceVerbOptions],
+      // The other half of the verb convention: the prefix rule checks that the
+      // name carries a read verb, this one checks that the name is true. It
+      // reads the same closed list, passed from the same place.
+      "local/services-read-never-writes": [
+        "error",
+        { readVerbs: serviceVerbOptions.readVerbs },
+      ],
       "local/services-no-trpc-import": "error",
     },
   },

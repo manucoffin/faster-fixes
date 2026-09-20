@@ -19,12 +19,13 @@ The boundary rules are `require-server-action-suffix`,
 named entry in `next.js`, reviewed like the three server folder exemptions, not
 a disable comment.
 
-Six rules take options from `next.js`: `require-schema-conventions`
+Seven rules take options from `next.js`: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
 (`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
 client imports of the server folder, empty today), `services-verb-prefix`
 (`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary),
+`services-read-never-writes` (`readVerbs`, the same closed list),
 `schema-must-be-pure-zod` (`allowImportPatterns`, the modules a schema may
 import beyond the built-in allowlist) and `no-cross-layer-import` (`rows`, the
 layer import table described below). `require-use-client-suffix` and
@@ -51,6 +52,17 @@ and the three modules `schemaPurityOptions` names, and every other runtime
 import is reported. A denylist only knew the leaks somebody had already met, so
 the next server-only specifier to appear in a schema was admitted by default.
 A type-only import stays free, whatever it points at.
+
+`services-read-never-writes` is the other half of the verb convention: the
+prefix rule checks that a service name carries a read verb, this one checks
+that the name is true. A file in `_services/` named `get-`, `list-`, `find-`,
+`search-`, `has-`, `is-` or `count-` may not call a Prisma write method
+(`create`, `update`, `upsert`, `delete` and their bulk forms, `$executeRaw`) on
+a database client. The receiver has to be a database client, so
+`crypto.createHash(…).update(raw)` and `response.cookies.delete(name)` are not
+writes; a read service calling a write _service_ is not reported either, since
+that service carries its own verb. It reads the same closed read list the verb
+prefix rule declares, passed to both rules from `serviceVerbOptions`.
 
 `serviceVerbOptions` in `next.js` is the service naming vocabulary in one
 place. The read verbs are closed (extending them is an ADR change, not a config

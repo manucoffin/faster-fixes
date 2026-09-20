@@ -4,10 +4,16 @@ import crypto from "crypto";
 export const DEFAULT_IMPORT_REVIEWER_NAME = "Imported feedback";
 
 /**
+ * The Reviewer an import attributes its Feedback to: the existing one under
+ * that name, reactivated if it had been deactivated, or a new one.
+ *
+ * Named `upsert-` rather than `get-or-create-`: it writes, and a read verb
+ * promises it does not.
+ *
  * Imported reviewers never authenticate via the widget, but `reviewer.token`
  * is unique + required — generate an unguessable hashed value to fill it.
  */
-export async function getOrCreateImportReviewer(
+export async function upsertImportReviewer(
   projectId: string,
   name: string,
   db: typeof prisma = prisma,
@@ -32,6 +38,6 @@ export async function getOrCreateImportReviewer(
   });
 }
 
-export type GetOrCreateImportReviewerOutput = Awaited<
-  ReturnType<typeof getOrCreateImportReviewer>
+export type UpsertImportReviewerOutput = Awaited<
+  ReturnType<typeof upsertImportReviewer>
 >;

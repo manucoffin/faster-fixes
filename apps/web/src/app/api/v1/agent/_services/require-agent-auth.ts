@@ -10,6 +10,7 @@ import {
   type AuthenticatedAgentToken,
   findAgentToken,
 } from "./find-agent-token";
+import { updateAgentTokenLastUsed } from "./update-agent-token-last-used";
 
 type AgentRateLimitKey = "agent:read" | "agent:write";
 
@@ -35,6 +36,10 @@ export async function requireAgentAuth(
   if (!agentToken) {
     return agentError("Unauthorized", "UNAUTHORIZED", 401);
   }
+
+  // Not awaited: the stamp is usage telemetry, and a slow or failing write on
+  // it must not slow down or fail the request it describes.
+  updateAgentTokenLastUsed(agentToken.id).catch(() => {});
 
   if (!hasAgentScope(agentToken.scopes, scope)) {
     return agentError("Insufficient permissions", "FORBIDDEN", 403);

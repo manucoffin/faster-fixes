@@ -41,6 +41,7 @@ const EXPECTED_CITATIONS = {
   "schema-must-be-pure-zod.js": ["0011"],
   "services-no-bare-error.js": ["0012"],
   "services-no-trpc-import.js": ["0011"],
+  "services-read-never-writes.js": ["0011"],
   "services-verb-prefix.js": ["0011"],
 };
 

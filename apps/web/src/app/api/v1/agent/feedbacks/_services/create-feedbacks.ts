@@ -9,8 +9,8 @@ import { resolveProjectId } from "../../_helpers/resolve-project-id";
 import type { CreateFeedbackItemInput } from "../../_services/agent.schema";
 import {
   DEFAULT_IMPORT_REVIEWER_NAME,
-  getOrCreateImportReviewer,
-} from "./get-or-create-import-reviewer";
+  upsertImportReviewer,
+} from "./upsert-import-reviewer";
 
 type CreateFeedbacksInput = {
   /** Public ID or internal ID, as the caller sent it. */
@@ -69,7 +69,7 @@ export async function createFeedbacks(
     }
   }
 
-  const reviewer = await getOrCreateImportReviewer(
+  const reviewer = await upsertImportReviewer(
     projectId,
     reviewerName ?? DEFAULT_IMPORT_REVIEWER_NAME,
     db,

@@ -15,6 +15,7 @@ import { requireUseClientSuffixRule } from "./require-use-client-suffix.js";
 import { schemaMustBePureZodRule } from "./schema-must-be-pure-zod.js";
 import { servicesNoBareErrorRule } from "./services-no-bare-error.js";
 import { servicesNoTrpcImportRule } from "./services-no-trpc-import.js";
+import { servicesReadNeverWritesRule } from "./services-read-never-writes.js";
 import { servicesVerbPrefixRule } from "./services-verb-prefix.js";
 
 export const localRulesPlugin = {
@@ -36,6 +37,7 @@ export const localRulesPlugin = {
     "schema-must-be-pure-zod": schemaMustBePureZodRule,
     "services-no-bare-error": servicesNoBareErrorRule,
     "services-no-trpc-import": servicesNoTrpcImportRule,
+    "services-read-never-writes": servicesReadNeverWritesRule,
     "services-verb-prefix": servicesVerbPrefixRule,
   },
 };
