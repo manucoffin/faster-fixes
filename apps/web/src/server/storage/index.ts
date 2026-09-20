@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cloudflare } from "@better-upload/server/clients";
 
 export const s3Client = cloudflare({

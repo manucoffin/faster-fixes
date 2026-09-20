@@ -1,3 +1,5 @@
+import "server-only";
+
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 

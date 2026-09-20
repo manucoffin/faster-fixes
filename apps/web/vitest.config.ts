@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 // Pinned at module load so date assertions resolve identically on every machine and in CI.
@@ -10,6 +11,14 @@ export default defineConfig({
   oxc: { jsx: { runtime: "automatic" } },
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      // The Next.js compiler resolves `server-only`; node does not, so the
+      // modules that guard themselves with it are unloadable in a test
+      // without this alias.
+      "server-only": fileURLToPath(
+        new URL("./test/server-only-stub.ts", import.meta.url),
+      ),
+    },
   },
   test: {
     include: ["src/**/*.test.{ts,tsx}"],

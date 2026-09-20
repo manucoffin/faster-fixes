@@ -1,9 +1,17 @@
-export { checkFeatureAccess, type FeatureCheckResult } from "./check-feature-access";
+import "server-only";
+
+export {
+  checkFeatureAccess,
+  type FeatureCheckResult,
+} from "./check-feature-access";
 export {
   checkOrganizationLimit,
   type OrganizationCheckResult,
 } from "./check-organization-limit";
-export { checkResourceLimit, type ResourceCheckResult } from "./check-resource-limit";
+export {
+  checkResourceLimit,
+  type ResourceCheckResult,
+} from "./check-resource-limit";
 export type {
   FeatureGateMetadata,
   PlanDenial,

@@ -1,3 +1,5 @@
+import "server-only";
+
 import Stripe from "stripe";
 
 // Only throw if Stripe is actually accessed, not during module import

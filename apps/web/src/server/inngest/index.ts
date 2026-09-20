@@ -1,3 +1,5 @@
+import "server-only";
+
 import { Inngest } from "inngest";
 
 // v4 defaults to cloud mode, which requires a signing key. Use the local
