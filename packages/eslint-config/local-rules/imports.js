@@ -33,6 +33,16 @@ export function normalizePath(filename) {
   return (filename ?? "").replace(/\\/g, "/");
 }
 
+/**
+ * True when a specifier points inside the importing file's own folder tree
+ * rather than at an alias or a package. The mock rule asks this of a
+ * `vi.mock()` argument, which is a specifier carried by a call rather than by
+ * an import declaration.
+ */
+export function isRelativeSpecifier(source) {
+  return RELATIVE_RE.test(source);
+}
+
 export function filenameOf(context) {
   return normalizePath(context.filename || context.getFilename());
 }
@@ -51,7 +61,7 @@ export function filenameOf(context) {
 
 function referenceFor(filename, node, kind) {
   const source = node.value;
-  const isRelative = RELATIVE_RE.test(source);
+  const isRelative = isRelativeSpecifier(source);
   const resolvedPath = isRelative
     ? path.posix.resolve(path.posix.dirname(filename), source)
     : null;

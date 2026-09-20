@@ -26,7 +26,7 @@ Keep the surface small and high-value. **Test only pure `_helpers/` functions an
 
 ### The route handler is the third seam
 
-A route handler that serves a contract **someone else already depends on** (the public widget API, the agent API, a registered Tracker webhook) is tested at the handler, not below it. This is the one seam where module mocks are correct, and it exists because the alternative is no coverage at all for the responses customers parse.
+A route handler that serves a contract **someone else already depends on** (the public widget API, the agent API, a registered Tracker webhook) is tested at the handler, not below it. This is the seam module mocks exist for, and it exists because the alternative is no coverage at all for the responses customers parse.
 
 - **Call the exported HTTP method function with a `Request` and assert the `Response`**: status, exact JSON body, headers. 17 `route.test.ts` files under `src/app/api/` do this today; `api/webhooks/github/route.test.ts` is the reference.
 - **Fake only infrastructure at the module boundary** (`@workspace/db`, `@/server/inngest`, a provider SDK), never the scope's own services. Nothing asserts which function the route called, in what order, or with what internal shape.
@@ -34,6 +34,20 @@ A route handler that serves a contract **someone else already depends on** (the 
 - Services extracted behind such a route get no tests of their own. They are covered through the route and can be reshaped freely.
 
 This does not reopen the scope above for ordinary handlers. A route with no external consumer is still covered by testing its helpers and injectable services.
+
+### A module mock sits at a boundary
+
+A test may not mock a module of its own scope. When a collaborator is reached through a singleton rather than through a parameter, the double is registered at a boundary, named by alias or package:
+
+- the database package (`@workspace/db`),
+- the server folder (`@/server/...`),
+- the lib folder (`@/lib/...`),
+- an external package (a provider SDK),
+- another domain's barrel (`@/app/_domains/<domain>`).
+
+A relative specifier (`./get-unique-organization-slug`, `../_helpers/...`) is **not** one of them, and `local/no-relative-test-mock` reports it on every `*.test.ts(x)` file. A relative path either pins a sibling the test should be free to reshape, or spells a boundary as if it were local code. The fix is one of two moves: mock the boundary the collaborator itself reaches (`create-organization.test.ts` fakes `@workspace/db` and lets the real slug service run against it), or inject the collaborator as a parameter and pass a fake.
+
+That boundary rule is what the 80-odd mocks in the tree already do, and it is why a `vi.mock` in a service test is not a violation of "no mocking of internals": the module faked is infrastructure, not a neighbour. The rule is not a boundary rule in the not-disableable sense, so a genuine one-off is a disable comment with a reason.
 
 ### A structural check is the fourth seam
 
@@ -48,5 +62,5 @@ Because component tests are out of scope, the harness carries no DOM tooling. `j
 ## What makes a good test
 
 - Test **external behavior at the highest seam**, feed data in, assert data out. Never assert on internals or implementation details.
-- **No mocking of internals.** Inject dependencies as plain fakes or fixtures through the function's parameters; don't reach for module mocks. The route-handler seam above is the single exception, and even there only infrastructure modules are faked.
+- **No mocking of internals.** Inject dependencies as plain fakes or fixtures through the function's parameters; don't reach for module mocks. Where a module mock is unavoidable, it sits at a boundary ("A module mock sits at a boundary" above).
 - Cover the meaningful states (empty / partial / full, allowed / denied, present / missing), not just the happy path.

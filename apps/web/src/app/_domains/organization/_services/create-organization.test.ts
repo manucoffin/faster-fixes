@@ -2,14 +2,17 @@ import { ForbiddenError } from "@/server/errors/domain-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const checkOrganizationLimitApi = vi.fn();
-const getUniqueOrganizationSlugApi = vi.fn();
+// The slug service is a sibling, so it is not mocked: it reaches the Prisma
+// singleton instead of taking the `db` parameter, and the boundary that drives
+// it is the database package. The real slug generation runs here.
+const organizationFindFirst = vi.fn();
 
 vi.mock("@/server/auth/subscription", () => ({
   checkOrganizationLimit: checkOrganizationLimitApi,
 }));
 
-vi.mock("./get-unique-organization-slug", () => ({
-  getUniqueOrganizationSlug: getUniqueOrganizationSlugApi,
+vi.mock("@workspace/db", () => ({
+  prisma: { organization: { findFirst: organizationFindFirst } },
 }));
 
 const { createOrganization } = await import("./create-organization");
@@ -33,7 +36,7 @@ const input = { name: "Acme", ownerId: "user_1" };
 describe("createOrganization", () => {
   beforeEach(() => {
     checkOrganizationLimitApi.mockReset();
-    getUniqueOrganizationSlugApi.mockReset().mockResolvedValue("acme");
+    organizationFindFirst.mockReset().mockResolvedValue(null);
   });
 
   it("refuses an owner who reached the organization limit of their plan", async () => {
@@ -55,7 +58,7 @@ describe("createOrganization", () => {
       ForbiddenError,
     );
     expect(db.organization.create).not.toHaveBeenCalled();
-    expect(getUniqueOrganizationSlugApi).not.toHaveBeenCalled();
+    expect(organizationFindFirst).not.toHaveBeenCalled();
   });
 
   it("creates the organization with its owner when the plan allows it", async () => {

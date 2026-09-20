@@ -30,6 +30,10 @@ const EXPECTED_CITATIONS = {
   "no-default-export.js": [],
   "no-feature-nesting.js": ["0010"],
   "no-raw-tailwind-colors.js": [],
+  // The boundaries a mock may sit at are the public surfaces the architecture
+  // draws: the domain barrel and the cross-cutting server folder (0010), the
+  // services layer and the lib adapters (0011).
+  "no-relative-test-mock.js": ["0010", "0011"],
   "require-schema-conventions.js": ["0011"],
   "require-server-action-suffix.js": [],
   "require-service-output-type.js": ["0011"],

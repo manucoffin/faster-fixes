@@ -111,6 +111,15 @@ convention, which is why it is wired on the whole source tree rather than on
 own service, and no consumer infers the same type with `inferProcedureOutput`
 or `inferRouterOutputs`.
 
+`no-relative-test-mock` is wired on `**/*.test.{ts,tsx}` and reads
+`vi.mock`, `vi.doMock`, `vi.unmock` and `vi.doUnmock`, including the
+`vi.mock(import("…"))` form. A relative specifier is reported: a test mocks at
+a boundary, spelled as an alias or a package (`@workspace/db`, `@/server/…`,
+`@/lib/…`, an external package, another domain's barrel), and a relative path
+either points inside the test's own scope or spells a boundary as if it were
+one. It is not a boundary rule, so a genuine one-off is a disable comment with
+a reason.
+
 `local-rules/_deprecated_no-client-import-of-server-errors.js` and
 `local-rules/_deprecated_require-trpc-output-type.js` are the empty stubs of the
 rules `no-client-import-of-server-folder` and `require-service-output-type`
@@ -121,7 +130,8 @@ four import forms (static `import`, `export … from`, `export *`, dynamic
 `import()`), resolves a relative specifier against the importing file and
 expresses it in its `@/` alias form, classifies an import as value or type, and
 answers whether a file is a client module. Every import rule reads it, so a hole
-closed once is closed everywhere. It has no test suite of its own: it is
+closed once is closed everywhere, and `no-relative-test-mock` asks it the one
+question it needs about a specifier carried by a call rather than an import. It has no test suite of its own: it is
 observed through the rules that consume it.
 
 `next-config.test.js` tests the wiring: a rule wired on the wrong glob matches

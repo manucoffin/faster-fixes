@@ -516,6 +516,15 @@ export const nextJsConfig = [
     },
   },
   {
+    // Test files only: the rule reads a `vi.mock()` call, which exists nowhere
+    // else, and the boundary it names is a boundary for a test rather than for
+    // production code.
+    files: ["**/*.test.{ts,tsx}"],
+    rules: {
+      "local/no-relative-test-mock": "error",
+    },
+  },
+  {
     files: ["**/*.schema.ts"],
     rules: {
       "local/require-schema-conventions": ["error", schemaConventionOptions],

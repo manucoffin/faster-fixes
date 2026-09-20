@@ -12,6 +12,8 @@ const SCHEMA =
   "src/app/_domains/subscription/_services/upgrade-subscription.schema.ts";
 const FEATURE =
   "src/app/(public)/_features/github-stars/github-stars-button.client.tsx";
+const SERVICE_TEST =
+  "src/app/_domains/organization/_services/create-organization.test.ts";
 
 // Every `local/` convention rule, each paired with a file its own glob matches,
 // so the severity is resolved on a path the rule really guards (ADR-0015).
@@ -33,6 +35,7 @@ const CONVENTION_RULES = {
   "local/no-cross-layer-import": SERVICE,
   "local/require-server-action-suffix": SERVICE,
   "local/services-no-bare-error": SERVICE,
+  "local/no-relative-test-mock": SERVICE_TEST,
 };
 
 /**
@@ -1144,6 +1147,73 @@ describe("no-raw-tailwind-colors", () => {
       "Avoid raw Tailwind color class `text-red-500`. Use `text-destructive` instead.",
     ]);
     expect(messages.map((message) => message.severity)).toEqual([2, 2]);
+  });
+});
+
+describe("no-relative-test-mock", () => {
+  const RULE = "local/no-relative-test-mock";
+
+  it("runs on the test files and nowhere else", async () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/*.test.{ts,tsx}"]);
+    expect(entry.rules[RULE]).toBe("error");
+
+    const severityFor = await severityResolver(RULE);
+
+    expect(await severityFor(SERVICE_TEST)).toBe(2);
+    expect(await severityFor(SERVICE)).toBeUndefined();
+    expect(await severityFor("src/app/api/v1/feedback/route.test.ts")).toBe(2);
+  });
+
+  it("reports a mock of a module of the test's own scope", async () => {
+    const messages = await messagesFor(
+      SERVICE_TEST,
+      `import { vi } from "vitest";\nvi.mock("./get-unique-organization-slug", () => ({}));\n`,
+      RULE,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("@workspace/db");
+    expect(messages[0].message).toContain("@/server/");
+    expect(messages[0].message).toContain("@/lib/");
+    expect(messages[0].message).toContain("@/app/_domains/<domain>");
+  });
+
+  it("accepts a mock at each of the legal boundaries", async () => {
+    const boundaries = [
+      "@workspace/db",
+      "@/server/auth/subscription",
+      "@/lib/mailer/client",
+      "@better-upload/server/helpers",
+      "@/app/_domains/subscription",
+    ];
+
+    for (const specifier of boundaries) {
+      const messages = await messagesFor(
+        SERVICE_TEST,
+        `import { vi } from "vitest";\nvi.mock("${specifier}", () => ({}));\n`,
+        RULE,
+      );
+
+      expect([specifier, messages]).toEqual([specifier, []]);
+    }
+  });
+
+  // A naming-shaped rule rather than a boundary one: the exception is a
+  // comment a reviewer reads in the diff, not an entry in this file.
+  it("is disableable with a reason", async () => {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(
+      `import { vi } from "vitest";\n// eslint-disable-next-line ${RULE} -- a reviewed one-off\nvi.mock("./sibling", () => ({}));\n`,
+      { filePath: SERVICE_TEST },
+    );
+
+    expect(result.messages).toEqual([]);
   });
 });
 
