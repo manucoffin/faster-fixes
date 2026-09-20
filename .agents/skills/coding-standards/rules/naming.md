@@ -23,7 +23,7 @@ The write set is **open**: prefer the **most precise accurate verb**. Unlike the
 - **Default to a generic CRUD verb** when the operation is a plain field write (`create...`, `update...`, `delete...`, `upsert...`, `send...`, …).
 - **Prefer a precise domain verb** (e.g. `archive...`, `publish...`, `book...`) when the operation is a **distinct domain transition** — it has its own call site/entry point, a distinct authorization or invariant, or it is a state transition the domain language already names. Example: `archiveSpecialization`, not `updateSpecialization`, for the dedicated "Archive" action. Coin the verb from the ubiquitous language; you don't register it anywhere.
 - **A write verb must never collide with a read verb** (a mutation never starts with `get`/`list`/etc.), so the verb still tells you read-vs-write at a glance.
-- **No synonyms of `update`**: `modify...`, `edit...`, `save...`, `change...` are banned. If it is a plain field write, it is `update...`. Check the established verbs before coining a new one.
+- **No synonyms of `update`**: `modify...`, `edit...`, `save...`, `change...` are banned. If it is a plain field write, it is `update...`. Check the established verbs before coining a new one. Inside `apps/web` `_services/`, the established set is `serviceVerbOptions.writeVerbs` in `packages/eslint-config/next.js` and `services-verb-prefix` reports a verb that is not on it, so a coined verb is added there in the same diff.
 - `handle...` is reserved for event/webhook write-orchestrations (multi-step state transitions + side effects, e.g. `handleProPaidReward`).
 
 A function is a read **iff** it performs no writes.

@@ -12,10 +12,8 @@ import {
   CreateFeedbacksSchema,
   ListFeedbacksQuerySchema,
 } from "../_services/agent.schema";
-import {
-  isAuthFailure,
-  requireAgentAuth,
-} from "../_services/require-agent-auth";
+import { isAuthFailure } from "../_helpers/is-auth-failure";
+import { requireAgentAuth } from "../_services/require-agent-auth";
 import { createFeedbacks } from "./_services/create-feedbacks";
 import { listFeedbacks } from "./_services/list-feedbacks";
 

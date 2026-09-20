@@ -18,13 +18,21 @@ The boundary rules are `require-server-action-suffix`,
 `src/server/`. An exception to one of them is a named entry in `next.js`,
 reviewed like the three server folder exemptions, not a disable comment.
 
-Three rules take options from `next.js`: `require-schema-conventions`
+Four rules take options from `next.js`: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
-(`allowPatterns`, `ignorePathPatterns` for the four home page illustrations)
-and `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
-client imports of the server folder, empty today).
+(`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
+`no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
+client imports of the server folder, empty today) and `services-verb-prefix`
+(`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary).
 `require-use-client-suffix` takes the Next.js special file names as
 `ignorePathPatterns`. No other rule declares an option.
+
+`serviceVerbOptions` in `next.js` is the service naming vocabulary in one
+place. The read verbs are closed (extending them is an ADR change, not a config
+change); the write verbs are open, so coining a domain verb is a one-line,
+reviewed addition there and the rule's report says where; the exempt suffixes
+name the `_services/` modules that are not operations (an SDK client, an error
+class, a token cipher, a cookie reader, the GitHub App factory).
 
 `local-rules/_deprecated_no-client-import-of-server-errors.js` is the empty stub
 of the rule `no-client-import-of-server-folder` replaced. Nothing imports it; it

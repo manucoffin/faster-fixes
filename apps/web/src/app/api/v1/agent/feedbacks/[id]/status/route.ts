@@ -11,10 +11,8 @@ import {
   FeedbackIdSchema,
   UpdateFeedbackStatusSchema,
 } from "../../../_services/agent.schema";
-import {
-  isAuthFailure,
-  requireAgentAuth,
-} from "../../../_services/require-agent-auth";
+import { isAuthFailure } from "../../../_helpers/is-auth-failure";
+import { requireAgentAuth } from "../../../_services/require-agent-auth";
 import { updateFeedbackStatus } from "./_services/update-feedback-status";
 
 type RouteContext = { params: Promise<{ id: string }> };

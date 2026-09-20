@@ -31,6 +31,66 @@ const useClientSuffixOptions = {
   ],
 };
 
+// The service naming vocabulary, in one place because two rules read it: the
+// verb prefix rule below, and the read-never-writes rule that holds a read verb
+// to its promise.
+//
+// The read verbs are a closed set (ADR-0011): "a verb outside this list means a
+// possible write" is the signal the whole convention rests on, so extending it
+// is not a config change, it is an ADR change. The write verbs are open, which
+// is exactly why they are listed here: coining a domain verb for a distinct
+// domain transition is a one-line, reviewed addition, and the rule's report
+// says so. The list is the vocabulary the tree uses today.
+//
+// The exempt suffixes name the `_services/` modules that are not operations (an
+// SDK client factory, an error class, a token cipher, a cookie reader, the
+// GitHub App factory). Naming one `get-…` would lie about what it is.
+const serviceVerbOptions = {
+  readVerbs: ["count", "find", "get", "has", "is", "list", "search"],
+  writeVerbs: [
+    "accept",
+    "add",
+    "complete",
+    "create",
+    "delete",
+    "disconnect",
+    "handle",
+    "impersonate",
+    "leave",
+    "link",
+    "notify",
+    "refresh",
+    "regenerate",
+    "register",
+    "reject",
+    "request",
+    "require",
+    "reset",
+    "restore",
+    "revoke",
+    "select",
+    "send",
+    "sign",
+    "stop",
+    "sync",
+    "toggle",
+    "unlink",
+    "update",
+    "upgrade",
+    "upsert",
+  ],
+  exemptSuffixes: [
+    "access",
+    "app",
+    "client",
+    "cookie",
+    "crypto",
+    "error",
+    "errors",
+    "registration",
+  ],
+};
+
 // The sanctioned exceptions to the client/server boundary: a client module may
 // import a runtime value from these server folder modules and no others. Empty
 // on purpose. A module of the server folder that a client may call is a module
@@ -175,7 +235,7 @@ export const nextJsConfig = [
     files: ["**/_services/**/*.{ts,tsx}"],
     rules: {
       "local/services-no-bare-error": "error",
-      "local/services-verb-prefix": "error",
+      "local/services-verb-prefix": ["error", serviceVerbOptions],
       "local/services-no-trpc-import": "error",
       "local/require-trpc-output-type": "error",
     },

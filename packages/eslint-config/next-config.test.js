@@ -206,6 +206,90 @@ describe("services-no-bare-error", () => {
   });
 });
 
+describe("services-verb-prefix", () => {
+  const RULE = "local/services-verb-prefix";
+  const INTEGRATION = "src/app/_domains/integration/_services";
+
+  async function verbMessagesFor(file) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(`export function anything() {}\n`, {
+      filePath: file,
+    });
+
+    return result.messages.filter((message) => message.ruleId === RULE);
+  }
+
+  it("is declared once, with the three vocabulary lists", () => {
+    const entry = onlyEntryFor(RULE);
+    const [severity, options] = entry.rules[RULE];
+
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual([
+      "readVerbs",
+      "writeVerbs",
+      "exemptSuffixes",
+    ]);
+  });
+
+  // Closed set: a read verb added here would be an ADR change, not a config
+  // one, so the list is pinned rather than counted.
+  it("passes the closed read set of ADR-0011", () => {
+    const [, options] = onlyEntryFor(RULE).rules[RULE];
+
+    expect(options.readVerbs).toEqual([
+      "count",
+      "find",
+      "get",
+      "has",
+      "is",
+      "list",
+      "search",
+    ]);
+  });
+
+  it("passes an open write set that covers the verbs the tree uses", () => {
+    const [, options] = onlyEntryFor(RULE).rules[RULE];
+
+    for (const verb of ["create", "update", "delete", "upsert", "handle"]) {
+      expect([verb, options.writeVerbs]).toEqual([
+        verb,
+        expect.arrayContaining([verb]),
+      ]);
+    }
+    expect(options.writeVerbs).not.toContain("edit");
+  });
+
+  it("reports a noun-named service and says how to add a verb", async () => {
+    const messages = await verbMessagesFor(
+      "src/app/_domains/subscription/_services/plan-summary.ts",
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain(
+      "add it to `serviceVerbOptions.writeVerbs`",
+    );
+  });
+
+  it("leaves the integration modules exempt by suffix alone", async () => {
+    for (const file of [
+      `${INTEGRATION}/github/github-app.ts`,
+      `${INTEGRATION}/jira/jira-rest-client.ts`,
+      `${INTEGRATION}/jira/jira-errors.ts`,
+      `${INTEGRATION}/jira/token-access.ts`,
+      `${INTEGRATION}/jira/token-crypto.ts`,
+      `${INTEGRATION}/jira/webhook-registration.ts`,
+      `${INTEGRATION}/linear/linear-request-error.ts`,
+      `${INTEGRATION}/oauth-state-cookie.ts`,
+    ]) {
+      expect([file, await verbMessagesFor(file)]).toEqual([file, []]);
+    }
+  });
+});
+
 describe("the server folder import lock", () => {
   const DEEP = "@/app/_domains/integration/_services/jira/jira-errors";
   const BARREL = "@/app/_domains/subscription";

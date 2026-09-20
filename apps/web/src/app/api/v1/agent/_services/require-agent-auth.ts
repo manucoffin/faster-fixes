@@ -80,9 +80,3 @@ export async function requireAgentAuth(
 
   return agentToken;
 }
-
-export function isAuthFailure(
-  result: AuthenticatedAgentToken | NextResponse,
-): result is NextResponse {
-  return result instanceof NextResponse;
-}
