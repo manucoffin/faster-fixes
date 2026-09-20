@@ -12,9 +12,11 @@ Errors travel from a service throw, through a transport boundary, to one of four
 
 A second-level subclass of one of the five is allowed when a caller has to tell cases apart, and then carries its own fields and its own copy: the three expected Jira failures (`JiraNotConnectedError`, `JiraReauthRequiredError`, `JiraIssueConfigurationError` in `@/app/_domains/integration/_services/jira/jira-errors`) extend `PreconditionFailedError`, so `instanceof` discriminates them while the transported code stays `PRECONDITION_FAILED`. The five _codes_ remain a closed set: a new code amends ADR 0012.
 
-Client code never imports `@/server/errors/*` and never relies on `instanceof DomainError` (it does not survive serialization). Branch on the transported code instead: `error.data.code` (tRPC).
+Client code never imports `@/server/errors/*` and never relies on `instanceof DomainError` (it does not survive serialization). Branch on the transported code instead: `error.data.code` (tRPC). Both halves are enforced: `local/no-client-import-of-server-folder` for the import, `local/no-client-domain-error-instanceof` for the always-false branch.
 
 ## Choosing among the five codes
+
+**Prose only**, no rule, for this whole section and for "Telling a refusal from an outage" below: which of the five codes fits a failure, and whether a `catch` is reading the provider's status or the fact that something threw, are semantic judgements no linter makes.
 
 - **A rejected input is `BAD_REQUEST`; an unmet state of the world is `PRECONDITION_FAILED`.** A wrong password, a rejected credential and an invalid or missing reset token are rejected inputs, not missing sessions, so they are `BadRequestError`. A well-formed, permitted request that fails because of something outside the caller's input (an unverified email, a disconnected Installation, a link the user must repair) is `PreconditionFailedError`. `ForbiddenError` stays for permission facts; `UNAUTHORIZED` does not exist, because identity is established at the transport edge before a service runs.
 - **A message is never a machine sentinel.** When a client must branch on a case, reserve the transported **code** to that case in the service rather than shipping a marker string: `signInUser` throws `PreconditionFailedError("Verify your email address before signing in.")` for the unverified email and nothing else, so `login-form.client.tsx` can branch on `error.data?.code === "PRECONDITION_FAILED"` to keep offering the resend. A sentinel such as `ForbiddenError("EMAIL_NOT_VERIFIED")` fails twice: it leaks a machine token as user copy and it burns a code for nothing.
@@ -34,12 +36,16 @@ An Integration that fails must not be marked **Reconnect required** for a transi
 
 ## The four display channels
 
+Of the four, only the `Errored` branch of a query carries a rule, and only for one shape: `query.data ?? []` is reported by `local/no-restricted-patterns` (see [frontend.md](frontend.md)). The rest is **prose only**.
+
 - **Mutations (tRPC mutation / server action): toast.** Read the message from the failed mutation/action and show it via the Sonner toast. The message is already final copy for `DomainError`s, and an `INTERNAL_SERVER_ERROR` arrives pre-masked, so toasting `error.message` never leaks an internal message.
 - **Queries (tRPC query): `matchQueryStatus`.** Handle the `Errored` branch declaratively (see [frontend.md](frontend.md)); render `error.message`, never a raw stack.
 - **Forms (invalid input): zod field errors.** Validation failures surface as per-field messages from the zod schema, not a toast. tRPC `BAD_REQUEST` with a `ZodError` cause is exposed under `error.data.zodError`.
 - **Render crashes and navigation interrupts: route boundaries.** `error.tsx` (render crash), `not-found.tsx` (`notFound()`), `forbidden.tsx` (`forbidden()`), `unauthorized.tsx` (`unauthorized()`). Root `error.tsx` / `global-error.tsx` are the catch-all; a per-shell `error.tsx` exists to render the same screen inside its layout, not to change the copy. An error boundary receives `error` and `retry`.
 
 ## Boundary conventions
+
+**Prose only**, no rule, for this whole section and for "Logging" below. The boundary files are the Next.js special files, exempt from the suffix and default export rules by definition, and what they render is a judgement about output.
 
 - Every boundary file renders the shared `ErrorScreen` (`@/app/_components/error-screen`) with copy from `@/app/_constants/error-screens` and its actions as children (a retry button, a link out). Do not hand-roll the layout and do not inline the copy: six files use it today (`app/{error,global-error,not-found,forbidden,unauthorized}.tsx` and `app/(authenticated)/error.tsx`, which keeps the sidebar and the header on a dashboard render error).
 - A boundary must never render `error.message`: Server Component errors carry a masked digest, and an unexpected message may leak internals. Log the raw error in `useEffect`; show fixed copy to the user. `digest` is not declared in the boundary props type at all (`{ error: Error; retry: () => void }`), so it is unrenderable by construction rather than by discipline.
@@ -64,7 +70,8 @@ The `errorFormatter` replaces the **message** of an `INTERNAL_SERVER_ERROR` and 
 
 ## Anti-patterns
 
-- Never show a raw `error.message`, stack, or `digest` to the user.
-- Never `instanceof DomainError` in client code, or import server error modules into a `.client.tsx` / `"use client"` module.
-- Never toast a validation error that belongs inline on a form field.
-- Never add a per-shell `error.tsx` that duplicates `ErrorScreen`'s markup.
+- Never show a raw `error.message`, stack, or `digest` to the user. **Prose only**, no rule.
+- Never `instanceof DomainError` in client code (`local/no-client-domain-error-instanceof`), or import server error modules into a `.client.tsx` / `"use client"` module (`local/no-client-import-of-server-folder`). Both are boundary rules and neither can be switched off by a disable comment.
+- Never throw a bare `Error` or a `TRPCError` from a service: `local/services-no-bare-error` reports the first, and the `TRPCError` row of `local/no-cross-layer-import` confines `@trpc/server` to a router and `src/server/trpc/`.
+- Never toast a validation error that belongs inline on a form field. **Prose only**, no rule.
+- Never add a per-shell `error.tsx` that duplicates `ErrorScreen`'s markup. **Prose only**, no rule.

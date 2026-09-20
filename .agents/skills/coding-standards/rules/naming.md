@@ -6,15 +6,18 @@ Consistent verb/resource/file naming for functions, methods, and files across th
 
 ## Read verbs (never write)
 
+Inside `apps/web/src/app/**/_services/`, enforced by `local/services-verb-prefix` (the basename carries a verb from the closed read list or the open write list) and `local/services-read-never-writes` (a read-verb file may call no Prisma write method). Elsewhere in the repo the vocabulary below is **prose only**.
+
 - `get...` for a single item (one / by-id).
 - `list...` for collections (single entrypoint with an options object).
 - `find...` for a nullable lookup.
 - `search...` for a query.
 - `has...` / `is...` for predicates (IO-predicate in `_services/`, pure predicate in `_helpers/`).
 - `count...` for counting operations.
+- `get-all-...` and `get-paginated-...` are reported by name: one `list-` entrypoint takes an options object.
 - **Computed reads use `get...` + the result noun.** A function that derives a result from queries but writes nothing (feasibility, suggestions, a preview, a resolved default) is still a read: name the **result**, not the process — `getSessionFeasibility` not `evaluateSessionFeasibility`, `getSessionSlotSuggestions` not `suggestSessionSlots`. Process verbs (`evaluate...`, `suggest...`, `preview...`, `resolve...`, `compute...`) are never read verbs.
-- Reserve `fetch...` for external APIs only.
-- Reserve `load...` for file/data loading.
+- Reserve `fetch...` for external APIs only. **Prose only**: `fetch-` is not on the service verb lists, so inside `_services/` it is reported as an unknown verb.
+- Reserve `load...` for file/data loading. **Prose only**, same caveat.
 
 ## Write verbs
 
@@ -30,17 +33,17 @@ A function is a read **iff** it performs no writes.
 
 ## Resource naming
 
-- `singular+ById` for single items: `getUserById` (or `getUser`).
-- `plural` for collections: `listUsers`.
-- Match function names to file names.
+- `singular+ById` for single items: `getUserById` (or `getUser`). **Prose only**, no rule.
+- `plural` for collections: `listUsers`. **Prose only**, no rule.
+- Match function names to file names. Enforced inside `_services/` by `local/services-verb-prefix`, which compares the exported function's name against the camelCase of the basename, ignoring letter case so a proper noun keeps its house spelling. **Prose only** everywhere else.
 
 ## Collection operations
 
-- One list entrypoint per shape.
+- One list entrypoint per shape. The `get-all-`/`get-paginated-` half is enforced by `local/services-verb-prefix`; the shape of the options object is **prose only**.
 - Consolidate filtering/pagination/sorting in an `opts` object — no separate `getAllUsers`, `getPaginatedUsers`, etc.
 
 ```ts
-interface ListOptions {
+type ListOptions = {
   filter?: {...}
   sort?: { field: keyof T; dir: 'asc' | 'desc' }
   page?: { skip: number; take: number }
@@ -50,6 +53,8 @@ listUsers(opts?: ListOptions)
 ```
 
 ## File naming
+
+**Prose only** apart from the verb prefix, which `local/services-verb-prefix` holds inside `_services/`.
 
 - kebab-case file names.
 - Match the CRUD verb in the file name: `get-user.ts` / `get-user-by-id.ts`, `list-users.ts`.

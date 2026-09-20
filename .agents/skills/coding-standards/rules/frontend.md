@@ -6,11 +6,11 @@ Everything for building UI in `apps/web`. For where files go, see [architecture.
 
 Export pattern:
 
-- Always use `export function` syntax.
-- Never use default exports, anywhere under `src/`. The Next.js special files (`page`, `layout`, `error`, `not-found`, `sitemap`, `manifest`, …) are the one exception: the framework requires a default export from them.
+- Always use `export function` syntax. Enforced by `react/function-component-definition`, which allows an arrow only for an unnamed component (an inline render prop).
+- Never use default exports, anywhere under `src/`. The Next.js special files (`page`, `layout`, `error`, `not-found`, `sitemap`, `manifest`, …) are the one exception: the framework requires a default export from them. Enforced by `local/no-default-export`, which also reports `export { X as default }` and reads the special file names from one anchored list in `packages/eslint-config/next.js`.
 - Use named exports consistently.
 
-Props pattern:
+Props pattern (**prose only**, no rule):
 
 - Pass a props object as the first parameter.
 - Define a separate props type, destructure in the parameter list, type it inline.
@@ -28,21 +28,16 @@ export function MyComponent({ prop1, prop2 }: MyComponentProps) {
 
 ## Client components
 
-- Start the file with the `'use client'` directive.
-- Name the file `*.client.tsx` (see [architecture.md](architecture.md)).
+- Start the file with the `'use client'` directive, and name the file `*.client.tsx` (see [architecture.md](architecture.md)). The two halves are one convention and `local/require-use-client-suffix` holds both: a `'use client'` module without the suffix, and a `*.client.tsx` file without the directive. `use-*` hooks, `*.context.tsx` and the Next.js special files are exempt.
 - Use `useState` and React hooks as normal.
-- Handle browser APIs with hydration safety: guard browser-only code with `typeof window`, or use the `use-is-client` hook pattern.
-- Prevent hydration mismatches with proper client checks.
-- A client file must **not** import from a `_services/` path (except `*.schema.ts`); use a tRPC hook or a server component instead.
+- Handle browser APIs with hydration safety (**prose only**, no rule): guard browser-only code with `typeof window`, or use the `use-is-client` hook pattern.
+- Prevent hydration mismatches with proper client checks (**prose only**, no rule).
+- A client file must **not** import from a `_services/` path (except `*.schema.ts` and type-only imports); use a tRPC hook or a server component instead. Enforced by `local/no-client-import-of-services`.
+- A client file must **not** import a runtime value from `@/server/**` either. Enforced by `local/no-client-import-of-server-folder`. See [backend.md](backend.md).
 
 ## TailwindCSS
 
-Spacing and layout:
-
-- Use `flex gap-n` over `space-y-n` / `space-x-n`.
-- Combine with `flex-col` for vertical spacing.
-
-Opacity:
+Opacity (**prose only**, no rule):
 
 - Use `bg-white/50` over `bg-white bg-opacity-50`.
 
@@ -51,12 +46,14 @@ Theme variables:
 - Use semantic theme tokens over hardcoded colors.
 - Prefer `text-muted-foreground` over `text-gray-500`.
 - Follow design-system color tokens. The theme defines `muted-foreground`, `destructive`, `success`, `primary`, `secondary`, `border` and `foreground` in `packages/ui/src/styles/globals.css`. There is no `warning` and no `info` token; adding one is a two-step change, the CSS variable **and** a line in the lint rule's hue table, and until both land the yellow, amber and blue sites stay raw and unreported.
-- **`no-raw-tailwind-colors` is driven by a hue-to-token table**, `HUE_TOKENS` in `packages/eslint-config/local-rules/no-raw-tailwind-colors.js`: `red` maps to `destructive`, `green` and `emerald` to `success`, the neutral hues to `muted` / `border` / `foreground`. **A hue absent from the table is never reported**, so the rule can never demand a token that does not exist. A neutral hue's message names all three candidates, because the right one depends on what the class is for. The table is the rule's own, so the shared config passes only `allowPatterns` and `ignorePathPatterns`.
+- **`local/no-raw-tailwind-colors` is driven by a hue-to-token table**, `HUE_TOKENS` in `packages/eslint-config/local-rules/no-raw-tailwind-colors.js`: `red` maps to `destructive`, `green` and `emerald` to `success`, the neutral hues to `muted` / `border` / `foreground`. **A hue absent from the table is never reported**, so the rule can never demand a token that does not exist. A neutral hue's message names all three candidates, because the right one depends on what the class is for. The table is the rule's own, so the shared config passes only `allowPatterns` and `ignorePathPatterns`.
 - **The rule reads every string literal and template chunk in the file**, not only a `className` attribute or a `cn()` argument. A ternary branch, a constant map of status classes and a `cva` variant value are all checked, so moving a class string out of the attribute is not a way round the rule.
 - **A `dark:` variant disappears when a class becomes a token; it is not ported.** A semantic token carries its own light and dark values, so `text-green-600 dark:text-green-400` collapses to `text-success`, never `text-success dark:text-success-400`. If the dark rendering is then wrong, that is a theme question (fix `--success` in `globals.css`), not a class question.
 - **The four home-page illustration files are permanently exempt** through anchored `ignorePathPatterns` entries: `hero/hero-flow-animation.client.tsx`, `how-it-works/flow-animations.tsx`, `before-after-section.tsx` and `problem/problem-chat-animation.client.tsx`. They are drawn mock screens whose fixed colours are the point. Do not "fix" them and do not remove the exemptions.
 
 ## TanStack Query status handling
+
+**Prose only**, no rule, for the whole of this section except the `query.data ?? []` ban below: whether a branch is imperative, whether a `Loading` renders a `<Skeleton>` shaped like its content, and which folder's `Errored` convention wins are judgements about rendered output that a linter reading one file cannot make.
 
 - Use the `matchQueryStatus` utility for query states; do not write imperative `isLoading`/`isError` branches.
 - Handle all four states: `Loading`, `Errored`, `Empty`, `Success`.
@@ -71,7 +68,7 @@ Each state has a required component, so the four branches look the same everywhe
 
 ### What an `Errored` branch must never do
 
-- **Never pass `query.data ?? []` into a child list, select or picker.** A failed read then renders "No teams available": an empty state standing in for an error. Nest `matchQueryStatus` around the picker instead.
+- **Never pass `query.data ?? []` into a child list, select or picker.** A failed read then renders "No teams available": an empty state standing in for an error. Nest `matchQueryStatus` around the picker instead. This one is enforced, by `local/no-restricted-patterns`.
 - **Never fall back to a default that enables a destructive or duplicating action.** `isDefault ?? false` left `Delete organization` enabled and pointed at a default Organization; a `Not subscribed` fallback invited an admin to create a second Subscription. This is a safety rule, not a cosmetic one.
 - **Exemption:** a value read only to enable a control may skip the `Errored` branch when failure yields the safe outcome, especially when the same query's failure is already on screen elsewhere on the page. The delete-confirmation name is the live case: empty on failure, so the input can never match and `Delete` stays disabled.
 - **Exemption:** a table that owns its search field and its pagination keeps its own `isError` branch, because converting it to `matchQueryStatus` would remove the search field on a failure. Only its copy goes through `getErrorMessage`.
@@ -131,6 +128,8 @@ export function PostsList() {
 
 ## Forms (create/edit)
 
+**Prose only**, no rule, for this whole section.
+
 - Build on the project `Form` component with `react-hook-form` + `zodResolver`. No hand-rolled form state.
 - **Never drive form state with `useEffect`.** `react-hook-form` owns it: use `defaultValues`, `values`, `reset()`, or `useFormContext()`. An effect that syncs props into the form is a bug waiting to happen.
 - When a form is used for both create and edit: split into a dialog wrapper (fetches data, `matchQueryStatus`) and a pure form component (receives loaded data as props).
@@ -141,7 +140,11 @@ export function PostsList() {
 ## User-facing copy
 
 - English only. Professional, clear, and concise: match the tone of serious developer tools
-  (Vercel, Linear, Stripe).
+  (Vercel, Linear, Stripe). **Prose only**, no rule.
 - No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated
-  wording.
-- Never use the em dash character; use a comma, colon, or period.
+  wording. **Prose only**, no rule: an exclamation mark is legitimate inside a quoted string, a
+  regular expression or a shell snippet, so a character ban would report more noise than copy.
+- Never use the em dash character; use a comma, colon, or period. Enforced by
+  `local/no-em-dash-in-copy` over string literals, JSX text and template chunks in
+  `apps/web/src/**`, and by `apps/web/src/mdx-no-em-dash.test.ts` over the `.mdx` content ESLint
+  cannot parse.

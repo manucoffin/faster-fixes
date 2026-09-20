@@ -11,6 +11,8 @@ Shared by the backend (tRPC `.input()`) and the frontend (form resolver), so thi
 
 ## File structure
 
+**Prose only**, no rule. "Tightly coupled" is the whole of the judgement here and a linter cannot read it: a rule counting exported schemas would reject the multi-step form the section below asks for.
+
 - **One exported schema per file by default.** The file is named after that schema's operation (`update-client.schema.ts`).
 - **Multiple schemas in one file only when they are tightly coupled** — a base schema plus the schema(s) composed from it, or pieces that assemble into one final schema defined in the **same** file (e.g. multi-step forms: `Step1Schema` + `Step2Schema` -> `SignupSchema`).
 - Do **not** split tightly-coupled schemas across files just to honor one-per-file. Do **not** bundle unrelated schemas into one file for convenience (no junk-drawer schema files).
@@ -27,9 +29,11 @@ Shared by the backend (tRPC `.input()`) and the frontend (form resolver), so thi
   ```
 
 - Use `.extend()`, `.partial()`, `.omit()` to derive schemas. A derived schema lives in its own file (one schema per file) unless it is tightly coupled to its base (see above).
-- **`.merge()` is deprecated in zod 4.** Spread the other schema's shape instead: `Base.extend(Other.partial().shape)`, or `z.object({ ...Base.shape, ...Other.shape })` for the best `tsc` performance.
+- **`.merge()` is deprecated in zod 4**, and reported by `local/require-schema-conventions`. Spread the other schema's shape instead: `Base.extend(Other.partial().shape)`, or `z.object({ ...Base.shape, ...Other.shape })` for the best `tsc` performance.
 
 ## Schema naming
+
+Enforced by `local/require-schema-conventions` on `**/*.schema.ts`: a `*.schema.ts` exports at least one schema, its name is PascalCase and ends in `Schema`. The verb the prefix mirrors is **prose only**, because the schema and its service sit in different files.
 
 - **PascalCase**, suffixed with `Schema`: `CreateInvoiceSchema`.
 - **The prefix mirrors the service operation the schema validates** — the schema, the function, and the file all carry the same verb:
@@ -38,6 +42,8 @@ Shared by the backend (tRPC `.input()`) and the frontend (form resolver), so thi
 - The verb set follows [naming.md](naming.md): generic CRUD verbs by default, a precise domain verb (`Archive`, `Restore`, `Reorder`, ...) when the operation is a distinct domain transition. Banned synonyms of `update` (`edit`/`modify`/`save`/`change`) are banned here too: it is `UpdateClientSchema`, not `EditClientSchema`.
 
 ## Type extraction
+
+Enforced by `local/require-schema-conventions`: an `Input` type is `z.infer` of a schema declared in the same file, a `Values` type is `z.input` of one, and a plural `Inputs` suffix is reported. A schema fragment that exports no `Input` type is fine, and a type that validates something other than an input keeps its real name, as the caveat below says.
 
 - Infer the type with `z.infer<typeof SchemaName>`.
 - **Name the type by replacing the `Schema` suffix with `Input`** — drop `Schema`, do not keep it:
@@ -77,10 +83,10 @@ Only add `XValues` when input and output actually diverge. A schema with no `.de
 
 ## Prisma integration
 
-- Use **`z.enum(PrismaEnum)`** for a Prisma enum. `apps/web` is on zod 4, where `z.enum()` is overloaded to absorb an enum-like object, and **`z.nativeEnum()` is deprecated**.
-- Never hand-write `z.enum(["A", "B"])` to mirror a DB-backed enum: it silently drifts from the schema. Import the enum from `@workspace/db/generated/prisma/enums` and pass it to `z.enum()`.
+- Use **`z.enum(PrismaEnum)`** for a Prisma enum. `apps/web` is on zod 4, where `z.enum()` is overloaded to absorb an enum-like object, and **`z.nativeEnum()` is deprecated** and reported by `local/require-schema-conventions`.
+- Never hand-write `z.enum(["A", "B"])` to mirror a DB-backed enum: it silently drifts from the schema. **Prose only**, no rule: a literal list is indistinguishable from a legitimate local const array. Import the enum from `@workspace/db/generated/prisma/enums` and pass it to `z.enum()`.
 - `z.enum()` is also how you declare a local const array of string literals (`z.enum(ALLOWED_FILE_TYPES)`) that is not a Prisma enum. Same function, both cases.
-- **`@workspace/db/generated/prisma/enums` is the only database specifier a schema may import.** It is the one database entry point on the `schema-must-be-pure-zod` allowlist: the enums module is types and string unions, while `@workspace/db`, `@workspace/db/index` and `@workspace/db/generated/prisma/client` pull the client into a module a client form imports.
+- **`@workspace/db/generated/prisma/enums` is the only database specifier a schema may import**, enforced by `local/schema-must-be-pure-zod` and, for the rest of the app source, by the database entry point row of `local/no-cross-layer-import`. It is the one database entry point on the `schema-must-be-pure-zod` allowlist: the enums module is types and string unions, while `@workspace/db`, `@workspace/db/index` and `@workspace/db/generated/prisma/client` pull the client into a module a client form imports.
 
 ## Example
 

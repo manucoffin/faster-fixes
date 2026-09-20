@@ -4,24 +4,33 @@ How big a file may get and when to split it. Applies to any file you write or re
 
 ## Readability
 
-Flag and fix these, they are almost always mechanical:
+Flag and fix these, they are almost always mechanical. Three of the six are enforced; the rest
+are review judgements.
 
-- Nested conditionals → early returns / guard clauses.
-- Deeply nested ternaries → extract to a named variable or an `if` block.
-- Boolean flag props/params → separate components, separate functions, or a named options object.
-- The same expression repeated 3+ times → extract to a variable or a helper.
-- `else` after a `return` or a `throw` → drop it.
-- `as unknown as Type` casts, `// @ts-ignore`, `// @ts-expect-error` without a reason → fix the underlying type instead.
+- Nested conditionals → early returns / guard clauses. **Prose only**, no rule.
+- Deeply nested ternaries → extract to a named variable or an `if` block. Enforced by
+  `no-nested-ternary`.
+- Boolean flag props/params → separate components, separate functions, or a named options object. **Prose only**, no rule.
+- The same expression repeated 3+ times → extract to a variable or a helper. **Prose only**, no rule.
+- `else` after a `return` or a `throw` → drop it. Enforced by `no-else-return`.
+- `as unknown as Type` casts → fix the underlying type instead. Enforced by
+  `local/no-restricted-patterns`, which spares `*.test.ts(x)`: a service test builds a partial fake
+  of the Prisma client and passes it through the dependency-injection seam. `// @ts-ignore` and
+  `// @ts-expect-error` without a reason are **prose only**.
 
 ## Size thresholds
 
-Thresholds are a smell signal, not a hard limit. **Flag, do not auto-split**: where the seam goes needs judgement.
+**Prose only**, no rule, and deliberately so. Thresholds are a smell signal, not a hard limit:
+**flag, do not auto-split**, because where the seam goes needs judgement. A zero-warning lint has
+no way to say "look at this" without also saying "this cannot land".
 
 - Component file (`*.client.tsx` / `*.server.tsx`): **> 250 lines**.
 - Hook, helper, schema, or service file: **> 150 lines**.
 - Exception: mostly-declarative JSX with no logic branches may stay longer if it is genuinely one cohesive block.
 
 ## Single-responsibility red flags
+
+**Prose only**, no rule.
 
 A component is doing too much if it combines any 2+ of:
 

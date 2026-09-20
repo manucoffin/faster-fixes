@@ -1,5 +1,7 @@
 // A module inside `_domains/<a>/` may only reach `_domains/<b>/` through that
-// domain's public barrel, addressed by its alias (`@/app/_domains/<b>`).
+// domain's public barrel, addressed by its alias (`@/app/_domains/<b>`). This
+// is the domain encapsulation ADR-0010 draws: every domain exposes one public
+// surface and other domains may import that path and no other.
 // Three shapes are blocked: an alias deep path, a relative specifier that
 // resolves inside another domain (at any depth, its barrel included, since a
 // relative path to `index.ts` is not the public address), and any of the four

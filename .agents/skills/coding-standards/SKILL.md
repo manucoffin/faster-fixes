@@ -20,7 +20,10 @@ Three facts settle most placement questions:
 
 - **All code under `src/app` follows these rule files.** The rules that guard the structure report at
   `error` in plain `pnpm lint` everywhere, with no per-scope allowlist, and report nothing today: a
-  violation is a regression, not a burn-down item (ADR-0015).
+  violation is a regression, not a burn-down item (ADR-0015). Every convention below either names
+  the lint rule or the test that enforces it, or is marked **prose only**, which means no check
+  holds it and a reviewer does. The complete rule set is listed in `rules/backend.md`
+  ("Enforced by ESLint") and in `packages/eslint-config/README.md`.
 - **`src/server/` accepts a new file under two conditions only**: it is wiring (it configures or
   instantiates a library for the whole application and makes no business decision), or it is a
   cross-cutting abstraction at least two domains or transports need whose server implementation no

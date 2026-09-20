@@ -4,13 +4,13 @@ The data/IO layer lives in a per-scope `_services/` folder; tRPC is thin transpo
 
 ## The `_services/` folder
 
-- `_services/` is the **data/IO layer** of a scope (a domain or a route segment): reads, writes, IO-predicates, write-orchestrations, `*.inngest.ts` jobs, and `*.schema.ts`.
-- Files are **plain-named after their export** with a load-bearing **verb prefix** — `get-user.ts` exports `getUser`. **No role suffixes** (`*.server.query.ts`, `*.trpc.query.ts` are gone).
-- **All data ops go here, even single-use.** A solitary query still lives in `_services/`, not colocated in a feature. Control clutter with route-tree granularity (each segment owns its `_services/` + router) and, secondarily, subfolders inside `_services/` when ~3+ files cluster.
+- `_services/` is the **data/IO layer** of a scope (a domain or a route segment): reads, writes, IO-predicates, write-orchestrations, `*.inngest.ts` jobs, and `*.schema.ts`. An `*.inngest.ts` file may sit nowhere else, and `createFunction` may be called nowhere else: enforced by `local/require-inngest-function-placement`.
+- Files are **plain-named after their export** with a load-bearing **verb prefix** — `get-user.ts` exports `getUser`. **No role suffixes** (`*.server.query.ts`, `*.trpc.query.ts` are gone). The verb and the export name are enforced by `local/services-verb-prefix`; the absence of role suffixes is **prose only**.
+- **All data ops go here, even single-use** (**prose only**, no rule). A solitary query still lives in `_services/`, not colocated in a feature. Control clutter with route-tree granularity (each segment owns its `_services/` + router) and, secondarily, subfolders inside `_services/` when ~3+ files cluster. The database import half is enforced: outside `_services/` and `src/server/`, a runtime `@workspace/db` import is a row of `local/no-cross-layer-import`.
 
 ## Verb vocabulary (enforced)
 
-A file is a **read iff it performs no writes**, and a read may use only read verbs. Full vocabulary in [naming.md](naming.md).
+A file is a **read iff it performs no writes**, and a read may use only read verbs. Full vocabulary in [naming.md](naming.md). Two rules split the job: `local/services-verb-prefix` checks that the name carries a verb from the vocabulary, and `local/services-read-never-writes` checks that a read-verb name is true, by reporting a Prisma write method called on a database client from a `get-`, `list-`, `find-`, `search-`, `has-`, `is-` or `count-` file.
 
 - **Reads** (never write) — **CLOSED set, you may not extend it**: `get-` (one / by-id), `list-` (collections, single entrypoint with an options object — no `getAllX`/`getPaginatedX`), `find-` (nullable lookup), `search-` (query), `has-` / `is-` (IO-predicates), `count-`. A **computed read** (derives a result from queries but writes nothing — a feasibility check, slot suggestions, a preview) is still a read: use `get-` and name the **result noun** (`get-session-feasibility`, `get-session-slot-suggestions`), never a process verb (`evaluate-`, `suggest-`, `preview-`, `resolve-`, `compute-`).
 - **Writes** — **OPEN set, prefer the most precise accurate verb**. Generic CRUD verbs by default (`create-`, `update-`, `delete-`, `send-`, `upsert-`, `mark-`, `convert-`, `duplicate-`, `validate-`, `export-`, `handle-`); a precise domain verb (`archive-`, `restore-`, `reorder-`, `promote-`, …) is preferred when the operation is a **distinct domain transition** (its own entry point, a distinct authorization/invariant, or a state transition the domain already names). A write verb must **never** collide with a read verb. No synonyms of `update` (`edit-`/`modify-`/`save-`/`change-`). The enforced list is `serviceVerbOptions.writeVerbs` in `packages/eslint-config/next.js`: a verb the tree does not use yet is added there in the same diff as the service that needs it, which is how coining one stays a reviewed decision. Full guidance in [naming.md](naming.md).
@@ -31,7 +31,7 @@ Renaming or relocating a `*.inngest.ts` service must not change its Inngest func
 
 ## Transport-agnostic services (Option B)
 
-- A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`). It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
+- A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`), enforced by `local/services-no-trpc-import`, and never imports `next/server`, `next/headers` or `next/navigation` at runtime, enforced by the service row of `local/no-cross-layer-import`. It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
 - The **type source of truth** is the service's return type, exported from the service file as `<Service>Output`: `export type GetUserOutput = Awaited<ReturnType<typeof getUser>>`. The alias is named after the file's own service and built from `typeof` it, so a `ReturnType` of some other function does not stand in for it. Do **not** use `inferProcedureOutput` as the canonical output type: `require-service-output-type` reports it, and `inferRouterOutputs`, in consumer code.
 - A service **throws a `DomainError` subclass** for an expected failure, never `TRPCError` and never a bare `Error`. The vocabulary lives in `@/server/errors/domain-errors` (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) and exists since migration step 3, so an extracted service throws it from day one. The base tRPC procedure maps the code and the message back to a `TRPCError`, so no procedure try/catches for mapping. Authority: `docs/adr/0012-domain-errors-and-transport-mapping.md`; display channels in [errors.md](errors.md).
 
@@ -59,8 +59,9 @@ const accessToken = await getValidJiraAccessToken(
 ).catch(rethrowDomainErrorsAsNonRetriable);
 ```
 
+- **Inject the Prisma client, the `DomainError` branches, the service-calls-service shape and everything below are prose only**, no rule: each is a judgement about what a function does rather than about a name or an import.
 - **Identity and transport policy stay in the procedure**: `UNAUTHORIZED`, rate limiting (`TOO_MANY_REQUESTS`) and plan-limit denials have no domain-error equivalent. An authorization check that needs a loaded resource (membership, ownership) belongs in the service that loads it, as a `ForbiddenError`.
-- **A service takes plain named values, never the transport's context.** The router resolves what the service needs and passes it by name (`headers: await headers()`, `userId`, an entity id). A service never reads the tRPC `ctx` and never calls `next/headers` itself. "Transport-agnostic" is wider than "does not import tRPC": taking `ctx` as a parameter would satisfy the lint rule and still bind the service to one transport.
+- **A service takes plain named values, never the transport's context** (**prose only** for the `ctx` parameter). The router resolves what the service needs and passes it by name (`headers: await headers()`, `userId`, an entity id). A service never reads the tRPC `ctx` and never calls `next/headers` itself: the second half is the service row of `local/no-cross-layer-import`, the first has no rule. "Transport-agnostic" is wider than "does not import tRPC": taking `ctx` as a parameter satisfies every lint rule here and still binds the service to one transport.
 - **A service reads the fact it decides on rather than receiving it from its caller.** `stopImpersonate` calls `auth.api.getSession` itself instead of taking `impersonatedBy` from the procedure, so the rule it enforces holds for any future transport. The cost is one extra read on a rare action, which is the right trade.
 - **A service may call another service.** A multi-step preamble shared by several services becomes its own read service rather than being inlined N times: `get-jira-access.ts`, `get-linear-access.ts` and `get-monthly-churn-rate.ts` are each consumed by another service. The caller forwards its injected client so one test covers both.
 - **A service returns what the boundary needs to report.** `update-feedback-status` returns `previousStatus` beside the stored row so the route can name the transition without a second read.
@@ -69,6 +70,8 @@ const accessToken = await getValidJiraAccessToken(
 - **The one sanctioned exception to transport agnosticism** is `api/v1/agent/_services/require-agent-auth.ts`, which returns `AuthenticatedAgentToken | NextResponse`. Its 401, 403 and 429 carry headers and body fields no `DomainError` can express, and it does IO, so it lives in `_services/` and is a transport guard by design. It is not a precedent for handlers posing as services: no other service may return a `Response`.
 
 ## tRPC router
+
+One convention of this section is enforced: a `trpc-router.ts` imports no Prisma (a row of `local/no-cross-layer-import`). Thinness, composition shape and the procedure key are **prose only**, no rule.
 
 - `trpc-router.ts` is **thin transport at the scope root** (sibling of `_services/`; for a route, colocated with `page.tsx`).
 - Procedures are **inlined** in the router when thin: auth procedure + zod `.input()` + one service call. A fat procedure wrapper is a smell → push logic into the service.
@@ -92,12 +95,16 @@ export const animalRouter = router({
 
 ## Helpers vs services vs types
 
+The import half of helper purity is enforced by the helper row of `local/no-cross-layer-import`: no `@workspace/db`, no `@prisma/client`, no `next`, no `react`. Which side of the IO line a given function falls on is **prose only**.
+
 - **`_helpers/`** = pure **behavioral** functions only (no IO): formatters, label maps, calculators, slug generators, nuqs `search-params` parsers, and **pure predicates** that operate on already-loaded inputs.
 - **Nondeterministic is not the same as IO.** `crypto.randomBytes` is a local call, so a generator built on it is a helper: `project/_helpers/generate-api-key.ts` and `generate-public-id.ts` are helpers, not services.
 - **Predicates split by IO, not verb:** `isSubscriptionActive(sub)` (pure) → `_helpers/`; `hasActiveSubscription(userId)` (queries to answer) → `_services/`. A pure predicate must never fetch its own data; if it needs to, it has become an IO-predicate and moves to `_services/`.
 - **`_types/`** = standalone, hand-written, isomorphic shared types. A type derived from a service stays **in** that service file.
 
 ## External libraries
+
+**Prose only**, no rule: the swap test below is the whole of the judgement.
 
 Placement follows the **domain decision, not the dependency**. Thin domain-agnostic SDK adapters → root `@/server/<lib>/` (e.g. `@/server/stripe/`). Domain logic that _happens_ to call the SDK stays in the domain's `_services/`. Test: _"If I swapped the provider, does this file's reason for existing change?"_ Yes → domain service. No → `@/server/<lib>/`. `@/server/` takes the adapter only under its own two conditions (wiring, or a cross-cutting abstraction two domains or transports need): every Tracker and Notification channel client failed that test and lives in `@/app/_domains/integration/_services/<provider>/`.
 
@@ -110,11 +117,47 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 
 ## Enforced by ESLint
 
-`no-client-import-of-services` (exempts `*.schema.ts` and type-only imports),
-`no-client-import-of-server-folder` (no runtime import of `@/server/**` from a client module; type imports and the named allowlist excepted), `services-no-trpc-import`,
-`schema-must-be-pure-zod`, `no-feature-nesting`,
-`services-verb-prefix` (the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-`, the exempt module suffixes, and the exported function's name),
-`require-service-output-type` (a read service exports `<Service>Output` built from `typeof` its own service; `inferProcedureOutput` and `inferRouterOutputs` are reported wherever a consumer uses them),
-`services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`; always on since step 4, not agent-gated),
-`require-use-client-suffix` (exempts `use-*`),
-`require-server-action-suffix` (a `'use server'` directive at module or function level). See `packages/eslint-config/local-rules/`.
+Every rule below is `error` in plain `pnpm lint`, with no environment gate and no per-scope
+allowlist (ADR-0015), so the pre-commit hook and CI run exactly this set. Sources are in
+`packages/eslint-config/local-rules/`, wiring and options in `packages/eslint-config/next.js`.
+A convention of this file that is not listed here is marked **prose only** where it is stated.
+
+Inside `_services/`:
+
+- `services-verb-prefix`: the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-`, the exempt module suffixes, and the exported function named after the file.
+- `services-read-never-writes`: a `get-`, `list-`, `find-`, `search-`, `has-`, `is-` or `count-` file may not call a Prisma write method on a database client.
+- `services-no-trpc-import`: no `@/server/trpc` or `@/lib/trpc` from a service.
+- `services-no-bare-error`: throw a `DomainError` subclass, not `new Error(...)`. Applies to `*.inngest.ts`, `*.schema.ts` and `index.ts` too, which the two verb rules exempt.
+
+Across the app source:
+
+- `require-service-output-type`: a read service exports `<Service>Output` built from `typeof` its own service, and no consumer infers the same type with `inferProcedureOutput` or `inferRouterOutputs`.
+- `require-inngest-function-placement`: `createFunction` is called in an `*.inngest.ts(x)` file, and such a file lives in a `_services/` folder. The Inngest client in `src/server/inngest/` is wiring and is untouched.
+- `no-cross-layer-import`, the layer import table (`layerImportRows` in `next.js`). Nine rows: a domain barrel exports no service or router at runtime; a `trpc-router.ts` imports no Prisma; a helper imports neither the database, nor `next`, nor `react`; a service does not reach for `next/server`, `next/headers` or `next/navigation`; root `_components/`, `_providers/` and `_constants/` import no domain; `src/lib/` and `src/utils/` do not import the app tree; `@trpc/server` is confined to a router and `src/server/trpc/`; runtime database imports are confined to `_services/` and `src/server/`; the database package is reached through `@workspace/db`, `@workspace/db/types` and `@workspace/db/generated/prisma/enums`. `require-agent-auth.ts` is the one named service exemption.
+- `no-cross-domain-deep-import`: another domain is reached through its barrel, by alias, in every import form.
+- `no-restricted-imports` on `src/server/**`: the server folder does not reach into the app tree by deep path. Its exemptions are named file by file in `next.js`.
+- `no-default-export`, `no-restricted-patterns` (`enum`, `as unknown as`, `query.data ?? []`), `no-em-dash-in-copy` and the installed plugin rules (`@typescript-eslint/consistent-type-definitions`, `react/function-component-definition`, `no-nested-ternary`, `no-else-return`) apply to services like every other module. See [typescript.md](typescript.md) and [code-shape.md](code-shape.md).
+
+At the client/server boundary:
+
+- `no-client-import-of-services`: exempts `*.schema.ts` and type-only imports.
+- `no-client-import-of-server-folder`: no runtime import of `@/server/**` from a client module; type imports and the named allowlist excepted.
+- `no-client-domain-error-instanceof`: `instanceof DomainError` in a client module is a branch that is always false.
+- `require-use-client-suffix`: exempts `use-*` and the Next.js special files.
+- `require-server-action-suffix`: a `'use server'` directive at module or function level belongs only in a `*.server.action.ts`.
+
+On the folders and the schemas:
+
+- `no-feature-nesting`: one grouping level under a features folder, and no features folder inside one.
+- `schema-must-be-pure-zod` and `require-schema-conventions` on `**/*.schema.ts`. See [schemas.md](schemas.md).
+- `no-raw-tailwind-colors` on class strings, and `no-relative-test-mock` on `*.test.ts(x)`. See [frontend.md](frontend.md) and [testing.md](testing.md).
+
+The five boundary rules (`no-client-import-of-server-folder`, `no-client-import-of-services`,
+`no-cross-domain-deep-import`, `no-cross-layer-import`, `require-server-action-suffix`) and the
+`src/server/**` `no-restricted-imports` lock cannot be switched off by a disable comment: an
+exception to one of them is a named entry in `next.js`. Every other rule is disableable with a
+written reason, which `eslint-comments/require-description` makes mandatory.
+
+Two conventions of the tree are held by a test rather than by lint, because each is a property of
+the whole tree that ESLint cannot see one file at a time: `src/app/_domains/domain-cycles.test.ts`
+(no domain import cycle) and `src/mdx-no-em-dash.test.ts` (no em dash in the MDX content).

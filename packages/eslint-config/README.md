@@ -12,6 +12,50 @@ Every rule is `error`, with no environment gate and no per-scope allowlist
 all run the same set. Every rule reports nothing today, so a report is a
 regression.
 
+## The rule set
+
+Twenty-one rules, every one `error`. The glob is the one it is wired on in `next.js`; "options"
+names the constant in `next.js` it reads.
+
+| Rule                                 | Glob                     | Holds                                                                                             | Options                    |
+| ------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------- |
+| `no-client-domain-error-instanceof`  | `**/*.{ts,tsx}`          | `instanceof DomainError` in a client module is always false; branch on `error.data.code`          |                            |
+| `no-client-import-of-server-folder`  | `**/*.{ts,tsx}`          | a client module imports no runtime value from `@/server/**`                                       | `allowImportPatterns`      |
+| `no-client-import-of-services`       | `**/*.{ts,tsx}`          | a client module imports no `_services/` path, bar `*.schema.ts` and type-only imports             |                            |
+| `require-server-action-suffix`       | `**/*.{ts,tsx}`          | a `'use server'` directive, at module or function level, belongs only in `*.server.action.ts`     |                            |
+| `no-cross-domain-deep-import`        | `**/src/app/_domains/**` | another domain is reached through its barrel, by alias, in every import form                      |                            |
+| `no-cross-layer-import`              | `**/src/**/*.{ts,tsx}`   | the layer import table: nine rows, described below                                                | `layerImportRows`          |
+| `no-default-export`                  | `**/src/**/*.{ts,tsx}`   | no `export default` and no `export { X as default }`, Next.js special files excepted              | `noDefaultExportOptions`   |
+| `require-use-client-suffix`          | `**/src/**/*.{ts,tsx}`   | a `'use client'` module is named `*.client.ts(x)` and a `*.client.ts(x)` carries the directive    | `useClientSuffixOptions`   |
+| `require-service-output-type`        | `**/src/**/*.{ts,tsx}`   | a read service exports `<Service>Output`; no consumer infers it from the router                   |                            |
+| `require-inngest-function-placement` | `**/src/**/*.{ts,tsx}`   | `createFunction` sits in an `*.inngest.ts(x)` file, and that file in a `_services/` folder        |                            |
+| `no-restricted-patterns`             | `**/src/**/*.{ts,tsx}`   | no `enum`, no `as unknown as`, no `query.data ?? []`                                              | `restrictedPatternOptions` |
+| `no-em-dash-in-copy`                 | `**/src/**/*.{ts,tsx}`   | no em dash in a string literal, JSX text or a template chunk                                      |                            |
+| `no-feature-nesting`                 | `**/_features/**`        | one grouping level under a features folder, and no features folder inside one                     |                            |
+| `services-verb-prefix`               | `**/_services/**`        | the basename carries a verb from the vocabulary, and the export is named after the file           | `serviceVerbOptions`       |
+| `services-read-never-writes`         | `**/_services/**`        | a read-verb file calls no Prisma write method on a database client                                | `serviceVerbOptions`       |
+| `services-no-trpc-import`            | `**/_services/**`        | a service imports no tRPC                                                                         |                            |
+| `services-no-bare-error`             | `**/_services/**`        | a service throws a `DomainError` subclass, not `new Error(...)`                                   |                            |
+| `require-schema-conventions`         | `**/*.schema.ts`         | `*Schema` names, `Input` as `z.infer` and `Values` as `z.input`, no `z.nativeEnum`, no `.merge()` | `schemaConventionOptions`  |
+| `schema-must-be-pure-zod`            | `**/*.schema.ts`         | a schema imports only what the allowlist names                                                    | `schemaPurityOptions`      |
+| `no-relative-test-mock`              | `**/*.test.{ts,tsx}`     | a `vi.mock` names a boundary, never a relative specifier                                          |                            |
+| `no-raw-tailwind-colors`             | every linted file        | a hue with a semantic token is written as that token                                              | `rawTailwindColorOptions`  |
+
+Four rules of installed plugins carry the style conventions on `**/src/**/*.{ts,tsx}`:
+`@typescript-eslint/consistent-type-definitions` (`type` over `interface`),
+`react/function-component-definition` (a named component is an `export function`),
+`no-nested-ternary` and `no-else-return`. The core `no-restricted-imports` is the
+`src/server/**` deep-import lock and nothing else.
+
+Two conventions of the tree are held by a test in `apps/web` rather than by lint, because each is a
+property of the whole tree: `src/app/_domains/domain-cycles.test.ts` (no domain import cycle) and
+`src/mdx-no-em-dash.test.ts` (no em dash in the MDX content).
+
+The coding standards skill at `.claude/skills/coding-standards/` is the reader's half of this
+table: every checkable convention there names its rule, and every other one is marked prose only.
+
+## How the rules behave
+
 The boundary rules are `require-server-action-suffix`,
 `no-client-import-of-server-folder`, `no-client-import-of-services`,
 `no-cross-domain-deep-import`, `no-cross-layer-import` and the
@@ -19,7 +63,7 @@ The boundary rules are `require-server-action-suffix`,
 named entry in `next.js`, reviewed like the three server folder exemptions, not
 a disable comment.
 
-Seven rules take options from `next.js`: `require-schema-conventions`
+Ten rules take options from `next.js`, as the table's last column says. Seven of them take options of their own: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
 (`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
@@ -33,8 +77,9 @@ layer import table described below). `require-use-client-suffix` and
 `ignorePathPatterns`, from one list in `next.js`: the framework owns those
 files' names and shapes, so neither the `.client.tsx` suffix nor a named export
 can apply to them. The pattern is anchored on the whole basename, so a module
-merely ending in one of their words (`edit-page.tsx`) is not exempt. No other
-rule declares an option.
+merely ending in one of their words (`edit-page.tsx`) is not exempt. The tenth
+is `no-restricted-patterns`, whose `allowDoubleCastPathPatterns` is described
+with it below. No other rule declares an option.
 
 `no-default-export` is wired on the whole web app source, not on
 `src/app/_domains/`: "never use default exports" is a repo-wide convention. It
