@@ -277,7 +277,7 @@ Client code never imports `src/server/errors/*` and never uses `instanceof Domai
 - The barrel exports **contracts**: UI components, `*.schema.ts`, domain types, parsers, pure helpers, and type-only re-exports from `_services/`. It never exports a service function or the router.
 - Routes and `app/api/` are the composition layer and may reach into a domain's internals.
 - If a domain seems to need another domain's server implementation, one of three moves applies: wrap the data in a server component and export that; move the operation to the domain that owns it; lift the abstraction to `src/server/` or a package so both depend on it. A second "server barrel" is not an option.
-- No cross-domain cycles. Soft hierarchy: low-level domains (`user`, `organization`) should not depend on high-level ones (`subscription`, `feedback`).
+- No cross-domain cycles, checked by `src/app/_domains/domain-cycles.test.ts`: it builds the domain graph from every import form in the folder and fails `pnpm test` naming the domains of any cycle it finds. Soft hierarchy, prose only: low-level domains (`user`, `organization`) should not depend on high-level ones (`subscription`, `feedback`).
 
 ## Packages
 

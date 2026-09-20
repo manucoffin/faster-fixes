@@ -35,6 +35,12 @@ A route handler that serves a contract **someone else already depends on** (the 
 
 This does not reopen the scope above for ordinary handlers. A route with no external consumer is still covered by testing its helpers and injectable services.
 
+### A structural check is the fourth seam
+
+A convention that holds over the tree rather than inside one module is checked by a test that reads the files, because ESLint sees one file at a time and cannot hold what it learned from the previous one. There is one today: `src/app/_domains/domain-cycles.test.ts` builds the domain dependency graph from every import form under `_domains/` and fails when it finds a cycle, naming the domains in it (ADR-0010). The prior art is `packages/eslint-config/local-rules/adr-citations.test.js`.
+
+Such a test sits next to the folder it checks and proves both halves: the scan is exercised on written-out specifiers, and the analysis on planted inputs, so neither can pass because it read nothing.
+
 **Out of scope for now** (do not write tests for these yet): React components and client components, container hooks (`use-*.ts`), tRPC routers and procedures, and any `_services/` function that reaches a singleton (`prisma` imported directly, `next/headers`, `auth.api.*`) instead of receiving its deps. If a piece of logic is worth testing but is trapped behind one of these, extract it down into a pure `_helpers/` function or a dependency-injected `_services/` function and test it there.
 
 Because component tests are out of scope, the harness carries no DOM tooling. `jsdom` and `@testing-library/react` are added the day the first component test exists, not before.
