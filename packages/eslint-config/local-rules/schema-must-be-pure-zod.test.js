@@ -19,6 +19,21 @@ const ruleTester = new RuleTester({
 ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
   valid: [
     {
+      name: "a schema with inline type specifiers only on a server import",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `import { type Session } from "@/server/auth";\n`,
+    },
+    {
+      name: "a schema re-exporting a server type",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `export type { Session } from "@/server/auth";\n`,
+    },
+    {
+      name: "a schema re-exporting another schema",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `export { LineSchema } from "./line.schema";\n`,
+    },
+    {
       name: "a file that is not a schema may import server code",
       filename: "/repo/apps/web/src/app/_services/invoice.service.ts",
       code: `import { prisma } from "@workspace/db";\n`,
@@ -55,6 +70,30 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
     },
   ],
   invalid: [
+    {
+      name: "a schema re-exporting the database package",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `export { prisma } from "@workspace/db";\n`,
+      errors: [{ messageId: "serverImport" }],
+    },
+    {
+      name: "a schema star-re-exporting a sibling service",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `export * from "./invoice.service";\n`,
+      errors: [{ messageId: "siblingService" }],
+    },
+    {
+      name: "a schema dynamically importing server code",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `const load = () => import("@/server/auth");\n`,
+      errors: [{ messageId: "serverImport" }],
+    },
+    {
+      name: "a schema reaching server code by relative path",
+      filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",
+      code: `import { auth } from "../../server/auth";\n`,
+      errors: [{ messageId: "serverImport" }],
+    },
     {
       name: "a schema importing from @/server/",
       filename: "/repo/apps/web/src/app/_services/invoice.schema.ts",

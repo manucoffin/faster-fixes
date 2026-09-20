@@ -19,6 +19,16 @@ const ruleTester = new RuleTester({
 ruleTester.run("no-client-import-of-services", noClientImportOfServicesRule, {
   valid: [
     {
+      name: "a client module re-exporting a service type",
+      filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+      code: `export type { Plan } from "./_services/get-plan";\n`,
+    },
+    {
+      name: "a client module re-exporting a schema from a services folder",
+      filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+      code: `export { planSchema } from "./_services/plan.schema";\n`,
+    },
+    {
       name: "a server module importing a service",
       filename: "/repo/apps/web/src/app/_domains/billing/plan-card.tsx",
       code: `import { getPlan } from "./_services/get-plan";\n`,
@@ -45,6 +55,37 @@ ruleTester.run("no-client-import-of-services", noClientImportOfServicesRule, {
     },
   ],
   invalid: [
+    {
+      name: "a client module re-exporting a service",
+      filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+      code: `export { getPlan } from "./_services/get-plan";\n`,
+      errors: [{ messageId: "clientImportsService" }],
+    },
+    {
+      name: "a client module star-re-exporting a service",
+      filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+      code: `export * from "./_services/get-plan";\n`,
+      errors: [{ messageId: "clientImportsService" }],
+    },
+    {
+      name: "a client module dynamically importing a service",
+      filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+      code: `const load = () => import("./_services/get-plan");\n`,
+      errors: [{ messageId: "clientImportsService" }],
+    },
+    {
+      name: "a client module reaching a service by a relative path that climbs",
+      filename:
+        "/repo/apps/web/src/app/_domains/billing/plan/plan-form.client.tsx",
+      code: `import { getInvoice } from "../../invoice/_services/get-invoice";\n`,
+      errors: [{ messageId: "clientImportsService" }],
+    },
+    {
+      name: "a .client.ts module importing a service",
+      filename: "/repo/apps/web/src/app/_domains/billing/use-plan.client.ts",
+      code: `import { getPlan } from "./_services/get-plan";\n`,
+      errors: [{ messageId: "clientImportsService" }],
+    },
     {
       name: "a .client.tsx module importing a service",
       filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",

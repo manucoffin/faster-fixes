@@ -3,6 +3,14 @@
 // without an HTTP round-trip, so it must never import the tRPC layer. The
 // `trpc-router.ts` at the scope root is the only place that wires tRPC, and it
 // imports the services, not the other way around.
+//
+// The four import forms and the relative spelling of the same path are covered
+// by the shared import helper. A type-only import is reported like any other:
+// what this rule guards is coupling to a transport, not what reaches a bundle,
+// and a service typed against tRPC is coupled to it whether or not the import
+// survives compilation.
+
+import { importVisitors, filenameOf, matchesSpecifier } from "./imports.js";
 
 const SERVICES_PATH_RE = /(^|\/)_services\//;
 const TRPC_IMPORT_RE =
@@ -22,20 +30,15 @@ export const servicesNoTrpcImportRule = {
     },
   },
   create(context) {
-    const filename = context.filename || context.getFilename();
-    if (!SERVICES_PATH_RE.test(filename)) return {};
+    if (!SERVICES_PATH_RE.test(filenameOf(context))) return {};
 
-    return {
-      ImportDeclaration(node) {
-        const source = node.source.value;
-        if (typeof source !== "string") return;
-        if (!TRPC_IMPORT_RE.test(source)) return;
-        context.report({
-          node: node.source,
-          messageId: "servicesImportsTrpc",
-          data: { source },
-        });
-      },
-    };
+    return importVisitors(context, (reference) => {
+      if (!matchesSpecifier(reference, TRPC_IMPORT_RE)) return;
+      context.report({
+        node: reference.node,
+        messageId: "servicesImportsTrpc",
+        data: { source: reference.source },
+      });
+    });
   },
 };

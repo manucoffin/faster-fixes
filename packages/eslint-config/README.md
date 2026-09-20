@@ -24,6 +24,14 @@ Two rules take options from `next.js`: `require-schema-conventions`
 `require-use-client-suffix` takes the Next.js special file names as
 `ignorePathPatterns`. No other rule declares an option.
 
+`local-rules/imports.js` is the shared import view, not a rule: it visits the
+four import forms (static `import`, `export … from`, `export *`, dynamic
+`import()`), resolves a relative specifier against the importing file and
+expresses it in its `@/` alias form, classifies an import as value or type, and
+answers whether a file is a client module. Every import rule reads it, so a hole
+closed once is closed everywhere. It has no test suite of its own: it is
+observed through the rules that consume it.
+
 `next-config.test.js` tests the wiring: a rule wired on the wrong glob matches
 nothing and reports nothing, which looks exactly like passing.
 

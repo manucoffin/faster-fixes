@@ -41,11 +41,19 @@ const RESERVED = {
   "0012": "domain-errors",
 };
 
-function ruleSourceFiles() {
+// The modules of this folder that are not rules, so the table below stays a
+// list of rules. `imports.js` is the shared import helper: it cites no ADR of
+// its own and is observed through the rules that consume it.
+const NON_RULE_MODULES = ["imports.js", "index.js"];
+
+function sourceFiles() {
   return readdirSync(localRulesDir).filter(
-    (name) =>
-      name.endsWith(".js") && !name.endsWith(".test.js") && name !== "index.js",
+    (name) => name.endsWith(".js") && !name.endsWith(".test.js"),
   );
+}
+
+function ruleSourceFiles() {
+  return sourceFiles().filter((name) => !NON_RULE_MODULES.includes(name));
 }
 
 function citationsIn(source) {
@@ -57,6 +65,16 @@ describe("ADR citations in the local rules", () => {
     expect(ruleSourceFiles().sort()).toEqual(
       Object.keys(EXPECTED_CITATIONS).sort(),
     );
+  });
+
+  // A new module is a rule until this list says otherwise, so a rule cannot
+  // slip past the table by being mistaken for a helper.
+  it("accounts for every module of the folder", () => {
+    const helpers = sourceFiles().filter((name) =>
+      NON_RULE_MODULES.includes(name),
+    );
+
+    expect(helpers.sort()).toEqual([...NON_RULE_MODULES].sort());
   });
 
   it.each(Object.entries(EXPECTED_CITATIONS))(

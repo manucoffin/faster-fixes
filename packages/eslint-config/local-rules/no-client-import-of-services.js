@@ -1,6 +1,7 @@
-// A client module (`'use client'` directive or `*.client.tsx` filename) must not
-// import a `_services/` module, because services carry server-only deps (Prisma,
-// Stripe, secrets) that would leak into the client bundle. Two exceptions:
+// A client module (`'use client'` directive or `*.client.ts(x)` filename) must
+// not import a `_services/` module, because services carry server-only deps
+// (Prisma, Stripe, secrets) that would leak into the client bundle. Two
+// exceptions:
 //   1. `*.schema.ts`: schemas are pure-Zod (enforced by `schema-must-be-pure-zod`)
 //      and are meant to be shared between the tRPC `.input()` and the client form
 //      resolver (ADR-0011, server file conventions).
@@ -9,18 +10,26 @@
 //      runtime dep. The service return type is the type source of truth
 //      (ADR-0011), so a client importing it directly is safe. Only the explicit
 //      `type` marker is exempt — a value import stays blocked.
+//
+// The four import forms and the relative spelling of the same path are covered
+// by the shared import helper: a re-export or a dynamic `import()` reaches the
+// bundle exactly like a static import.
+
+import {
+  clientModuleDetector,
+  importVisitors,
+  matchesSpecifier,
+} from "./imports.js";
 
 const SERVICES_IMPORT_RE = /(^|\/)_services\//;
-const SCHEMA_RE = /\.schema(\.[jt]sx?)?$/;
-const CLIENT_SUFFIX_RE = /\.client\.tsx?$/;
-const USE_CLIENT_RE = /^['"]use client['"]/;
+const SCHEMA_IMPORT_RE = /\.schema(\.[jt]sx?)?$/;
 
 export const noClientImportOfServicesRule = {
   meta: {
     type: "problem",
     docs: {
       description:
-        "Client modules ('use client' / *.client.tsx) may not import a _services/ module, except *.schema.ts.",
+        "Client modules ('use client' / *.client.ts(x)) may not import a _services/ module, except *.schema.ts.",
     },
     schema: [],
     messages: {
@@ -29,47 +38,21 @@ export const noClientImportOfServicesRule = {
     },
   },
   create(context) {
-    const filename = context.filename || context.getFilename();
-
-    let isClient = CLIENT_SUFFIX_RE.test(filename);
+    const client = clientModuleDetector(context);
 
     return {
-      Program(node) {
-        const firstStatement = node.body[0];
-        if (
-          firstStatement &&
-          firstStatement.type === "ExpressionStatement" &&
-          firstStatement.expression.type === "Literal" &&
-          typeof firstStatement.expression.raw === "string" &&
-          USE_CLIENT_RE.test(firstStatement.expression.raw)
-        ) {
-          isClient = true;
-        }
-      },
-      ImportDeclaration(node) {
-        if (!isClient) return;
-        const source = node.source.value;
-        if (typeof source !== "string") return;
-        if (!SERVICES_IMPORT_RE.test(source)) return;
-        if (SCHEMA_RE.test(source)) return;
-        // Type-only imports are erased by TS and never reach the bundler.
-        if (node.importKind === "type") return;
-        const specifiers = node.specifiers ?? [];
-        const hasNamed = specifiers.some((s) => s.type === "ImportSpecifier");
-        if (
-          hasNamed &&
-          specifiers.every(
-            (s) => s.type === "ImportSpecifier" && s.importKind === "type",
-          )
-        ) {
-          return;
-        }
+      Program: client.Program,
+      ...importVisitors(context, (reference) => {
+        if (!client.isClientModule()) return;
+        if (reference.kind === "type") return;
+        if (!matchesSpecifier(reference, SERVICES_IMPORT_RE)) return;
+        if (SCHEMA_IMPORT_RE.test(reference.source)) return;
         context.report({
-          node: node.source,
+          node: reference.node,
           messageId: "clientImportsService",
-          data: { source },
+          data: { source: reference.source },
         });
-      },
+      }),
     };
   },
 };

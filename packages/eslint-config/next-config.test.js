@@ -248,6 +248,40 @@ describe("the server folder import lock", () => {
     expect(messages[0].message).toContain("Import a domain through its barrel");
   });
 
+  // The lock matches the specifier as written, so the relative spelling of the
+  // same escape is listed beside the alias one.
+  it("rejects the relative spelling of the same escape", async () => {
+    const relativeDeep = await restrictedImportsFor(
+      "src/server/trpc/context.ts",
+      "../../app/_domains/integration/_services/jira/jira-errors",
+    );
+    const relativeRouteGroup = await restrictedImportsFor(
+      "src/server/trpc/context.ts",
+      "../../app/(public)/trpc-router",
+    );
+
+    expect(relativeDeep.map((message) => message.severity)).toEqual([2]);
+    expect(relativeDeep[0].message).toContain(
+      "Import a domain through its barrel",
+    );
+    expect(relativeRouteGroup).toHaveLength(1);
+  });
+
+  it("allows a relative path that stays inside the server folder", async () => {
+    expect(
+      await restrictedImportsFor(
+        "src/server/trpc/context.ts",
+        "../auth/config",
+      ),
+    ).toEqual([]);
+    expect(
+      await restrictedImportsFor(
+        "src/server/trpc/context.ts",
+        "../../app/_domains/subscription",
+      ),
+    ).toEqual([]);
+  });
+
   it("allows a domain barrel but not a route group deep path", async () => {
     expect(
       await restrictedImportsFor("src/server/trpc/context.ts", BARREL),

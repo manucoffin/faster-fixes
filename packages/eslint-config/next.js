@@ -69,15 +69,24 @@ const serverDeepImportMessage =
 // negation cannot re-include a path whose parent the group already excluded.
 // So the domains are carved out of the first group and their insides are
 // forbidden by the second.
+//
+// Each group carries the relative spelling of its own alias patterns: the core
+// rule matches the specifier string, so `../../app/_domains/<d>/<file>` would
+// otherwise walk out of the server folder past a lock written for `@/app/…`.
 const serverDeepImportPatterns = [
   {
-    group: ["@/app/*/**", "!@/app/_domains/**"],
+    group: [
+      "@/app/*/**",
+      "!@/app/_domains/**",
+      "../**/app/*/**",
+      "!../**/app/_domains/**",
+    ],
     message: serverDeepImportMessage,
   },
   {
     // `@/app/_domains/<domain>` is the barrel and stays allowed; anything below
     // it does not.
-    group: ["@/app/_domains/*/**"],
+    group: ["@/app/_domains/*/**", "../**/app/_domains/*/**"],
     message: serverDeepImportMessage,
   },
 ];

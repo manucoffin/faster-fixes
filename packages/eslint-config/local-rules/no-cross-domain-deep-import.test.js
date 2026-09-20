@@ -81,6 +81,18 @@ ruleTester.run("no-cross-domain-deep-import", noCrossDomainDeepImportRule, {
   ],
   invalid: [
     {
+      name: "a dynamic import of another domain's internals",
+      filename: "/repo/apps/web/src/app/_domains/billing/use-plan.ts",
+      code: `const load = () => import("@/app/_domains/invoice/_services/get-invoice");\n`,
+      errors: [{ messageId: "crossDomainDeep" }],
+    },
+    {
+      name: "a dynamic import of another domain by relative path",
+      filename: "/repo/apps/web/src/app/_domains/billing/use-plan.ts",
+      code: `const load = () => import("../invoice/_services/get-invoice");\n`,
+      errors: [{ messageId: "crossDomainRelative" }],
+    },
+    {
       name: "a deep import into another domain's services",
       filename: "/repo/apps/web/src/app/_domains/billing/use-plan.ts",
       code: `import { getProject } from "@/app/_domains/project/_services/get-project";\n`,

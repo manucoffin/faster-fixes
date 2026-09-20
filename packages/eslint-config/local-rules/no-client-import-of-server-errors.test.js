@@ -21,6 +21,24 @@ ruleTester.run(
   {
     valid: [
       {
+        name: "a client module type-importing a server error class",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `import type { DomainError } from "@/server/errors";\n`,
+      },
+      {
+        name: "a client module re-exporting a server error type",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `export type { DomainError } from "@/server/errors";\n`,
+      },
+      {
+        name: "a client module importing a server error with inline type specifiers only",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `import { type DomainError } from "@/server/errors";\n`,
+      },
+      {
         name: "a server module importing the server errors",
         filename: "/repo/apps/web/src/app/_domains/billing/plan-card.tsx",
         code: `import { DomainError } from "@/server/errors";\n`,
@@ -39,6 +57,34 @@ ruleTester.run(
       },
     ],
     invalid: [
+      {
+        name: "a client module re-exporting a server error class",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `export { DomainError } from "@/server/errors";\n`,
+        errors: [{ messageId: "clientImportsServerErrors" }],
+      },
+      {
+        name: "a client module star-re-exporting the server errors barrel",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `export * from "@/server/errors";\n`,
+        errors: [{ messageId: "clientImportsServerErrors" }],
+      },
+      {
+        name: "a client module dynamically importing the server errors barrel",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `const load = () => import("@/server/errors");\n`,
+        errors: [{ messageId: "clientImportsServerErrors" }],
+      },
+      {
+        name: "a client module reaching the server errors by relative path",
+        filename:
+          "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
+        code: `import { DomainError } from "../../../server/errors/not-found";\n`,
+        errors: [{ messageId: "clientImportsServerErrors" }],
+      },
       {
         name: "a .client.tsx module importing the server errors barrel",
         filename:

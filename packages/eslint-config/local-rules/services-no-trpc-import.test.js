@@ -13,6 +13,11 @@ const ruleTester = new RuleTester({
 ruleTester.run("services-no-trpc-import", servicesNoTrpcImportRule, {
   valid: [
     {
+      name: "a service re-exporting a sibling module",
+      filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
+      code: `export { formatPlan } from "./format-plan";\n`,
+    },
+    {
       name: "a service importing the database",
       filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
       code: `import { db } from "@/server/db";\nexport function getPlan() {}\n`,
@@ -34,6 +39,30 @@ ruleTester.run("services-no-trpc-import", servicesNoTrpcImportRule, {
     },
   ],
   invalid: [
+    {
+      name: "a service re-exporting the tRPC layer",
+      filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
+      code: `export { router } from "@/server/trpc";\n`,
+      errors: [{ messageId: "servicesImportsTrpc" }],
+    },
+    {
+      name: "a service star-re-exporting the tRPC server package",
+      filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
+      code: `export * from "@trpc/server";\n`,
+      errors: [{ messageId: "servicesImportsTrpc" }],
+    },
+    {
+      name: "a service dynamically importing the tRPC layer",
+      filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
+      code: `const load = () => import("@/server/trpc");\n`,
+      errors: [{ messageId: "servicesImportsTrpc" }],
+    },
+    {
+      name: "a service reaching the tRPC layer by relative path",
+      filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
+      code: `import { router } from "../../../../server/trpc";\n`,
+      errors: [{ messageId: "servicesImportsTrpc" }],
+    },
     {
       name: "the server tRPC folder",
       filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
