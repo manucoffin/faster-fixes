@@ -1,5 +1,8 @@
 "use client";
 
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import { useQuery } from "@tanstack/react-query";
 import {
   Combobox,
   ComboboxContent,
@@ -15,10 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import * as React from "react";
 
 type FeedbackFiltersProps = {
-  pageUrls: string[];
+  projectId: string;
   selectedPageUrl: string | null;
   onPageUrlChange: (url: string | null) => void;
   sort: string;
@@ -35,37 +39,60 @@ function formatPageUrl(url: string) {
 }
 
 export function FeedbackFilters({
-  pageUrls,
+  projectId,
   selectedPageUrl,
   onPageUrlChange,
   sort,
   onSortChange,
 }: FeedbackFiltersProps) {
+  const trpc = useTRPC();
+
+  const pageUrlsQuery = useQuery(
+    trpc.authenticated.projects.feedback.listDistinctPageUrls.queryOptions({
+      projectId,
+    }),
+  );
+
   return (
     <div className="flex w-full flex-wrap items-center gap-2 sm:w-fit">
-      <Combobox
-        items={pageUrls}
-        value={selectedPageUrl}
-        onValueChange={(value) => onPageUrlChange(value)}
-        itemToStringValue={formatPageUrl}
-      >
-        <ComboboxInput
-          placeholder="Filter by page"
-          showTrigger
-          showClear={!!selectedPageUrl}
-          className="w-full sm:w-[250px]"
-        />
-        <ComboboxContent>
-          <ComboboxEmpty>No pages found.</ComboboxEmpty>
-          <ComboboxList>
-            {(url) => (
-              <ComboboxItem key={url} value={url}>
-                <span className="truncate">{formatPageUrl(url)}</span>
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </ComboboxContent>
-      </Combobox>
+      {/* The picker owns the page list, so a failed read says so rather than
+          offering a filter with nothing in it. The sort select stays available
+          in every state: it needs no read of its own. */}
+      {matchQueryStatus(pageUrlsQuery, {
+        Loading: <Skeleton className="h-9 w-full sm:w-[250px]" />,
+        Errored: (
+          <p className="text-sm text-destructive">
+            Failed to load the page filter.
+          </p>
+        ),
+        // No feedback on any page yet: there is nothing to filter by.
+        Empty: <></>,
+        Success: ({ data: pageUrls }) => (
+          <Combobox
+            items={pageUrls}
+            value={selectedPageUrl}
+            onValueChange={(value) => onPageUrlChange(value)}
+            itemToStringValue={formatPageUrl}
+          >
+            <ComboboxInput
+              placeholder="Filter by page"
+              showTrigger
+              showClear={!!selectedPageUrl}
+              className="w-full sm:w-[250px]"
+            />
+            <ComboboxContent>
+              <ComboboxEmpty>No pages found.</ComboboxEmpty>
+              <ComboboxList>
+                {(url) => (
+                  <ComboboxItem key={url} value={url}>
+                    <span className="truncate">{formatPageUrl(url)}</span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        ),
+      })}
 
       <Select value={sort} onValueChange={onSortChange}>
         <SelectTrigger className="w-full sm:w-[160px]">

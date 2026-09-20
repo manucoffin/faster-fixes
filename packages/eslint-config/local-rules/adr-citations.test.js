@@ -34,6 +34,11 @@ const EXPECTED_CITATIONS = {
   // draws: the domain barrel and the cross-cutting server folder (0010), the
   // services layer and the lib adapters (0011).
   "no-relative-test-mock.js": ["0010", "0011"],
+  // Three code-shape conventions of the coding standards, not architecture
+  // decisions: the union type over the enum, the cast that checks nothing, and
+  // the empty list standing in for a failed read. No ADR to cite, so the
+  // messages name the alternative instead.
+  "no-restricted-patterns.js": [],
   "require-schema-conventions.js": ["0011"],
   "require-server-action-suffix.js": [],
   "require-service-output-type.js": ["0011"],

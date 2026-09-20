@@ -159,6 +159,16 @@ const clientServerImportOptions = {
   allowImportPatterns: [],
 };
 
+// The one exception to the double-cast ban: a service test builds a partial
+// fake of the Prisma client and passes it through the dependency-injection
+// seam, whose parameter type is the real client. A partial object cannot reach
+// that type without the widening step, and giving the double a hand-written
+// type would mean writing out a surface the test does not use. The other two
+// patterns of the rule still apply to a test file.
+const restrictedPatternOptions = {
+  allowDoubleCastPathPatterns: ["\\.test\\.tsx?$"],
+};
+
 const rawTailwindColorOptions = {
   // Allow explicit palette classes for charting or third-party styling edge-cases.
   allowPatterns: [
@@ -551,6 +561,17 @@ export const nextJsConfig = [
       // An `else` after a `return` is a block that could be the rest of the
       // function.
       "no-else-return": "error",
+    },
+  },
+  {
+    // The three shapes with no plugin rule to lean on, in one rule of ours: a
+    // TypeScript `enum`, an `as unknown as` double cast and an empty-array
+    // fallback on a query result. Same glob as the style rules above, for the
+    // same reason: they are conventions of the app source, not of a config
+    // file at the app root.
+    files: ["**/src/**/*.{ts,tsx}"],
+    rules: {
+      "local/no-restricted-patterns": ["error", restrictedPatternOptions],
     },
   },
   {

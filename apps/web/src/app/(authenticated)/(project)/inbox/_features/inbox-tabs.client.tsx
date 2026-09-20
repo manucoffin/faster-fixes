@@ -47,12 +47,6 @@ export function InboxTabs() {
     trpc.authenticated.projects.feedback.list.queryOptions({ projectId }),
   );
 
-  const pageUrlsQuery = useQuery(
-    trpc.authenticated.projects.feedback.listDistinctPageUrls.queryOptions({
-      projectId,
-    }),
-  );
-
   const gitHubLinkQuery = useQuery(
     trpc.authenticated.projects.github.getLink.queryOptions({ projectId }),
   );
@@ -87,7 +81,7 @@ export function InboxTabs() {
 
           {view === "board" && (
             <FeedbackFilters
-              pageUrls={pageUrlsQuery.data ?? []}
+              projectId={projectId}
               selectedPageUrl={pageUrlFilter}
               onPageUrlChange={setPageUrlFilter}
               sort={sort}

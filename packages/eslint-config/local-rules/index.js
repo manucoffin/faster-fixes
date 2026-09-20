@@ -7,6 +7,7 @@ import { noDefaultExportRule } from "./no-default-export.js";
 import { noFeatureNestingRule } from "./no-feature-nesting.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
 import { noRelativeTestMockRule } from "./no-relative-test-mock.js";
+import { noRestrictedPatternsRule } from "./no-restricted-patterns.js";
 import { requireInngestFunctionPlacementRule } from "./require-inngest-function-placement.js";
 import { requireSchemaConventionsRule } from "./require-schema-conventions.js";
 import { requireServerActionSuffixRule } from "./require-server-action-suffix.js";
@@ -29,6 +30,7 @@ export const localRulesPlugin = {
     "no-feature-nesting": noFeatureNestingRule,
     "no-raw-tailwind-colors": noRawTailwindColorsRule,
     "no-relative-test-mock": noRelativeTestMockRule,
+    "no-restricted-patterns": noRestrictedPatternsRule,
     "require-inngest-function-placement": requireInngestFunctionPlacementRule,
     "require-schema-conventions": requireSchemaConventionsRule,
     "require-server-action-suffix": requireServerActionSuffixRule,

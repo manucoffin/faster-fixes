@@ -37,6 +37,7 @@ const CONVENTION_RULES = {
   "local/require-server-action-suffix": SERVICE,
   "local/services-no-bare-error": SERVICE,
   "local/no-relative-test-mock": SERVICE_TEST,
+  "local/no-restricted-patterns": FEATURE,
 };
 
 /**
@@ -1373,6 +1374,116 @@ describe("the style rules", () => {
         SERVICE,
         `export function pick(a: boolean) {\n  if (a) {\n    return 1;\n  }\n\n  return 2;\n}\n`,
         rule,
+      ),
+    ).toEqual([]);
+  });
+});
+
+// The three shapes with no plugin rule of their own, held by one rule of ours
+// rather than by a second block of the core restricted-syntax rule. The wiring
+// test says where it runs and what the one exception is; the behaviour cases
+// are here rather than in the rule suite because the double cast exception is
+// a config decision, not a rule default.
+describe("no-restricted-patterns", () => {
+  const RULE = "local/no-restricted-patterns";
+  const TEST_FILE =
+    "src/app/(authenticated)/integrations/_services/list-agent-tokens.test.ts";
+
+  it("runs on the web app source and nowhere else", async () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+
+    const severityFor = await severityResolver(RULE);
+
+    expect(await severityFor(FEATURE)).toBe(2);
+    expect(await severityFor(SERVICE)).toBe(2);
+    expect(await severityFor("next.config.ts")).toBeUndefined();
+  });
+
+  it("carries the test-double exception and nothing else", () => {
+    const [severity, options] = onlyEntryFor(RULE).rules[RULE];
+
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual(["allowDoubleCastPathPatterns"]);
+    expect(options.allowDoubleCastPathPatterns).toEqual(["\\.test\\.tsx?$"]);
+  });
+
+  it("reports an enum and accepts the `as const` object it replaces", async () => {
+    const reported = await messagesFor(
+      SERVICE,
+      `export enum Plan {\n  Free = "free",\n}\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(reported[0].message).toContain("union type");
+    expect(
+      await messagesFor(
+        SERVICE,
+        `export const Plan = { Free: "free" } as const;\nexport type Plan = (typeof Plan)[keyof typeof Plan];\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports a double cast and accepts a single one", async () => {
+    const reported = await messagesFor(
+      SERVICE,
+      `export const id = handle as unknown as number;\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(SERVICE, `export const id = handle as number;\n`, RULE),
+    ).toEqual([]);
+  });
+
+  it("spares a double cast in a test double and still reports its enum", async () => {
+    expect(
+      await messagesFor(
+        TEST_FILE,
+        `const db = { member: {} } as unknown as FakeDb;\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+
+    const reported = await messagesFor(
+      TEST_FILE,
+      `enum Role {\n  Owner = "owner",\n}\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+  });
+
+  it("reports an empty-array fallback on a query and accepts a count", async () => {
+    const reported = await messagesFor(
+      FEATURE,
+      `export const rows = listQuery.data ?? [];\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(reported[0].message).toContain("matchQueryStatus");
+    expect(
+      await messagesFor(
+        FEATURE,
+        `export const count = listQuery.data?.length ?? 0;\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+  });
+
+  // The success payload of a guarded query is not the query: the error state
+  // already has its own branch, so narrowing it costs nothing.
+  it("accepts an empty-array fallback that is not on a query result", async () => {
+    expect(
+      await messagesFor(
+        FEATURE,
+        `export const items = grouped[columnId] ?? [];\n`,
+        RULE,
       ),
     ).toEqual([]);
   });

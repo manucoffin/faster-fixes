@@ -72,13 +72,15 @@ export function OrganizationMembersTab() {
     ),
   );
 
-  const invitations = invitationsQuery.data ?? [];
-
   // A failed invitation read owns its own row, so the empty state must not
-  // claim the organization has no member at the same time.
+  // claim the organization has no member at the same time. A count rather than
+  // an empty-array fallback: the rows themselves come from `matchQueryStatus`
+  // below, which keeps the error state distinct from "nothing to show".
+  const invitationCount = invitationsQuery.data?.length ?? 0;
+
   const hasNoRows =
     (!members || members.length === 0) &&
-    invitations.length === 0 &&
+    invitationCount === 0 &&
     !invitationsQuery.isError;
 
   const leaveOrganization = useMutation(

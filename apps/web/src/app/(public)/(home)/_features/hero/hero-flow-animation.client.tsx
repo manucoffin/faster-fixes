@@ -50,7 +50,11 @@ export function HeroFlowAnimation() {
 
 function StaticState() {
   return (
-    <div className="flex w-full flex-col gap-4" role="img" aria-label={ARIA_LABEL}>
+    <div
+      className="flex w-full flex-col gap-4"
+      role="img"
+      aria-label={ARIA_LABEL}
+    >
       <TerminalFrame
         title="yourapp.com"
         contentClassName="relative px-4 py-3 h-[220px]"
@@ -134,7 +138,11 @@ function AnimatedState() {
   const agentActive = elapsed >= T.exit && elapsed < T.fix2 + 400;
 
   return (
-    <div className="flex w-full flex-col gap-4" role="img" aria-label={ARIA_LABEL}>
+    <div
+      className="flex w-full flex-col gap-4"
+      role="img"
+      aria-label={ARIA_LABEL}
+    >
       <style dangerouslySetInnerHTML={{ __html: heroAnimStyles }} />
       <TerminalFrame
         title="yourapp.com"
@@ -391,7 +399,7 @@ function useElapsed(loopMs: number, tickMs: number) {
     let id = 0;
     const tick = () => {
       setElapsed((performance.now() - start) % loopMs);
-      id = window.setTimeout(tick, tickMs) as unknown as number;
+      id = window.setTimeout(tick, tickMs);
     };
     tick();
     return () => clearTimeout(id);

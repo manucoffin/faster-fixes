@@ -132,6 +132,21 @@ either points inside the test's own scope or spells a boundary as if it were
 one. It is not a boundary rule, so a genuine one-off is a disable comment with
 a reason.
 
+`no-restricted-patterns` holds the three shapes with no plugin rule to lean
+on, in one rule rather than a second block of the core `no-restricted-syntax`
+rule, for the same reason the layer import table is one rule: a second block
+matching the same file would replace the first. It reports a TypeScript `enum`
+(the standard prefers a `const` object plus a union of its values), an
+`as unknown as` double cast, and `query.data ?? []`, where the fallback renders
+a failed read as an empty list and the child shows its empty state instead of
+the error. Each message names the alternative.
+
+Its one option, `allowDoubleCastPathPatterns` in `restrictedPatternOptions`,
+spares `*.test.ts(x)` the double cast: a service test builds a partial fake of
+the Prisma client and passes it through the dependency-injection seam, whose
+parameter type is the real client. The enum and the fallback are still reported
+in a test file.
+
 `local-rules/_deprecated_no-client-import-of-server-errors.js` and
 `local-rules/_deprecated_require-trpc-output-type.js` are the empty stubs of the
 rules `no-client-import-of-server-folder` and `require-service-output-type`

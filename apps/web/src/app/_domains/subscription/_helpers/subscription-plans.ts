@@ -3,22 +3,32 @@
 // asking Stripe. The Stripe plan list, which reads price identifiers from the
 // environment, stays with the Better Auth configuration in `@/server/auth`.
 
-export enum SubscriptionPlanName {
-  Free = "free",
-  Pro = "pro",
-  Agency = "agency",
-}
+// A `const` object plus the union of its values rather than an `enum`: the
+// object still answers `SubscriptionPlanName.Pro` and `Object.values(...)`, and
+// the type accepts the plain string a Stripe webhook or a database column
+// carries, which a nominal enum member does not.
+export const SubscriptionPlanName = {
+  Free: "free",
+  Pro: "pro",
+  Agency: "agency",
+} as const;
 
-export enum SubscriptionStatus {
-  Incomplete = "incomplete",
-  IncompleteExpired = "incomplete_expired",
-  Trialing = "trialing",
-  Active = "active",
-  PastDue = "past_due",
-  Canceled = "canceled",
-  Unpaid = "unpaid",
-  Paused = "paused",
-}
+export type SubscriptionPlanName =
+  (typeof SubscriptionPlanName)[keyof typeof SubscriptionPlanName];
+
+export const SubscriptionStatus = {
+  Incomplete: "incomplete",
+  IncompleteExpired: "incomplete_expired",
+  Trialing: "trialing",
+  Active: "active",
+  PastDue: "past_due",
+  Canceled: "canceled",
+  Unpaid: "unpaid",
+  Paused: "paused",
+} as const;
+
+export type SubscriptionStatus =
+  (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
 // The Plans a Subscription can be bought on, in display order. Free is the
 // absence of a Subscription, so it is not one of them. The Stripe plan list
