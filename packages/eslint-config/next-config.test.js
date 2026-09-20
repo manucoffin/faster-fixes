@@ -63,6 +63,19 @@ function onlyEntryFor(ruleName) {
   return entries[0];
 }
 
+async function schemaPurityMessagesFor(file, code) {
+  const eslint = new ESLint({
+    cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+    overrideConfigFile: true,
+    overrideConfig: nextJsConfig,
+  });
+  const [result] = await eslint.lintText(code, { filePath: file });
+
+  return result.messages.filter(
+    (message) => message.ruleId === "local/schema-must-be-pure-zod",
+  );
+}
+
 describe("the schema rules wiring", () => {
   it("runs require-schema-conventions on *.schema.ts with both convention options", () => {
     const entry = onlyEntryFor("local/require-schema-conventions");
@@ -74,11 +87,73 @@ describe("the schema rules wiring", () => {
     ]);
   });
 
-  it("runs schema-must-be-pure-zod on *.schema.ts", () => {
+  it("runs schema-must-be-pure-zod on *.schema.ts with its named exceptions", () => {
     const entry = onlyEntryFor("local/schema-must-be-pure-zod");
+    const [severity, options] = entry.rules["local/schema-must-be-pure-zod"];
 
     expect(entry.files).toEqual(["**/*.schema.ts"]);
-    expect(entry.rules["local/schema-must-be-pure-zod"]).toBe("error");
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual(["allowImportPatterns"]);
+    expect(options.allowImportPatterns).toEqual([
+      "/_domains/feedback/_types/feedback-status$",
+      "/_domains/project/_helpers/normalize-domain$",
+      "^@/app/_domains/subscription$",
+    ]);
+  });
+
+  // The allowlist is what a schema may reach for, so the two halves are
+  // asserted through the real config: a specifier nobody named is reported
+  // even though no denylist ever heard of it, and each named exception is the
+  // import the tree actually makes.
+  it("reports an import the allowlist does not cover", async () => {
+    const messages = await schemaPurityMessagesFor(
+      SCHEMA,
+      `import { format } from "date-fns";\n`,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("must stay pure Zod");
+  });
+
+  it("accepts zod, another schema and the generated Prisma enums", async () => {
+    for (const specifier of [
+      "zod",
+      "./line.schema",
+      "@workspace/db/generated/prisma/enums",
+    ]) {
+      const messages = await schemaPurityMessagesFor(
+        SCHEMA,
+        `import { x } from "${specifier}";\nexport const y = x;\n`,
+      );
+
+      expect([specifier, messages]).toEqual([specifier, []]);
+    }
+  });
+
+  it("accepts each module it names, on the schema that imports it", async () => {
+    const namedExceptions = [
+      [
+        "src/app/api/v1/agent/_services/agent.schema.ts",
+        "@/app/_domains/feedback/_types/feedback-status",
+      ],
+      [
+        "src/app/_domains/project/_services/domain.schema.ts",
+        "../_helpers/normalize-domain",
+      ],
+      [
+        "src/app/admin/users/_services/create-subscription.schema.ts",
+        "@/app/_domains/subscription",
+      ],
+    ];
+
+    for (const [file, specifier] of namedExceptions) {
+      const messages = await schemaPurityMessagesFor(
+        file,
+        `import { x } from "${specifier}";\nexport const y = x;\n`,
+      );
+
+      expect([file, messages]).toEqual([file, []]);
+    }
   });
 
   it("carries no per-file block turning unused disable directives off", () => {

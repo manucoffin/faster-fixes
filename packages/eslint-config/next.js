@@ -18,6 +18,31 @@ const schemaConventionOptions = {
   requireSingularInput: true,
 };
 
+// The specifiers a schema may import besides Zod, another `*.schema` file and
+// the generated Prisma enums. The rule is an allowlist, so this list is the
+// whole of the exception surface: a new server-only import in a schema is
+// rejected until somebody adds it here and a reviewer reads the reason.
+//
+// Each entry is a module that is pure by construction, reviewed like the
+// server folder deep-import exemptions below.
+const schemaPurityOptions = {
+  allowImportPatterns: [
+    // Glossary vocabulary, not an operation input: a Zod enum for a CONTEXT.md
+    // value lives in `_types/` rather than in a schema file, so the schema that
+    // validates that value has to reach for it there. The module is Zod and
+    // string literals.
+    "/_domains/feedback/_types/feedback-status$",
+    // A pure string helper: the domain schema normalises a host name inside a
+    // `transform`, and the helper has no import of its own.
+    "/_domains/project/_helpers/normalize-domain$",
+    // The plan and status vocabulary of the subscription domain, read through
+    // that domain's barrel, which is the only sanctioned cross-domain
+    // specifier. The values are enums; the barrel's other exports are client
+    // safe.
+    "^@/app/_domains/subscription$",
+  ],
+};
+
 const useClientSuffixOptions = {
   // The Next.js special files need a default export, and a `'use client'`
   // directive under a name the framework fixes, so the suffix cannot apply to
@@ -267,7 +292,7 @@ export const nextJsConfig = [
     files: ["**/*.schema.ts"],
     rules: {
       "local/require-schema-conventions": ["error", schemaConventionOptions],
-      "local/schema-must-be-pure-zod": "error",
+      "local/schema-must-be-pure-zod": ["error", schemaPurityOptions],
     },
   },
   {

@@ -18,14 +18,23 @@ The boundary rules are `require-server-action-suffix`,
 `src/server/`. An exception to one of them is a named entry in `next.js`,
 reviewed like the three server folder exemptions, not a disable comment.
 
-Four rules take options from `next.js`: `require-schema-conventions`
+Five rules take options from `next.js`: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
 (`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
-client imports of the server folder, empty today) and `services-verb-prefix`
-(`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary).
-`require-use-client-suffix` takes the Next.js special file names as
-`ignorePathPatterns`. No other rule declares an option.
+client imports of the server folder, empty today), `services-verb-prefix`
+(`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary) and
+`schema-must-be-pure-zod` (`allowImportPatterns`, the modules a schema may
+import beyond the built-in allowlist). `require-use-client-suffix` takes the
+Next.js special file names as `ignorePathPatterns`. No other rule declares an
+option.
+
+`schema-must-be-pure-zod` is an allowlist rather than a denylist: a schema may
+import `zod`, another `*.schema` file, `@workspace/db/generated/prisma/enums`
+and the three modules `schemaPurityOptions` names, and every other runtime
+import is reported. A denylist only knew the leaks somebody had already met, so
+the next server-only specifier to appear in a schema was admitted by default.
+A type-only import stays free, whatever it points at.
 
 `serviceVerbOptions` in `next.js` is the service naming vocabulary in one
 place. The read verbs are closed (extending them is an ADR change, not a config
