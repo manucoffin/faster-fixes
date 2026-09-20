@@ -25,9 +25,9 @@ const pageUrl = `${APP_URL}/integrations/mcp`;
 // server is; this one names the tool call and the payload the agent receives.
 const title = `MCP server: fix client feedback in Claude Code - ${SITE_NAME}`;
 const description =
-  "Your agent calls list_feedbacks and gets the screenshot, DOM selector, React tree, console logs and network requests — then fixes it from the terminal.";
+  "Your agent calls list_feedbacks and gets the screenshot, DOM selector, React tree, console logs and network requests, then fixes it from the terminal.";
 const ogImageAlt =
-  "FasterFixes MCP server — an AI coding agent fetching client feedback with a full repro bundle";
+  "FasterFixes MCP server: an AI coding agent fetching client feedback with a full repro bundle";
 const datePublished = "2026-06-03T00:00:00.000Z";
 const dateModified = "2026-06-03T00:00:00.000Z";
 

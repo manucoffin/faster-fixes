@@ -42,19 +42,19 @@ export function MarkerIoPricingSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Pricing
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Free if you self-host. Flat rate if you don&apos;t.
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
-            FasterFixes is open source. The lowest plan in any honest
-            comparison is &quot;free, forever, on your own server.&quot; If you
-            would rather not run it yourself, the hosted plans are flat-rate —
-            not per-seat. Marker.io uses tiered per-seat pricing where Jira
-            sync, session replay, and developer tools are gated behind the
-            Team plan at $149/month annual.
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            FasterFixes is open source. The lowest plan in any honest comparison
+            is &quot;free, forever, on your own server.&quot; If you would
+            rather not run it yourself, the hosted plans are flat-rate, not
+            per-seat. Marker.io uses tiered per-seat pricing where Jira sync,
+            session replay, and developer tools are gated behind the Team plan
+            at $149/month annual.
           </p>
         </div>
 
@@ -66,19 +66,19 @@ export function MarkerIoPricingSection() {
                 card.highlight ? "border-foreground bg-muted/30" : ""
               }`}
             >
-              <p className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+              <p className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                 {card.vendor}
               </p>
               <p className="mt-2 text-sm">{card.plan}</p>
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="text-4xl font-bold">{card.price}</span>
                 {card.suffix && (
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-sm text-muted-foreground">
                     {card.suffix}
                   </span>
                 )}
               </div>
-              <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 {card.note}
               </p>
             </div>
@@ -100,7 +100,7 @@ export function MarkerIoPricingSection() {
           </Button>
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center text-sm">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Prices reflect each vendor&apos;s public pricing page at time of
           writing.
         </p>

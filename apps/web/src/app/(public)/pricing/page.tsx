@@ -23,9 +23,9 @@ const pageUrl = `${APP_URL}/pricing`;
 // GSC shows the impressions here come from competitor price research
 // ("atarim pricing", "ruttl pricing"), not from brand queries — so the snippet
 // leads with the numbers and the flat-rate model rather than "simple pricing".
-const title = "Pricing — $0 self-hosted, $20/mo flat rate";
+const title = "Pricing: $0 self-hosted, $20/mo flat rate";
 const description =
-  "Self-host free under AGPL-3.0, or $20/month flat for up to 5 members and $99 for unlimited. Flat rate, not per seat — see what you would actually pay.";
+  "Self-host free under AGPL-3.0, or $20/month flat for up to 5 members and $99 for unlimited. Flat rate, not per seat. See what you would actually pay.";
 
 export const metadata: Metadata = {
   title,

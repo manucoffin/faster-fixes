@@ -15,7 +15,7 @@ import { GleapHero } from "./_features/gleap-hero";
 import { GleapPricingSection } from "./_features/gleap-pricing-section";
 
 const pageUrl = `${APP_URL}/vs/gleap`;
-const title = `Gleap Alternative — Open-Source & Dev-First | ${SITE_NAME}`;
+const title = `Gleap Alternative: Open-Source & Dev-First | ${SITE_NAME}`;
 const description =
   "FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $20/mo pricing.";
 const datePublished = "2026-05-03T00:00:00.000Z";

@@ -13,24 +13,24 @@ export const migrationSteps = [
   },
   {
     label: "Invite your team and connect your issue tracker",
-    body: "Add team members from the dashboard — your plan covers the full team at a flat rate. Connect your GitHub repository, your Linear workspace, your Jira Cloud site, or any combination, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
+    body: "Add team members from the dashboard. Your plan covers the full team at a flat rate. Connect your GitHub repository, your Linear workspace, your Jira Cloud site, or any combination, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
   },
 ];
 
 export function AtarimMigrationSection() {
   return (
-    <section className="bg-muted/30 w-full border-y py-16 md:py-24">
+    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Migration
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Switching from Atarim
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            No one-click import. Export your data, replace the widget, and
-            wire up the integrations — the whole process takes under a day.
+          <p className="mt-4 text-lg text-muted-foreground">
+            No one-click import. Export your data, replace the widget, and wire
+            up the integrations. The whole process takes under a day.
           </p>
         </div>
 
@@ -38,14 +38,14 @@ export function AtarimMigrationSection() {
           {migrationSteps.map((step, i) => (
             <li
               key={step.label}
-              className="bg-background flex gap-4 rounded-xl border p-6"
+              className="flex gap-4 rounded-xl border bg-background p-6"
             >
-              <span className="text-muted-foreground font-mono text-sm">
+              <span className="font-mono text-sm text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
                 <h3 className="font-semibold">{step.label}</h3>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
+                <p className="mt-2 leading-relaxed text-muted-foreground">
                   {step.body}
                 </p>
               </div>

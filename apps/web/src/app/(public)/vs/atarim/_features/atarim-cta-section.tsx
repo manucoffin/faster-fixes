@@ -7,14 +7,14 @@ import Link from "next/link";
 
 export function AtarimCtaSection() {
   return (
-    <section className="bg-muted/50 w-full py-16 md:py-24">
+    <section className="w-full bg-muted/50 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="text-3xl font-bold md:text-4xl">
             Ready to switch from Atarim?
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg md:text-xl">
-            Try FasterFixes free — self-host for $0 or use hosted Pro at
+          <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+            Try FasterFixes free: self-host for $0 or use hosted Pro at
             $20/month flat. No per-seat pricing, no vendor lock-in.
           </p>
 

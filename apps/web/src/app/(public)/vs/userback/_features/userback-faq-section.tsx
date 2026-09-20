@@ -31,10 +31,10 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
     answer:
-      "Yes. The free plan includes 1 project, 50 feedback items, and 1 member — no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).",
+      "Yes. The free plan includes 1 project, 50 feedback items, and 1 member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The free plan includes 1 project, 50 feedback items, and 1 member —
+        Yes. The free plan includes 1 project, 50 feedback items, and 1 member,
         no credit card required. The self-hosted version is also free under
         AGPL-3.0; you only pay for your own hosting infrastructure (typically
         $5-20/month on Railway or Vercel). See the{" "}
@@ -65,14 +65,14 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from Userback?",
     answer:
-      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport on every report. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal — features FasterFixes does not currently offer. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
+      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport on every report. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes does not currently offer those features. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source and self-hostable; Userback is closed-source
         and cloud-only. FasterFixes captures React component tree, DOM selector,
         URL, browser, and viewport on every report. Userback is a broader
         platform with annotated video, session replay, NPS surveys, and a
-        feature portal — features FasterFixes does not currently offer.
+        feature portal. FasterFixes does not currently offer those features.
       </p>
     ),
   },
@@ -89,12 +89,12 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP server do?",
     answer:
-      "@fasterfixes/mcp connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal — no browser tab switching, no copy-pasting issue descriptions into a chat window. Userback also offers an MCP server, but FasterFixes is open-source and self-hostable end to end.",
+      "@fasterfixes/mcp connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal, no browser tab switching, no copy-pasting issue descriptions into a chat window. Userback also offers an MCP server, but FasterFixes is open-source and self-hostable end to end.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp connects Claude Code, Cursor, and Codex to your
         FasterFixes workspace. Feedback items are accessible directly in the
-        terminal — no browser tab switching, no copy-pasting issue descriptions
+        terminal, no browser tab switching, no copy-pasting issue descriptions
         into a chat window. Userback also offers an MCP server, but FasterFixes
         is open-source and self-hostable end to end. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
@@ -126,13 +126,13 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React stacks?",
     answer:
-      "Partially. FasterFixes has a basic HTML embed for non-React pages. However, the full context capture — React component tree, DOM selector — is only available with the React widget. Userback's JS snippet and browser extension work on any stack. If your project is not React-based, Userback offers broader compatibility today.",
+      "Partially. FasterFixes has a basic HTML embed for non-React pages. However, the full context capture of the React component tree and DOM selector is only available with the React widget. Userback's JS snippet and browser extension work on any stack. If your project is not React-based, Userback offers broader compatibility today.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Partially. FasterFixes has a basic HTML embed for non-React pages.
-        However, the full context capture — React component tree, DOM selector —
-        is only available with the React widget. Userback&apos;s JS snippet and
-        browser extension work on any stack. See the{" "}
+        However, the full context capture of the React component tree and DOM
+        selector is only available with the React widget. Userback&apos;s JS
+        snippet and browser extension work on any stack. See the{" "}
         <DocLink href={"/docs/widget/other-frameworks" as Route}>
           other frameworks page
         </DocLink>{" "}
@@ -143,7 +143,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Userback?",
     answer:
-      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that video recordings, session replays, and survey responses do not migrate — FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
+      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that video recordings, session replays, and survey responses do not migrate. FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
   },
   {
     question: "Is FasterFixes open source?",

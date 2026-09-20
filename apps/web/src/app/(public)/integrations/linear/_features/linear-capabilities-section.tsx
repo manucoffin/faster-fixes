@@ -16,7 +16,7 @@ const capabilities = [
   },
   {
     title: "Track the Linear identifier without leaving Faster Fixes",
-    body: "Once an issue is created, the Faster Fixes inbox shows a Linear badge — the identifier (e.g. ENG-123) and a colored dot reflecting the issue's current state. The integration is independent of GitHub: a feedback item can be linked to a Linear issue, a GitHub issue, both, or neither.",
+    body: "Once an issue is created, the Faster Fixes inbox shows a Linear badge: the identifier (e.g. ENG-123) and a colored dot reflecting the issue's current state. The integration is independent of GitHub: a feedback item can be linked to a Linear issue, a GitHub issue, both, or neither.",
   },
 ];
 
@@ -25,16 +25,16 @@ export function LinearCapabilitiesSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             What lands in every Linear issue
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Every issue arrives with full context attached
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            The integration goes beyond creating a title and a link. Each
-            Linear issue carries the data your engineers need to reproduce and
-            fix the bug without a follow-up conversation.
+          <p className="mt-4 text-lg text-muted-foreground">
+            The integration goes beyond creating a title and a link. Each Linear
+            issue carries the data your engineers need to reproduce and fix the
+            bug without a follow-up conversation.
           </p>
         </div>
 

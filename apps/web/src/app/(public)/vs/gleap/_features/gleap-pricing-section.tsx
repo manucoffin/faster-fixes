@@ -19,20 +19,18 @@ export function GleapPricingSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Pricing
           </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Pricing comparison
-          </h2>
-          <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
+          <h2 className="text-3xl font-bold md:text-4xl">Pricing comparison</h2>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Gleap&apos;s Hobby plan ($39/mo) is limited to 1 member and 1
-            project — not viable for any real team. For 5 people, the minimum
-            is the Team plan.
+            project, not viable for any real team. For 5 people, the minimum is
+            the Team plan.
           </p>
         </div>
 
-        <div className="bg-muted/30 mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border">
+        <div className="mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border bg-muted/30">
           {rows.map((row) => (
             <div
               key={row.label}
@@ -43,16 +41,16 @@ export function GleapPricingSection() {
               <span className="text-sm font-medium md:text-base">
                 {row.label}
               </span>
-              <span className="text-foreground text-sm font-semibold tabular-nums md:text-base">
+              <span className="text-sm font-semibold text-foreground tabular-nums md:text-base">
                 {row.value}
               </span>
             </div>
           ))}
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-center text-sm">
-          Note: Gleap AI features (Kai) are billed separately at ~$0.02 per
-          AI response.
+        <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
+          Note: Gleap AI features (Kai) are billed separately at ~$0.02 per AI
+          response.
         </p>
       </div>
     </section>

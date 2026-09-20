@@ -28,9 +28,9 @@ import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-sectio
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const pageUrl = `${APP_URL}/vs/usersnap`;
-const title = `Usersnap Alternative — Open-Source & Self-Hosted | ${SITE_NAME}`;
+const title = `Usersnap Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
 const description =
-  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context — no per-seat pricing, no vendor lock-in. Compare features and pricing.";
+  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context, no per-seat pricing, no vendor lock-in. Compare features and pricing.";
 const datePublished = "2026-04-27T00:00:00.000Z";
 const dateModified = "2026-04-28T00:00:00.000Z";
 

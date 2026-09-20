@@ -24,7 +24,7 @@ import { WorksWithSection } from "./_features/works-with-section";
 
 export const metadata: Metadata = {
   title: {
-    absolute: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    absolute: `${SITE_NAME}: ${SITE_TAGLINE}`,
   },
   description: SITE_META_DESCRIPTION,
   keywords: [
@@ -47,12 +47,12 @@ export const metadata: Metadata = {
     canonical: APP_URL,
   },
   openGraph: {
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME}: ${SITE_TAGLINE}`,
     description: SITE_META_DESCRIPTION,
     url: APP_URL,
   },
   twitter: {
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME}: ${SITE_TAGLINE}`,
     description: SITE_META_DESCRIPTION,
   },
 };

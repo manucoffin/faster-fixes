@@ -15,7 +15,7 @@ export const ruttlFaqs: FaqItem[] = [
   {
     question: "Does Ruttl require a Chrome extension?",
     answer:
-      "Yes for sites behind Basic Authentication. The extension requirement removes mobile feedback from the workflow on those projects — clients cannot annotate from a phone.",
+      "Yes for sites behind Basic Authentication. The extension requirement removes mobile feedback from the workflow on those projects: clients cannot annotate from a phone.",
   },
   {
     question:

@@ -12,11 +12,11 @@ import { GithubHowItWorksSection } from "./_features/github-how-it-works-section
 const pageUrl = `${APP_URL}/integrations/github`;
 // Title/meta lead with the job-to-be-done, not the generic "{Tool} integration" pattern,
 // to lift CTR at page-1-adjacent positions where users compare similarly-ranked tool pages (ChatSEO 2026-07-07).
-const title = "GitHub Issues from Visual Feedback — Screenshot + Context";
+const title = "GitHub Issues from Visual Feedback: Screenshot + Context";
 const description =
-  "Turn client feedback into GitHub issues automatically — screenshot, CSS selector, component path, browser info included. Bidirectional status sync.";
+  "Turn client feedback into GitHub issues automatically: screenshot, CSS selector, component path, browser info included. Bidirectional status sync.";
 const ogImageAlt =
-  "FasterFixes GitHub integration — visual feedback to GitHub issues";
+  "FasterFixes GitHub integration: visual feedback to GitHub issues";
 const datePublished = "2026-05-05T00:00:00.000Z";
 const dateModified = "2026-05-05T00:00:00.000Z";
 

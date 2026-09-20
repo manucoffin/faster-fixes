@@ -9,9 +9,9 @@ type SetupStep = { label: string; body: string; content?: ReactNode };
 export const mcpSetupSteps: SetupStep[] = [
   {
     label: "Create an agent token",
-    body: "On the Integrations page in your Faster Fixes account, create an agent token under MCP Server and grant the scopes the agent needs. Read, update, and create are separate permissions — leave any unchecked to lock the agent out of that operation.",
+    body: "On the Integrations page in your Faster Fixes account, create an agent token under MCP Server and grant the scopes the agent needs. Read, update, and create are separate permissions. Leave any unchecked to lock the agent out of that operation.",
     content: (
-      <p className="text-muted-foreground mt-2 leading-relaxed">
+      <p className="mt-2 leading-relaxed text-muted-foreground">
         On the{" "}
         <Link
           href={"/integrations" as Route}
@@ -21,14 +21,14 @@ export const mcpSetupSteps: SetupStep[] = [
         </Link>{" "}
         in your Faster Fixes account, create an agent token under MCP Server and
         grant the scopes the agent needs. Read, update, and create are separate
-        permissions — leave any unchecked to lock the agent out of that
+        permissions. Leave any unchecked to lock the agent out of that
         operation.
       </p>
     ),
   },
   {
     label: "Add the server to your agent",
-    body: "One command, no global install. Point it at the token and your project ID. Config formats differ per editor — JSON for most, TOML for Codex — and the setup docs cover each one.",
+    body: "One command, no global install. Point it at the token and your project ID. Config formats differ per editor: JSON for most, TOML for Codex. The setup docs cover each one.",
   },
   {
     label: "Fetch, fix, resolve",
@@ -46,7 +46,7 @@ export function McpHowItWorksSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             How it works
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
@@ -58,15 +58,15 @@ export function McpHowItWorksSection() {
           {mcpSetupSteps.map((step, i) => (
             <li
               key={step.label}
-              className="bg-muted/30 flex gap-4 rounded-xl border p-6"
+              className="flex gap-4 rounded-xl border bg-muted/30 p-6"
             >
-              <span className="text-muted-foreground font-mono text-sm">
+              <span className="font-mono text-sm text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
                 <h3 className="font-semibold">{step.label}</h3>
                 {step.content ?? (
-                  <p className="text-muted-foreground mt-2 leading-relaxed">
+                  <p className="mt-2 leading-relaxed text-muted-foreground">
                     {step.body}
                   </p>
                 )}
@@ -76,10 +76,10 @@ export function McpHowItWorksSection() {
         </ol>
 
         <div className="mx-auto mt-10 max-w-3xl">
-          <p className="text-muted-foreground mb-2 text-sm font-semibold">
+          <p className="mb-2 text-sm font-semibold text-muted-foreground">
             Claude Code
           </p>
-          <pre className="bg-muted text-muted-foreground overflow-x-auto rounded-lg p-4 text-sm">
+          <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm text-muted-foreground">
             <code>{installCommand}</code>
           </pre>
         </div>

@@ -13,16 +13,16 @@ export function McpMigrationSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Migration
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Moving off another tool?
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Export your current tool&apos;s data as CSV or JSON, parse it, and
             call <code>create_feedbacks</code> with up to 100 items per call.
-            The batch is atomic and skips integration fan-out — no accidental
+            The batch is atomic and skips integration fan-out, no accidental
             issue spam in GitHub or Linear. Tag the source tool and attribute
             imports to a named reviewer so you know where each item came from.
           </p>
@@ -33,10 +33,10 @@ export function McpMigrationSection() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="group bg-muted/30 hover:border-foreground flex items-center justify-between rounded-xl border p-4 transition-colors"
+                className="group flex items-center justify-between rounded-xl border bg-muted/30 p-4 transition-colors hover:border-foreground"
               >
                 <span>{item.label}</span>
-                <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                <span className="text-muted-foreground transition-colors group-hover:text-foreground">
                   →
                 </span>
               </Link>
@@ -44,7 +44,7 @@ export function McpMigrationSection() {
           ))}
         </ul>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-muted-foreground">
           Import details are in the{" "}
           <Link
             href={"/docs/api-reference/agent-api" as Route}

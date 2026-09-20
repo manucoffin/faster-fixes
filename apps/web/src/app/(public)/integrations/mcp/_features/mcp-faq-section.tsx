@@ -31,7 +31,7 @@ export const mcpFaqs: RichFaqItem[] = [
   {
     question: "Do my clients need an account to use the MCP server?",
     answer:
-      "No. The MCP server uses an agent token scoped to your project. Clients never touch the agent or the token — they only use the Faster Fixes feedback widget on your site.",
+      "No. The MCP server uses an agent token scoped to your project. Clients never touch the agent or the token. They only use the Faster Fixes feedback widget on your site.",
   },
   {
     question: "Can I point the MCP server at a self-hosted instance?",
@@ -41,7 +41,7 @@ export const mcpFaqs: RichFaqItem[] = [
   {
     question: "Is the MCP server available on the free plan?",
     answer:
-      "Yes. Agent tokens and all three tools — list_feedbacks, update_feedback_status, and create_feedbacks — are available on every plan, including the free Community edition. Bulk create is capped at your plan's feedback limit.",
+      "Yes. Agent tokens and all three tools are available on every plan, including the free Community edition. The tools are list_feedbacks, update_feedback_status, and create_feedbacks. Bulk create is capped at your plan's feedback limit.",
   },
   {
     question: "How do I migrate existing feedback from another tool?",
@@ -63,7 +63,7 @@ export const mcpFaqs: RichFaqItem[] = [
   {
     question: "Is the MCP server open source?",
     answer:
-      "Yes. The server is open source under the MIT license and published as @fasterfixes/mcp on npm — inspect the source, fork it, or contribute. There are no proprietary dependencies in the server itself.",
+      "Yes. The server is open source under the MIT license and published as @fasterfixes/mcp on npm. Inspect the source, fork it, or contribute. There are no proprietary dependencies in the server itself.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The server is open source under the MIT license and published as{" "}
@@ -74,8 +74,8 @@ export const mcpFaqs: RichFaqItem[] = [
           className="text-foreground underline underline-offset-4 hover:no-underline"
         >
           @fasterfixes/mcp on npm
-        </a>{" "}
-        — inspect the source, fork it, or contribute. There are no proprietary
+        </a>
+        . Inspect the source, fork it, or contribute. There are no proprietary
         dependencies in the server itself.
       </p>
     ),

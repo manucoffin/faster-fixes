@@ -31,10 +31,10 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
     answer:
-      "Yes. The Free plan includes 1 project, 50 feedback items, and 1 member — no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $20/month flat for up to 5 members, and the Agency plan is $99/month for unlimited members.",
+      "Yes. The Free plan includes 1 project, 50 feedback items, and 1 member, no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $20/month flat for up to 5 members, and the Agency plan is $99/month for unlimited members.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The Free plan includes 1 project, 50 feedback items, and 1 member —
+        Yes. The Free plan includes 1 project, 50 feedback items, and 1 member,
         no credit card required. Self-hosting is free forever with no item or
         member limits beyond your own infrastructure. The Pro plan is $20/month
         flat for up to 5 members, and the Agency plan is $99/month for unlimited
@@ -91,7 +91,7 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP server do?",
     answer:
-      "@fasterfixes/mcp is a Model Context Protocol server that connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal — no browser tab switching, no copy-pasting issue descriptions into a chat window. Atarim does not have an MCP integration: its InnerCircle AI agents run only inside the Atarim dashboard.",
+      "@fasterfixes/mcp is a Model Context Protocol server that connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal, no browser tab switching, no copy-pasting issue descriptions into a chat window. Atarim does not have an MCP integration: its InnerCircle AI agents run only inside the Atarim dashboard.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp is a Model Context Protocol server that connects Claude
@@ -128,12 +128,12 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React stacks?",
     answer:
-      "Partially. FasterFixes has a basic HTML embed for non-React pages. The full context capture — React component tree, DOM selector — is only available with the React widget. Atarim's JS snippet, Chrome extension, and WordPress plugin work on any stack. If your project is WordPress, plain HTML, or a non-React framework, Atarim has broader compatibility today.",
+      "Partially. FasterFixes has a basic HTML embed for non-React pages. The full context capture of the React component tree and DOM selector is only available with the React widget. Atarim's JS snippet, Chrome extension, and WordPress plugin work on any stack. If your project is WordPress, plain HTML, or a non-React framework, Atarim has broader compatibility today.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Partially. FasterFixes has a basic HTML embed for non-React pages. The
-        full context capture — React component tree, DOM selector — is only
-        available with the React widget. Atarim&apos;s JS snippet, Chrome
+        full context capture of the React component tree and DOM selector is
+        only available with the React widget. Atarim&apos;s JS snippet, Chrome
         extension, and WordPress plugin work on any stack. See the{" "}
         <DocLink href={"/docs/widget/other-frameworks" as Route}>
           other frameworks page

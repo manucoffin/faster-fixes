@@ -16,7 +16,7 @@ const title = "Linear Integration: Client Feedback → Linear Issues, Auto";
 const description =
   "Client feedback lands in Linear automatically, with screenshot, CSS selector, React component path, and full browser context. No manual triage.";
 const ogImageAlt =
-  "FasterFixes Linear integration — visual feedback creating a Linear issue with screenshot and dev context attached";
+  "FasterFixes Linear integration: visual feedback creating a Linear issue with screenshot and dev context attached";
 const datePublished = "2026-05-06T00:00:00.000Z";
 const dateModified = "2026-05-06T00:00:00.000Z";
 

@@ -27,7 +27,7 @@ export const pricingFaqs: FaqItem[] = [
   {
     question: "Do you offer annual billing?",
     answer:
-      "Yes. Annual billing saves you two months compared to paying monthly — effectively 10 months for the price of 12.",
+      "Yes. Annual billing saves you two months compared to paying monthly, effectively 10 months for the price of 12.",
   },
   {
     question: "Is FasterFixes open source? Can I self-host?",
@@ -36,12 +36,12 @@ export const pricingFaqs: FaqItem[] = [
   {
     question: "What payment methods do you accept?",
     answer:
-      "We use Stripe for billing. You can pay with any major credit or debit card. All payments are processed securely through Stripe — we never store your card details.",
+      "We use Stripe for billing. You can pay with any major credit or debit card. All payments are processed securely through Stripe. We never store your card details.",
   },
   {
     question: "Do I need a paid plan for the MCP server or GitHub integration?",
     answer:
-      "The MCP server works on all plans, including Free. The GitHub integration — which automatically creates issues from feedback — requires a Pro or Agency plan.",
+      "The MCP server works on all plans, including Free. The GitHub integration, which automatically creates issues from feedback, requires a Pro or Agency plan.",
   },
   {
     question: "What counts as a feedback item?",
@@ -51,7 +51,7 @@ export const pricingFaqs: FaqItem[] = [
   {
     question: "How does team member pricing work?",
     answer:
-      "There are no per-seat charges. Each plan includes a set number of team members — 1 on Free, 5 on Pro, unlimited on Agency. You only pay the flat plan price.",
+      "There are no per-seat charges. Each plan includes a set number of team members: 1 on Free, 5 on Pro, unlimited on Agency. You only pay the flat plan price.",
   },
 ];
 

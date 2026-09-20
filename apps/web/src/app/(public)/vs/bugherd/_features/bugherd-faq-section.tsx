@@ -31,11 +31,11 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes really free?",
     answer:
-      "Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT — clone the repo and self-host for free. The hosted Free plan is also permanently free (one project, up to 50 feedback items, one team member). Paid hosted plans are $20/month for Pro and $99/month for Agency.",
+      "Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT. Clone the repo and self-host for free. The hosted Free plan is also permanently free (one project, up to 50 feedback items, one team member). Paid hosted plans are $20/month for Pro and $99/month for Agency.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The dashboard is open source under AGPL-3.0 and the widget under
-        MIT — clone the repo and self-host for free. See the{" "}
+        MIT. Clone the repo and self-host for free. See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
@@ -48,7 +48,7 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from BugHerd?",
     answer:
-      "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations — features FasterFixes does not currently have.",
+      "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations. FasterFixes does not currently have those features.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Three differences matter most. FasterFixes is open source and
@@ -57,8 +57,8 @@ export const bugherdFaqs: RichFaqItem[] = [
         coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback
         directly from the terminal. BugHerd is a more mature SaaS with video
         feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+
-        project-management integrations — features FasterFixes does not
-        currently have.
+        project-management integrations. FasterFixes does not currently have
+        those features.
       </p>
     ),
   },
@@ -87,13 +87,13 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path, browser, viewport), apply a fix, and mark the item resolved — all from the terminal, without leaving the editor.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path, browser, viewport), apply a fix, and mark the item resolved, all from the terminal, without leaving the editor.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context for each item (URL, DOM selector, React component path, browser,
-        viewport), apply a fix, and mark the item resolved — all from the
+        viewport), apply a fix, and mark the item resolved, all from the
         terminal, without leaving the editor. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
@@ -123,14 +123,14 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React websites?",
     answer:
-      "Not today. The widget is a framework-native React component — first-class on React and Next.js, and adapters for other frameworks are on the roadmap. We chose framework-native over a generic JS tag because it gives the widget access to the React component tree and lets us render inside your app rather than in a sandboxed overlay. If you need a feedback widget on a non-JavaScript stack today, BugHerd's JS tag or Chrome extension is a better fit.",
+      "Not today. The widget is a framework-native React component, first-class on React and Next.js, and adapters for other frameworks are on the roadmap. We chose framework-native over a generic JS tag because it gives the widget access to the React component tree and lets us render inside your app rather than in a sandboxed overlay. If you need a feedback widget on a non-JavaScript stack today, BugHerd's JS tag or Chrome extension is a better fit.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Not today. The widget is a framework-native React component —
-        first-class on React and Next.js, and adapters for other frameworks are
-        on the roadmap. We chose framework-native over a generic JS tag because
-        it gives the widget access to the React component tree and lets us
-        render inside your app rather than in a sandboxed overlay. If you need a
+        Not today. The widget is a framework-native React component, first-class
+        on React and Next.js, and adapters for other frameworks are on the
+        roadmap. We chose framework-native over a generic JS tag because it
+        gives the widget access to the React component tree and lets us render
+        inside your app rather than in a sandboxed overlay. If you need a
         feedback widget on a non-JavaScript stack today, BugHerd&apos;s JS tag
         or Chrome extension is a better fit. See the{" "}
         <DocLink href={"/docs/widget/other-frameworks" as Route}>
@@ -143,14 +143,14 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "Can I use Claude, GPT, or any other model with FasterFixes?",
     answer:
-      "Yes. The MCP server is model-agnostic. Pick the agent you already use — Claude Code, Cursor, Codex, or any other MCP-compatible client — and the agent runs whichever model you have configured. BugHerd AI, by contrast, is bundled into the BugHerd dashboard and does not let you bring your own model.",
+      "Yes. The MCP server is model-agnostic. Pick the agent you already use, whether Claude Code, Cursor, Codex, or any other MCP-compatible client, and the agent runs whichever model you have configured. BugHerd AI, by contrast, is bundled into the BugHerd dashboard and does not let you bring your own model.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink>{" "}
-        is model-agnostic. Pick the agent you already use — Claude Code, Cursor,
-        Codex, or any other MCP-compatible client — and the agent runs whichever
-        model you have configured. BugHerd AI, by contrast, is bundled into the
-        BugHerd dashboard and does not let you bring your own model.
+        is model-agnostic. Pick the agent you already use, whether Claude Code,
+        Cursor, Codex, or any other MCP-compatible client, and the agent runs
+        whichever model you have configured. BugHerd AI, by contrast, is bundled
+        into the BugHerd dashboard and does not let you bring your own model.
       </p>
     ),
   },
@@ -163,16 +163,15 @@ export const bugherdFaqs: RichFaqItem[] = [
     question:
       "Does FasterFixes integrate with GitHub, Linear, and Jira like BugHerd does?",
     answer:
-      "Yes. The GitHub, Linear, and Jira Cloud integrations each create an issue from a feedback item with the full structured report — screenshot, component path, selector, environment — and sync status both ways. Closing the issue on GitHub, moving it to Done in Linear, or transitioning it to a Done-category status in Jira resolves the feedback in FasterFixes, and vice versa. A feedback can be linked to all three at once.",
+      "Yes. The GitHub, Linear, and Jira Cloud integrations each create an issue from a feedback item with the full structured report: screenshot, component path, selector, environment. Status syncs both ways. Closing the issue on GitHub, moving it to Done in Linear, or transitioning it to a Done-category status in Jira resolves the feedback in FasterFixes, and vice versa. A feedback can be linked to all three at once.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The GitHub, Linear, and Jira Cloud integrations each create an
-        issue from a feedback item with the full structured report — screenshot,
-        component path, selector, environment — and sync status both ways.
-        Closing the issue on GitHub, moving it to Done in Linear, or
-        transitioning it to a Done-category status in Jira resolves the feedback
-        in FasterFixes, and vice versa. A feedback can be linked to all three at
-        once. See the{" "}
+        issue from a feedback item with the full structured report: screenshot,
+        component path, selector, environment. Status syncs both ways. Closing
+        the issue on GitHub, moving it to Done in Linear, or transitioning it to
+        a Done-category status in Jira resolves the feedback in FasterFixes, and
+        vice versa. A feedback can be linked to all three at once. See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
           GitHub integration docs
         </DocLink>
