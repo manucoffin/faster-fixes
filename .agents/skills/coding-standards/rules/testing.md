@@ -51,7 +51,7 @@ That boundary rule is what the 80-odd mocks in the tree already do, and it is wh
 
 ### A structural check is the fourth seam
 
-A convention that holds over the tree rather than inside one module is checked by a test that reads the files, because ESLint sees one file at a time and cannot hold what it learned from the previous one. There is one today: `src/app/_domains/domain-cycles.test.ts` builds the domain dependency graph from every import form under `_domains/` and fails when it finds a cycle, naming the domains in it (ADR-0010). The prior art is `packages/eslint-config/local-rules/adr-citations.test.js`.
+A convention that holds over the tree rather than inside one module is checked by a test that reads the files, because ESLint sees one file at a time and cannot hold what it learned from the previous one. There are two today. `src/app/_domains/domain-cycles.test.ts` builds the domain dependency graph from every import form under `_domains/` and fails when it finds a cycle, naming the domains in it (ADR-0010). `src/mdx-no-em-dash.test.ts` reads every `.mdx` file of the app (the documentation, the blog, the legal pages) and fails on an em dash, naming the file and the line: the em dash ban is a non-negotiable of the house style, and ESLint cannot parse MDX, so a lint rule over the source reaches none of that copy. The prior art is `packages/eslint-config/local-rules/adr-citations.test.js`.
 
 Such a test sits next to the folder it checks and proves both halves: the scan is exercised on written-out specifiers, and the analysis on planted inputs, so neither can pass because it read nothing.
 

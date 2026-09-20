@@ -3,7 +3,7 @@ title: Linear integration setup
 description: Set up the Faster Fixes Linear integration to automatically create Linear issues from feedback and sync status bidirectionally.
 ---
 
-Faster Fixes integrates with Linear to automatically create issues when new feedback is submitted and sync status changes between the dashboard and Linear. The integration runs alongside GitHub — you can connect either, both, or neither. For a product overview, see the [Linear integration overview](/integrations/linear).
+Faster Fixes integrates with Linear to automatically create issues when new feedback is submitted and sync status changes between the dashboard and Linear. The integration runs alongside GitHub: you can connect either, both, or neither. For a product overview, see the [Linear integration overview](/integrations/linear).
 
 ## Setup
 
@@ -31,13 +31,13 @@ Issues are attributed to the Faster Fixes app, not to the member who installed t
 
 Each project link controls how new issues are created:
 
-| Setting | Description |
-|---------|-------------|
-| **Team** | The Linear team that receives new issues |
-| **Default state** | Workflow state used for new feedback (typically Todo) |
-| **Default labels** | Labels applied to every created issue |
-| **Default priority** | None, Urgent, High, Medium, or Low |
-| **Auto-create** | Toggle automatic issue creation off without unlinking |
+| Setting              | Description                                           |
+| -------------------- | ----------------------------------------------------- |
+| **Team**             | The Linear team that receives new issues              |
+| **Default state**    | Workflow state used for new feedback (typically Todo) |
+| **Default labels**   | Labels applied to every created issue                 |
+| **Default priority** | None, Urgent, High, Medium, or Low                    |
+| **Auto-create**      | Toggle automatic issue creation off without unlinking |
 
 If a saved state or label is later deleted in Linear, Faster Fixes falls back to a state of the matching type and surfaces a banner in project settings prompting you to re-pick.
 
@@ -45,16 +45,16 @@ If a saved state or label is later deleted in Linear, Faster Fixes falls back to
 
 Status changes propagate in both directions. Mapping is by Linear's workflow state **type**, not name, so renamed or custom states still work.
 
-| Action | Result |
-|--------|--------|
-| Feedback marked **resolved** in dashboard | Linear issue moves to a `completed`-type state |
-| Feedback marked **closed** (Archived) in dashboard | Linear issue moves to a `canceled`-type state |
-| Feedback marked **in progress** in dashboard | Linear issue moves to a `started`-type state |
-| Feedback marked **new** in dashboard | Linear issue moves to the project's default state |
-| Linear issue moved to **Done / completed** | Feedback status updated to resolved |
-| Linear issue **canceled** | Feedback status updated to closed |
-| Linear issue moved to **In Progress / started** | Feedback status updated to in progress |
-| Linear issue moved to **Triage / Backlog / Todo** | Feedback status updated to new |
+| Action                                             | Result                                            |
+| -------------------------------------------------- | ------------------------------------------------- |
+| Feedback marked **resolved** in dashboard          | Linear issue moves to a `completed`-type state    |
+| Feedback marked **closed** (Archived) in dashboard | Linear issue moves to a `canceled`-type state     |
+| Feedback marked **in progress** in dashboard       | Linear issue moves to a `started`-type state      |
+| Feedback marked **new** in dashboard               | Linear issue moves to the project's default state |
+| Linear issue moved to **Done / completed**         | Feedback status updated to resolved               |
+| Linear issue **canceled**                          | Feedback status updated to closed                 |
+| Linear issue moved to **In Progress / started**    | Feedback status updated to in progress            |
+| Linear issue moved to **Triage / Backlog / Todo**  | Feedback status updated to new                    |
 
 ## Manual issue creation
 
