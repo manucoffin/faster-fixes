@@ -103,7 +103,7 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 
 ## Client/server boundary
 
-- A module-level `'use server'` directive belongs **only** in a `*.server.action.ts` file: it turns every export into a public endpoint. A server component needs no directive, and an infrastructure helper must be called through a service that checks who is asking.
+- A `'use server'` directive belongs **only** in a `*.server.action.ts` file, at module level or inside a function: a module-level one turns every export into a public endpoint, and a function-level one (an inline server action) mints the same endpoint under no name a reader can search for. A server component needs no directive, and an infrastructure helper must be called through a service that checks who is asking.
 - A client file (`'use client'` / `*.client.tsx`) must **not** import from a `_services/` path — **except** `*.schema.ts` and **type-only imports** (`import type { … }`): TS erases those at compile time, so they cannot leak server code into the bundle, and the service return type is the type source of truth. For runtime values, use a tRPC hook or a server component instead.
 - A client file must **not** import a **runtime value** from `@/server/**` either: the folder holds wiring and server-only cross-cutting abstractions, so the import leaks them into the bundle, and `instanceof DomainError` would not survive serialization anyway (branch on `error.data.code`). Type-only imports are free. A value a client legitimately needs does not belong in the server folder: it moves to `@/utils/` or `@/lib/`, as the public asset URL builder did (`@/utils/url/resolve-s3-url`). Any remaining exception is a named pattern in `packages/eslint-config/next.js`, not a disable comment.
 - Container hooks (`use-*.ts`) own form state + mutation + optimistic update + toast + invalidation, returning `{ form, onSubmit, isPending }`. They live in their owning scope's `_features/` slice, next to the UI they drive. Extract a hook only on real logic or reuse; a trivial single `useQuery` stays inline.
@@ -117,4 +117,4 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 `require-service-output-type` (a read service exports `<Service>Output` built from `typeof` its own service; `inferProcedureOutput` and `inferRouterOutputs` are reported wherever a consumer uses them),
 `services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`; always on since step 4, not agent-gated),
 `require-use-client-suffix` (exempts `use-*`),
-`require-server-action-suffix` (always on, not agent-gated). See `packages/eslint-config/local-rules/`.
+`require-server-action-suffix` (a `'use server'` directive at module or function level). See `packages/eslint-config/local-rules/`.

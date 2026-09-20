@@ -28,7 +28,7 @@ export const requireUseClientSuffixRule = {
     ],
     messages: {
       missingClientSuffix:
-        "This file has a `'use client'` directive but its name does not end with `.client.tsx`. Rename it to `{{ suggested }}`.",
+        "This file has a `'use client'` directive but its name does not carry the `.client` suffix. Rename it to `{{ suggested }}`.",
       missingUseClient:
         "This file is named `.client.ts(x)` but is missing the `'use client'` directive at the top.",
     },
@@ -60,7 +60,10 @@ export const requireUseClientSuffixRule = {
           USE_CLIENT_RE.test(firstStatement.expression.raw);
 
         if (hasUseClient && !hasClientSuffix && !isExemptFilename) {
-          const suggested = basename.replace(/\.tsx$/, ".client.tsx");
+          // Keep the file's own extension: a `.ts` module renamed to
+          // `.client.tsx` would be a rename the reader cannot make, and
+          // `.client.ts` is a client module to the import rules too.
+          const suggested = basename.replace(/\.(tsx?)$/, ".client.$1");
           context.report({
             node: firstStatement,
             messageId: "missingClientSuffix",

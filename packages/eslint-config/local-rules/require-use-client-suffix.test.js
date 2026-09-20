@@ -16,9 +16,13 @@ const ruleTester = new RuleTester({
   },
 });
 
-// The globs in the shared config exempt the Next.js special files by path.
+// The shape the shared config passes: one pattern anchored on the whole
+// basename, so it exempts the Next.js special files and nothing that merely
+// ends in one of their names.
 const nextSpecialFileOptions = [
-  { ignorePathPatterns: ["/app/.*page\\.tsx$", "/app/.*layout\\.tsx$"] },
+  {
+    ignorePathPatterns: ["/app/(?:.*/)?(?:layout|page)\\.tsx?$"],
+  },
 ];
 
 ruleTester.run("require-use-client-suffix", requireUseClientSuffixRule, {
@@ -68,6 +72,12 @@ ruleTester.run("require-use-client-suffix", requireUseClientSuffixRule, {
       code: `"use client";\nexport const panelId = "panel";\n`,
     },
     {
+      name: "a Next.js page at the app root, with no folder before it",
+      filename: "/repo/apps/web/src/app/page.tsx",
+      code: `"use client";\nexport default function Page() {\n  return <div />;\n}\n`,
+      options: nextSpecialFileOptions,
+    },
+    {
       name: "a .client.tsx file using single quotes for the directive",
       filename: "/repo/apps/web/src/app/_features/project/panel.client.tsx",
       code: `'use client';\nexport function Panel() {\n  return <div />;\n}\n`,
@@ -85,6 +95,34 @@ ruleTester.run("require-use-client-suffix", requireUseClientSuffixRule, {
       filename: "/repo/apps/web/src/components/toolbar.tsx",
       code: `"use client";\nexport function Toolbar() {\n  return <div />;\n}\n`,
       errors: [{ messageId: "missingClientSuffix" }],
+    },
+    {
+      // The ignore patterns name the Next.js special files, not every file
+      // whose name happens to end in one of their words.
+      name: "a component whose name merely ends in a special file name",
+      filename:
+        "/repo/apps/web/src/app/(authenticated)/projects/_features/edit-page.tsx",
+      code: `"use client";\nexport function EditPage() {\n  return <div />;\n}\n`,
+      options: nextSpecialFileOptions,
+      errors: [
+        {
+          messageId: "missingClientSuffix",
+          data: { suggested: "edit-page.client.tsx" },
+        },
+      ],
+    },
+    {
+      // The suggestion keeps the file's own extension, so it names a rename
+      // the reader can actually make.
+      name: "a .ts module with the directive, told to become .client.ts",
+      filename: "/repo/apps/web/src/app/_features/project/panel-id.ts",
+      code: `"use client";\nexport const panelId = "panel";\n`,
+      errors: [
+        {
+          messageId: "missingClientSuffix",
+          data: { suggested: "panel-id.client.ts" },
+        },
+      ],
     },
     {
       name: "a .client.tsx file missing the directive",

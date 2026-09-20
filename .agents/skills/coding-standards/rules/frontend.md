@@ -7,7 +7,7 @@ Everything for building UI in `apps/web`. For where files go, see [architecture.
 Export pattern:
 
 - Always use `export function` syntax.
-- Never use default exports.
+- Never use default exports, anywhere under `src/`. The Next.js special files (`page`, `layout`, `error`, `not-found`, `sitemap`, `manifest`, …) are the one exception: the framework requires a default export from them.
 - Use named exports consistently.
 
 Props pattern:

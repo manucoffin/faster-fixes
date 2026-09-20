@@ -63,6 +63,18 @@ function onlyEntryFor(ruleName) {
   return entries[0];
 }
 
+/** Every message one rule reports for this source text at this path. */
+async function messagesFor(file, code, ruleId) {
+  const eslint = new ESLint({
+    cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+    overrideConfigFile: true,
+    overrideConfig: nextJsConfig,
+  });
+  const [result] = await eslint.lintText(code, { filePath: file });
+
+  return result.messages.filter((message) => message.ruleId === ruleId);
+}
+
 async function schemaPurityMessagesFor(file, code) {
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
@@ -221,17 +233,42 @@ describe("every convention rule is on", () => {
     expect(options.ignorePathPatterns).toHaveLength(4);
   });
 
+  // One pattern rather than a list of loose ones: it names the whole basename
+  // of each Next.js special file, so the exemption covers those files and not
+  // every module whose name ends in one of their words.
   it("exempts require-use-client-suffix on the Next.js special files, once each", () => {
     const entry = onlyEntryFor("local/require-use-client-suffix");
     const [, options] = entry.rules["local/require-use-client-suffix"];
 
-    expect(options.ignorePathPatterns).toEqual([
-      "/app/.*page\\.tsx$",
-      "/app/.*layout\\.tsx$",
-      "/app/.*loading\\.tsx$",
-      "/app/.*error\\.tsx$",
-      "/app/.*not-found\\.tsx$",
-    ]);
+    expect(options.ignorePathPatterns).toHaveLength(1);
+
+    const [pattern] = options.ignorePathPatterns;
+
+    expect(pattern).toContain("/app/(?:.*/)?");
+    for (const name of ["page", "layout", "loading", "error", "not-found"]) {
+      expect([name, pattern]).toEqual([name, expect.stringContaining(name)]);
+    }
+  });
+
+  it("spares the Next.js special files the client suffix and reports their namesakes", async () => {
+    const clientComponent = `"use client";\nexport const x = 1;\n`;
+
+    expect(
+      await messagesFor(
+        "src/app/(authenticated)/projects/page.tsx",
+        clientComponent,
+        "local/require-use-client-suffix",
+      ),
+    ).toEqual([]);
+
+    const namesake = await messagesFor(
+      "src/app/(authenticated)/projects/_features/edit-page.tsx",
+      clientComponent,
+      "local/require-use-client-suffix",
+    );
+
+    expect(namesake.map((message) => message.severity)).toEqual([2]);
+    expect(namesake[0].message).toContain("edit-page.client.tsx");
   });
 
   // The pre-migration procedure modules all carried a module-level
@@ -565,6 +602,97 @@ describe("no-client-import-of-server-folder", () => {
       await serverFolderMessagesFor(
         "src/app/(authenticated)/_features/sidebar/sidebar.client.tsx",
         "@/utils/url/resolve-s3-url",
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe("no-default-export", () => {
+  const RULE = "local/no-default-export";
+
+  // Widened from the domains folder: "never use named exports only in a
+  // domain" was never the convention, so the glob is the whole source tree.
+  it("is declared once, for the whole web app source", () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+    expect(entry.rules[RULE][0]).toBe("error");
+  });
+
+  it("reports a default export outside the domains folder", async () => {
+    const messages = await messagesFor(
+      "src/app/_components/toolbar.tsx",
+      `export default function Toolbar() {}\n`,
+      RULE,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("named export");
+  });
+
+  it("reports the aliased form too", async () => {
+    const messages = await messagesFor(
+      "src/app/_components/toolbar.tsx",
+      `function Toolbar() {}\nexport { Toolbar as default };\n`,
+      RULE,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("mints a default export");
+  });
+
+  it("spares the Next.js special files the framework gives a default export", async () => {
+    for (const file of [
+      "src/app/layout.tsx",
+      "src/app/(public)/(home)/page.tsx",
+      "src/app/(authenticated)/error.tsx",
+      "src/app/not-found.tsx",
+      "src/app/sitemap.ts",
+      "src/app/robots.ts",
+      "src/app/manifest.ts",
+      "src/app/opengraph-image.tsx",
+    ]) {
+      const messages = await messagesFor(
+        file,
+        `export default function Special() {}\n`,
+        RULE,
+      );
+
+      expect([file, messages]).toEqual([file, []]);
+    }
+  });
+
+  it("still reports a module whose name merely ends in a special file name", async () => {
+    const messages = await messagesFor(
+      "src/app/(authenticated)/projects/_features/edit-page.tsx",
+      `export default function EditPage() {}\n`,
+      RULE,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+  });
+});
+
+describe("require-server-action-suffix", () => {
+  const RULE = "local/require-server-action-suffix";
+
+  it("reports a function-level directive in a file without the suffix", async () => {
+    const messages = await messagesFor(
+      "src/app/(authenticated)/_features/project/project-form.tsx",
+      `export async function submit() {\n  "use server";\n  return null;\n}\n`,
+      RULE,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("function-level");
+  });
+
+  it("allows a function-level directive in a server action file", async () => {
+    expect(
+      await messagesFor(
+        "src/app/(authenticated)/_features/project/rename-project.server.action.ts",
+        `export async function renameProject() {\n  "use server";\n  return null;\n}\n`,
+        RULE,
       ),
     ).toEqual([]);
   });

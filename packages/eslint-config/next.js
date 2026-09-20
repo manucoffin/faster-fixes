@@ -43,17 +43,48 @@ const schemaPurityOptions = {
   ],
 };
 
+// The Next.js special files, whose name and shape the framework owns: each one
+// is reached by its path and read through its default export. Two rules read
+// the list, so it is written once: the default export rule cannot ask them for
+// a named export, and the client suffix rule cannot ask one that carries a
+// `'use client'` directive for a `.client.tsx` name.
+//
+// `route.ts`, `proxy.ts`, `instrumentation.ts` and `mdx-components.tsx` are not
+// here: the framework reads named exports from them, so they meet both
+// conventions as they are.
+const nextSpecialFilenames = [
+  "apple-icon",
+  "default",
+  "error",
+  "forbidden",
+  "global-error",
+  "icon",
+  "layout",
+  "loading",
+  "manifest",
+  "not-found",
+  "opengraph-image",
+  "page",
+  "robots",
+  "sitemap",
+  "template",
+  "twitter-image",
+  "unauthorized",
+];
+
+// Anchored on the whole basename, under the app folder: a feature file whose
+// name merely ends in one of those words (`edit-page.tsx`, `form-error.tsx`) is
+// an ordinary module and is not spared.
+const nextSpecialFilePattern = `/app/(?:.*/)?(?:${nextSpecialFilenames.join(
+  "|",
+)})\\.tsx?$`;
+
 const useClientSuffixOptions = {
-  // The Next.js special files need a default export, and a `'use client'`
-  // directive under a name the framework fixes, so the suffix cannot apply to
-  // them.
-  ignorePathPatterns: [
-    "/app/.*page\\.tsx$",
-    "/app/.*layout\\.tsx$",
-    "/app/.*loading\\.tsx$",
-    "/app/.*error\\.tsx$",
-    "/app/.*not-found\\.tsx$",
-  ],
+  ignorePathPatterns: [nextSpecialFilePattern],
+};
+
+const noDefaultExportOptions = {
+  ignorePathPatterns: [nextSpecialFilePattern],
 };
 
 // The service naming vocabulary, in one place because two rules read it: the
@@ -268,7 +299,6 @@ export const nextJsConfig = [
     files: ["**/src/app/_domains/**/*.{ts,tsx}"],
     rules: {
       "local/no-cross-domain-deep-import": "error",
-      "local/no-default-export": "error",
     },
   },
   {
@@ -281,6 +311,10 @@ export const nextJsConfig = [
     files: ["**/src/**/*.{ts,tsx}"],
     rules: {
       "local/require-use-client-suffix": ["error", useClientSuffixOptions],
+      // The whole source tree, not the domains folder it used to be scoped to:
+      // "never use default exports" is a repo-wide convention, so a component
+      // outside a domain is held to it too.
+      "local/no-default-export": ["error", noDefaultExportOptions],
       // Both halves of the output type convention (ADR-0011), so the glob is
       // the whole source tree and not the services folder: the producer half
       // scopes itself to a read service, the consumer half forbids inferring

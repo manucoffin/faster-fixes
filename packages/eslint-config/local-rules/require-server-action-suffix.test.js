@@ -29,14 +29,20 @@ ruleTester.run("require-server-action-suffix", requireServerActionSuffixRule, {
       code: `"use client";\nexport function Form() {}\n`,
     },
     {
-      name: "a function-level directive (inline server action)",
-      filename: "/repo/apps/cms/src/app/layout.tsx",
-      code: `const serverFunction = async () => {\n  "use server";\n  return null;\n};\nexport { serverFunction };\n`,
+      name: "a function-level directive inside a server action file",
+      filename:
+        "/repo/apps/web/src/app/x/_features/y/delete-user.server.action.ts",
+      code: `export async function deleteUser() {\n  "use server";\n  return null;\n}\n`,
     },
     {
       name: "a string expression that is not a directive",
       filename: "/repo/apps/web/src/server/storage/keys.ts",
       code: `const key = 1;\n"use server";\nexport { key };\n`,
+    },
+    {
+      name: "a string statement inside a function that is not a directive",
+      filename: "/repo/apps/web/src/server/storage/keys.ts",
+      code: `export function keys() {\n  const key = 1;\n  "use server";\n  return key;\n}\n`,
     },
   ],
   invalid: [
@@ -57,6 +63,26 @@ ruleTester.run("require-server-action-suffix", requireServerActionSuffixRule, {
       filename: "/repo/apps/web/src/server/storage/sign-download-url.ts",
       code: `"use strict";\n"use server";\nexport async function signDownloadUrl() {}\n`,
       errors: [{ messageId: "unexpectedUseServer" }],
+    },
+    {
+      // An inline server action mints the same public endpoint as a
+      // module-level directive, under no name a reader can search for.
+      name: "a function-level directive in an arrow function",
+      filename: "/repo/apps/web/src/app/x/_features/y/form.tsx",
+      code: `const submit = async () => {\n  "use server";\n  return null;\n};\nexport { submit };\n`,
+      errors: [{ messageId: "unexpectedFunctionUseServer" }],
+    },
+    {
+      name: "a function-level directive in a function declaration",
+      filename: "/repo/apps/web/src/app/x/_features/y/form.tsx",
+      code: `export async function submit() {\n  "use server";\n  return null;\n}\n`,
+      errors: [{ messageId: "unexpectedFunctionUseServer" }],
+    },
+    {
+      name: "a function-level directive behind 'use strict'",
+      filename: "/repo/apps/web/src/app/x/_features/y/form.tsx",
+      code: `export async function submit() {\n  "use strict";\n  "use server";\n  return null;\n}\n`,
+      errors: [{ messageId: "unexpectedFunctionUseServer" }],
     },
     {
       name: "a file named like an action but with the wrong extension",
