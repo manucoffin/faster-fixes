@@ -11,15 +11,15 @@ import { localRulesPlugin } from "./local-rules/index.js";
 
 const enableAgentRules = process.env.ESLINT_AGENT_RULES === "1";
 
-// Steps 2 and 3 are done and step 4 closed the last burn-down: every convention
-// rule now reports at `error`, so any report is a regression on migrated code.
-// Still behind the agent gate; step 5 decides which ones leave it.
+// Every convention rule reports at `error` with nothing to report, so any
+// report is a regression. They stay behind the agent gate on purpose: taking a
+// rule out of the gate is the same as adding it to the commit hook.
 const migratedSeverity = enableAgentRules ? "error" : "off";
 
 // Both options are the repo convention, not opt-in extras: a schema const is
 // PascalCase (`CreateInvoiceSchema`) and its input type is singular
-// (`CreateInvoiceInput`). Wiring them is what makes the plural `Inputs` aliases
-// visible in the burn-down instead of silently passing.
+// (`CreateInvoiceInput`). Wiring them is what makes a plural `Inputs` alias
+// report instead of silently passing.
 const schemaConventionOptions = {
   requirePascalCaseSchema: true,
   requireSingularInput: true,
@@ -133,9 +133,8 @@ export const nextJsConfig = [
     files: ["**/*.{ts,tsx}"],
     rules: {
       "local/require-server-action-suffix": "error",
-      // `src/server/errors/` exists since the step 3 prerequisite, and zero
-      // violations are possible today, so ADR-0012 has this one land straight
-      // at `error` rather than in the burn-down.
+      // Always on per ADR-0012: a client file importing `src/server/errors/`
+      // is a correctness problem, not a convention.
       "local/no-client-import-of-server-errors": "error",
     },
   },
