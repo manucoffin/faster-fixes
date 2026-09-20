@@ -3,9 +3,9 @@
  * Provides flexible and type-safe environment checking
  */
 
-export type Environment = 'production' | 'preview' | 'development' | 'test';
+export type Environment = "production" | "preview" | "development" | "test";
 
-export interface EnvironmentInfo {
+export type EnvironmentInfo = {
   environment: Environment;
   isProduction: boolean;
   isPreview: boolean;
@@ -13,7 +13,7 @@ export interface EnvironmentInfo {
   isTest: boolean;
   isVercel: boolean;
   isLocal: boolean;
-}
+};
 
 /**
  * Determines the current environment based on various environment variables
@@ -26,12 +26,12 @@ function detectEnvironment(): Environment {
   // Check Vercel-specific environment first (most reliable on Vercel)
   if (process.env.VERCEL_ENV) {
     switch (process.env.VERCEL_ENV) {
-      case 'production':
-        return 'production';
-      case 'preview':
-        return 'preview';
-      case 'development':
-        return 'development';
+      case "production":
+        return "production";
+      case "preview":
+        return "preview";
+      case "development":
+        return "development";
       default:
         // Fallback for unknown VERCEL_ENV values
         break;
@@ -40,13 +40,13 @@ function detectEnvironment(): Environment {
 
   // Fallback to NODE_ENV
   switch (process.env.NODE_ENV) {
-    case 'production':
-      return 'production';
-    case 'test':
-      return 'test';
-    case 'development':
+    case "production":
+      return "production";
+    case "test":
+      return "test";
+    case "development":
     default:
-      return 'development';
+      return "development";
   }
 }
 
@@ -59,10 +59,10 @@ export function getEnvironmentInfo(): EnvironmentInfo {
 
   return {
     environment,
-    isProduction: environment === 'production',
-    isPreview: environment === 'preview',
-    isDevelopment: environment === 'development',
-    isTest: environment === 'test',
+    isProduction: environment === "production",
+    isPreview: environment === "preview",
+    isDevelopment: environment === "development",
+    isTest: environment === "test",
     isVercel,
     isLocal: !isVercel,
   };

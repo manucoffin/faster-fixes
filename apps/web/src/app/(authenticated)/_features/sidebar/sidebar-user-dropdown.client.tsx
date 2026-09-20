@@ -62,11 +62,9 @@ export function SidebarUserDropdown() {
       : "User";
 
   const userImage = session?.user.image;
-  const profilePicture = userImage
-    ? userImage.startsWith("http")
-      ? userImage
-      : resolveS3Url(userImage)
-    : null;
+  // `resolveS3Url` returns an absolute URL untouched, so a stored key and a
+  // provider avatar URL both go through it.
+  const profilePicture = userImage ? resolveS3Url(userImage) : null;
 
   if (isPending) {
     return <SidebarUserDropdownLoading />;

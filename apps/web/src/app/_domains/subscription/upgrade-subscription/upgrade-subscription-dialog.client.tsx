@@ -12,9 +12,9 @@ import {
 import { ReactNode, useState } from "react";
 import { PlanSelection } from "./plan-selection.client";
 
-interface UpgradeSubscriptionDialogProps {
+type UpgradeSubscriptionDialogProps = {
   trigger?: ReactNode;
-}
+};
 
 export function UpgradeSubscriptionDialog({
   trigger,

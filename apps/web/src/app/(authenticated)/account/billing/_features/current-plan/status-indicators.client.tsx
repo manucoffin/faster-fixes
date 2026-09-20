@@ -1,8 +1,8 @@
 "use client";
 
-interface StatusIndicatorsProps {
+type StatusIndicatorsProps = {
   cancelAtPeriodEnd?: boolean;
-}
+};
 
 export function StatusIndicators({ cancelAtPeriodEnd }: StatusIndicatorsProps) {
   // If not a trial, show cancel or renewal status

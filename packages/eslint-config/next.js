@@ -523,6 +523,37 @@ export const nextJsConfig = [
     },
   },
   {
+    // The four style drifts an agent reproduces most, each held by a rule the
+    // repo already installs rather than by a rule of ours: the plugins say it
+    // better, and a rule we do not maintain is a rule that cannot rot.
+    //
+    // The glob is the web app source, the same one the repo-wide conventions
+    // above use, so a config or script file at the app root is not held to a
+    // component convention.
+    files: ["**/src/**/*.{ts,tsx}"],
+    rules: {
+      // `type` over `interface`: one way to name an object shape, and the one
+      // that composes with unions and intersections.
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      // A named component is an `export function`, which hoists and shows its
+      // name in a stack. An unnamed one is still an arrow, because that is the
+      // only thing an inline render prop can be.
+      "react/function-component-definition": [
+        "error",
+        {
+          namedComponents: "function-declaration",
+          unnamedComponents: "arrow-function",
+        },
+      ],
+      // A ternary inside a ternary is a branch a reader has to unpick; an early
+      // return or a lookup says the same thing in reading order.
+      "no-nested-ternary": "error",
+      // An `else` after a `return` is a block that could be the rest of the
+      // function.
+      "no-else-return": "error",
+    },
+  },
+  {
     // Test files only: the rule reads a `vi.mock()` call, which exists nowhere
     // else, and the boundary it names is a boundary for a test rather than for
     // production code.

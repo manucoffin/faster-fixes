@@ -14,9 +14,9 @@ import * as React from "react";
 import { type DateRange } from "react-day-picker";
 import { periodSelectorParsers } from "./search-params";
 
-interface PeriodSelectorProps {
+type PeriodSelectorProps = {
   onDateRangeChange?: (dateRange: DateRange | undefined) => void;
-}
+};
 
 type PredefinedPeriod = {
   label: string;

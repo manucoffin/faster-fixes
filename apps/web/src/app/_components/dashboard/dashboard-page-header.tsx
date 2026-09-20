@@ -1,12 +1,12 @@
 import { cn } from "@workspace/ui/lib/utils";
 import * as React from "react";
 
-interface DashboardPageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+type DashboardPageHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
   title: string;
   description?: string;
   actions?: React.ReactNode;
   backLink?: React.ReactNode;
-}
+};
 
 export function DashboardPageHeader({
   title,

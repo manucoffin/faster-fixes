@@ -13,21 +13,21 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface OrganizationInvitationProps {
+type OrganizationInvitationProps = {
   organizationName?: string;
   inviterName?: string;
   invitationLink?: string;
   role?: string;
-}
+};
 
 const baseUrl = getAppUrl();
 
-export const OrganizationInvitation = ({
+export function OrganizationInvitation({
   organizationName = "My organization",
   inviterName = "A user",
   invitationLink = `${baseUrl}/organization/invitations`,
   role = "member",
-}: OrganizationInvitationProps) => {
+}: OrganizationInvitationProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -83,4 +83,4 @@ export const OrganizationInvitation = ({
       </Tailwind>
     </Html>
   );
-};
+}

@@ -54,10 +54,10 @@ import {
   UpdateSubscriptionSchema,
 } from "@/app/admin/users/_services/update-subscription.schema";
 
-interface SubscriptionEditDialogProps {
+type SubscriptionEditDialogProps = {
   userId: string;
   subscription: NonNullable<GetSubscriptionOutput>;
-}
+};
 
 export function SubscriptionEditDialog({
   userId,

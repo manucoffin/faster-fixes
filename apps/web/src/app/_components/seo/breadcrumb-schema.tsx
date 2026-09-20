@@ -1,13 +1,13 @@
 import { BreadcrumbList, WithContext } from "schema-dts";
 
-interface BreadcrumbItem {
+type BreadcrumbItem = {
   name: string;
   url: string;
-}
+};
 
-interface BreadcrumbSchemaProps {
+type BreadcrumbSchemaProps = {
   items: BreadcrumbItem[];
-}
+};
 
 export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
   const jsonLd: WithContext<BreadcrumbList> = {

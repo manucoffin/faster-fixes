@@ -10,11 +10,15 @@ export function formatRelativeTime(date: Date | string): string {
 
   if (diffInMinutes < 1) {
     return "maintenant";
-  } else if (diffInMinutes < 60) {
-    return rtf.format(-diffInMinutes, "minute");
-  } else if (diffInHours < 24) {
-    return rtf.format(-diffInHours, "hour");
-  } else {
-    return rtf.format(-diffInDays, "day");
   }
+
+  if (diffInMinutes < 60) {
+    return rtf.format(-diffInMinutes, "minute");
+  }
+
+  if (diffInHours < 24) {
+    return rtf.format(-diffInHours, "hour");
+  }
+
+  return rtf.format(-diffInDays, "day");
 }

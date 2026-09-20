@@ -18,9 +18,9 @@ import {
 import { BadgeAlert, BadgeCheck, MoreVertical } from "lucide-react";
 import { EmailVerifiedToggle } from "./email-verified-toggle.client";
 
-interface EmailInformationProps {
+type EmailInformationProps = {
   userId: string;
-}
+};
 
 export function EmailInformation({ userId }: EmailInformationProps) {
   const trpc = useTRPC();

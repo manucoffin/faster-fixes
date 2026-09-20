@@ -11,17 +11,17 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface UserFeedbackProps {
+type UserFeedbackProps = {
   senderName?: string;
   senderEmail?: string;
   message?: string;
-}
+};
 
-export const UserFeedback = ({
+export function UserFeedback({
   senderName = "A user",
   senderEmail = "user@example.com",
   message = "This is a sample feedback message.",
-}: UserFeedbackProps) => {
+}: UserFeedbackProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -54,4 +54,4 @@ export const UserFeedback = ({
       </Tailwind>
     </Html>
   );
-};
+}

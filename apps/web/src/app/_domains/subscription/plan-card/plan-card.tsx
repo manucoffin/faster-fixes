@@ -3,13 +3,13 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Check, Gift } from "lucide-react";
 import * as React from "react";
 
-interface PlanFeature {
+type PlanFeature = {
   id: string;
   label: string;
   highlighted?: boolean;
-}
+};
 
-interface PlanCardProps {
+type PlanCardProps = {
   title: string;
   description: string;
   price: number;
@@ -19,7 +19,7 @@ interface PlanCardProps {
   children: React.ReactNode;
   variant?: "default" | "highlighted";
   isAnnual?: boolean;
-}
+};
 
 export function PlanCard({
   title,

@@ -1,14 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { cn } from "@workspace/ui/lib/utils";
 import { ReactNode } from "react";
 
-interface DashboardSectionProps {
+type DashboardSectionProps = {
   title: ReactNode;
   description: ReactNode;
   cardTitle?: string;
   cardClassName?: string;
   children: ReactNode;
-}
+};
 
 export function DashboardSection({
   title,
@@ -18,7 +23,7 @@ export function DashboardSection({
   children,
 }: DashboardSectionProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* Left Column - Section Info */}
       <div className="col-span-1">
         <div>

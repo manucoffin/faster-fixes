@@ -10,13 +10,13 @@ import {
   UpdateContactOptions,
 } from "./types";
 
-interface PlunkAttachment {
+type PlunkAttachment = {
   filename: string;
   content: string;
   contentType?: string;
-}
+};
 
-interface PlunkEmailResponse {
+type PlunkEmailResponse = {
   success: boolean;
   emails: Array<{
     contact: {
@@ -26,16 +26,16 @@ interface PlunkEmailResponse {
     email: string;
   }>;
   timestamp: string;
-}
+};
 
-interface PlunkContactResponse {
+type PlunkContactResponse = {
   id: string;
   email: string;
   subscribed: boolean;
   data: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-}
+};
 
 export class PlunkMailer implements Mailer {
   private apiKey: string;
@@ -51,7 +51,7 @@ export class PlunkMailer implements Mailer {
       if (!options.body && !options.templateId) {
         throw new EmailError(
           "Email body or templateId is required",
-          "MISSING_BODY"
+          "MISSING_BODY",
         );
       }
 
@@ -59,7 +59,7 @@ export class PlunkMailer implements Mailer {
       if (options.attachments && options.attachments.length > 5) {
         throw new EmailError(
           "Maximum 5 attachments allowed",
-          "TOO_MANY_ATTACHMENTS"
+          "TOO_MANY_ATTACHMENTS",
         );
       }
 
@@ -104,7 +104,7 @@ export class PlunkMailer implements Mailer {
             errorMessage,
             typeof errorData.code === "string"
               ? errorData.code
-              : String(response.status)
+              : String(response.status),
           );
         }
 
@@ -144,7 +144,7 @@ export class PlunkMailer implements Mailer {
         if (!response.ok) {
           throw new EmailError(
             `Failed to list contacts: HTTP ${response.status}`,
-            String(response.status)
+            String(response.status),
           );
         }
 
@@ -192,7 +192,7 @@ export class PlunkMailer implements Mailer {
             errorMessage,
             typeof errorData.code === "string"
               ? errorData.code
-              : String(response.status)
+              : String(response.status),
           );
         }
 
@@ -221,7 +221,7 @@ export class PlunkMailer implements Mailer {
         if (!response.ok) {
           throw new EmailError(
             `Failed to get contact: HTTP ${response.status}`,
-            String(response.status)
+            String(response.status),
           );
         }
 
@@ -241,7 +241,7 @@ export class PlunkMailer implements Mailer {
       if (!options.id && !options.email) {
         throw new EmailError(
           "Either id or email must be provided",
-          "MISSING_IDENTIFIER"
+          "MISSING_IDENTIFIER",
         );
       }
 
@@ -279,7 +279,7 @@ export class PlunkMailer implements Mailer {
             errorMessage,
             typeof errorData.code === "string"
               ? errorData.code
-              : String(response.status)
+              : String(response.status),
           );
         }
 
@@ -323,7 +323,7 @@ export class PlunkMailer implements Mailer {
             errorMessage,
             typeof errorData.code === "string"
               ? errorData.code
-              : String(response.status)
+              : String(response.status),
           );
         }
 
@@ -345,7 +345,7 @@ export class PlunkMailer implements Mailer {
     addToSegment: async (): Promise<void> => {
       throw new EmailError(
         "Plunk does not support segments",
-        "UNSUPPORTED_OPERATION"
+        "UNSUPPORTED_OPERATION",
       );
     },
   };

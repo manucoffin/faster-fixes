@@ -19,6 +19,13 @@ import type { GetMonthlyStatsOutput } from "../../_services/get-monthly-stats";
 
 type MonthData = GetMonthlyStatsOutput[number];
 
+/** The tooltip label of a series; revenue is the remaining series. */
+function getSeriesLabel(name: string | number | undefined): string {
+  if (name === "users") return "Users:";
+  if (name === "subscriptions") return "Subscriptions:";
+  return "Revenue:";
+}
+
 export function SubscriptionsChart() {
   const trpc = useTRPC();
   const [period] = useQueryStates(periodSelectorParsers);
@@ -153,11 +160,7 @@ export function SubscriptionsChart() {
                               style={{ backgroundColor: entry.color }}
                             />
                             <span className="text-muted-foreground">
-                              {entry.name === "users"
-                                ? "Users:"
-                                : entry.name === "subscriptions"
-                                  ? "Subscriptions:"
-                                  : "Revenue:"}
+                              {getSeriesLabel(entry.name)}
                             </span>
                             <span className="font-medium">
                               {entry.name === "revenue"

@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 
 type ThemeToggleProps = React.ComponentProps<typeof Button>;
 
-export const ThemeToggle = ({ ...props }: ThemeToggleProps) => {
+export function ThemeToggle({ ...props }: ThemeToggleProps) {
   const { setTheme, theme } = useTheme();
 
   const handleThemeChange = (newTheme: string) => {
@@ -26,4 +26,4 @@ export const ThemeToggle = ({ ...props }: ThemeToggleProps) => {
       )}
     </Button>
   );
-};
+}

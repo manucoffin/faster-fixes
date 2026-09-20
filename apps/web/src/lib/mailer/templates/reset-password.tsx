@@ -12,11 +12,11 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface ResetPasswordProps {
+type ResetPasswordProps = {
   resetPasswordLink?: string;
-}
+};
 
-export const ResetPassword = ({ resetPasswordLink }: ResetPasswordProps) => {
+export function ResetPassword({ resetPasswordLink }: ResetPasswordProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -71,4 +71,4 @@ export const ResetPassword = ({ resetPasswordLink }: ResetPasswordProps) => {
       </Tailwind>
     </Html>
   );
-};
+}

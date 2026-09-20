@@ -8,6 +8,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   TableMeta,
   Updater,
@@ -30,7 +31,7 @@ import {
 import { AlertCircle, Search } from "lucide-react";
 import { DataTableExportButton } from "./data-table-export-button.client";
 
-interface DataTableProps<TData, TValue> {
+type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageCount: number;
@@ -50,9 +51,78 @@ interface DataTableProps<TData, TValue> {
     data: Array<Record<string, unknown>>;
   };
   onSortingChange?: (sorting: Array<{ id: string; desc: boolean }>) => void;
+};
+
+type DataTableBodyProps<TData> = {
+  rows: Row<TData>[];
+  columnCount: number;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage: string;
+};
+
+function DataTableBody<TData>({
+  rows,
+  columnCount,
+  isLoading,
+  isError,
+  errorMessage,
+}: DataTableBodyProps<TData>) {
+  if (isLoading) {
+    return (
+      <>
+        {Array.from({ length: 10 }).map((_, index) => (
+          <TableRow key={index}>
+            {Array.from({ length: columnCount }).map((_, cellIndex) => (
+              <TableCell key={cellIndex}>
+                <Skeleton className="h-6 w-full" />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <TableRow>
+        <TableCell colSpan={columnCount} className="h-24 text-center">
+          <div className="flex items-center justify-center text-destructive">
+            <AlertCircle className="mr-2 size-4" />
+            <span>{errorMessage}</span>
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <TableRow>
+        <TableCell colSpan={columnCount} className="h-24 text-center">
+          No results.
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  return (
+    <>
+      {rows.map((row) => (
+        <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+          {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </>
+  );
 }
 
-export const DataTable = <TData, TValue>({
+export function DataTable<TData, TValue>({
   columns,
   data,
   pageCount,
@@ -68,7 +138,7 @@ export const DataTable = <TData, TValue>({
   filterComponents,
   exportConfig,
   onSortingChange,
-}: DataTableProps<TData, TValue>) => {
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -156,58 +226,13 @@ export const DataTable = <TData, TValue>({
           </TableHeader>
 
           <TableBody>
-            {isLoading ? (
-              // Loading skeleton
-              Array.from({ length: 10 }).map((_, index) => (
-                <TableRow key={index}>
-                  {Array.from({ length: columns.length }).map(
-                    (_, cellIndex) => (
-                      <TableCell key={cellIndex}>
-                        <Skeleton className="h-6 w-full" />
-                      </TableCell>
-                    ),
-                  )}
-                </TableRow>
-              ))
-            ) : isError ? (
-              // Error message
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  <div className="flex items-center justify-center text-destructive">
-                    <AlertCircle className="mr-2 size-4" />
-                    <span>{errorMessage}</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+            <DataTableBody
+              rows={table.getRowModel().rows}
+              columnCount={columns.length}
+              isLoading={isLoading}
+              isError={isError}
+              errorMessage={errorMessage}
+            />
           </TableBody>
         </Table>
       </div>
@@ -238,4 +263,4 @@ export const DataTable = <TData, TValue>({
       </div>
     </div>
   );
-};
+}

@@ -11,13 +11,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
-interface UpgradeSubscriptionButtonProps
-  extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
-  planName: string;
-  isAnnual: boolean;
-  onSuccess?: () => void;
-  asChild?: boolean;
-}
+type UpgradeSubscriptionButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    planName: string;
+    isAnnual: boolean;
+    onSuccess?: () => void;
+    asChild?: boolean;
+  };
 
 export function UpgradeSubscriptionButton({
   planName,

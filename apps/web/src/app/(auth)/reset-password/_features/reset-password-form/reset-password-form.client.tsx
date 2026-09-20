@@ -27,9 +27,9 @@ import { AlertCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-interface ResetPasswordFormProps {
+type ResetPasswordFormProps = {
   token: string;
-}
+};
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const trpc = useTRPC();

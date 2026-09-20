@@ -52,9 +52,9 @@ import {
   CreateSubscriptionSchema,
 } from "@/app/admin/users/_services/create-subscription.schema";
 
-interface SubscriptionCreateDialogProps {
+type SubscriptionCreateDialogProps = {
   userId: string;
-}
+};
 
 export function SubscriptionCreateDialog({
   userId,

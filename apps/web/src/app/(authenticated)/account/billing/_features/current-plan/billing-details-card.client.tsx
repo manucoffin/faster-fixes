@@ -7,11 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Empty, EmptyHeader, EmptyTitle } from "@workspace/ui/components/empty";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-interface BillingDetailsCardProps {
+type BillingDetailsCardProps = {
   planName: string;
   stripeSubscriptionId?: string;
   subscriptionStatus?: string;
-}
+};
 
 export function BillingDetailsCard({
   planName,

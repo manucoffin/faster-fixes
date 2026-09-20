@@ -1,6 +1,6 @@
 import { WebPage, WithContext } from "schema-dts";
 
-interface WebPageSchemaProps {
+type WebPageSchemaProps = {
   title: string;
   description: string;
   url: string;
@@ -9,7 +9,7 @@ interface WebPageSchemaProps {
   dateModified?: string | null;
   /** Schema.org @id of the entity the page is about (e.g. SoftwareApplication). */
   aboutId?: string;
-}
+};
 
 export function WebPageSchema({
   title,

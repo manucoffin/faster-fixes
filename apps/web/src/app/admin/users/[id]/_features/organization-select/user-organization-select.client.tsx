@@ -12,12 +12,12 @@ import {
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-interface UserOrganizationSelectProps {
+type UserOrganizationSelectProps = {
   userId: string;
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
-}
+};
 
 export function UserOrganizationSelect({
   userId,

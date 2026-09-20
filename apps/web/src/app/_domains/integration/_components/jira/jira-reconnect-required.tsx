@@ -13,19 +13,19 @@ import {
 
 import { emailTailwindConfig } from "@/lib/mailer/templates/tailwind.config";
 
-export interface JiraReconnectRequiredProps {
+export type JiraReconnectRequiredProps = {
   organizationName?: string;
   siteName?: string;
   integrationsLink?: string;
-}
+};
 
 const baseUrl = getAppUrl();
 
-export const JiraReconnectRequired = ({
+export function JiraReconnectRequired({
   organizationName = "your organization",
   siteName = "your Jira site",
   integrationsLink = `${baseUrl}/integrations`,
-}: JiraReconnectRequiredProps) => {
+}: JiraReconnectRequiredProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -80,4 +80,4 @@ export const JiraReconnectRequired = ({
       </Tailwind>
     </Html>
   );
-};
+}

@@ -15,9 +15,9 @@ import Link from "next/link";
 import * as React from "react";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
-export const AdminSidebar = async ({
+export async function AdminSidebar({
   ...props
-}: React.ComponentProps<typeof Sidebar>) => {
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -54,4 +54,4 @@ export const AdminSidebar = async ({
       </SidebarFooter>
     </Sidebar>
   );
-};
+}

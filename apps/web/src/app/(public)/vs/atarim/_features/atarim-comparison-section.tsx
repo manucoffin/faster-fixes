@@ -1,6 +1,7 @@
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
-type Cell = string | { type: "yes" | "no" | "partial"; note?: string };
+type CellType = "yes" | "no" | "partial";
+type Cell = string | { type: CellType; note?: string };
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -85,10 +86,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Client portal",
-    cells: [
-      { type: "no" },
-      { type: "yes", note: "Login + guest link" },
-    ],
+    cells: [{ type: "no" }, { type: "yes", note: "Login + guest link" }],
   },
   {
     label: "WordPress integration",
@@ -110,10 +108,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "GitHub two-way sync",
-    cells: [
-      { type: "yes" },
-      { type: "partial", note: "Via integration" },
-    ],
+    cells: [{ type: "yes" }, { type: "partial", note: "Via integration" }],
   },
   {
     label: "Linear two-way sync",
@@ -137,24 +132,29 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
 
 const headers = ["FasterFixes", "Atarim"] as const;
 
+function CellIcon({ type }: { type: CellType }) {
+  if (type === "yes") {
+    return <CheckIcon className="size-5 text-success" aria-label="Yes" />;
+  }
+
+  if (type === "no") {
+    return <XIcon className="size-5 text-destructive" aria-label="No" />;
+  }
+
+  return (
+    <MinusIcon className="size-5 text-muted-foreground" aria-label="Partial" />
+  );
+}
+
 function renderCell(cell: Cell) {
   if (typeof cell === "string") {
-    return <span className="text-muted-foreground text-sm">{cell}</span>;
+    return <span className="text-sm text-muted-foreground">{cell}</span>;
   }
   return (
     <div className="flex flex-col gap-1">
-      {cell.type === "yes" ? (
-        <CheckIcon className="text-success size-5" aria-label="Yes" />
-      ) : cell.type === "no" ? (
-        <XIcon className="text-destructive size-5" aria-label="No" />
-      ) : (
-        <MinusIcon
-          className="text-muted-foreground size-5"
-          aria-label="Partial"
-        />
-      )}
+      <CellIcon type={cell.type} />
       {cell.note && (
-        <span className="text-muted-foreground text-xs">{cell.note}</span>
+        <span className="text-xs text-muted-foreground">{cell.note}</span>
       )}
     </div>
   );
@@ -162,16 +162,16 @@ function renderCell(cell: Cell) {
 
 export function AtarimComparisonSection() {
   return (
-    <section className="bg-muted/30 w-full border-y py-16 md:py-24">
+    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Compare
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             FasterFixes vs Atarim: full feature comparison
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Side-by-side comparison based on each product&apos;s public
             documentation and pricing page.
           </p>
@@ -217,7 +217,7 @@ export function AtarimComparisonSection() {
           </table>
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center text-sm">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
           vendor&apos;s website. Last updated May 12, 2026.
         </p>

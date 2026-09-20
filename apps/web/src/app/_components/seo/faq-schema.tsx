@@ -1,13 +1,13 @@
 import { FAQPage, WithContext } from "schema-dts";
 
-export interface FaqItem {
+export type FaqItem = {
   question: string;
   answer: string;
-}
+};
 
-interface FaqSchemaProps {
+type FaqSchemaProps = {
   faqs: FaqItem[];
-}
+};
 
 export function FaqSchema({ faqs }: FaqSchemaProps) {
   // Safety check to ensure faqs is an array and contains valid data

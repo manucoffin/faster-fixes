@@ -9,13 +9,11 @@ import {
   ArrowUpWideNarrow,
 } from "lucide-react";
 
-interface DataTableColumnHeaderProps<
-  TData,
-  TValue,
-> extends React.HTMLAttributes<HTMLDivElement> {
-  column: Column<TData, TValue>;
-  title: string;
-}
+type DataTableColumnHeaderProps<TData, TValue> =
+  React.HTMLAttributes<HTMLDivElement> & {
+    column: Column<TData, TValue>;
+    title: string;
+  };
 
 export function DataTableColumnHeader<TData, TValue>({
   column,

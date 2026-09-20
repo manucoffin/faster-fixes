@@ -9,7 +9,29 @@ import {
   BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
 import React from "react";
-import { useBreadcrumbs } from "./breadcrumb-provider.client";
+import {
+  type BreadcrumbItem as BreadcrumbEntry,
+  useBreadcrumbs,
+} from "./breadcrumb-provider.client";
+
+type BreadcrumbLabelProps = {
+  breadcrumb: BreadcrumbEntry;
+  isLast: boolean;
+};
+
+function BreadcrumbLabel({ breadcrumb, isLast }: BreadcrumbLabelProps) {
+  if (isLast) {
+    return <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>;
+  }
+
+  if (breadcrumb.link) {
+    return (
+      <BreadcrumbLink href={breadcrumb.link}>{breadcrumb.label}</BreadcrumbLink>
+    );
+  }
+
+  return <span>{breadcrumb.label}</span>;
+}
 
 export function Breadcrumbs() {
   const { breadcrumbs } = useBreadcrumbs();
@@ -28,15 +50,7 @@ export function Breadcrumbs() {
             <React.Fragment key={index}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                {isLast ? (
-                  <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
-                ) : breadcrumb.link ? (
-                  <BreadcrumbLink href={breadcrumb.link}>
-                    {breadcrumb.label}
-                  </BreadcrumbLink>
-                ) : (
-                  <span>{breadcrumb.label}</span>
-                )}
+                <BreadcrumbLabel breadcrumb={breadcrumb} isLast={isLast} />
               </BreadcrumbItem>
             </React.Fragment>
           );

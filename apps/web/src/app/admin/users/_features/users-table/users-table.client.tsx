@@ -94,7 +94,7 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
   },
 ];
 
-export const UsersTable = () => {
+export function UsersTable() {
   const trpc = useTRPC();
   // Sync 'search', 'page', and 'role' with URL query parameters
   const [search, setSearch] = useQueryState(
@@ -216,4 +216,4 @@ export const UsersTable = () => {
       }}
     />
   );
-};
+}

@@ -19,7 +19,7 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export const StopImpersonateButton = () => {
+export function StopImpersonateButton() {
   const trpc = useTRPC();
   const router = useRouter();
   const { data: session, refetch: refetchSession } = useSession();
@@ -89,4 +89,4 @@ export const StopImpersonateButton = () => {
       </AlertDialog>
     </div>
   );
-};
+}

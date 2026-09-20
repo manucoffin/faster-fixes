@@ -7,10 +7,10 @@ import { VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface ManageSubscriptionButtonProps
-  extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
+type ManageSubscriptionButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
 
 export function ManageSubscriptionButton({
   className,
@@ -19,8 +19,8 @@ export function ManageSubscriptionButton({
 }: ManageSubscriptionButtonProps) {
   const trpc = useTRPC();
 
-  const createBillingPortalMutation =
-    useMutation(trpc.authenticated.account.billing.portal.create.mutationOptions({
+  const createBillingPortalMutation = useMutation(
+    trpc.authenticated.account.billing.portal.create.mutationOptions({
       onSuccess: async (data) => {
         // Redirect to billing portal
         if (data.url) {
@@ -30,7 +30,8 @@ export function ManageSubscriptionButton({
       onError: (error) => {
         toast.error(error.message);
       },
-    }));
+    }),
+  );
 
   async function handleClick() {
     createBillingPortalMutation.mutate();

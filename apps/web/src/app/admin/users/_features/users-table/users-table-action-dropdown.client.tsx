@@ -16,9 +16,9 @@ type UsersTableActionDropdownProps = {
   userId: string;
 };
 
-export const UsersTableActionDropdown = ({
+export function UsersTableActionDropdown({
   userId,
-}: UsersTableActionDropdownProps) => {
+}: UsersTableActionDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -42,4 +42,4 @@ export const UsersTableActionDropdown = ({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+}

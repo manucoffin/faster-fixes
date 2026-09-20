@@ -5,17 +5,17 @@ import { Download } from "lucide-react";
 import * as React from "react";
 import * as XLSX from "xlsx";
 
-interface DataTableExportButtonProps {
+type DataTableExportButtonProps = {
   filename?: string;
   data: Array<Record<string, unknown>>;
   disabled?: boolean;
-}
+};
 
-export const DataTableExportButton = ({
+export function DataTableExportButton({
   filename,
   data,
   disabled = false,
-}: DataTableExportButtonProps) => {
+}: DataTableExportButtonProps) {
   const handleExport = React.useCallback(() => {
     try {
       if (!data || data.length === 0) {
@@ -53,4 +53,4 @@ export const DataTableExportButton = ({
       Exporter
     </Button>
   );
-};
+}

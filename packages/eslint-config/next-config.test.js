@@ -1280,6 +1280,104 @@ describe("no-relative-test-mock", () => {
   });
 });
 
+// The four style drifts, each held by a plugin or core rule rather than by one
+// of ours. The wiring test is what says they are on for the web app source;
+// the behaviour cases are the plugin's own, so one rejected and one accepted
+// example each is enough to show the rule is live on a real path.
+describe("the style rules", () => {
+  const STYLE_RULES = [
+    "@typescript-eslint/consistent-type-definitions",
+    "react/function-component-definition",
+    "no-nested-ternary",
+    "no-else-return",
+  ];
+
+  it("runs every style rule on the web app source and nowhere else", async () => {
+    for (const rule of STYLE_RULES) {
+      const entry = onlyEntryFor(rule);
+
+      expect([rule, entry.files]).toEqual([rule, ["**/src/**/*.{ts,tsx}"]]);
+
+      const severityFor = await severityResolver(rule);
+
+      expect([rule, await severityFor(FEATURE)]).toEqual([rule, 2]);
+      expect([rule, await severityFor(SERVICE)]).toEqual([rule, 2]);
+      expect([rule, await severityFor("next.config.ts")]).toEqual([
+        rule,
+        undefined,
+      ]);
+    }
+  });
+
+  it("reports an `interface` and accepts a `type`", async () => {
+    const rule = "@typescript-eslint/consistent-type-definitions";
+    const reported = await messagesFor(
+      FEATURE,
+      `export type Props = { id: string };\ninterface Other { id: string }\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(FEATURE, `type Other = { id: string };\n`, rule),
+    ).toEqual([]);
+  });
+
+  it("reports an arrow component and accepts `export function`", async () => {
+    const rule = "react/function-component-definition";
+    const reported = await messagesFor(
+      FEATURE,
+      `export const Stars = () => <span />;\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(
+        FEATURE,
+        `export function Stars() {\n  return <span />;\n}\n`,
+        rule,
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports a nested ternary and accepts a single one", async () => {
+    const rule = "no-nested-ternary";
+    const reported = await messagesFor(
+      FEATURE,
+      `export const label = (a: string) => (a ? "one" : a === "b" ? "two" : "three");\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(
+        FEATURE,
+        `export const label = (a: string) => (a ? "one" : "two");\n`,
+        rule,
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports an `else` after a `return` and accepts the flat form", async () => {
+    const rule = "no-else-return";
+    const reported = await messagesFor(
+      SERVICE,
+      `export function pick(a: boolean) {\n  if (a) {\n    return 1;\n  } else {\n    return 2;\n  }\n}\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(
+        SERVICE,
+        `export function pick(a: boolean) {\n  if (a) {\n    return 1;\n  }\n\n  return 2;\n}\n`,
+        rule,
+      ),
+    ).toEqual([]);
+  });
+});
+
 // The exception surface: what an agent or a human may switch off in a file,
 // and what they may not. Every case goes through `lintText` on the real
 // config, because the answer depends on the directive, the rule it names and
@@ -1336,7 +1434,7 @@ describe("the disable comment policy", () => {
       ["local/no-default-export", `export default function PlanCard() {}\n`],
       [
         "local/no-raw-tailwind-colors",
-        `export const Swatch = () => <span className="bg-zinc-800" />;\n`,
+        `export function Swatch() { return <span className="bg-zinc-800" />; }\n`,
       ],
     ];
 

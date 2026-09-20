@@ -10,7 +10,7 @@ type Props = Omit<ComponentProps<typeof Link>, "href"> & {
   iconClassName?: string;
 };
 
-export const AppLogo = ({ className, ...props }: Props) => {
+export function AppLogo({ className, ...props }: Props) {
   const sharedClassName = cn(
     "dark:hover:text-primary-foreground hover:text-foreground font-medium transition-colors",
     className,
@@ -34,13 +34,13 @@ export const AppLogo = ({ className, ...props }: Props) => {
       /fasterfixes
     </Link>
   );
-};
+}
 
 type AppLogoMarkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   className?: string;
 };
 
-export const AppLogoMark = ({ className, ...props }: AppLogoMarkProps) => {
+export function AppLogoMark({ className, ...props }: AppLogoMarkProps) {
   const sharedClassName = cn(
     "dark:hover:text-primary-foreground hover:text-foreground font-medium transition-colors",
     className,
@@ -64,4 +64,4 @@ export const AppLogoMark = ({ className, ...props }: AppLogoMarkProps) => {
       /ff
     </Link>
   );
-};
+}

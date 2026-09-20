@@ -37,13 +37,9 @@ export function ProfileAvatarUpload() {
     };
   }, []);
 
-  const displayUrl =
-    previewUrl ??
-    (userImage
-      ? userImage.startsWith("http")
-        ? userImage
-        : resolveS3Url(userImage)
-      : null);
+  // `resolveS3Url` returns an absolute URL untouched, so a stored key and a
+  // provider avatar URL both go through it.
+  const displayUrl = previewUrl ?? (userImage ? resolveS3Url(userImage) : null);
 
   return (
     <div className="flex items-center gap-4">

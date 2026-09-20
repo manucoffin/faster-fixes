@@ -20,12 +20,12 @@ type RevokeUserSessionsButtonProps = {
   userId: string;
 };
 
-export const RevokeUserSessionsButton = ({
+export function RevokeUserSessionsButton({
   userId,
-}: RevokeUserSessionsButtonProps) => {
+}: RevokeUserSessionsButtonProps) {
   const trpc = useTRPC();
-  const revokeSessionsMutation =
-    useMutation(trpc.admin.users.sessions.revoke.mutationOptions({
+  const revokeSessionsMutation = useMutation(
+    trpc.admin.users.sessions.revoke.mutationOptions({
       onSuccess: () => {
         toast.success("Success", {
           description: "All user sessions have been revoked",
@@ -33,11 +33,11 @@ export const RevokeUserSessionsButton = ({
       },
       onError: (error) => {
         toast.error("Error", {
-          description:
-            error.message || "Failed to revoke user sessions",
+          description: error.message || "Failed to revoke user sessions",
         });
       },
-    }));
+    }),
+  );
 
   const handleRevoke = () => {
     revokeSessionsMutation.mutate({ userId });
@@ -52,9 +52,7 @@ export const RevokeUserSessionsButton = ({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Sign out user from all devices?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Sign out user from all devices?</AlertDialogTitle>
           <AlertDialogDescription>
             This will sign the user out of all active sessions across all
             devices. The user will need to sign in again to access their
@@ -67,12 +65,10 @@ export const RevokeUserSessionsButton = ({
             onClick={handleRevoke}
             disabled={revokeSessionsMutation.isPending}
           >
-            {revokeSessionsMutation.isPending
-              ? "Signing out..."
-              : "Sign out"}
+            {revokeSessionsMutation.isPending ? "Signing out..." : "Sign out"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}

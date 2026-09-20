@@ -15,9 +15,9 @@ import { OrganizationSwitcher } from "./organization/organization-switcher.clien
 import { ProjectNavigation } from "./project/project-navigation.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
-export const AuthenticatedSidebar = async ({
+export async function AuthenticatedSidebar({
   ...props
-}: React.ComponentProps<typeof Sidebar>) => {
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -48,4 +48,4 @@ export const AuthenticatedSidebar = async ({
       </SidebarFooter>
     </Sidebar>
   );
-};
+}

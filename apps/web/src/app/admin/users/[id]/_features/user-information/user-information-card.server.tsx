@@ -3,9 +3,9 @@ import { Card, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { EmailInformation } from "./email/email-information.client";
 import { getUserInformation } from "@/app/admin/users/_services/get-user-information";
 
-interface UserInformationCardProps {
+type UserInformationCardProps = {
   userId: string;
-}
+};
 
 export async function UserInformationCard({
   userId,

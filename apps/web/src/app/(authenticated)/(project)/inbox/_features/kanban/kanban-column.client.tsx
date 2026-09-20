@@ -6,6 +6,7 @@ import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
+import { getColumnSelectionState } from "./column-selection-state";
 
 type FeedbackItem = ListFeedbackOutput[number];
 
@@ -26,14 +27,10 @@ export function KanbanColumnHeader({
   itemIds,
   onToggleSelectAll,
 }: KanbanColumnHeaderProps) {
-  const allSelected =
-    itemIds.length > 0 && itemIds.every((id) => selectedIds.has(id));
-  const someSelected = itemIds.some((id) => selectedIds.has(id));
-
   return (
     <div className="flex items-center gap-2">
       <Checkbox
-        checked={allSelected ? true : someSelected ? "indeterminate" : false}
+        checked={getColumnSelectionState(itemIds, selectedIds)}
         onCheckedChange={() => onToggleSelectAll(id, itemIds)}
       />
       <h3 className="text-sm font-medium">{title}</h3>

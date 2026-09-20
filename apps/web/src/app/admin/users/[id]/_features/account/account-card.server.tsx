@@ -10,9 +10,9 @@ import { ImpersonateUserButton } from "./impersonate-user/impersonate-user-butto
 import { RequestPasswordResetButton } from "./request-password-reset/request-password-reset-button.client";
 import { RevokeUserSessionsButton } from "./revoke-user-sessions/revoke-user-sessions-button.client";
 
-interface AccountCardProps {
+type AccountCardProps = {
   userId: string;
-}
+};
 
 export async function AccountCard({ userId }: AccountCardProps) {
   const { email, hasCredentialProvider } = await getUserAccount({ userId });

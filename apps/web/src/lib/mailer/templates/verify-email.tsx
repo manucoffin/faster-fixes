@@ -12,11 +12,11 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface VerifyEmailProps {
+type VerifyEmailProps = {
   verificationLink?: string;
-}
+};
 
-export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
+export function VerifyEmail({ verificationLink }: VerifyEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -67,4 +67,4 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
       </Tailwind>
     </Html>
   );
-};
+}
