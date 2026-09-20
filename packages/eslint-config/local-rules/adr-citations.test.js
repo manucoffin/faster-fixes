@@ -20,6 +20,11 @@ const EXPECTED_CITATIONS = {
   "no-client-import-of-server-folder.js": ["0012"],
   "no-client-import-of-services.js": ["0011"],
   "no-cross-domain-deep-import.js": [],
+  // The layer import table draws four boundaries at once, so it cites the four
+  // ADRs its rows enforce: the barrel (0010), the router and the services
+  // folder (0011), the transport error mapping (0012), the package entry
+  // points (0013).
+  "no-cross-layer-import.js": ["0010", "0011", "0012", "0013"],
   "no-default-export.js": [],
   "no-feature-nesting.js": ["0010"],
   "no-raw-tailwind-colors.js": [],

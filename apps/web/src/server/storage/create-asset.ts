@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { Prisma } from "@workspace/db/generated/prisma/client";
+import { Prisma } from "@workspace/db/types";
 
 type CreateAssetInput = {
   key: string;

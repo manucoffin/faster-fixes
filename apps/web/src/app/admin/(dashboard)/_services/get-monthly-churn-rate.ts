@@ -1,5 +1,5 @@
 import { SubscriptionStatus } from "@/app/_domains/subscription";
-import { prisma } from "@workspace/db/index";
+import { prisma } from "@workspace/db";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 

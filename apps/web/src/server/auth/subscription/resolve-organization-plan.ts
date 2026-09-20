@@ -5,10 +5,7 @@ import {
   SubscriptionStatus,
 } from "@/app/_domains/subscription";
 import { isCloud } from "@/utils/environment/env";
-import type {
-  PrismaClient,
-  Subscription,
-} from "@workspace/db/generated/prisma/client";
+import type { PrismaClient, Subscription } from "@workspace/db/types";
 
 export type ResolvedPlan = {
   planName: SubscriptionPlanName;

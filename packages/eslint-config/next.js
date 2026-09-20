@@ -174,6 +174,72 @@ const rawTailwindColorOptions = {
   ],
 };
 
+// The layer import table, read by `local/no-cross-layer-import` as its rule
+// options. One rule with a table rather than several blocks of the core
+// restricted-imports rule: flat config replaces rather than merges two blocks
+// of the same core rule matching one file, so the second restriction written
+// that way would silently delete the first.
+//
+// A row is a source path pattern, the specifiers that source may not import,
+// the message an agent gets, and an allowlist of sanctioned specifiers. Rows
+// are read in order and the first match reports, so the narrow rows come
+// first and own the message. `runtimeOnly` marks the rows that are about what
+// reaches a runtime: a type import is erased, so it does not cross those
+// boundaries.
+//
+// Every pattern is a regular expression over the posix path or the specifier,
+// which is how the other rules of this package match paths.
+const layerImportRows = [
+  {
+    name: "a domain barrel exports capabilities, not server implementations",
+    sourcePathPattern: "/src/app/_domains/[^/]+/index\\.ts$",
+    forbiddenPatterns: ["/_services/", "(^|/)trpc-router$"],
+    // A type-only re-export from `_services/` is the sanctioned way to publish
+    // a service's output type, so this row judges runtime edges only.
+    runtimeOnly: true,
+    message:
+      "A domain barrel exposes UI, schemas, types and pure helpers (ADR-0010). A service is called by its own domain's server side through its deep path, a router is mounted on the root router, and a service's output type is published as a type-only re-export.",
+  },
+  {
+    name: "a tRPC router is thin transport, not a query",
+    sourcePathPattern: "(^|/)trpc-router\\.ts$",
+    forbiddenPatterns: ["^@workspace/db(/|$)", "^@prisma/client(/|$)"],
+    message:
+      "A tRPC router validates input and calls a service (ADR-0011). Move the Prisma query into a `_services/` module of the same scope and call it from the procedure.",
+  },
+  {
+    name: "`TRPCError` is transport, not domain",
+    sourcePathPattern: "/src/",
+    exemptPathPatterns: ["/src/server/trpc/", "(^|/)trpc-router\\.ts$"],
+    forbiddenPatterns: ["^@trpc/server$"],
+    message:
+      "`TRPCError` belongs to the transport layer: a router or `src/server/trpc/` (ADR-0012). A service throws a `DomainError` subclass and the tRPC error mapper turns it into a `TRPCError`; a client branches on `error.data.code`.",
+  },
+  {
+    name: "database access lives in a services folder or the server folder",
+    sourcePathPattern: "/src/",
+    exemptPathPatterns: ["/_services/", "/src/server/"],
+    forbiddenPatterns: ["^@workspace/db(/|$)", "^@prisma/client(/|$)"],
+    // A row about the runtime edge: a Prisma row type names no connection.
+    runtimeOnly: true,
+    message:
+      "Database access lives in a `_services/` module or in `src/server/` (ADR-0011). Call a service from here rather than importing the Prisma client.",
+  },
+  {
+    name: "the database package has public entry points",
+    sourcePathPattern: "/src/",
+    // Anything inside the package that is not one of its entry points: the
+    // package declares no `exports` map, so this row is what closes the leak
+    // ADR-0013 records. `@workspace/db` is the client instance,
+    // `@workspace/db/types` the Prisma row and input types, and
+    // `generated/prisma/enums` the generated enum vocabulary a schema may
+    // import, which the schema purity rule names too.
+    forbiddenPatterns: ["^@workspace/db/(?!types$|generated/prisma/enums$)"],
+    message:
+      "The database package is imported through its public entry points (ADR-0013): `@workspace/db` for the client instance, `@workspace/db/types` for Prisma row and input types, `@workspace/db/generated/prisma/enums` for the generated enums. Everything else inside the package is private to it.",
+  },
+];
+
 // The server folder holds wiring and cross-cutting abstractions only, so it
 // never reaches into the app tree by deep path. A domain is imported through
 // its barrel; everything else below is a reviewed exception, named file by
@@ -236,6 +302,7 @@ const notDisableableRules = [
   "local/no-client-import-of-server-folder",
   "local/no-client-import-of-services",
   "local/no-cross-domain-deep-import",
+  "local/no-cross-layer-import",
   "local/require-server-action-suffix",
   "no-restricted-imports",
 ];
@@ -359,6 +426,10 @@ export const nextJsConfig = [
       // "never use default exports" is a repo-wide convention, so a component
       // outside a domain is held to it too.
       "local/no-default-export": ["error", noDefaultExportOptions],
+      // The layer import table (ADR-0010, ADR-0011, ADR-0012, ADR-0013): one
+      // rule over the whole source tree, whose rows scope themselves to the
+      // folder each boundary belongs to.
+      "local/no-cross-layer-import": ["error", { rows: layerImportRows }],
       // Both halves of the output type convention (ADR-0011), so the glob is
       // the whole source tree and not the services folder: the producer half
       // scopes itself to a read service, the consumer half forbids inferring

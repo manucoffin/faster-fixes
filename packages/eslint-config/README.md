@@ -14,18 +14,20 @@ regression.
 
 The boundary rules are `require-server-action-suffix`,
 `no-client-import-of-server-folder`, `no-client-import-of-services`,
-`no-cross-domain-deep-import` and the `no-restricted-imports` lock on
-`src/server/`. An exception to one of them is a named entry in `next.js`,
-reviewed like the three server folder exemptions, not a disable comment.
+`no-cross-domain-deep-import`, `no-cross-layer-import` and the
+`no-restricted-imports` lock on `src/server/`. An exception to one of them is a
+named entry in `next.js`, reviewed like the three server folder exemptions, not
+a disable comment.
 
-Five rules take options from `next.js`: `require-schema-conventions`
+Six rules take options from `next.js`: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
 (`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
 client imports of the server folder, empty today), `services-verb-prefix`
-(`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary) and
+(`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary),
 `schema-must-be-pure-zod` (`allowImportPatterns`, the modules a schema may
-import beyond the built-in allowlist). `require-use-client-suffix` and
+import beyond the built-in allowlist) and `no-cross-layer-import` (`rows`, the
+layer import table described below). `require-use-client-suffix` and
 `no-default-export` both take the Next.js special files as
 `ignorePathPatterns`, from one list in `next.js`: the framework owns those
 files' names and shapes, so neither the `.client.tsx` suffix nor a named export
@@ -56,6 +58,29 @@ change); the write verbs are open, so coining a domain verb is a one-line,
 reviewed addition there and the rule's report says where; the exempt suffixes
 name the `_services/` modules that are not operations (an SDK client, an error
 class, a token cipher, a cookie reader, the GitHub App factory).
+
+`no-cross-layer-import` is the layer import table: one rule reading a list of
+rows from `layerImportRows` in `next.js`, rather than several blocks of the
+core `no-restricted-imports` rule. Flat config replaces rather than merges two
+blocks of the same core rule matching one file, so a second restriction written
+that way would silently delete the first; the core rule therefore stays the
+server folder lock's alone, pinned by its test.
+
+A row is a source path pattern, the specifiers that source may not import, the
+message an agent gets, and an allowlist of sanctioned specifiers. Rows are read
+in order and the first match reports, so a narrow row owns the message. An
+allowance lifts its own row only. `runtimeOnly` marks the rows about what
+reaches a runtime, where a type import is erased and so does not cross the
+boundary. Patterns are regular expressions over the posix path or the
+specifier, as in every other rule here.
+
+The five rows today: a domain barrel exports capabilities and not services or
+routers (a type-only re-export of a service's output type stays free); a tRPC
+router does not import Prisma; `TRPCError` is confined to routers and
+`src/server/trpc/`; runtime database imports are confined to `_services/` and
+`src/server/`; and the database package is reached through `@workspace/db`,
+`@workspace/db/types` and `@workspace/db/generated/prisma/enums`, which closes
+the deep-import leak ADR-0013 records.
 
 `require-service-output-type` carries both halves of the output type
 convention, which is why it is wired on the whole source tree rather than on

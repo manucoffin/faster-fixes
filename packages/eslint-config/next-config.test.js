@@ -28,6 +28,7 @@ const CONVENTION_RULES = {
   "local/no-raw-tailwind-colors": FEATURE,
   "local/no-client-import-of-server-folder": FEATURE,
   "local/no-cross-domain-deep-import": SERVICE,
+  "local/no-cross-layer-import": SERVICE,
   "local/require-server-action-suffix": SERVICE,
   "local/services-no-bare-error": SERVICE,
 };
@@ -607,6 +608,180 @@ describe("no-client-import-of-server-folder", () => {
   });
 });
 
+describe("the layer import table", () => {
+  const RULE = "local/no-cross-layer-import";
+
+  async function layerMessagesFor(file, code) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(code, { filePath: file });
+
+    return result.messages.filter((message) => message.ruleId === RULE);
+  }
+
+  function importing(specifier) {
+    return `import { x } from "${specifier}";\nexport const y = x;\n`;
+  }
+
+  // One rule with a table, not several blocks of the core restricted-imports
+  // rule: flat config would have kept only the last block of those, so a row
+  // added later would have deleted the rows before it without a word.
+  it("is declared once, for the whole web app source, as one rule carrying every row", () => {
+    const entry = onlyEntryFor(RULE);
+    const [severity, options] = entry.rules[RULE];
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual(["rows"]);
+    expect(options.rows.map((row) => row.name)).toEqual([
+      "a domain barrel exports capabilities, not server implementations",
+      "a tRPC router is thin transport, not a query",
+      "`TRPCError` is transport, not domain",
+      "database access lives in a services folder or the server folder",
+      "the database package has public entry points",
+    ]);
+  });
+
+  // The core rule stays the server folder lock's alone, pinned by its own
+  // test above: every other import-shaped restriction is a row here.
+  it("adds no block to the core restricted-imports or restricted-syntax rule", () => {
+    expect(entriesFor("no-restricted-imports")).toHaveLength(1);
+    expect(entriesFor("no-restricted-syntax")).toHaveLength(0);
+  });
+
+  it("names the fix in every row's message", () => {
+    const [, options] = onlyEntryFor(RULE).rules[RULE];
+
+    for (const row of options.rows) {
+      expect([row.name, row.message.length > 40]).toEqual([row.name, true]);
+    }
+  });
+
+  describe("a domain barrel exports capabilities, not server implementations", () => {
+    const BARREL = "src/app/_domains/billing/index.ts";
+
+    it("rejects a re-exported service", async () => {
+      const messages = await layerMessagesFor(
+        BARREL,
+        `export { getPlan } from "./_services/get-plan";\n`,
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("barrel");
+    });
+
+    it("accepts a type-only re-export of a service's output type", async () => {
+      expect(
+        await layerMessagesFor(
+          BARREL,
+          `export type { GetPlanOutput } from "./_services/get-plan";\n`,
+        ),
+      ).toEqual([]);
+    });
+  });
+
+  describe("a tRPC router is thin transport, not a query", () => {
+    const ROUTER = "src/app/(authenticated)/trpc-router.ts";
+
+    it("rejects a Prisma import", async () => {
+      const messages = await layerMessagesFor(
+        ROUTER,
+        importing("@workspace/db"),
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("_services/");
+    });
+
+    it("accepts a service call", async () => {
+      expect(
+        await layerMessagesFor(ROUTER, importing("./_services/get-plan")),
+      ).toEqual([]);
+    });
+  });
+
+  describe("`TRPCError` is transport, not domain", () => {
+    it("rejects @trpc/server outside a router and the server tRPC folder", async () => {
+      const messages = await layerMessagesFor(
+        "src/app/_domains/billing/_services/get-plan.ts",
+        importing("@trpc/server"),
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("DomainError");
+    });
+
+    it("accepts it in the server tRPC folder, and accepts the fetch adapter anywhere", async () => {
+      expect(
+        await layerMessagesFor(
+          "src/server/trpc/middlewares/enforce-limit.ts",
+          importing("@trpc/server"),
+        ),
+      ).toEqual([]);
+      expect(
+        await layerMessagesFor(
+          "src/app/api/trpc/[trpc]/route.ts",
+          importing("@trpc/server/adapters/fetch"),
+        ),
+      ).toEqual([]);
+    });
+  });
+
+  describe("database access lives in a services folder or the server folder", () => {
+    it("rejects a runtime Prisma import from a feature", async () => {
+      const messages = await layerMessagesFor(
+        "src/app/(authenticated)/_features/plan-card.tsx",
+        importing("@workspace/db"),
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("`_services/`");
+    });
+
+    it("accepts it in a services folder and in the server folder", async () => {
+      for (const file of [
+        "src/app/_domains/billing/_services/get-plan.ts",
+        "src/server/auth/index.ts",
+      ]) {
+        expect([
+          file,
+          await layerMessagesFor(file, importing("@workspace/db")),
+        ]).toEqual([file, []]);
+      }
+    });
+  });
+
+  describe("the database package has public entry points", () => {
+    const SERVICE_FILE = "src/app/_domains/billing/_services/get-plan.ts";
+
+    it("rejects a deep import of the generated Prisma client, type-only included", async () => {
+      const messages = await layerMessagesFor(
+        SERVICE_FILE,
+        `import type { Prisma } from "@workspace/db/generated/prisma/client";\nexport type X = Prisma.UserSelect;\n`,
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("@workspace/db/types");
+    });
+
+    it("accepts the package root, the types entry point and the generated enums", async () => {
+      for (const specifier of [
+        "@workspace/db",
+        "@workspace/db/types",
+        "@workspace/db/generated/prisma/enums",
+      ]) {
+        expect([
+          specifier,
+          await layerMessagesFor(SERVICE_FILE, importing(specifier)),
+        ]).toEqual([specifier, []]);
+      }
+    });
+  });
+});
+
 describe("no-default-export", () => {
   const RULE = "local/no-default-export";
 
@@ -774,6 +949,7 @@ describe("the disable comment policy", () => {
       "local/no-client-import-of-server-folder",
       "local/no-client-import-of-services",
       "local/no-cross-domain-deep-import",
+      "local/no-cross-layer-import",
       "local/require-server-action-suffix",
       "no-restricted-imports",
     ]);
@@ -827,6 +1003,26 @@ describe("the disable comment policy", () => {
       ]);
       expect(reported[0].message).toContain("no-cross-domain-deep-import");
     }
+  });
+
+  // The layer import table is a boundary too: a row is lifted by a named
+  // allowlist entry in `next.js`, not by the module the row guards.
+  it("reports a directive targeting the layer import table", async () => {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(
+      `// eslint-disable-next-line local/no-cross-layer-import -- just this once\nimport { prisma } from "@workspace/db";\nexport const y = prisma;\n`,
+      { filePath: "src/app/(authenticated)/_features/plan-card.tsx" },
+    );
+    const reported = result.messages.filter(
+      (message) => message.ruleId === "eslint-comments/no-restricted-disable",
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(reported[0].message).toContain("no-cross-layer-import");
   });
 
   // A blanket directive names no rule, so it switches the boundary rules off

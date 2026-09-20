@@ -1,5 +1,5 @@
 import type { LimitableResource } from "@/app/_domains/subscription";
-import type { PrismaClient } from "@workspace/db/generated/prisma/client";
+import type { PrismaClient } from "@workspace/db/types";
 import { getMinimumRequiredPlanForResource, type PlanDenial } from "./denial";
 import { resolveOrganizationPlan } from "./resolve-organization-plan";
 

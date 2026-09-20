@@ -1,4 +1,4 @@
-import { prisma } from "@workspace/db/index";
+import { prisma } from "@workspace/db";
 import slugify from "slugify";
 
 export async function getUniqueOrganizationSlug(

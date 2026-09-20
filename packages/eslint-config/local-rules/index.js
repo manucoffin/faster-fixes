@@ -1,6 +1,7 @@
 import { noClientImportOfServerFolderRule } from "./no-client-import-of-server-folder.js";
 import { noClientImportOfServicesRule } from "./no-client-import-of-services.js";
 import { noCrossDomainDeepImportRule } from "./no-cross-domain-deep-import.js";
+import { noCrossLayerImportRule } from "./no-cross-layer-import.js";
 import { noDefaultExportRule } from "./no-default-export.js";
 import { noFeatureNestingRule } from "./no-feature-nesting.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
@@ -18,6 +19,7 @@ export const localRulesPlugin = {
     "no-client-import-of-server-folder": noClientImportOfServerFolderRule,
     "no-client-import-of-services": noClientImportOfServicesRule,
     "no-cross-domain-deep-import": noCrossDomainDeepImportRule,
+    "no-cross-layer-import": noCrossLayerImportRule,
     "no-default-export": noDefaultExportRule,
     "no-feature-nesting": noFeatureNestingRule,
     "no-raw-tailwind-colors": noRawTailwindColorsRule,

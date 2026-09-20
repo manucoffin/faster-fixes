@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { Prisma } from "@workspace/db/generated/prisma/client";
+import { Prisma } from "@workspace/db/types";
 import { ListUsersInput } from "./list-users.schema";
 
 // Shape returned for each row; kept in one place so both the default and the
