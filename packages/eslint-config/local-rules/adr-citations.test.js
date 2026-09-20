@@ -17,7 +17,7 @@ const ADR_CITATION_RE = /ADR-(\d{4})/g;
 // citation that merely points at an existing file is not enough. This table is
 // the assertion: a rule may cite these numbers and no others.
 const EXPECTED_CITATIONS = {
-  "no-client-import-of-server-errors.js": ["0012"],
+  "no-client-import-of-server-folder.js": ["0012"],
   "no-client-import-of-services.js": ["0011"],
   "no-cross-domain-deep-import.js": [],
   "no-default-export.js": [],
@@ -46,6 +46,10 @@ const RESERVED = {
 // its own and is observed through the rules that consume it.
 const NON_RULE_MODULES = ["imports.js", "index.js"];
 
+// A retired rule leaves an empty `_deprecated_` stub behind for the maintainer
+// to delete. It exports nothing and is wired nowhere, so it is not a rule.
+const DEPRECATED_PREFIX = "_deprecated_";
+
 function sourceFiles() {
   return readdirSync(localRulesDir).filter(
     (name) => name.endsWith(".js") && !name.endsWith(".test.js"),
@@ -53,7 +57,10 @@ function sourceFiles() {
 }
 
 function ruleSourceFiles() {
-  return sourceFiles().filter((name) => !NON_RULE_MODULES.includes(name));
+  return sourceFiles().filter(
+    (name) =>
+      !NON_RULE_MODULES.includes(name) && !name.startsWith(DEPRECATED_PREFIX),
+  );
 }
 
 function citationsIn(source) {
@@ -75,6 +82,22 @@ describe("ADR citations in the local rules", () => {
     );
 
     expect(helpers.sort()).toEqual([...NON_RULE_MODULES].sort());
+  });
+
+  // A stub that still held a rule would be a second, unwired copy of it: the
+  // next reader could not tell which one the plugin loads.
+  it("leaves every deprecated stub empty of rule code", () => {
+    const stubs = sourceFiles().filter((name) =>
+      name.startsWith(DEPRECATED_PREFIX),
+    );
+
+    for (const name of stubs) {
+      const source = readFileSync(join(localRulesDir, name), "utf8");
+      expect([name, source]).toEqual([
+        name,
+        expect.not.stringContaining("export"),
+      ]);
+    }
   });
 
   it.each(Object.entries(EXPECTED_CITATIONS))(

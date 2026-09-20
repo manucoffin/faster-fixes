@@ -95,6 +95,8 @@ Inverse test: a file that makes a business decision for one glossary entity is a
 
 The rule is enforced rather than merely written down. An always-on `no-restricted-imports` block forbids every deep import from `src/server/**` into the app tree, so a server file that needs a domain's internals fails plain `pnpm lint` and the pre-commit hook; a domain is read through its barrel. Exemptions are named file by file in `packages/eslint-config/next.js`, so an exemption stays a reviewed decision instead of becoming a pattern. `[Faster Fixes]` Three are named: the root tRPC router, which mounts the domain routers a barrel never exports; the Better Auth database hooks, which call the Organization slug service on sign-up; and the tRPC mapping test, a fixture that names a shipped domain error subclass.
 
+The boundary is guarded from the other side too: `no-client-import-of-server-folder` fails a client module that imports a **runtime value** from `src/server/**`, whatever the bucket. Type-only imports stay free, and the sanctioned exceptions are a named allowlist in `packages/eslint-config/next.js`, empty today. A value a client legitimately calls is a value that does not meet the folder's two conditions: the public asset URL builder moved to `src/utils/url/resolve-s3-url.ts`, where its nine client callers read it.
+
 `[Faster Fixes]` What the rule admits here: the tRPC setup, middlewares and root router; the domain error vocabulary and its boundary helpers; the durable function client; the Stripe client; storage; the Better Auth wiring; Plan enforcement; the CORS helper the proxy reads; and the agent API rate limit check, which both the agent API and the tRPC context depend on. Everything else left in step 5: every Integration now lives in `app/_domains/integration/`, each durable function is a service of the domain it drives, and the Plan vocabulary lives in `app/_domains/subscription/`.
 
 ## Two tiers, one bucket set
@@ -320,7 +322,7 @@ Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/e
 | `require-trpc-output-type`          | `**/_services/**`     | A read service exports `Awaited<ReturnType<typeof x>>` as its type. Tests exempt.                                  |
 | `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                |
 | `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports. |
-| `no-client-import-of-server-errors` | all                   | Client code never imports `src/server/errors/*`.                                                                   |
+| `no-client-import-of-server-folder` | all                   | Client code never imports a runtime value from `src/server/**`; type-only imports and named exceptions are free.   |
 | `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                          |
 | `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                           |
 | `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                          |

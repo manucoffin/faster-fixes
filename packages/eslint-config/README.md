@@ -13,16 +13,22 @@ all run the same set. Every rule reports nothing today, so a report is a
 regression.
 
 The boundary rules are `require-server-action-suffix`,
-`no-client-import-of-server-errors`, `no-client-import-of-services`,
+`no-client-import-of-server-folder`, `no-client-import-of-services`,
 `no-cross-domain-deep-import` and the `no-restricted-imports` lock on
 `src/server/`. An exception to one of them is a named entry in `next.js`,
 reviewed like the three server folder exemptions, not a disable comment.
 
-Two rules take options from `next.js`: `require-schema-conventions`
-(`requirePascalCaseSchema`, `requireSingularInput`) and `no-raw-tailwind-colors`
-(`allowPatterns`, `ignorePathPatterns` for the four home page illustrations).
+Three rules take options from `next.js`: `require-schema-conventions`
+(`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
+(`allowPatterns`, `ignorePathPatterns` for the four home page illustrations)
+and `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
+client imports of the server folder, empty today).
 `require-use-client-suffix` takes the Next.js special file names as
 `ignorePathPatterns`. No other rule declares an option.
+
+`local-rules/_deprecated_no-client-import-of-server-errors.js` is the empty stub
+of the rule `no-client-import-of-server-folder` replaced. Nothing imports it; it
+is the maintainer's to delete.
 
 `local-rules/imports.js` is the shared import view, not a rule: it visits the
 four import forms (static `import`, `export … from`, `export *`, dynamic

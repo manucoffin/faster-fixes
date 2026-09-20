@@ -8,7 +8,7 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { GripVertical } from "lucide-react";

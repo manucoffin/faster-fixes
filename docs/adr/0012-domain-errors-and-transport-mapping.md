@@ -22,7 +22,7 @@ Accepted, committed 2026-09-18 with the step 3 prerequisites, and implemented in
 - **Next.js interrupts** (`interruptOnDomainError`): no RSC page calls a service that can throw, so the helper would have no caller. See amendment 2.
 - **Server actions**: the action client branch. Inert here, since the repo has no `next-safe-action` client and no `*.server.action.ts` module.
 
-`no-client-import-of-server-errors` was raised from `off` to `error` in step 3, once `src/server/errors/` existed, and reports zero violations.
+The client-side guard was raised from `off` to `error` in step 3, once `src/server/errors/` existed, and reports zero violations. It has since been generalised from the errors folder to the whole server folder and is named `no-client-import-of-server-folder`: the serialization argument below holds for `src/server/errors/` and the bundle-leak argument holds for the rest of the folder.
 
 ### Amendments
 
@@ -69,7 +69,7 @@ Step 4 amended three of the decisions below and step 5 two more, each recorded i
 ### Enforcement and sequencing
 
 - `services-no-bare-error` lands at `warn` with the vocabulary, acting as a guardrail during the migration, and flips to always-on `error` once the tree is clean. It is always on for `**/_services/**` since step 4. Step 5 brought the relocated server files under it by moving them into `_services/` buckets rather than by widening the rule's scope.
-- `no-client-import-of-server-errors` lands straight at `error` while zero violations are possible.
+- The client-side guard (now `no-client-import-of-server-folder`) lands straight at `error` while zero violations are possible.
 - A ban on importing any retired legacy error module lands in the PR that converts its last consumer. Inert here: no module was retired, so step 4 added no ban rule.
 - Not lint-enforced (heuristic): Inngest helper adoption, RSC catch-handler usage, copy quality.
 - **The vocabulary and the tRPC middleware land before the first procedure is extracted into a service.** Otherwise each extraction destroys the codes irrecoverably. All other boundaries, masking, and the boundary hierarchy land after the extraction completes.
@@ -89,5 +89,5 @@ Step 4 amended three of the decisions below and step 5 two more, each recorded i
 - New `src/server/errors/` module: the vocabulary plus boundary helpers.
 - The tRPC init gains the mapping middleware immediately and the masking plus logging after the migration.
 - Any legacy error module is deprecated to a stub and its import banned. None was, here: the three expected Jira classes were re-parented in place and the two infrastructure ones kept.
-- Two lint rules guard the system: `services-no-bare-error` and `no-client-import-of-server-errors`. The legacy-import ban has nothing to ban.
+- Two lint rules guard the system: `services-no-bare-error` and `no-client-import-of-server-folder`, which covers `src/server/errors/` as one part of the server folder. The legacy-import ban has nothing to ban.
 - Implementation is phased: vocabulary and tRPC mapping first, app-wide consolidation after the services migration.

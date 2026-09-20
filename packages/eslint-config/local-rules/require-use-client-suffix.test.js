@@ -61,6 +61,13 @@ ruleTester.run("require-use-client-suffix", requireUseClientSuffixRule, {
       options: nextSpecialFileOptions,
     },
     {
+      // The client/server import rules read `.client.ts` as a client module,
+      // so this rule reads it as carrying the suffix too.
+      name: "a .client.ts file carrying the directive",
+      filename: "/repo/apps/web/src/app/_features/project/use-panel.client.ts",
+      code: `"use client";\nexport const panelId = "panel";\n`,
+    },
+    {
       name: "a .client.tsx file using single quotes for the directive",
       filename: "/repo/apps/web/src/app/_features/project/panel.client.tsx",
       code: `'use client';\nexport function Panel() {\n  return <div />;\n}\n`,
@@ -83,6 +90,12 @@ ruleTester.run("require-use-client-suffix", requireUseClientSuffixRule, {
       name: "a .client.tsx file missing the directive",
       filename: "/repo/apps/web/src/app/_features/project/panel.client.tsx",
       code: `export function Panel() {\n  return <div />;\n}\n`,
+      errors: [{ messageId: "missingUseClient" }],
+    },
+    {
+      name: "a .client.ts file missing the directive",
+      filename: "/repo/apps/web/src/app/_features/project/panel-id.client.ts",
+      code: `export const panelId = "panel";\n`,
       errors: [{ messageId: "missingUseClient" }],
     },
     {

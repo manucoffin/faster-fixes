@@ -2,7 +2,7 @@
 
 import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/feedback-mutations/use-feedback-mutations";
 import { useOrgMembers } from "./use-org-members";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,

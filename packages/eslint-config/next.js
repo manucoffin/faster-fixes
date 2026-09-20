@@ -31,6 +31,17 @@ const useClientSuffixOptions = {
   ],
 };
 
+// The sanctioned exceptions to the client/server boundary: a client module may
+// import a runtime value from these server folder modules and no others. Empty
+// on purpose. A module of the server folder that a client may call is a module
+// that does not belong there (the folder admits wiring and server-only
+// cross-cutting abstractions only), so the first answer is to move the value
+// to `src/utils/` or `src/lib/`, as the public asset URL builder was. An entry
+// here is reviewed like the server folder deep-import exemptions below.
+const clientServerImportOptions = {
+  allowImportPatterns: [],
+};
+
 const rawTailwindColorOptions = {
   // Allow explicit palette classes for charting or third-party styling edge-cases.
   allowPatterns: [
@@ -149,9 +160,14 @@ export const nextJsConfig = [
     files: ["**/*.{ts,tsx}"],
     rules: {
       "local/require-server-action-suffix": "error",
-      // ADR-0012: a client file importing `src/server/errors/` is a
-      // correctness problem, `instanceof` does not survive serialization.
-      "local/no-client-import-of-server-errors": "error",
+      // A client file importing a runtime value from `src/server/` leaks
+      // server-only code into the bundle, and for the errors bucket it is a
+      // correctness problem too: `instanceof` does not survive serialization
+      // (ADR-0012).
+      "local/no-client-import-of-server-folder": [
+        "error",
+        clientServerImportOptions,
+      ],
       "local/no-client-import-of-services": "error",
     },
   },

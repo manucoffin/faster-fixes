@@ -7,7 +7,7 @@ import {
   useSession,
 } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { getErrorMessage } from "@/utils/error/get-error-message";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useMutation, useQuery } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { noClientImportOfServerErrorsRule } from "./no-client-import-of-server-errors.js";
+import { noClientImportOfServerFolderRule } from "./no-client-import-of-server-folder.js";
 import { noClientImportOfServicesRule } from "./no-client-import-of-services.js";
 import { noCrossDomainDeepImportRule } from "./no-cross-domain-deep-import.js";
 import { noDefaultExportRule } from "./no-default-export.js";
@@ -15,7 +15,7 @@ import { servicesVerbPrefixRule } from "./services-verb-prefix.js";
 
 export const localRulesPlugin = {
   rules: {
-    "no-client-import-of-server-errors": noClientImportOfServerErrorsRule,
+    "no-client-import-of-server-folder": noClientImportOfServerFolderRule,
     "no-client-import-of-services": noClientImportOfServicesRule,
     "no-cross-domain-deep-import": noCrossDomainDeepImportRule,
     "no-default-export": noDefaultExportRule,

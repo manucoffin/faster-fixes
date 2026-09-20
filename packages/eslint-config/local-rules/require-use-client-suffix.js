@@ -1,5 +1,6 @@
+import { isClientFilename } from "./imports.js";
+
 const USE_CLIENT_RE = /^['"]use client['"]/;
-const CLIENT_SUFFIX_RE = /\.client\.tsx$/;
 // Hooks and context files legitimately use 'use client' without the .client.tsx suffix.
 // Hooks are `use-*.ts` (or `use-*.tsx` when they also export a JSX provider) and never
 // carry the `.client` suffix (ADR-0010, app folder architecture); `.client.tsx`
@@ -29,7 +30,7 @@ export const requireUseClientSuffixRule = {
       missingClientSuffix:
         "This file has a `'use client'` directive but its name does not end with `.client.tsx`. Rename it to `{{ suggested }}`.",
       missingUseClient:
-        "This file is named `.client.tsx` but is missing the `'use client'` directive at the top.",
+        "This file is named `.client.ts(x)` but is missing the `'use client'` directive at the top.",
     },
   },
   create(context) {
@@ -42,7 +43,10 @@ export const requireUseClientSuffixRule = {
       return {};
     }
 
-    const hasClientSuffix = CLIENT_SUFFIX_RE.test(filename);
+    // Read through the shared helper, so this rule and the client/server
+    // import rules agree on what carries the client suffix: `.client.ts` as
+    // well as `.client.tsx`.
+    const hasClientSuffix = isClientFilename(filename);
     const basename = filename.split("/").pop() || "";
     const isExemptFilename = EXEMPT_FILENAME_RE.test(basename);
 

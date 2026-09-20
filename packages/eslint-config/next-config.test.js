@@ -26,7 +26,7 @@ const CONVENTION_RULES = {
   "local/require-schema-conventions": SCHEMA,
   "local/schema-must-be-pure-zod": SCHEMA,
   "local/no-raw-tailwind-colors": FEATURE,
-  "local/no-client-import-of-server-errors": FEATURE,
+  "local/no-client-import-of-server-folder": FEATURE,
   "local/no-cross-domain-deep-import": SERVICE,
   "local/require-server-action-suffix": SERVICE,
   "local/services-no-bare-error": SERVICE,
@@ -317,13 +317,51 @@ describe("the server folder import lock", () => {
   });
 });
 
-describe("no-client-import-of-server-errors", () => {
-  it("is declared once, at error", () => {
-    const entry = onlyEntryFor("local/no-client-import-of-server-errors");
+describe("no-client-import-of-server-folder", () => {
+  const RULE = "local/no-client-import-of-server-folder";
 
-    expect(entry.rules["local/no-client-import-of-server-errors"]).toBe(
-      "error",
+  async function serverFolderMessagesFor(file, specifier) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(
+      `"use client";\nimport { x } from "${specifier}";\nexport const y = x;\n`,
+      { filePath: file },
     );
+
+    return result.messages.filter((message) => message.ruleId === RULE);
+  }
+
+  it("is declared once, at error, with its allowlist named", () => {
+    const entry = onlyEntryFor(RULE);
+    const [severity, options] = entry.rules[RULE];
+
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual(["allowImportPatterns"]);
+    // Empty today: the public asset URL builder moved to `src/utils/url/`
+    // rather than being exempted.
+    expect(options.allowImportPatterns).toEqual([]);
+  });
+
+  it("rejects a runtime import of the server folder from a client module", async () => {
+    const messages = await serverFolderMessagesFor(
+      "src/app/(authenticated)/_features/sidebar/sidebar.client.tsx",
+      "@/server/storage/resolve-s3-url",
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("server folder");
+  });
+
+  it("leaves a client import of the utils folder alone", async () => {
+    expect(
+      await serverFolderMessagesFor(
+        "src/app/(authenticated)/_features/sidebar/sidebar.client.tsx",
+        "@/utils/url/resolve-s3-url",
+      ),
+    ).toEqual([]);
   });
 });
 

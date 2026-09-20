@@ -5,7 +5,7 @@ import {
   useActiveOrganization,
   useListOrganizations,
 } from "@/lib/auth";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { getInitials } from "@/utils/text/get-initials";
 import {
   Avatar,
@@ -71,7 +71,7 @@ export function OrganizationSwitcher() {
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="default"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+                className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-6 w-6 rounded-md">
                   {orgLogo && (
@@ -124,7 +124,7 @@ export function OrganizationSwitcher() {
                       </Avatar>
                       <span className="flex-1 truncate">{org.name}</span>
                       {org.id === activeOrg?.id && (
-                        <Check className="text-muted-foreground size-4" />
+                        <Check className="size-4 text-muted-foreground" />
                       )}
                     </DropdownMenuItem>
                   );
