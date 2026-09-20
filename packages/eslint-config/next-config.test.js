@@ -1,12 +1,10 @@
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { ESLint } from "eslint";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-// The config reads ESLINT_AGENT_RULES once, at import time, so the gate has to
-// be set before the dynamic import below.
-process.env.ESLINT_AGENT_RULES = "1";
-const { nextJsConfig } = await import("./next.js");
+import { nextJsConfig } from "./next.js";
 
 const SERVICE =
   "src/app/_domains/subscription/_services/get-active-subscription.ts";
@@ -15,9 +13,9 @@ const SCHEMA =
 const FEATURE =
   "src/app/(public)/_features/github-stars/github-stars-button.client.tsx";
 
-// The rules step 3 locked at its final commit, each paired with a file its own
-// glob matches, so the severity is resolved on a path the rule really guards.
-const STEP_3_RULES = {
+// Every `local/` convention rule, each paired with a file its own glob matches,
+// so the severity is resolved on a path the rule really guards (ADR-0015).
+const CONVENTION_RULES = {
   "local/services-verb-prefix": SERVICE,
   "local/services-no-trpc-import": SERVICE,
   "local/require-trpc-output-type": SERVICE,
@@ -27,6 +25,11 @@ const STEP_3_RULES = {
   "local/no-feature-nesting": FEATURE,
   "local/require-schema-conventions": SCHEMA,
   "local/schema-must-be-pure-zod": SCHEMA,
+  "local/no-raw-tailwind-colors": FEATURE,
+  "local/no-client-import-of-server-errors": FEATURE,
+  "local/no-cross-domain-deep-import": SERVICE,
+  "local/require-server-action-suffix": SERVICE,
+  "local/services-no-bare-error": SERVICE,
 };
 
 /**
@@ -34,13 +37,13 @@ const STEP_3_RULES = {
  * through ESLint's own matcher rather than by eye, because route groups keep
  * their parentheses and dynamic segments their brackets.
  */
-async function severityResolver(ruleName, config = nextJsConfig) {
+async function severityResolver(ruleName) {
   // The config declares the `local` plugin itself, so it is passed as-is: a
   // second `plugins` block redefining it is a flat-config error.
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
     overrideConfigFile: true,
-    overrideConfig: config,
+    overrideConfig: nextJsConfig,
   });
 
   return async (file) => {
@@ -87,28 +90,36 @@ describe("the schema rules wiring", () => {
   });
 });
 
-describe("the step 3 final lock", () => {
-  it("declares every step 3 rule exactly once, with no per-scope allowlist", () => {
-    for (const rule of Object.keys(STEP_3_RULES)) {
+describe("every convention rule is on", () => {
+  it("declares each rule exactly once, with no per-scope allowlist", () => {
+    for (const rule of Object.keys(CONVENTION_RULES)) {
       expect(onlyEntryFor(rule).rules[rule]).toBeDefined();
     }
   });
 
-  it("exports no migratedScopes allowlist or expansion helper", async () => {
+  it("exports the config and nothing that could narrow it", async () => {
     const exported = await import("./next.js");
 
     expect(Object.keys(exported)).toEqual(["nextJsConfig"]);
   });
 
-  it("resolves every step 3 rule to error inside the agent gate", async () => {
-    for (const [rule, file] of Object.entries(STEP_3_RULES)) {
+  it("resolves every rule to error", async () => {
+    for (const [rule, file] of Object.entries(CONVENTION_RULES)) {
       const severityFor = await severityResolver(rule);
 
       expect([rule, await severityFor(file)]).toEqual([rule, 2]);
     }
   });
 
-  it("applies the lock outside the migrated scopes of step 3 too", async () => {
+  // The severity no longer depends on the caller's environment, so the commit
+  // hook, CI and an agent all resolve the same rule set (ADR-0015).
+  it("reads no environment variable at all", () => {
+    const source = readFileSync(new URL("./next.js", import.meta.url), "utf8");
+
+    expect(source).not.toContain("process.env");
+  });
+
+  it("applies to every services scope, not a migrated subset", async () => {
     const severityFor = await severityResolver("local/services-verb-prefix");
 
     expect(
@@ -119,35 +130,33 @@ describe("the step 3 final lock", () => {
     ).toBe(2);
   });
 
-  it("locks no-raw-tailwind-colors at error, the last rule off the ramp", async () => {
+  // Every option the config passes is one a rule reads, and every ignore
+  // pattern matches a file that exists: a dead pattern reads as a live
+  // exemption to the next person to touch the list.
+  it("passes no-raw-tailwind-colors its allowlist and the four illustration exemptions", () => {
     const entry = onlyEntryFor("local/no-raw-tailwind-colors");
+    const [severity, options] = entry.rules["local/no-raw-tailwind-colors"];
 
-    expect(entry.rules["local/no-raw-tailwind-colors"][0]).toBe("error");
-
-    const severityFor = await severityResolver("local/no-raw-tailwind-colors");
-
-    expect(await severityFor(FEATURE)).toBe(2);
+    expect(severity).toBe("error");
+    expect(Object.keys(options)).toEqual([
+      "allowPatterns",
+      "ignorePathPatterns",
+    ]);
+    expect(options.allowPatterns).toHaveLength(1);
+    expect(options.ignorePathPatterns).toHaveLength(4);
   });
 
-  it("stays off outside the agent gate", async () => {
-    vi.resetModules();
-    process.env.ESLINT_AGENT_RULES = "0";
-    const { nextJsConfig: ungated } = await import("./next.js");
-    process.env.ESLINT_AGENT_RULES = "1";
-    vi.resetModules();
+  it("exempts require-use-client-suffix on the Next.js special files, once each", () => {
+    const entry = onlyEntryFor("local/require-use-client-suffix");
+    const [, options] = entry.rules["local/require-use-client-suffix"];
 
-    for (const [rule, file] of Object.entries(STEP_3_RULES)) {
-      const severityFor = await severityResolver(rule, ungated);
-
-      expect([rule, await severityFor(file)]).toEqual([rule, 0]);
-    }
-
-    const rawColorSeverityFor = await severityResolver(
-      "local/no-raw-tailwind-colors",
-      ungated,
-    );
-
-    expect(await rawColorSeverityFor(FEATURE)).toBe(0);
+    expect(options.ignorePathPatterns).toEqual([
+      "/app/.*page\\.tsx$",
+      "/app/.*layout\\.tsx$",
+      "/app/.*loading\\.tsx$",
+      "/app/.*error\\.tsx$",
+      "/app/.*not-found\\.tsx$",
+    ]);
   });
 
   // The pre-migration procedure modules all carried a module-level
@@ -173,17 +182,8 @@ describe("services-no-bare-error", () => {
     expect(entry.rules["local/services-no-bare-error"]).toBe("error");
   });
 
-  it("resolves to error for a service with the agent gate off", async () => {
-    vi.resetModules();
-    process.env.ESLINT_AGENT_RULES = "0";
-    const { nextJsConfig: ungated } = await import("./next.js");
-    process.env.ESLINT_AGENT_RULES = "1";
-    vi.resetModules();
-
-    const severityFor = await severityResolver(
-      "local/services-no-bare-error",
-      ungated,
-    );
+  it("resolves to error for a service in every scope", async () => {
+    const severityFor = await severityResolver("local/services-no-bare-error");
 
     expect(await severityFor(SERVICE)).toBe(2);
     expect(
@@ -191,9 +191,9 @@ describe("services-no-bare-error", () => {
     ).toBe(2);
   });
 
-  // Step 5 relocated every domain-bound file into a `_services` bucket, where
-  // the rule reaches it. What is left in the server folder is infrastructure,
-  // and its bare `throw new Error(` sites stay as they are (ADR 0012).
+  // Every domain-bound file lives in a `_services` bucket, where the rule
+  // reaches it. What is left in the server folder is infrastructure, and its
+  // bare `throw new Error(` sites stay as they are (ADR 0012).
   it("does not reach the server folder", async () => {
     const severityFor = await severityResolver("local/services-no-bare-error");
 
@@ -210,11 +210,11 @@ describe("the server folder import lock", () => {
   const DEEP = "@/app/_domains/integration/_services/jira/jira-errors";
   const BARREL = "@/app/_domains/subscription";
 
-  async function restrictedImportsFor(file, specifier, config = nextJsConfig) {
+  async function restrictedImportsFor(file, specifier) {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: config,
+      overrideConfig: nextJsConfig,
     });
     const [result] = await eslint.lintText(
       `import x from "${specifier}";\nexport default x;\n`,
@@ -238,17 +238,10 @@ describe("the server folder import lock", () => {
     expect(entry.rules["no-restricted-imports"][0]).toBe("error");
   });
 
-  it("rejects a deep import into the app tree with the agent gate off", async () => {
-    vi.resetModules();
-    process.env.ESLINT_AGENT_RULES = "0";
-    const { nextJsConfig: ungated } = await import("./next.js");
-    process.env.ESLINT_AGENT_RULES = "1";
-    vi.resetModules();
-
+  it("rejects a deep import into the app tree", async () => {
     const messages = await restrictedImportsFor(
       "src/server/trpc/context.ts",
       DEEP,
-      ungated,
     );
 
     expect(messages.map((message) => message.severity)).toEqual([2]);
@@ -291,17 +284,10 @@ describe("the server folder import lock", () => {
 });
 
 describe("no-client-import-of-server-errors", () => {
-  it("is an error even with the agent gate off", async () => {
-    vi.resetModules();
-    process.env.ESLINT_AGENT_RULES = "0";
-    const { nextJsConfig: ungated } = await import("./next.js");
-    process.env.ESLINT_AGENT_RULES = "1";
+  it("is declared once, at error", () => {
+    const entry = onlyEntryFor("local/no-client-import-of-server-errors");
 
-    const entries = ungated.filter(
-      (entry) => entry.rules?.["local/no-client-import-of-server-errors"],
-    );
-    expect(entries).toHaveLength(1);
-    expect(entries[0].rules["local/no-client-import-of-server-errors"]).toBe(
+    expect(entry.rules["local/no-client-import-of-server-errors"]).toBe(
       "error",
     );
   });

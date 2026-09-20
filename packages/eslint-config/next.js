@@ -9,13 +9,6 @@ import tseslint from "typescript-eslint";
 import { config as baseConfig } from "./base.js";
 import { localRulesPlugin } from "./local-rules/index.js";
 
-const enableAgentRules = process.env.ESLINT_AGENT_RULES === "1";
-
-// Every convention rule reports at `error` with nothing to report, so any
-// report is a regression. They stay behind the agent gate on purpose: taking a
-// rule out of the gate is the same as adding it to the commit hook.
-const migratedSeverity = enableAgentRules ? "error" : "off";
-
 // Both options are the repo convention, not opt-in extras: a schema const is
 // PascalCase (`CreateInvoiceSchema`) and its input type is singular
 // (`CreateInvoiceInput`). Wiring them is what makes a plural `Inputs` alias
@@ -26,18 +19,30 @@ const schemaConventionOptions = {
 };
 
 const useClientSuffixOptions = {
-  // Ignore Next.js page/layout/route files which need default exports or 'use client' without .client suffix
+  // The Next.js special files need a default export, and a `'use client'`
+  // directive under a name the framework fixes, so the suffix cannot apply to
+  // them.
   ignorePathPatterns: [
-    "/app/\\(.*\\)/.*page\\.tsx$",
-    "/app/\\(.*\\)/.*layout\\.tsx$",
-    "/app/\\(.*\\)/.*loading\\.tsx$",
-    "/app/\\(.*\\)/.*error\\.tsx$",
-    "/app/\\(.*\\)/.*not-found\\.tsx$",
     "/app/.*page\\.tsx$",
     "/app/.*layout\\.tsx$",
     "/app/.*loading\\.tsx$",
     "/app/.*error\\.tsx$",
     "/app/.*not-found\\.tsx$",
+  ],
+};
+
+const rawTailwindColorOptions = {
+  // Allow explicit palette classes for charting or third-party styling edge-cases.
+  allowPatterns: [
+    "^fill-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}$",
+  ],
+  // The home page illustrations only: drawn mock screens keep fixed colours on
+  // purpose, independently of the theme.
+  ignorePathPatterns: [
+    "/\\(home\\)/_features/hero/hero-flow-animation\\.client\\.tsx$",
+    "/\\(home\\)/_features/how-it-works/flow-animations\\.tsx$",
+    "/\\(home\\)/_features/before-after-section\\.tsx$",
+    "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
   ],
 };
 
@@ -122,7 +127,9 @@ export const nextJsConfig = [
       "react/prop-types": "off",
     },
   },
-  // --- Always-on rules (independent of the agent gate) ---
+  // Every rule below is `error` with no environment gate and no per-scope
+  // allowlist (ADR-0015): one lint mode, so lint-staged, CI and an agent
+  // enforce the same set. A rule reporting anything here is a regression.
   {
     rules: {
       // Only Error instances carry a stack, so only they may be thrown.
@@ -133,32 +140,58 @@ export const nextJsConfig = [
     files: ["**/*.{ts,tsx}"],
     rules: {
       "local/require-server-action-suffix": "error",
-      // Always on per ADR-0012: a client file importing `src/server/errors/`
-      // is a correctness problem, not a convention.
+      // ADR-0012: a client file importing `src/server/errors/` is a
+      // correctness problem, `instanceof` does not survive serialization.
       "local/no-client-import-of-server-errors": "error",
+      "local/no-client-import-of-services": "error",
     },
   },
   {
-    // Step 4 takes this one out of the agent gate: a service throwing a bare
-    // `Error` is now rejected by plain `pnpm lint`, so the pre-commit hook
-    // catches it.
     files: ["**/_services/**/*.{ts,tsx}"],
     rules: {
       "local/services-no-bare-error": "error",
+      "local/services-verb-prefix": "error",
+      "local/services-no-trpc-import": "error",
+      "local/require-trpc-output-type": "error",
     },
   },
   {
-    // A deep cross-domain import reaches past a domain's public index.ts, so it
-    // is an error even outside agent mode.
     files: ["**/src/app/_domains/**/*.{ts,tsx}"],
     rules: {
       "local/no-cross-domain-deep-import": "error",
+      "local/no-default-export": "error",
+    },
+  },
+  {
+    files: ["**/_features/**/*.{ts,tsx}"],
+    rules: {
+      "local/no-feature-nesting": "error",
+    },
+  },
+  {
+    files: ["**/src/**/*.{ts,tsx}"],
+    rules: {
+      "local/require-use-client-suffix": ["error", useClientSuffixOptions],
+    },
+  },
+  {
+    files: ["**/*.schema.ts"],
+    rules: {
+      "local/require-schema-conventions": ["error", schemaConventionOptions],
+      "local/schema-must-be-pure-zod": "error",
+    },
+  },
+  {
+    // Class strings show up in every file type the app lints, so this one is
+    // not scoped to a glob.
+    rules: {
+      "local/no-raw-tailwind-colors": ["error", rawTailwindColorOptions],
     },
   },
   {
     // The server folder rule of the architecture document, enforced: a deep
-    // import from here into the app tree fails plain `pnpm lint`, and so the
-    // pre-commit hook.
+    // import from here into the app tree fails lint, and so the pre-commit
+    // hook.
     files: ["**/src/server/**/*.{ts,tsx}"],
     ignores: serverDeepImportExemptions,
     rules: {
@@ -166,79 +199,6 @@ export const nextJsConfig = [
         "error",
         { patterns: serverDeepImportPatterns },
       ],
-    },
-  },
-  // --- Agent rules (enabled via ESLINT_AGENT_RULES=1) ---
-  {
-    files: ["**/*.{ts,tsx}"],
-    rules: {
-      "local/no-client-import-of-services": migratedSeverity,
-    },
-  },
-  {
-    files: ["**/_features/**/*.{ts,tsx}"],
-    rules: {
-      "local/no-feature-nesting": migratedSeverity,
-    },
-  },
-  {
-    files: ["**/_services/**/*.{ts,tsx}"],
-    rules: {
-      "local/services-verb-prefix": migratedSeverity,
-      "local/services-no-trpc-import": migratedSeverity,
-      "local/require-trpc-output-type": migratedSeverity,
-    },
-  },
-  {
-    // Class strings show up in every file type the app lints, so this one is
-    // not scoped to a glob.
-    rules: {
-      "local/no-raw-tailwind-colors": enableAgentRules
-        ? [
-            migratedSeverity,
-            {
-              // Allow explicit palette classes for charting or third-party styling edge-cases.
-              allowPatterns: [
-                "^fill-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}$",
-              ],
-              // Ignore generated or low-priority style surfaces, plus the
-              // home page illustrations: drawn mock screens keep fixed
-              // colours on purpose, independently of the theme.
-              ignorePathPatterns: [
-                "\\.stories\\.",
-                "/emails/",
-                "/\\(home\\)/_features/hero/hero-flow-animation\\.client\\.tsx$",
-                "/\\(home\\)/_features/how-it-works/flow-animations\\.tsx$",
-                "/\\(home\\)/_features/before-after-section\\.tsx$",
-                "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
-              ],
-            },
-          ]
-        : "off",
-    },
-  },
-  {
-    files: ["**/src/app/_domains/**/*.{ts,tsx}"],
-    rules: {
-      "local/no-default-export": migratedSeverity,
-    },
-  },
-  {
-    files: ["**/src/**/*.{ts,tsx}"],
-    rules: {
-      "local/require-use-client-suffix": enableAgentRules
-        ? [migratedSeverity, useClientSuffixOptions]
-        : "off",
-    },
-  },
-  {
-    files: ["**/*.schema.ts"],
-    rules: {
-      "local/require-schema-conventions": [
-        migratedSeverity,
-        schemaConventionOptions,
-      ],
-      "local/schema-must-be-pure-zod": migratedSeverity,
     },
   },
 ];

@@ -43,12 +43,6 @@ ruleTester.run("no-client-import-of-services", noClientImportOfServicesRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
       code: `import { helper } from "./_services-legacy/helper";\n`,
     },
-    {
-      name: "a client module matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/legacy/plan.client.tsx",
-      code: `import { getPlan } from "./_services/get-plan";\n`,
-      options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-    },
   ],
   invalid: [
     {

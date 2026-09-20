@@ -16,18 +16,7 @@ export const noClientImportOfServerErrorsRule = {
       description:
         "Client modules ('use client' / *.client.tsx) may not import @/server/errors/* (instanceof does not survive serialization; branch on error.data.code).",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       clientImportsServerErrors:
         "Client modules may not import `@/server/errors/*` (`instanceof DomainError` does not survive serialization). Branch on `error.data.code` instead. Offending import: `{{ source }}`.",
@@ -35,13 +24,6 @@ export const noClientImportOfServerErrorsRule = {
   },
   create(context) {
     const filename = context.filename || context.getFilename();
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     let isClient = CLIENT_SUFFIX_RE.test(filename);
 

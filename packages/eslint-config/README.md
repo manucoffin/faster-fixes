@@ -7,15 +7,25 @@ Shared eslint configuration for the workspace.
 `local-rules/` holds the project convention rules, exported as the `local/`
 plugin from `local-rules/index.js` and wired per file glob in `next.js`.
 
-Convention rules take their severity from one constant in `next.js`,
-`migratedSeverity`: `error` when `ESLINT_AGENT_RULES=1`, otherwise `off`. Every
-convention rule reports nothing today, so a report is a regression.
+Every rule is `error`, with no environment gate and no per-scope allowlist
+(ADR-0015): `pnpm lint` is the single lint mode, so lint-staged, CI and an agent
+all run the same set. Every rule reports nothing today, so a report is a
+regression.
 
-Rules that guard a security or correctness boundary are `error` regardless of
-the gate: `require-server-action-suffix`, `no-client-import-of-server-errors`,
-`services-no-bare-error`, `no-cross-domain-deep-import`, the
-`no-restricted-imports` lock on `src/server/` and the built-in
-`no-throw-literal`.
+The boundary rules are `require-server-action-suffix`,
+`no-client-import-of-server-errors`, `no-client-import-of-services`,
+`no-cross-domain-deep-import` and the `no-restricted-imports` lock on
+`src/server/`. An exception to one of them is a named entry in `next.js`,
+reviewed like the three server folder exemptions, not a disable comment.
+
+Two rules take options from `next.js`: `require-schema-conventions`
+(`requirePascalCaseSchema`, `requireSingularInput`) and `no-raw-tailwind-colors`
+(`allowPatterns`, `ignorePathPatterns` for the four home page illustrations).
+`require-use-client-suffix` takes the Next.js special file names as
+`ignorePathPatterns`. No other rule declares an option.
+
+`next-config.test.js` tests the wiring: a rule wired on the wrong glob matches
+nothing and reports nothing, which looks exactly like passing.
 
 Every rule has a colocated `*.test.js` `RuleTester` suite:
 

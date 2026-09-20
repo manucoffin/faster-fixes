@@ -68,12 +68,6 @@ ruleTester.run("require-trpc-output-type", requireTrpcOutputTypeRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/get-plan.ts",
       code: `export async function getPlan() {}\n`,
     },
-    {
-      name: "a read service matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/legacy/_services/get-plan.ts",
-      code: `export async function getPlan() {}\n`,
-      options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-    },
   ],
   invalid: [
     {

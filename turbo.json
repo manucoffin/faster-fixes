@@ -20,7 +20,6 @@
     "lint": {
       "dependsOn": ["transit"]
     },
-    "lint:agent-rules": {},
     "typecheck": {
       "dependsOn": ["transit"]
     },

@@ -15,10 +15,6 @@ export const requireSchemaConventionsRule = {
       {
         type: "object",
         properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
           // When true, an exported `*Schema` const must be PascalCase
           // (start with an uppercase letter): `PrestationSchema`, not
           // `prestationSchema`.
@@ -52,17 +48,8 @@ export const requireSchemaConventionsRule = {
     }
 
     const [
-      {
-        ignorePathPatterns = [],
-        requirePascalCaseSchema = false,
-        requireSingularInput = false,
-      } = {},
+      { requirePascalCaseSchema = false, requireSingularInput = false } = {},
     ] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     let hasSchemaExport = false;
     let hasInputExport = false;

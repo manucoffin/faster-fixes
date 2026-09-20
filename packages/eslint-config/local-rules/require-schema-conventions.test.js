@@ -63,12 +63,6 @@ export type InvoiceInputs = z.infer<typeof InvoiceSchema>;
         "/repo/apps/web/src/app/_services/_deprecated_invoice.schema.ts",
       code: `// Retired, kept as an empty stub.\n`,
     },
-    {
-      name: "a schema matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_services/legacy/invoice.schema.ts",
-      code: `export const whatever = 1;\n`,
-      options: [{ ignorePathPatterns: ["/_services/legacy/"] }],
-    },
   ],
   invalid: [
     {

@@ -32,18 +32,7 @@ export const servicesVerbPrefixRule = {
       description:
         "A file in _services/ must be named `<verb>-<entity>` with a read verb (get-/list-/find-/search-/has-/is-/count-) or the most precise accurate write verb; `update` synonyms (modify-/edit-/save-/change-) are banned.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       missingVerbPrefix:
         "`{{ basename }}` is in `_services/` but is not named `<verb>-<entity>`. Name it after its export with a verb prefix: a read verb (get-/list-/find-/search-/has-/is-/count-) or the most precise accurate write verb.",
@@ -54,13 +43,6 @@ export const servicesVerbPrefixRule = {
   create(context) {
     const filename = context.filename || context.getFilename();
     if (!SERVICES_PATH_RE.test(filename)) return {};
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     const basename = filename.split("/").pop() || "";
     if (EXEMPT_BASENAME_RE.test(basename)) return {};

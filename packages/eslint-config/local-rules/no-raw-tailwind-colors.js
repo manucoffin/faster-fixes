@@ -49,7 +49,7 @@ const NEUTRAL_TOKENS = ["muted", "border", "foreground"];
  * not reported, so the rule never asks for a token that does not exist: adding
  * `warning` and `info` to the theme is what unlocks yellow, amber and blue.
  */
-const DEFAULT_HUE_TOKENS = {
+const HUE_TOKENS = {
   red: "destructive",
   green: "success",
   emerald: "success",
@@ -185,15 +185,6 @@ export const noRawTailwindColorsRule = {
             type: "array",
             items: { type: "string" },
           },
-          hueTokens: {
-            type: "object",
-            additionalProperties: {
-              anyOf: [
-                { type: "string" },
-                { type: "array", items: { type: "string" } },
-              ],
-            },
-          },
         },
         additionalProperties: false,
       },
@@ -204,13 +195,8 @@ export const noRawTailwindColorsRule = {
     },
   },
   create(context) {
-    const [
-      {
-        allowPatterns = [],
-        ignorePathPatterns = [],
-        hueTokens = DEFAULT_HUE_TOKENS,
-      } = {},
-    ] = context.options;
+    const [{ allowPatterns = [], ignorePathPatterns = [] } = {}] =
+      context.options;
     const filename = context.filename;
 
     if (
@@ -222,7 +208,7 @@ export const noRawTailwindColorsRule = {
     function reportRawClasses(value, node) {
       for (const token of getClassTokens(value)) {
         const rawColor = matchRawColorClass(token, allowPatterns);
-        const tokens = rawColor && hueTokens[rawColor.hue];
+        const tokens = rawColor && HUE_TOKENS[rawColor.hue];
         if (!tokens) {
           continue;
         }

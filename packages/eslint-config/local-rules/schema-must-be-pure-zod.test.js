@@ -53,12 +53,6 @@ ruleTester.run("schema-must-be-pure-zod", schemaMustBePureZodRule, {
       filename: "/repo/apps/web/src/app/_helpers/invoice.schema.ts",
       code: `import { formatAmount } from "./format";\n`,
     },
-    {
-      name: "a schema matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_services/legacy/invoice.schema.ts",
-      code: `import { prisma } from "@workspace/db";\n`,
-      options: [{ ignorePathPatterns: ["/_services/legacy/"] }],
-    },
   ],
   invalid: [
     {

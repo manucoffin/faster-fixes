@@ -22,18 +22,7 @@ export const noClientImportOfServicesRule = {
       description:
         "Client modules ('use client' / *.client.tsx) may not import a _services/ module, except *.schema.ts.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       clientImportsService:
         "Client modules may not import from `_services/` (server-only code leaks into the client bundle). Move the call behind a tRPC procedure, or import the `*.schema.ts` instead. Offending import: `{{ source }}`.",
@@ -41,13 +30,6 @@ export const noClientImportOfServicesRule = {
   },
   create(context) {
     const filename = context.filename || context.getFilename();
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     let isClient = CLIENT_SUFFIX_RE.test(filename);
 

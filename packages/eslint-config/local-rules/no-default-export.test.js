@@ -27,12 +27,6 @@ ruleTester.run("no-default-export", noDefaultExportRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/plan.ts",
       code: `export { default as Chart } from "chart-lib";\n`,
     },
-    {
-      name: "a default export matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/billing/page.tsx",
-      code: `export default function Page() {}\n`,
-      options: [{ ignorePathPatterns: ["/page\\.tsx$"] }],
-    },
   ],
   invalid: [
     {

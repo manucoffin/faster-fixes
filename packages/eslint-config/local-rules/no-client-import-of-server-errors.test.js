@@ -37,12 +37,6 @@ ruleTester.run(
           "/repo/apps/web/src/app/_domains/billing/plan-form.client.tsx",
         code: `import { toMessage } from "@/server/errors-ui";\n`,
       },
-      {
-        name: "a client module matched by ignorePathPatterns",
-        filename: "/repo/apps/web/src/app/_domains/legacy/plan.client.tsx",
-        code: `import { DomainError } from "@/server/errors";\n`,
-        options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-      },
     ],
     invalid: [
       {

@@ -28,18 +28,7 @@ export const schemaMustBePureZodRule = {
       description:
         "A *.schema.ts must stay pure-Zod: no @/server/, no Prisma, no sibling non-schema _services/ import, so it is safe to import from the client bundle.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       serverImport:
         "A `*.schema.ts` must stay pure-Zod and may not import server-only code (`{{ source }}`). Move the server logic into a sibling service and keep this file Zod-only.",
@@ -50,13 +39,6 @@ export const schemaMustBePureZodRule = {
   create(context) {
     const filename = context.filename || context.getFilename();
     if (!SCHEMA_FILE_RE.test(filename)) return {};
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     const schemaInServices = SERVICES_PATH_RE.test(filename);
 

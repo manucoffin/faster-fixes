@@ -60,18 +60,7 @@ export const requireTrpcOutputTypeRule = {
       description:
         "A read service in _services/ must export its return type (Awaited<ReturnType<typeof getX>>) as the type source of truth.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       missing:
         "This read service must export a type alias derived from its own return type (e.g. `export type GetUser = Awaited<ReturnType<typeof getUser>>;`). The service return type is the source of truth, not `inferProcedureOutput`.",
@@ -84,13 +73,6 @@ export const requireTrpcOutputTypeRule = {
     const basename = filename.split("/").pop() || "";
     if (EXEMPT_BASENAME_RE.test(basename)) return {};
     if (!READ_VERB_RE.test(basename)) return {};
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     let hasReturnTypeExport = false;
     // A retired service keeps its filename as an empty `export {}` placeholder,

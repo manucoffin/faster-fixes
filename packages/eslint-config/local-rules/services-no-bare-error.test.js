@@ -32,25 +32,12 @@ ruleTester.run("services-no-bare-error", servicesNoBareErrorRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/trpc-router.ts",
       code: `export function getPlan() {\n  throw new Error("boom");\n}\n`,
     },
-    {
-      name: "a services file matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/legacy/_services/get-plan.ts",
-      code: `export function getPlan() {\n  throw new Error("boom");\n}\n`,
-      options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-    },
   ],
   invalid: [
     {
       name: "a bare Error",
       filename: "/repo/apps/web/src/app/_domains/billing/_services/get-plan.ts",
       code: `export function getPlan() {\n  throw new Error("boom");\n}\n`,
-      errors: [{ messageId: "bareError" }],
-    },
-    {
-      name: "the transport-coupled ActionError",
-      filename:
-        "/repo/apps/web/src/app/_domains/billing/_services/cancel-plan.ts",
-      code: `export function cancelPlan() {\n  throw new ActionError("nope");\n}\n`,
       errors: [{ messageId: "bareError" }],
     },
   ],

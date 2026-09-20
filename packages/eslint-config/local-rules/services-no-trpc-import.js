@@ -15,18 +15,7 @@ export const servicesNoTrpcImportRule = {
       description:
         "Files under _services/ may not import the tRPC layer (@/server/trpc, @/lib/trpc, @trpc/*). Services are transport-agnostic.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       servicesImportsTrpc:
         "A `_services/` module must stay transport-agnostic and may not import tRPC (`{{ source }}`). Keep the tRPC wiring in the scope's root `trpc-router.ts` and call this service from there.",
@@ -35,13 +24,6 @@ export const servicesNoTrpcImportRule = {
   create(context) {
     const filename = context.filename || context.getFilename();
     if (!SERVICES_PATH_RE.test(filename)) return {};
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     return {
       ImportDeclaration(node) {

@@ -301,53 +301,52 @@ The architecture holds because it is enforced, not because it is documented.
 
 ### Commands and required checks
 
-| Command                 | What it runs                                                                                                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm typecheck`        | `tsc --noEmit` in every workspace                                                                                                                                                                 |
-| `pnpm lint`             | ESLint with `--max-warnings 0`, always-on rules only                                                                                                                                              |
-| `pnpm lint:agent-rules` | Same, with `ESLINT_AGENT_RULES=1`, enabling the convention rules. `[Faster Fixes]` It dropped `--max-warnings 0` from step 1 to the step 4 final lock, which restored it: zero problems required. |
-| `pnpm test`             | Vitest in every workspace                                                                                                                                                                         |
+| Command          | What it runs                                                              |
+| ---------------- | ------------------------------------------------------------------------- |
+| `pnpm typecheck` | `tsc --noEmit` in every workspace                                         |
+| `pnpm lint`      | ESLint with `--max-warnings 0`, every rule including the convention rules |
+| `pnpm test`      | Vitest in every workspace                                                 |
 
-The pre-commit hook runs typecheck, tests, and lint-staged. An agent never declares work done while any required check fails.
+There is one lint mode (ADR-0015). The pre-commit hook runs typecheck, tests, and lint-staged. An agent never declares work done while any required check fails.
 
 ### Custom ESLint rules
 
-Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/eslint-config/next.js` under the `local/` plugin namespace. Most are gated behind `ESLINT_AGENT_RULES=1` so the plain `pnpm lint` stays fast and stable while agents get the full set. A few are always on because their violation is a security or correctness problem, not a style one.
+Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/eslint-config/next.js` under the `local/` plugin namespace. Every one is `error` in plain `pnpm lint`, so lint-staged, CI and an agent run the same set.
 
-| Rule                                | Scope                 | Enforces                                                                                                           | Gate   |
-| ----------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
-| `services-verb-prefix`              | `**/_services/**`     | Basename is `<lowercase-verb>-<entity>`; bans `edit-`, `modify-`, `save-`, `change-`.                              | agent  |
-| `services-no-trpc-import`           | `**/_services/**`     | A service never imports the tRPC server or client modules.                                                         | agent  |
-| `require-trpc-output-type`          | `**/_services/**`     | A read service exports `Awaited<ReturnType<typeof x>>` as its type. Tests exempt.                                  | agent  |
-| `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                | always |
-| `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports. | agent  |
-| `no-client-import-of-server-errors` | all                   | Client code never imports `src/server/errors/*`.                                                                   | always |
-| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                          | agent  |
-| `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                           | agent  |
-| `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                          | agent  |
-| `no-cross-domain-deep-import`       | `src/app/_domains/**` | Another domain is imported only via its barrel.                                                                    | always |
-| `no-default-export`                 | `src/app/_domains/**` | Named exports only.                                                                                                | agent  |
-| `require-use-client-suffix`         | `src/**`              | A `'use client'` module is `*.client.tsx`; exempts `use-*` hooks and Next special files.                           | agent  |
-| `require-server-action-suffix`      | all                   | A module-level `'use server'` only in `*.server.action.ts`.                                                        | always |
-| `no-throw-literal` (built-in)       | all                   | Throw `Error` instances only.                                                                                      | always |
-| `no-raw-tailwind-colors`            | all                   | `[optional]` Semantic color tokens over raw palette classes. Only useful with a token-based design system.         | agent  |
-| `no-restricted-imports` (built-in)  | `src/server/**`       | No deep import into the app tree; a domain is read through its barrel. Exemptions named file by file.              | always |
+| Rule                                | Scope                 | Enforces                                                                                                           |
+| ----------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `services-verb-prefix`              | `**/_services/**`     | Basename is `<lowercase-verb>-<entity>`; bans `edit-`, `modify-`, `save-`, `change-`.                              |
+| `services-no-trpc-import`           | `**/_services/**`     | A service never imports the tRPC server or client modules.                                                         |
+| `require-trpc-output-type`          | `**/_services/**`     | A read service exports `Awaited<ReturnType<typeof x>>` as its type. Tests exempt.                                  |
+| `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                |
+| `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports. |
+| `no-client-import-of-server-errors` | all                   | Client code never imports `src/server/errors/*`.                                                                   |
+| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                          |
+| `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                           |
+| `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                          |
+| `no-cross-domain-deep-import`       | `src/app/_domains/**` | Another domain is imported only via its barrel.                                                                    |
+| `no-default-export`                 | `src/app/_domains/**` | Named exports only.                                                                                                |
+| `require-use-client-suffix`         | `src/**`              | A `'use client'` module is `*.client.tsx`; exempts `use-*` hooks and Next special files.                           |
+| `require-server-action-suffix`      | all                   | A module-level `'use server'` only in `*.server.action.ts`.                                                        |
+| `no-throw-literal` (built-in)       | all                   | Throw `Error` instances only.                                                                                      |
+| `no-raw-tailwind-colors`            | all                   | `[optional]` Semantic color tokens over raw palette classes. Only useful with a token-based design system.         |
+| `no-restricted-imports` (built-in)  | `src/server/**`       | No deep import into the app tree; a domain is read through its barrel. Exemptions named file by file.              |
 
 Fourteen custom rules, exported by `packages/eslint-config/local-rules/index.js`, plus the built-in `no-throw-literal` and the built-in `no-restricted-imports` lock on the server folder. Each custom rule has a `RuleTester` test beside it, run by `pnpm test`.
 
 `require-use-client-suffix` runs on all of `src/**`, wider than the domain tier: the `.client.tsx` naming applies wherever a `'use client'` file lives, and a naming convention that holds in one folder only is half a convention.
 
-**Which gate a rule belongs in.** A rule that guards user-visible correctness or a security property goes always-on at `error`, which puts it in lint-staged and the pre-commit hook. A rule that enforces a convention stays behind `ESLINT_AGENT_RULES=1`. `services-no-bare-error` crossed over on that criterion; `services-verb-prefix`, `services-no-trpc-import`, `require-trpc-output-type` and `no-raw-tailwind-colors` deliberately did not, even at `error` with nothing to report, because taking a rule out of the gate is the same as adding it to the commit hook.
+**Every rule is on.** A convention worth a rule is worth enforcing on every commit, so there is no severity gate and no per-scope allowlist: each rule above is `error` in plain `pnpm lint`. The escape from a naming or colour rule is an `eslint-disable` with a written reason; the boundary rules cannot be disabled by comment, and an exception to one of them is a named entry in `packages/eslint-config/next.js`. ADR-0015 records that decision and the measurements behind it.
 
 **Writing or changing a rule.** Three checks exist beyond the per-rule `RuleTester`, and each catches a failure mode the `RuleTester` cannot see:
 
-- **A zero is not evidence until the glob is verified.** A rule wired with the wrong `files` pattern matches nothing and reports nothing, which is indistinguishable from passing now that the whole tree is expected to be clean. Confirm with `ESLINT_AGENT_RULES=1 npx eslint --print-config <file>` from `apps/web` before trusting a zero.
+- **A zero is not evidence until the glob is verified.** A rule wired with the wrong `files` pattern matches nothing and reports nothing, which is indistinguishable from passing now that the whole tree is expected to be clean. Confirm with `npx eslint --print-config <file>` from `apps/web` before trusting a zero.
 - **The wiring itself is tested**, separately from the rules: `packages/eslint-config/next-config.test.js` asserts the shape of the config blocks, and its glob assertions go through ESLint's own `calculateConfigForFile` rather than pulling in a matcher dependency. A rule wired with no options silently never runs.
 - **Every ADR number cited in a rule's comments or messages must be a committed ADR** under `docs/adr/`. `local-rules/adr-citations.test.js` fails the build otherwise, so renumbering or removing an ADR is a two-file change.
 
-### Severity ramp during a migration
+### Introducing a rule
 
-A rule that cannot yet pass everywhere is introduced at `warn`, then locked to `error` per scope as each scope is migrated (an allowlist of migrated scopes in the ESLint config), and finally collapsed to plain `error` with the allowlist deleted. A rule whose violation surface is empty when it lands goes straight to `error`.
+A rule lands at `error` with its existing violations already fixed, so it starts at zero and stays there. A rule that cannot pass everywhere on the day it lands is not wired until the violations it would report are cleared, because a `warn` ramp is a burn-down list that nothing forces anyone to finish.
 
 ### The `coding-standards` skill
 
@@ -371,7 +370,7 @@ These statements hold in this repo and are **not** part of the exported architec
 - **No `next-safe-action`.** There is no action client, so the server-action row of the mapping table has no implementation here. `require-server-action-suffix` still runs as an always-on error, so a module-level `'use server'` cannot appear under an unmarked filename.
 - **No cache tags.** The app uses no `unstable_cache` and no tag-based revalidation, so the "Cache tags" section is inert and `src/server/cache/` does not exist.
 - **English user-facing copy**, professional and understated, no exclamation marks, no em dash character. Identifiers, comments, filenames and schemas are English too.
-- **`no-throw-literal` is on as an error** outside the agent gate, so only `Error` instances are thrown anywhere in the repo.
+- **`no-throw-literal` is on as an error**, so only `Error` instances are thrown anywhere in the repo.
 - **Three published npm packages** under `packages/`: `@fasterfixes/core`, `@fasterfixes/react`, `@fasterfixes/mcp`. They are released from `main` by CI through Changesets, and their internal structure follows their own conventions: the bucket architecture applies to `apps/` only.
 
 ## Rules

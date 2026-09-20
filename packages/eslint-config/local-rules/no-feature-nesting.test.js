@@ -29,13 +29,6 @@ ruleTester.run("no-feature-nesting", noFeatureNestingRule, {
       filename: "/repo/apps/web/src/app/(authenticated)/page.tsx",
       code: `export default function Page() {}\n`,
     },
-    {
-      name: "a nested feature matched by ignorePathPatterns",
-      filename:
-        "/repo/apps/web/src/app/_features/legacy/_features/old/thing.ts",
-      code: `export const thing = 1;\n`,
-      options: [{ ignorePathPatterns: ["/_features/legacy/"] }],
-    },
   ],
   invalid: [
     {

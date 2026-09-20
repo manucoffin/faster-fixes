@@ -52,7 +52,7 @@ Also read any repo-level convention doc the diff touches (`docs/adr/*` reference
 
 ### 3b. Subtract what tooling already enforces
 
-Never report a finding that `pnpm lint` or `pnpm lint:agent-rules` already catches: it is noise, and the fix step runs both anyway. Read the current list from `packages/eslint-config/local-rules/` (each rule file has a `description`) rather than trusting a hardcoded list. At time of writing it covers: default exports, `use client` / `.client.tsx` suffix pairing, raw Tailwind palette colors, schema naming (`*Schema` / `*Input`), pure-Zod schemas, service return-type exports, `_services/` verb prefixes, `_services/` tRPC imports, `_services/` bare `Error` throws, client imports of `_services/` and of `@/server/errors/*`, cross-domain deep imports, deprecated error imports, and feature nesting.
+Never report a finding that `pnpm lint` already catches: it is noise, and the fix step runs it anyway. Read the current list from `packages/eslint-config/local-rules/` (each rule file has a `description`) rather than trusting a hardcoded list. At time of writing it covers: default exports, `use client` / `.client.tsx` suffix pairing, raw Tailwind palette colors, schema naming (`*Schema` / `*Input`), pure-Zod schemas, service return-type exports, `_services/` verb prefixes, `_services/` tRPC imports, `_services/` bare `Error` throws, client imports of `_services/` and of `@/server/errors/*`, cross-domain deep imports, deprecated error imports, and feature nesting.
 
 ### 3c. The smell baseline
 

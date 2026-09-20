@@ -19,8 +19,8 @@ behind it. The rule files under `rules/` are the working form of all of it, so r
 Three facts settle most placement questions:
 
 - **All code under `src/app` follows these rule files.** The rules that guard the structure report at
-  `error` under `ESLINT_AGENT_RULES=1` everywhere, with no per-scope allowlist, and report nothing
-  today: a violation is a regression, not a burn-down item.
+  `error` in plain `pnpm lint` everywhere, with no per-scope allowlist, and report nothing today: a
+  violation is a regression, not a burn-down item (ADR-0015).
 - **`src/server/` accepts a new file under two conditions only**: it is wiring (it configures or
   instantiates a library for the whole application and makes no business decision), or it is a
   cross-cutting abstraction at least two domains or transports need whose server implementation no

@@ -17,13 +17,15 @@ const ruleTester = new RuleTester({
 });
 
 // The options the shared config passes to the rule. The hue-to-token table is
-// the rule's own default, so the config does not repeat it.
+// the rule's own, so the config never passes one.
 const configuredOptions = [
   {
     allowPatterns: [
       "^fill-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}$",
     ],
-    ignorePathPatterns: ["\\.stories\\.", "/emails/"],
+    ignorePathPatterns: [
+      "/\\(home\\)/_features/hero/hero-flow-animation\\.client\\.tsx$",
+    ],
   },
 ];
 
@@ -45,27 +47,16 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       code: `const Badge = () => <span className="hover:bg-amber-500" />;\n`,
     },
     {
-      name: "a hue removed from the table by an explicit hueTokens option",
-      filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const Badge = () => <span className="text-red-500" />;\n`,
-      options: [{ hueTokens: { green: "success" } }],
-    },
-    {
       name: "a chart fill class allowed by allowPatterns",
       filename: "/repo/apps/web/src/components/chart.tsx",
       code: `const Chart = () => <path className="fill-green-500" />;\n`,
       options: configuredOptions,
     },
     {
-      name: "a raw color in a file matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/components/badge.stories.tsx",
-      code: `const Badge = () => <span className="text-red-500" />;\n`,
-      options: configuredOptions,
-    },
-    {
-      name: "a raw color in an email template matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/emails/welcome.tsx",
-      code: `const Welcome = () => <span className="text-red-500" />;\n`,
+      name: "a raw color in a home page illustration, exempt by path",
+      filename:
+        "/repo/apps/web/src/app/(public)/(home)/_features/hero/hero-flow-animation.client.tsx",
+      code: `const Hero = () => <span className="text-red-500" />;\n`,
       options: configuredOptions,
     },
     {
@@ -153,18 +144,6 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       code: `const Chart = () => <path className="fill-gray-500" />;\n`,
       options: configuredOptions,
       errors: [{ messageId: "avoidRawColor" }],
-    },
-    {
-      name: "a hue added to the table by an explicit hueTokens option",
-      filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const Badge = () => <span className="bg-amber-50" />;\n`,
-      options: [{ hueTokens: { amber: "warning" } }],
-      errors: [
-        {
-          message:
-            "Avoid raw Tailwind color class `bg-amber-50`. Use `bg-warning` instead.",
-        },
-      ],
     },
   ],
 });

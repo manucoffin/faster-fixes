@@ -33,10 +33,9 @@ const EXPECTED_CITATIONS = {
   "services-verb-prefix.js": ["0011"],
 };
 
-// `0011` (server file conventions) and `0012` (domain errors) were committed as a
-// step 3 prerequisite, after the rules below already cited them. The mapping is
-// kept so a later renumbering cannot point a citation at an unrelated ADR that
-// took the slot.
+// `0011` (server file conventions) and `0012` (domain errors) are pinned to
+// their slugs so a later renumbering cannot point a citation at an unrelated
+// ADR that took the slot.
 const RESERVED = {
   "0011": "server-file-conventions",
   "0012": "domain-errors",

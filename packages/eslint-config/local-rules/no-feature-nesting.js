@@ -12,18 +12,7 @@ export const noFeatureNestingRule = {
       description:
         "A _features/<x>/ folder may not contain a nested feature. Promote the child capability to a sibling _features/ folder.",
     },
-    schema: [
-      {
-        type: "object",
-        properties: {
-          ignorePathPatterns: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        additionalProperties: false,
-      },
-    ],
+    schema: [],
     messages: {
       nestedFeature:
         "This file lives in a feature nested inside another feature. Promote the inner `_features/<x>/` to a sibling at the domain/segment level.",
@@ -32,13 +21,6 @@ export const noFeatureNestingRule = {
   create(context) {
     const filename = context.filename || context.getFilename();
     if (!NESTED_FEATURE_RE.test(filename)) return {};
-
-    const [{ ignorePathPatterns = [] } = {}] = context.options;
-    if (
-      ignorePathPatterns.some((pattern) => new RegExp(pattern).test(filename))
-    ) {
-      return {};
-    }
 
     return {
       Program(node) {

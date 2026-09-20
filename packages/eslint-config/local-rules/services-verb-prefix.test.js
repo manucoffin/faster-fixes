@@ -57,12 +57,6 @@ ruleTester.run("services-verb-prefix", servicesVerbPrefixRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/plan.ts",
       code: `export const plan = 1;\n`,
     },
-    {
-      name: "a services file matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/legacy/_services/plan.ts",
-      code: `export const plan = 1;\n`,
-      options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-    },
   ],
   invalid: [
     {

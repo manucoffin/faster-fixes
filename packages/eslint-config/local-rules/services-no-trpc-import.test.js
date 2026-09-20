@@ -32,12 +32,6 @@ ruleTester.run("services-no-trpc-import", servicesNoTrpcImportRule, {
       filename: "/repo/apps/web/src/app/_domains/billing/trpc-router.ts",
       code: `import { router } from "@/server/trpc";\nexport const billingRouter = router({});\n`,
     },
-    {
-      name: "a services file matched by ignorePathPatterns",
-      filename: "/repo/apps/web/src/app/_domains/legacy/_services/get-plan.ts",
-      code: `import { router } from "@/server/trpc";\nexport function getPlan() {}\n`,
-      options: [{ ignorePathPatterns: ["/_domains/legacy/"] }],
-    },
   ],
   invalid: [
     {
