@@ -17,9 +17,9 @@ type JiraIssueBadgeProps = {
 // Jira exposes a coarse status category rather than a per-project status name,
 // so the dot maps on the category and works across arbitrary workflows.
 const STATUS_CATEGORY_COLOR: Record<string, string> = {
-  new: "bg-slate-500",
+  new: "bg-muted-foreground",
   indeterminate: "bg-blue-500",
-  done: "bg-emerald-500",
+  done: "bg-success",
 };
 
 export function JiraIssueBadge({
@@ -47,7 +47,8 @@ export function JiraIssueBadge({
 
   if (issueLink) {
     const dotColor =
-      STATUS_CATEGORY_COLOR[issueLink.issueStatusCategory] ?? "bg-slate-400";
+      STATUS_CATEGORY_COLOR[issueLink.issueStatusCategory] ??
+      "bg-muted-foreground/60";
     return (
       <a
         href={issueLink.issueUrl}

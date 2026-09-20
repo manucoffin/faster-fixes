@@ -14,12 +14,14 @@ type LinearIssueBadgeProps = {
   projectId: string;
 };
 
+// The two greys separate backlog from unstarted; the opacity modifier keeps
+// them distinguishable while both follow the theme.
 const STATE_TYPE_COLOR: Record<string, string> = {
   triage: "bg-purple-500",
-  backlog: "bg-slate-400",
-  unstarted: "bg-slate-500",
+  backlog: "bg-muted-foreground/60",
+  unstarted: "bg-muted-foreground",
   started: "bg-blue-500",
-  completed: "bg-emerald-500",
+  completed: "bg-success",
   canceled: "bg-rose-500",
 };
 
@@ -48,7 +50,7 @@ export function LinearIssueBadge({
 
   if (issueLink) {
     const dotColor =
-      STATE_TYPE_COLOR[issueLink.issueStateType] ?? "bg-slate-400";
+      STATE_TYPE_COLOR[issueLink.issueStateType] ?? "bg-muted-foreground/60";
     return (
       <a
         href={issueLink.issueUrl}

@@ -103,69 +103,14 @@ function describeTokens(utility, tokens) {
   return `one of the ${quoted.slice(0, -1).join(", ")} or ${quoted[quoted.length - 1]} token classes`;
 }
 
-function collectLiteralClassValues(node, out) {
-  if (!node) return;
-
-  if (node.type === "Literal" && typeof node.value === "string") {
-    out.push({ value: node.value, node });
-    return;
-  }
-
-  if (node.type === "TemplateLiteral") {
-    for (const quasi of node.quasis) {
-      if (quasi.value?.cooked) {
-        out.push({ value: quasi.value.cooked, node: quasi });
-      }
-    }
-    return;
-  }
-
-  if (node.type === "ArrayExpression") {
-    for (const element of node.elements) {
-      collectLiteralClassValues(element, out);
-    }
-    return;
-  }
-
-  if (node.type === "ObjectExpression") {
-    for (const property of node.properties) {
-      if (
-        property.type === "Property" &&
-        property.key &&
-        property.key.type === "Literal" &&
-        typeof property.key.value === "string"
-      ) {
-        out.push({ value: property.key.value, node: property.key });
-      }
-    }
-    return;
-  }
-
-  if (node.type === "ConditionalExpression") {
-    collectLiteralClassValues(node.consequent, out);
-    collectLiteralClassValues(node.alternate, out);
-    return;
-  }
-
-  if (node.type === "LogicalExpression") {
-    collectLiteralClassValues(node.left, out);
-    collectLiteralClassValues(node.right, out);
-  }
-}
-
-function isClassNameAttribute(node) {
-  if (node.type !== "JSXAttribute" || !node.name) return false;
-  return node.name.name === "className" || node.name.name === "class";
-}
-
-function isClassHelperCall(node) {
-  if (node.type !== "CallExpression" || node.callee.type !== "Identifier") {
-    return false;
-  }
-
-  return ["cn", "clsx", "cva", "twMerge"].includes(node.callee.name);
-}
-
+/**
+ * Every string literal and template chunk is tokenised on whitespace, not only
+ * the ones reachable from a `className` attribute or a class helper call: a
+ * ternary branch, a constant map of status classes and a `cva` variant value
+ * are class strings the attribute-shaped scan never saw. A palette class is
+ * specific enough that a string which is not a class string does not match one
+ * by accident.
+ */
 export const noRawTailwindColorsRule = {
   meta: {
     type: "suggestion",
@@ -225,39 +170,14 @@ export const noRawTailwindColorsRule = {
     }
 
     return {
-      JSXAttribute(node) {
-        if (!isClassNameAttribute(node) || !node.value) {
-          return;
-        }
-
-        if (
-          node.value.type === "Literal" &&
-          typeof node.value.value === "string"
-        ) {
-          reportRawClasses(node.value.value, node.value);
-          return;
-        }
-
-        if (node.value.type === "JSXExpressionContainer") {
-          const literals = [];
-          collectLiteralClassValues(node.value.expression, literals);
-          for (const literal of literals) {
-            reportRawClasses(literal.value, literal.node);
-          }
+      Literal(node) {
+        if (typeof node.value === "string") {
+          reportRawClasses(node.value, node);
         }
       },
-      CallExpression(node) {
-        if (!isClassHelperCall(node)) {
-          return;
-        }
-
-        const literals = [];
-        for (const arg of node.arguments) {
-          collectLiteralClassValues(arg, literals);
-        }
-
-        for (const literal of literals) {
-          reportRawClasses(literal.value, literal.node);
+      TemplateElement(node) {
+        if (node.value?.cooked) {
+          reportRawClasses(node.value.cooked, node);
         }
       },
     };

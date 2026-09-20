@@ -65,9 +65,14 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       code: `const classes = cn("bg-card", "text-foreground");\n`,
     },
     {
-      name: "a raw color string passed to a call that is not a class helper",
+      name: "a template chunk that cuts a class in half matches nothing",
       filename: "/repo/apps/web/src/components/badge.tsx",
-      code: `const label = translate("text-red-500");\n`,
+      code: "const classes = `text-red-${shade}`;\n",
+    },
+    {
+      name: "a constant map of untokenised hues",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const TONE = { info: "bg-blue-50 text-blue-700" };\n`,
     },
     {
       name: "a utility class that is not a palette color",
@@ -136,6 +141,49 @@ ruleTester.run("no-raw-tailwind-colors", noRawTailwindColorsRule, {
       name: "a reported hue in a template literal className",
       filename: "/repo/apps/web/src/components/badge.tsx",
       code: "const Badge = () => <span className={`ring-emerald-300 ${extra}`} />;\n",
+      errors: [{ messageId: "avoidRawColor" }],
+    },
+    {
+      name: "a ternary branch inside a template literal",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: 'const classes = `border ${isError ? "text-red-600" : "text-foreground"}`;\n',
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `text-red-600`. Use `text-destructive` instead.",
+        },
+      ],
+    },
+    {
+      name: "a constant map of status classes",
+      filename: "/repo/apps/web/src/components/status-badge.tsx",
+      code: `const STATUS_CLASSES = { resolved: "bg-emerald-50 text-emerald-700" };\n`,
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `bg-emerald-50`. Use `bg-success` instead.",
+        },
+        {
+          message:
+            "Avoid raw Tailwind color class `text-emerald-700`. Use `text-success` instead.",
+        },
+      ],
+    },
+    {
+      name: "a cva variant value",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const badge = cva("rounded", { variants: { tone: { danger: "bg-red-100" } } });\n`,
+      errors: [
+        {
+          message:
+            "Avoid raw Tailwind color class `bg-red-100`. Use `bg-destructive` instead.",
+        },
+      ],
+    },
+    {
+      name: "a raw color in any string, not only in a class position",
+      filename: "/repo/apps/web/src/components/badge.tsx",
+      code: `const label = translate("text-red-500");\n`,
       errors: [{ messageId: "avoidRawColor" }],
     },
     {

@@ -1161,13 +1161,13 @@ describe("no-raw-tailwind-colors", () => {
   // path was ignored rather than the hues being unreported.
   const MOCK_SCREEN = `const Mock = () => <span className="bg-zinc-800 text-red-500" />;\n`;
 
-  async function rawColorWarningsFor(file) {
+  async function rawColorWarningsFor(file, source = MOCK_SCREEN) {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
       overrideConfig: nextJsConfig,
     });
-    const [result] = await eslint.lintText(MOCK_SCREEN, { filePath: file });
+    const [result] = await eslint.lintText(source, { filePath: file });
 
     return result.messages.filter(
       (message) => message.ruleId === "local/no-raw-tailwind-colors",
@@ -1190,6 +1190,26 @@ describe("no-raw-tailwind-colors", () => {
       "Avoid raw Tailwind color class `text-red-500`. Use `text-destructive` instead.",
     ]);
     expect(messages.map((message) => message.severity)).toEqual([2, 2]);
+  });
+
+  // The shapes a scan anchored on the `className` attribute never reached.
+  it("reports a class string held anywhere in the file", async () => {
+    const messages = await rawColorWarningsFor(
+      "src/app/(authenticated)/_features/status/status-badge.client.tsx",
+      [
+        `const TONE = { failed: "bg-red-50" };`,
+        'const dot = `size-2 ${done ? "bg-emerald-500" : "bg-muted"}`;',
+        `const badge = cva("rounded", { variants: { tone: { muted: "text-slate-500" } } });`,
+        `export const surface = [TONE, dot, badge];`,
+        ``,
+      ].join("\n"),
+    );
+
+    expect(messages.map((message) => message.message)).toEqual([
+      "Avoid raw Tailwind color class `bg-red-50`. Use `bg-destructive` instead.",
+      "Avoid raw Tailwind color class `bg-emerald-500`. Use `bg-success` instead.",
+      "Avoid raw Tailwind color class `text-slate-500`. Use one of the `muted`, `border` or `foreground` token classes instead.",
+    ]);
   });
 });
 
