@@ -25,7 +25,7 @@ const EXPECTED_CITATIONS = {
   "no-raw-tailwind-colors.js": [],
   "require-schema-conventions.js": [],
   "require-server-action-suffix.js": [],
-  "require-trpc-output-type.js": ["0011"],
+  "require-service-output-type.js": ["0011"],
   "require-use-client-suffix.js": ["0010"],
   "schema-must-be-pure-zod.js": ["0011"],
   "services-no-bare-error.js": ["0012"],

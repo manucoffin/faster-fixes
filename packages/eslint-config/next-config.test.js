@@ -18,7 +18,7 @@ const FEATURE =
 const CONVENTION_RULES = {
   "local/services-verb-prefix": SERVICE,
   "local/services-no-trpc-import": SERVICE,
-  "local/require-trpc-output-type": SERVICE,
+  "local/require-service-output-type": SERVICE,
   "local/no-client-import-of-services": SERVICE,
   "local/require-use-client-suffix": SERVICE,
   "local/no-default-export": SERVICE,
@@ -171,6 +171,52 @@ describe("every convention rule is on", () => {
       await severityFor("src/app/(public)/_services/get-github-stars.ts"),
     ).toBe(2);
     expect(await severityFor("src/app/(public)/x.trpc.mutation.ts")).toBe(2);
+  });
+});
+
+describe("require-service-output-type", () => {
+  const RULE = "local/require-service-output-type";
+  const CONSUMER =
+    "src/app/(authenticated)/(project)/inbox/_features/kanban/kanban-card.client.tsx";
+
+  async function messagesFor(file, code) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(code, { filePath: file });
+
+    return result.messages.filter((message) => message.ruleId === RULE);
+  }
+
+  // The consumer half has to reach a consumer, so the rule is wired on the
+  // source tree rather than on the services folder it used to be scoped to.
+  it("is declared once, for the whole web app source", () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+    expect(entry.rules[RULE]).toBe("error");
+  });
+
+  it("asks a read service for an alias named after its own service", async () => {
+    const messages = await messagesFor(
+      SERVICE,
+      `export async function getActiveSubscription() {\n  return null;\n}\n`,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("GetActiveSubscriptionOutput");
+  });
+
+  it("reports router output inference in a client feature file", async () => {
+    const messages = await messagesFor(
+      CONSUMER,
+      `import type { inferRouterOutputs } from "@trpc/server";\nexport type Outputs = inferRouterOutputs<AppRouter>;\n`,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("inferRouterOutputs");
   });
 });
 

@@ -23,7 +23,7 @@ The **folder** sets the layer (`_services/` = IO); the **verb** sets the directi
 - **A module that is not an operation keeps its noun name, and says so with a suffix.** `services-verb-prefix` exempts a basename ending in `-client`, `-app`, `-error`, `-errors`, `-crypto`, `-access`, `-cookie` or `-registration` (the `exemptSuffixes` option in `packages/eslint-config/next.js`), so `github-app.ts`, `linear-client.ts`, `jira-client.ts`, `jira-rest-client.ts`, `slack-client.ts`, `token-access.ts`, `webhook-registration.ts`, the named infrastructure error modules (`integration-configuration-error.ts`, `linear-request-error.ts`, `slack-request-error.ts`) and the shared `oauth-state-cookie.ts` are correct as they stand. Do not invent a `get-` name for a client factory, and do not invent a new suffix to dodge the verb list: a module with neither a verb nor an exempt suffix is reported. The provider token cipher is uniformly `token-crypto.ts`.
 - **Every other basename opens with a verb from the vocabulary.** The read verbs are the closed ADR-0011 set; the write verbs are the `writeVerbs` option, which is the open set the tree uses today. Coining a precise domain verb for a distinct domain transition is a one-line addition there, reviewed in the diff, and the report names the file to edit. `get-all-…` and `get-paginated-…` are reported by name: one `list-` entrypoint takes an options object.
 - **In a non-exempt service file, an exported function is named after the file.** `get-plan.ts` exports `getPlan` and nothing else callable; a second exported function is reported and belongs in its own file or in `_helpers/`. The comparison ignores letter case, so a proper noun keeps its house spelling (`get-github-installation.ts` exports `getGitHubInstallation`).
-- **`*.inngest.ts`, `*.schema.ts`, `index.ts`, `_`-prefixed and test files are exempt** from `services-verb-prefix` and `require-trpc-output-type`; `services-no-bare-error` still applies to all of them. The suffix is load-bearing, not decoration: it is also why `handle-linear-oauth-revoked.inngest.ts` may carry `handle-` without colliding with the verb reserved for the one webhook orchestration per Tracker.
+- **`*.inngest.ts`, `*.schema.ts`, `index.ts`, `_`-prefixed and test files are exempt** from `services-verb-prefix` and `require-service-output-type`; `services-no-bare-error` still applies to all of them. The suffix is load-bearing, not decoration: it is also why `handle-linear-oauth-revoked.inngest.ts` may carry `handle-` without colliding with the verb reserved for the one webhook orchestration per Tracker.
 
 ### A live external identifier survives a file move
 
@@ -32,7 +32,7 @@ Renaming or relocating a `*.inngest.ts` service must not change its Inngest func
 ## Transport-agnostic services (Option B)
 
 - A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`). It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
-- The **type source of truth** is the service's return type, exported from the service file as `<Service>Output`: `export type GetUserOutput = Awaited<ReturnType<typeof getUser>>`. Do **not** use `inferProcedureOutput` as the canonical output type.
+- The **type source of truth** is the service's return type, exported from the service file as `<Service>Output`: `export type GetUserOutput = Awaited<ReturnType<typeof getUser>>`. The alias is named after the file's own service and built from `typeof` it, so a `ReturnType` of some other function does not stand in for it. Do **not** use `inferProcedureOutput` as the canonical output type: `require-service-output-type` reports it, and `inferRouterOutputs`, in consumer code.
 - A service **throws a `DomainError` subclass** for an expected failure, never `TRPCError` and never a bare `Error`. The vocabulary lives in `@/server/errors/domain-errors` (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) and exists since migration step 3, so an extracted service throws it from day one. The base tRPC procedure maps the code and the message back to a `TRPCError`, so no procedure try/catches for mapping. Authority: `docs/adr/0012-domain-errors-and-transport-mapping.md`; display channels in [errors.md](errors.md).
 
 ```ts
@@ -114,7 +114,7 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 `no-client-import-of-server-folder` (no runtime import of `@/server/**` from a client module; type imports and the named allowlist excepted), `services-no-trpc-import`,
 `schema-must-be-pure-zod`, `no-feature-nesting`,
 `services-verb-prefix` (the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-`, the exempt module suffixes, and the exported function's name),
-`require-trpc-output-type` (inverted: service return-type export),
+`require-service-output-type` (a read service exports `<Service>Output` built from `typeof` its own service; `inferProcedureOutput` and `inferRouterOutputs` are reported wherever a consumer uses them),
 `services-no-bare-error` (throw a `DomainError` subclass, not `new Error(...)`; always on since step 4, not agent-gated),
 `require-use-client-suffix` (exempts `use-*`),
 `require-server-action-suffix` (always on, not agent-gated). See `packages/eslint-config/local-rules/`.

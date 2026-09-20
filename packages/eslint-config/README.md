@@ -34,9 +34,16 @@ reviewed addition there and the rule's report says where; the exempt suffixes
 name the `_services/` modules that are not operations (an SDK client, an error
 class, a token cipher, a cookie reader, the GitHub App factory).
 
-`local-rules/_deprecated_no-client-import-of-server-errors.js` is the empty stub
-of the rule `no-client-import-of-server-folder` replaced. Nothing imports it; it
-is the maintainer's to delete.
+`require-service-output-type` carries both halves of the output type
+convention, which is why it is wired on the whole source tree rather than on
+`_services/`: a read service exports `<Service>Output` built from `typeof` its
+own service, and no consumer infers the same type with `inferProcedureOutput`
+or `inferRouterOutputs`.
+
+`local-rules/_deprecated_no-client-import-of-server-errors.js` and
+`local-rules/_deprecated_require-trpc-output-type.js` are the empty stubs of the
+rules `no-client-import-of-server-folder` and `require-service-output-type`
+replaced. Nothing imports them; they are the maintainer's to delete.
 
 `local-rules/imports.js` is the shared import view, not a rule: it visits the
 four import forms (static `import`, `export … from`, `export *`, dynamic

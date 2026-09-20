@@ -237,7 +237,6 @@ export const nextJsConfig = [
       "local/services-no-bare-error": "error",
       "local/services-verb-prefix": ["error", serviceVerbOptions],
       "local/services-no-trpc-import": "error",
-      "local/require-trpc-output-type": "error",
     },
   },
   {
@@ -257,6 +256,11 @@ export const nextJsConfig = [
     files: ["**/src/**/*.{ts,tsx}"],
     rules: {
       "local/require-use-client-suffix": ["error", useClientSuffixOptions],
+      // Both halves of the output type convention (ADR-0011), so the glob is
+      // the whole source tree and not the services folder: the producer half
+      // scopes itself to a read service, the consumer half forbids inferring
+      // the same type from the router wherever a consumer lives.
+      "local/require-service-output-type": "error",
     },
   },
   {

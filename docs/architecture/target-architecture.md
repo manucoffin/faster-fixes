@@ -317,24 +317,24 @@ There is one lint mode (ADR-0015). The pre-commit hook runs typecheck, tests, an
 
 Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/eslint-config/next.js` under the `local/` plugin namespace. Every one is `error` in plain `pnpm lint`, so lint-staged, CI and an agent run the same set.
 
-| Rule                                | Scope                 | Enforces                                                                                                           |
-| ----------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `services-verb-prefix`              | `**/_services/**`     | Basename is `<lowercase-verb>-<entity>`; bans `edit-`, `modify-`, `save-`, `change-`.                              |
-| `services-no-trpc-import`           | `**/_services/**`     | A service never imports the tRPC server or client modules.                                                         |
-| `require-trpc-output-type`          | `**/_services/**`     | A read service exports `Awaited<ReturnType<typeof x>>` as its type. Tests exempt.                                  |
-| `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                |
-| `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports. |
-| `no-client-import-of-server-folder` | all                   | Client code never imports a runtime value from `src/server/**`; type-only imports and named exceptions are free.   |
-| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                          |
-| `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                           |
-| `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                          |
-| `no-cross-domain-deep-import`       | `src/app/_domains/**` | Another domain is imported only via its barrel.                                                                    |
-| `no-default-export`                 | `src/app/_domains/**` | Named exports only.                                                                                                |
-| `require-use-client-suffix`         | `src/**`              | A `'use client'` module is `*.client.tsx`; exempts `use-*` hooks and Next special files.                           |
-| `require-server-action-suffix`      | all                   | A module-level `'use server'` only in `*.server.action.ts`.                                                        |
-| `no-throw-literal` (built-in)       | all                   | Throw `Error` instances only.                                                                                      |
-| `no-raw-tailwind-colors`            | all                   | `[optional]` Semantic color tokens over raw palette classes. Only useful with a token-based design system.         |
-| `no-restricted-imports` (built-in)  | `src/server/**`       | No deep import into the app tree; a domain is read through its barrel. Exemptions named file by file.              |
+| Rule                                | Scope                 | Enforces                                                                                                                                                          |
+| ----------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `services-verb-prefix`              | `**/_services/**`     | Basename is `<lowercase-verb>-<entity>`; bans `edit-`, `modify-`, `save-`, `change-`.                                                                             |
+| `services-no-trpc-import`           | `**/_services/**`     | A service never imports the tRPC server or client modules.                                                                                                        |
+| `require-service-output-type`       | `**/src/**`           | A read service exports `<Service>Output` built from `typeof` its own service; a consumer never uses `inferProcedureOutput` or `inferRouterOutputs`. Tests exempt. |
+| `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                                                               |
+| `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports.                                                |
+| `no-client-import-of-server-folder` | all                   | Client code never imports a runtime value from `src/server/**`; type-only imports and named exceptions are free.                                                  |
+| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                                                                         |
+| `schema-must-be-pure-zod`           | `**/*.schema.ts`      | No `@/server/`, no Prisma client, no non-schema sibling import. Generated enums allowed.                                                                          |
+| `require-schema-conventions`        | `**/*.schema.ts`      | PascalCase `XSchema` const, singular `Input` type suffix.                                                                                                         |
+| `no-cross-domain-deep-import`       | `src/app/_domains/**` | Another domain is imported only via its barrel.                                                                                                                   |
+| `no-default-export`                 | `src/app/_domains/**` | Named exports only.                                                                                                                                               |
+| `require-use-client-suffix`         | `src/**`              | A `'use client'` module is `*.client.tsx`; exempts `use-*` hooks and Next special files.                                                                          |
+| `require-server-action-suffix`      | all                   | A module-level `'use server'` only in `*.server.action.ts`.                                                                                                       |
+| `no-throw-literal` (built-in)       | all                   | Throw `Error` instances only.                                                                                                                                     |
+| `no-raw-tailwind-colors`            | all                   | `[optional]` Semantic color tokens over raw palette classes. Only useful with a token-based design system.                                                        |
+| `no-restricted-imports` (built-in)  | `src/server/**`       | No deep import into the app tree; a domain is read through its barrel. Exemptions named file by file.                                                             |
 
 Fourteen custom rules, exported by `packages/eslint-config/local-rules/index.js`, plus the built-in `no-throw-literal` and the built-in `no-restricted-imports` lock on the server folder. Each custom rule has a `RuleTester` test beside it, run by `pnpm test`.
 

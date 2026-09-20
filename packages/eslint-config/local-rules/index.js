@@ -6,7 +6,7 @@ import { noFeatureNestingRule } from "./no-feature-nesting.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
 import { requireSchemaConventionsRule } from "./require-schema-conventions.js";
 import { requireServerActionSuffixRule } from "./require-server-action-suffix.js";
-import { requireTrpcOutputTypeRule } from "./require-trpc-output-type.js";
+import { requireServiceOutputTypeRule } from "./require-service-output-type.js";
 import { requireUseClientSuffixRule } from "./require-use-client-suffix.js";
 import { schemaMustBePureZodRule } from "./schema-must-be-pure-zod.js";
 import { servicesNoBareErrorRule } from "./services-no-bare-error.js";
@@ -23,7 +23,7 @@ export const localRulesPlugin = {
     "no-raw-tailwind-colors": noRawTailwindColorsRule,
     "require-schema-conventions": requireSchemaConventionsRule,
     "require-server-action-suffix": requireServerActionSuffixRule,
-    "require-trpc-output-type": requireTrpcOutputTypeRule,
+    "require-service-output-type": requireServiceOutputTypeRule,
     "require-use-client-suffix": requireUseClientSuffixRule,
     "schema-must-be-pure-zod": schemaMustBePureZodRule,
     "services-no-bare-error": servicesNoBareErrorRule,
