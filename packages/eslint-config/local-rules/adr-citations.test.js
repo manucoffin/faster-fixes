@@ -23,7 +23,7 @@ const EXPECTED_CITATIONS = {
   "no-default-export.js": [],
   "no-feature-nesting.js": ["0010"],
   "no-raw-tailwind-colors.js": [],
-  "require-schema-conventions.js": [],
+  "require-schema-conventions.js": ["0011"],
   "require-server-action-suffix.js": [],
   "require-service-output-type.js": ["0011"],
   "require-use-client-suffix.js": ["0010"],
