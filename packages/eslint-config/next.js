@@ -1,3 +1,4 @@
+import pluginEslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import pluginNext from "@next/eslint-plugin-next";
 import eslintConfigPrettier from "eslint-config-prettier";
@@ -218,6 +219,27 @@ const serverDeepImportPatterns = [
   },
 ];
 
+// The rules a file may not switch off from the inside (ADR-0015): the
+// client/server import rules, the cross-domain import rule, the server folder
+// lock and the server action suffix rule. Each one draws a boundary between
+// layers, so the module on one side of it is the last place that should get to
+// decide the boundary does not apply. An exception to one of them is a named
+// entry in this file, reviewed like the server folder deep-import exemptions
+// above; the rule's report is not the place to argue for it.
+//
+// A naming, schema or colour rule is absent on purpose: a genuine one-off there
+// is a disable comment with a reason, which a reviewer reads in the diff.
+//
+// A blanket `/* eslint-disable */` is reported by this rule too, whatever it
+// names: it disables every rule, boundary rules included.
+const notDisableableRules = [
+  "local/no-client-import-of-server-folder",
+  "local/no-client-import-of-services",
+  "local/no-cross-domain-deep-import",
+  "local/require-server-action-suffix",
+  "no-restricted-imports",
+];
+
 /**
  * A custom ESLint configuration for libraries that use Next.js.
  *
@@ -270,6 +292,28 @@ export const nextJsConfig = [
     rules: {
       // Only Error instances carry a stack, so only they may be thrown.
       "no-throw-literal": "error",
+    },
+  },
+  // The exception surface of the whole rule set: a rule may be switched off in
+  // a file, in writing, unless it guards a boundary. A stale exception is a
+  // report of its own, so an exception that outlives its reason is deleted
+  // rather than inherited.
+  {
+    linterOptions: {
+      // `error` rather than the flat-config default of `warn`: an unused
+      // directive fails lint on its own terms, not only because the web app
+      // happens to lint with `--max-warnings 0`.
+      reportUnusedDisableDirectives: "error",
+    },
+    plugins: {
+      "eslint-comments": pluginEslintComments,
+    },
+    rules: {
+      "eslint-comments/require-description": "error",
+      "eslint-comments/no-restricted-disable": [
+        "error",
+        ...notDisableableRules,
+      ],
     },
   },
   {

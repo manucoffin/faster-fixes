@@ -88,7 +88,7 @@ export default function BlogPage() {
                   href={`/blog/${slug}`}
                   className="group flex flex-col gap-4"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- the card art is the post's own generated OG route, already sized and cached, so the image optimizer would only add a round trip */}
                   <img
                     src={`/blog/${slug}/og`}
                     alt={post.data.title}

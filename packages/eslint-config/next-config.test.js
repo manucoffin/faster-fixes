@@ -741,3 +741,114 @@ describe("no-raw-tailwind-colors", () => {
     expect(messages.map((message) => message.severity)).toEqual([2, 2]);
   });
 });
+
+// The exception surface: what an agent or a human may switch off in a file,
+// and what they may not. Every case goes through `lintText` on the real
+// config, because the answer depends on the directive, the rule it names and
+// the boundary list together.
+describe("the disable comment policy", () => {
+  const FILE = "src/app/_domains/subscription/_features/plan-card.tsx";
+
+  async function lintDirective(code) {
+    const eslint = new ESLint({
+      cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
+      overrideConfigFile: true,
+      overrideConfig: nextJsConfig,
+    });
+    const [result] = await eslint.lintText(code, { filePath: FILE });
+
+    return result.messages;
+  }
+
+  function messagesOf(messages, ruleId) {
+    return messages.filter((message) => message.ruleId === ruleId);
+  }
+
+  it("names the boundary rules and nothing else", () => {
+    const entry = onlyEntryFor("eslint-comments/no-restricted-disable");
+    const [severity, ...rules] =
+      entry.rules["eslint-comments/no-restricted-disable"];
+
+    expect(severity).toBe("error");
+    expect(rules).toEqual([
+      "local/no-client-import-of-server-folder",
+      "local/no-client-import-of-services",
+      "local/no-cross-domain-deep-import",
+      "local/require-server-action-suffix",
+      "no-restricted-imports",
+    ]);
+  });
+
+  it("reports a directive with no description", async () => {
+    const messages = await lintDirective(
+      `// eslint-disable-next-line local/no-default-export\nexport default 1;\n`,
+    );
+    const reported = messagesOf(
+      messages,
+      "eslint-comments/require-description",
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(reported[0].message).toContain("descriptions");
+  });
+
+  it("accepts a described directive targeting a naming or colour rule", async () => {
+    const oneOffs = [
+      ["local/no-default-export", `export default function PlanCard() {}\n`],
+      [
+        "local/no-raw-tailwind-colors",
+        `export const Swatch = () => <span className="bg-zinc-800" />;\n`,
+      ],
+    ];
+
+    for (const [rule, violation] of oneOffs) {
+      const code = `// eslint-disable-next-line ${rule} -- a reviewed one-off\n${violation}`;
+
+      expect([rule, await lintDirective(code)]).toEqual([rule, []]);
+    }
+  });
+
+  // A boundary is not the guarded module's to lift, so the description makes
+  // no difference: the exception belongs in `next.js`, where a reviewer sees
+  // it beside the others.
+  it("reports a directive targeting a boundary rule, described or not", async () => {
+    for (const suffix of ["", " -- the reason does not matter here"]) {
+      const messages = await lintDirective(
+        `// eslint-disable-next-line local/no-cross-domain-deep-import${suffix}\nimport { x } from "@/app/_domains/project/_services/get-project";\nexport const y = x;\n`,
+      );
+      const reported = messagesOf(
+        messages,
+        "eslint-comments/no-restricted-disable",
+      );
+
+      expect([suffix, reported.map((message) => message.severity)]).toEqual([
+        suffix,
+        [2],
+      ]);
+      expect(reported[0].message).toContain("no-cross-domain-deep-import");
+    }
+  });
+
+  // A blanket directive names no rule, so it switches the boundary rules off
+  // along with everything else.
+  it("reports a blanket directive that names no rule", async () => {
+    const messages = await lintDirective(
+      `/* eslint-disable -- everything, for a moment */\nexport default 1;\n`,
+    );
+
+    expect(
+      messagesOf(messages, "eslint-comments/no-restricted-disable"),
+    ).toHaveLength(1);
+  });
+
+  // Reported as an error rather than the flat-config default warning, so a
+  // stale exception fails lint on its own terms.
+  it("reports an unused directive", async () => {
+    const messages = await lintDirective(
+      `// eslint-disable-next-line local/no-default-export -- stale, the default export is gone\nexport const x = 1;\n`,
+    );
+
+    expect(messages.map((message) => message.severity)).toEqual([2]);
+    expect(messages[0].message).toContain("Unused eslint-disable directive");
+  });
+});

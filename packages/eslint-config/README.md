@@ -84,3 +84,20 @@ Every rule has a colocated `*.test.js` `RuleTester` suite:
 ```sh
 pnpm --filter @workspace/eslint-config test
 ```
+
+## Disable comments
+
+Every `eslint-disable` directive carries a written reason after `--`, enforced
+by `eslint-comments/require-description`: an exception explains itself in the
+diff or it does not land. `@eslint-community/eslint-plugin-eslint-comments` is
+this package's only plugin dependency added for that policy.
+
+`eslint-comments/no-restricted-disable` holds the `notDisableableRules` list in
+`next.js`, which is the boundary set above: a directive naming one of them is
+reported whether or not it has a reason, and so is a blanket
+`/* eslint-disable */`, which would switch them off along with everything else.
+A naming, schema or colour rule stays disableable with a reason.
+
+`reportUnusedDisableDirectives` is `error` rather than the flat-config default
+of `warn`, so an exception that outlived its reason fails lint on its own terms
+rather than only under `--max-warnings 0`.
