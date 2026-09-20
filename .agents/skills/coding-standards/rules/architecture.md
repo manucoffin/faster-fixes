@@ -120,6 +120,12 @@ A folder qualifies as a feature if **at least one** is true:
 
 A folder that is only a presentational component with no logic → `_components/`. **No feature nested in a feature** — a grown child promotes to a sibling.
 
+**One grouping level, and a single-file feature needs no folder.** Enforced by `local/no-feature-nesting`:
+
+- A file sits at most at `_features/<area>/<capability>/`: two non-underscore folder segments before the file. Several related capabilities may share an area folder (`(authenticated)/_features/sidebar/organization/`, `settings/_features/jira/link-project/`); a third capability folder is a lint error. Flatten it, or promote the inner capability to a sibling feature.
+- A feature that is one file sits directly in the features folder, `_features/<name>.client.tsx`. Give it a folder when it has a second file.
+- Underscore-prefixed folders are buckets, not capabilities: they are free and do not count toward the depth. A second `_features/` segment anywhere in the path is a nested feature and is reported.
+
 ## File naming conventions
 
 | Item             | Pattern                    | Example                                    |

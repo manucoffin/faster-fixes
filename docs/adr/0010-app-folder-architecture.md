@@ -7,7 +7,7 @@ The `src/app/` tree was organised around a root `_features/` folder whose direct
 - **Root `_features/` becomes `_domains/`.** Its direct children are domain folders named after canonical terms of the project glossary. "Feature" now means a capability slice inside a scope.
 - **Domains live inside the App Router tree**, at `src/app/_domains/`, not in a sibling `src/domains/`. One tree, one mental model: routes compose domains, and the same buckets serve both.
 - **One bucket set at both tiers** (domain and route segment):
-  - `_features/`: capability slices (client or server UI tied to one capability, plus its container hooks). Never nested.
+  - `_features/`: capability slices (client or server UI tied to one capability, plus its container hooks). Never nested, and at most one grouping level deep (see the amendment below).
   - `_components/`: pure UI bound to this scope, no schema, no server.
   - `_services/`: the data/IO layer, verb-prefixed, transport-agnostic, lazy.
   - `_helpers/`: pure behavioral functions only, lazy.
@@ -41,6 +41,26 @@ The `src/app/` tree was organised around a root `_features/` folder whose direct
 - Some old feature leaves are pure presentational components. They move to `_components/`.
 - One-time flatten pass on `_components/` wrapper folders.
 - The inside of `_services/` (naming, verb vocabulary, transport agnosticism) is specified by the server file conventions ADR, which amends the bucket set described here.
+
+## Amendment: one grouping level under `_features/`
+
+Recorded 2026-09-20. `_features/` holds capability folders, and some scopes group several
+related capabilities under a shared area (`(authenticated)/_features/sidebar/organization/`,
+`settings/_features/jira/link-project/`). That grouping level is part of the convention and
+`no-feature-nesting` now enforces its limit:
+
+- A file sits at most at `_features/<area>/<capability>/`. Two non-underscore folder segments
+  before the file, no more. A third capability folder is a report: flatten it, or promote the
+  inner capability to a sibling feature.
+- **A single-file feature sits directly in the features folder**, at `_features/<name>.tsx`. It
+  does not need a folder of its own until it has more than one file.
+- Underscore-prefixed folders are buckets, not capabilities, so they are free and do not count
+  toward that depth. A second `_features/` segment anywhere in the path is still a nested
+  feature and is still reported.
+
+One folder breached the limit when the rule landed
+(`(authenticated)/_features/sidebar/project/create/`) and was flattened into its parent
+capability folder.
 
 ## Amendment: domain capability folders sit at the domain root
 

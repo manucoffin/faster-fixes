@@ -18,7 +18,7 @@ The folder architecture ADR gave each scope a server bucket but left its inside 
 - **Pure logic is a helper, not a service.** `_helpers/` is strictly behavioral: functions only, no IO, no JSX, no state, no schema, no standalone type. Predicates split by IO: pure predicate in `_helpers/`, IO-predicate in `_services/`.
 - **Standalone shared types live in `_types/`.** A service-derived type stays in its service file.
 - **Schemas live in `_services/`** as `*.schema.ts`, consumed by the procedure's `.input()` and the client form resolver. A schema stays pure Zod with no server-only import, so the client can import it without pulling server code. The client-boundary lint exempts `*.schema.ts` and type-only imports.
-- **Structure grows on demand.** A feature is flat until a species crowds it (around three files), then collapses into a `_`-prefixed subfolder. No mandatory per-feature skeleton. No feature nested in a feature (lint-enforced).
+- **Structure grows on demand.** A feature is flat until a species crowds it (around three files), then collapses into a `_`-prefixed subfolder. No mandatory per-feature skeleton. No feature nested in a feature, and one grouping level at most under a `_features/` folder (lint-enforced, see the folder architecture ADR).
 - **Side-effecting orchestrations** (`*.inngest.ts`, `notify-*`, `send-*` on a write path) are services. Thin adapter calls with no domain decision are infrastructure in `src/lib/`.
 - **External SDK code follows the domain decision, not the dependency.** Thin domain-agnostic adapters live in `src/server/<lib>/`. Domain logic that happens to call an SDK stays in the domain's `_services/`.
 

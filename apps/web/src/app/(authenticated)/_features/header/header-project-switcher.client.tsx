@@ -16,7 +16,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Check, ChevronsUpDown, FolderOpen, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CreateProjectDialog } from "../sidebar/project/create/create-project-dialog.client";
+import { CreateProjectDialog } from "../sidebar/project/create-project-dialog.client";
 
 function HeaderProjectSwitcherLoading() {
   return <Skeleton className="h-5 w-24" />;

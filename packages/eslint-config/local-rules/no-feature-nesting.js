@@ -1,30 +1,56 @@
-// No feature nested in a feature (ADR-0010, app folder architecture). The tree stays
-// two deep (domain/segment -> feature); a grown child capability promotes to a
-// sibling `_features/<x>/`, it does not nest under another feature. A path that
-// contains `_features/` twice is a nested feature.
+// Feature folder shape (ADR-0010, app folder architecture). A feature is a capability
+// slice inside a scope, so the tree under `_features/` stays shallow: one optional
+// grouping level, then the capability, then the files. A grown child capability
+// promotes to a sibling, it does not nest under another feature.
+//
+// Underscore-prefixed folders are buckets, not capabilities, so they do not count
+// toward the depth; a second `_features/` in the path is a nested feature.
 
-const NESTED_FEATURE_RE = /\/_features\/[^/]+\/(?:.*\/)?_features\//;
+const FEATURES_SEGMENT = "_features";
+const MAX_GROUPING_DEPTH = 2;
+
+function folderSegmentsUnderFeatures(filename) {
+  const segments = filename.split("/");
+  const featuresIndex = segments.indexOf(FEATURES_SEGMENT);
+  if (featuresIndex === -1) return null;
+
+  // Drop the basename: the rule reports on the file, it does not count it.
+  return segments.slice(featuresIndex + 1, -1);
+}
 
 export const noFeatureNestingRule = {
   meta: {
     type: "problem",
     docs: {
       description:
-        "A _features/<x>/ folder may not contain a nested feature. Promote the child capability to a sibling _features/ folder.",
+        "Under a `_features/` folder, a file sits at most at `<area>/<capability>/`, and no feature nests in another feature.",
     },
     schema: [],
     messages: {
       nestedFeature:
         "This file lives in a feature nested inside another feature. Promote the inner `_features/<x>/` to a sibling at the domain/segment level.",
+      tooDeep:
+        "This file is {{ depth }} capability folders deep under `_features/`. A feature allows one grouping level: `_features/<area>/<capability>/`. Flatten the folder, or promote the inner capability to a sibling feature.",
     },
   },
   create(context) {
-    const filename = context.filename || context.getFilename();
-    if (!NESTED_FEATURE_RE.test(filename)) return {};
+    const folders = folderSegmentsUnderFeatures(context.filename);
+    if (folders === null) return {};
+
+    if (folders.includes(FEATURES_SEGMENT)) {
+      return {
+        Program(node) {
+          context.report({ node, messageId: "nestedFeature" });
+        },
+      };
+    }
+
+    const depth = folders.filter((segment) => !segment.startsWith("_")).length;
+    if (depth <= MAX_GROUPING_DEPTH) return {};
 
     return {
       Program(node) {
-        context.report({ node, messageId: "nestedFeature" });
+        context.report({ node, messageId: "tooDeep", data: { depth } });
       },
     };
   },
