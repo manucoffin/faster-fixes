@@ -31,7 +31,7 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
         <div className="flex flex-col gap-1">
           <Link href={`/admin/users/${row.original.id}`}>
             <div className="flex items-center gap-2">
-              <span>{name || "—"}</span>
+              <span>{name || "N/A"}</span>
               {subscriptionPlan && (
                 <Badge
                   variant={
@@ -46,7 +46,7 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
               )}
             </div>
             <div className="text-xs text-muted-foreground">
-              {organizationName || "—"}
+              {organizationName || "N/A"}
             </div>
           </Link>
         </div>
@@ -60,7 +60,7 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
     ),
     cell: ({ getValue }) => {
       const email = getValue<string>();
-      return email ? <span>{email}</span> : <span>{"—"}</span>;
+      return email ? <span>{email}</span> : <span>{"N/A"}</span>;
     },
   },
   {

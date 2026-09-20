@@ -29,7 +29,7 @@ export async function findProjectByPublicId(token: string | null) {
   });
   if (project) {
     console.warn(
-      `[find-project-by-public-id] legacy ff_ API key resolved for project ${project.id} — migrate to publicId`,
+      `[find-project-by-public-id] legacy ff_ API key resolved for project ${project.id}. Migrate to publicId`,
     );
   }
   return project;

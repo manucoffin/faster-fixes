@@ -14,13 +14,13 @@ const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
   console.info(
-    "[feedback] POST /api/v1/feedback — content-type:",
+    "[feedback] POST /api/v1/feedback, content-type:",
     req.headers.get("content-type"),
   );
 
   const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
-    console.warn("[feedback] unauthorized — invalid API key");
+    console.warn("[feedback] unauthorized: invalid API key");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
   );
   if (screenshotField !== null && !(screenshotField instanceof File)) {
     console.warn(
-      "[feedback] screenshot field is not a File — type:",
+      "[feedback] screenshot field is not a File, type:",
       typeof screenshotField,
       "| value preview:",
       String(screenshotField).slice(0, 100),
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.info(
-      "[feedback] screenshot file — name:",
+      "[feedback] screenshot file, name:",
       screenshotField.name,
       "| type:",
       screenshotField.type,

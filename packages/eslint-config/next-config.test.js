@@ -38,6 +38,7 @@ const CONVENTION_RULES = {
   "local/services-no-bare-error": SERVICE,
   "local/no-relative-test-mock": SERVICE_TEST,
   "local/no-restricted-patterns": FEATURE,
+  "local/no-em-dash-in-copy": FEATURE,
 };
 
 /**
@@ -1483,6 +1484,78 @@ describe("no-restricted-patterns", () => {
       await messagesFor(
         FEATURE,
         `export const items = grouped[columnId] ?? [];\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+  });
+});
+
+// The house style's punctuation ban, which ESLint can hold for the source and
+// a test holds for the MDX. The cases go through the real config because what
+// is asked here is where the rule runs and which text it reads, not how the
+// rule walks the tree: its own suite covers that.
+describe("no-em-dash-in-copy", () => {
+  const RULE = "local/no-em-dash-in-copy";
+
+  // Built from its code point, so that the file asserting the ban is not the
+  // file breaking it.
+  const DASH = String.fromCodePoint(0x2014);
+
+  it("runs on the web app source and nowhere else", async () => {
+    const entry = onlyEntryFor(RULE);
+
+    expect(entry.files).toEqual(["**/src/**/*.{ts,tsx}"]);
+
+    const severityFor = await severityResolver(RULE);
+
+    expect(await severityFor(FEATURE)).toBe(2);
+    expect(await severityFor(SERVICE)).toBe(2);
+    expect(await severityFor("next.config.ts")).toBeUndefined();
+  });
+
+  it("reports a string literal and accepts the comma that replaces it", async () => {
+    const reported = await messagesFor(
+      FEATURE,
+      `export const label = "Free ${DASH} one project.";\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(reported[0].message).toContain("comma, a colon or a period");
+    expect(
+      await messagesFor(
+        FEATURE,
+        `export const label = "Free, one project.";\n`,
+        RULE,
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports JSX text", async () => {
+    const reported = await messagesFor(
+      FEATURE,
+      `export function Card() {\n  return <p>Free ${DASH} one project.</p>;\n}\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+  });
+
+  it("reports a template chunk", async () => {
+    const reported = await messagesFor(
+      FEATURE,
+      `export const label = (n: number) => \`${"${n}"} projects ${DASH} one seat\`;\n`,
+      RULE,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+  });
+
+  it("accepts an em dash in a comment, which no reader of the site sees", async () => {
+    expect(
+      await messagesFor(
+        SERVICE,
+        `// Free ${DASH} the trial tier ${DASH} has no card.\nexport const tier = "free";\n`,
         RULE,
       ),
     ).toEqual([]);

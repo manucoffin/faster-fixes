@@ -24,7 +24,7 @@ export function MrrCard() {
       const formattedNetRevenue = formatEur(data?.netRevenue ?? 0);
       const formattedMrr = formatEur(data?.mrr ?? 0);
       const formattedArr = formatEur(data?.arr ?? 0);
-      const formattedLtv = data?.ltv == null ? "—" : formatEur(data.ltv);
+      const formattedLtv = data?.ltv == null ? "N/A" : formatEur(data.ltv);
 
       return (
         <Card>

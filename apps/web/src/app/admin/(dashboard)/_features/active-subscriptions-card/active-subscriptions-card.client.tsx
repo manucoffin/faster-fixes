@@ -18,7 +18,7 @@ export function ActiveSubscriptionsCard() {
     Success: ({ data }) => {
       const formattedChurn =
         data?.churnRate == null
-          ? "—"
+          ? "N/A"
           : new Intl.NumberFormat("fr-FR", {
               style: "percent",
               maximumFractionDigits: 1,

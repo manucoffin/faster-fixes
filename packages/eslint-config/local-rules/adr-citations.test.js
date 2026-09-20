@@ -28,6 +28,10 @@ const EXPECTED_CITATIONS = {
   "no-cross-layer-import.js": ["0010", "0011", "0012", "0013"],
   "require-inngest-function-placement.js": ["0011"],
   "no-default-export.js": [],
+  // The em dash ban is a non-negotiable of the house style, recorded in
+  // `CLAUDE.md` and the coding standards rather than in an architecture
+  // decision, so there is nothing for it to cite.
+  "no-em-dash-in-copy.js": [],
   "no-feature-nesting.js": ["0010"],
   "no-raw-tailwind-colors.js": [],
   // The boundaries a mock may sit at are the public surfaces the architecture

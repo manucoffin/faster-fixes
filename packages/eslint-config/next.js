@@ -575,6 +575,19 @@ export const nextJsConfig = [
     },
   },
   {
+    // The one non-negotiable of the house style that a linter can hold: no em
+    // dash in user-facing text. Same glob as the style rules above, because a
+    // config file at the app root ships no copy, and only the three node kinds
+    // that can carry copy are read, so a comment keeps its dashes.
+    //
+    // MDX is the other half of the convention and ESLint cannot parse it:
+    // `apps/web/src/mdx-no-em-dash.test.ts` reads those files directly.
+    files: ["**/src/**/*.{ts,tsx}"],
+    rules: {
+      "local/no-em-dash-in-copy": "error",
+    },
+  },
+  {
     // Test files only: the rule reads a `vi.mock()` call, which exists nowhere
     // else, and the boundary it names is a boundary for a test rather than for
     // production code.

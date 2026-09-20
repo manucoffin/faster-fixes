@@ -9,7 +9,7 @@
  * @returns Formatted duration string
  */
 export function formatDuration(minutes: number): string {
-  if (!minutes && minutes !== 0) return "—";
+  if (!minutes && minutes !== 0) return "N/A";
 
   if (minutes < 60) {
     return `${minutes}min`;

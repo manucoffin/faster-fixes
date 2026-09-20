@@ -48,7 +48,7 @@ export function UsersOverviewCard() {
                     growth === 0 && "text-muted-foreground",
                   )}
                 >
-                  {formattedGrowth ?? "—"}
+                  {formattedGrowth ?? "N/A"}
                 </span>
               </div>
             </div>

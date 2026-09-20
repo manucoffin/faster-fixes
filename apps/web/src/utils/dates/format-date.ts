@@ -2,7 +2,7 @@
  * Formats a date in a human-readable format
  */
 export function formatDate(date: Date | string | null | undefined): string {
-  if (!date) return "—";
+  if (!date) return "N/A";
 
   const dateObj = typeof date === "string" ? new Date(date) : date;
 

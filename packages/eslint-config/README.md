@@ -147,6 +147,16 @@ the Prisma client and passes it through the dependency-injection seam, whose
 parameter type is the real client. The enum and the fallback are still reported
 in a test file.
 
+`no-em-dash-in-copy` holds the one punctuation non-negotiable of the house
+style. It reports the em dash character in a string literal, in JSX text and in
+a static chunk of a template literal, and names the replacement: a comma, a
+colon or a period, whichever reads correctly in the sentence. A comment is not
+user-facing, so the rule never visits one. It does not sort user-facing strings
+from internal ones, because an internal string has no use for the character
+either. MDX is the other half of the convention and ESLint cannot parse it:
+`apps/web/src/mdx-no-em-dash.test.ts` reads those files directly and fails on
+the same character.
+
 `local-rules/_deprecated_no-client-import-of-server-errors.js` and
 `local-rules/_deprecated_require-trpc-output-type.js` are the empty stubs of the
 rules `no-client-import-of-server-folder` and `require-service-output-type`

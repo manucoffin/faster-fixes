@@ -25,7 +25,7 @@ export async function createFeedbackScreenshot({
   const key = `feedback-screenshots/${projectId}/${crypto.randomUUID()}.${ext}`;
   const bucket = process.env.STORAGE_BUCKET_NAME!;
   console.info(
-    "[feedback] uploading screenshot — key:",
+    "[feedback] uploading screenshot, key:",
     key,
     "| bucket:",
     bucket,

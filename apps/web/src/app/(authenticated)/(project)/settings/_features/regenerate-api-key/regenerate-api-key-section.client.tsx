@@ -54,16 +54,16 @@ export function RegenerateApiKeySection({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="bg-muted flex items-center gap-2 rounded-md border p-3">
+      <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
         <code className="flex-1 font-mono text-sm">
           ff_••••••••••••••••••••••••••••••{project?.apiKeyLastFour}
         </code>
       </div>
 
       {newApiKey && (
-        <div className="border-destructive/50 bg-destructive/10 rounded-md border p-3">
-          <p className="text-destructive mb-2 text-xs font-medium">
-            New key — copy it now, it won&apos;t be shown again.
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+          <p className="mb-2 text-xs font-medium text-destructive">
+            New key: copy it now, it won&apos;t be shown again.
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 font-mono text-sm break-all">
@@ -71,7 +71,7 @@ export function RegenerateApiKeySection({
             </code>
             <Button variant="ghost" size="icon" onClick={handleCopyKey}>
               {keyCopied ? (
-                <Check className="text-success size-4" />
+                <Check className="size-4 text-success" />
               ) : (
                 <Copy className="size-4" />
               )}

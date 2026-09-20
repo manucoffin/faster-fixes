@@ -4,6 +4,7 @@ import { noClientImportOfServicesRule } from "./no-client-import-of-services.js"
 import { noCrossDomainDeepImportRule } from "./no-cross-domain-deep-import.js";
 import { noCrossLayerImportRule } from "./no-cross-layer-import.js";
 import { noDefaultExportRule } from "./no-default-export.js";
+import { noEmDashInCopyRule } from "./no-em-dash-in-copy.js";
 import { noFeatureNestingRule } from "./no-feature-nesting.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
 import { noRelativeTestMockRule } from "./no-relative-test-mock.js";
@@ -27,6 +28,7 @@ export const localRulesPlugin = {
     "no-cross-domain-deep-import": noCrossDomainDeepImportRule,
     "no-cross-layer-import": noCrossLayerImportRule,
     "no-default-export": noDefaultExportRule,
+    "no-em-dash-in-copy": noEmDashInCopyRule,
     "no-feature-nesting": noFeatureNestingRule,
     "no-raw-tailwind-colors": noRawTailwindColorsRule,
     "no-relative-test-mock": noRelativeTestMockRule,
