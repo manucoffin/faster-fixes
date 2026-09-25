@@ -27,14 +27,9 @@ export function BillingDetailsCard({
   );
 
   const getStripeSubscriptionQuery = useQuery(
-    trpc.subscription.getStripeSubscription.queryOptions(
-      {
-        stripeSubscriptionId: stripeSubscriptionId!,
-      },
-      {
-        enabled: !!stripeSubscriptionId,
-      },
-    ),
+    trpc.subscription.getStripeSubscription.queryOptions(undefined, {
+      enabled: !!stripeSubscriptionId,
+    }),
   );
 
   return matchQueryStatus(getStripePricesQuery, {
