@@ -1,4 +1,4 @@
-import { auth } from "@/server/auth";
+import type { auth } from "@/server/auth";
 import { stripeClient } from "@better-auth/stripe/client";
 import {
   adminClient,
