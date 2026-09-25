@@ -1,4 +1,5 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
+import { deleteAssets } from "@/server/storage/delete-assets";
 import { prisma } from "@workspace/db";
 import { DeleteProjectInput } from "./delete-project.schema";
 
@@ -26,7 +27,20 @@ export async function deleteProject(
     throw new ForbiddenError("Access denied.");
   }
 
+  // The Feedback cascade only nulls each screenshot reference, so the Assets
+  // are collected first and freed once the Project is gone.
+  const screenshots = await db.feedback.findMany({
+    where: { projectId, screenshotId: { not: null } },
+    select: { screenshotId: true },
+  });
+
   await db.project.delete({ where: { id: projectId } });
+
+  await deleteAssets(
+    screenshots.flatMap(({ screenshotId }) =>
+      screenshotId ? [screenshotId] : [],
+    ),
+  );
 
   return { id: projectId };
 }

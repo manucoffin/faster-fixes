@@ -26,6 +26,8 @@ vi.mock("@workspace/db", async () => {
   return { prisma: widgetApiPrisma };
 });
 
+vi.mock("@/server/storage", () => ({ s3Client: {} }));
+
 const { DELETE, PUT } = await import("./route");
 
 const ROUTE_URL = `https://app.test/api/v1/feedback/${FEEDBACK_ID}`;
