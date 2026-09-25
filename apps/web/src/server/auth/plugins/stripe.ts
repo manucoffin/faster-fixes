@@ -1,9 +1,13 @@
 import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
+import { authorizeBillingReference } from "@/server/auth/subscription/authorize-billing-reference";
 import { stripeApi } from "@/server/stripe";
 import { stripe } from "@better-auth/stripe";
 import { prisma } from "@workspace/db";
 
-if (process.env.NODE_ENV === "production" && !process.env.STRIPE_WEBHOOK_SIGNING_SECRET) {
+if (
+  process.env.NODE_ENV === "production" &&
+  !process.env.STRIPE_WEBHOOK_SIGNING_SECRET
+) {
   throw new Error("STRIPE_WEBHOOK_SIGNING_SECRET is required in production");
 }
 
@@ -46,26 +50,12 @@ export const stripePlugin = stripe({
         },
       });
     },
-    authorizeReference: async ({ user, referenceId, action }) => {
-      // Check if the user has permission to manage subscriptions for this reference
-      if (
-        action === "upgrade-subscription" ||
-        action === "cancel-subscription" ||
-        action === "restore-subscription"
-      ) {
-        const org = await prisma.member.findFirst({
-          where: {
-            organizationId: referenceId,
-            userId: user.id,
-          },
-        });
-
-        return org?.role === "owner";
-      }
-
-      // For other actions, authorize
-      return true;
-    },
+    authorizeReference: ({ user, referenceId, action }) =>
+      authorizeBillingReference({
+        userId: user.id,
+        organizationId: referenceId,
+        action,
+      }),
     plans: SUBSCRIPTION_PLANS,
     getCheckoutSessionParams: async ({ plan }) => ({
       params: {
