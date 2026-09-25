@@ -1,5 +1,6 @@
 import { auth } from "@/server/auth";
 import { BadRequestError } from "@/server/errors/domain-errors";
+import { APIError } from "better-auth/api";
 import { AcceptInvitationInput } from "./accept-invitation.schema";
 
 export async function acceptInvitation({
@@ -14,9 +15,10 @@ export async function acceptInvitation({
 
     return { success: true };
   } catch (error) {
-    // Better-Auth reports an expired, already answered or foreign invitation as
-    // a plain Error, and its message is the copy the toast shows.
-    if (error instanceof Error) {
+    // Better Auth reports an expired, already answered or foreign invitation as
+    // a 4xx APIError whose message is the copy the toast shows. Anything else is
+    // an outage and keeps its 500 masking.
+    if (error instanceof APIError && error.statusCode < 500) {
       throw new BadRequestError(error.message);
     }
 

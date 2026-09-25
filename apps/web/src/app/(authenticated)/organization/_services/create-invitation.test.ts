@@ -1,4 +1,5 @@
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
+import { APIError } from "better-auth/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const createInvitationApi = vi.fn();
@@ -39,7 +40,9 @@ describe("createInvitation", () => {
 
   it("reports a Better Auth refusal with its own message", async () => {
     createInvitationApi.mockRejectedValue(
-      new Error("User is already invited to this organization"),
+      new APIError("BAD_REQUEST", {
+        message: "User is already invited to this organization",
+      }),
     );
 
     await expect(
@@ -47,6 +50,26 @@ describe("createInvitation", () => {
     ).rejects.toThrow(
       new BadRequestError("User is already invited to this organization"),
     );
+  });
+
+  it("lets a failure that is not a Better Auth refusal propagate untranslated", async () => {
+    const outage = new Error("Can't reach database server");
+    createInvitationApi.mockRejectedValue(outage);
+
+    await expect(
+      createInvitation(input, fakeDb({ id: "member_1" })),
+    ).rejects.toBe(outage);
+  });
+
+  it("lets a Better Auth server error propagate untranslated", async () => {
+    const failure = new APIError("INTERNAL_SERVER_ERROR", {
+      message: "Failed to create invitation",
+    });
+    createInvitationApi.mockRejectedValue(failure);
+
+    await expect(
+      createInvitation(input, fakeDb({ id: "member_1" })),
+    ).rejects.toBe(failure);
   });
 
   it("returns the invitation Better Auth issued", async () => {
