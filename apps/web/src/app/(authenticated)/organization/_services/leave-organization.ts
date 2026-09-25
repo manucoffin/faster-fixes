@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { LeaveOrganizationInput } from "./leave-organization.schema";
+import type { LeaveOrganizationInput } from "./leave-organization.schema";
 
 export async function leaveOrganization(
   { organizationId, userId }: LeaveOrganizationInput & { userId: string },

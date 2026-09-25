@@ -1,6 +1,7 @@
 import { handleGitHubWebhook } from "@/app/_domains/integration/_services/github/handle-github-webhook";
 import { verifyWebhookSignature } from "@/app/_domains/integration/_helpers/github/verify-webhook-signature";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();

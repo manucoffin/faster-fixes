@@ -41,8 +41,9 @@ names the constant in `next.js` it reads.
 | `no-relative-test-mock`              | `**/*.test.{ts,tsx}`     | a `vi.mock` names a boundary, never a relative specifier                                          |                            |
 | `no-raw-tailwind-colors`             | every linted file        | a hue with a semantic token is written as that token                                              | `rawTailwindColorOptions`  |
 
-Four rules of installed plugins carry the style conventions on `**/src/**/*.{ts,tsx}`:
+Five rules of installed plugins carry the style conventions on `**/src/**/*.{ts,tsx}`:
 `@typescript-eslint/consistent-type-definitions` (`type` over `interface`),
+`@typescript-eslint/consistent-type-imports` (an import used only as a type is `import type`),
 `react/function-component-definition` (a named component is an `export function`),
 `no-nested-ternary` and `no-else-return`. The core `no-restricted-imports` is the
 `src/server/**` deep-import lock and nothing else.

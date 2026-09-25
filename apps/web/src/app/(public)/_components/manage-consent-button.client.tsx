@@ -1,8 +1,9 @@
 "use client";
 
 import { useConsentManager } from "@c15t/nextjs";
-import { Button, buttonVariants } from "@workspace/ui/components/button";
-import { VariantProps } from "class-variance-authority";
+import type { buttonVariants } from "@workspace/ui/components/button";
+import { Button } from "@workspace/ui/components/button";
+import type { VariantProps } from "class-variance-authority";
 import React from "react";
 
 type Props = React.ComponentProps<"button"> &

@@ -3,7 +3,7 @@ import { ActiveProjectProvider } from "@/app/_domains/project/active-project/act
 import { hasCompletedOnboarding } from "@/app/_domains/user/_services/has-completed-onboarding";
 import { auth } from "@/server/auth";
 import { isCloud } from "@/utils/environment/env";
-import { LayoutParams } from "@/types/next";
+import type { LayoutParams } from "@/types/next";
 import {
   SidebarInset,
   SidebarProvider,

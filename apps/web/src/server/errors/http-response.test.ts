@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
+import type { DomainError } from "./domain-errors";
 import {
   BadRequestError,
   ConflictError,
-  DomainError,
   ForbiddenError,
   NotFoundError,
   PreconditionFailedError,

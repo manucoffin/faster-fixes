@@ -4,7 +4,7 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { LinkRepoInput } from "./link-repo.schema";
+import type { LinkRepoInput } from "./link-repo.schema";
 
 export async function linkRepo(
   {

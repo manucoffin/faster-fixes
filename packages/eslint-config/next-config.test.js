@@ -1282,13 +1282,14 @@ describe("no-relative-test-mock", () => {
   });
 });
 
-// The four style drifts, each held by a plugin or core rule rather than by one
+// The five style drifts, each held by a plugin or core rule rather than by one
 // of ours. The wiring test is what says they are on for the web app source;
 // the behaviour cases are the plugin's own, so one rejected and one accepted
 // example each is enough to show the rule is live on a real path.
 describe("the style rules", () => {
   const STYLE_RULES = [
     "@typescript-eslint/consistent-type-definitions",
+    "@typescript-eslint/consistent-type-imports",
     "react/function-component-definition",
     "no-nested-ternary",
     "no-else-return",
@@ -1322,6 +1323,24 @@ describe("the style rules", () => {
     expect(reported.map((message) => message.severity)).toEqual([2]);
     expect(
       await messagesFor(FEATURE, `type Other = { id: string };\n`, rule),
+    ).toEqual([]);
+  });
+
+  it("reports a value import used only as a type and accepts `import type`", async () => {
+    const rule = "@typescript-eslint/consistent-type-imports";
+    const reported = await messagesFor(
+      FEATURE,
+      `import { auth } from "@/server/auth";\nexport type Session = typeof auth;\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(
+        FEATURE,
+        `import type { auth } from "@/server/auth";\nexport type Session = typeof auth;\n`,
+        rule,
+      ),
     ).toEqual([]);
   });
 

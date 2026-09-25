@@ -1,4 +1,4 @@
-import { BreadcrumbItem } from "./breadcrumb-provider.client";
+import type { BreadcrumbItem } from "./breadcrumb-provider.client";
 import { PageBreadcrumbs } from "./page-breadcrumbs.client";
 import { DashboardPageHeader } from "./dashboard-page-header";
 

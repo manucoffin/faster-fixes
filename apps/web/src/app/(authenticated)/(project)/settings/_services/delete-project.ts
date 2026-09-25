@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { deleteAssets } from "@/server/storage/delete-assets";
 import { prisma } from "@workspace/db";
-import { DeleteProjectInput } from "./delete-project.schema";
+import type { DeleteProjectInput } from "./delete-project.schema";
 
 export async function deleteProject(
   { projectId, userId }: DeleteProjectInput & { userId: string },

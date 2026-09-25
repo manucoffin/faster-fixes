@@ -1,4 +1,4 @@
-import { WebPage, WithContext } from "schema-dts";
+import type { WebPage, WithContext } from "schema-dts";
 
 type WebPageSchemaProps = {
   title: string;

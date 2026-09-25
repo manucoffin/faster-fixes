@@ -2,7 +2,8 @@ import { findInstallingMember } from "@/app/_domains/integration/_services/find-
 import { findGitHubInstallationAccount } from "@/app/_domains/integration/_services/github/find-github-installation-account";
 import { upsertGitHubInstallation } from "@/app/_domains/integration/_services/github/upsert-github-installation";
 import { auth } from "@/server/auth";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;

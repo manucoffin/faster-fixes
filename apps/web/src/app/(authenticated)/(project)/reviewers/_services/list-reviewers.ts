@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { ListReviewersInput } from "./list-reviewers.schema";
+import type { ListReviewersInput } from "./list-reviewers.schema";
 
 export async function listReviewers(
   { projectId, userId }: ListReviewersInput & { userId: string },

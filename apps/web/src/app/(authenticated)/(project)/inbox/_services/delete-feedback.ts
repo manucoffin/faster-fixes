@@ -5,7 +5,7 @@ import {
 } from "@/server/errors/domain-errors";
 import { deleteAsset } from "@/server/storage/delete-asset";
 import { prisma } from "@workspace/db";
-import { DeleteFeedbackInput } from "./delete-feedback.schema";
+import type { DeleteFeedbackInput } from "./delete-feedback.schema";
 
 export async function deleteFeedback(
   { feedbackId, userId }: DeleteFeedbackInput & { userId: string },

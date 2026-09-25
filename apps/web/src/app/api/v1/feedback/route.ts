@@ -2,7 +2,8 @@ import { isAllowedOrigin } from "@/app/_domains/project/_helpers/is-allowed-orig
 import { findProjectByPublicId } from "@/app/_domains/project/_services/find-project-by-public-id";
 import { findReviewerByToken } from "@/app/_domains/project/_services/find-reviewer-by-token";
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { createFeedback } from "./_services/create-feedback";
 import { CreateFeedbackSchema } from "./_services/create-feedback.schema";
 import { createFeedbackScreenshot } from "./_services/create-feedback-screenshot";

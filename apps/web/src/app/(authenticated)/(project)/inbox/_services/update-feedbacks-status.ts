@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { UpdateFeedbacksStatusInput } from "./update-feedbacks-status.schema";
+import type { UpdateFeedbacksStatusInput } from "./update-feedbacks-status.schema";
 
 export async function updateFeedbacksStatus(
   {

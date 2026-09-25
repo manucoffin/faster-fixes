@@ -3,7 +3,7 @@ import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { isCloud } from "@/utils/environment/env";
 import { prisma } from "@workspace/db";
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import { agentError } from "../_helpers/agent-error";
 import { type AgentScope, hasAgentScope } from "../_helpers/has-agent-scope";
 import {

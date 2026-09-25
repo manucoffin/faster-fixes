@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { GetProjectInput } from "./get-project.schema";
+import type { GetProjectInput } from "./get-project.schema";
 
 export async function getProject(
   { projectId, userId }: GetProjectInput & { userId: string },

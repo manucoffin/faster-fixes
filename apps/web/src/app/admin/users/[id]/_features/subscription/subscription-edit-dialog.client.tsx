@@ -1,9 +1,9 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import type { SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
   PAID_PLAN_NAMES,
-  SubscriptionPlanName,
   SubscriptionStatus,
 } from "@/app/_domains/subscription";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,10 +49,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
 import type { GetSubscriptionOutput } from "@/app/admin/users/_services/get-subscription";
-import {
-  UpdateSubscriptionInput,
-  UpdateSubscriptionSchema,
-} from "@/app/admin/users/_services/update-subscription.schema";
+import type { UpdateSubscriptionInput } from "@/app/admin/users/_services/update-subscription.schema";
+import { UpdateSubscriptionSchema } from "@/app/admin/users/_services/update-subscription.schema";
 
 type SubscriptionEditDialogProps = {
   userId: string;

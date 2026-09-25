@@ -1,7 +1,7 @@
 import { generateApiKey } from "@/app/_domains/project/_helpers/generate-api-key";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { RegenerateApiKeyInput } from "./regenerate-api-key.schema";
+import type { RegenerateApiKeyInput } from "./regenerate-api-key.schema";
 
 export async function regenerateApiKey(
   { projectId, userId }: RegenerateApiKeyInput & { userId: string },

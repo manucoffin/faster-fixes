@@ -1,6 +1,6 @@
 import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { stripeApi } from "@/server/stripe";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 
 export async function getPlansPrices({ planNames }: { planNames: string[] }) {
   const pricesMap: Record<

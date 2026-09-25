@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
-import { GetFeedbackDiagnosticsInput } from "./get-feedback-diagnostics.schema";
+import type { GetFeedbackDiagnosticsInput } from "./get-feedback-diagnostics.schema";
 
 // Dedicated lazy read for the Diagnostic Trail. Kept separate from the inbox
 // `listFeedback` read so the (potentially ~64 KB) trail is fetched only when

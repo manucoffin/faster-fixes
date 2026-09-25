@@ -34,10 +34,8 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  DeleteAccountInput,
-  DeleteAccountSchema,
-} from "@/app/(authenticated)/account/settings/_services/delete-account.schema";
+import type { DeleteAccountInput } from "@/app/(authenticated)/account/settings/_services/delete-account.schema";
+import { DeleteAccountSchema } from "@/app/(authenticated)/account/settings/_services/delete-account.schema";
 
 export function AccountDeletionButton() {
   const trpc = useTRPC();

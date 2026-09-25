@@ -1,7 +1,7 @@
 import { isCloud } from "@/utils/environment/env";
 import { cn } from "@workspace/ui/lib/utils";
 import Link from "next/link";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 
 const EXTERNAL_SITE_URL = "https://faster-fixes.com";
 

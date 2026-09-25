@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { GetProjectLinearLinkInput } from "./get-project-linear-link.schema";
+import type { GetProjectLinearLinkInput } from "./get-project-linear-link.schema";
 
 export async function getProjectLinearLink(
   { projectId, userId }: GetProjectLinearLinkInput & { userId: string },

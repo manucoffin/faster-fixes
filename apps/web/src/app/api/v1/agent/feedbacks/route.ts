@@ -6,7 +6,8 @@
 
 import { formatFeedbackListAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
 import { domainErrorResponse } from "@/server/errors/http-response";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { agentError } from "../_helpers/agent-error";
 import {
   CreateFeedbacksSchema,

@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { GetProjectSlackLinkInput } from "./get-project-slack-link.schema";
+import type { GetProjectSlackLinkInput } from "./get-project-slack-link.schema";
 
 export async function getProjectSlackLink(
   { projectId, userId }: GetProjectSlackLinkInput & { userId: string },

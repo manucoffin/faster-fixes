@@ -1,10 +1,8 @@
 "use client";
 
 import type { GetProjectOutput } from "@/app/(authenticated)/(project)/settings/_services/get-project";
-import {
-  UpdateProjectInput,
-  UpdateProjectSchema,
-} from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
+import type { UpdateProjectInput } from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
+import { UpdateProjectSchema } from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { getErrorMessage } from "@/utils/error/get-error-message";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";

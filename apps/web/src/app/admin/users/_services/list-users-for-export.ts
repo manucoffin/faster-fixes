@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { ListUsersForExportInput } from "./list-users-for-export.schema";
+import type { ListUsersForExportInput } from "./list-users-for-export.schema";
 
 export async function listUsersForExport({ search }: ListUsersForExportInput) {
   const where = {

@@ -14,10 +14,8 @@ import { MessageSquareIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  SendFeedbackInput,
-  SendFeedbackSchema,
-} from "@/app/(authenticated)/_services/send-feedback.schema";
+import type { SendFeedbackInput } from "@/app/(authenticated)/_services/send-feedback.schema";
+import { SendFeedbackSchema } from "@/app/(authenticated)/_services/send-feedback.schema";
 
 export function FeedbackButton() {
   const trpc = useTRPC();

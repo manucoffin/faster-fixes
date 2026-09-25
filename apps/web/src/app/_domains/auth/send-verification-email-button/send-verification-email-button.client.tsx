@@ -3,9 +3,9 @@
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
-import { buttonVariants } from "@workspace/ui/components/button";
-import { VariantProps } from "class-variance-authority";
-import { ReactNode } from "react";
+import type { buttonVariants } from "@workspace/ui/components/button";
+import type { VariantProps } from "class-variance-authority";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { SendVerificationEmailSchema } from "../_services/send-verification-email.schema";
 

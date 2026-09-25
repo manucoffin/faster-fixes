@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { CreateSubscriptionInput } from "./create-subscription.schema";
+import type { CreateSubscriptionInput } from "./create-subscription.schema";
 
 export async function createSubscription(input: CreateSubscriptionInput) {
   return await prisma.subscription.create({

@@ -1,6 +1,6 @@
 import { ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { ListAgentTokensInput } from "./list-agent-tokens.schema";
+import type { ListAgentTokensInput } from "./list-agent-tokens.schema";
 
 export async function listAgentTokens(
   { organizationId, userId }: ListAgentTokensInput & { userId: string },

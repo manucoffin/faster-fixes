@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { DeleteInvitationInput } from "./delete-invitation.schema";
+import type { DeleteInvitationInput } from "./delete-invitation.schema";
 
 export async function deleteInvitation(
   { invitationId, userId }: DeleteInvitationInput & { userId: string },

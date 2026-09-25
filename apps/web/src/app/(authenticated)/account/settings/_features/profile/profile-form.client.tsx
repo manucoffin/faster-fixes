@@ -25,10 +25,8 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  UpdateProfileInput,
-  UpdateProfileSchema,
-} from "@/app/(authenticated)/account/settings/_services/update-profile.schema";
+import type { UpdateProfileInput } from "@/app/(authenticated)/account/settings/_services/update-profile.schema";
+import { UpdateProfileSchema } from "@/app/(authenticated)/account/settings/_services/update-profile.schema";
 
 export function ProfileForm() {
   const trpc = useTRPC();

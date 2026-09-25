@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { LinkSlackChannelInput } from "./link-slack-channel.schema";
+import type { LinkSlackChannelInput } from "./link-slack-channel.schema";
 
 export async function linkSlackChannel(
   {

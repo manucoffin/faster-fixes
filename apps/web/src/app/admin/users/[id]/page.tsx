@@ -1,5 +1,5 @@
 import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
-import { PageParams } from "@/types/next";
+import type { PageParams } from "@/types/next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AccountCardLoading } from "./_features/account/account-card-loading.server";

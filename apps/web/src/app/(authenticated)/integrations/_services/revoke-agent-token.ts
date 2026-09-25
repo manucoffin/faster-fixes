@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { RevokeAgentTokenInput } from "./revoke-agent-token.schema";
+import type { RevokeAgentTokenInput } from "./revoke-agent-token.schema";
 
 export async function revokeAgentToken(
   {

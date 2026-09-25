@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  CreateReviewerInput,
-  CreateReviewerSchema,
-} from "@/app/(authenticated)/(project)/reviewers/_services/create-reviewer.schema";
+import type { CreateReviewerInput } from "@/app/(authenticated)/(project)/reviewers/_services/create-reviewer.schema";
+import { CreateReviewerSchema } from "@/app/(authenticated)/(project)/reviewers/_services/create-reviewer.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

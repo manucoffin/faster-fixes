@@ -1,6 +1,6 @@
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { getAppUrl } from "@/utils/url/get-app-url";
-import { WebSite, WithContext } from "schema-dts";
+import type { WebSite, WithContext } from "schema-dts";
 
 const appUrl = getAppUrl();
 

@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UnlinkRepoInput } from "./unlink-repo.schema";
+import type { UnlinkRepoInput } from "./unlink-repo.schema";
 
 export async function unlinkRepo(
   { projectId, userId }: UnlinkRepoInput & { userId: string },

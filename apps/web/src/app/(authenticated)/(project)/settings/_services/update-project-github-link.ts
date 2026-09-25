@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateProjectGitHubLinkInput } from "./update-project-github-link.schema";
+import type { UpdateProjectGitHubLinkInput } from "./update-project-github-link.schema";
 
 export async function updateProjectGitHubLink(
   {

@@ -533,7 +533,7 @@ export const nextJsConfig = [
     },
   },
   {
-    // The four style drifts an agent reproduces most, each held by a rule the
+    // The five style drifts an agent reproduces most, each held by a rule the
     // repo already installs rather than by a rule of ours: the plugins say it
     // better, and a rule we do not maintain is a rule that cannot rot.
     //
@@ -545,6 +545,13 @@ export const nextJsConfig = [
       // `type` over `interface`: one way to name an object shape, and the one
       // that composes with unions and intersections.
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      // An import used only as a type says so. Without it, a module that
+      // imports server code for `typeof` alone reads as a runtime dependency,
+      // and the client boundary rules cannot tell it from a real one.
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "separate-type-imports" },
+      ],
       // A named component is an `export function`, which hoists and shows its
       // name in a stack. An unnamed one is still an arrow, because that is the
       // only thing an inline render prop can be.

@@ -24,10 +24,8 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  CreateOrganizationInput,
-  CreateOrganizationSchema,
-} from "@/app/_domains/organization/_services/create-organization.schema";
+import type { CreateOrganizationInput } from "@/app/_domains/organization/_services/create-organization.schema";
+import { CreateOrganizationSchema } from "@/app/_domains/organization/_services/create-organization.schema";
 
 type CreateOrganizationDialogProps = {
   open: boolean;

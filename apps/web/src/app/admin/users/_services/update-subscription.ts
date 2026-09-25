@@ -1,6 +1,6 @@
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateSubscriptionInput } from "./update-subscription.schema";
+import type { UpdateSubscriptionInput } from "./update-subscription.schema";
 
 export async function updateSubscription(
   input: UpdateSubscriptionInput,

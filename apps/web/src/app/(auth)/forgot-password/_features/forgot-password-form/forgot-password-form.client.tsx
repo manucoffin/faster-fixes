@@ -1,10 +1,8 @@
 "use client";
 
 import { loginUrl } from "@/app/_constants/routes";
-import {
-  RequestPasswordResetInput,
-  RequestPasswordResetSchema,
-} from "@/app/_domains/auth/_services/request-password-reset.schema";
+import type { RequestPasswordResetInput } from "@/app/_domains/auth/_services/request-password-reset.schema";
+import { RequestPasswordResetSchema } from "@/app/_domains/auth/_services/request-password-reset.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

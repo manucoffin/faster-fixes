@@ -6,7 +6,7 @@ import {
   CookieBanner,
 } from "@c15t/nextjs";
 import { ClientSideOptionsProvider } from "@c15t/nextjs/client";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type ConsentProviderProps = {
   children: ReactNode;

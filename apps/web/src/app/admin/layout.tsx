@@ -1,6 +1,6 @@
 import { loginUrl } from "@/app/_constants/routes";
 import { auth } from "@/server/auth";
-import { LayoutParams } from "@/types/next";
+import type { LayoutParams } from "@/types/next";
 import { Separator } from "@workspace/ui/components/separator";
 import {
   SidebarInset,

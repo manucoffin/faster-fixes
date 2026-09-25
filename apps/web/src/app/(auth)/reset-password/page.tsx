@@ -1,5 +1,5 @@
 import { forgotPasswordUrl, loginUrl } from "@/app/_constants/routes";
-import { PageParams } from "@/types/next";
+import type { PageParams } from "@/types/next";
 import {
   Alert,
   AlertDescription,

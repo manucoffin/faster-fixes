@@ -2,7 +2,7 @@ import { listJiraProjects } from "@/app/_domains/integration/_services/jira/jira
 import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
-import { ListAccessibleJiraProjectsInput } from "./list-accessible-jira-projects.schema";
+import type { ListAccessibleJiraProjectsInput } from "./list-accessible-jira-projects.schema";
 
 export async function listAccessibleJiraProjects(
   { projectId, userId }: ListAccessibleJiraProjectsInput & { userId: string },

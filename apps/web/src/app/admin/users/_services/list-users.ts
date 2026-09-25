@@ -1,6 +1,6 @@
 import { prisma } from "@workspace/db";
-import { Prisma } from "@workspace/db/types";
-import { ListUsersInput } from "./list-users.schema";
+import type { Prisma } from "@workspace/db/types";
+import type { ListUsersInput } from "./list-users.schema";
 
 // Shape returned for each row; kept in one place so both the default and the
 // feedback-count sort path hydrate users identically.

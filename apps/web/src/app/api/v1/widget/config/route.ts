@@ -8,7 +8,8 @@
 import { isAllowedOrigin } from "@/app/_domains/project/_helpers/is-allowed-origin";
 import { findProjectByPublicId } from "@/app/_domains/project/_services/find-project-by-public-id";
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getWidgetConfig } from "./_services/get-widget-config";
 
 export async function GET(req: NextRequest) {

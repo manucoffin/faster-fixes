@@ -6,7 +6,7 @@ import {
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { CreateGitHubIssueForFeedbackInput } from "./create-github-issue-for-feedback.schema";
+import type { CreateGitHubIssueForFeedbackInput } from "./create-github-issue-for-feedback.schema";
 
 export async function createGitHubIssueForFeedback(
   {

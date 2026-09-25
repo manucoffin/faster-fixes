@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
-import { CreateReviewerInput } from "./create-reviewer.schema";
+import type { CreateReviewerInput } from "./create-reviewer.schema";
 
 export async function createReviewer(
   { projectId, name, userId }: CreateReviewerInput & { userId: string },

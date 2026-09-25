@@ -1,5 +1,5 @@
 import { type UseQueryResult } from "@tanstack/react-query";
-import { JSX } from "react";
+import type { JSX } from "react";
 
 type QueryLike<TData> = {
   isLoading: boolean;

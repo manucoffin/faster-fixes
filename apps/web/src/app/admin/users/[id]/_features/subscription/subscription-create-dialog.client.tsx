@@ -47,10 +47,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
-import {
-  CreateSubscriptionInput,
-  CreateSubscriptionSchema,
-} from "@/app/admin/users/_services/create-subscription.schema";
+import type { CreateSubscriptionInput } from "@/app/admin/users/_services/create-subscription.schema";
+import { CreateSubscriptionSchema } from "@/app/admin/users/_services/create-subscription.schema";
 
 type SubscriptionCreateDialogProps = {
   userId: string;

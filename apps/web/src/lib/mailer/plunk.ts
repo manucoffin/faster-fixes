@@ -1,14 +1,14 @@
 import "server-only";
 
-import {
+import type {
   Contact,
   CreateContactOptions,
-  EmailError,
   EmailResponse,
   Mailer,
   MailOptions,
   UpdateContactOptions,
 } from "./types";
+import { EmailError } from "./types";
 
 type PlunkAttachment = {
   filename: string;

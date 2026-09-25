@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { cn } from "@workspace/ui/lib/utils";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type DashboardSectionProps = {
   title: ReactNode;

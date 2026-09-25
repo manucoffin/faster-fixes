@@ -1,7 +1,7 @@
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
-import { UpdateProjectJiraLinkInput } from "./update-project-jira-link.schema";
+import type { UpdateProjectJiraLinkInput } from "./update-project-jira-link.schema";
 
 export async function updateProjectJiraLink(
   {

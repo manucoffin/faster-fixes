@@ -1,7 +1,7 @@
+import type { inferParserType } from "nuqs/server";
 import {
   createLoader,
   createSearchParamsCache,
-  inferParserType,
   parseAsString,
 } from "nuqs/server";
 

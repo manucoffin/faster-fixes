@@ -1,6 +1,6 @@
 import { ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { ListProjectsInput } from "./list-projects.schema";
+import type { ListProjectsInput } from "./list-projects.schema";
 
 export async function listProjects(
   { organizationId, userId }: ListProjectsInput & { userId: string },

@@ -1,6 +1,6 @@
 "use client";
 
-import { Column } from "@tanstack/react-table";
+import type { Column } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import {

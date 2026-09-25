@@ -9,7 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog";
-import { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useState } from "react";
 import { PlanSelection } from "./plan-selection.client";
 
 type UpgradeSubscriptionDialogProps = {

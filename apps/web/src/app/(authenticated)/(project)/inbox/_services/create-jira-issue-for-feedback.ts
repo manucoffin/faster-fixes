@@ -6,7 +6,7 @@ import {
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { CreateJiraIssueForFeedbackInput } from "./create-jira-issue-for-feedback.schema";
+import type { CreateJiraIssueForFeedbackInput } from "./create-jira-issue-for-feedback.schema";
 
 export async function createJiraIssueForFeedback(
   { feedbackId, userId }: CreateJiraIssueForFeedbackInput & { userId: string },

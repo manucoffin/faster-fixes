@@ -1,10 +1,8 @@
 "use client";
 
 import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
-import {
-  RegisterUserInput,
-  RegisterUserSchema,
-} from "@/app/_domains/auth/_services/register-user.schema";
+import type { RegisterUserInput } from "@/app/_domains/auth/_services/register-user.schema";
+import { RegisterUserSchema } from "@/app/_domains/auth/_services/register-user.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";

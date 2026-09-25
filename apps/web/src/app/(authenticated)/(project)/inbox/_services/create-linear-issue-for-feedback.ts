@@ -6,7 +6,7 @@ import {
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
-import { CreateLinearIssueForFeedbackInput } from "./create-linear-issue-for-feedback.schema";
+import type { CreateLinearIssueForFeedbackInput } from "./create-linear-issue-for-feedback.schema";
 
 export async function createLinearIssueForFeedback(
   {

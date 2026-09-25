@@ -4,16 +4,16 @@ import { Resend } from "resend";
 
 import { isDevelopment } from "@/utils/environment/env";
 
-import {
+import type {
   AddContactToSegmentOptions,
   Contact,
   CreateContactOptions,
-  EmailError,
   EmailResponse,
   Mailer,
   MailOptions,
   UpdateContactOptions,
 } from "./types";
+import { EmailError } from "./types";
 
 const DEV_TEST_EMAIL = "delivered@resend.dev";
 
@@ -29,7 +29,7 @@ export class ResendMailer implements Mailer {
       if (!options.body && !options.templateId) {
         throw new EmailError(
           "Email body or templateId is required",
-          "MISSING_BODY"
+          "MISSING_BODY",
         );
       }
 
@@ -117,7 +117,7 @@ export class ResendMailer implements Mailer {
       if (!options.id && !options.email) {
         throw new EmailError(
           "Either id or email must be provided",
-          "MISSING_IDENTIFIER"
+          "MISSING_IDENTIFIER",
         );
       }
 
@@ -165,11 +165,13 @@ export class ResendMailer implements Mailer {
       return contact;
     },
 
-    addToSegment: async (options: AddContactToSegmentOptions): Promise<void> => {
+    addToSegment: async (
+      options: AddContactToSegmentOptions,
+    ): Promise<void> => {
       if (!options.id && !options.email) {
         throw new EmailError(
           "Either id or email must be provided",
-          "MISSING_IDENTIFIER"
+          "MISSING_IDENTIFIER",
         );
       }
 

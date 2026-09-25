@@ -27,10 +27,8 @@ import { Check, Copy, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import {
-  CreateProjectInput,
-  CreateProjectSchema,
-} from "@/app/(authenticated)/_services/create-project.schema";
+import type { CreateProjectInput } from "@/app/(authenticated)/_services/create-project.schema";
+import { CreateProjectSchema } from "@/app/(authenticated)/_services/create-project.schema";
 
 type CreateProjectDialogProps = {
   children?: React.ReactNode;

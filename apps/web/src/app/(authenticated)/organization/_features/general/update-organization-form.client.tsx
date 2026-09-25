@@ -19,10 +19,8 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";
-import {
-  UpdateOrganizationInput,
-  UpdateOrganizationSchema,
-} from "../../_services/update-organization.schema";
+import type { UpdateOrganizationInput } from "../../_services/update-organization.schema";
+import { UpdateOrganizationSchema } from "../../_services/update-organization.schema";
 
 export function UpdateOrganizationForm() {
   const trpc = useTRPC();

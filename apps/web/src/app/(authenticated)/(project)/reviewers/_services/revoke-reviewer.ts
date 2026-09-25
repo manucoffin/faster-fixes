@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { RevokeReviewerInput } from "./revoke-reviewer.schema";
+import type { RevokeReviewerInput } from "./revoke-reviewer.schema";
 
 export async function revokeReviewer(
   { reviewerId, userId }: RevokeReviewerInput & { userId: string },

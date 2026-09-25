@@ -4,7 +4,7 @@ import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/ji
 import { registerProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
-import { LinkJiraProjectInput } from "./link-jira-project.schema";
+import type { LinkJiraProjectInput } from "./link-jira-project.schema";
 
 export async function linkJiraProject(
   {

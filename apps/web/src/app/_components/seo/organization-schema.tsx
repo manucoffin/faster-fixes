@@ -12,7 +12,7 @@ import {
 } from "@/app/_constants/company";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { getAppUrl } from "@/utils/url/get-app-url";
-import { Organization, WithContext } from "schema-dts";
+import type { Organization, WithContext } from "schema-dts";
 
 export function OrganizationSchema() {
   const appUrl = getAppUrl();

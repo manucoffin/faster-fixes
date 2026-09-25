@@ -30,10 +30,8 @@ import { AlertCircleIcon, CheckIcon, InfoIcon, MailIcon } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  ChangeEmailInput,
-  ChangeEmailSchema,
-} from "@/app/(authenticated)/account/settings/_services/change-email.schema";
+import type { ChangeEmailInput } from "@/app/(authenticated)/account/settings/_services/change-email.schema";
+import { ChangeEmailSchema } from "@/app/(authenticated)/account/settings/_services/change-email.schema";
 
 export function EmailForm() {
   const trpc = useTRPC();

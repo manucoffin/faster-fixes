@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateProjectInput } from "./update-project.schema";
+import type { UpdateProjectInput } from "./update-project.schema";
 
 export async function updateProject(
   {

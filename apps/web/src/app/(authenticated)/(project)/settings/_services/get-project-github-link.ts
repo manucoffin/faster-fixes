@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { GetProjectGitHubLinkInput } from "./get-project-github-link.schema";
+import type { GetProjectGitHubLinkInput } from "./get-project-github-link.schema";
 
 export async function getProjectGitHubLink(
   { projectId, userId }: GetProjectGitHubLinkInput & { userId: string },

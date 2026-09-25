@@ -2,10 +2,8 @@
 
 import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants/routes";
 import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
-import {
-  SignInUserInput,
-  SignInUserSchema,
-} from "@/app/_domains/auth/_services/sign-in-user.schema";
+import type { SignInUserInput } from "@/app/_domains/auth/_services/sign-in-user.schema";
+import { SignInUserSchema } from "@/app/_domains/auth/_services/sign-in-user.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

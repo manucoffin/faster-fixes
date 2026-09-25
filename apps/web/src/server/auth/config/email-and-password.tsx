@@ -3,7 +3,7 @@ import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import { ResetPassword } from "@/lib/mailer/templates/reset-password";
 import { PreconditionFailedError } from "@/server/errors/domain-errors";
 import { render } from "@react-email/components";
-import { BetterAuthOptions } from "better-auth";
+import type { BetterAuthOptions } from "better-auth";
 
 export const emailAndPassword: NonNullable<
   BetterAuthOptions["emailAndPassword"]

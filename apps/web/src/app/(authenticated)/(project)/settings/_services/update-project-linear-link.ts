@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateProjectLinearLinkInput } from "./update-project-linear-link.schema";
+import type { UpdateProjectLinearLinkInput } from "./update-project-linear-link.schema";
 
 export async function updateProjectLinearLink(
   input: UpdateProjectLinearLinkInput & { userId: string },

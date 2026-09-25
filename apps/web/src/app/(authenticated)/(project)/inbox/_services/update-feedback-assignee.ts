@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateFeedbackAssigneeInput } from "./update-feedback-assignee.schema";
+import type { UpdateFeedbackAssigneeInput } from "./update-feedback-assignee.schema";
 
 export async function updateFeedbackAssignee(
   {

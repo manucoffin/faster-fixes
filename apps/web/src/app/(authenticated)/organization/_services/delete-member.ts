@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { DeleteMemberInput } from "./delete-member.schema";
+import type { DeleteMemberInput } from "./delete-member.schema";
 
 export async function deleteMember(
   { memberId, userId }: DeleteMemberInput & { userId: string },

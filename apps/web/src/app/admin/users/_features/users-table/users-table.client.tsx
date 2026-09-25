@@ -6,7 +6,7 @@ import { useTRPC } from "@/lib/trpc/trpc-client";
 import { getErrorMessage } from "@/utils/error/get-error-message";
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionPlanName } from "@/app/_domains/subscription";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";

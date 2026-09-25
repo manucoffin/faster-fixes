@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { ListArchivedFeedbackInput } from "./list-archived-feedback.schema";
+import type { ListArchivedFeedbackInput } from "./list-archived-feedback.schema";
 
 export async function listArchivedFeedback(
   {

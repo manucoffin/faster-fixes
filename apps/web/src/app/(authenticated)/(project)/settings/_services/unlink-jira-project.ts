@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { deregisterProjectJiraWebhook } from "@/app/_domains/integration/_services/jira/webhook-registration";
 import { prisma } from "@workspace/db";
-import { UnlinkJiraProjectInput } from "./unlink-jira-project.schema";
+import type { UnlinkJiraProjectInput } from "./unlink-jira-project.schema";
 
 // Not plan-gated: downgraded users must always be able to unlink. Deliberately
 // does not use getJiraAccess — unlinking must stay possible even when the

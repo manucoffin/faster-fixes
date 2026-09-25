@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UnlinkLinearTeamInput } from "./unlink-linear-team.schema";
+import type { UnlinkLinearTeamInput } from "./unlink-linear-team.schema";
 
 export async function unlinkLinearTeam(
   { projectId, userId }: UnlinkLinearTeamInput & { userId: string },

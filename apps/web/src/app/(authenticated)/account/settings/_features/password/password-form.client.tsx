@@ -22,10 +22,8 @@ import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  UpdatePasswordInput,
-  UpdatePasswordSchema,
-} from "@/app/(authenticated)/account/settings/_services/update-password.schema";
+import type { UpdatePasswordInput } from "@/app/(authenticated)/account/settings/_services/update-password.schema";
+import { UpdatePasswordSchema } from "@/app/(authenticated)/account/settings/_services/update-password.schema";
 
 export function PasswordForm() {
   const trpc = useTRPC();

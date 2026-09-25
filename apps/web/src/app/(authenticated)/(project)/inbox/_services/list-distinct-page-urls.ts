@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { ListDistinctPageUrlsInput } from "./list-distinct-page-urls.schema";
+import type { ListDistinctPageUrlsInput } from "./list-distinct-page-urls.schema";
 
 export async function listDistinctPageUrls(
   { projectId, userId }: ListDistinctPageUrlsInput & { userId: string },

@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { GetProjectJiraLinkInput } from "./get-project-jira-link.schema";
+import type { GetProjectJiraLinkInput } from "./get-project-jira-link.schema";
 
 export async function getProjectJiraLink(
   { projectId, userId }: GetProjectJiraLinkInput & { userId: string },

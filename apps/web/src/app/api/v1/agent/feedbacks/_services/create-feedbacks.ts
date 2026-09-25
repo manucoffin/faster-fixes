@@ -4,7 +4,7 @@ import {
 } from "@/server/auth/subscription";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { Prisma } from "@workspace/db/types";
+import type { Prisma } from "@workspace/db/types";
 import { resolveProjectId } from "../../_helpers/resolve-project-id";
 import type { CreateFeedbackItemInput } from "../../_services/agent.schema";
 import {

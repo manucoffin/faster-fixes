@@ -1,5 +1,5 @@
 import { stripeApi } from "@/server/stripe";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { getMonthlyChurnRate } from "./get-monthly-churn-rate";
 
 // Stripe exposes no direct "MRR" endpoint — the Dashboard figure is internal

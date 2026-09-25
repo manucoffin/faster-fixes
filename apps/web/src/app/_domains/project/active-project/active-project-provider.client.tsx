@@ -3,9 +3,9 @@
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   createContext,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,

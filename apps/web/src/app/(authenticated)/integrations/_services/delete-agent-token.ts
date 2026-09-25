@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { DeleteAgentTokenInput } from "./delete-agent-token.schema";
+import type { DeleteAgentTokenInput } from "./delete-agent-token.schema";
 
 export async function deleteAgentToken(
   {

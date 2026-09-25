@@ -1,7 +1,7 @@
 import { loginUrl } from "@/app/_constants/routes";
 import { hasCompletedOnboarding } from "@/app/_domains/user/_services/has-completed-onboarding";
 import { auth } from "@/server/auth";
-import { LayoutParams } from "@/types/next";
+import type { LayoutParams } from "@/types/next";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

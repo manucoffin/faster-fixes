@@ -4,7 +4,7 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { LinkLinearTeamInput } from "./link-linear-team.schema";
+import type { LinkLinearTeamInput } from "./link-linear-team.schema";
 
 export async function linkLinearTeam(
   {

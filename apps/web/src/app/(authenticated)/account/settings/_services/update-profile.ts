@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { UpdateProfileInput } from "./update-profile.schema";
+import type { UpdateProfileInput } from "./update-profile.schema";
 
 export async function updateProfile({
   userId,

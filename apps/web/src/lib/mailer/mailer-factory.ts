@@ -2,7 +2,7 @@ import "server-only";
 
 import { PlunkMailer } from "./plunk";
 import { ResendMailer } from "./resend";
-import { Mailer } from "./types";
+import type { Mailer } from "./types";
 
 type MailerProvider = "plunk" | "resend";
 

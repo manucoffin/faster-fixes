@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { DeleteReviewerInput } from "./delete-reviewer.schema";
+import type { DeleteReviewerInput } from "./delete-reviewer.schema";
 
 export async function deleteReviewer(
   { reviewerId, userId }: DeleteReviewerInput & { userId: string },

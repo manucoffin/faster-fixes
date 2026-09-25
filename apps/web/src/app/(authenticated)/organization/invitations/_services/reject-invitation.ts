@@ -1,7 +1,7 @@
 import { auth } from "@/server/auth";
 import { BadRequestError } from "@/server/errors/domain-errors";
 import { APIError } from "better-auth/api";
-import { RejectInvitationInput } from "./reject-invitation.schema";
+import type { RejectInvitationInput } from "./reject-invitation.schema";
 
 export async function rejectInvitation({
   invitationId,

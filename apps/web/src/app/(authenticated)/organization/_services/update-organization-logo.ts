@@ -2,7 +2,7 @@ import { ForbiddenError } from "@/server/errors/domain-errors";
 import { s3Client } from "@/server/storage";
 import { deleteObject } from "@better-upload/server/helpers";
 import { prisma } from "@workspace/db";
-import { UpdateOrganizationLogoInput } from "./update-organization-logo.schema";
+import type { UpdateOrganizationLogoInput } from "./update-organization-logo.schema";
 
 export async function updateOrganizationLogo(
   { organizationId, userId }: UpdateOrganizationLogoInput & { userId: string },

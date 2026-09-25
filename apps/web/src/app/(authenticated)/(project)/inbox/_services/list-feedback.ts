@@ -1,7 +1,7 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { ListFeedbackInput } from "./list-feedback.schema";
+import type { ListFeedbackInput } from "./list-feedback.schema";
 
 export async function listFeedback(
   { projectId, userId }: ListFeedbackInput & { userId: string },

@@ -1,7 +1,7 @@
 import { getUniqueOrganizationSlug } from "@/app/_domains/organization/_services/get-unique-organization-slug";
 import { ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateOrganizationInput } from "./update-organization.schema";
+import type { UpdateOrganizationInput } from "./update-organization.schema";
 
 export async function updateOrganization(
   {

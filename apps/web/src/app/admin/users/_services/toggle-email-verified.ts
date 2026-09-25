@@ -1,6 +1,6 @@
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { ToggleEmailVerifiedInput } from "./toggle-email-verified.schema";
+import type { ToggleEmailVerifiedInput } from "./toggle-email-verified.schema";
 
 export async function toggleEmailVerified(
   { userId, emailVerified }: ToggleEmailVerifiedInput,

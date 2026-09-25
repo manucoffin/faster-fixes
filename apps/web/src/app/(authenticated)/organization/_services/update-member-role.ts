@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
-import { UpdateMemberRoleInput } from "./update-member-role.schema";
+import type { UpdateMemberRoleInput } from "./update-member-role.schema";
 
 export async function updateMemberRole(
   { memberId, role, userId }: UpdateMemberRoleInput & { userId: string },

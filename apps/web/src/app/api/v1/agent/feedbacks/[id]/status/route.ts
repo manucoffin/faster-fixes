@@ -5,7 +5,8 @@
  */
 
 import { domainErrorResponse } from "@/server/errors/http-response";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { agentError } from "../../../_helpers/agent-error";
 import {
   FeedbackIdSchema,

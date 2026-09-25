@@ -4,7 +4,7 @@ import { inngest } from "@/server/inngest";
 import { getAccessibleResources } from "@/app/_domains/integration/_services/jira/jira-client";
 import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
-import { SelectJiraSiteInput } from "./select-jira-site.schema";
+import type { SelectJiraSiteInput } from "./select-jira-site.schema";
 
 export async function selectJiraSite(
   {

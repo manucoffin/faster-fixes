@@ -1,7 +1,7 @@
+import type { DomainError } from "@/server/errors/domain-errors";
 import {
   BadRequestError,
   ConflictError,
-  DomainError,
   ForbiddenError,
   NotFoundError,
   PreconditionFailedError,

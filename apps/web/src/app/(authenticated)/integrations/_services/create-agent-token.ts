@@ -1,7 +1,7 @@
 import { ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
-import { CreateAgentTokenInput } from "./create-agent-token.schema";
+import type { CreateAgentTokenInput } from "./create-agent-token.schema";
 
 export async function createAgentToken(
   {

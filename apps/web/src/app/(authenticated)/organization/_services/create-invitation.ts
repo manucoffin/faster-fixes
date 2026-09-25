@@ -2,7 +2,7 @@ import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
 import { APIError } from "better-auth/api";
 import { prisma } from "@workspace/db";
-import { CreateInvitationInput } from "./create-invitation.schema";
+import type { CreateInvitationInput } from "./create-invitation.schema";
 
 export async function createInvitation(
   {

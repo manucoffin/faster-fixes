@@ -2,7 +2,7 @@ import { listJiraIssueTypes } from "@/app/_domains/integration/_services/jira/ji
 import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
 import { getJiraAccess } from "./get-jira-access";
-import { ListJiraIssueTypesForProjectInput } from "./list-jira-issue-types-for-project.schema";
+import type { ListJiraIssueTypesForProjectInput } from "./list-jira-issue-types-for-project.schema";
 
 export async function listJiraIssueTypesForProject(
   {

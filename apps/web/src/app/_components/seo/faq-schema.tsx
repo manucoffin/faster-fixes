@@ -1,4 +1,4 @@
-import { FAQPage, WithContext } from "schema-dts";
+import type { FAQPage, WithContext } from "schema-dts";
 
 export type FaqItem = {
   question: string;
