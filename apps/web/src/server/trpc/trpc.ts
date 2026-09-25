@@ -90,16 +90,16 @@ export const protectedProcedure = publicProcedure
     return opts.next();
   });
 
+// The caller is signed in, so a missing role is a permission fact (ADR 0012):
+// 403, not 401.
 export const adminProcedure = protectedProcedure.use((opts) => {
   const { session } = opts.ctx;
 
   if (session.user.role !== "admin") {
     throw new TRPCError({
-      code: "UNAUTHORIZED",
+      code: "FORBIDDEN",
     });
   }
 
   return opts.next({ ctx: { session } });
 });
-
-// check this to implement in server actions: https://github.com/trpc/examples-next-app-dir/blob/main/src/server/trpc.ts
