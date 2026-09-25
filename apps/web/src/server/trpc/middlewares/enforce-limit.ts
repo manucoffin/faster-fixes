@@ -3,6 +3,9 @@ import { checkResourceLimit } from "@/server/auth/subscription";
 import { TRPCError } from "@trpc/server";
 import { middleware } from "../trpc";
 
+// Checks the limit on the active Organization and hands that same Organization
+// to the procedure, so the write lands in the Organization whose Plan was
+// checked rather than in one the client names.
 export function enforceLimit(resource: LimitableResource) {
   return middleware(async ({ ctx, next }) => {
     const organizationId = (
@@ -32,6 +35,6 @@ export function enforceLimit(resource: LimitableResource) {
       });
     }
 
-    return next();
+    return next({ ctx: { organizationId } });
   });
 }

@@ -1,5 +1,4 @@
 import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
 import { createReviewer } from "./reviewers/_services/create-reviewer";
@@ -285,8 +284,8 @@ export const projectsRouter = router({
         }),
       ),
   }),
-  // The two plan-gated writes keep `planAwareProcedure` and `enforceFeature`:
-  // a plan denial is transport policy and has no domain-error equivalent.
+  // The plan-gated writes keep `enforceFeature`: a plan denial is transport
+  // policy and has no domain-error equivalent.
   github: router({
     getLink: protectedProcedure
       .input(GetProjectGitHubLinkSchema)
@@ -302,9 +301,9 @@ export const projectsRouter = router({
         headers: await headers(),
       }),
     ),
-    linkRepo: planAwareProcedure
-      .use(enforceFeature("githubIntegration"))
+    linkRepo: protectedProcedure
       .input(LinkRepoSchema)
+      .use(enforceFeature("githubIntegration"))
       .mutation(({ input, ctx }) =>
         linkRepo({ ...input, userId: ctx.session.user.id }),
       ),
@@ -317,9 +316,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    updateLink: planAwareProcedure
-      .use(enforceFeature("githubIntegration"))
+    updateLink: protectedProcedure
       .input(UpdateProjectGitHubLinkSchema)
+      .use(enforceFeature("githubIntegration"))
       .mutation(({ input, ctx }) =>
         updateProjectGitHubLink({
           projectId: input.projectId,
@@ -360,9 +359,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    linkTeam: planAwareProcedure
-      .use(enforceFeature("linearIntegration"))
+    linkTeam: protectedProcedure
       .input(LinkLinearTeamSchema)
+      .use(enforceFeature("linearIntegration"))
       .mutation(({ input, ctx }) =>
         linkLinearTeam({ ...input, userId: ctx.session.user.id }),
       ),
@@ -375,9 +374,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    updateLink: planAwareProcedure
-      .use(enforceFeature("linearIntegration"))
+    updateLink: protectedProcedure
       .input(UpdateProjectLinearLinkSchema)
+      .use(enforceFeature("linearIntegration"))
       .mutation(({ input, ctx }) =>
         updateProjectLinearLink({ ...input, userId: ctx.session.user.id }),
       ),
@@ -408,9 +407,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    linkProject: planAwareProcedure
-      .use(enforceFeature("jiraIntegration"))
+    linkProject: protectedProcedure
       .input(LinkJiraProjectSchema)
+      .use(enforceFeature("jiraIntegration"))
       .mutation(({ input, ctx }) =>
         linkJiraProject({ ...input, userId: ctx.session.user.id }),
       ),
@@ -423,9 +422,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    updateLink: planAwareProcedure
-      .use(enforceFeature("jiraIntegration"))
+    updateLink: protectedProcedure
       .input(UpdateProjectJiraLinkSchema)
+      .use(enforceFeature("jiraIntegration"))
       .mutation(({ input, ctx }) =>
         updateProjectJiraLink({
           projectId: input.projectId,
@@ -450,9 +449,9 @@ export const projectsRouter = router({
         headers: await headers(),
       }),
     ),
-    linkChannel: planAwareProcedure
-      .use(enforceFeature("slackIntegration"))
+    linkChannel: protectedProcedure
       .input(LinkSlackChannelSchema)
+      .use(enforceFeature("slackIntegration"))
       .mutation(({ input, ctx }) =>
         linkSlackChannel({
           projectId: input.projectId,
@@ -461,9 +460,9 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    updateLink: planAwareProcedure
-      .use(enforceFeature("slackIntegration"))
+    updateLink: protectedProcedure
       .input(UpdateProjectSlackLinkSchema)
+      .use(enforceFeature("slackIntegration"))
       .mutation(({ input, ctx }) =>
         updateProjectSlackLink({
           projectId: input.projectId,

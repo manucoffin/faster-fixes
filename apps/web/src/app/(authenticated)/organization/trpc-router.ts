@@ -1,5 +1,4 @@
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
 import { createInvitation } from "./_services/create-invitation";
@@ -64,13 +63,13 @@ export const organizationRouter = router({
     ),
   invitation: router({
     // The seat limit is a plan fact the context answers, so it stays on the
-    // procedure as the middleware it already was.
-    create: planAwareProcedure
+    // procedure, which invites into the Organization the limit was checked on.
+    create: protectedProcedure
       .use(enforceLimit("seats"))
       .input(CreateInvitationSchema)
       .mutation(async ({ input, ctx }) =>
         createInvitation({
-          organizationId: input.organizationId,
+          organizationId: ctx.organizationId,
           email: input.email,
           role: input.role,
           userId: ctx.session.user.id,

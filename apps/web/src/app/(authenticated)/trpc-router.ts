@@ -3,7 +3,6 @@ import { accountRouter } from "@/app/(authenticated)/account/trpc-router";
 import { integrationsRouter } from "@/app/(authenticated)/integrations/trpc-router";
 import { organizationRouter } from "@/app/(authenticated)/organization/trpc-router";
 import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { createProject } from "./_services/create-project";
 import { CreateProjectSchema } from "./_services/create-project.schema";
@@ -18,12 +17,12 @@ export const authenticatedRouter = router({
 
   // The two operations the authenticated shell owns itself: the sidebar's
   // create-project dialog and the header's feedback popover.
-  createProject: planAwareProcedure
+  createProject: protectedProcedure
     .use(enforceLimit("projects"))
     .input(CreateProjectSchema)
     .mutation(({ input, ctx }) =>
       createProject({
-        organizationId: input.organizationId,
+        organizationId: ctx.organizationId,
         userId: ctx.session.user.id,
         name: input.name,
         domain: input.domain,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
-import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,7 +40,6 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   const trpc = useTRPC();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: activeOrg } = useActiveOrganization();
   const { setActiveProject } = useActiveProject();
 
   const [open, setOpen] = React.useState(false);
@@ -53,7 +51,6 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   const form = useForm<CreateProjectInput>({
     resolver: zodResolver(CreateProjectSchema),
     defaultValues: {
-      organizationId: activeOrg?.id ?? "",
       name: "",
       domain: "",
     },
@@ -100,13 +97,6 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
       createProject.reset();
     }
   };
-
-  // Keep organizationId in sync when activeOrg changes
-  React.useEffect(() => {
-    if (activeOrg?.id) {
-      form.setValue("organizationId", activeOrg.id);
-    }
-  }, [activeOrg?.id, form]);
 
   return (
     <>

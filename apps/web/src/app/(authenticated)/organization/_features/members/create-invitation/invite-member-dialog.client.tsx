@@ -1,6 +1,5 @@
 "use client";
 
-import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +41,6 @@ export function InviteMemberDialog({
   onOpenChange,
 }: InviteMemberDialogProps) {
   const trpc = useTRPC();
-  const { data: activeOrg } = useActiveOrganization();
   const queryClient = useQueryClient();
 
   const form = useForm<InviteMemberFormInputs>({
@@ -75,10 +73,7 @@ export function InviteMemberDialog({
   );
 
   const onSubmit = (data: InviteMemberFormInputs) => {
-    if (!activeOrg) return;
-
     createInvitation.mutate({
-      organizationId: activeOrg.id,
       email: data.email,
       role: "member",
     });

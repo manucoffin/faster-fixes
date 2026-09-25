@@ -10,7 +10,11 @@ export async function createInvitation(
     role,
     userId,
     headers,
-  }: CreateInvitationInput & { userId: string; headers: Headers },
+  }: CreateInvitationInput & {
+    organizationId: string;
+    userId: string;
+    headers: Headers;
+  },
   db: typeof prisma = prisma,
 ) {
   // The denial needs the loaded membership and its role, so it belongs here.
