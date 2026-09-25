@@ -1,5 +1,7 @@
 "use client";
 
+import { canManageBilling } from "@/app/_domains/organization";
+import { useActiveMemberRole } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import type { buttonVariants } from "@workspace/ui/components/button";
@@ -19,6 +21,7 @@ export function ManageSubscriptionButton({
   ...props
 }: ManageSubscriptionButtonProps) {
   const trpc = useTRPC();
+  const { data: memberRole } = useActiveMemberRole();
 
   const createBillingPortalMutation = useMutation(
     trpc.authenticated.account.billing.portal.create.mutationOptions({
@@ -36,6 +39,10 @@ export function ManageSubscriptionButton({
 
   async function handleClick() {
     createBillingPortalMutation.mutate();
+  }
+
+  if (!canManageBilling(memberRole?.role ?? "")) {
+    return null;
   }
 
   return (
