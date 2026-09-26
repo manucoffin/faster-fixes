@@ -27,6 +27,8 @@ jobs:
 
       # Builds, typechecks, lints, then packs each @fasterfixes/* tarball and lints it with publint,
       # so a broken "exports" or "files" field fails the PR instead of the release.
+      # The widget build also fails when its minified IIFE exceeds the footprint ceiling
+      # recorded next to the check in packages/widget/tsdown.config.ts.
       - run: pnpm check:packages
 
   knip:
