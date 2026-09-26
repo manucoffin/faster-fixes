@@ -52,15 +52,18 @@ convention (a `_` binding is imposed by the caller and ignored on purpose),
 `eqeqeq` (`== null` allowed), `object-shorthand` and ASCII identifiers
 (`id-match`). On `**/src/**/*.{ts,tsx}`: `consistent-type-definitions` (`type`
 over `interface`), `consistent-type-imports`, `no-inferrable-types`,
-`no-nested-ternary`, `no-else-return` (no `else if` either) and `max-depth: 3`.
+`no-nested-ternary`, `no-else-return` (no `else if` either), `max-depth: 3`,
+`no-console` (`info`, `warn` and `error` allowed), `prefer-template` and
+`curly: multi-line`.
 
 The same glob runs the type-aware rules through the TypeScript project service:
 `await-thenable`, `no-floating-promises` (`void` marks a deliberate
 fire-and-forget), `no-misused-promises` (JSX attributes excepted),
 the `no-unsafe-*` family (`argument`, `assignment`, `call`, `member-access`,
 `return`, `enum-comparison`; `no-unsafe-assignment` is off in `*.test.ts(x)`),
-`no-unnecessary-type-assertion`,
-`restrict-template-expressions`, `no-base-to-string`, `no-deprecated`,
+`no-unnecessary-type-assertion`, `no-unnecessary-condition`,
+`prefer-nullish-coalescing`, `no-non-null-assertion` (off in `*.test.ts(x)`),
+`return-await: in-try-catch`, `restrict-template-expressions`, `no-base-to-string`, `no-deprecated`,
 `only-throw-error` and `switch-exhaustiveness-check`. They read the generated
 types, so a fresh clone builds the packages, the Prisma client and the Next.js
 route types before it lints. `next-config.test.js` lints made-up paths, so it

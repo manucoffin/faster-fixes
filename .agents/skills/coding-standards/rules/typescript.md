@@ -52,6 +52,20 @@ catches what `tsc` accepts:
   (`z.email()`, `z.url()`, `z.uuid()`, `z.flattenError()`).
 - `only-throw-error`: only `Error` instances are thrown.
 - `switch-exhaustiveness-check`: a `switch` over a union handles every member or has a `default`.
+- `no-unnecessary-condition`: a `?.`, `??` or `if` the types already settle. Drop the guard when the
+  type is right; fix the type at its source when it lies (external data, a mistyped library value).
+  Never silence it with a cast.
+- `prefer-nullish-coalescing`: `??` over `||`. When `""`, `0` or `false` must fall back too, write
+  the comparison out (`value === "" ? fallback : value`).
+- `no-non-null-assertion`: no `x!`. Narrow with a guard, or throw a named error when the invariant
+  breaks (a domain error in a service). A required environment variable is read with
+  `requireEnv("NAME", process.env.NAME)` (`@/utils/environment/require-env`), and the auth origin
+  with `getAuthBaseUrl()` (`@/utils/url/get-auth-base-url`). Off in `*.test.ts(x)`.
+- `return-await: in-try-catch`: a promise returned inside `try` is awaited, so its rejection reaches
+  the `catch`; elsewhere it is returned bare.
+
+Syntactic, on the same glob: `no-console` (`console.info`, `warn` and `error` are the deliberate log
+lines; `log` and `debug` are debugging leftovers), `prefer-template` and `curly: multi-line`.
 
 ## Language
 

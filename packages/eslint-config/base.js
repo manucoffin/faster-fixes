@@ -98,6 +98,13 @@ export const config = withBinarySeverity([
       // em dash in user-facing text. Only the node kinds that can carry copy
       // are read, so a comment keeps its dashes.
       "local/no-em-dash-in-copy": "error",
+      // `console.log` and `console.debug` are debugging leftovers. `info`,
+      // `warn` and `error` are the deliberate operational log lines: no
+      // logger exists, and the host captures stdout.
+      "no-console": ["error", { allow: ["info", "warn", "error"] }],
+      "prefer-template": "error",
+      // A single-line body may drop its braces; a body that wraps may not.
+      curly: ["error", "multi-line"],
     },
   },
   {
@@ -145,6 +152,19 @@ export const config = withBinarySeverity([
       "@typescript-eslint/no-unsafe-return": "error",
       "@typescript-eslint/no-unsafe-enum-comparison": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
+      // A check the types already settle (`?.` on a value that cannot be
+      // nullish, `if (x)` on a value that is always truthy) is defensive code
+      // that hides what the value really is. Fix the type, or drop the check.
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      // `||` also replaces `0`, `""` and `false`. `??` replaces only a
+      // missing value, which is almost always what a fallback means.
+      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      // `!` tells the compiler to stop checking. Narrow the value, or fail
+      // with a named error when the invariant does not hold.
+      "@typescript-eslint/no-non-null-assertion": "error",
+      // Inside `try`, a returned promise must be awaited or its rejection
+      // escapes the `catch`; elsewhere the `await` is noise.
+      "@typescript-eslint/return-await": ["error", "in-try-catch"],
       // `${object}` prints `[object Object]`.
       "@typescript-eslint/restrict-template-expressions": "error",
       "@typescript-eslint/no-base-to-string": "error",
@@ -167,6 +187,9 @@ export const config = withBinarySeverity([
     files: ["**/*.test.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",
+      // `mock.calls[0]!` on a value the test just arranged: if the invariant
+      // breaks, the test fails, which is the check.
+      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
   // The exception surface: a rule may be switched off in a file, in writing.
