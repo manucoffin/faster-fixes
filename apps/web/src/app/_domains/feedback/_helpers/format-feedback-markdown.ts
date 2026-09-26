@@ -40,14 +40,14 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
   // Where to look — most actionable info first
   const locationLines: string[] = [];
   locationLines.push(`**Page URL:** ${f.pageUrl}`);
-  if (md?.reactComponentPath) {
+  if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
     locationLines.push(`**Component tree:** \`${md.reactComponentPath}\``);
   }
-  if (md?.sourceFile) {
+  if (typeof md?.sourceFile === "string" && md.sourceFile) {
     locationLines.push(`**Source file:** \`${md.sourceFile}\``);
   }
   if (f.selector) locationLines.push(`**DOM selector:** \`${f.selector}\``);
-  if (md?.elementDescription) {
+  if (typeof md?.elementDescription === "string" && md.elementDescription) {
     locationLines.push(`**Element:** ${md.elementDescription}`);
   }
 
@@ -66,7 +66,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     .join("\n");
   lines.push(quotedComment);
 
-  if (md?.nearbyText) {
+  if (typeof md?.nearbyText === "string" && md.nearbyText) {
     lines.push("");
     lines.push(`**Nearby text:** "${md.nearbyText}"`);
   }

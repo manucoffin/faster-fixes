@@ -50,10 +50,10 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
   // Component path + selector
   const locationParts: string[] = [];
   const md = feedback.metadata;
-  if (md?.reactComponentPath) {
+  if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
     locationParts.push(`\`${md.reactComponentPath}\``);
   }
-  if (md?.sourceFile) {
+  if (typeof md?.sourceFile === "string" && md.sourceFile) {
     locationParts.push(`\`${md.sourceFile}\``);
   }
   if (feedback.selector) {

@@ -15,6 +15,6 @@ export function createMailer(): Mailer {
     case "resend":
       return new ResendMailer(process.env.RESEND_API_KEY!);
     default:
-      throw new Error(`Unsupported mailer provider: ${provider}`);
+      throw new Error(`Unsupported mailer provider: ${String(provider)}`);
   }
 }
