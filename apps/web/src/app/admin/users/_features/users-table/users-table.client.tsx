@@ -127,16 +127,18 @@ export function UsersTable() {
       return;
     }
 
-    if (searchInput !== search) {
-      isUserSearch.current = true; // Indicate that the search is triggered by user
-      const handler = setTimeout(() => {
-        void setSearch(searchInput);
-      }, 500); // 500ms debounce
-
-      return () => {
-        clearTimeout(handler);
-      };
+    if (searchInput === search) {
+      return;
     }
+
+    isUserSearch.current = true; // Indicate that the search is triggered by user
+    const handler = setTimeout(() => {
+      void setSearch(searchInput);
+    }, 500); // 500ms debounce
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [searchInput, search, setSearch]);
 
   // Reset to first page when the debounced search changes, but only if it was a user search
