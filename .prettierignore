@@ -1,0 +1,2 @@
+# Untracked Prisma client. The nested .gitignore that excludes it is not read by Prettier.
+packages/database/generated
