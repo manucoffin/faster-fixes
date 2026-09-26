@@ -83,39 +83,9 @@ ruleTester.run("services-verb-prefix", servicesVerbPrefixRule, {
       code: `export function plan() {}\n`,
     },
     {
-      name: "the exported name keeps the house spelling of a proper noun",
-      filename: `${SERVICES}/get-github-installation.ts`,
-      code: `export async function getGitHubInstallation() {}\n`,
-    },
-    {
-      name: "an arrow function named after the file",
-      filename: `${SERVICES}/list-plans.ts`,
-      code: `export const listPlans = async () => [];\n`,
-    },
-    {
-      name: "`export { … }` of the function the file is named after",
+      name: "a drifted export is left to services-filename-matches-export",
       filename: `${SERVICES}/get-plan.ts`,
-      code: `function getPlan() {}\nexport { getPlan };\n`,
-    },
-    {
-      name: "a derived output type beside the service",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `export function getPlan() {}\nexport type GetPlanOutput = ReturnType<typeof getPlan>;\n`,
-    },
-    {
-      name: "`export type { … }` of the derived alias",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `export function getPlan() {}\ntype GetPlanOutput = ReturnType<typeof getPlan>;\nexport type { GetPlanOutput };\n`,
-    },
-    {
-      name: "an inner function that is not exported",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `function toRow() {}\nexport function getPlan() {\n  return toRow();\n}\n`,
-    },
-    {
-      name: "an exported constant that is not a function",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `export const PLAN_SELECT = { id: true };\nexport function getPlan() {}\n`,
+      code: `export function fetchPlan() {}\nexport function isFreePlan() {}\n`,
     },
   ],
   invalid: [
@@ -195,35 +165,6 @@ ruleTester.run("services-verb-prefix", servicesVerbPrefixRule, {
       code: `export function createStripeClient() {}\n`,
       options: [{ exemptSuffixes: [] }],
       errors: [{ messageId: "unknownVerb" }],
-    },
-    {
-      name: "an exported function that drifted from the file name",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `export function fetchPlan() {}\n`,
-      errors: [
-        {
-          message:
-            /`fetchPlan` is exported from `get-plan\.ts`.+rename the function to `getPlan`/,
-        },
-      ],
-    },
-    {
-      name: "a second exported function riding along",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `export function getPlan() {}\nexport function isFreePlan() {\n  return true;\n}\n`,
-      errors: [{ messageId: "exportNameMismatch" }],
-    },
-    {
-      name: "an exported arrow function that drifted from the file name",
-      filename: `${SERVICES}/list-plans.ts`,
-      code: `export const listAllPlans = async () => [];\n`,
-      errors: [{ messageId: "exportNameMismatch" }],
-    },
-    {
-      name: "`export { … }` of a function the file is not named after",
-      filename: `${SERVICES}/get-plan.ts`,
-      code: `function getPlan() {}\nfunction isFreePlan() {}\nexport { getPlan, isFreePlan };\n`,
-      errors: [{ messageId: "exportNameMismatch" }],
     },
   ],
 });

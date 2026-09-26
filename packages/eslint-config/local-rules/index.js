@@ -1,3 +1,4 @@
+import { appFilePlacementRule } from "./app-file-placement.js";
 import { errorBoundaryRendersErrorScreenRule } from "./error-boundary-renders-error-screen.js";
 import { kebabCasePathRule } from "./kebab-case-path.js";
 import { noClientDomainErrorInstanceofRule } from "./no-client-domain-error-instanceof.js";
@@ -10,6 +11,7 @@ import { noEmDashInCopyRule } from "./no-em-dash-in-copy.js";
 import { noFeatureNestingRule } from "./no-feature-nesting.js";
 import { noFormMutationInEffectRule } from "./no-form-mutation-in-effect.js";
 import { noFormStatePropRule } from "./no-form-state-prop.js";
+import { noQueryStatusBranchRule } from "./no-query-status-branch.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
 import { noRelativeTestMockRule } from "./no-relative-test-mock.js";
 import { noRestrictedPatternsRule } from "./no-restricted-patterns.js";
@@ -20,13 +22,17 @@ import { requireServerActionSuffixRule } from "./require-server-action-suffix.js
 import { requireServiceOutputTypeRule } from "./require-service-output-type.js";
 import { requireUseClientSuffixRule } from "./require-use-client-suffix.js";
 import { schemaMustBePureZodRule } from "./schema-must-be-pure-zod.js";
+import { servicesFilenameMatchesExportRule } from "./services-filename-matches-export.js";
 import { servicesNoBareErrorRule } from "./services-no-bare-error.js";
 import { servicesNoTrpcImportRule } from "./services-no-trpc-import.js";
 import { servicesReadNeverWritesRule } from "./services-read-never-writes.js";
 import { servicesVerbPrefixRule } from "./services-verb-prefix.js";
+import { testFilePlacementRule } from "./test-file-placement.js";
+import { typesFolderTypeOnlyRule } from "./types-folder-type-only.js";
 
 export const localRulesPlugin = {
   rules: {
+    "app-file-placement": appFilePlacementRule,
     "error-boundary-renders-error-screen": errorBoundaryRendersErrorScreenRule,
     "kebab-case-path": kebabCasePathRule,
     "no-client-domain-error-instanceof": noClientDomainErrorInstanceofRule,
@@ -39,6 +45,7 @@ export const localRulesPlugin = {
     "no-feature-nesting": noFeatureNestingRule,
     "no-form-mutation-in-effect": noFormMutationInEffectRule,
     "no-form-state-prop": noFormStatePropRule,
+    "no-query-status-branch": noQueryStatusBranchRule,
     "no-raw-tailwind-colors": noRawTailwindColorsRule,
     "no-relative-test-mock": noRelativeTestMockRule,
     "no-restricted-patterns": noRestrictedPatternsRule,
@@ -49,9 +56,12 @@ export const localRulesPlugin = {
     "require-service-output-type": requireServiceOutputTypeRule,
     "require-use-client-suffix": requireUseClientSuffixRule,
     "schema-must-be-pure-zod": schemaMustBePureZodRule,
+    "services-filename-matches-export": servicesFilenameMatchesExportRule,
     "services-no-bare-error": servicesNoBareErrorRule,
     "services-no-trpc-import": servicesNoTrpcImportRule,
     "services-read-never-writes": servicesReadNeverWritesRule,
     "services-verb-prefix": servicesVerbPrefixRule,
+    "test-file-placement": testFilePlacementRule,
+    "types-folder-type-only": typesFolderTypeOnlyRule,
   },
 };

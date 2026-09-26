@@ -5,7 +5,7 @@ The data/IO layer lives in a per-scope `_services/` folder; tRPC is thin transpo
 ## The `_services/` folder
 
 - `_services/` is the **data/IO layer** of a scope (a domain or a route segment): reads, writes, IO-predicates, write-orchestrations, `*.inngest.ts` jobs, and `*.schema.ts`. An `*.inngest.ts` file may sit nowhere else, and `createFunction` may be called nowhere else: enforced by `local/require-inngest-function-placement`.
-- Files are **plain-named after their export** with a load-bearing **verb prefix** — `get-user.ts` exports `getUser`. **No role suffixes** (`*.server.query.ts`, `*.trpc.query.ts` are gone). The verb and the export name are enforced by `local/services-verb-prefix`; the absence of role suffixes is **prose only**.
+- Files are **plain-named after their export** with a load-bearing **verb prefix** — `get-user.ts` exports `getUser`. **No role suffixes** (`*.server.query.ts`, `*.trpc.query.ts` are gone). The verb is enforced by `local/services-verb-prefix`, the export name by `local/services-filename-matches-export`; the absence of role suffixes is **prose only**.
 - **All data ops go here, even single-use** (**prose only**, no rule). A solitary query still lives in `_services/`, not colocated in a feature. Control clutter with route-tree granularity (each segment owns its `_services/` + router) and, secondarily, subfolders inside `_services/` when ~3+ files cluster. The database import half is enforced: outside `_services/` and `src/server/`, a runtime `@workspace/db` import is a row of `local/no-cross-layer-import`.
 
 ## Verb vocabulary (enforced)
@@ -22,8 +22,8 @@ The **folder** sets the layer (`_services/` = IO); the **verb** sets the directi
 
 - **A module that is not an operation keeps its noun name, and says so with a suffix.** `services-verb-prefix` exempts a basename ending in `-client`, `-app`, `-error`, `-errors`, `-crypto`, `-access`, `-cookie` or `-registration` (the `exemptSuffixes` option in `packages/eslint-config/next.js`), so `github-app.ts`, `linear-client.ts`, `jira-client.ts`, `jira-rest-client.ts`, `slack-client.ts`, `token-access.ts`, `webhook-registration.ts`, the named infrastructure error modules (`integration-configuration-error.ts`, `linear-request-error.ts`, `slack-request-error.ts`) and the shared `oauth-state-cookie.ts` are correct as they stand. Do not invent a `get-` name for a client factory, and do not invent a new suffix to dodge the verb list: a module with neither a verb nor an exempt suffix is reported. The provider token cipher is uniformly `token-crypto.ts`.
 - **Every other basename opens with a verb from the vocabulary.** The read verbs are the closed ADR-0011 set; the write verbs are the `writeVerbs` option, which is the open set the tree uses today. Coining a precise domain verb for a distinct domain transition is a one-line addition there, reviewed in the diff, and the report names the file to edit. `get-all-…` and `get-paginated-…` are reported by name: one `list-` entrypoint takes an options object.
-- **In a non-exempt service file, an exported function is named after the file.** `get-plan.ts` exports `getPlan` and nothing else callable; a second exported function is reported and belongs in its own file or in `_helpers/`. The comparison ignores letter case, so a proper noun keeps its house spelling (`get-github-installation.ts` exports `getGitHubInstallation`).
-- **`*.inngest.ts`, `*.schema.ts`, `index.ts`, `_`-prefixed and test files are exempt** from `services-verb-prefix` and `require-service-output-type`; `services-no-bare-error` still applies to all of them. The suffix is load-bearing, not decoration: it is also why `handle-linear-oauth-revoked.inngest.ts` may carry `handle-` without colliding with the verb reserved for the one webhook orchestration per Tracker.
+- **The export half is `local/services-filename-matches-export`**: a non-exempt service file exports the value it is named after and no other function, and its report says how to fix it.
+- **`*.inngest.ts`, `*.schema.ts`, `index.ts`, `_`-prefixed and test files are exempt** from `services-verb-prefix`, `services-filename-matches-export` and `require-service-output-type`; `services-no-bare-error` still applies to all of them. The suffix is load-bearing, not decoration: it is also why `handle-linear-oauth-revoked.inngest.ts` may carry `handle-` without colliding with the verb reserved for the one webhook orchestration per Tracker.
 
 ### A live external identifier survives a file move
 
@@ -125,7 +125,8 @@ A convention of this file that is not listed here is marked **prose only** where
 
 Inside `_services/`:
 
-- `services-verb-prefix`: the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-`, the exempt module suffixes, and the exported function named after the file.
+- `services-verb-prefix`: the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-` and the exempt module suffixes.
+- `services-filename-matches-export`: the file exports the value it is named after and no other function; same exemptions as the verb rule.
 - `services-read-never-writes`: a `get-`, `list-`, `find-`, `search-`, `has-`, `is-` or `count-` file may not call a Prisma write method on a database client.
 - `services-no-trpc-import`: no `@/server/trpc`, `@/lib/trpc` or `@trpc/*` from a service, type-only imports included.
 - `services-no-bare-error`: throw a `DomainError` subclass, not `new Error(...)`. Applies to `*.inngest.ts`, `*.schema.ts` and `index.ts` too, which the two verb rules exempt.
@@ -150,9 +151,12 @@ At the client/server boundary:
 On the folders and the schemas:
 
 - `no-feature-nesting`: one grouping level under a features folder, and no features folder inside one.
+- `app-file-placement`: every folder of an `src/app/` path is a bucket, a domain or a segment its tier allows. See [architecture.md](architecture.md).
+- `types-folder-type-only`: a `_types/` file holds types only; a runtime value is a helper.
+- `test-file-placement`: a test sits beside its subject, in `_helpers/`, `_services/` or a `route.test.ts`; no `*.spec.ts(x)`, no `__tests__/`. See [testing.md](testing.md).
 - `schema-must-be-pure-zod` and `require-schema-conventions` on `**/*.schema.ts`. See [schemas.md](schemas.md).
 - `no-raw-tailwind-colors` on class strings, and `no-relative-test-mock` on `*.test.ts(x)`. See [frontend.md](frontend.md) and [testing.md](testing.md).
-- `require-named-props-type` on component props, `no-form-state-prop` and `no-form-mutation-in-effect` on react-hook-form, and `error-boundary-renders-error-screen` on `error.tsx` / `global-error.tsx`. See [frontend.md](frontend.md), [code-shape.md](code-shape.md) and [errors.md](errors.md).
+- `require-named-props-type` on component props, `no-query-status-branch` on query status, `no-form-state-prop` and `no-form-mutation-in-effect` on react-hook-form, and `error-boundary-renders-error-screen` on `error.tsx` / `global-error.tsx`. See [frontend.md](frontend.md), [code-shape.md](code-shape.md) and [errors.md](errors.md).
 - The `eslint-plugin-react-hooks` v7 preset (`recommended-latest`) on every React module: the rules of hooks, `exhaustive-deps` and the React Compiler rules (`set-state-in-effect`, `refs`, `purity`, `immutability`, `static-components`, `incompatible-library`, ...). Each rule's message says what to do instead.
 
 The five boundary rules (`no-client-import-of-server-folder`, `no-client-import-of-services`,

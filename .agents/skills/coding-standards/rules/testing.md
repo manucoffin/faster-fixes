@@ -15,14 +15,14 @@ The reference test to copy the shape of is `src/utils/crypto/token-cipher.test.t
 
 ## Where tests live
 
-**Prose only**, no rule: `vitest.config.ts` includes `src/**/*.test.{ts,tsx}` wherever it sits, and a rule pairing a test with a source file could not tell a colocated unit test from the two structural checks below, which sit next to a folder and have no source file of their own.
+Enforced by `local/test-file-placement`: a test whose basename matches no file beside it is reported, and so are a `*.spec.ts(x)` name and a `__tests__/` folder. A structural check (below) has no subject by design and is named in `structuralCheckPathPatterns` in `packages/eslint-config/next.js`.
 
 - **Colocate.** A test sits **next to the file it tests**, same folder, same basename + `.test.ts`: `token-cipher.test.ts` beside `token-cipher.ts`.
 - One test file per unit. If a `_services/` file exports one function, its test file tests that function.
 
 ## What to test (current scope)
 
-**Prose only**, no rule, for this section and "The route handler is the third seam" below. The one convention here that is enforced is where a module mock may point, two sections down.
+Inside `src/app/`, the layers a test may sit in are enforced by `local/test-file-placement`: `_helpers/`, `_services/` and a route handler's `route.test.ts`. The rest of this section and "The route handler is the third seam" below are **prose only**, apart from where a module mock may point, two sections down.
 
 Keep the surface small and high-value. **Test only pure functions (in `_helpers/`, `src/utils/`, `src/server/`) and dependency-injected `_services/` functions**, plus the two seams below (contract route handlers, structural checks). Nothing else for now.
 

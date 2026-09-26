@@ -15,7 +15,7 @@ regression.
 
 ## The rule set
 
-Twenty-five rules, every one `error`. The glob is the one it is wired on in `next.js`, or in
+Thirty rules, every one `error`. The glob is the one it is wired on in `next.js`, or in
 `base.js` where the row says so; "options" names the constant it reads.
 
 | Rule                                  | Glob                     | Holds                                                                                             | Options                    |
@@ -35,9 +35,14 @@ Twenty-five rules, every one `error`. The glob is the one it is wired on in `nex
 | `kebab-case-path`                     | every linted file        | (`base.js`) every folder and file name is kebab-case; `_` buckets and route segments excepted     |                            |
 | `no-form-state-prop`                  | `**/src/**/*.{ts,tsx}`   | a react-hook-form `formState` is never handed to a child as a whole                               |                            |
 | `no-form-mutation-in-effect`          | `**/src/**/*.{ts,tsx}`   | no form `reset` or `setValue` inside an effect: `useForm({ values })` or the event handler        |                            |
+| `no-query-status-branch`              | `**/src/**/*.tsx`        | a component renders a query through `matchQueryStatus`, never by branching on its status flags    |                            |
+| `test-file-placement`                 | `**/src/**/*.{ts,tsx}`   | a test sits beside its subject, in a layer the harness tests; no `*.spec` file, no `__tests__/`   |                            |
 | `error-boundary-renders-error-screen` | `**/src/app/**/*.tsx`    | `error.tsx` and `global-error.tsx` render `ErrorScreen` and read no `message`, `stack`, `digest`  |                            |
+| `app-file-placement`                  | `**/src/app/**`          | every folder of an app path is a bucket, domain or segment its tier allows (ADR-0010, ADR-0011)   |                            |
 | `no-feature-nesting`                  | `**/_features/**`        | one grouping level under a features folder, and no features folder inside one                     |                            |
-| `services-verb-prefix`                | `**/_services/**`        | the basename carries a verb from the vocabulary, and the export is named after the file           | `serviceVerbOptions`       |
+| `types-folder-type-only`              | `**/_types/**`           | a `_types/` file holds types only; a runtime value, a Zod enum included, is a helper              |                            |
+| `services-verb-prefix`                | `**/_services/**`        | the basename carries a verb from the vocabulary                                                   | `serviceVerbOptions`       |
+| `services-filename-matches-export`    | `**/_services/**`        | a service file exports the value it is named after, and no other function                         | `serviceVerbOptions`       |
 | `services-read-never-writes`          | `**/_services/**`        | a read-verb file calls no Prisma write method on a database client                                | `serviceVerbOptions`       |
 | `services-no-trpc-import`             | `**/_services/**`        | a service imports no tRPC                                                                         |                            |
 | `services-no-bare-error`              | `**/_services/**`        | a service throws a `DomainError` subclass, not `new Error(...)`                                   |                            |
@@ -103,13 +108,18 @@ The boundary rules are `require-server-action-suffix`,
 named entry in `next.js`, reviewed like the three server folder exemptions, not
 a disable comment.
 
-Ten rules take options from `next.js`, as the table's last column says. Seven of them take options of their own: `require-schema-conventions`
+Twelve rules take options from `next.js`: the eleven the table's last column names, and
+`test-file-placement`, whose one option is inline. Nine of them take options of their own: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
 (`allowPatterns`, `ignorePathPatterns` for the four home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
 client imports of the server folder, empty today), `services-verb-prefix`
 (`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary),
 `services-read-never-writes` (`readVerbs`, the same closed list),
+`services-filename-matches-export` (`exemptSuffixes`, the same list, so a
+module exempt from the verb is exempt from the export too), `test-file-placement`
+(`structuralCheckPathPatterns`, the tests that read the tree and so have no
+subject file beside them),
 `schema-must-be-pure-zod` (`allowImportPatterns`, the modules a schema may
 import beyond the built-in allowlist) and `no-cross-layer-import` (`rows`, the
 layer import table described below). `require-use-client-suffix` and
@@ -117,7 +127,7 @@ layer import table described below). `require-use-client-suffix` and
 `ignorePathPatterns`, from one list in `next.js`: the framework owns those
 files' names and shapes, so neither the `.client.tsx` suffix nor a named export
 can apply to them. The pattern is anchored on the whole basename, so a module
-merely ending in one of their words (`edit-page.tsx`) is not exempt. The tenth
+merely ending in one of their words (`edit-page.tsx`) is not exempt. The twelfth
 is `no-restricted-patterns`, whose `allowDoubleCastPathPatterns` is described
 with it below. No other rule declares an option.
 

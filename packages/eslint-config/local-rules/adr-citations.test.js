@@ -17,6 +17,7 @@ const ADR_CITATION_RE = /ADR-(\d{4})/g;
 // citation that merely points at an existing file is not enough. This table is
 // the assertion: a rule may cite these numbers and no others.
 const EXPECTED_CITATIONS = {
+  "app-file-placement.js": ["0010", "0011"],
   // The shared error screen and its fixed copy are a frontend convention of the
   // coding standards; the leak it closes is argued in the message, not an ADR.
   "error-boundary-renders-error-screen.js": [],
@@ -52,6 +53,9 @@ const EXPECTED_CITATIONS = {
   // the library subscribes and resets rather than in an architecture decision.
   "no-form-mutation-in-effect.js": [],
   "no-form-state-prop.js": [],
+  // A rendering convention of the frontend standards: the four states of a
+  // query go through `matchQueryStatus`, argued in the message.
+  "no-query-status-branch.js": [],
   // A design-system convention: the hue-to-token table is the theme in
   // `packages/ui/src/styles/globals.css`, not an ADR.
   "no-raw-tailwind-colors.js": [],
@@ -73,10 +77,18 @@ const EXPECTED_CITATIONS = {
   "require-service-output-type.js": ["0011"],
   "require-use-client-suffix.js": ["0010"],
   "schema-must-be-pure-zod.js": ["0011"],
+  "services-filename-matches-export.js": ["0011"],
   "services-no-bare-error.js": ["0012"],
   "services-no-trpc-import.js": ["0011"],
   "services-read-never-writes.js": ["0011"],
   "services-verb-prefix.js": ["0011"],
+  // Colocation is a convention of the test standard; the testable layers are
+  // where ADR-0011 puts the logic.
+  "test-file-placement.js": ["0011"],
+  // The bucket definitions of both architecture ADRs: a constant is a helper
+  // or a type (0010), and every scope may import `_types/` because a type
+  // import is erased (0011).
+  "types-folder-type-only.js": ["0010", "0011"],
 };
 
 // `0011` (server file conventions), `0012` (domain errors) and `0015` (every

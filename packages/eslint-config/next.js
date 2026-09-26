@@ -460,6 +460,13 @@ export const nextJsConfig = withBinarySeverity([
     rules: {
       "local/services-no-bare-error": "error",
       "local/services-verb-prefix": ["error", serviceVerbOptions],
+      // The export half of the same file name: the prefix rule checks the
+      // verb, this one checks that the file exports what its name declares.
+      // A module exempt from the verb is exempt from the export too.
+      "local/services-filename-matches-export": [
+        "error",
+        { exemptSuffixes: serviceVerbOptions.exemptSuffixes },
+      ],
       // The other half of the verb convention: the prefix rule checks that the
       // name carries a read verb, this one checks that the name is true. It
       // reads the same closed list, passed from the same place.
@@ -480,6 +487,14 @@ export const nextJsConfig = withBinarySeverity([
     files: ["**/_features/**/*.{ts,tsx}"],
     rules: {
       "local/no-feature-nesting": "error",
+    },
+  },
+  {
+    // A `_types/` file is erased at compile time (ADR-0010): a runtime value
+    // there belongs in `_helpers/`.
+    files: ["**/_types/**/*.{ts,tsx}"],
+    rules: {
+      "local/types-folder-type-only": "error",
     },
   },
   {
@@ -519,6 +534,14 @@ export const nextJsConfig = withBinarySeverity([
     },
   },
   {
+    // TanStack Query: a component renders the four states of a query through
+    // `matchQueryStatus`, so none of them can be forgotten.
+    files: ["**/src/**/*.tsx"],
+    rules: {
+      "local/no-query-status-branch": "error",
+    },
+  },
+  {
     // The rule checks the basename itself, so the glob is the app tree and
     // only `error.tsx` and `global-error.tsx` are read.
     files: ["**/src/app/**/*.tsx"],
@@ -533,6 +556,36 @@ export const nextJsConfig = withBinarySeverity([
     files: ["**/*.test.{ts,tsx}"],
     rules: {
       "local/no-relative-test-mock": "error",
+    },
+  },
+  {
+    // The bucket tiers of ADR-0010 and ADR-0011. The rule walks the path
+    // itself, so the glob is the app tree.
+    files: ["**/src/app/**/*.{ts,tsx}"],
+    rules: {
+      "local/app-file-placement": "error",
+    },
+  },
+  {
+    // The whole source tree rather than the test glob: a `*.spec.ts` name is
+    // one of the reports, and the harness would never collect it.
+    files: ["**/src/**/*.{ts,tsx}"],
+    rules: {
+      "local/test-file-placement": [
+        "error",
+        {
+          // Tests that read the tree rather than one module, so no subject
+          // file sits beside them.
+          structuralCheckPathPatterns: [
+            "/src/app/_domains/domain-cycles\\.test\\.ts$",
+            "/src/mdx-no-em-dash\\.test\\.ts$",
+            "/src/server/server-only-alias\\.test\\.ts$",
+            // Not structural: it tests the error formatter of `trpc.ts` under
+            // a behaviour name. Listed until it is renamed `trpc.test.ts`.
+            "/src/server/trpc/domain-error-mapping\\.test\\.ts$",
+          ],
+        },
+      ],
     },
   },
   {

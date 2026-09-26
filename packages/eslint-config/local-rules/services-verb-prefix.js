@@ -1,8 +1,10 @@
-// A file in `_services/` is named after its export: `<verb>-<entity>.ts`. The
-// verb prefix declares read-vs-write (ADR-0011, server file conventions), and
-// the file name declares the export, so neither can drift from the other.
+// A file in `_services/` is named `<verb>-<entity>.ts`, and the verb prefix
+// declares read-vs-write (ADR-0011, server file conventions): a reader knows
+// whether a call can write before opening the file.
 //
-// The rule checks four things:
+// This rule owns the verb half of the convention only. That the file exports
+// the operation it is named after is `services-filename-matches-export`, so a
+// drifted export is reported once, by one rule. This one checks three things:
 //   1. the verb        — the first word of the basename is a read verb (closed
 //                        set) or a write verb (open set, a rule option). A noun
 //                        is not a verb, so `plan.ts` is reported;
@@ -12,19 +14,12 @@
 //                        `list-` entrypoint replaces;
 //   3. the exemptions  — a module that is not an operation (an SDK client, an
 //                        error class, a cipher, a cookie) keeps its noun name,
-//                        recognised by a suffix from the option list;
-//   4. the export      — in a non-exempt file, an exported function is named
-//                        after the basename.
+//                        recognised by a suffix from the option list.
 //
 // The read set is closed because "a verb outside the read set means a possible
 // write" is the signal the whole convention rests on. The write set is open, so
 // it is an option rather than a constant: coining a domain verb is a one-line,
 // reviewed change to the shared config, and the report says so.
-//
-// The export name is compared case-insensitively. A kebab basename cannot carry
-// the house spelling of a proper noun, so `get-github-installation.ts` exports
-// `getGitHubInstallation`, and the check is about the words and their order,
-// not about where the capitals fall.
 //
 // The deeper "a read performs no writes" invariant is a separate rule that
 // reads the same closed read set from the shared config.
@@ -114,26 +109,12 @@ function stripExtension(basename) {
   return basename.replace(/\.tsx?$/, "");
 }
 
-function camelCaseOf(basename) {
-  return stripExtension(basename).replace(/-([a-z0-9])/g, (_, character) =>
-    character.toUpperCase(),
-  );
-}
-
-function isFunctionValued(node) {
-  return (
-    node?.type === "FunctionDeclaration" ||
-    node?.type === "FunctionExpression" ||
-    node?.type === "ArrowFunctionExpression"
-  );
-}
-
 export const servicesVerbPrefixRule = {
   meta: {
     type: "problem",
     docs: {
       description:
-        "A file in _services/ is named `<verb>-<entity>` with a read verb (closed set) or a write verb (open set, a rule option), and exports a function named after the file.",
+        "A file in _services/ is named `<verb>-<entity>` with a read verb (closed set) or a write verb (open set, a rule option).",
     },
     schema: [
       {
@@ -157,8 +138,6 @@ export const servicesVerbPrefixRule = {
         "`{{ basename }}` uses the process verb `{{ verb }}-`. A computed read is still a read: name it `get-` plus the result noun it returns.",
       bannedPrefix:
         "`{{ basename }}` starts with `{{ prefix }}`. One `list-` entrypoint per shape takes filtering, pagination and sorting in an options object.",
-      exportNameMismatch:
-        "`{{ exported }}` is exported from `{{ basename }}`, which is named after a different function. A service file is plain-named after its export: rename the function to `{{ expected }}`, or move it to its own file or to `_helpers/`.",
     },
   },
   create(context) {
@@ -178,71 +157,11 @@ export const servicesVerbPrefixRule = {
 
     const readVerbList = readVerbs.map((verb) => `${verb}-`).join(", ");
     const nameReport = fileNameReport();
-
-    if (nameReport) {
-      return {
-        Program(node) {
-          context.report({ node, ...nameReport });
-        },
-      };
-    }
-
-    // The export check only runs once the file name is itself legal: when it is
-    // not, the rename is the fix and a second report about the export would
-    // point at the same edit.
-    const expected = camelCaseOf(basename);
-    const functionNames = new Set();
-
-    function reportName(node, exported) {
-      if (exported.toLowerCase() === expected.toLowerCase()) return;
-      context.report({
-        node,
-        messageId: "exportNameMismatch",
-        data: { exported, basename, expected },
-      });
-    }
+    if (!nameReport) return {};
 
     return {
-      FunctionDeclaration(node) {
-        if (node.id) functionNames.add(node.id.name);
-      },
-      VariableDeclarator(node) {
-        if (node.id.type === "Identifier" && isFunctionValued(node.init)) {
-          functionNames.add(node.id.name);
-        }
-      },
-      ExportNamedDeclaration(node) {
-        if (node.declaration?.type === "FunctionDeclaration") {
-          if (node.declaration.id) {
-            reportName(node.declaration.id, node.declaration.id.name);
-          }
-          return;
-        }
-
-        if (node.declaration?.type === "VariableDeclaration") {
-          for (const declarator of node.declaration.declarations) {
-            if (
-              declarator.id.type === "Identifier" &&
-              isFunctionValued(declarator.init)
-            ) {
-              reportName(declarator.id, declarator.id.name);
-            }
-          }
-          return;
-        }
-
-        // `export { getUser }`: only the local names this file declares as
-        // functions are checked, so a re-export of a type or of another
-        // module's value is left alone.
-        if (node.declaration || node.source || node.exportKind === "type") {
-          return;
-        }
-        for (const specifier of node.specifiers) {
-          if (specifier.exportKind === "type") continue;
-          if (functionNames.has(specifier.local.name)) {
-            reportName(specifier, specifier.local.name);
-          }
-        }
+      Program(node) {
+        context.report({ node, ...nameReport });
       },
     };
 

@@ -35,7 +35,7 @@ A function is a read **iff** it performs no writes.
 
 - `singular+ById` for single items: `getUserById` (or `getUser`). **Prose only**, no rule.
 - `plural` for collections: `listUsers`. **Prose only**, no rule.
-- Match function names to file names. Enforced inside `_services/` by `local/services-verb-prefix`, which compares the exported function's name against the camelCase of the basename, ignoring letter case so a proper noun keeps its house spelling. **Prose only** everywhere else.
+- Match function names to file names. Enforced inside `_services/` by `local/services-filename-matches-export`, which compares the exported function's name against the camelCase of the basename, ignoring letter case so a proper noun keeps its house spelling. **Prose only** everywhere else.
 
 ## Collection operations
 

@@ -74,6 +74,7 @@ export function OrganizationMembersTab() {
   const hasNoRows =
     (!members || members.length === 0) &&
     invitationCount === 0 &&
+    // eslint-disable-next-line local/no-query-status-branch -- derives a boolean for the empty row, the rows themselves go through matchQueryStatus
     !invitationsQuery.isError;
 
   const leaveOrganization = useMutation(

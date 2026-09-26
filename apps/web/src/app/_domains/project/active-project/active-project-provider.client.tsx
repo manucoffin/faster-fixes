@@ -73,6 +73,7 @@ export function ActiveProjectProvider({
     ),
   );
 
+  // eslint-disable-next-line local/no-query-status-branch -- the provider publishes the query state for its consumers, it renders nothing from it
   const { data: projects, isPending } = projectsQuery;
 
   // Clear active project when organization changes
@@ -123,6 +124,7 @@ export function ActiveProjectProvider({
         isPending,
         projectsQuery: {
           isLoading: isPending,
+          // eslint-disable-next-line local/no-query-status-branch -- published as ProjectsQueryState for consumers to pass to matchQueryStatus
           isError: projectsQuery.isError,
           error: projectsQuery.error,
           data: projects,

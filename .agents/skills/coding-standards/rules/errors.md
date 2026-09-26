@@ -36,7 +36,7 @@ An Integration that fails must not be marked **Reconnect required** for a transi
 
 ## The four display channels
 
-Of the four, only the `Errored` branch of a query carries a rule, and only for one shape: `query.data ?? []` is reported by `local/no-restricted-patterns` (see [frontend.md](frontend.md)). The rest is **prose only**.
+Only the query channel carries rules: `local/no-query-status-branch` reports a hand-written status branch, so a query renders through `matchQueryStatus`, and `local/no-restricted-patterns` reports `query.data ?? []` (see [frontend.md](frontend.md)). The rest is **prose only**.
 
 - **Mutations (tRPC mutation / server action): toast.** Read the message from the failed mutation/action and show it via the Sonner toast. The message is already final copy for `DomainError`s, and an `INTERNAL_SERVER_ERROR` arrives pre-masked, so toasting `error.message` never leaks an internal message.
 - **Queries (tRPC query): `matchQueryStatus`.** Handle the `Errored` branch declaratively (see [frontend.md](frontend.md)); render `error.message`, never a raw stack.

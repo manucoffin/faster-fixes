@@ -80,7 +80,7 @@ _domains/subscription/
 - `_helpers/` is **pure** (no IO, no JSX, no React state). `_services/` is the only place IO lives outside a feature. The import half is enforced by the helper row of `local/no-cross-layer-import`: a helper imports neither the database, nor `next`, nor `react`. "No JSX, no React state" follows from the `react` ban; five named modules that build or narrow a response or request are exempt, listed in `layerImportRows`.
 - **Database access lives in `_services/` or `src/server/`**, and the database package is reached through `@workspace/db`, `@workspace/db/types` and `@workspace/db/generated/prisma/enums`. Both are rows of `local/no-cross-layer-import` (ADR-0011, ADR-0013).
 - Purity is about IO, not about import direction: a helper may import a shared error class from its scope's `_services/` root. `_helpers/linear/verify-webhook-signature.ts` imports `IntegrationConfigurationError` from `_services/integration-configuration-error.ts` rather than the bucket growing a second copy of the class.
-- A Zod enum that is **domain vocabulary** rather than an operation input lives in `_types/`, not in `_services/` as a `*.schema.ts`. `_types/feedback-status.ts` exports `FeedbackStatusEnum` and `FeedbackStatus`: the DB column is free-form, so the enum is the only runtime validator, fifteen modules read it as vocabulary, and Zod is client-safe so the validator travels with the type it defines. Naming it `*.schema.ts` would force `FeedbackStatusInput` on a glossary type to satisfy a rule aimed at input schemas. See [schemas.md](schemas.md).
+- **`_types/` holds types only**, enforced by `local/types-folder-type-only`: a runtime value, a Zod enum included, is a helper. A Zod enum that is **domain vocabulary** rather than an operation input lives in `_helpers/`, not in `_services/` as a `*.schema.ts`, and `_types/` derives its type by `import type`: `_helpers/feedback-status.ts` exports `FeedbackStatusEnum`, `_types/feedback-status.ts` exports `FeedbackStatus` (same split as `subscription`'s `_helpers/subscription-plans.ts` and `_types/plan-limits.ts`). See [schemas.md](schemas.md).
 - `trpc-router.ts` sits at the scope **root**, never inside `_services/` (services must not import tRPC, enforced by `local/services-no-trpc-import`). A router itself imports no Prisma: that is a row of `local/no-cross-layer-import`.
 - **Capability folders sit at the domain root, not under `_features/`.** Six live today: `auth/send-verification-email-button/`, `auth/stop-impersonate-button/`, `subscription/plan-card/`, `subscription/plan-gate/`, `subscription/upgrade-subscription/` and `project/active-project/`. This is an accepted deviation from ADR-0010 carried through the migration, not an oversight, and nothing lint-enforces it either way. The open decision is whether domains gain a `_features/` bucket or this becomes the documented shape; until it is taken, follow the existing tree rather than creating a domain `_features/` for a seventh. Route scopes are unaffected and keep `_features/`.
 - **A hook read by more than one feature in the same scope is promoted to a capability folder of its own** (`subscription/plan-gate/`, `inbox/_features/feedback-mutations/`), barrel-exported when the scope is a domain. A single-consumer hook moves inside the feature that consumes it. No `_hooks/` bucket is ever created inside a scope: a hook is a capability and a capability is a feature. This intra-scope trigger (a second _feature_ consumer) is distinct from the cross-route promotion rule below.
@@ -101,7 +101,7 @@ Same buckets, scoped to the route, with the router colocated next to `page.tsx`:
 └── _components/     # optional
 ```
 
-**No other `_*` folders at the route level** (**prose only**, no rule). No `_queries/`, `_sections/`, `_hooks/`, `_server/`, `_utils/`. The bucket set is closed, but a rule enforcing it would have to name every folder a scope may hold, and a new bucket is an architecture decision (an ADR amendment) rather than a lint report.
+**No other `_*` folders at the route level.** No `_queries/`, `_sections/`, `_hooks/`, `_server/`, `_utils/`. The bucket set of every tier (root, `_domains/`, scope, bucket) is enforced by `local/app-file-placement`; a new bucket is an ADR amendment first, then a change to that rule.
 
 ## Feature folder
 
@@ -143,7 +143,7 @@ A folder that is only a presentational component with no logic → `_components/
 
 See [naming.md](naming.md) for the full read/write verb vocabulary.
 
-Three rows of that table are enforced: the client component suffix by `local/require-use-client-suffix`, the two service rows by `local/services-verb-prefix` (the verb, and the exported function named after the file), and the schema name inside a `*.schema.ts` by `local/require-schema-conventions`. The server component, hook, helper and router rows are **prose only**: `*.server.tsx` is the default rather than a marker, and a helper's `[verb]-[noun]` draws on the open verb set.
+Three rows of that table are enforced: the client component suffix by `local/require-use-client-suffix`, the two service rows by `local/services-verb-prefix` (the verb) and `local/services-filename-matches-export` (the exported function named after the file), and the schema name inside a `*.schema.ts` by `local/require-schema-conventions`. The server component, hook, helper and router rows are **prose only**: `*.server.tsx` is the default rather than a marker, and a helper's `[verb]-[noun]` draws on the open verb set.
 
 ## Disambiguation rules
 
@@ -182,7 +182,7 @@ Each of these was argued and settled. They cut against a default stated elsewher
 
 ## Key principles
 
-1. **Underscore prefixes** are implementation folders and don't create routes. Which underscore folders exist is a closed set, kept **prose only** (see "Route layout").
+1. **Underscore prefixes** are implementation folders and don't create routes. Which underscore folders exist is a closed set, enforced by `local/app-file-placement` (see "Route layout").
 2. **Two tiers, same buckets** — one mental model at domain or route.
 3. **Domain entities drive `_domains/` naming** (match `CONTEXT.md`).
 4. **Co-locate UI aggressively; centralize data ops in `_services/`.**

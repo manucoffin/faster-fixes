@@ -50,7 +50,9 @@ Theme variables:
 
 ## TanStack Query status handling
 
-**Prose only**, no rule, for the whole of this section except the `query.data ?? []` ban below: whether a branch is imperative, whether a `Loading` renders a `<Skeleton>` shaped like its content, and which folder's `Errored` convention wins are judgements about rendered output that a linter reading one file cannot make.
+**Enforced by `local/no-query-status-branch`** for the first bullet below: in a `.tsx` file, reading `isLoading`, `isPending`, `isError`, `isSuccess` or `status` on a query result (a `use*Query(...)` call, a variable assigned from one, or a variable named `query` / `*Query`) is reported. Mutations pass. The rest of this section is **prose only**, except the `query.data ?? []` ban below: whether a `Loading` renders a `<Skeleton>` shaped like its content and which folder's `Errored` convention wins are judgements about rendered output that a linter reading one file cannot make.
+
+**Accepted blind spot:** consumers of `useActiveProject()` read `isPending` from a state the provider publishes, not from a query result, so the rule does not see them. Render those through `projectsQuery` and `matchQueryStatus` anyway.
 
 - Use the `matchQueryStatus` utility for query states; do not write imperative `isLoading`/`isError` branches.
 - Handle all four states: `Loading`, `Errored`, `Empty`, `Success`.

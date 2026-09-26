@@ -161,6 +161,7 @@ export function UsersTable() {
     parseAsString.withDefault(""),
   );
 
+  // eslint-disable-next-line local/no-query-status-branch -- the table keeps its search field and rows mounted across search and pagination
   const { data, isLoading, isError, error } = useQuery(
     trpc.admin.users.list.queryOptions({
       search,
