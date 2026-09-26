@@ -21,19 +21,21 @@ function CustomFeedbackButton() {
 
 ## Return values
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `show` | `() => void` | Show the widget |
-| `hide` | `() => void` | Hide the widget |
-| `isVisible` | `boolean` | Whether the widget is currently visible |
-| `startAnnotation` | `() => void` | Enter annotation mode (user can click elements) |
-| `feedbackItems` | `FeedbackItem[]` | All feedback items for the current project |
-| `togglePins` | `() => void` | Toggle visibility of feedback pins on the page |
-| `showPins` | `boolean` | Whether pins are currently visible |
+Components that read `isVisible`, `feedbackItems` or `showPins` re-render when the value changes. Before the widget mounts on the client, the hook returns `isVisible: false`, `feedbackItems: []` and `showPins: true`, and its methods do nothing.
+
+| Property          | Type             | Description                                                         |
+| ----------------- | ---------------- | ------------------------------------------------------------------- |
+| `show`            | `() => void`     | Show the widget                                                     |
+| `hide`            | `() => void`     | Hide the widget                                                     |
+| `isVisible`       | `boolean`        | Whether the widget is currently visible                             |
+| `startAnnotation` | `() => void`     | Show the widget and enter annotation mode (user can click elements) |
+| `feedbackItems`   | `FeedbackItem[]` | All feedback items for the current project                          |
+| `togglePins`      | `() => void`     | Toggle visibility of feedback pins on the page                      |
+| `showPins`        | `boolean`        | Whether pins are currently visible                                  |
 
 ## Custom trigger button
 
-Replace the default floating button with your own UI:
+Start annotation from your own UI. The floating button stays on the page:
 
 ```tsx
 import { useFeedback } from "@fasterfixes/react";

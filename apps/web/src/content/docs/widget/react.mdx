@@ -3,13 +3,15 @@ title: React
 description: Install and configure the Faster Fixes widget in your React application.
 ---
 
+`@fasterfixes/react` is the React embed of the widget. It mounts the same widget as the [script embed](/docs/widget/script-embed), from `@fasterfixes/widget`, and exposes it through a provider and the [`useFeedback` hook](/docs/widget/use-feedback-hook).
+
 ## Installation
 
 ```package-install
 @fasterfixes/react
 ```
 
-The `projectId` prop requires `@fasterfixes/react` version 0.0.9 or later.
+The `projectId` prop requires `@fasterfixes/react` version 0.0.9 or later. This page documents version 1.0.0. To upgrade from 0.0.x, read [Upgrading to 1.0.0](#upgrading-to-100).
 
 ## Provider setup
 
@@ -37,17 +39,37 @@ export default function RootLayout({
 
 Get your Project ID in [Project Settings](https://faster-fixes.com/settings).
 
+The widget mounts on the client, after hydration. On the server, and on the first client render, `FeedbackProvider` renders only its `children`, so server rendering with the Next.js App Router is unaffected. You can place the provider in a Server Component layout: the package is marked `"use client"`.
+
+When `FeedbackProvider` unmounts, it removes the widget and restores the `console`, `fetch` and `XMLHttpRequest` functions it patched to record the Diagnostic Trail. React Strict Mode mounts it twice in development and leaves one widget on the page.
+
 ## Props
 
-| Prop | Type | Required | Description |
-| --- | --- | --- | --- |
-| `projectId` | `string` | Yes | Your Faster Fixes Project ID (found in project settings) |
-| `apiKey` | `string` | No | Deprecated alias for `projectId`; removed in a future major. |
-| `apiOrigin` | `string` | No | API base URL. Defaults to `https://www.faster-fixes.com` |
-| `color` | `string` | No | Accent color. Accepts any CSS color value. Defaults to `#02527E` |
-| `position` | `WidgetPosition` | No | Floating button placement. Defaults to `bottom-right` |
-| `classNames` | `object` | No | CSS class overrides for widget elements |
-| `labels` | `object` | No | Custom text labels for the widget UI |
+| Prop                 | Type              | Required | Description                                                                                            |
+| -------------------- | ----------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `projectId`          | `string`          | Yes      | Your Faster Fixes Project ID (found in project settings)                                               |
+| `apiOrigin`          | `string`          | No       | API base URL. Defaults to `https://www.faster-fixes.com`                                               |
+| `color`              | `string`          | No       | Accent color. Accepts any CSS color value. Defaults to `#02527E`                                       |
+| `position`           | `WidgetPosition`  | No       | Floating button placement. Defaults to `bottom-right`                                                  |
+| `labels`             | `Partial<Labels>` | No       | Replaces any visible or announced string. See [Customization](/docs/widget/customization#labels).      |
+| `captureDiagnostics` | `boolean`         | No       | Records the console and network history leading to a report. Defaults to `true`                        |
+| `children`           | `ReactNode`       | Yes      | Your application                                                                                       |
+| `apiKey`             | `string`          | No       | Deprecated. Use `projectId`. Used as the Project ID when `projectId` is absent.                        |
+| `classNames`         | `object`          | No       | Deprecated and ignored. Use [CSS custom properties](/docs/widget/customization#css-custom-properties). |
+
+The props match the options of the script embed's `init`. Changing `projectId`, `apiOrigin`, `color`, `position`, `labels` or `captureDiagnostics` replaces the widget with a new one that uses the new values. A `labels` object written inline is compared by its values, so a re-render with the same labels keeps the widget in place.
+
+### Deprecated props
+
+`apiKey` still works in version 1. When `projectId` is absent, its value is used as the Project ID, and development builds log a console warning. Rename the prop to `projectId`:
+
+```tsx
+<FeedbackProvider projectId="proj_your_project_id">
+```
+
+`classNames` is accepted so existing code keeps compiling, but it has no effect: the widget renders inside a Shadow DOM, which class names from your stylesheet cannot reach. Development builds log a console warning. Remove the prop and theme the widget with [CSS custom properties](#theming).
+
+Both props will be removed in version 2.
 
 ## Color
 
@@ -57,22 +79,49 @@ The `color` prop accepts any CSS color value, including CSS variables:
 <FeedbackProvider projectId="proj_your_project_id" color="var(--color-blue-500)">
 ```
 
-Default: `#02527E`. The color is applied as a CSS custom property `--ff-accent`, so styles passed via the `classNames` prop naturally take precedence.
+Default: `#02527E`. The color is applied as the CSS custom property `--ff-accent`.
 
 ## Position
 
 The `position` prop controls where the floating button appears. Default: `bottom-right`.
 
-| Position | Description |
-| --- | --- |
+| Position       | Description                   |
+| -------------- | ----------------------------- |
 | `bottom-right` | Bottom-right corner (default) |
-| `bottom-left` | Bottom-left corner |
-| `top-right` | Top-right corner |
-| `top-left` | Top-left corner |
-| `middle-right` | Middle of the right edge |
-| `middle-left` | Middle of the left edge |
+| `bottom-left`  | Bottom-left corner            |
+| `top-right`    | Top-right corner              |
+| `top-left`     | Top-left corner               |
+| `middle-right` | Middle of the right edge      |
+| `middle-left`  | Middle of the left edge       |
 
-The `WidgetPosition` type is exported from the `@fasterfixes/core` package.
+The `WidgetPosition` and `Labels` types are exported by `@fasterfixes/widget`, which `@fasterfixes/react` installs as a dependency.
+
+## Theming
+
+The widget renders inside an open Shadow DOM, so your site's styles, resets and `!important` rules do not reach it. Theme it with the CSS custom properties shared with the script embed, set on its host element, `[data-ff-widget]`:
+
+```css title="app/globals.css"
+[data-ff-widget] {
+  --ff-background: #ffffff;
+  --ff-foreground: #18181b;
+  --ff-radius: 4px;
+  --ff-font-family: "Inter", sans-serif;
+}
+```
+
+The full list of properties and the `::part()` selectors is on the [Customization](/docs/widget/customization#css-custom-properties) page.
+
+## Upgrading to 1.0.0
+
+Version 1.0.0 replaces the React UI of 0.0.x with the widget of `@fasterfixes/widget`. `FeedbackProvider` and `useFeedback` keep their names, props and return shape, so for most installs the upgrade is a version bump. Check the following:
+
+- `classNames` no longer has an effect. Move your overrides to CSS custom properties and `::part()` selectors.
+- Styles that targeted the widget's elements from your stylesheet no longer apply, for the same reason.
+- `apiKey` logs a warning in development. Rename it to `projectId`.
+- `@fasterfixes/react/internal` and `FeedbackProviderCore` are removed.
+- `labels` accepts new keys for strings that were fixed in 0.0.x, such as the accessible names of the toolbar controls and of the pins. See [Customization](/docs/widget/customization#available-labels-keys).
+
+The package [changelog](https://github.com/manucoffin/faster-fixes/blob/main/packages/widget-react/CHANGELOG.md) lists every change.
 
 ## Dashboard toggle
 

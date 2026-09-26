@@ -1,8 +1,10 @@
 # @fasterfixes/react
 
-> **[Documentation](https://faster-fixes.com/docs)** · [Website](https://faster-fixes.com)
+> **[Documentation](https://faster-fixes.com/docs/widget/react)** · [Website](https://faster-fixes.com)
 
-React feedback widget for [FasterFixes](https://faster-fixes.com) — collect visual feedback with screenshots, element annotations, and inline comments.
+React embed of the [FasterFixes](https://faster-fixes.com) feedback widget. Reviewers click an element of your site, describe the issue, and submit it with a screenshot and the browser context.
+
+The package is a thin wrapper around [`@fasterfixes/widget`](https://www.npmjs.com/package/@fasterfixes/widget): it mounts the same widget as the script embed and exposes it through a provider and a hook. Both embeds share the same options, `labels`, CSS custom properties and instance methods.
 
 ## Installation
 
@@ -10,7 +12,7 @@ React feedback widget for [FasterFixes](https://faster-fixes.com) — collect vi
 npm install @fasterfixes/react
 ```
 
-The `projectId` prop requires `@fasterfixes/react` version 0.0.9 or later.
+Requires `react` and `react-dom` 18 or later.
 
 ## Quick start
 
@@ -28,104 +30,74 @@ function App() {
 }
 ```
 
-That's it. The widget appears as a floating button. Reviewers with a valid token can click elements, annotate them, and submit feedback with automatic screenshots.
+The widget appears as a floating button for Reviewers who open your site with a token link (`?ff_token=...`). Other visitors see nothing.
 
-### Customize appearance
-
-```tsx
-<FeedbackProvider
-  projectId="proj_your_project_id"
-  color="#e63946"
-  position="bottom-left"
->
-  <YourApp />
-</FeedbackProvider>
-```
-
-`color` accepts any CSS color value, including CSS variables:
-
-```tsx
-<FeedbackProvider projectId="proj_your_project_id" color="var(--brand-primary)">
-```
-
-The color is applied as a `--ff-accent` CSS custom property on the widget root. Any `classNames` overrides take precedence.
-
-## How it works
-
-1. A reviewer visits your site with a token link (`?ff_token=...`)
-2. They click the floating widget button to enter feedback mode
-3. They click any element on the page to annotate it
-4. A comment popover appears — they describe the issue and submit
-5. A screenshot is captured automatically and uploaded with the feedback
-6. Feedback pins appear on the page showing existing feedback items
+The widget mounts on the client, after hydration, so server rendering (including the Next.js App Router) is unaffected. When the provider unmounts, the widget is removed and every global it patched is restored.
 
 ## Props
 
-### `FeedbackProvider`
+| Prop                 | Type              | Required | Description                                                                       |
+| -------------------- | ----------------- | -------- | --------------------------------------------------------------------------------- |
+| `projectId`          | `string`          | Yes      | Your Faster Fixes Project ID (found in project settings)                          |
+| `apiOrigin`          | `string`          | No       | API base URL (default: `https://www.faster-fixes.com`)                            |
+| `color`              | `string`          | No       | Accent color, any CSS color value (default: `#02527E`)                            |
+| `position`           | `WidgetPosition`  | No       | Floating button position (default: `bottom-right`)                                |
+| `labels`             | `Partial<Labels>` | No       | Replaces any visible or announced string                                          |
+| `captureDiagnostics` | `boolean`         | No       | Records the console and network history leading to a report (default: `true`)     |
+| `children`           | `ReactNode`       | Yes      | Your application                                                                  |
+| `apiKey`             | `string`          | No       | Deprecated. Use `projectId`. Used as the Project ID when `projectId` is absent    |
+| `classNames`         | `object`          | No       | Deprecated and ignored. Use the CSS custom properties below. Removed in version 2 |
 
-| Prop         | Type                  | Required | Description                                                    |
-| ------------ | --------------------- | -------- | -------------------------------------------------------------- |
-| `projectId`  | `string`              | Yes      | Your Faster Fixes Project ID (found in project settings)       |
-| `apiKey`     | `string`              | No       | Deprecated alias for `projectId`; removed in a future major.   |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)    |
-| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`) |
-| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)             |
-| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                        |
-| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                          |
+Changing a prop replaces the widget with one that uses the new value. In development, `apiKey` and `classNames` log a console warning.
 
-### `useFeedback` hook
+## `useFeedback`
 
-Control the widget programmatically:
+Control the widget from any component inside `FeedbackProvider`:
 
 ```tsx
 import { useFeedback } from "@fasterfixes/react";
 
-function MyComponent() {
-  const {
-    show,
-    hide,
-    isVisible,
-    startAnnotation,
-    feedbackItems,
-    togglePins,
-    showPins,
-  } = useFeedback();
+function ReportButton() {
+  const { startAnnotation, feedbackItems } = useFeedback();
 
   return (
-    <button onClick={() => (isVisible ? hide() : show())}>
-      Toggle feedback widget
+    <button onClick={startAnnotation}>
+      Report an issue ({feedbackItems.length})
     </button>
   );
 }
 ```
 
-| Property          | Type             | Description                           |
-| ----------------- | ---------------- | ------------------------------------- |
-| `show`            | `() => void`     | Show the widget                       |
-| `hide`            | `() => void`     | Hide the widget and reset mode        |
-| `isVisible`       | `boolean`        | Whether the widget is currently shown |
-| `startAnnotation` | `() => void`     | Enter annotation mode directly        |
-| `feedbackItems`   | `FeedbackItem[]` | All feedback items for the project    |
-| `togglePins`      | `() => void`     | Toggle pin visibility on the page     |
-| `showPins`        | `boolean`        | Whether pins are currently visible    |
+| Property          | Type             | Description                                 |
+| ----------------- | ---------------- | ------------------------------------------- |
+| `show`            | `() => void`     | Show the widget                             |
+| `hide`            | `() => void`     | Hide the widget                             |
+| `isVisible`       | `boolean`        | Whether the widget is currently shown       |
+| `startAnnotation` | `() => void`     | Show the widget and enter annotation mode   |
+| `feedbackItems`   | `FeedbackItem[]` | Feedback items of the Project loaded so far |
+| `togglePins`      | `() => void`     | Toggle pin visibility on the page           |
+| `showPins`        | `boolean`        | Whether pins are currently visible          |
 
-## Features
+Components re-render when `isVisible`, `feedbackItems` or `showPins` change.
 
-- Visual element annotation with click-to-select
-- Automatic screenshot capture
-- Edit and delete existing feedback
-- Resolved feedback filtering
-- Dark mode UI
-- Animated toolbar with list and visibility toggles
-- Feedback pins positioned on annotated elements
-- Element highlighting on hover and active feedback
-- Cross-page feedback list with navigation
-- Configurable position (corners, middle-left, middle-right)
-- Configurable accent color
-- Custom CSS class overrides
-- Custom text labels
-- SPA navigation support (URL change detection)
-- Full keyboard support (Escape to cancel)
+## Theming
+
+The widget renders inside a Shadow DOM, so your site's styles do not reach it. Set the accent with the `color` prop, and theme the rest with CSS custom properties on the host element:
+
+```css
+[data-ff-widget] {
+  --ff-background: #ffffff;
+  --ff-foreground: #18181b;
+  --ff-radius: 4px;
+  --ff-font-family: "Inter", sans-serif;
+}
+```
+
+Available properties: `--ff-accent`, `--ff-background`, `--ff-foreground`, `--ff-radius`, `--ff-font-family` and `--ff-z-index`. Individual elements can be targeted with `::part()`. See [Customization](https://faster-fixes.com/docs/widget/customization) for defaults, parts and `labels` keys.
+
+## Upgrading from 0.0.x
+
+Version 1.0.0 replaces the React UI with the widget of `@fasterfixes/widget`. `FeedbackProvider` and `useFeedback` keep their names, props and return shape. `classNames` is ignored, `@fasterfixes/react/internal` is removed, and `labels` accepts new keys. The [changelog](./CHANGELOG.md) lists every change.
 
 ## Browser support
 

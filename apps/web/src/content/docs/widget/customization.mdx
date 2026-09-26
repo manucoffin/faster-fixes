@@ -3,7 +3,12 @@ title: Customization
 description: Customize the widget's text labels and theme it with CSS custom properties.
 ---
 
-Both embeds accept the same `color`, `position` and `labels` options. The script embed is also themed with CSS custom properties and `::part()` selectors.
+The React embed and the script embed share one contract. Both mount the same widget from `@fasterfixes/widget`, so everything on this page applies to both:
+
+- The same options: `projectId`, `apiOrigin`, `color`, `position`, `labels` and `captureDiagnostics`, passed as props to `FeedbackProvider` or as options to `init`.
+- The same `labels` keys and defaults.
+- The same CSS custom properties and `::part()` selectors.
+- The same instance methods and values, returned by `init` and by the [`useFeedback` hook](/docs/widget/use-feedback-hook).
 
 ## Labels
 
@@ -66,7 +71,7 @@ window.FasterFixes.init({
 | `pinAriaLabel`        | `` (comment) => `Feedback: ${comment}` `` | Accessible name of a pin. A function that receives an excerpt of the comment. |
 | `successMessage`      | `"Feedback sent"`                         | Not displayed. Kept so existing `labels` objects remain valid.                |
 
-The React embed reads the keys from `submitButton` to `emptyList`. The script embed reads every key except `successMessage`.
+Both embeds read every key except `successMessage`.
 
 ## Color and position
 
@@ -74,7 +79,7 @@ The `color` option sets the accent color and accepts any CSS color value, includ
 
 ## CSS custom properties
 
-The script embed renders inside an open Shadow DOM, so your site's styles, resets and `!important` rules do not reach it. Theme it by setting CSS custom properties on its host element, `[data-ff-widget]`:
+The widget renders inside an open Shadow DOM, so your site's styles, resets and `!important` rules do not reach it. Theme it by setting CSS custom properties on its host element, `[data-ff-widget]`:
 
 ```css
 [data-ff-widget] {
@@ -118,4 +123,4 @@ To style an element beyond the custom properties, target it with `::part()`:
 
 ## `classNames` (React only, deprecated)
 
-The React embed accepts a `classNames` prop with the keys `button`, `popover`, `textarea`, `pin`, `overlay`, `successState`, `errorState`, `feedbackList` and `feedbackListItem`. It is deprecated: the widget's own styles take precedence over the classes, so they have no visible effect. The script embed does not offer it. Use CSS custom properties and `::part()` instead.
+`FeedbackProvider` still accepts a `classNames` prop so code written for version 0.0.x keeps compiling. Since version 1.0.0 it is ignored: class names from your stylesheet cannot reach inside the Shadow DOM. Development builds log a console warning. Use CSS custom properties and `::part()` instead. The prop will be removed in version 2.
