@@ -56,8 +56,22 @@ function collectNearbyText(el: Element, maxLength = 200): string {
     : joined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Fiber = Record<string, any>;
+// The fields of a React fiber this module reads. React publishes no type for
+// its internals, so these are the shapes it has shipped for years.
+type ComponentType = {
+  displayName?: string;
+  name?: string;
+  // forwardRef / memo wrappers
+  render?: { displayName?: string; name?: string };
+};
+
+type DebugSource = { fileName?: string; lineNumber?: number };
+
+type Fiber = {
+  type?: unknown;
+  return?: Fiber | null;
+  _debugSource?: DebugSource;
+};
 
 /**
  * Finds the React fiber node attached to a DOM element.
@@ -65,8 +79,21 @@ type Fiber = Record<string, any>;
  */
 function getFiber(el: Element): Fiber | null {
   const key = Object.keys(el).find((k) => k.startsWith("__reactFiber$"));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return key ? (el as any)[key] : null;
+  return key ? ((Reflect.get(el, key) as Fiber | undefined) ?? null) : null;
+}
+
+function componentNameOf(type: unknown): string | null {
+  if (typeof type !== "function" && (typeof type !== "object" || !type)) {
+    return null;
+  }
+  const component = type as ComponentType;
+  return (
+    component.displayName ??
+    component.name ??
+    component.render?.displayName ??
+    component.render?.name ??
+    null
+  );
 }
 
 /**
@@ -83,20 +110,11 @@ function getReactComponentPath(el: Element): string | null {
     let depth = 0;
 
     while (fiber && depth < maxDepth) {
-      if (typeof fiber.type === "function" || typeof fiber.type === "object") {
-        const name =
-          fiber.type?.displayName ??
-          fiber.type?.name ??
-          // forwardRef / memo wrappers
-          fiber.type?.render?.displayName ??
-          fiber.type?.render?.name ??
-          null;
-
-        if (name && !name.startsWith("_")) {
-          names.unshift(`<${name}>`);
-        }
+      const name = componentNameOf(fiber.type);
+      if (name && !name.startsWith("_")) {
+        names.unshift(`<${name}>`);
       }
-      fiber = fiber.return;
+      fiber = fiber.return ?? null;
       depth++;
     }
 
@@ -104,6 +122,17 @@ function getReactComponentPath(el: Element): string | null {
   } catch {
     return null;
   }
+}
+
+function formatDebugSource(src: DebugSource): string | null {
+  const fileName = src.fileName ?? "";
+  if (!fileName) return null;
+  // Strip common bundler prefixes
+  const clean = fileName
+    .replace(/^webpack-internal:\/\/\//, "")
+    .replace(/^\(rsc\)\//, "")
+    .replace(/^\.\//, "");
+  return src.lineNumber ? `${clean}:${src.lineNumber}` : clean;
 }
 
 /**
@@ -118,20 +147,11 @@ function getSourceFile(el: Element): string | null {
     // Walk up to find the nearest fiber with _debugSource
     let depth = 0;
     while (fiber && depth < 10) {
-      if (fiber._debugSource) {
-        const src = fiber._debugSource;
-        const fileName: string = src.fileName ?? "";
-        const line: number | undefined = src.lineNumber;
-        if (fileName) {
-          // Strip common bundler prefixes
-          const clean = fileName
-            .replace(/^webpack-internal:\/\/\//, "")
-            .replace(/^\(rsc\)\//, "")
-            .replace(/^\.\//, "");
-          return line ? `${clean}:${line}` : clean;
-        }
-      }
-      fiber = fiber.return;
+      const location = fiber._debugSource
+        ? formatDebugSource(fiber._debugSource)
+        : null;
+      if (location) return location;
+      fiber = fiber.return ?? null;
       depth++;
     }
 
