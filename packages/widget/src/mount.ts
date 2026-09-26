@@ -25,6 +25,7 @@ import { createPinLayer, resolveTarget } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
+import { createWidgetState } from "./state.js";
 import { accentRule, WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
 
@@ -143,17 +144,20 @@ export function mountWidget({
       openPinPopover(item, pin);
     },
   );
-  let feedbackItems: FeedbackItem[] = [];
-  let showPins = true;
+  const state = createWidgetState({
+    isVisible: true,
+    feedbackItems: [],
+    showPins: true,
+  });
 
-  function setFeedbackItems(next: FeedbackItem[]) {
-    feedbackItems = next;
+  function setFeedbackItems(next: readonly FeedbackItem[]) {
     const pinned = next.filter((item) =>
       isOpenOnPage(item, window.location.href),
     );
     pinLayer.render(pinned);
     pinPopover.sync(pinned);
     list.render(next);
+    state.set({ feedbackItems: next });
   }
 
   const pinPopover = createPinPopover(document, shadow, options.labels, {
@@ -161,7 +165,7 @@ export function mountWidget({
       await client.updateFeedback(item.id, { comment }, reviewerToken);
       if (destroyed) return;
       setFeedbackItems(
-        feedbackItems.map((current) =>
+        state.current.feedbackItems.map((current) =>
           current.id === item.id ? { ...current, comment } : current,
         ),
       );
@@ -170,7 +174,9 @@ export function mountWidget({
     async onDelete(item) {
       await client.deleteFeedback(item.id, reviewerToken);
       if (destroyed) return;
-      setFeedbackItems(feedbackItems.filter(({ id }) => id !== item.id));
+      setFeedbackItems(
+        state.current.feedbackItems.filter(({ id }) => id !== item.id),
+      );
       void loadFeedback();
     },
     onClose: () => pinLayer.setActive(null),
@@ -206,7 +212,9 @@ export function mountWidget({
   // Set by a list row for another page, just before navigating there.
   function restorePendingFeedback() {
     const pendingId = takePendingFeedback(sessionStore);
-    const pending = feedbackItems.find(({ id }) => id === pendingId);
+    const pending = state.current.feedbackItems.find(
+      ({ id }) => id === pendingId,
+    );
     if (!pending) return;
     pendingTimers.push(
       setTimeout(() => {
@@ -227,7 +235,7 @@ export function mountWidget({
 
   // Opens the item's pin popover, or only outlines its element when it has no pin.
   function activate(item: FeedbackItem) {
-    const pin = showPins ? pinLayer.pinOf(item.id) : null;
+    const pin = state.current.showPins ? pinLayer.pinOf(item.id) : null;
     if (pin) {
       openPinPopover(item, pin);
       return;
@@ -279,7 +287,7 @@ export function mountWidget({
       );
       void attachScreenshot(created.id, screenshot);
       if (destroyed) return;
-      setFeedbackItems([...feedbackItems, created]);
+      setFeedbackItems([...state.current.feedbackItems, created]);
       void loadFeedback();
     },
     onClose() {
@@ -327,39 +335,39 @@ export function mountWidget({
   // A client-side route change shows the new page's pins and drops the active item.
   const stopWatchingLocation = watchLocation(() => {
     closePinPopover();
-    setFeedbackItems(feedbackItems);
+    setFeedbackItems(state.current.feedbackItems);
   });
 
-  let visible = true;
   let destroyed = false;
   document.body.appendChild(host);
   void loadFeedback();
 
   function togglePins() {
-    showPins = !showPins;
+    const showPins = !state.current.showPins;
     if (!showPins) closePinPopover();
     pinLayer.setShown(showPins);
     toolbar.setPinsShown(showPins);
+    state.set({ showPins });
   }
 
   function show() {
-    if (destroyed || visible) return;
-    visible = true;
+    if (destroyed || state.current.isVisible) return;
     document.body.appendChild(host);
+    state.set({ isVisible: true });
   }
 
   return {
     show,
     hide() {
-      if (destroyed || !visible) return;
-      visible = false;
+      if (destroyed || !state.current.isVisible) return;
       setMode("idle");
       closePinPopover();
       list.close();
       host.remove();
+      state.set({ isVisible: false });
     },
     get isVisible() {
-      return visible && !destroyed;
+      return state.current.isVisible;
     },
     startAnnotation() {
       if (destroyed) return;
@@ -367,17 +375,21 @@ export function mountWidget({
       setMode("annotating");
     },
     get feedbackItems() {
-      return feedbackItems;
+      return state.current.feedbackItems;
     },
     togglePins() {
       if (!destroyed) togglePins();
     },
     get showPins() {
-      return showPins;
+      return state.current.showPins;
     },
+    subscribe: state.subscribe,
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      // Dropped first: the teardown below is not a state change to report.
+      state.clear();
+      state.set({ isVisible: false });
       setMode("idle");
       closePinPopover();
       list.close();
