@@ -12,6 +12,12 @@ import { createFeedbackList } from "./feedback-list.js";
 import { buildFeedbackPayload } from "./feedback-payload.js";
 import { guardHost } from "./host-guard.js";
 import type { Widget } from "./instance.js";
+import {
+  isNavigableUrl,
+  storePendingFeedback,
+  takePendingFeedback,
+  watchLocation,
+} from "./navigation.js";
 import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
 import { createPinPopover } from "./pin-popover.js";
@@ -32,6 +38,12 @@ type MountInput = {
 
 // `selected` covers the comment popover in every state: typing, submitting, error.
 type WidgetMode = "idle" | "annotating" | "selected";
+
+const sessionStore = () => window.sessionStorage;
+
+// Lets the host page lay out before the pending item is activated, then scrolled to.
+const PENDING_ACTIVATE_DELAY_MS = 100;
+const PENDING_SCROLL_DELAY_MS = 200;
 
 // Resolved and closed Feedback stay in the list but get no pin.
 function isOpenOnPage(item: FeedbackItem, url: string) {
@@ -173,13 +185,54 @@ export function mountWidget({
     pinLayer.setActive(null);
   }
 
+  let pendingChecked = false;
+  const pendingTimers: ReturnType<typeof setTimeout>[] = [];
+
   async function loadFeedback() {
     try {
       const { feedback } = await client.getFeedback(reviewerToken);
-      if (!destroyed) setFeedbackItems(feedback);
+      if (destroyed) return;
+      setFeedbackItems(feedback);
+      if (!pendingChecked) {
+        pendingChecked = true;
+        restorePendingFeedback();
+      }
     } catch {
       // The Widget works without pins when the list cannot be loaded
     }
+  }
+
+  // Set by a list row for another page, just before navigating there.
+  function restorePendingFeedback() {
+    const pendingId = takePendingFeedback(sessionStore);
+    const pending = feedbackItems.find(({ id }) => id === pendingId);
+    if (!pending) return;
+    pendingTimers.push(
+      setTimeout(() => {
+        activate(pending);
+        pendingTimers.push(
+          setTimeout(() => scrollToTarget(pending), PENDING_SCROLL_DELAY_MS),
+        );
+      }, PENDING_ACTIVATE_DELAY_MS),
+    );
+  }
+
+  function scrollToTarget(item: FeedbackItem) {
+    resolveTarget(item)?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
+  // Opens the item's pin popover, or only outlines its element when it has no pin.
+  function activate(item: FeedbackItem) {
+    const pin = showPins ? pinLayer.pinOf(item.id) : null;
+    if (pin) {
+      openPinPopover(item, pin);
+      return;
+    }
+    pinPopover.close();
+    pinLayer.setActive(item);
   }
 
   // Best-effort and never awaited by the submit: a missing screenshot is not an error.
@@ -238,21 +291,15 @@ export function mountWidget({
     { labels: options.labels, position: options.position, branding },
     {
       onSelect(item) {
-        // Cross-page rows are handled with in-app navigation, not here yet.
-        if (item.pageUrl !== window.location.href) return;
-        if (mode === "selected") setMode("annotating");
-        resolveTarget(item)?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        const pin = showPins ? pinLayer.pinOf(item.id) : null;
-        if (pin) {
-          openPinPopover(item, pin);
+        if (item.pageUrl !== window.location.href) {
+          if (!isNavigableUrl(item.pageUrl)) return;
+          storePendingFeedback(sessionStore, item.id);
+          window.location.href = item.pageUrl;
           return;
         }
-        // Resolved and closed items have no pin: only their element is outlined.
-        pinPopover.close();
-        pinLayer.setActive(item);
+        if (mode === "selected") setMode("annotating");
+        scrollToTarget(item);
+        activate(item);
       },
     },
   );
@@ -275,6 +322,12 @@ export function mountWidget({
   applyStackLayout(stack, options.position);
   stack.append(toolbar.element, list.element);
   shadow.append(overlay, stack);
+
+  // A client-side route change shows the new page's pins and drops the active item.
+  const stopWatchingLocation = watchLocation(() => {
+    closePinPopover();
+    setFeedbackItems(feedbackItems);
+  });
 
   let visible = true;
   let destroyed = false;
@@ -329,6 +382,8 @@ export function mountWidget({
       list.close();
       recorder?.stop();
       recorder = null;
+      stopWatchingLocation();
+      pendingTimers.forEach(clearTimeout);
       pinLayer.destroy();
       unguardHost();
       host.remove();

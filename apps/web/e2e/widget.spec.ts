@@ -357,6 +357,87 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(page.locator("h1")).toBeInViewport();
     });
 
+    test("shows the pins of the new page after an in-app navigation", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(new URL(fixture.path, baseURL).href),
+          stubbedItem(new URL(fixture.otherPage.path, baseURL).href, {
+            id: "fb_other",
+            comment: "The other heading is too small",
+          }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const pin = page.getByRole("button", {
+        name: "Feedback: The heading is misaligned",
+      });
+      const otherPin = page.getByRole("button", {
+        name: "Feedback: The other heading is too small",
+      });
+      await expect(pin).toBeVisible();
+      await expect(otherPin).toHaveCount(0);
+
+      await page
+        .getByRole("link", { name: fixture.otherPage.linkName })
+        .click();
+      // The dev server compiles the other page on its first request.
+      await expect(page).toHaveURL(
+        new URL(fixture.otherPage.path, baseURL).href,
+        { timeout: 30_000 },
+      );
+      await expect(otherPin).toBeVisible();
+      await expect(pin).toHaveCount(0);
+
+      // A popstate, not a click: nothing but the route change can close the popover.
+      await otherPin.click();
+      await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+      await page.goBack();
+      await expect(page).toHaveURL(new URL(fixture.path, baseURL).href);
+      await expect(page.getByRole("button", { name: "Edit" })).toHaveCount(0);
+      await expect(pin).toBeVisible();
+      await expect(otherPin).toHaveCount(0);
+    });
+
+    test("opens a list row of another page after navigating there", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(new URL(fixture.otherPage.path, baseURL).href, {
+            id: "fb_other",
+            comment: "The other heading is too small",
+          }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Show feedback list" }).click();
+      await page
+        .getByText("The other heading is too small", { exact: true })
+        .click();
+
+      // The dev server compiles the other page on its first request.
+      await expect(page).toHaveURL(
+        new URL(fixture.otherPage.path, baseURL).href,
+        { timeout: 30_000 },
+      );
+      await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+      await expect(page.locator("h1")).toBeInViewport();
+      expect(
+        await page.evaluate(() =>
+          window.sessionStorage.getItem("ff_pending_feedback"),
+        ),
+      ).toBeNull();
+    });
+
     test("links to the product site only when the config asks for branding", async ({
       page,
     }) => {

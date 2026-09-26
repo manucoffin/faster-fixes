@@ -5,13 +5,23 @@
 type WidgetFixture = {
   name: string;
   path: string;
+  /** A second page, and the name of the link that reaches it without a reload. */
+  otherPage: { path: string; linkName: string };
 };
 
 export const WIDGET_FIXTURES: WidgetFixture[] = [
   // The root layout mounts the React Embed; the login page renders it without
   // a database or a cloud-only route.
-  { name: "app layout (React Embed)", path: "/login" },
+  {
+    name: "app layout (React Embed)",
+    path: "/login",
+    otherPage: { path: "/signup", linkName: "Sign up" },
+  },
   // A static page served by the app outside production, loading the built IIFE
   // under a hostile stylesheet.
-  { name: "static page (script embed)", path: "/e2e/script-embed" },
+  {
+    name: "static page (script embed)",
+    path: "/e2e/script-embed",
+    otherPage: { path: "/e2e/script-embed/second", linkName: "Second page" },
+  },
 ];
