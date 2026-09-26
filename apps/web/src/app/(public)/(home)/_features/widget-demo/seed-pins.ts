@@ -37,7 +37,7 @@ export const SEED_PINS: FeedbackItem[] = [
     id: "seed-han",
     status: "new",
     comment:
-      "Should we mention React/Next.js compatibility right here? Not all visitors will know what `@fasterfixes/react` is at a glance.",
+      "Should we say this works on any site, not only React apps? Not all visitors will know what `@fasterfixes/react` is at a glance.",
     pageUrl: "",
     clickX: null,
     clickY: null,

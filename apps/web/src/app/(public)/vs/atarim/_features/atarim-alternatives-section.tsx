@@ -15,7 +15,7 @@ const alternatives: Alternative[] = [
   {
     name: "FasterFixes",
     bestFor:
-      "Dev agencies building React/Next.js apps; self-hosted feedback with MCP + GitHub, Linear & Jira sync",
+      "Dev agencies shipping sites on any stack; self-hosted feedback with MCP + GitHub, Linear & Jira sync",
     startingPrice: "Free (self-hosted)",
     openSource: { type: "yes", note: "AGPL-3.0 + MIT" },
     highlight: true,

@@ -87,21 +87,31 @@ An unknown `position`, a `projectId` that is not a non-empty string or a `labels
 
 `init` returns a `Widget`. Its members match the `useFeedback` hook of `@fasterfixes/react`:
 
-| Member              | Description                                                                        |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| `show()`            | Shows the Widget after `hide()`.                                                   |
-| `hide()`            | Removes the Widget from the page until `show()`.                                   |
-| `isVisible`         | `true` while the Widget is on the page.                                            |
-| `startAnnotation()` | Shows the Widget and enters annotation mode.                                       |
-| `feedbackItems`     | The Feedback items of the Project loaded so far.                                   |
-| `togglePins()`      | Hides or shows every pin on the page.                                              |
-| `showPins`          | `true` while pins are shown.                                                       |
-| `destroy()`         | Removes the Widget, stops the Diagnostic Trail and restores `console` and `fetch`. |
+| Member                | Description                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `show()`              | Shows the Widget after `hide()`.                                                                                         |
+| `hide()`              | Removes the Widget from the page until `show()`.                                                                         |
+| `isVisible`           | `true` while the Widget is on the page.                                                                                  |
+| `startAnnotation()`   | Shows the Widget and enters annotation mode.                                                                             |
+| `feedbackItems`       | The Feedback items of the Project loaded so far.                                                                         |
+| `togglePins()`        | Hides or shows every pin on the page.                                                                                    |
+| `showPins`            | `true` while pins are shown.                                                                                             |
+| `subscribe(listener)` | Calls `listener` after `isVisible`, `feedbackItems` or `showPins` changes. Returns a function that removes the listener. |
+| `destroy()`           | Removes the Widget, stops the Diagnostic Trail and restores `console` and `fetch`.                                       |
 
 ```html
 <button type="button" onclick="window.FasterFixes.instance?.startAnnotation()">
   Report an issue
 </button>
+```
+
+`subscribe` lets your own UI follow the Widget state without polling. The listener receives no arguments: read the values from the instance. `destroy()` removes every listener.
+
+```js
+const widget = init({ projectId: "proj_your_project_id" });
+const unsubscribe = widget.subscribe(() => {
+  counter.textContent = String(widget.feedbackItems.length);
+});
 ```
 
 ## Labels

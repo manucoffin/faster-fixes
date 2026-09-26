@@ -49,14 +49,6 @@
       },
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./internal": {
-      "import": {
-        "types": "./dist/internal.d.ts",
-        "default": "./dist/internal.js"
-      },
-      "types": "./dist/internal.d.ts",
-      "default": "./dist/internal.js"
     }
   },
   "files": [
@@ -69,20 +61,21 @@
     "access": "public"
   },
   "dependencies": {
-    "@fasterfixes/core": "workspace:*",
-    "@floating-ui/react": "^0.27.16",
-    "modern-screenshot": "^4.6.8"
+    "@fasterfixes/widget": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.1",
+    "jsdom": "^30.1.1",
     "tsdown": "^0.21.4",
     "typescript": "^5.9.3",
     "vite": "^8.3.0",

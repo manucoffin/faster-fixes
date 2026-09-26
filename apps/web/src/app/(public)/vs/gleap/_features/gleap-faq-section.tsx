@@ -20,7 +20,7 @@ export const gleapFaqs: FaqItem[] = [
   {
     question: "Does FasterFixes have mobile SDKs?",
     answer:
-      "No. Web and React/Next.js only. No iOS, Android, Flutter, or React Native SDKs.",
+      "No. FasterFixes is web only: a script tag for any website, and a React package for React apps. No iOS, Android, Flutter, or React Native SDKs.",
   },
   {
     question: "How does FasterFixes integrate with Claude Code and Cursor?",

@@ -65,14 +65,15 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from Userback?",
     answer:
-      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport on every report. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes does not currently offer those features. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
+      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures DOM selector, URL, browser, and viewport on every report, plus the React component tree on React sites. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes does not currently offer those features. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source and self-hostable; Userback is closed-source
-        and cloud-only. FasterFixes captures React component tree, DOM selector,
-        URL, browser, and viewport on every report. Userback is a broader
-        platform with annotated video, session replay, NPS surveys, and a
-        feature portal. FasterFixes does not currently offer those features.
+        and cloud-only. FasterFixes captures DOM selector, URL, browser, and
+        viewport on every report, plus the React component tree on React sites.
+        Userback is a broader platform with annotated video, session replay, NPS
+        surveys, and a feature portal. FasterFixes does not currently offer
+        those features.
       </p>
     ),
   },
@@ -103,19 +104,23 @@ export const userbackFaqs: RichFaqItem[] = [
     ),
   },
   {
-    question: "How do I install FasterFixes in Next.js?",
+    question: "How do I install FasterFixes on my site?",
     answer:
-      "Run npm install @fasterfixes/react, mount the FeedbackWidget component in your layout, and pass the project key. The widget hooks into your React tree and captures the component path on every report. Works with the Next.js App Router and any React-based framework.",
+      "Add one script tag with your Project ID to any site: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or any other framework. In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap the app in FeedbackProvider with your Project ID. Both embeds share the same widget, options, and captured context.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Run npm install @fasterfixes/react, mount the FeedbackWidget component
-        in your layout, and pass the project key. The widget hooks into your
-        React tree and captures the component path on every report. Works with
-        the Next.js App Router and any React-based framework. See the{" "}
-        <DocLink href={"/docs/widget/react" as Route}>
-          React widget docs
-        </DocLink>{" "}
-        and the{" "}
+        Add one script tag with your Project ID to any site: WordPress, Webflow,
+        static HTML, or an app built with Vue, Angular, Svelte, or any other
+        framework. In a React or Next.js app, you can instead run npm install
+        @fasterfixes/react and wrap the app in FeedbackProvider with your
+        Project ID. Both embeds share the same widget, options, and captured
+        context. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        , the{" "}
+        <DocLink href={"/docs/widget/react" as Route}>React embed docs</DocLink>
+        , and the{" "}
         <DocLink href={"/docs/getting-started/quickstart" as Route}>
           quickstart
         </DocLink>
@@ -126,17 +131,18 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React stacks?",
     answer:
-      "Partially. FasterFixes has a basic HTML embed for non-React pages. However, the full context capture of the React component tree and DOM selector is only available with the React widget. Userback's JS snippet and browser extension work on any stack. If your project is not React-based, Userback offers broader compatibility today.",
+      "Yes. The script embed installs the widget with one script tag on any site, with the same screenshot, DOM selector, URL, browser, viewport, console, and network capture as the React embed. The React component path is added when the site runs React. Unlike Userback, FasterFixes does not offer a browser extension.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Partially. FasterFixes has a basic HTML embed for non-React pages.
-        However, the full context capture of the React component tree and DOM
-        selector is only available with the React widget. Userback&apos;s JS
-        snippet and browser extension work on any stack. See the{" "}
-        <DocLink href={"/docs/widget/other-frameworks" as Route}>
-          other frameworks page
-        </DocLink>{" "}
-        for the latest status.
+        Yes. The script embed installs the widget with one script tag on any
+        site, with the same screenshot, DOM selector, URL, browser, viewport,
+        console, and network capture as the React embed. The React component
+        path is added when the site runs React. Unlike Userback, FasterFixes
+        does not offer a browser extension. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        .
       </p>
     ),
   },

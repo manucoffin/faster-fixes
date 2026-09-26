@@ -27,6 +27,8 @@ export default defineConfig({
       // Unresolvable on purpose: every widget request is answered by the route stub,
       // and one the stub misses fails instead of reaching a real backend.
       NEXT_PUBLIC_FF_API_ORIGIN: WIDGET_API_ORIGIN,
+      // The homepage demo is a cloud-only route; self-hosted redirects it to /login.
+      NEXT_PUBLIC_IS_CLOUD: "true",
       // Placeholders for the modules the auth pages evaluate at import. No database
       // is reached: the specs answer the session request in the browser.
       RESEND_API_KEY: "re_e2e",

@@ -4,34 +4,36 @@ import type { FeedbackItem } from "@fasterfixes/core";
 
 import { createDeferredWidget, createInertWidget } from "./instance.js";
 import type { Widget } from "./instance.js";
+import { createWidgetState } from "./state.js";
 
 function createFakeWidget(items: FeedbackItem[] = []) {
-  let visible = true;
-  let pins = true;
-  const widget = {
-    show: vi.fn(() => {
-      visible = true;
-    }),
-    hide: vi.fn(() => {
-      visible = false;
-    }),
-    get isVisible() {
-      return visible;
-    },
-    startAnnotation: vi.fn(() => {
-      visible = true;
-    }),
+  const state = createWidgetState({
+    isVisible: true,
     feedbackItems: items,
-    togglePins: vi.fn(() => {
-      pins = !pins;
-    }),
-    get showPins() {
-      return pins;
+    showPins: true,
+  });
+  const widget = {
+    show: vi.fn(() => state.set({ isVisible: true })),
+    hide: vi.fn(() => state.set({ isVisible: false })),
+    get isVisible() {
+      return state.current.isVisible;
     },
+    startAnnotation: vi.fn(() => state.set({ isVisible: true })),
+    get feedbackItems() {
+      return state.current.feedbackItems;
+    },
+    togglePins: vi.fn(() => state.set({ showPins: !state.current.showPins })),
+    get showPins() {
+      return state.current.showPins;
+    },
+    subscribe: state.subscribe,
     destroy: vi.fn(() => {
-      visible = false;
+      state.clear();
+      state.set({ isVisible: false });
     }),
-  } satisfies Widget;
+    setFeedbackItems: (next: FeedbackItem[]) =>
+      state.set({ feedbackItems: next }),
+  } satisfies Widget & { setFeedbackItems: unknown };
   return widget;
 }
 
@@ -42,6 +44,17 @@ describe("createInertWidget", () => {
     widget.destroy();
 
     expect(widget.isVisible).toBe(false);
+  });
+
+  it("accepts a listener it never calls", () => {
+    const widget = createInertWidget();
+    const listener = vi.fn();
+    const unsubscribe = widget.subscribe(listener);
+    widget.show();
+    widget.togglePins();
+    unsubscribe();
+
+    expect(listener).not.toHaveBeenCalled();
   });
 });
 
@@ -169,5 +182,80 @@ describe("createDeferredWidget", () => {
     expect(second.destroy).toHaveBeenCalledOnce();
     deferred.widget.destroy();
     expect(first.destroy).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the same empty Feedback list before the Widget mounts", () => {
+    const { widget } = createDeferredWidget();
+
+    expect(widget.feedbackItems).toBe(widget.feedbackItems);
+  });
+
+  describe("subscribe", () => {
+    it("notifies when pins are toggled before the Widget mounts", () => {
+      const deferred = createDeferredWidget();
+      const listener = vi.fn();
+      deferred.widget.subscribe(listener);
+      deferred.widget.togglePins();
+
+      expect(listener).toHaveBeenCalledOnce();
+    });
+
+    it("notifies once when attaching changes the state", () => {
+      const deferred = createDeferredWidget();
+      const listener = vi.fn();
+      deferred.widget.subscribe(listener);
+      deferred.attach(createFakeWidget());
+
+      expect(listener).toHaveBeenCalledOnce();
+      expect(deferred.widget.isVisible).toBe(true);
+    });
+
+    it("stays silent on show and hide before the Widget mounts", () => {
+      const deferred = createDeferredWidget();
+      const listener = vi.fn();
+      deferred.widget.subscribe(listener);
+      deferred.widget.hide();
+      deferred.widget.show();
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("forwards every change of the mounted Widget", () => {
+      const deferred = createDeferredWidget();
+      const mounted = createFakeWidget();
+      deferred.attach(mounted);
+      const listener = vi.fn();
+      deferred.widget.subscribe(listener);
+
+      deferred.widget.hide();
+      deferred.widget.show();
+      deferred.widget.togglePins();
+      mounted.setFeedbackItems([{ id: "fb_1" } as FeedbackItem]);
+
+      expect(listener).toHaveBeenCalledTimes(4);
+    });
+
+    it("stops calling a listener once unsubscribed", () => {
+      const deferred = createDeferredWidget();
+      deferred.attach(createFakeWidget());
+      const listener = vi.fn();
+      const unsubscribe = deferred.widget.subscribe(listener);
+      unsubscribe();
+      deferred.widget.hide();
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("drops every listener on destroy", () => {
+      const deferred = createDeferredWidget();
+      const mounted = createFakeWidget();
+      deferred.attach(mounted);
+      const listener = vi.fn();
+      deferred.widget.subscribe(listener);
+      deferred.widget.destroy();
+      mounted.setFeedbackItems([{ id: "fb_1" } as FeedbackItem]);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
   });
 });

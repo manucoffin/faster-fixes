@@ -18,18 +18,10 @@ export function BugherdHonestTakeSection() {
           </p>
           <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
             <li>
-              <strong className="text-foreground">
-                Works on any tech stack
-              </strong>
-              : a one-line JS tag or a Chrome extension lets you collect
-              feedback on a WordPress site, a Webflow page, or any
-              non-JavaScript backend. FasterFixes is React and Next.js native
-              today.
-            </li>
-            <li>
               <strong className="text-foreground">Chrome extension</strong>:
               install once and review feedback on any client site without
-              touching their code.
+              touching their code. FasterFixes needs its script tag or React
+              package installed on the site.
             </li>
             <li>
               <strong className="text-foreground">
@@ -67,12 +59,10 @@ export function BugherdHonestTakeSection() {
               resolve feedback from your editor with the model you choose.
             </li>
             <li>
-              <strong className="text-foreground">
-                Framework-native widget, by design
-              </strong>
-              : React and Next.js today, more frameworks coming. The trade-off
-              against a generic JS tag is full control over the integration: the
-              widget knows your component tree and renders inside your app.
+              <strong className="text-foreground">One widget, any stack</strong>
+              : a drop-in script tag on any site, or a React package for React
+              apps. On React sites, every report also carries the component
+              path.
             </li>
             <li>
               Full control of the infrastructure: self-host the dashboard, the
@@ -82,7 +72,7 @@ export function BugherdHonestTakeSection() {
           <p>
             If that matches what you actually need, FasterFixes is faster to
             adopt and cheaper to run. If you need the breadth of BugHerd&apos;s
-            project-management surface or non-React stack support, pick BugHerd.
+            project-management surface or a Chrome extension, pick BugHerd.
           </p>
         </div>
       </div>

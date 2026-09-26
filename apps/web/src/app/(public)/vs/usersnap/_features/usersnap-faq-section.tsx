@@ -85,33 +85,37 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap has no equivalent.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap has no equivalent.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
-        context (URL, DOM selector, React component path, browser, viewport),
-        apply a fix, and mark the item resolved, all from the terminal. Usersnap
-        has no equivalent. See{" "}
+        context (URL, DOM selector, React component path when available,
+        browser, viewport), apply a fix, and mark the item resolved, all from
+        the terminal. Usersnap has no equivalent. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>
     ),
   },
   {
-    question: "How do I install the widget in a Next.js or React app?",
+    question: "How do I install the widget on my site?",
     answer:
-      "Run npm install @fasterfixes/react, mount the FeedbackWidget component in your layout, and pass the project key. The widget hooks into your React tree and captures the component path on every report. Works with the Next.js App Router and any React-based framework.",
+      'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context. On React sites, every report also carries the component path.',
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Run npm install @fasterfixes/react, mount the FeedbackWidget component
-        in your layout, and pass the project key. The widget hooks into your
-        React tree and captures the component path on every report. Works with
-        the Next.js App Router and any React-based framework. See the{" "}
-        <DocLink href={"/docs/widget/react" as Route}>
-          React widget docs
-        </DocLink>{" "}
-        and the{" "}
+        On any site, paste one script tag with your Project ID, or run npm
+        install @fasterfixes/widget and call init({"{ projectId }"}). In a React
+        or Next.js app, you can instead run npm install @fasterfixes/react and
+        wrap your app in {"<FeedbackProvider>"}. Both embeds share the same
+        widget, options, and captured context. On React sites, every report also
+        carries the component path. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        , the{" "}
+        <DocLink href={"/docs/widget/react" as Route}>React embed docs</DocLink>
+        , and the{" "}
         <DocLink href={"/docs/getting-started/quickstart" as Route}>
           quickstart
         </DocLink>
@@ -122,24 +126,27 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React stacks?",
     answer:
-      "Partially. FasterFixes has a basic HTML embed for non-React pages. However, the full context capture of the React component tree and DOM selector is only available with the React widget. Usersnap's JS snippet and browser extension work on any stack. If your project is not React-based, Usersnap offers broader compatibility today.",
+      "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. Every report carries the screenshot, DOM selector, URL, browser, viewport, and console and network logs. The React component path is added when the site runs React. Unlike Usersnap, FasterFixes has no browser extension, so the widget must be installed on the site.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Partially. FasterFixes has a basic HTML embed for non-React pages.
-        However, the full context capture of the React component tree and DOM
-        selector is only available with the React widget. Usersnap&apos;s JS
-        snippet and browser extension work on any stack. See the{" "}
-        <DocLink href={"/docs/widget/other-frameworks" as Route}>
-          other frameworks page
-        </DocLink>{" "}
-        for the latest status.
+        Yes. The script embed installs the widget with one script tag on any
+        website: WordPress, Webflow, static HTML, or an app built with Vue,
+        Angular, Svelte, or no framework at all. Every report carries the
+        screenshot, DOM selector, URL, browser, viewport, and console and
+        network logs. The React component path is added when the site runs
+        React. Unlike Usersnap, FasterFixes has no browser extension, so the
+        widget must be installed on the site. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        .
       </p>
     ),
   },
   {
     question: "How do I migrate from Usersnap to FasterFixes?",
     answer:
-      "Export your feedback data from Usersnap via CSV or API, then deploy FasterFixes (self-hosted or Pro). Replace the Usersnap widget with the FasterFixes React widget or HTML embed. Note that NPS and survey workflows do not migrate. FasterFixes does not support those features. Connect GitHub, Linear, or Jira for two-way sync and configure @fasterfixes/mcp for your AI agent.",
+      "Export your feedback data from Usersnap via CSV or API, then deploy FasterFixes (self-hosted or Pro). Replace the Usersnap snippet with the FasterFixes script tag, or with the React package in a React app. Note that NPS and survey workflows do not migrate. FasterFixes does not support those features. Connect GitHub, Linear, or Jira for two-way sync and configure @fasterfixes/mcp for your AI agent.",
   },
   {
     question: "Is FasterFixes open source?",

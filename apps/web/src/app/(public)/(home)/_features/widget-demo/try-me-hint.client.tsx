@@ -35,19 +35,20 @@ export function TryMeHint() {
       APPEAR_DELAY_MS,
     );
 
-    // First interaction inside the widget portal dismisses the hint forever.
+    // First interaction with the Widget host dismisses the hint forever. The
+    // Widget hides pointerdown from the page, so listen for pointerup.
     const dismiss = (e: PointerEvent) => {
       const target = e.target;
       if (target instanceof Element && target.closest("[data-ff-widget]")) {
         setVisible(false);
-        document.removeEventListener("pointerdown", dismiss, true);
+        document.removeEventListener("pointerup", dismiss, true);
       }
     };
-    document.addEventListener("pointerdown", dismiss, true);
+    document.addEventListener("pointerup", dismiss, true);
 
     return () => {
       window.clearTimeout(showTimer);
-      document.removeEventListener("pointerdown", dismiss, true);
+      document.removeEventListener("pointerup", dismiss, true);
     };
   }, []);
 

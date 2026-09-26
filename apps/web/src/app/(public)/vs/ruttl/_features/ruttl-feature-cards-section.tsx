@@ -5,7 +5,7 @@ const cards = [
   },
   {
     title: "React component tree captured automatically",
-    body: "When a client annotates a bug, FasterFixes captures the React component name, props, and DOM selector at the click point. Developers receive a report that maps to the codebase, not a pixel coordinate. No reproduction steps required.",
+    body: "When a client annotates a bug on a React site, FasterFixes captures the React component name, props, and DOM selector at the click point. Developers receive a report that maps to the codebase, not a pixel coordinate. No reproduction steps required.",
   },
   {
     title: "No client account required",

@@ -15,6 +15,8 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@fasterfixes/widget"><img src="https://img.shields.io/npm/v/@fasterfixes/widget?label=%40fasterfixes%2Fwidget&color=0a0a0a" alt="@fasterfixes/widget on npm" /></a>
+  &nbsp;
   <a href="https://www.npmjs.com/package/@fasterfixes/react"><img src="https://img.shields.io/npm/v/@fasterfixes/react?label=%40fasterfixes%2Freact&color=0a0a0a" alt="@fasterfixes/react on npm" /></a>
   &nbsp;
   <a href="https://www.npmjs.com/package/@fasterfixes/mcp"><img src="https://img.shields.io/npm/v/@fasterfixes/mcp?label=%40fasterfixes%2Fmcp&color=0a0a0a" alt="@fasterfixes/mcp on npm" /></a>
@@ -38,19 +40,31 @@ The goal is a short path from client comment to resolved fix:
 
 ### 1. Collect feedback with the widget
 
-Install the React widget in your application. Clients click anywhere on the page to leave feedback. The widget captures the screenshot, element selector, component tree, and browser info automatically — no setup required from the client.
+Add the widget to any website: WordPress, Webflow, static HTML, or an app built with any framework. Paste one tag, replacing the Project ID with your own:
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"
+  data-project-id="proj_your_project_id"
+  defer
+></script>
+```
+
+In a React application, use the React embed instead. It mounts the same widget:
 
 ```tsx
 import { FeedbackProvider } from "@fasterfixes/react";
 
 function App() {
   return (
-    <FeedbackProvider apiKey="your-project-api-key">
+    <FeedbackProvider projectId="proj_your_project_id">
       <YourApp />
     </FeedbackProvider>
   );
 }
 ```
+
+Clients click anywhere on the page to leave feedback. The widget captures the screenshot, element selector, browser info, and the React component tree on React sites automatically, with no setup required from the client. See the [script embed](https://faster-fixes.com/docs/widget/script-embed) and [React](https://faster-fixes.com/docs/widget/react) docs.
 
 ### 2. Review feedback on the dashboard
 
@@ -83,13 +97,14 @@ The MCP server works with Claude Code, Cursor, VS Code, Windsurf, Codex, and Zed
 
 ## Packages
 
-This monorepo publishes three npm packages:
+This monorepo publishes four npm packages:
 
-| Package                                                                  | Description                       | Install                          |
-| ------------------------------------------------------------------------ | --------------------------------- | -------------------------------- |
-| [`@fasterfixes/react`](https://www.npmjs.com/package/@fasterfixes/react) | React feedback widget             | `npm install @fasterfixes/react` |
-| [`@fasterfixes/core`](https://www.npmjs.com/package/@fasterfixes/core)   | Framework-agnostic client library | `npm install @fasterfixes/core`  |
-| [`@fasterfixes/mcp`](https://www.npmjs.com/package/@fasterfixes/mcp)     | MCP server for AI coding agents   | `npx -y @fasterfixes/mcp`        |
+| Package                                                                    | Description                       | Install                                         |
+| -------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------- |
+| [`@fasterfixes/widget`](https://www.npmjs.com/package/@fasterfixes/widget) | Feedback widget for any website   | Script tag or `npm install @fasterfixes/widget` |
+| [`@fasterfixes/react`](https://www.npmjs.com/package/@fasterfixes/react)   | React embed of the widget         | `npm install @fasterfixes/react`                |
+| [`@fasterfixes/core`](https://www.npmjs.com/package/@fasterfixes/core)     | Framework-agnostic client library | `npm install @fasterfixes/core`                 |
+| [`@fasterfixes/mcp`](https://www.npmjs.com/package/@fasterfixes/mcp)       | MCP server for AI coding agents   | `npx -y @fasterfixes/mcp`                       |
 
 ## MCP Setup
 
@@ -241,4 +256,4 @@ You can find your agent token and project ID in [Organization Settings](https://
 
 This repository is licensed under the [GNU AGPLv3 License](./LICENSE).
 
-The widget packages (`@fasterfixes/core`, `@fasterfixes/react`) and the MCP server (`@fasterfixes/mcp`) are licensed under MIT for unrestricted use in your applications.
+The widget packages (`@fasterfixes/widget`, `@fasterfixes/react`, `@fasterfixes/core`) and the MCP server (`@fasterfixes/mcp`) are licensed under MIT for unrestricted use in your applications.

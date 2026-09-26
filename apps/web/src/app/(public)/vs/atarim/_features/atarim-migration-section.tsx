@@ -9,7 +9,7 @@ export const migrationSteps = [
   },
   {
     label: "Replace the Atarim widget",
-    body: "Run npm install @fasterfixes/react and drop the FasterFixes component into your app layout. Remove the Atarim JS snippet from your site, deactivate the WordPress plugin, or stop using the Chrome extension for new feedback. The widget captures component tree, DOM selector, URL, browser, and viewport automatically.",
+    body: "Add the FasterFixes script tag to your site, or in a React app install @fasterfixes/react and wrap the app in FeedbackProvider. Remove the Atarim JS snippet from your site, deactivate the WordPress plugin, or stop using the Chrome extension for new feedback. The widget captures DOM selector, URL, browser, and viewport automatically, plus the component tree on React sites.",
   },
   {
     label: "Invite your team and connect your issue tracker",

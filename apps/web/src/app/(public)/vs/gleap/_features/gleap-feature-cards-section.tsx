@@ -5,7 +5,7 @@ const cards = [
   },
   {
     title: "React component tree capture",
-    body: 'When a client clicks on a bug, FasterFixes captures the full React component tree at that point: component name, props, state, and DOM selector. Developers receive a report that maps directly to the codebase, not a pixel coordinate. Eliminates the "which button is this?" back-and-forth entirely.',
+    body: 'When a client clicks on a bug on a React site, FasterFixes captures the full React component tree at that point: component name, props, state, and DOM selector. Developers receive a report that maps directly to the codebase, not a pixel coordinate. Eliminates the "which button is this?" back-and-forth entirely.',
   },
   {
     title: "Structured markdown output",

@@ -1,7 +1,7 @@
 import { CheckIcon } from "lucide-react";
 
 const fitPoints = [
-  "You're a dev agency or product team building React or Next.js apps and need feedback that maps directly to component trees and DOM selectors.",
+  "You're a dev agency or product team and need feedback that maps directly to DOM selectors and, on React apps, component trees.",
   "You want AI coding agents such as Claude Code, Cursor, and Codex to read and act on feedback directly from the terminal or IDE, without context-switching to a browser dashboard.",
   "You need to self-host: client feedback must stay in your own infrastructure, not a third-party cloud.",
   "You want flat pricing: one plan covers your whole team at a fixed monthly rate, not a per-seat bill that grows with every new member.",

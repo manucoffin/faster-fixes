@@ -36,19 +36,14 @@ export function UsersnapHonestTakeSection() {
             <li>
               <strong className="text-foreground">Browser extension</strong>:
               lets non-technical reporters submit feedback on any site without
-              installing a widget. FasterFixes requires a React or Next.js
-              widget today.
+              installing a widget. FasterFixes needs its script tag or React
+              package installed on the site.
             </li>
             <li>
               <strong className="text-foreground">Integration breadth</strong>:
               Jira, Slack, Zendesk, Azure DevOps, and 50+ other tools.
               FasterFixes ships GitHub, Linear, and Jira two-way sync; more
               integrations are in progress.
-            </li>
-            <li>
-              <strong className="text-foreground">Any-stack support</strong>:
-              Usersnap works on any stack. FasterFixes is React-native with a
-              basic HTML embed for non-React pages.
             </li>
             <li>
               <strong className="text-foreground">Enterprise polish</strong>:
@@ -88,8 +83,8 @@ export function UsersnapHonestTakeSection() {
               <strong className="text-foreground">
                 React component tree capture
               </strong>
-              : every report ships with the DOM selector and the React component
-              path. The agent knows which file owns the bug.
+              : on React sites, every report ships with the DOM selector and the
+              React component path. The agent knows which file owns the bug.
             </li>
             <li>
               <strong className="text-foreground">Flat pricing</strong>:

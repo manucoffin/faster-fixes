@@ -1,7 +1,7 @@
 const atarimWins = [
   "Whitelabel on Enterprise: custom logo, favicon, color scheme, plugin name, and removal of all Atarim branding. FasterFixes has no whitelabel option.",
   "Client portal: clients can log in with their own account or access via a shared guest link without an account. FasterFixes has no dedicated client portal.",
-  "WordPress-native: deep WordPress integration via a dedicated plugin, used by 72,000+ teams. FasterFixes has no WordPress plugin.",
+  "WordPress-native: deep WordPress integration via a dedicated plugin, used by 72,000+ teams. FasterFixes has no WordPress plugin: its script tag runs on WordPress sites, without a plugin-level integration.",
   "AI InnerCircle: six specialized AI agents built into the platform, covering design (Pixel), copy (Claro), SEO (Lexi), UX (Index), clarity (Navi), and QA (Glitch).",
   "Broad PM integrations out of the box: Jira, Asana, ClickUp, Monday.com, Trello, Basecamp, Teamwork, Slack, Figma, Zapier, Pabbly, Make, and more.",
   "Chrome extension: works on any website without installing a widget or touching code. Useful for reviewing third-party or live production sites.",
