@@ -76,6 +76,9 @@ importers:
       "@fasterfixes/react":
         specifier: workspace:*
         version: link:../../packages/widget-react
+      "@fasterfixes/widget":
+        specifier: workspace:*
+        version: link:../../packages/widget
       "@hookform/resolvers":
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.1(react@19.3.0))
@@ -197,9 +200,6 @@ importers:
         specifier: ^4.3.5
         version: 4.3.5
     devDependencies:
-      "@fasterfixes/widget":
-        specifier: workspace:*
-        version: link:../../packages/widget
       "@mdx-js/loader":
         specifier: ^3.1.1
         version: 3.1.1

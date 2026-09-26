@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["docs/**"],
+  "ignore": ["docs/**", "**/_deprecated_*"],
   "ignoreExportsUsedInFile": true,
   "ignoreIssues": {
     "apps/web/src/**/_services/**/*.ts": ["types"]
@@ -13,7 +13,7 @@
       "entry": ["src/app/**/page.mdx", "mdx-components.tsx"],
       "ignoreFiles": ["src/app/_domains/*/index.ts"],
       "ignoreBinaries": ["portless", "stripe"],
-      "ignoreDependencies": ["@tailwindcss/postcss", "@fasterfixes/widget"]
+      "ignoreDependencies": ["@tailwindcss/postcss"]
     },
     "packages/database": {
       "ignoreDependencies": ["@prisma/client"]
