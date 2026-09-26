@@ -19,7 +19,7 @@ import { HowItWorksSection } from "./_features/how-it-works/how-it-works-section
 import { IntegrationsSection } from "./_features/integrations-section";
 import { ProblemSection } from "./_features/problem/problem-section";
 import { SolutionSection } from "./_features/solution/solution-section";
-import { DemoFeedbackProvider } from "./_features/widget-demo/demo-feedback-provider.client";
+import { DemoWidget } from "./_features/widget-demo/demo-widget.client";
 import { WorksWithSection } from "./_features/works-with-section";
 
 export const metadata: Metadata = {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <DemoFeedbackProvider>
+    <>
       <div>
         <HeroSection />
         <WorksWithSection />
@@ -77,6 +77,7 @@ export default function Page() {
         <WebSiteSchema />
         <SoftwareApplicationSchema />
       </div>
-    </DemoFeedbackProvider>
+      <DemoWidget />
+    </>
   );
 }
