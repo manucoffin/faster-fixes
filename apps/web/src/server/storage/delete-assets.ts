@@ -27,27 +27,32 @@ export async function deleteAssets(assetIds: string[]) {
     }
 
     for (const [bucket, keys] of keysByBucket) {
-      try {
-        const { errors } = await deleteObjects(s3Client, {
-          bucket,
-          objects: keys.map((key) => ({ key })),
-          quiet: true,
-        });
-        for (const error of errors) {
-          console.error(
-            `Failed to delete S3 object (key=${error.key}): ${error.code} ${error.message}`,
-          );
-        }
-      } catch (error) {
-        console.error(
-          `Failed to delete ${keys.length} S3 objects (bucket=${bucket}):`,
-          error,
-        );
-      }
+      await deleteBucketObjects(bucket, keys);
     }
 
     await prisma.asset.deleteMany({
       where: { id: { in: assets.map((asset) => asset.id) } },
     });
+  }
+}
+
+// Best-effort: a failed S3 delete is logged and never blocks the DB cleanup.
+async function deleteBucketObjects(bucket: string, keys: string[]) {
+  try {
+    const { errors } = await deleteObjects(s3Client, {
+      bucket,
+      objects: keys.map((key) => ({ key })),
+      quiet: true,
+    });
+    for (const error of errors) {
+      console.error(
+        `Failed to delete S3 object (key=${error.key}): ${error.code} ${error.message}`,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `Failed to delete ${keys.length} S3 objects (bucket=${bucket}):`,
+      error,
+    );
   }
 }
