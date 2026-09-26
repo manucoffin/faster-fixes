@@ -50,3 +50,4 @@ What changes because of this? What new constraints does it create?
 - [ADR-0013](./0013-package-extraction-boundaries.md): Package extraction boundaries are reuse-driven, layered and lazy; nothing is extracted from the app until a second consumer exists.
 - [ADR-0014](./0014-one-integration-domain.md): One `integration` domain holds every external system, with per-provider subfolders.
 - [ADR-0015](./0015-every-convention-rule-is-always-on.md): Every convention rule is always on at `error`; the `ESLINT_AGENT_RULES` gate is removed and CI lints the web app.
+- [ADR-0016](./0016-one-vanilla-widget-framework-embeds-are-wrappers.md): The Widget is one vanilla DOM implementation in `@fasterfixes/widget`; the script embed and every framework package are wrappers around it.

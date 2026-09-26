@@ -18,6 +18,14 @@ _Avoid_: Reporter, Submitter, User.
 A Faster Fixes container scoped to one website (one widget install). Holds Feedback, settings, and at most one **Project link** per **Integration**.
 _Avoid_: Site, App, Workspace.
 
+**Widget**:
+The in-page reporting UI a Reviewer uses to submit and browse Feedback on a customer's site. One Widget per Project, whatever the **Embed** it was installed through.
+_Avoid_: Plugin, SDK, Snippet (the install code of an Embed, not the Widget itself).
+
+**Embed**:
+A way of installing the **Widget** on a site: the **script embed** (a script tag, no build step) or a **framework embed** (a package for React, later Vue and others). Every Embed exposes the same customization and behaviour; an Embed changes how the Widget is installed, never what it does.
+_Avoid_: Integration (reserved for external systems), Adapter, Wrapper (implementation vocabulary).
+
 ### Identity & access
 
 **Project public ID**:
@@ -133,7 +141,8 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
-- A **Reviewer** submits **Feedback** through the widget; Reviewers are not authenticated app users
+- A **Reviewer** submits **Feedback** through the **Widget**; Reviewers are not authenticated app users
+- A **Widget** is installed through exactly one **Embed**; Embeds differ in install mechanism only, never in behaviour or customization
 - An **Installation** is owned by an Organization and shared across all Projects in that Organization
 - The same **Feedback** may exist as a GitHub Issue and a Linear Issue at the same time; both are mirrors of the Feedback, not peers of each other
 - A **Notification channel** (Slack) receives one-way announcements of a Feedback; unlike a **Tracker** it holds no mirror, has no **Issue link**, and never feeds state back to the Feedback

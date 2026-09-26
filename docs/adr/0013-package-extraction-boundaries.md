@@ -80,3 +80,21 @@ Audited when the two public APIs moved behind services, and worth keeping becaus
 - Both a package and an app domain folder may exist for the same domain the day one is extracted: the package holds cross-consumer logic, the folder keeps app-only pieces. Accepted as the price of reuse.
 - The graph above dates from the day it was written. A new package, a new app or a new internal edge amends this ADR; nothing else records the layering.
 - The question "should this leave the app?" is closed until a second consumer exists. Reopening it without one is a change to this ADR, not a judgement call in a review.
+
+## Amendment 2026-09-26: a third published widget package and a three-deep chain
+
+[ADR-0016](./0016-one-vanilla-widget-framework-embeds-are-wrappers.md) adds `packages/widget` (`@fasterfixes/widget`), the vanilla DOM implementation of the Widget, and turns `@fasterfixes/react` into a wrapper around it. The gate of this ADR is met the same way it is for the other published packages: external consumers. The graph changes as follows.
+
+| Layer | Package                 | Alias                 | Published | Internal runtime dependencies | Internal consumers                                  |
+| ----- | ----------------------- | --------------------- | --------- | ----------------------------- | --------------------------------------------------- |
+| 0     | `packages/widget-core`  | `@fasterfixes/core`   | yes       | none                          | `@fasterfixes/widget`, the app                      |
+| 1     | `packages/widget`       | `@fasterfixes/widget` | yes       | `@fasterfixes/core`           | `@fasterfixes/react`, the marketing demo in the app |
+| 2     | `packages/widget-react` | `@fasterfixes/react`  | yes       | `@fasterfixes/widget`         | the app (root layout)                               |
+| top   | `apps/web`              | `web`                 | no        | anything                      | none                                                |
+
+Reading of the change:
+
+- **Layers are numbered by depth, not fixed at three.** A package's layer is one more than the deepest internal package it imports; apps sit on top and may depend on anything. The two rules that matter are unchanged: no cycle, and no package imports an app. The published widget chain (core, widget, framework embeds) is the first three-deep chain in the repo, and future framework packages (`@fasterfixes/vue`, and so on) join `@fasterfixes/react` at layer 2.
+- **`@fasterfixes/react` stops importing `@fasterfixes/core` directly.** Everything it needs comes through `@fasterfixes/widget`. The app keeps importing core for utilities and types.
+- **The app's second import site of the React package moves.** The marketing demo ([ADR-0001](./0001-marketing-demo-uses-internal-widget-core.md)) consumes `@fasterfixes/widget/internal` instead of `@fasterfixes/react/internal`, which is removed at the React 1.0.0 release.
+- **The "which response fields the published clients read" audit gains a rule.** ADR-0016 makes the widget HTTP API additive only, so the audit above is no longer only a checklist before an error-body change: removing or renaming any field of a widget API response is out of bounds while a shipped client may read it.
