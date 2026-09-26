@@ -4,6 +4,8 @@ export type Widget = {
   /** Removes the Widget from the page until `show()`. */
   hide: () => void;
   readonly isVisible: boolean;
+  /** Shows the Widget and enters annotation mode. */
+  startAnnotation: () => void;
   /** Unmounts the Widget and restores every global it patched. */
   destroy: () => void;
 };
@@ -13,6 +15,7 @@ export function createInertWidget(): Widget {
     show: () => undefined,
     hide: () => undefined,
     isVisible: false,
+    startAnnotation: () => undefined,
     destroy: () => undefined,
   };
 }
@@ -25,10 +28,11 @@ export type DeferredWidget = {
 };
 
 // `init` returns synchronously but mounts only after the config request, so
-// the instance buffers `show`/`hide` and forwards them once attached.
+// the instance buffers `show`, `hide` and `startAnnotation` and forwards them once attached.
 export function createDeferredWidget(): DeferredWidget {
   let mounted: Widget | null = null;
   let wantsVisible = true;
+  let wantsAnnotation = false;
   let destroyed = false;
 
   const widget: Widget = {
@@ -40,7 +44,14 @@ export function createDeferredWidget(): DeferredWidget {
     hide() {
       if (destroyed) return;
       wantsVisible = false;
+      wantsAnnotation = false;
       mounted?.hide();
+    },
+    startAnnotation() {
+      if (destroyed) return;
+      wantsVisible = true;
+      if (mounted) mounted.startAnnotation();
+      else wantsAnnotation = true;
     },
     get isVisible() {
       return mounted?.isVisible ?? false;
@@ -62,6 +73,7 @@ export function createDeferredWidget(): DeferredWidget {
       }
       mounted = next;
       if (!wantsVisible) next.hide();
+      if (wantsAnnotation) next.startAnnotation();
     },
     get destroyed() {
       return destroyed;

@@ -25,6 +25,8 @@ type StubbedRequest = {
 type WidgetApiStub = {
   requests: StubbedRequest[];
   requestsTo: (method: string, path: string | RegExp) => StubbedRequest[];
+  /** The payload of every create request, in order. */
+  createdFeedback: () => (CreateFeedbackData | null)[];
 };
 
 // The widget calls the API cross-origin with custom headers, so every answer,
@@ -135,15 +137,21 @@ export async function stubWidgetApi(
     return json(route, 404, { error: "Not found" });
   });
 
+  const requestsTo = (method: string, path: string | RegExp) =>
+    requests.filter(
+      (request) =>
+        request.method === method &&
+        (typeof path === "string"
+          ? request.path === path
+          : path.test(request.path)),
+    );
+
   return {
     requests,
-    requestsTo: (method, path) =>
-      requests.filter(
-        (request) =>
-          request.method === method &&
-          (typeof path === "string"
-            ? request.path === path
-            : path.test(request.path)),
+    requestsTo,
+    createdFeedback: () =>
+      requestsTo("POST", "/api/v1/feedback").map((request) =>
+        readCreateData(request.body),
       ),
   };
 }

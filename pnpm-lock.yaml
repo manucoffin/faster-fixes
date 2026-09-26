@@ -538,6 +538,9 @@ importers:
       "@fasterfixes/core":
         specifier: workspace:*
         version: link:../widget-core
+      "@floating-ui/dom":
+        specifier: ^1.7.4
+        version: 1.7.6
     devDependencies:
       "@workspace/eslint-config":
         specifier: workspace:*
@@ -2355,22 +2358,10 @@ packages:
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
 
-  "@floating-ui/core@1.7.3":
-    resolution:
-      {
-        integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==,
-      }
-
   "@floating-ui/core@1.7.5":
     resolution:
       {
         integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==,
-      }
-
-  "@floating-ui/dom@1.7.4":
-    resolution:
-      {
-        integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==,
       }
 
   "@floating-ui/dom@1.7.6":
@@ -15345,18 +15336,9 @@ snapshots:
       "@eslint/core": 0.17.0
       levn: 0.4.1
 
-  "@floating-ui/core@1.7.3":
-    dependencies:
-      "@floating-ui/utils": 0.2.10
-
   "@floating-ui/core@1.7.5":
     dependencies:
       "@floating-ui/utils": 0.2.11
-
-  "@floating-ui/dom@1.7.4":
-    dependencies:
-      "@floating-ui/core": 1.7.3
-      "@floating-ui/utils": 0.2.10
 
   "@floating-ui/dom@1.7.6":
     dependencies:
@@ -15365,7 +15347,7 @@ snapshots:
 
   "@floating-ui/react-dom@2.1.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)":
     dependencies:
-      "@floating-ui/dom": 1.7.4
+      "@floating-ui/dom": 1.7.6
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 

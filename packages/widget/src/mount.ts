@@ -1,36 +1,28 @@
 import { createDiagnosticsRecorder } from "@fasterfixes/core";
-import type { DiagnosticsRecorder, WidgetPosition } from "@fasterfixes/core";
+import type {
+  DiagnosticsRecorder,
+  FeedbackClient,
+  WidgetPosition,
+} from "@fasterfixes/core";
 
+import { createAnnotationMode } from "./annotation.js";
+import { createCommentPopover } from "./comment-popover.js";
+import { buildFeedbackPayload } from "./feedback-payload.js";
 import type { Widget } from "./instance.js";
 import type { ResolvedDisplayOptions } from "./options.js";
+import type { PinPoint } from "./pin-placement.js";
 import { getPositionStyle } from "./position.js";
 import { WIDGET_CSS } from "./styles.js";
+import { createToolbar } from "./toolbar.js";
 
-const SVG_NS = "http://www.w3.org/2000/svg";
+type MountInput = {
+  options: ResolvedDisplayOptions;
+  client: FeedbackClient;
+  reviewerToken: string;
+};
 
-function createMessageIcon(document: Document) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  for (const [name, value] of Object.entries({
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    "stroke-width": "2",
-    "stroke-linecap": "round",
-    "stroke-linejoin": "round",
-    "aria-hidden": "true",
-  })) {
-    svg.setAttribute(name, value);
-  }
-  const path = document.createElementNS(SVG_NS, "path");
-  path.setAttribute(
-    "d",
-    "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
-  );
-  svg.appendChild(path);
-  return svg;
-}
+// `selected` covers the comment popover in every state: typing, submitting, error.
+type WidgetMode = "idle" | "annotating" | "selected";
 
 function stackAlignment(position: WidgetPosition) {
   if (position.includes("bottom")) return "flex-end";
@@ -47,32 +39,15 @@ function applyStackLayout(stack: HTMLElement, position: WidgetPosition) {
   stack.style.alignItems = stackAlignment(position);
 }
 
-function createFloatingButton(
-  document: Document,
-  options: ResolvedDisplayOptions,
-) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "button";
-  button.setAttribute("part", "button");
-  button.setAttribute("aria-label", options.labels.startFeedback);
-  button.appendChild(createMessageIcon(document));
-
-  const tooltip = document.createElement("span");
-  tooltip.className = "tooltip";
-  tooltip.dataset.side = options.position.includes("right") ? "left" : "right";
-  tooltip.setAttribute("aria-hidden", "true");
-  tooltip.textContent = options.labels.startFeedback;
-  button.appendChild(tooltip);
-
-  return button;
-}
-
 /**
  * Renders the Widget into an open shadow root on a light-DOM host appended to
  * `document.body`. The caller has already decided the Widget should mount.
  */
-export function mountWidget(options: ResolvedDisplayOptions): Widget {
+export function mountWidget({
+  options,
+  client,
+  reviewerToken,
+}: MountInput): Widget {
   const host = document.createElement("div");
   host.setAttribute("data-ff-widget", "");
   host.style.setProperty("--ff-accent", options.color);
@@ -82,12 +57,6 @@ export function mountWidget(options: ResolvedDisplayOptions): Widget {
   sheet.replaceSync(WIDGET_CSS);
   shadow.adoptedStyleSheets = [sheet];
 
-  const stack = document.createElement("div");
-  stack.className = "stack";
-  applyStackLayout(stack, options.position);
-  stack.appendChild(createFloatingButton(document, options));
-  shadow.appendChild(stack);
-
   // Starts at mount, stops on destroy: an opted-out site never patches globals.
   let recorder: DiagnosticsRecorder | null = null;
   if (options.captureDiagnostics) {
@@ -95,27 +64,93 @@ export function mountWidget(options: ResolvedDisplayOptions): Widget {
     recorder.start();
   }
 
+  let mode: WidgetMode = "idle";
+  let selection: { element: Element; click: PinPoint } | null = null;
+
+  function setMode(next: WidgetMode) {
+    mode = next;
+    toolbar.setActive(next !== "idle");
+    if (next === "annotating") annotation.start();
+    else annotation.stop();
+    if (next !== "selected") {
+      selection = null;
+      popover.close();
+    }
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.setAttribute("part", "overlay");
+  overlay.hidden = true;
+
+  const annotation = createAnnotationMode(document, overlay, {
+    onSelect(element, click) {
+      setMode("selected");
+      selection = { element, click };
+      popover.open(element);
+    },
+    onCancel: () => setMode("idle"),
+  });
+
+  const popover = createCommentPopover(document, shadow, options.labels, {
+    async onSubmit(comment) {
+      if (!selection) return;
+      await client.createFeedback(
+        buildFeedbackPayload({
+          comment,
+          element: selection.element,
+          click: selection.click,
+          diagnosticTrail: recorder?.snapshot(),
+        }),
+        reviewerToken,
+      );
+    },
+    onClose() {
+      if (mode === "selected") setMode("idle");
+    },
+  });
+
+  const toolbar = createToolbar(document, options, {
+    onStart: () => setMode("annotating"),
+    onExit: () => setMode("idle"),
+  });
+
+  const stack = document.createElement("div");
+  stack.className = "stack";
+  applyStackLayout(stack, options.position);
+  stack.appendChild(toolbar.element);
+  shadow.append(overlay, stack);
+
   let visible = true;
   let destroyed = false;
   document.body.appendChild(host);
 
+  function show() {
+    if (destroyed || visible) return;
+    visible = true;
+    document.body.appendChild(host);
+  }
+
   return {
-    show() {
-      if (destroyed || visible) return;
-      visible = true;
-      document.body.appendChild(host);
-    },
+    show,
     hide() {
       if (destroyed || !visible) return;
       visible = false;
+      setMode("idle");
       host.remove();
     },
     get isVisible() {
       return visible && !destroyed;
     },
+    startAnnotation() {
+      if (destroyed) return;
+      show();
+      setMode("annotating");
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      setMode("idle");
       recorder?.stop();
       recorder = null;
       host.remove();

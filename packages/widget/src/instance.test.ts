@@ -15,6 +15,9 @@ function createFakeWidget() {
     get isVisible() {
       return visible;
     },
+    startAnnotation: vi.fn(() => {
+      visible = true;
+    }),
     destroy: vi.fn(() => {
       visible = false;
     }),
@@ -63,6 +66,25 @@ describe("createDeferredWidget", () => {
 
     expect(mounted.hide).toHaveBeenCalledOnce();
     expect(deferred.widget.isVisible).toBe(false);
+  });
+
+  it("starts annotation once the Widget mounts when asked before", () => {
+    const deferred = createDeferredWidget();
+    deferred.widget.startAnnotation();
+    const mounted = createFakeWidget();
+    deferred.attach(mounted);
+
+    expect(mounted.startAnnotation).toHaveBeenCalledOnce();
+  });
+
+  it("drops a pending annotation request when hidden before mount", () => {
+    const deferred = createDeferredWidget();
+    deferred.widget.startAnnotation();
+    deferred.widget.hide();
+    const mounted = createFakeWidget();
+    deferred.attach(mounted);
+
+    expect(mounted.startAnnotation).not.toHaveBeenCalled();
   });
 
   it("destroys the mounted Widget and ignores later calls", () => {

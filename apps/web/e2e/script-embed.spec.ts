@@ -61,10 +61,33 @@ test.describe("script embed", () => {
     ).toBeVisible();
     await expect(page.locator("[data-ff-widget]")).toHaveCount(1);
   });
+
+  test("startAnnotation on the instance shows the Widget and starts annotating", async ({
+    page,
+  }) => {
+    await page.goto(FIXTURE_PATH);
+    await expect(
+      page.getByRole("button", { name: "Start feedback" }),
+    ).toBeVisible();
+
+    await page.evaluate(() => {
+      window.FasterFixes?.instance?.hide();
+      window.FasterFixes?.instance?.startAnnotation();
+    });
+
+    await expect(
+      page.getByRole("button", { name: "Exit feedback mode" }),
+    ).toBeVisible();
+    await page.locator("#primary-action").click();
+    await expect(page.getByPlaceholder("Describe the issue...")).toBeFocused();
+  });
 });
 
 declare global {
   interface Window {
-    FasterFixes?: { init: (options: unknown) => unknown };
+    FasterFixes?: {
+      init: (options: unknown) => unknown;
+      instance?: { hide: () => void; startAnnotation: () => void };
+    };
   }
 }

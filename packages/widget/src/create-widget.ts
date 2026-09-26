@@ -21,7 +21,7 @@ export type CreateWidgetOptions = DisplayOptions & {
  * config already resolved. The public `init` resolves both, then calls this.
  */
 export function createWidget(input: CreateWidgetOptions): Widget {
-  const { reviewerToken, config } = input;
+  const { client, reviewerToken, config } = input;
   const result = validateDisplayOptions(input);
   if (
     !result.valid ||
@@ -30,5 +30,5 @@ export function createWidget(input: CreateWidgetOptions): Widget {
   ) {
     return createInertWidget();
   }
-  return mountWidget(result.options);
+  return mountWidget({ options: result.options, client, reviewerToken });
 }
