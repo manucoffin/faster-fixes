@@ -52,6 +52,11 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   );
 }
 
+type ComboboxInputProps = ComboboxPrimitive.Input.Props & {
+  showTrigger?: boolean;
+  showClear?: boolean;
+};
+
 function ComboboxInput({
   className,
   children,
@@ -59,10 +64,7 @@ function ComboboxInput({
   showTrigger = true,
   showClear = false,
   ...props
-}: ComboboxPrimitive.Input.Props & {
-  showTrigger?: boolean;
-  showClear?: boolean;
-}) {
+}: ComboboxInputProps) {
   return (
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
@@ -241,14 +243,16 @@ function ComboboxChips({
   );
 }
 
+type ComboboxChipProps = ComboboxPrimitive.Chip.Props & {
+  showRemove?: boolean;
+};
+
 function ComboboxChip({
   className,
   children,
   showRemove = true,
   ...props
-}: ComboboxPrimitive.Chip.Props & {
-  showRemove?: boolean;
-}) {
+}: ComboboxChipProps) {
   return (
     <ComboboxPrimitive.Chip
       data-slot="combobox-chip"

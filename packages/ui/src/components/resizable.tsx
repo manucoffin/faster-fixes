@@ -25,13 +25,15 @@ function ResizablePanel({ ...props }: ResizablePrimitive.PanelProps) {
   return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
 }
 
+type ResizableHandleProps = ResizablePrimitive.SeparatorProps & {
+  withHandle?: boolean;
+};
+
 function ResizableHandle({
   withHandle,
   className,
   ...props
-}: ResizablePrimitive.SeparatorProps & {
-  withHandle?: boolean;
-}) {
+}: ResizableHandleProps) {
   return (
     // The separator's aria-orientation is perpendicular to its group: a vertical group yields horizontal separators.
     <ResizablePrimitive.Separator
