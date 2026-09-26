@@ -13,7 +13,7 @@ function CopyableText({
   const ref = React.useRef<HTMLSpanElement>(null);
 
   const handleCopy = async () => {
-    const text = ref.current?.textContent?.trim() ?? "";
+    const text = ref.current?.textContent.trim() ?? "";
     try {
       await navigator.clipboard.writeText(text);
     } catch {

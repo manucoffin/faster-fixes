@@ -17,7 +17,7 @@ export function ActionButton({
   children,
   disabled,
   className,
-  pending,
+  pending = false,
   ...props
 }: Props) {
   return (
