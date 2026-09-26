@@ -37,8 +37,7 @@ const comparisons: Comparison[] = [
   {
     label: "Gleap alternative",
     href: "/vs/gleap" as Route,
-    description:
-      "All-in-one customer support platform with an AI chatbot.",
+    description: "All-in-one customer support platform with an AI chatbot.",
   },
   {
     label: "Ruttl alternative",
@@ -59,15 +58,14 @@ export function ComparisonsSection() {
     <section className="w-full border-t py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Comparisons
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Switching from another tool?
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            See how FasterFixes compares to the tools you might be using
-            today.
+          <p className="mt-4 text-lg text-muted-foreground">
+            See how FasterFixes compares to the tools you might be using today.
           </p>
         </div>
 
@@ -76,15 +74,15 @@ export function ComparisonsSection() {
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="bg-muted/30 hover:border-foreground group flex h-full flex-col rounded-xl border p-6 transition-colors"
+                className="group flex h-full flex-col rounded-xl border bg-muted/30 p-6 transition-colors hover:border-foreground"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-foreground text-base font-semibold">
+                  <span className="text-base font-semibold text-foreground">
                     {item.label}
                   </span>
-                  <ArrowRightIcon className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
+                  <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
                 </div>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {item.description}
                 </p>
               </Link>

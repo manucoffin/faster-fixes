@@ -21,7 +21,7 @@ function StepIndicator({ step, currentStep }: StepIndicatorProps) {
           "flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
           isCompleted && "bg-primary text-primary-foreground",
           isCurrent &&
-            "bg-primary text-primary-foreground ring-primary/20 ring-4",
+            "bg-primary text-primary-foreground ring-4 ring-primary/20",
           !isCompleted && !isCurrent && "bg-muted text-muted-foreground",
         )}
       >
@@ -30,7 +30,7 @@ function StepIndicator({ step, currentStep }: StepIndicatorProps) {
       <span
         className={cn(
           "hidden text-sm sm:inline",
-          isCurrent ? "text-foreground font-medium" : "text-muted-foreground",
+          isCurrent ? "font-medium text-foreground" : "text-muted-foreground",
         )}
       >
         {STEPPER_LABELS[step]}

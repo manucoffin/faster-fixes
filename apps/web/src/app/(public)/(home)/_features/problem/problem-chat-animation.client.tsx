@@ -180,7 +180,7 @@ export function ProblemChatAnimation() {
                 return (
                   <div
                     key={phase.card.title}
-                    className="bg-background rounded-xl border p-7 transition-all duration-500 ease-out"
+                    className="rounded-xl border bg-background p-7 transition-all duration-500 ease-out"
                     style={{
                       opacity: show ? 1 : 0,
                       transform: show ? "translateY(0)" : "translateY(12px)",
@@ -189,7 +189,7 @@ export function ProblemChatAnimation() {
                     <h3 className="text-lg font-semibold">
                       {phase.card.title}
                     </h3>
-                    <p className="text-muted-foreground mt-3 text-base leading-relaxed">
+                    <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                       {phase.card.description}
                     </p>
                   </div>

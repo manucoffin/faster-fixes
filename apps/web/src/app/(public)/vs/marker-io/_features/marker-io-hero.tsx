@@ -11,13 +11,13 @@ export function MarkerIoHero() {
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Marker.io alternative
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
             The open-source alternative to Marker.io
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             FasterFixes is an open-source, self-hostable alternative to
             Marker.io, licensed AGPL-3.0 and priced flat rather than per seat.
             The difference goes beyond price: an MCP server lets Claude Code,

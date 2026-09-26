@@ -20,7 +20,7 @@ export function HeroSection() {
               Let your AI coding agent handle client feedback.
             </h1>
 
-            <p className="text-muted-foreground mt-6 max-w-lg text-lg md:text-xl">
+            <p className="mt-6 max-w-lg text-lg text-muted-foreground md:text-xl">
               Open-source website feedback widget for dev teams. Clients
               annotate issues on your live site, your AI coding agent ships the
               fix. No more messy revision rounds.
@@ -42,7 +42,7 @@ export function HeroSection() {
               </Button>
             </div>
 
-            <ul className="text-muted-foreground mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
               {objectionRemovers.map((item) => (
                 <li key={item} className="flex items-center gap-1.5">
                   <CheckIcon className="size-3.5 shrink-0" />

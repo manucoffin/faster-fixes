@@ -72,17 +72,14 @@ export function UsersnapPricingCalculator() {
       : "Save the full Usersnap subscription";
 
   return (
-    <div className="bg-background mx-auto mt-12 max-w-4xl rounded-xl border p-7">
+    <div className="mx-auto mt-12 max-w-4xl rounded-xl border bg-background p-7">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           <div className="mb-3 flex items-baseline justify-between">
-            <label
-              htmlFor="team-slider"
-              className="text-sm font-medium"
-            >
+            <label htmlFor="team-slider" className="text-sm font-medium">
               Team members
             </label>
-            <span className="text-foreground text-lg font-semibold tabular-nums">
+            <span className="text-lg font-semibold text-foreground tabular-nums">
               {team}
             </span>
           </div>
@@ -99,13 +96,10 @@ export function UsersnapPricingCalculator() {
 
         <div>
           <div className="mb-3 flex items-baseline justify-between">
-            <label
-              htmlFor="projects-slider"
-              className="text-sm font-medium"
-            >
+            <label htmlFor="projects-slider" className="text-sm font-medium">
               Active projects
             </label>
-            <span className="text-foreground text-lg font-semibold tabular-nums">
+            <span className="text-lg font-semibold text-foreground tabular-nums">
               {projects}
             </span>
           </div>
@@ -123,62 +117,62 @@ export function UsersnapPricingCalculator() {
 
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-lg border p-5">
-          <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             Usersnap
           </p>
           <p className="mt-1 text-sm">{usersnap.planLabel}</p>
           <p className="mt-3 text-3xl font-bold tabular-nums">
             {formatPrice(usersnap.monthly)}
             {usersnap.monthly !== null && (
-              <span className="text-muted-foreground ml-1 text-sm font-normal">
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
                 /mo
               </span>
             )}
           </p>
-          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+          <p className="mt-1 text-sm text-muted-foreground tabular-nums">
             {usersnap.annual !== null
               ? `${formatPrice(usersnap.annual)}/year`
               : usersnap.note}
           </p>
         </div>
 
-        <div className="border-foreground bg-muted/30 rounded-lg border p-5">
-          <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+        <div className="rounded-lg border border-foreground bg-muted/30 p-5">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             FasterFixes hosted
           </p>
           <p className="mt-1 text-sm">{fasterFixesHosted.planLabel}</p>
           <p className="mt-3 text-3xl font-bold tabular-nums">
             {formatPrice(fasterFixesHosted.monthly)}
-            <span className="text-muted-foreground ml-1 text-sm font-normal">
+            <span className="ml-1 text-sm font-normal text-muted-foreground">
               /mo
             </span>
           </p>
-          <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+          <p className="mt-1 text-sm text-muted-foreground tabular-nums">
             {formatPrice(fasterFixesHosted.annual)}/year
           </p>
           {hostedSavings && (
-            <p className="text-success mt-3 text-sm font-semibold">
+            <p className="mt-3 text-sm font-semibold text-success">
               {hostedSavings}
             </p>
           )}
         </div>
 
         <div className="rounded-lg border p-5">
-          <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             FasterFixes self-hosted
           </p>
           <p className="mt-1 text-sm">Open source · AGPL-3.0</p>
           <p className="mt-3 text-3xl font-bold tabular-nums">$0</p>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="mt-1 text-sm text-muted-foreground">
             Infrastructure costs only
           </p>
-          <p className="text-success mt-3 text-sm font-semibold">
+          <p className="mt-3 text-sm font-semibold text-success">
             {selfHostedSavings}
           </p>
         </div>
       </div>
 
-      <p className="text-muted-foreground mt-6 text-xs">
+      <p className="mt-6 text-xs text-muted-foreground">
         Usersnap tiers: Starter (5 seats / 5 projects), Growth (10 / 10),
         Professional (20 / 20), Premium (50 / 50). Beyond 50, Usersnap requires
         an Enterprise contract. Annual savings are calculated against Usersnap

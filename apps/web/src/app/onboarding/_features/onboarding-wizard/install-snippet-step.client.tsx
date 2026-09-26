@@ -39,7 +39,7 @@ export function InstallSnippetStep({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Install the widget</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Add the feedback widget to your React application. Your Project ID is
           already included in the snippet below.
         </p>
@@ -48,7 +48,7 @@ export function InstallSnippetStep({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
           <p className="text-sm font-medium">1. Install the package</p>
-          <div className="bg-muted relative rounded-md border p-3">
+          <div className="relative rounded-md border bg-muted p-3">
             <code className="font-mono text-sm">
               npm install @fasterfixes/react
             </code>
@@ -62,8 +62,10 @@ export function InstallSnippetStep({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <p className="text-sm font-medium">2. Wrap your app with the provider</p>
-          <div className="bg-muted relative rounded-md border p-3">
+          <p className="text-sm font-medium">
+            2. Wrap your app with the provider
+          </p>
+          <div className="relative rounded-md border bg-muted p-3">
             <pre className="overflow-x-auto font-mono text-sm leading-relaxed">
               <code>{snippet}</code>
             </pre>

@@ -16,18 +16,16 @@ export function SubscriptionCardLoading() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-muted-foreground text-sm">
-                Subscription plan
-              </p>
-              <Skeleton className="h-6 w-32 mt-2" />
+              <p className="text-sm text-muted-foreground">Subscription plan</p>
+              <Skeleton className="mt-2 h-6 w-32" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm">Status</p>
-              <Skeleton className="h-6 w-20 mt-2" />
+              <p className="text-sm text-muted-foreground">Status</p>
+              <Skeleton className="mt-2 h-6 w-20" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm">Period end</p>
-              <Skeleton className="h-6 w-40 mt-2" />
+              <p className="text-sm text-muted-foreground">Period end</p>
+              <Skeleton className="mt-2 h-6 w-40" />
             </div>
           </div>
         </div>

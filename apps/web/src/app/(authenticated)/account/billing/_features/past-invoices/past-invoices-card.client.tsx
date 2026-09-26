@@ -35,7 +35,7 @@ function InvoiceLoadingSkeleton() {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="border-border flex items-start justify-between border-b pb-2"
+          className="flex items-start justify-between border-b border-border pb-2"
         >
           <div className="w-56 space-y-1">
             <Skeleton className="h-5 w-32" />
@@ -51,8 +51,9 @@ function InvoiceLoadingSkeleton() {
 export function PastInvoicesCard() {
   const trpc = useTRPC();
 
-  const getPastInvoicesQuery =
-    useQuery(trpc.authenticated.account.billing.invoices.list.queryOptions());
+  const getPastInvoicesQuery = useQuery(
+    trpc.authenticated.account.billing.invoices.list.queryOptions(),
+  );
 
   return matchQueryStatus(getPastInvoicesQuery, {
     Loading: (
@@ -109,7 +110,7 @@ export function PastInvoicesCard() {
                     className={cn(
                       "flex items-start justify-between pb-2",
                       index !== invoices.length - 1
-                        ? "border-border border-b"
+                        ? "border-b border-border"
                         : "",
                     )}
                   >
@@ -118,7 +119,7 @@ export function PastInvoicesCard() {
                         <span className="font-medium">
                           {getMonthName(new Date(invoice.created * 1000))}
                         </span>
-                        <div className="border-muted-foreground mx-2 flex-1 border-b border-dotted"></div>
+                        <div className="mx-2 flex-1 border-b border-dotted border-muted-foreground"></div>
                         <span className="text-sm">
                           {((invoice.total || 0) / 100).toFixed(2)} €
                         </span>

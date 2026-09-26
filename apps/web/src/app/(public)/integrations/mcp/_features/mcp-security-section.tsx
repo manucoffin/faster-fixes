@@ -24,10 +24,10 @@ const guarantees = [
 
 export function McpSecuritySection() {
   return (
-    <section className="bg-muted/50 w-full py-16 md:py-24">
+    <section className="w-full bg-muted/50 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Token scopes and security
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
@@ -48,7 +48,7 @@ export function McpSecuritySection() {
           ))}
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-muted-foreground">
           Full details in the{" "}
           <Link
             href={"/docs/concepts/agent-tokens" as Route}

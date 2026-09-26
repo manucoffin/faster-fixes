@@ -28,7 +28,7 @@ export function TableOfContents({ headings }: { headings: Toc }) {
               >
                 <a
                   href={entry.url}
-                  className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                 >
                   <AnimatedText>{entry.title}</AnimatedText>
                 </a>

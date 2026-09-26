@@ -28,7 +28,7 @@ export function WorksWithSection() {
           {tools.map(({ label, Icon }) => (
             <li
               key={label}
-              className="bg-muted/30 flex items-center gap-2 rounded-full border px-4 py-2"
+              className="flex items-center gap-2 rounded-full border bg-muted/30 px-4 py-2"
             >
               <Icon className="size-4 shrink-0" />
               <span className="text-sm font-medium">{label}</span>

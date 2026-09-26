@@ -81,13 +81,13 @@ export function UserbackAlternativesSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Alternatives
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Best Userback alternatives in 2026
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Not every team needs the same thing. Here is how the main
             alternatives stack up.
           </p>
@@ -134,26 +134,26 @@ export function UserbackAlternativesSection() {
                       row.name
                     )}
                   </th>
-                  <td className="text-muted-foreground p-4 align-top text-sm">
+                  <td className="p-4 align-top text-sm text-muted-foreground">
                     {row.bestFor}
                   </td>
-                  <td className="text-muted-foreground p-4 align-top text-sm">
+                  <td className="p-4 align-top text-sm text-muted-foreground">
                     {row.startingPrice}
                   </td>
                   <td className="p-4 align-top">
                     {row.openSource.type === "yes" ? (
                       <div className="flex flex-col gap-1">
                         <CheckIcon
-                          className="text-success size-5"
+                          className="size-5 text-success"
                           aria-label="Yes"
                         />
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-xs text-muted-foreground">
                           {row.openSource.note}
                         </span>
                       </div>
                     ) : (
                       <XIcon
-                        className="text-destructive size-5"
+                        className="size-5 text-destructive"
                         aria-label="No"
                       />
                     )}
@@ -164,7 +164,7 @@ export function UserbackAlternativesSection() {
           </table>
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-3xl text-center text-sm">
+        <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-muted-foreground">
           FasterFixes is the only tool in this list with a permanent free tier,
           self-hosting support, and an MCP server for AI coding agents.
         </p>

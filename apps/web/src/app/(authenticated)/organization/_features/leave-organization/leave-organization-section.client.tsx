@@ -71,7 +71,7 @@ export function LeaveOrganizationSection() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <LogOut className="text-destructive h-5 w-5" />
+              <LogOut className="h-5 w-5 text-destructive" />
               <AlertDialogTitle>Quitter l&apos;organization</AlertDialogTitle>
             </div>
             <AlertDialogDescription className="pt-2">

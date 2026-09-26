@@ -37,8 +37,8 @@ export function SlackIntegrationSection() {
           </EmptyMedia>
           <EmptyTitle>Failed to load integration</EmptyTitle>
           <EmptyDescription>
-            An error occurred while loading the Slack integration. Try refreshing
-            the page.
+            An error occurred while loading the Slack integration. Try
+            refreshing the page.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
