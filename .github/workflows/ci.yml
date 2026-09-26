@@ -44,8 +44,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Unused files, exports and dependencies across every workspace. Knip reads source only,
-      # so it needs none of the generated sources the web job builds first.
+      # Knip resolves the `@collections/*` alias to the untracked `.source` folder fumadocs
+      # generates; without it every blog and docs MDX file reads as unused.
+      - run: pnpm --filter web exec fumadocs-mdx
+
+      # Unused files, exports and dependencies across every workspace.
       - run: pnpm knip
 
   format:
