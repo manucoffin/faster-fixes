@@ -1,11 +1,5 @@
-export { validateOptions } from "./options.js";
-export type {
-  WidgetOptions,
-  ResolvedWidgetOptions,
-  OptionsValidationResult,
-} from "./options.js";
+export { init } from "./init.js";
+export type { Widget } from "./instance.js";
+export type { WidgetOptions } from "./options.js";
 
-export { resolveLabels } from "./labels.js";
-
-export { getPositionStyle } from "./position.js";
-export type { PositionStyle } from "./position.js";
+export type { Labels, WidgetPosition } from "@fasterfixes/core";

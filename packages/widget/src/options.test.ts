@@ -6,7 +6,7 @@ import {
 } from "@fasterfixes/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { validateOptions } from "./options.js";
+import { validateDisplayOptions, validateOptions } from "./options.js";
 
 describe("validateOptions", () => {
   afterEach(() => {
@@ -89,5 +89,39 @@ describe("validateOptions", () => {
 
     expect(validateOptions({ projectId: 42 })).toMatchObject({ valid: false });
     expect(error).not.toHaveBeenCalled();
+  });
+});
+
+describe("validateDisplayOptions", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("needs no projectId and fills the defaults", () => {
+    expect(validateDisplayOptions({})).toEqual({
+      valid: true,
+      options: {
+        apiOrigin: DEFAULT_API_ORIGIN,
+        color: DEFAULT_WIDGET_COLOR,
+        position: DEFAULT_WIDGET_POSITION,
+        labels: DEFAULT_LABELS,
+        captureDiagnostics: true,
+      },
+    });
+  });
+
+  it("ignores keys outside the option object", () => {
+    const result = validateDisplayOptions({ client: {}, position: "top-left" });
+
+    expect(result.valid && result.options).not.toHaveProperty("client");
+  });
+
+  it("rejects an invalid position", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(validateDisplayOptions({ position: "center" })).toMatchObject({
+      valid: false,
+      option: "position",
+    });
   });
 });

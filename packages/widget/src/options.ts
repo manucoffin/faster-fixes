@@ -28,18 +28,32 @@ export type OptionsValidationResult =
   | { valid: true; options: ResolvedWidgetOptions }
   | { valid: false; option: keyof WidgetOptions; message: string };
 
+/** Every option except `projectId`, which only the HTTP client needs. */
+export type DisplayOptions = Omit<WidgetOptions, "projectId">;
+
+export type ResolvedDisplayOptions = Omit<ResolvedWidgetOptions, "projectId">;
+
+export type DisplayOptionsValidationResult =
+  | { valid: true; options: ResolvedDisplayOptions }
+  | { valid: false; option: keyof DisplayOptions; message: string };
+
 function isPosition(value: unknown): value is WidgetPosition {
   return WIDGET_POSITIONS.some((position) => position === value);
 }
 
-function checkOptions(input: Record<string, unknown>) {
-  const { projectId, position, labels } = input;
+function checkProjectId(input: Record<string, unknown>) {
+  const { projectId } = input;
   if (typeof projectId !== "string" || projectId.trim() === "") {
     return {
       option: "projectId",
       message: "`projectId` must be a non-empty string.",
     } as const;
   }
+  return undefined;
+}
+
+function checkDisplayOptions(input: Record<string, unknown>) {
+  const { position, labels } = input;
   if (position !== undefined && !isPosition(position)) {
     return {
       option: "position",
@@ -58,17 +72,36 @@ function checkOptions(input: Record<string, unknown>) {
   return undefined;
 }
 
+function toFields(input: unknown) {
+  return typeof input === "object" && input !== null
+    ? (input as Record<string, unknown>)
+    : {};
+}
+
+function reportFailure(failure: { message: string }) {
+  if (isDevelopment()) {
+    console.error(`[faster-fixes] Invalid option ${failure.message}`);
+  }
+}
+
+function resolveDisplayOptions(
+  options: DisplayOptions,
+): ResolvedDisplayOptions {
+  return {
+    apiOrigin: options.apiOrigin ?? DEFAULT_API_ORIGIN,
+    color: options.color ?? DEFAULT_WIDGET_COLOR,
+    position: options.position ?? DEFAULT_WIDGET_POSITION,
+    labels: resolveLabels(options.labels),
+    captureDiagnostics: options.captureDiagnostics ?? true,
+  };
+}
+
 // Options can come from untyped script-tag code, so the input is `unknown`.
 export function validateOptions(input: unknown): OptionsValidationResult {
-  const fields =
-    typeof input === "object" && input !== null
-      ? (input as Record<string, unknown>)
-      : {};
-  const failure = checkOptions(fields);
+  const fields = toFields(input);
+  const failure = checkProjectId(fields) ?? checkDisplayOptions(fields);
   if (failure) {
-    if (isDevelopment()) {
-      console.error(`[faster-fixes] Invalid option ${failure.message}`);
-    }
+    reportFailure(failure);
     return { valid: false, ...failure };
   }
 
@@ -77,11 +110,20 @@ export function validateOptions(input: unknown): OptionsValidationResult {
     valid: true,
     options: {
       projectId: options.projectId,
-      apiOrigin: options.apiOrigin ?? DEFAULT_API_ORIGIN,
-      color: options.color ?? DEFAULT_WIDGET_COLOR,
-      position: options.position ?? DEFAULT_WIDGET_POSITION,
-      labels: resolveLabels(options.labels),
-      captureDiagnostics: options.captureDiagnostics ?? true,
+      ...resolveDisplayOptions(options),
     },
   };
+}
+
+// For a Widget running against an injected client, where no `projectId` exists.
+export function validateDisplayOptions(
+  input: unknown,
+): DisplayOptionsValidationResult {
+  const fields = toFields(input);
+  const failure = checkDisplayOptions(fields);
+  if (failure) {
+    reportFailure(failure);
+    return { valid: false, ...failure };
+  }
+  return { valid: true, options: resolveDisplayOptions(fields) };
 }
