@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --fix .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
     "inngest": "pnpm dlx inngest-cli@latest dev",
     "test": "vitest run",

@@ -4,6 +4,9 @@
   "tasks": {
     "build": {
       "outputs": ["generated/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["build", "transit"]
     }
   }
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "prisma generate",
     "db:gen": "prisma generate",
+    "typecheck": "tsc --noEmit",
     "db:seed": "dotenv -e .env.local -- npx prisma db seed",
     "db:pull": "dotenv -e .env.local -- npx prisma db pull",
     "migrate:dev": "npx prisma migrate dev",

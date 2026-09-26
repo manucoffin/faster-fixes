@@ -21,7 +21,7 @@
       "dependsOn": ["transit"]
     },
     "typecheck": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["^build", "transit"]
     },
     "test": {
       "dependsOn": ["^build"],
