@@ -11,11 +11,12 @@
     "test:watch": "turbo run test:watch",
     "knip": "knip",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "build:packages": "turbo run build --filter='@fasterfixes/*'",
     "check:packages": "pnpm build:packages && turbo run typecheck lint --filter='@fasterfixes/*' && pnpm publint",
     "publint": "pnpm -r --filter \"@fasterfixes/*\" exec publint --strict",
     "changeset": "changeset",
-    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "version-packages": "changeset version && pnpm install --lockfile-only && prettier --write \"**/CHANGELOG.md\" pnpm-lock.yaml",
     "release": "pnpm build:packages && changeset publish",
     "prepare": "husky",
     "sandcastle": "npx tsx .sandcastle/main.mts"

@@ -45,6 +45,7 @@ All coding standards for this project live in the `coding-standards` skill at `.
 - Run from repo root: `pnpm typecheck`.
 - Run from repo root: `pnpm test`.
 - Run from repo root: `pnpm lint` (all workspaces). Zero warnings tolerated: it runs with `--max-warnings 0`, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression.
+- Run from repo root: `pnpm format:check`. CI fails on any unformatted `ts`, `tsx` or `md` file; `pnpm format` fixes them.
 - If DB schema changed: run `pnpm --filter @workspace/db migrate:dev`, then `pnpm --filter @workspace/db db:gen`.
 - A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `apps/web/src/app/_domains/integration/_services/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
 - Never declare completion while required checks fail.

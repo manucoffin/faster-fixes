@@ -48,6 +48,25 @@ jobs:
       # so it needs none of the generated sources the web job builds first.
       - run: pnpm knip
 
+  format:
+    name: Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The commit hook formats staged files only, and --no-verify skips it, so this is
+      # where an unformatted file stops a pull request.
+      - run: pnpm format:check
+
   web:
     name: Web app
     runs-on: ubuntu-latest
