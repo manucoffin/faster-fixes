@@ -27,7 +27,7 @@ const ISSUES: number[] = [];
  */
 const MAX_ITERATIONS = 30;
 
-const AGENT = claudeCode("claude-opus-5");
+const AGENT = claudeCode("claude-opus-5-5");
 const COMPLETION_SIGNAL = "<promise>NO MORE TASKS</promise>";
 
 /**
