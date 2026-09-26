@@ -98,15 +98,6 @@ export function KanbanBoard({
 
   const totalCount = filtered.length;
 
-  const bulkToolbar = (
-    <BulkActionToolbar
-      selectedItems={feedback.filter((f) => selectedIds.has(f.id))}
-      onMoveToStatus={(status) => handleBulkAction(status)}
-      onArchive={() => handleBulkAction("closed")}
-      onClearSelection={() => setSelectedIds(new Set())}
-    />
-  );
-
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
   }
@@ -164,6 +155,15 @@ export function KanbanBoard({
     bulkUpdateStatus(ids, status);
     setSelectedIds(new Set());
   }
+
+  const bulkToolbar = (
+    <BulkActionToolbar
+      selectedItems={feedback.filter((f) => selectedIds.has(f.id))}
+      onMoveToStatus={(status) => handleBulkAction(status)}
+      onArchive={() => handleBulkAction("closed")}
+      onClearSelection={() => setSelectedIds(new Set())}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-4">

@@ -35,7 +35,7 @@ export function OnboardingWizard() {
   const completeOnboarding = useMutation(
     trpc.onboarding.complete.mutationOptions({
       onSuccess: () => {
-        window.location.href = "/inbox";
+        window.location.assign("/inbox");
       },
     }),
   );

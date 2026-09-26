@@ -15,8 +15,7 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";
 import type { UpdateOrganizationInput } from "../../_services/update-organization.schema";
@@ -52,11 +51,8 @@ export function UpdateOrganizationForm() {
       : undefined,
   });
 
-  const nameValue = form.watch("name");
-  const slugPreview = React.useMemo(
-    () => slugify(nameValue, { lower: true, strict: true }),
-    [nameValue],
-  );
+  const nameValue = useWatch({ control: form.control, name: "name" });
+  const slugPreview = slugify(nameValue, { lower: true, strict: true });
 
   const onSubmit = (data: UpdateOrganizationInput) => {
     updateOrganization.mutate(data);

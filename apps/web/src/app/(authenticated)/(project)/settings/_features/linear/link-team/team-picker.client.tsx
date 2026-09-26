@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkLinearTeamSchema,
@@ -66,7 +66,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
     },
   });
 
-  const teamId = form.watch("teamId");
+  const teamId = useWatch({ control: form.control, name: "teamId" });
 
   const statesQuery = useQuery(
     trpc.authenticated.projects.linear.listTeamStates.queryOptions(

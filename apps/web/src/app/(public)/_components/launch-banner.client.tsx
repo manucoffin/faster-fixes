@@ -15,25 +15,40 @@ const DISMISS_STORAGE_KEY = "launch-banner-tinylaunch-15543-dismissed";
 const WINDOW_START_MS = Date.UTC(2026, 5, 29, 7, 0, 0);
 const WINDOW_END_MS = Date.UTC(2026, 6, 6, 7, 0, 0);
 
-export function LaunchBanner() {
-  // Start hidden so SSR/first paint renders nothing; reveal only after we
-  // confirm we're inside the launch window and localStorage holds no prior
-  // dismissal. Avoids a flash for users who already closed it or are off-window.
-  const [visible, setVisible] = React.useState(false);
+// Read once per render on the client; nothing notifies a change, and a
+// dismissal in this tab is tracked in state instead.
+function subscribeToNothing() {
+  return () => {};
+}
 
-  React.useEffect(() => {
-    const now = Date.now();
-    const inWindow = now >= WINDOW_START_MS && now < WINDOW_END_MS;
-    const dismissed = localStorage.getItem(DISMISS_STORAGE_KEY) === "true";
-    setVisible(inWindow && !dismissed);
-  }, []);
+function getIsEligible() {
+  const now = Date.now();
+  const inWindow = now >= WINDOW_START_MS && now < WINDOW_END_MS;
+  const dismissed = localStorage.getItem(DISMISS_STORAGE_KEY) === "true";
+  return inWindow && !dismissed;
+}
+
+// SSR and hydration render nothing; the banner appears only once the client
+// confirms we're inside the launch window and localStorage holds no prior
+// dismissal. Avoids a flash for users who already closed it or are off-window.
+function getServerIsEligible() {
+  return false;
+}
+
+export function LaunchBanner() {
+  const isEligible = React.useSyncExternalStore(
+    subscribeToNothing,
+    getIsEligible,
+    getServerIsEligible,
+  );
+  const [isDismissed, setIsDismissed] = React.useState(false);
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_STORAGE_KEY, "true");
-    setVisible(false);
+    setIsDismissed(true);
   };
 
-  if (!visible) {
+  if (!isEligible || isDismissed) {
     return null;
   }
 

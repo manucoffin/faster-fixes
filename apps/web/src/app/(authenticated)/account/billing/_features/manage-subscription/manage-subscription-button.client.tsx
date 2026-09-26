@@ -28,7 +28,7 @@ export function ManageSubscriptionButton({
       onSuccess: async (data) => {
         // Redirect to billing portal
         if (data.url) {
-          window.location.href = data.url;
+          window.location.assign(data.url);
         }
       },
       onError: (error) => {

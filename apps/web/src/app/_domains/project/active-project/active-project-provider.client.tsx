@@ -90,14 +90,20 @@ export function ActiveProjectProvider({
   const validatedProject =
     projects?.find((p) => p.id === activeProjectId) ?? null;
 
-  // Auto-select first project when none is active
+  // Auto-select the first project when none is active. Adjusting state during
+  // render (rather than in an effect) pins the choice, so a project added later
+  // at the head of the list does not take over.
+  const firstProject = projects?.[0];
+  if (!isPending && !validatedProject && firstProject) {
+    setActiveProjectIdState(firstProject.id);
+  }
+
+  const validatedProjectId = validatedProject?.id;
   useEffect(() => {
-    const firstProject = projects?.[0];
-    if (!isPending && !validatedProject && firstProject) {
-      setCookie(firstProject.id);
-      setActiveProjectIdState(firstProject.id);
+    if (validatedProjectId) {
+      setCookie(validatedProjectId);
     }
-  }, [isPending, validatedProject, projects]);
+  }, [validatedProjectId]);
 
   const setActiveProject = useCallback((projectId: string) => {
     setCookie(projectId);

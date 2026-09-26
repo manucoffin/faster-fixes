@@ -28,7 +28,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkJiraProjectSchema,
@@ -62,8 +62,11 @@ export function JiraProjectPicker({
     },
   });
 
-  const jiraProjectId = form.watch("jiraProjectId");
-  const issueTypeId = form.watch("issueTypeId");
+  const jiraProjectId = useWatch({
+    control: form.control,
+    name: "jiraProjectId",
+  });
+  const issueTypeId = useWatch({ control: form.control, name: "issueTypeId" });
 
   const issueTypesQuery = useQuery(
     trpc.authenticated.projects.jira.listIssueTypes.queryOptions(

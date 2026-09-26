@@ -1,7 +1,8 @@
 "use client";
 
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { ImageIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { TerminalFrame } from "../how-it-works/flow-animations";
 
 type ChatMessage = { text: string; isImage?: boolean };
@@ -60,23 +61,11 @@ const allMessages = phases.flatMap((phase, phaseIndex) =>
 // --- scroll-driven progress ---
 
 function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
-  const [progress, setProgress] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const isDesktop = !useIsMobile();
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  useEffect(() => {
-    // mobile: show everything immediately
-    if (!isDesktop) {
-      setProgress(1);
-      return;
-    }
+    if (!isDesktop) return;
 
     let ticking = false;
     const onScroll = () => {
@@ -103,7 +92,21 @@ function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [ref, isDesktop]);
 
-  return progress;
+  // mobile: show everything immediately
+  return isDesktop ? progress : 1;
+}
+
+function subscribeToNothing() {
+  return () => {};
+}
+
+// False on the server and during hydration, true afterwards: until then every message stays visible.
+function useIsHydrated() {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
 }
 
 // --- component ---
@@ -111,9 +114,7 @@ function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
 export function ProblemChatAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const progress = useScrollProgress(sectionRef);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsHydrated();
 
   // messages fill across 0–85 % of scroll, last 15 % is breathing room
   const msgProgress = Math.min(progress / 0.85, 1);

@@ -39,7 +39,7 @@ export function PlanSelection() {
     trpc.subscription.upgrade.mutationOptions({
       onSuccess: (data) => {
         if (data.url) {
-          window.location.href = data.url;
+          window.location.assign(data.url);
         }
       },
       onError: (error) => {

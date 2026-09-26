@@ -113,10 +113,12 @@ export function UsersTable() {
   const isInitialMount = useRef(true);
   const isUserSearch = useRef(false);
 
-  // Update searchInput when 'search' changes (e.g., on initial load or URL change)
-  useEffect(() => {
+  // Resync the input when 'search' changes outside it (URL navigation), adjusted during render
+  const [syncedSearch, setSyncedSearch] = useState(search);
+  if (search !== syncedSearch) {
+    setSyncedSearch(search);
     setSearchInput(search);
-  }, [search]);
+  }
 
   const pageSize = 10; // Number of rows per page
 
