@@ -83,7 +83,7 @@ export function FeedbackFilters({
             <ComboboxContent>
               <ComboboxEmpty>No pages found.</ComboboxEmpty>
               <ComboboxList>
-                {(url) => (
+                {(url: string) => (
                   <ComboboxItem key={url} value={url}>
                     <span className="truncate">{formatPageUrl(url)}</span>
                   </ComboboxItem>

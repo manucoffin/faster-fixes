@@ -15,7 +15,7 @@ const MAX_AGE = "3600";
  * The origin is validated against the project URL at the route level —
  * this helper just sets the response headers.
  */
-export function corsHeaders(origin: string): HeadersInit {
+export function corsHeaders(origin: string): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": ALLOWED_METHODS,
