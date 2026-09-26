@@ -5,9 +5,9 @@ import {
   resolveJiraTransition,
 } from "../../_helpers/jira/transition-mapping";
 import { getValidJiraAccessToken } from "./token-access";
-import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import { feedbackStatusChangedEvent } from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -16,14 +16,10 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
     id: "sync-feedback-status-to-jira",
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
-    triggers: [{ event: "feedback/status-changed" }],
+    triggers: [{ event: feedbackStatusChangedEvent }],
   },
   async ({ event }) => {
-    const { feedbackId, newStatus, origin } = event.data as {
-      feedbackId: string;
-      newStatus: string;
-      origin?: "app" | "github" | "linear" | "jira";
-    };
+    const { feedbackId, newStatus, origin } = event.data;
 
     // If this status change originated in Jira, don't echo back.
     if (origin === "jira") return { skipped: "origin_jira" };
@@ -68,7 +64,7 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
 
     const resolved = resolveJiraTransition({
       transitions,
-      feedbackStatus: newStatus as FeedbackStatus,
+      feedbackStatus: newStatus,
     });
 
     if (!resolved) {

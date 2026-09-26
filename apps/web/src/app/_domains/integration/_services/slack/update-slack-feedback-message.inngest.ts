@@ -4,23 +4,19 @@ import { decryptSlackToken } from "./token-crypto";
 import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
 import { updateMessage } from "./slack-client";
-import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import { feedbackStatusChangedEvent } from "@/server/inngest/events";
 
 export const updateSlackFeedbackMessage = inngest.createFunction(
   {
     id: "update-slack-feedback-message",
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
-    triggers: [{ event: "feedback/status-changed" }],
+    triggers: [{ event: feedbackStatusChangedEvent }],
   },
   async ({ event }) => {
-    const { feedbackId, newStatus, actor } = event.data as {
-      feedbackId: string;
-      newStatus: FeedbackStatus;
-      actor: "user" | "agent" | "tracker";
-    };
+    const { feedbackId, newStatus, actor } = event.data;
 
     const message = await prisma.feedbackSlackMessage.findUnique({
       where: { feedbackId },

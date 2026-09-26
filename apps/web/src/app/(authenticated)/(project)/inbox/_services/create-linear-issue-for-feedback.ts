@@ -5,6 +5,10 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackIntegrationIssueRequestedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import type { CreateLinearIssueForFeedbackInput } from "./create-linear-issue-for-feedback.schema";
 
@@ -50,10 +54,12 @@ export async function createLinearIssueForFeedback(
     throw new BadRequestError("No Linear team linked to this project.");
   }
 
-  await inngest.send({
-    name: "feedback/integration-issue-requested",
-    data: { feedbackId, target: "linear" },
-  });
+  await inngest.send(
+    buildEvent(feedbackIntegrationIssueRequestedEvent, {
+      feedbackId,
+      target: "linear",
+    }),
+  );
 
   return { queued: true };
 }

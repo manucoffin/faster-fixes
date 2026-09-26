@@ -1,4 +1,5 @@
 import { inngest } from "@/server/inngest";
+import { buildEvent, jiraOAuthRevokedEvent } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import { decryptToken, encryptToken } from "./token-crypto";
 import { JiraNotConnectedError, JiraReauthRequiredError } from "./jira-errors";
@@ -68,10 +69,11 @@ export async function getValidJiraAccessToken(
     // already-flipped row. Notifying from here rather than from each caller means
     // no sync path can drop a revocation on the floor.
     if (error instanceof JiraReauthRequiredError) {
-      await inngest.send({
-        name: "jira/oauth.revoked",
-        data: { installationId: error.installationId },
-      });
+      await inngest.send(
+        buildEvent(jiraOAuthRevokedEvent, {
+          installationId: error.installationId,
+        }),
+      );
     }
     throw error;
   }

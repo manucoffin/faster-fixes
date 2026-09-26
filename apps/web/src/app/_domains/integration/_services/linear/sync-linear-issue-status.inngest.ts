@@ -2,6 +2,11 @@ import { feedbackStatusFromLinearStateType } from "../../_helpers/linear/state-m
 import type { LinearStateType } from "../../_helpers/linear/state-mapping";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackStatusChangedEvent,
+  linearWebhookIssueEvent,
+} from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 60_000;
 
@@ -16,7 +21,7 @@ export const syncLinearIssueStatus = inngest.createFunction(
     id: "sync-linear-issue-status",
     retries: 3,
     concurrency: { key: "event.data.issue.id", limit: 1 },
-    triggers: [{ event: "linear/webhook.issue" }],
+    triggers: [{ event: linearWebhookIssueEvent }],
   },
   async ({ event }) => {
     const issueData = event.data.issue as IssueWebhookData | undefined;
@@ -62,16 +67,15 @@ export const syncLinearIssueStatus = inngest.createFunction(
     ]);
 
     // Propagate to other trackers (e.g. GitHub) so the feedback stays canonical.
-    await inngest.send({
-      name: "feedback/status-changed",
-      data: {
+    await inngest.send(
+      buildEvent(feedbackStatusChangedEvent, {
         feedbackId: issueLink.feedbackId,
         newStatus,
         origin: "linear",
         // Change originated from the Linear issue webhook syncing back.
         actor: "tracker",
-      },
-    });
+      }),
+    );
 
     return { feedbackId: issueLink.feedbackId, newStatus };
   },

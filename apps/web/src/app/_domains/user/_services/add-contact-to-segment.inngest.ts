@@ -1,5 +1,6 @@
 import { mailer } from "@/lib/mailer/client";
 import { inngest } from "@/server/inngest";
+import { userEmailVerifiedEvent } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 
 export const addContactToSegment = inngest.createFunction(
@@ -11,10 +12,10 @@ export const addContactToSegment = inngest.createFunction(
     // Verified addresses only, so the segment never accumulates unconfirmed
     // sign-ups. Idempotency is per-function, so this shares the trigger with
     // send-welcome-email without either suppressing the other.
-    triggers: [{ event: "user/email-verified" }],
+    triggers: [{ event: userEmailVerifiedEvent }],
   },
   async ({ event }) => {
-    const { userId } = event.data as { userId: string };
+    const { userId } = event.data;
 
     // Self-hosted instances have no marketing segment configured.
     const segmentId = process.env.RESEND_SEGMENT_ID;

@@ -1,4 +1,5 @@
 import { inngest } from "@/server/inngest";
+import { buildEvent, githubWebhookIssuesEvent } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import type { TrackerWebhookOutcome } from "../../_types/webhook-outcome";
@@ -120,15 +121,14 @@ async function handleIssuesEvent(
     return { status: "ignored", reason: `unhandled issues action: ${action}` };
   }
 
-  await inngest.send({
-    name: "github/webhook.issues",
-    data: {
+  await inngest.send(
+    buildEvent(githubWebhookIssuesEvent, {
       action,
       issueNumber: issue.number,
       issueState: issue.state,
       repoFullName: repository.full_name,
-    },
-  });
+    }),
+  );
 
   return { status: "accepted" };
 }

@@ -6,13 +6,14 @@ import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
 import { postMessage } from "./slack-client";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import { feedbackCreatedEvent } from "@/server/inngest/events";
 
 export const notifySlackFeedbackCreated = inngest.createFunction(
   {
     id: "notify-slack-feedback-created",
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
-    triggers: [{ event: "feedback/created" }],
+    triggers: [{ event: feedbackCreatedEvent }],
   },
   async ({ event }) => {
     const { feedbackId } = event.data;

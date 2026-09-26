@@ -5,6 +5,10 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackIntegrationIssueRequestedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import type { CreateJiraIssueForFeedbackInput } from "./create-jira-issue-for-feedback.schema";
 
@@ -47,10 +51,12 @@ export async function createJiraIssueForFeedback(
     throw new BadRequestError("No Jira project linked to this project.");
   }
 
-  await inngest.send({
-    name: "feedback/integration-issue-requested",
-    data: { feedbackId, target: "jira" },
-  });
+  await inngest.send(
+    buildEvent(feedbackIntegrationIssueRequestedEvent, {
+      feedbackId,
+      target: "jira",
+    }),
+  );
 
   return { queued: true };
 }

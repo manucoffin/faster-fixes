@@ -7,10 +7,12 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import { createGitHubIssueForFeedback } from "./create-github-issue-for-feedback";
 
-const send = vi.fn().mockResolvedValue(undefined);
+const send = vi
+  .fn<(payload: unknown) => Promise<void>>()
+  .mockResolvedValue(undefined);
 
 vi.mock("@/server/inngest", () => ({
-  inngest: { send: (...args: unknown[]) => send(...args) },
+  inngest: { send: (payload: unknown) => send(payload) },
 }));
 
 type FakeDb = NonNullable<Parameters<typeof createGitHubIssueForFeedback>[1]>;

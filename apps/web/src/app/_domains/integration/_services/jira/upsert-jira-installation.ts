@@ -1,4 +1,8 @@
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  jiraWebhooksRefreshRequestedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 
 import type { JiraAccessibleResource, JiraTokenResponse } from "./jira-client";
@@ -69,10 +73,11 @@ export async function upsertJiraInstallation({
   // immediately. A provisional selection waits for the picker instead, which
   // owes the same renewal once the site is settled.
   if (!siteSelectionPending) {
-    await inngest.send({
-      name: "jira/webhooks.refresh-requested",
-      data: { installationId: installation.id },
-    });
+    await inngest.send(
+      buildEvent(jiraWebhooksRefreshRequestedEvent, {
+        installationId: installation.id,
+      }),
+    );
   }
 
   return { siteSelectionPending };

@@ -1,5 +1,9 @@
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  jiraWebhooksRefreshRequestedEvent,
+} from "@/server/inngest/events";
 
 /**
  * Jira expires dynamic webhook registrations 30 days after they are created, and
@@ -33,10 +37,11 @@ export const refreshJiraWebhooks = inngest.createFunction(
     if (installations.length === 0) return { requested: 0 };
 
     await inngest.send(
-      installations.map((installation) => ({
-        name: "jira/webhooks.refresh-requested",
-        data: { installationId: installation.id },
-      })),
+      installations.map((installation) =>
+        buildEvent(jiraWebhooksRefreshRequestedEvent, {
+          installationId: installation.id,
+        }),
+      ),
     );
 
     return { requested: installations.length };

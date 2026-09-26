@@ -12,6 +12,10 @@ import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  feedbackCreatedEvent,
+  feedbackIntegrationIssueRequestedEvent,
+} from "@/server/inngest/events";
 
 export const createLinearIssue = inngest.createFunction(
   {
@@ -19,9 +23,9 @@ export const createLinearIssue = inngest.createFunction(
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
     triggers: [
-      { event: "feedback/created" },
+      { event: feedbackCreatedEvent },
       {
-        event: "feedback/integration-issue-requested",
+        event: feedbackIntegrationIssueRequestedEvent,
         if: "event.data.target == 'linear'",
       },
     ],

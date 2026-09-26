@@ -1,4 +1,5 @@
 import { inngest } from "@/server/inngest";
+import { buildEvent, feedbackCreatedEvent } from "@/server/inngest/events";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
 import type { CreateFeedbackInput } from "./create-feedback.schema";
@@ -50,7 +51,7 @@ export async function createFeedback({
   // Fire-and-forget: a Tracker or a Notification channel that is slow or down
   // must not hold up the widget's answer.
   inngest
-    .send({ name: "feedback/created", data: { feedbackId: feedback.id } })
+    .send(buildEvent(feedbackCreatedEvent, { feedbackId: feedback.id }))
     .catch(() => {});
 
   const screenshotUrl = feedback.screenshot

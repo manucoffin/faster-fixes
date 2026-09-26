@@ -1,9 +1,9 @@
 import { decryptToken } from "./token-crypto";
 import { getLinearClient } from "./linear-client";
 import { getFeedbackStateId } from "./get-feedback-state-id";
-import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import { feedbackStatusChangedEvent } from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 60_000;
 
@@ -12,14 +12,10 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
     id: "sync-feedback-status-to-linear",
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
-    triggers: [{ event: "feedback/status-changed" }],
+    triggers: [{ event: feedbackStatusChangedEvent }],
   },
   async ({ event }) => {
-    const { feedbackId, newStatus, origin } = event.data as {
-      feedbackId: string;
-      newStatus: string;
-      origin?: "app" | "github" | "linear";
-    };
+    const { feedbackId, newStatus, origin } = event.data;
 
     // If this status change originated on Linear, don't echo back.
     if (origin === "linear") return { skipped: "origin_linear" };
@@ -49,7 +45,7 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
     const resolved = await getFeedbackStateId({
       client,
       link: issueLink.projectLinearLink,
-      feedbackStatus: newStatus as FeedbackStatus,
+      feedbackStatus: newStatus,
     });
 
     if (!resolved) return { skipped: "no_team_states_available" };

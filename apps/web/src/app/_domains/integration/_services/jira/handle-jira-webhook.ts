@@ -1,4 +1,5 @@
 import { inngest } from "@/server/inngest";
+import { buildEvent, jiraWebhookIssueEvent } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import type { TrackerWebhookOutcome } from "../../_types/webhook-outcome";
@@ -51,10 +52,13 @@ export async function handleJiraWebhook({
     return { status: "ignored", reason: "no_issue_id" };
   }
 
-  await inngest.send({
-    name: "jira/webhook.issue",
-    data: { installationId, issueId, webhookEvent },
-  });
+  await inngest.send(
+    buildEvent(jiraWebhookIssueEvent, {
+      installationId,
+      issueId,
+      webhookEvent,
+    }),
+  );
 
   return { status: "accepted" };
 }

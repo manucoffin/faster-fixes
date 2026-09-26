@@ -5,6 +5,7 @@ import {
   type WelcomeEmailProps,
 } from "@/lib/mailer/templates/welcome";
 import { inngest } from "@/server/inngest";
+import { userEmailVerifiedEvent } from "@/server/inngest/events";
 import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";
 import { createElement } from "react";
@@ -15,7 +16,7 @@ export const sendWelcomeEmail = inngest.createFunction(
     retries: 3,
     // A re-emit of the same verification must not send a second welcome email.
     idempotency: "event.data.userId",
-    triggers: [{ event: "user/email-verified" }],
+    triggers: [{ event: userEmailVerifiedEvent }],
   },
   async ({ event }) => {
     const { userId } = event.data;

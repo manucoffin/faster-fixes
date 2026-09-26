@@ -1,5 +1,11 @@
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackStatusChangedEvent,
+  githubWebhookIssuesEvent,
+} from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -11,7 +17,7 @@ export const syncGitHubIssueStatus = inngest.createFunction(
       key: "event.data.repoFullName + ':' + event.data.issueNumber",
       limit: 1,
     },
-    triggers: [{ event: "github/webhook.issues" }],
+    triggers: [{ event: githubWebhookIssuesEvent }],
   },
   async ({ event }) => {
     const { action, issueNumber, repoFullName } = event.data;
@@ -34,7 +40,7 @@ export const syncGitHubIssueStatus = inngest.createFunction(
       return { skipped: "sync_loop_prevention" };
     }
 
-    let newStatus: string;
+    let newStatus: FeedbackStatus;
     if (action === "closed") {
       newStatus = "resolved";
     } else if (action === "reopened") {
@@ -59,16 +65,15 @@ export const syncGitHubIssueStatus = inngest.createFunction(
     ]);
 
     // Propagate to other trackers (e.g. Linear) so the feedback stays canonical.
-    await inngest.send({
-      name: "feedback/status-changed",
-      data: {
+    await inngest.send(
+      buildEvent(feedbackStatusChangedEvent, {
         feedbackId: issueLink.feedbackId,
         newStatus,
         origin: "github",
         // Change originated from the GitHub issue webhook syncing back.
         actor: "tracker",
-      },
-    });
+      }),
+    );
 
     return { feedbackId: issueLink.feedbackId, newStatus };
   },

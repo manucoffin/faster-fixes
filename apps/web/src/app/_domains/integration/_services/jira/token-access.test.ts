@@ -77,7 +77,7 @@ function atlassianAnswers(status: number, body = "") {
       ok: status >= 200 && status < 300,
       status,
       text: async () => body,
-      json: async () => JSON.parse(body),
+      json: async (): Promise<unknown> => JSON.parse(body),
     }),
   );
 }

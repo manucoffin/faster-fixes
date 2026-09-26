@@ -5,6 +5,10 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackIntegrationIssueRequestedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import type { CreateGitHubIssueForFeedbackInput } from "./create-github-issue-for-feedback.schema";
 
@@ -50,10 +54,12 @@ export async function createGitHubIssueForFeedback(
     throw new BadRequestError("No GitHub repository linked to this project.");
   }
 
-  await inngest.send({
-    name: "feedback/integration-issue-requested",
-    data: { feedbackId, target: "github" },
-  });
+  await inngest.send(
+    buildEvent(feedbackIntegrationIssueRequestedEvent, {
+      feedbackId,
+      target: "github",
+    }),
+  );
 
   return { queued: true };
 }

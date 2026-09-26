@@ -1,6 +1,7 @@
 import { getInstallationOctokit } from "./github-app";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import { feedbackStatusChangedEvent } from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -9,14 +10,10 @@ export const syncFeedbackStatusToGitHub = inngest.createFunction(
     id: "sync-feedback-status-to-github",
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
-    triggers: [{ event: "feedback/status-changed" }],
+    triggers: [{ event: feedbackStatusChangedEvent }],
   },
   async ({ event }) => {
-    const { feedbackId, newStatus, origin } = event.data as {
-      feedbackId: string;
-      newStatus: string;
-      origin?: "app" | "github" | "linear";
-    };
+    const { feedbackId, newStatus, origin } = event.data;
 
     // If this status change originated on GitHub, don't echo back.
     if (origin === "github") return { skipped: "origin_github" };

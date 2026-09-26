@@ -1,6 +1,10 @@
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  jiraWebhooksRefreshRequestedEvent,
+} from "@/server/inngest/events";
 import { getAccessibleResources } from "@/app/_domains/integration/_services/jira/jira-client";
 import { getValidJiraAccessToken } from "@/app/_domains/integration/_services/jira/token-access";
 import { prisma } from "@workspace/db";
@@ -56,10 +60,11 @@ export async function selectJiraSite(
 
   // This is the second half of the reconnect flow for multi-site grants, so it
   // owes the same webhook renewal the single-site callback does.
-  await inngest.send({
-    name: "jira/webhooks.refresh-requested",
-    data: { installationId: installation.id },
-  });
+  await inngest.send(
+    buildEvent(jiraWebhooksRefreshRequestedEvent, {
+      installationId: installation.id,
+    }),
+  );
 
   return { success: true };
 }

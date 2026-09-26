@@ -1,6 +1,10 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackStatusChangedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 
 type UpdateFeedbackStatusInput = {
@@ -46,11 +50,13 @@ export async function updateFeedbackStatus(
   // write. The dashboard service does fan out on a no-op; see ADR-0007.
   if (status !== previousStatus) {
     inngest
-      .send({
-        name: "feedback/status-changed",
-        // actor "agent": this service is only reachable with an agent token.
-        data: { feedbackId: feedback.id, newStatus: status, actor: "agent" },
-      })
+      .send(
+        buildEvent(
+          feedbackStatusChangedEvent,
+          // actor "agent": this service is only reachable with an agent token.
+          { feedbackId: feedback.id, newStatus: status, actor: "agent" },
+        ),
+      )
       .catch(() => {});
   }
 

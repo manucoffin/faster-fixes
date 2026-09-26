@@ -9,6 +9,7 @@ import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";
 import { createElement } from "react";
 import { inngest } from "@/server/inngest";
+import { jiraOAuthRevokedEvent } from "@/server/inngest/events";
 
 export const handleJiraOAuthRevoked = inngest.createFunction(
   {
@@ -18,10 +19,10 @@ export const handleJiraOAuthRevoked = inngest.createFunction(
     // installation is what makes the reconnectNotifiedAt check a real guard
     // instead of a race two concurrent runs both pass.
     concurrency: { key: "event.data.installationId", limit: 1 },
-    triggers: [{ event: "jira/oauth.revoked" }],
+    triggers: [{ event: jiraOAuthRevokedEvent }],
   },
   async ({ event }) => {
-    const { installationId } = event.data as { installationId: string };
+    const { installationId } = event.data;
     if (!installationId) return { skipped: "no_installation_id" };
 
     const installation = await prisma.jiraInstallation.findUnique({

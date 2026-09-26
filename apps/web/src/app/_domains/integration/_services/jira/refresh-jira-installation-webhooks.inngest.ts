@@ -4,16 +4,21 @@ import { getValidJiraAccessToken } from "./token-access";
 import { refreshProjectJiraWebhook } from "./webhook-registration";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  jiraOAuthRevokedEvent,
+  jiraWebhooksRefreshRequestedEvent,
+} from "@/server/inngest/events";
 
 export const refreshJiraInstallationWebhooks = inngest.createFunction(
   {
     id: "refresh-jira-installation-webhooks",
     retries: 2,
     concurrency: { key: "event.data.installationId", limit: 1 },
-    triggers: [{ event: "jira/webhooks.refresh-requested" }],
+    triggers: [{ event: jiraWebhooksRefreshRequestedEvent }],
   },
   async ({ event }) => {
-    const { installationId } = event.data as { installationId: string };
+    const { installationId } = event.data;
     if (!installationId) return { skipped: "no_installation_id" };
 
     const installation = await prisma.jiraInstallation.findUnique({
@@ -78,10 +83,11 @@ export const refreshJiraInstallationWebhooks = inngest.createFunction(
         // Nothing else on this site can succeed, so report it once and stop
         // rather than flagging every remaining link with a misleading reason.
         if (isJiraUnauthorizedError(error)) {
-          await inngest.send({
-            name: "jira/oauth.revoked",
-            data: { installationId: installation.id },
-          });
+          await inngest.send(
+            buildEvent(jiraOAuthRevokedEvent, {
+              installationId: installation.id,
+            }),
+          );
           return { refreshed, revoked: true };
         }
 

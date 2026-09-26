@@ -4,6 +4,11 @@ import { feedbackStatusFromJiraStatusCategory } from "../../_helpers/jira/transi
 import { getValidJiraAccessToken } from "./token-access";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackStatusChangedEvent,
+  jiraWebhookIssueEvent,
+} from "@/server/inngest/events";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -30,14 +35,10 @@ export const syncJiraIssueStatus = inngest.createFunction(
     id: "sync-jira-issue-status",
     retries: 3,
     concurrency: { key: "event.data.issueId", limit: 1 },
-    triggers: [{ event: "jira/webhook.issue" }],
+    triggers: [{ event: jiraWebhookIssueEvent }],
   },
   async ({ event }) => {
-    const { installationId, issueId, webhookEvent } = event.data as {
-      installationId: string;
-      issueId: string;
-      webhookEvent: string;
-    };
+    const { installationId, issueId, webhookEvent } = event.data;
 
     // Scoped to the installation the delivery token identified, so a payload
     // naming an issue id belonging to another tenant finds no link.
@@ -138,15 +139,14 @@ export const syncJiraIssueStatus = inngest.createFunction(
 
     // Converge the other Trackers on the Feedback. `origin: "jira"` stops this
     // from echoing straight back to the issue it came from.
-    await inngest.send({
-      name: "feedback/status-changed",
-      data: {
+    await inngest.send(
+      buildEvent(feedbackStatusChangedEvent, {
         feedbackId: issueLink.feedbackId,
         newStatus,
         origin: "jira",
         actor: "tracker",
-      },
-    });
+      }),
+    );
 
     return { feedbackId: issueLink.feedbackId, newStatus };
   },

@@ -1,4 +1,9 @@
 import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  linearOAuthRevokedEvent,
+  linearWebhookIssueEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
 import type { TrackerWebhookOutcome } from "../../_types/webhook-outcome";
@@ -55,24 +60,25 @@ export async function handleLinearWebhook({
   }
 
   if (type === "Issue") {
-    await inngest.send({
-      name: "linear/webhook.issue",
-      data: {
+    await inngest.send(
+      buildEvent(linearWebhookIssueEvent, {
         action,
         organizationId,
         installationId: installation.id,
         issue: data,
-      },
-    });
+      }),
+    );
     return { status: "accepted" };
   }
 
   if (type === "AppUserAuthentication") {
     if (action === "remove" || action === "revoke") {
-      await inngest.send({
-        name: "linear/oauth.revoked",
-        data: { organizationId, installationId: installation.id },
-      });
+      await inngest.send(
+        buildEvent(linearOAuthRevokedEvent, {
+          organizationId,
+          installationId: installation.id,
+        }),
+      );
     }
     return { status: "accepted" };
   }
