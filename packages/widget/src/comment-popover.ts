@@ -1,13 +1,10 @@
-import {
-  autoUpdate,
-  computePosition,
-  flip,
-  offset,
-  shift,
-} from "@floating-ui/dom";
 import type { Labels } from "@fasterfixes/core";
 
-const FADEOUT_DURATION = 200;
+import {
+  anchorBelow,
+  createActionButton,
+  POPOVER_FADEOUT_MS,
+} from "./popover-shell.js";
 
 type CommentPopoverActions = {
   /** Sends the comment; a rejection shows the error state. */
@@ -20,18 +17,6 @@ export type CommentPopover = {
   open: (reference: Element) => void;
   close: () => void;
 };
-
-function createActionButton(
-  document: Document,
-  text: string,
-  variant: "primary" | "secondary",
-) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = `action action-${variant}`;
-  button.textContent = text;
-  return button;
-}
 
 /**
  * The comment form anchored under the selected element. It stays anchored on
@@ -146,7 +131,7 @@ export function createCommentPopover(
     stopAutoUpdate?.();
     stopAutoUpdate = null;
     popover.classList.add("fading");
-    fadeTimer = setTimeout(cancel, FADEOUT_DURATION);
+    fadeTimer = setTimeout(cancel, POPOVER_FADEOUT_MS);
   }
 
   textarea.addEventListener("input", render);
@@ -166,16 +151,7 @@ export function createCommentPopover(
       showError(null);
       render();
       container.appendChild(popover);
-      stopAutoUpdate = autoUpdate(reference, popover, () => {
-        void computePosition(reference, popover, {
-          strategy: "fixed",
-          placement: "bottom",
-          middleware: [offset(12), flip(), shift({ padding: 8 })],
-        }).then(({ x, y }) => {
-          popover.style.left = `${x}px`;
-          popover.style.top = `${y}px`;
-        });
-      });
+      stopAutoUpdate = anchorBelow(reference, popover);
       textarea.focus();
     },
     close: teardown,

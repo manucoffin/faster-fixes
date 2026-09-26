@@ -12,6 +12,7 @@ import { buildFeedbackPayload } from "./feedback-payload.js";
 import type { Widget } from "./instance.js";
 import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
+import { createPinPopover } from "./pin-popover.js";
 import { createPinLayer } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
@@ -86,6 +87,8 @@ export function mountWidget({
 
   function setMode(next: WidgetMode) {
     mode = next;
+    // Annotating and commenting take over the page; a pin popover would sit in the way.
+    if (next !== "idle") closePinPopover();
     toolbar.setActive(next !== "idle");
     if (next === "annotating") annotation.start();
     else annotation.stop();
@@ -105,15 +108,57 @@ export function mountWidget({
   highlight.hidden = true;
   shadow.appendChild(highlight);
 
-  const pinLayer = createPinLayer(document, shadow, options.labels, highlight);
+  const pinLayer = createPinLayer(
+    document,
+    shadow,
+    options.labels,
+    highlight,
+    (item, pin) => {
+      if (pinPopover.itemId === item.id) {
+        pinPopover.dismiss();
+        return;
+      }
+      // Leaves the comment popover but stays in feedback mode, like the React Embed.
+      if (mode === "selected") setMode("annotating");
+      pinPopover.open(item, pin);
+      pinLayer.setActive(item.id);
+    },
+  );
   let feedbackItems: FeedbackItem[] = [];
   let showPins = true;
 
   function setFeedbackItems(next: FeedbackItem[]) {
     feedbackItems = next;
-    pinLayer.render(
-      next.filter((item) => isOpenOnPage(item, window.location.href)),
+    const pinned = next.filter((item) =>
+      isOpenOnPage(item, window.location.href),
     );
+    pinLayer.render(pinned);
+    pinPopover.sync(pinned);
+  }
+
+  const pinPopover = createPinPopover(document, shadow, options.labels, {
+    async onSave(item, comment) {
+      await client.updateFeedback(item.id, { comment }, reviewerToken);
+      if (destroyed) return;
+      setFeedbackItems(
+        feedbackItems.map((current) =>
+          current.id === item.id ? { ...current, comment } : current,
+        ),
+      );
+      void loadFeedback();
+    },
+    async onDelete(item) {
+      await client.deleteFeedback(item.id, reviewerToken);
+      if (destroyed) return;
+      setFeedbackItems(feedbackItems.filter(({ id }) => id !== item.id));
+      void loadFeedback();
+    },
+    onClose: () => pinLayer.setActive(null),
+  });
+
+  function closePinPopover() {
+    pinPopover.close();
+    pinLayer.setActive(null);
   }
 
   async function loadFeedback() {
@@ -195,6 +240,7 @@ export function mountWidget({
 
   function togglePins() {
     showPins = !showPins;
+    if (!showPins) closePinPopover();
     pinLayer.setShown(showPins);
     toolbar.setPinsShown(showPins);
   }
@@ -211,6 +257,7 @@ export function mountWidget({
       if (destroyed || !visible) return;
       visible = false;
       setMode("idle");
+      closePinPopover();
       host.remove();
     },
     get isVisible() {
@@ -234,6 +281,7 @@ export function mountWidget({
       if (destroyed) return;
       destroyed = true;
       setMode("idle");
+      closePinPopover();
       recorder?.stop();
       recorder = null;
       pinLayer.destroy();

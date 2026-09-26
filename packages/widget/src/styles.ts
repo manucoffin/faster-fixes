@@ -160,6 +160,11 @@ export const WIDGET_CSS = `
     transform: scale(1.15);
   }
 
+  .pin-active,
+  .pin-active:hover {
+    transform: scale(1.2);
+  }
+
   .pin:focus-visible {
     outline: 2px solid var(--ff-accent);
     outline-offset: 2px;
@@ -186,6 +191,59 @@ export const WIDGET_CSS = `
 
   .popover.fading {
     animation: ff-popover-fadeout 200ms ease-in forwards;
+  }
+
+  .popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .popover-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .status-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .reviewer {
+    overflow: hidden;
+    color: #71717a;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .icon-action {
+    all: initial;
+    display: flex;
+    padding: 4px;
+    border-radius: calc(var(--ff-radius) - 2px);
+    color: #a1a1aa;
+    cursor: pointer;
+  }
+
+  .icon-action:hover {
+    color: var(--ff-foreground);
+  }
+
+  .icon-action:focus-visible {
+    outline: 2px solid var(--ff-accent);
+    outline-offset: 2px;
+  }
+
+  .comment {
+    margin: 0 0 10px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 
   .textarea {
@@ -249,6 +307,15 @@ export const WIDGET_CSS = `
   .action-secondary {
     background-color: transparent;
     color: #a1a1aa;
+  }
+
+  .action-danger {
+    background-color: #dc2626;
+    color: #fff;
+  }
+
+  .action-destructive {
+    color: #dc2626;
   }
 
   .error-message {

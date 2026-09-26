@@ -282,6 +282,96 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(pin).toBeVisible();
     });
 
+    test("views, edits and deletes Feedback from its pin", async ({
+      page,
+      baseURL,
+    }) => {
+      const api = await stubWidgetApi(page, {
+        feedback: [stubbedItem(new URL(fixture.path, baseURL).href)],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const pin = page.getByRole("button", {
+        name: "Feedback: The heading is misaligned",
+      });
+      await pin.click();
+      await expect(page.getByText("The heading is misaligned")).toBeVisible();
+      await expect(page.getByText("E2E Reviewer")).toBeVisible();
+
+      await page.mouse.click(5, 300);
+      await expect(page.getByText("E2E Reviewer")).toBeHidden();
+
+      await pin.click();
+      await page.getByRole("button", { name: "Edit" }).click();
+      await page.locator("textarea").fill("The heading overlaps the logo");
+      await page.getByRole("button", { name: "Save" }).click();
+
+      await expect
+        .poll(() => api.requestsTo("PUT", "/api/v1/feedback/fb_stubbed"))
+        .toHaveLength(1);
+      expect(
+        JSON.parse(
+          api
+            .requestsTo("PUT", "/api/v1/feedback/fb_stubbed")[0]
+            ?.body?.toString() ?? "null",
+        ),
+      ).toEqual({ comment: "The heading overlaps the logo" });
+      const editedPin = page.getByRole("button", {
+        name: "Feedback: The heading overlaps the logo",
+      });
+      await expect(editedPin).toBeVisible();
+      await expect(page.getByText("E2E Reviewer")).toBeHidden();
+
+      await editedPin.click();
+      await page.getByRole("button", { name: "Delete" }).click();
+      await expect(page.getByText("Delete this feedback?")).toBeVisible();
+      expect(
+        api.requestsTo("DELETE", "/api/v1/feedback/fb_stubbed"),
+      ).toHaveLength(0);
+      await page.getByRole("button", { name: "Delete" }).click();
+
+      await expect
+        .poll(() => api.requestsTo("DELETE", "/api/v1/feedback/fb_stubbed"))
+        .toHaveLength(1);
+      await expect(editedPin).toHaveCount(0);
+      await expect(page.getByText("Delete this feedback?")).toBeHidden();
+    });
+
+    test("shows a server error in the pin popover", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [stubbedItem(new URL(fixture.path, baseURL).href)],
+      });
+      await seedReviewerToken(page);
+      // Registered after the stub, so it answers first.
+      await page.route("**/api/v1/feedback/fb_stubbed", (route) => {
+        if (route.request().method() !== "PUT") return route.fallback();
+        return route.fulfill({
+          status: 500,
+          headers: {
+            "Access-Control-Allow-Origin":
+              route.request().headers()["origin"] ?? "*",
+          },
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Storage unavailable" }),
+        });
+      });
+      await page.goto(fixture.path);
+
+      await page
+        .getByRole("button", { name: "Feedback: The heading is misaligned" })
+        .click();
+      await page.getByRole("button", { name: "Edit" }).click();
+      await page.locator("textarea").fill("Will not be saved");
+      await page.getByRole("button", { name: "Save" }).click();
+
+      await expect(page.getByText("Storage unavailable")).toBeVisible();
+      await expect(page.locator("textarea")).toHaveValue("Will not be saved");
+    });
+
     test("shows the server error with retry and cancel", async ({ page }) => {
       const api = await stubWidgetApi(page);
       await seedReviewerToken(page);

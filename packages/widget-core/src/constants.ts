@@ -34,6 +34,7 @@ export type Labels = {
   textareaPlaceholder: string;
   // Unused by the Widget, kept so existing `labels` objects still type-check.
   successMessage: string;
+  // Accessible name of the pin popover's close control.
   closeButton: string;
   retryButton: string;
   errorMessage: string;

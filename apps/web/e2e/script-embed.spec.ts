@@ -114,6 +114,40 @@ test.describe("script embed", () => {
     await page.evaluate(() => window.FasterFixes?.instance?.togglePins());
     await expect(pin).toBeVisible();
   });
+
+  test("takes every pin popover string from labels", async ({ page }) => {
+    await page.goto(`${FIXTURE_PATH}?manual`);
+    await page.evaluate(
+      ([projectId, apiOrigin]) => {
+        window.FasterFixes?.init({
+          projectId,
+          apiOrigin,
+          labels: {
+            editButton: "Modifier",
+            deleteButton: "Supprimer",
+            deleteConfirm: "Supprimer ce retour ?",
+            cancelButton: "Annuler",
+            closeButton: "Fermer",
+          },
+        });
+      },
+      [WIDGET_PROJECT_ID, WIDGET_API_ORIGIN] as const,
+    );
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.locator("h1").click();
+    await page.getByPlaceholder("Describe the issue...").fill("Pinned");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await page.getByRole("button", { name: "Feedback: Pinned" }).click();
+    await page.getByRole("button", { name: "Supprimer" }).click();
+    await expect(page.getByText("Supprimer ce retour ?")).toBeVisible();
+    await page.getByRole("button", { name: "Annuler" }).click();
+    await expect(page.getByRole("button", { name: "Modifier" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Fermer" }).click();
+    await expect(page.getByRole("button", { name: "Modifier" })).toBeHidden();
+  });
 });
 
 declare global {

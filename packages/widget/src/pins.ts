@@ -13,13 +13,15 @@ const RETRY_DELAYS = [100, 300, 600, 1200, 2500];
 const EXCERPT_LENGTH = 50;
 
 export type PinLayer = {
-  /** Replaces the pins with one per item. */
+  /** One pin per item; a pin already on screen for an id is kept and updated. */
   render: (items: FeedbackItem[]) => void;
   setShown: (shown: boolean) => void;
+  /** Scales up the active pin and keeps its element outlined. */
+  setActive: (id: string | null) => void;
   destroy: () => void;
 };
 
-function statusColor(status: string) {
+export function statusColor(status: string) {
   // why: the status comes from an API response, so a newer server can send one this build does not know
   const colors: Partial<Record<string, string>> = STATUS_COLORS;
   return colors[status] ?? STATUS_COLORS.new;
@@ -56,12 +58,14 @@ export function createPinLayer(
   container: ShadowRoot,
   labels: Labels,
   highlight: HTMLElement,
+  onPinClick: (item: FeedbackItem, pin: HTMLElement) => void,
 ): PinLayer {
   const layer = document.createElement("div");
   layer.className = "pins";
   container.appendChild(layer);
 
   let pins: { item: FeedbackItem; element: HTMLButtonElement }[] = [];
+  let activeId: string | null = null;
   let retryTimers: ReturnType<typeof setTimeout>[] = [];
   let frame: number | null = null;
 
@@ -99,22 +103,42 @@ export function createPinLayer(
     frame = null;
   }
 
-  function createPin(item: FeedbackItem) {
+  function itemOf(pin: HTMLButtonElement) {
+    return pins.find(({ element }) => element === pin)?.item ?? null;
+  }
+
+  // Hovering outlines the hovered pin's element, leaving restores the active one's.
+  function highlightActive() {
+    const active = pins.find(({ item }) => item.id === activeId);
+    showHighlight(highlight, active ? resolveTarget(active.item) : null);
+  }
+
+  function createPin() {
     const pin = document.createElement("button");
     pin.type = "button";
     pin.className = "pin";
     pin.setAttribute("part", "pin");
+    pin.appendChild(createIcon(document, "message", 12, { filled: true }));
+    pin.addEventListener("mouseenter", () => {
+      const item = itemOf(pin);
+      if (item) showHighlight(highlight, resolveTarget(item));
+    });
+    pin.addEventListener("mouseleave", highlightActive);
+    pin.addEventListener("click", () => {
+      const item = itemOf(pin);
+      if (item) onPinClick(item, pin);
+    });
+    return pin;
+  }
+
+  function fillPin(pin: HTMLButtonElement, item: FeedbackItem) {
     pin.dataset.ffPinId = item.id;
     pin.style.backgroundColor = statusColor(item.status);
     pin.setAttribute(
       "aria-label",
       labels.pinAriaLabel(item.comment.slice(0, EXCERPT_LENGTH)),
     );
-    pin.appendChild(createIcon(document, "message", 12, { filled: true }));
-    pin.addEventListener("mouseenter", () =>
-      showHighlight(highlight, resolveTarget(item)),
-    );
-    pin.addEventListener("mouseleave", () => showHighlight(highlight, null));
+    pin.classList.toggle("pin-active", item.id === activeId);
     return pin;
   }
 
@@ -124,6 +148,14 @@ export function createPinLayer(
     signal: listening.signal,
   });
   window.addEventListener("load", update, { signal: listening.signal });
+  // The highlight is fixed, so the active element's outline follows the scroll.
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (activeId !== null) highlightActive();
+    },
+    { passive: true, signal: listening.signal },
+  );
   // Dialog portals and client-rendered sections come and go as body children.
   const observer = new MutationObserver(update);
   observer.observe(document.body, { childList: true });
@@ -131,9 +163,16 @@ export function createPinLayer(
   return {
     render(items) {
       clearSchedule();
-      showHighlight(highlight, null);
-      pins = items.map((item) => ({ item, element: createPin(item) }));
+      // Kept by id so an open pin popover stays anchored across list reloads.
+      const existing = new Map(
+        pins.map(({ item, element }) => [item.id, element]),
+      );
+      pins = items.map((item) => ({
+        item,
+        element: fillPin(existing.get(item.id) ?? createPin(), item),
+      }));
       layer.replaceChildren(...pins.map(({ element }) => element));
+      highlightActive();
       update();
       frame = window.requestAnimationFrame(update);
       retryTimers = RETRY_DELAYS.map((delay) => setTimeout(update, delay));
@@ -141,6 +180,13 @@ export function createPinLayer(
     setShown(shown) {
       layer.hidden = !shown;
       if (!shown) showHighlight(highlight, null);
+    },
+    setActive(id) {
+      activeId = id;
+      for (const { item, element } of pins) {
+        element.classList.toggle("pin-active", item.id === id);
+      }
+      highlightActive();
     },
     destroy() {
       clearSchedule();

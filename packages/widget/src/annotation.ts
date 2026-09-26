@@ -12,7 +12,7 @@ export type AnnotationMode = {
 
 // Events from inside the shadow root reach the document retargeted to the
 // host, so this also recognises the Widget's own controls.
-function isWidgetEvent(event: Event) {
+export function isWidgetEvent(event: Event) {
   return (
     event.target instanceof Element &&
     event.target.closest("[data-ff-widget]") !== null
