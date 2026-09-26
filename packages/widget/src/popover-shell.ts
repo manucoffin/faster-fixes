@@ -18,7 +18,9 @@ export function anchorBelow(reference: Element, floating: HTMLElement) {
     void computePosition(reference, floating, {
       strategy: "fixed",
       placement: "bottom",
-      middleware: [offset(12), flip(), shift({ padding: 8 })],
+      // When neither side fits (a reference taller than the viewport), the
+      // cross-axis shift pins the popover to the visible edge, over the element.
+      middleware: [offset(12), flip(), shift({ padding: 8, crossAxis: true })],
     }).then(({ x, y }) => {
       floating.style.left = `${x}px`;
       floating.style.top = `${y}px`;

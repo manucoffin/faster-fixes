@@ -65,7 +65,8 @@ export function CommentPopover() {
     },
     strategy: "fixed",
     whileElementsMounted: autoUpdate,
-    middleware: [offset(12), flip(), shift({ padding: 8 })],
+    // Pins the popover to the visible edge when neither side fits.
+    middleware: [offset(12), flip(), shift({ padding: 8, crossAxis: true })],
     placement: "bottom",
   });
 
