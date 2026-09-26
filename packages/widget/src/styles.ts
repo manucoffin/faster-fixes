@@ -249,6 +249,7 @@ export const WIDGET_CSS = `
   .textarea {
     all: initial;
     display: block;
+    box-sizing: border-box;
     width: 100%;
     min-height: 80px;
     padding: 8px;
