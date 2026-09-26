@@ -530,6 +530,34 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
 
+  packages/widget:
+    dependencies:
+      "@fasterfixes/core":
+        specifier: workspace:*
+        version: link:../widget-core
+    devDependencies:
+      "@workspace/eslint-config":
+        specifier: workspace:*
+        version: link:../eslint-config
+      "@workspace/typescript-config":
+        specifier: workspace:*
+        version: link:../typescript-config
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.2(jiti@2.7.0)
+      tsdown:
+        specifier: ^0.21.4
+        version: 0.21.4(oxc-resolver@11.24.2)(publint@0.3.24)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.0(@types/node@25.0.10)(esbuild@0.27.4)(jiti@2.7.0)(sass@1.77.4)(tsx@4.21.0)(yaml@2.9.1)
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.1(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(vite@8.3.0(@types/node@25.0.10)(esbuild@0.27.4)(jiti@2.7.0)(sass@1.77.4)(tsx@4.21.0)(yaml@2.9.1))
+
   packages/widget-core:
     devDependencies:
       "@workspace/eslint-config":
