@@ -130,13 +130,20 @@ export function getPinPlacementMetadata(
   };
 }
 
-export const PIN_SIZE = 24;
-const PIN_GAP = 4;
+// A pin is a dot centred on its anchor, with a label beside it that widens to
+// the comment excerpt on hover.
+export const PIN_DOT_SIZE = 14;
+export const PIN_HEIGHT = 24;
+const PIN_LABEL_ROOM = 280;
 
+export type PinLabelSide = "left" | "right";
+
+/** `top` and `left` are where the dot's centre goes. */
 export type PinPosition = {
   mode: PinPlacementMode;
   top: number;
   left: number;
+  side: PinLabelSide;
 };
 
 export type PinView = {
@@ -158,6 +165,14 @@ type PinTarget = {
   readTargetKind: () => PinTargetKind;
 };
 
+// The label goes left only when it would overflow on the right and the left
+// has more room, so a pin on a narrow screen keeps its label on screen.
+function labelSide(viewportX: number, viewWidth: number): PinLabelSide {
+  return viewportX + PIN_LABEL_ROOM > viewWidth && viewportX > viewWidth / 2
+    ? "left"
+    : "right";
+}
+
 function placeOnTarget(
   metadata: unknown,
   { rect, readTargetKind }: PinTarget,
@@ -178,19 +193,20 @@ function placeOnTarget(
     : rect.left + rect.width;
   const anchorY = pinAnchor ? rect.top + rect.height * pinAnchor.y : rect.top;
 
-  let left = anchorX + PIN_GAP;
-  if (left + PIN_SIZE > view.width) left = anchorX - PIN_SIZE - PIN_GAP;
-  left = clamp(left, 0, view.width - PIN_SIZE);
+  const left = clamp(anchorX, PIN_DOT_SIZE / 2, view.width - PIN_DOT_SIZE / 2);
+  const side = labelSide(left, view.width);
 
-  let top = pinAnchor ? anchorY - PIN_SIZE / 2 : rect.top;
-  if (!pinAnchor && top + PIN_SIZE > view.height) {
-    top = rect.top + rect.height - PIN_SIZE;
+  let top = anchorY;
+  if (!pinAnchor && top + PIN_HEIGHT / 2 > view.height) {
+    top = rect.top + rect.height - PIN_HEIGHT / 2;
   }
-  if (mode === "viewport") top = clamp(top, 0, view.height - PIN_SIZE);
+  if (mode === "viewport") {
+    top = clamp(top, PIN_HEIGHT / 2, view.height - PIN_HEIGHT / 2);
+  }
 
   return mode === "document"
-    ? { mode, top: top + view.scrollY, left: left + view.scrollX }
-    : { mode, top, left };
+    ? { mode, top: top + view.scrollY, left: left + view.scrollX, side }
+    : { mode, top, left, side };
 }
 
 /**
@@ -217,7 +233,13 @@ export function placePin(
       mode: "document",
       top: stored.documentPoint.y,
       left: stored.documentPoint.x,
+      side: labelSide(stored.documentPoint.x - view.scrollX, view.width),
     };
   }
-  return { mode: "viewport", top: item.clickY, left: item.clickX };
+  return {
+    mode: "viewport",
+    top: item.clickY,
+    left: item.clickX,
+    side: labelSide(item.clickX, view.width),
+  };
 }

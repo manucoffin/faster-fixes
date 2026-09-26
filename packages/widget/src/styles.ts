@@ -1,5 +1,7 @@
 import { DEFAULT_WIDGET_COLOR } from "@fasterfixes/core";
 
+import { PIN_DOT_SIZE, PIN_HEIGHT } from "./pin-placement.js";
+
 // Theming surface: a customer overrides any of these on the `[data-ff-widget]`
 // host. Rules in the page's stylesheet win over `:host`, so these are defaults.
 export const THEME_DEFAULTS = {
@@ -165,32 +167,30 @@ export const WIDGET_CSS = `
     pointer-events: none;
   }
 
+  /* Positioned at the anchor: the translate puts the dot's centre on it. */
   .pin {
     all: initial;
     position: absolute;
     z-index: calc(var(--ff-z-index) - 1);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
     box-sizing: border-box;
-    width: 24px;
-    height: 24px;
-    border: 2px solid #27272a;
-    border-radius: 50%;
-    color: #fff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    height: ${PIN_HEIGHT}px;
+    border-radius: 999px;
+    font-family: var(--ff-font-family);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ff-foreground);
     cursor: pointer;
     pointer-events: auto;
-    transition: transform 0.15s ease;
+    transform: translate(-${PIN_DOT_SIZE / 2}px, -50%);
   }
 
-  .pin:hover {
-    transform: scale(1.15);
-  }
-
-  .pin-active,
-  .pin-active:hover {
-    transform: scale(1.2);
+  .pin[data-ff-pin-side="left"] {
+    flex-direction: row-reverse;
+    transform: translate(calc(-100% + ${PIN_DOT_SIZE / 2}px), -50%);
   }
 
   .pin:focus-visible {
@@ -198,8 +198,66 @@ export const WIDGET_CSS = `
     outline-offset: 2px;
   }
 
-  .pin svg {
-    display: block;
+  .pin-dot {
+    position: relative;
+    flex: none;
+    width: ${PIN_DOT_SIZE}px;
+    height: ${PIN_DOT_SIZE}px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background-color: var(--ff-pin-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .pin-dot::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--ff-pin-color);
+    border-radius: 50%;
+    animation: ff-pin-pulse 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  .pin-label {
+    display: flex;
+    align-items: center;
+    height: ${PIN_HEIGHT}px;
+    padding: 0 8px;
+    border: 1px solid color-mix(in srgb, var(--ff-pin-color) 60%, transparent);
+    border-radius: 999px;
+    background-color: var(--ff-background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    white-space: nowrap;
+  }
+
+  .pin-number {
+    color: var(--ff-pin-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pin-excerpt {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    opacity: 0;
+    transition: max-width 0.2s ease, margin-left 0.2s ease, opacity 0.2s ease;
+  }
+
+  .pin:hover .pin-excerpt,
+  .pin:focus-visible .pin-excerpt,
+  .pin-active .pin-excerpt {
+    max-width: 240px;
+    margin-left: 6px;
+    opacity: 1;
+  }
+
+  .pin-active .pin-label {
+    border-color: var(--ff-pin-color);
+  }
+
+  @keyframes ff-pin-pulse {
+    75%, 100% { transform: scale(2.4); opacity: 0; }
   }
 
   .popover {
@@ -563,11 +621,16 @@ export const WIDGET_CSS = `
     .controls,
     .list-item,
     .overlay,
-    .pin,
+    .pin-excerpt,
     .popover.fading,
     .tooltip {
       animation: none;
       transition-duration: 1ms;
+    }
+
+    /* Without its animation the pulse ring would sit still around the dot. */
+    .pin-dot::after {
+      display: none;
     }
 
     /* The list's exit animation is timed, so it is shortened rather than removed. */

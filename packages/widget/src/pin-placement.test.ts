@@ -6,7 +6,8 @@ import {
   getPinAnchor,
   getPinPlacementMetadata,
   getViewportAnchoringKind,
-  PIN_SIZE,
+  PIN_DOT_SIZE,
+  PIN_HEIGHT,
   placePin,
 } from "./pin-placement.js";
 
@@ -158,40 +159,50 @@ describe("placePin", () => {
     );
   }
 
-  it("places the pin right of the stored anchor, centred on it", () => {
+  it("centres the dot on the stored anchor", () => {
     expect(onElement({ pinAnchor: { x: 0.5, y: 0.5 } })).toEqual({
       mode: "document",
-      left: 200 + 4,
-      top: 250 - PIN_SIZE / 2,
+      left: 200,
+      top: 250,
+      side: "right",
     });
   });
 
   it("uses the top right corner for a pin stored without an anchor", () => {
     expect(onElement(null)).toEqual({
       mode: "document",
-      left: 300 + 4,
+      left: 300,
       top: 200,
+      side: "right",
     });
   });
 
-  it("flips to the left of the anchor when the pin would overflow", () => {
+  it("puts the label on the left when it would overflow on the right", () => {
     const edge = { left: 900, top: 200, width: 100, height: 100 };
     expect(onElement({ pinAnchor: { x: 0.9, y: 0 } }, { rect: edge })).toEqual(
-      expect.objectContaining({ left: 990 - PIN_SIZE - 4 }),
+      expect.objectContaining({ left: 990, side: "left" }),
     );
   });
 
-  it("clamps the pin inside the viewport width", () => {
+  it("keeps the label on the right when the left has even less room", () => {
+    const narrow = { ...view, width: 375 };
+    const near = { left: 50, top: 200, width: 100, height: 100 };
+    expect(
+      onElement({ pinAnchor: { x: 0.5, y: 0 } }, { rect: near }, narrow),
+    ).toEqual(expect.objectContaining({ left: 100, side: "right" }));
+  });
+
+  it("clamps the dot inside the viewport width", () => {
     const offscreen = { left: -300, top: 200, width: 100, height: 100 };
     expect(
       onElement({ pinAnchor: { x: 0, y: 0 } }, { rect: offscreen }),
-    ).toEqual(expect.objectContaining({ left: 0 }));
+    ).toEqual(expect.objectContaining({ left: PIN_DOT_SIZE / 2 }));
   });
 
   it("moves an anchorless pin up to the element's bottom when it overflows", () => {
     const low = { left: 100, top: 790, width: 100, height: 8 };
     expect(onElement(null, { rect: low })).toEqual(
-      expect.objectContaining({ top: 798 - PIN_SIZE }),
+      expect.objectContaining({ top: 798 - PIN_HEIGHT / 2 }),
     );
   });
 
@@ -199,8 +210,9 @@ describe("placePin", () => {
     const scrolled = { ...view, scrollX: 10, scrollY: 500 };
     expect(onElement({ pinAnchor: { x: 0, y: 0 } }, {}, scrolled)).toEqual({
       mode: "document",
-      left: 104 + 10,
-      top: 200 - PIN_SIZE / 2 + 500,
+      left: 100 + 10,
+      top: 200 + 500,
+      side: "right",
     });
   });
 
@@ -213,7 +225,12 @@ describe("placePin", () => {
         { rect: top, kind: "fixed" },
         scrolled,
       ),
-    ).toEqual({ mode: "viewport", left: 104, top: 0 });
+    ).toEqual({
+      mode: "viewport",
+      left: 100,
+      top: PIN_HEIGHT / 2,
+      side: "right",
+    });
   });
 
   it("prefers the stored placement over the element's current kind", () => {
@@ -255,7 +272,7 @@ describe("placePin", () => {
           ...view,
           scrollY: 880,
         }),
-      ).toEqual({ mode: "document", left: 10, top: 900 });
+      ).toEqual({ mode: "document", left: 10, top: 900, side: "right" });
     });
 
     it("falls back to the click coordinates", () => {
@@ -263,6 +280,7 @@ describe("placePin", () => {
         mode: "viewport",
         left: 10,
         top: 20,
+        side: "right",
       });
     });
 

@@ -5,7 +5,6 @@ import type {
   SelectorStrategies,
 } from "@fasterfixes/core";
 
-import { createIcon } from "./icons.js";
 import { getViewportAnchoringKind, placePin } from "./pin-placement.js";
 
 // Hydration and lazy rendering on the host page settle at unknown times.
@@ -18,7 +17,7 @@ export type PinLayer = {
   setShown: (shown: boolean) => void;
   /** The pin on screen for an item, or null when the item has none. */
   pinOf: (id: string) => HTMLElement | null;
-  /** Keeps the active item's element outlined and scales up its pin, if it has one. */
+  /** Keeps the active item's element outlined and its pin expanded, if it has one. */
   setActive: (item: FeedbackItem | null) => void;
   destroy: () => void;
 };
@@ -27,6 +26,14 @@ export function statusColor(status: string) {
   // why: the status comes from an API response, so a newer server can send one this build does not know
   const colors: Partial<Record<string, string>> = STATUS_COLORS;
   return colors[status] ?? STATUS_COLORS.new;
+}
+
+/** Each item's pin number, counting from 1 in the order the items were created. */
+export function numberPins(items: Pick<FeedbackItem, "id" | "createdAt">[]) {
+  const byCreation = [...items].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt),
+  );
+  return new Map(byCreation.map((item, index) => [item.id, index + 1]));
 }
 
 export function resolveTarget(item: FeedbackItem) {
@@ -91,6 +98,7 @@ export function createPinLayer(
       element.hidden = position === null;
       if (!position) continue;
       element.dataset.ffPinMode = position.mode;
+      element.dataset.ffPinSide = position.side;
       element.style.position =
         position.mode === "document" ? "absolute" : "fixed";
       element.style.top = `${position.top}px`;
@@ -119,7 +127,16 @@ export function createPinLayer(
     pin.type = "button";
     pin.className = "pin";
     pin.setAttribute("part", "pin");
-    pin.appendChild(createIcon(document, "message", 12, { filled: true }));
+    const dot = document.createElement("span");
+    dot.className = "pin-dot";
+    const label = document.createElement("span");
+    label.className = "pin-label";
+    const number = document.createElement("span");
+    number.className = "pin-number";
+    const excerpt = document.createElement("span");
+    excerpt.className = "pin-excerpt";
+    label.append(number, excerpt);
+    pin.append(dot, label);
     pin.addEventListener("mouseenter", () => {
       const item = itemOf(pin);
       if (item) showHighlight(highlight, resolveTarget(item));
@@ -132,9 +149,15 @@ export function createPinLayer(
     return pin;
   }
 
-  function fillPin(pin: HTMLButtonElement, item: FeedbackItem) {
+  function fillPin(pin: HTMLButtonElement, item: FeedbackItem, number = 0) {
     pin.dataset.ffPinId = item.id;
-    pin.style.backgroundColor = statusColor(item.status);
+    pin.style.setProperty("--ff-pin-color", statusColor(item.status));
+    const [numberText, excerpt] = pin.querySelectorAll(
+      ".pin-number, .pin-excerpt",
+    );
+    if (numberText) numberText.textContent = `#${number}`;
+    // The label truncates the comment itself, with an ellipsis.
+    if (excerpt) excerpt.textContent = item.comment;
     pin.setAttribute(
       "aria-label",
       labels.pinAriaLabel(item.comment.slice(0, EXCERPT_LENGTH)),
@@ -168,9 +191,14 @@ export function createPinLayer(
       const existing = new Map(
         pins.map(({ item, element }) => [item.id, element]),
       );
+      const numbers = numberPins(items);
       pins = items.map((item) => ({
         item,
-        element: fillPin(existing.get(item.id) ?? createPin(), item),
+        element: fillPin(
+          existing.get(item.id) ?? createPin(),
+          item,
+          numbers.get(item.id),
+        ),
       }));
       layer.replaceChildren(...pins.map(({ element }) => element));
       highlightActive();

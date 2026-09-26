@@ -38,7 +38,7 @@ function stubbedItem(
   };
 }
 
-// The pin sits just right of its anchor, vertically centred on it.
+// The pin sits on or just right of its anchor, vertically centred on it.
 async function expectPinAt(pin: Locator, target: Locator, anchorX: number) {
   const pinBox = await pin.boundingBox();
   const targetBox = await target.boundingBox();
