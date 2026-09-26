@@ -1,13 +1,13 @@
 ---
 name: release
-description: Prepare an npm release of the @fasterfixes/* packages (core, react, mcp) by writing a changeset. Use when the user asks to release, publish, bump, or version a package, or when finished work under packages/widget-core, packages/widget-react, or packages/mcp needs a changelog entry.
+description: Prepare an npm release of the @fasterfixes/* packages (core, widget, react, mcp) by writing a changeset. Use when the user asks to release, publish, bump, or version a package, or when finished work under packages/widget-core, packages/widget, packages/widget-react, or packages/mcp needs a changelog entry.
 ---
 
 Publishing is CI's job: a changeset on `main` becomes a "Version Packages" PR, and merging that PR publishes to npm. No credentials exist on any laptop, so this skill ends at a commit.
 
 ## 1. Find what is unreleased
 
-List the publishable changes since the last release: `git diff main...HEAD --stat -- packages/widget-core packages/widget-react packages/mcp`, plus `git status --short` for uncommitted work. Then read every `.changeset/*.md` already present. Done when each touched package is either covered by an existing changeset or on your list to write one for. When nothing is unreleased, say so and stop.
+List the publishable changes since the last release: `git diff main...HEAD --stat -- packages/widget-core packages/widget packages/widget-react packages/mcp`, plus `git status --short` for uncommitted work. Then read every `.changeset/*.md` already present. Done when each touched package is either covered by an existing changeset or on your list to write one for. When nothing is unreleased, say so and stop.
 
 ## 2. Pick the bump per package
 

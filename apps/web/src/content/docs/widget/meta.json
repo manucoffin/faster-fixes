@@ -1,5 +1,11 @@
 {
   "title": "Widget",
   "defaultOpen": true,
-  "pages": ["react", "customization", "use-feedback-hook", "other-frameworks"]
+  "pages": [
+    "react",
+    "script-embed",
+    "customization",
+    "use-feedback-hook",
+    "other-frameworks"
+  ]
 }

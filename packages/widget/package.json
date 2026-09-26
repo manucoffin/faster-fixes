@@ -1,0 +1,87 @@
+{
+  "name": "@fasterfixes/widget",
+  "version": "0.0.0",
+  "description": "The FasterFixes feedback widget for any website, with no framework required. Reviewers annotate elements and submit visual feedback.",
+  "type": "module",
+  "license": "MIT",
+  "author": "FasterFixes <support@faster-fixes.com> (https://faster-fixes.com)",
+  "homepage": "https://faster-fixes.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manucoffin/faster-fixes.git",
+    "directory": "packages/widget"
+  },
+  "bugs": {
+    "url": "https://github.com/manucoffin/faster-fixes/issues"
+  },
+  "keywords": [
+    "feedback",
+    "widget",
+    "bug-reporting",
+    "visual-feedback",
+    "annotation",
+    "screenshot",
+    "user-feedback",
+    "script-embed",
+    "qa"
+  ],
+  "sideEffects": [
+    "./dist/widget.iife.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/widget.iife.js",
+  "jsdelivr": "./dist/widget.iife.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./internal": {
+      "import": {
+        "types": "./dist/internal.d.ts",
+        "default": "./dist/internal.js"
+      },
+      "types": "./dist/internal.d.ts",
+      "default": "./dist/internal.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@fasterfixes/core": "workspace:*",
+    "@floating-ui/dom": "^1.7.4",
+    "modern-screenshot": "^4.6.8"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "^9.39.1",
+    "tsdown": "^0.21.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

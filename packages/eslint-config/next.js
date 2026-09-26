@@ -568,8 +568,9 @@ export const nextJsConfig = withBinarySeverity([
   },
   {
     // The whole source tree rather than the test glob: a `*.spec.ts` name is
-    // one of the reports, and the harness would never collect it.
-    files: ["**/src/**/*.{ts,tsx}"],
+    // one of the reports, and the harness would never collect it. `e2e/` holds
+    // the Playwright specs, where the naming flips.
+    files: ["**/src/**/*.{ts,tsx}", "**/e2e/**/*.{ts,tsx}"],
     rules: {
       "local/test-file-placement": [
         "error",

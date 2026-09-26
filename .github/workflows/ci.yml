@@ -27,6 +27,8 @@ jobs:
 
       # Builds, typechecks, lints, then packs each @fasterfixes/* tarball and lints it with publint,
       # so a broken "exports" or "files" field fails the PR instead of the release.
+      # The widget build also fails when its minified IIFE exceeds the footprint ceiling
+      # recorded next to the check in packages/widget/tsdown.config.ts.
       - run: pnpm check:packages
 
   knip:
@@ -102,3 +104,39 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm test
+
+  e2e:
+    name: Widget end to end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The dev server resolves the Embeds from their builds and the auth module from the
+      # Prisma client, so both are generated before the suite starts it.
+      - run: pnpm build:packages
+
+      - run: pnpm --filter @workspace/db db:gen
+
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+
+      # Starts `next dev` itself with placeholder env values; the widget API is stubbed in
+      # the browser, so no database or secret is needed.
+      - run: pnpm --filter web test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          retention-days: 7
