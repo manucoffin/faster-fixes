@@ -67,13 +67,15 @@ export function createToolbar(
   { onStart, onExit, onTogglePins, onToggleList }: ToolbarActions,
 ): Toolbar {
   const side = tooltipSide(position);
+  // One pill that grows from the button into the controls, so the shadow and
+  // the `button` part stay on the shape the user sees.
   const toolbar = document.createElement("div");
   toolbar.className = "toolbar";
+  toolbar.setAttribute("part", "button");
 
   const trigger = document.createElement("button");
   trigger.type = "button";
   trigger.className = "button";
-  trigger.setAttribute("part", "button");
   trigger.setAttribute("aria-label", labels.startFeedback);
   trigger.appendChild(createIcon(document, "message", 18));
   trigger.appendChild(createTooltip(document, labels.startFeedback, side));
@@ -81,7 +83,6 @@ export function createToolbar(
 
   const controls = document.createElement("div");
   controls.className = "controls";
-  controls.hidden = true;
   const exit = createControl(
     document,
     labels.exitFeedbackMode,
@@ -111,14 +112,28 @@ export function createToolbar(
 
   toolbar.append(trigger, controls);
 
+  // Both layers stay rendered so they can cross-fade; `inert` takes the
+  // faded one out of the tab order and the accessibility tree.
+  function applyState(active: boolean) {
+    toolbar.dataset.state = active ? "expanded" : "collapsed";
+    for (const [layer, visible] of [
+      [trigger, !active],
+      [controls, active],
+    ] as const) {
+      layer.dataset.visible = String(visible);
+      layer.inert = !visible;
+      layer.setAttribute("aria-hidden", String(!visible));
+    }
+  }
+  applyState(false);
+
   return {
     element: toolbar,
     setActive(active) {
       const root = toolbar.getRootNode();
       const focusWasInside =
         root instanceof ShadowRoot && toolbar.contains(root.activeElement);
-      trigger.hidden = active;
-      controls.hidden = !active;
+      applyState(active);
       // Keeps keyboard users on the toolbar when the button they pressed hides.
       if (focusWasInside) {
         (active ? exit.control : trigger).focus();

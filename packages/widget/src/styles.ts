@@ -40,7 +40,27 @@ export const WIDGET_CSS = `
   }
 
   .toolbar {
+    position: relative;
     display: flex;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: var(--ff-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: ff-button-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 0.22s ease,
+      transform 0.16s ease;
+  }
+
+  .toolbar[data-state="expanded"] {
+    height: 112px;
+    border-radius: 24px;
+  }
+
+  .toolbar[data-state="collapsed"]:hover {
+    transform: scale(1.05);
   }
 
   /* A class that sets display would otherwise beat the UA rule for hidden. */
@@ -50,23 +70,23 @@ export const WIDGET_CSS = `
 
   .button {
     all: initial;
-    position: relative;
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
     border-radius: 50%;
-    background-color: var(--ff-accent);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    animation: ff-button-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-    transition: transform 0.16s ease;
+    transition:
+      opacity 150ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .button:hover {
-    transform: scale(1.05);
+  .button[data-visible="false"] {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.72);
   }
 
   .button:focus-visible {
@@ -80,14 +100,22 @@ export const WIDGET_CSS = `
   }
 
   .controls {
+    position: absolute;
+    inset: 4px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 4px;
-    border-radius: 24px;
-    background-color: var(--ff-accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    animation: ff-button-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      opacity 150ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 220ms ease;
+  }
+
+  .controls[data-visible="false"] {
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(6px);
+    transform: scale(0.72) translateY(6px);
   }
 
   .control {
@@ -530,6 +558,7 @@ export const WIDGET_CSS = `
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .toolbar,
     .button,
     .controls,
     .list-item,
