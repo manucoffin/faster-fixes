@@ -16,6 +16,8 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { exchangeOAuthCode } from "@/app/_domains/integration/_services/slack/slack-client";
+
 const BASE_URL = "https://app.test";
 const REDIRECT_URI = `${BASE_URL}/api/slack/callback`;
 const USER_ID = "user_1";
@@ -39,7 +41,7 @@ const callbackPrisma = {
 
 const getSessionDouble = vi.fn();
 const getFullOrganizationDouble = vi.fn();
-const exchangeOAuthCodeDouble = vi.fn();
+const exchangeOAuthCodeDouble = vi.fn<typeof exchangeOAuthCode>();
 
 vi.mock("@workspace/db", () => ({ prisma: callbackPrisma }));
 
@@ -54,7 +56,7 @@ vi.mock("@/server/auth", () => ({
 
 vi.mock("@/app/_domains/integration/_services/slack/slack-client", () => ({
   SLACK_OAUTH_SCOPES: "chat:write,chat:write.public,channels:read",
-  exchangeOAuthCode: (...args: unknown[]) => exchangeOAuthCodeDouble(...args),
+  exchangeOAuthCode: exchangeOAuthCodeDouble,
 }));
 
 vi.mock("@/app/_domains/integration/_services/slack/token-crypto", () => ({

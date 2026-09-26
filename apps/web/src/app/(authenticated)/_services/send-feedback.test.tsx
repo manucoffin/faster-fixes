@@ -1,7 +1,8 @@
+import type { Mailer } from "@/lib/mailer/client";
 import { PreconditionFailedError } from "@/server/errors/domain-errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const send = vi.fn();
+const send = vi.fn<Mailer["emails"]["send"]>();
 
 // The real client imports `server-only` and builds a provider from the
 // environment, neither of which a node test can load.
@@ -21,7 +22,7 @@ const sender = { senderName: "Ada", senderEmail: "ada@example.com" };
 describe("sendFeedback", () => {
   beforeEach(() => {
     send.mockReset();
-    send.mockResolvedValue(undefined);
+    send.mockResolvedValue({ success: true, message: "" });
   });
 
   it("reports an instance with no administrator as a precondition failure", async () => {

@@ -1,12 +1,20 @@
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { TRPCError } from "@trpc/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from "vitest";
 import type { Context } from "./context";
 import { logTRPCError } from "./log-trpc-error";
 import { publicProcedure, router } from "./trpc";
 
-let consoleError: ReturnType<typeof vi.spyOn>;
+let consoleError: MockInstance<typeof console.error>;
 
 beforeEach(() => {
   consoleError = vi.spyOn(console, "error").mockImplementation(() => {});

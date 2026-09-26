@@ -14,6 +14,11 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type {
+  getAccessibleResources,
+  JiraTokenResponse,
+} from "@/app/_domains/integration/_services/jira/jira-client";
+
 const BASE_URL = "https://app.test";
 const REDIRECT_URI = `${BASE_URL}/api/jira/callback`;
 const USER_ID = "user_1";
@@ -49,9 +54,13 @@ const callbackPrisma = {
 
 const getSessionDouble = vi.fn();
 const getFullOrganizationDouble = vi.fn();
-const exchangeOAuthCodeDouble = vi.fn();
-const getAccessibleResourcesDouble = vi.fn();
-const inngestSendDouble = vi.fn();
+// Partial: one case replays an Atlassian answer that carries no expiry.
+const exchangeOAuthCodeDouble =
+  vi.fn<
+    (code: string, redirectUri: string) => Promise<Partial<JiraTokenResponse>>
+  >();
+const getAccessibleResourcesDouble = vi.fn<typeof getAccessibleResources>();
+const inngestSendDouble = vi.fn<(event: unknown) => Promise<void>>();
 
 vi.mock("@workspace/db", () => ({ prisma: callbackPrisma }));
 
@@ -65,13 +74,12 @@ vi.mock("@/server/auth", () => ({
 }));
 
 vi.mock("@/server/inngest", () => ({
-  inngest: { send: (...args: unknown[]) => inngestSendDouble(...args) },
+  inngest: { send: inngestSendDouble },
 }));
 
 vi.mock("@/app/_domains/integration/_services/jira/jira-client", () => ({
-  exchangeOAuthCode: (...args: unknown[]) => exchangeOAuthCodeDouble(...args),
-  getAccessibleResources: (...args: unknown[]) =>
-    getAccessibleResourcesDouble(...args),
+  exchangeOAuthCode: exchangeOAuthCodeDouble,
+  getAccessibleResources: getAccessibleResourcesDouble,
   getJiraOAuthRedirectUri: () => REDIRECT_URI,
 }));
 

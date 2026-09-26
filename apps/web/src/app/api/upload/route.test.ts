@@ -10,6 +10,7 @@
  */
 
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 const BUCKET = "uploads-test";
 const ORGANIZATION_ID = "org_1";
@@ -77,8 +78,27 @@ function userAvatarRequest() {
   });
 }
 
-function signedKey(response: { files: { signedUrl: string }[] }) {
-  return new URL(response.files[0]!.signedUrl).pathname;
+// Loose objects: the accepted-upload case asserts the whole file entry.
+const signedUploadSchema = z.object({
+  files: z.array(
+    z.object({
+      signedUrl: z.string(),
+      file: z.looseObject({
+        objectInfo: z.looseObject({ key: z.string() }),
+      }),
+    }),
+  ),
+  metadata: z.unknown(),
+});
+
+type SignedUpload = z.infer<typeof signedUploadSchema>;
+
+async function readSignedUpload(response: Response) {
+  return signedUploadSchema.parse(await response.json());
+}
+
+function signedKey(upload: SignedUpload) {
+  return new URL(upload.files[0]!.signedUrl).pathname;
 }
 
 beforeEach(() => {
@@ -136,11 +156,11 @@ describe("POST /api/upload, organization logo", () => {
     const response = await POST(organizationLogoRequest());
 
     expect(response.status).toBe(200);
-    const body = await response.json();
+    const body = await readSignedUpload(response);
     expect(signedKey(body)).toBe(
       `/${BUCKET}/organization-logos/${ORGANIZATION_ID}/${UPLOADED_AT.getTime()}.png`,
     );
-    expect(body.files[0].file).toEqual({
+    expect(body.files[0]!.file).toEqual({
       name: "logo.png",
       size: 1024,
       type: "image/png",
@@ -161,8 +181,8 @@ describe("POST /api/upload, organization logo", () => {
       }),
     );
 
-    const body = await response.json();
-    expect(body.files[0].file.objectInfo.key).toBe(
+    const body = await readSignedUpload(response);
+    expect(body.files[0]!.file.objectInfo.key).toBe(
       `organization-logos/${ORGANIZATION_ID}/${UPLOADED_AT.getTime()}.webp`,
     );
   });
@@ -213,7 +233,7 @@ describe("POST /api/upload, user avatar", () => {
     const response = await POST(userAvatarRequest());
 
     expect(response.status).toBe(200);
-    const body = await response.json();
+    const body = await readSignedUpload(response);
     expect(signedKey(body)).toBe(
       `/${BUCKET}/user-avatars/${USER_ID}/${UPLOADED_AT.getTime()}.png`,
     );

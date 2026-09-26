@@ -171,11 +171,12 @@ describe("PUT /api/v1/feedback/:id", () => {
     );
 
     expect(response.status).toBe(422);
-    const body = await response.json();
-    expect(body.error).toBe("Validation failed");
-    expect(body.details).toEqual({
-      formErrors: [],
-      fieldErrors: { comment: [expect.any(String)] },
+    await expect(response.json()).resolves.toEqual({
+      error: "Validation failed",
+      details: {
+        formErrors: [],
+        fieldErrors: { comment: [expect.any(String)] },
+      },
     });
     expect(widgetApiPrisma.feedback.update).not.toHaveBeenCalled();
   });

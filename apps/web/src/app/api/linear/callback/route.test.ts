@@ -14,6 +14,8 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { LinearOAuthTokenResponse } from "@/app/_domains/integration/_services/linear/linear-client";
+
 const BASE_URL = "https://app.test";
 const REDIRECT_URI = `${BASE_URL}/api/linear/callback`;
 const USER_ID = "user_1";
@@ -29,8 +31,16 @@ const callbackPrisma = {
 
 const getSessionDouble = vi.fn();
 const getFullOrganizationDouble = vi.fn();
-const exchangeOAuthCodeDouble = vi.fn();
-const linearOrganizationDouble = vi.fn();
+// Partial: one case replays a Linear answer that carries no expiry.
+const exchangeOAuthCodeDouble =
+  vi.fn<
+    (
+      code: string,
+      redirectUri: string,
+    ) => Promise<Partial<LinearOAuthTokenResponse>>
+  >();
+const linearOrganizationDouble =
+  vi.fn<() => Promise<{ id: string; name: string; urlKey: string }>>();
 
 vi.mock("@workspace/db", () => ({ prisma: callbackPrisma }));
 
@@ -44,7 +54,7 @@ vi.mock("@/server/auth", () => ({
 }));
 
 vi.mock("@/app/_domains/integration/_services/linear/linear-client", () => ({
-  exchangeOAuthCode: (...args: unknown[]) => exchangeOAuthCodeDouble(...args),
+  exchangeOAuthCode: exchangeOAuthCodeDouble,
   getLinearClient: () => ({
     get organization() {
       return linearOrganizationDouble();
