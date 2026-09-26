@@ -62,7 +62,9 @@ Such a test sits next to the folder it checks and proves both halves: the scan i
 
 **Out of scope for now** (do not write tests for these yet): React components and client components, container hooks (`use-*.ts`), tRPC routers and procedures, and any `_services/` function that reaches a singleton (`prisma` imported directly, `next/headers`, `auth.api.*`) instead of receiving its deps. If a piece of logic is worth testing but is trapped behind one of these, extract it down into a pure `_helpers/` function or a dependency-injected `_services/` function and test it there.
 
-Because component tests are out of scope, the harness carries no DOM tooling. `jsdom` and `@testing-library/react` are added the day the first component test exists, not before.
+Because component tests are out of scope in the app, its harness carries no DOM tooling: `apps/web` still has no `jsdom` and no `@testing-library/react`.
+
+The day for the first component test has arrived in one place only: the React Embed, `packages/widget-react`. Its Vitest config runs `environment: "jsdom"`, and it carries `jsdom`, `@testing-library/react` and `@testing-library/dom` as dev dependencies. `FeedbackProvider` and `useFeedback` are the package's whole surface, so they are tested there with React Testing Library against a fake Widget instance (`src/fake-widget.ts`) that implements `subscribe`; `@fasterfixes/widget` is the module mocked, which is the package boundary. This does not reopen component tests in the app.
 
 ## End-to-end specs: the Widget in a real browser
 

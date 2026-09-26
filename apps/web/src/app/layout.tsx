@@ -1,14 +1,13 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider.client";
-// import { FeedbackProvider } from "@fasterfixes/react";
+import { FeedbackProvider } from "@fasterfixes/react";
 import { Analytics } from "@vercel/analytics/next";
 import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
-import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_domains/auth/stop-impersonate-button/stop-impersonate-button.client";
@@ -76,35 +75,20 @@ export default function RootLayout({
               <NuqsAdapter>
                 <StopImpersonateButton />
 
-                {/* QA #171: React embed disabled, script embed below */}
-                {/* <FeedbackProvider
+                <FeedbackProvider
                   projectId={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
-                  classNames={{
-                    button:
-                      "bg-primary text-primary-foreground hover:bg-primary/90",
-                  }}
                   position="bottom-right"
                   captureDiagnostics={true}
-                > */}
-                <RootProvider>{children}</RootProvider>
-                {/* </FeedbackProvider> */}
+                >
+                  <RootProvider>{children}</RootProvider>
+                </FeedbackProvider>
 
                 <Toaster />
               </NuqsAdapter>
             </TRPCProvider>
           </ConsentProvider>
         </ThemeProvider>
-
-        {/* QA #171: local IIFE build served by the dev-only e2e route, the CDN @1 is not published yet */}
-        <Script
-          src="/e2e/widget.iife.js"
-          data-project-id={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
-          data-api-origin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
-          data-position="bottom-right"
-          data-capture-diagnostics="true"
-          strategy="afterInteractive"
-        />
 
         <Analytics />
       </body>
