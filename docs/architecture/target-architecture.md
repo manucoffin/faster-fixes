@@ -139,7 +139,7 @@ Rules that follow:
 
 ### Promotion rule
 
-When a route feature gains a second consumer in a different route, **move the whole feature** to `_domains/<x>/_features/`. Do not extract a shared subset. The original location becomes an import. Export from the barrel only if another domain needs it.
+When a route feature gains a second consumer in a different route, **move the whole feature** to a capability folder at the domain root, `_domains/<x>/<capability>/` (see the deviation above). Do not extract a shared subset. The original location becomes an import. Export from the barrel only if another domain needs it.
 
 ## The services layer
 
@@ -325,7 +325,7 @@ Rules live in `packages/eslint-config/local-rules/` and are wired in `packages/e
 | `services-no-bare-error`            | `**/_services/**`     | No `throw new Error(...)`; throw a `DomainError` subclass. Rethrowing a caught variable is allowed.                                                                              |
 | `no-client-import-of-services`      | all                   | A `'use client'` or `*.client.tsx` module never imports `_services/*`, except `*.schema.ts` and type-only imports.                                                               |
 | `no-client-import-of-server-folder` | all                   | Client code never imports a runtime value from `src/server/**`; type-only imports and named exceptions are free.                                                                 |
-| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice.                                                                                                                                        |
+| `no-feature-nesting`                | `**/_features/**`     | A path never contains `_features/` twice, and holds at most one grouping level (`_features/<area>/<capability>/`).                                                               |
 | `schema-must-be-pure-zod`           | `**/*.schema.ts`      | Allowlist: `zod`, another `*.schema` file, the generated Prisma enums, the exceptions named in the config. Type-only imports free.                                               |
 | `require-schema-conventions`        | `**/*.schema.ts`      | Every export form: a value is a PascalCase `XSchema`, an `Input` type is `z.infer` and a `Values` type `z.input` of a schema of the same file; no `z.nativeEnum`, no `.merge()`. |
 | `no-cross-domain-deep-import`       | `src/app/_domains/**` | Another domain is imported only via its barrel.                                                                                                                                  |
@@ -359,11 +359,11 @@ A rule lands at `error` with its existing violations already fixed, so it starts
 ## Testing
 
 - Vitest, colocated `*.test.ts` next to the unit, one test file per unit.
-- Test only pure `_helpers/` and dependency-injected `_services/`. Components, hooks, and routers are out of scope until a real need appears.
-- No module mocks. Inject fakes through parameters. If logic worth testing is trapped behind a singleton, extract it down into a helper or an injectable service.
+- Test only pure functions (`_helpers/`, `src/utils/`, `src/server/`) and dependency-injected `_services/`, plus the route-handler and structural-check seams. Components, hooks, and routers are out of scope until a real need appears.
+- Prefer injecting fakes through parameters. A module mock is allowed only at a boundary (`@workspace/db`, `@/server/...`, `@/lib/...`, an external package, another domain's barrel), never on a relative path: `local/no-relative-test-mock` reports it. If logic worth testing is trapped behind a singleton, extract it down into a helper or an injectable service.
 - **Exception, the route-handler seam:** a handler serving a contract an outside party already depends on (a public API, a registered webhook) is tested by calling its exported method with a `Request` and asserting status, exact body and headers, with infrastructure modules faked at their boundary. Such tests are written **before** the handler is refactored and must survive it unchanged; a test that has to change is a broken contract. Services extracted behind the handler get no tests of their own.
 
-`[Faster Fixes]` The harness matches that policy and nothing more. `apps/web/vitest.config.ts` runs `environment: "node"`, resolves the `@/*` alias through Vite's native tsconfig path resolution, pins `TZ` to `UTC` so date assertions hold on every machine, and loads no setup file. There is no jsdom and no `@testing-library/*`: they are added the day the first component test exists, not before, so the installed harness and the documented policy stay in agreement. `apps/web/src/utils/crypto/token-cipher.test.ts` is the reference test. The custom ESLint rules have their own Vitest project in `packages/eslint-config`; both run under `pnpm test` through Turbo.
+`[Faster Fixes]` The harness matches that policy and nothing more. `apps/web/vitest.config.ts` runs `environment: "node"`, resolves the `@/*` alias through Vite's native tsconfig path resolution, pins `TZ` to `UTC` so date assertions hold on every machine, aliases `server-only` to an empty stub, and loads no setup file. There is no jsdom and no `@testing-library/*`: they are added the day the first component test exists, not before, so the installed harness and the documented policy stay in agreement. `apps/web/src/utils/crypto/token-cipher.test.ts` is the reference test. The custom ESLint rules have their own Vitest project in `packages/eslint-config`; both run under `pnpm test` through Turbo.
 
 ## Faster Fixes-specific, not exported
 

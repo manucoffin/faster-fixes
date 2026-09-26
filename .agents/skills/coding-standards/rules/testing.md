@@ -6,6 +6,7 @@ The harness is **Vitest** in `apps/web`. The config is a `.ts` file (`vitest.con
 - `resolve.tsconfigPaths: true`, so `@/*` imports resolve through Vite's native tsconfig paths support. No extra resolver plugin.
 - `process.env.TZ = "UTC"`, set at the top of the config module so date assertions resolve the same way on every machine and in CI.
 - `include: ["src/**/*.test.{ts,tsx}"]` with `passWithNoTests: true`.
+- `resolve.alias` maps `server-only` to `test/server-only-stub.ts`: Node cannot resolve it, so every guarded `src/server` module would fail to load. `src/server/server-only-alias.test.ts` pins the alias.
 - `oxc: { jsx: { runtime: "automatic" } }`. The app's tsconfig leaves JSX to Next (`jsx: "preserve"`), so Vite has to be told how to compile the `.tsx` a test loads. **The option is `oxc`, not `esbuild`:** Vitest 5 runs on rolldown-vite, which ignores `esbuild` with a warning that is easy to miss. Reaching for `esbuild` here looks correct and silently does nothing.
 
 Run with `pnpm test` (`vitest run`) or `pnpm test:watch`; it is wired into Turbo as `turbo run test`. Folder buckets are defined in [architecture.md](architecture.md); the data/IO layer in [backend.md](backend.md).
@@ -23,7 +24,7 @@ The reference test to copy the shape of is `src/utils/crypto/token-cipher.test.t
 
 **Prose only**, no rule, for this section and "The route handler is the third seam" below. The one convention here that is enforced is where a module mock may point, two sections down.
 
-Keep the surface small and high-value. **Test only pure `_helpers/` functions and dependency-injected `_services/` functions.** Nothing else for now.
+Keep the surface small and high-value. **Test only pure functions (in `_helpers/`, `src/utils/`, `src/server/`) and dependency-injected `_services/` functions**, plus the two seams below (contract route handlers, structural checks). Nothing else for now.
 
 - **`_helpers/` (pure)**: formatters, label maps, calculators, slug generators, pure predicates. These take inputs and return outputs with no IO, so they are the cheapest and highest-value tests. Prefer testing here.
 - **`_services/` (dependency-injected)**: a service that takes its dependencies as explicit parameters (for example `prisma`) is testable by passing a fake or fixture. Test it through that seam. The DI pattern to mirror is `checkFeatureAccess(organizationId, feature, prisma)` under `src/server/auth/subscription/`, which takes `prisma` as a parameter and can be driven with a fake whose `*.findFirst` returns null or an active row.
@@ -51,7 +52,7 @@ A test may not mock a module of its own scope. When a collaborator is reached th
 
 A relative specifier (`./get-unique-organization-slug`, `../_helpers/...`) is **not** one of them, and `local/no-relative-test-mock` reports it on every `*.test.ts(x)` file. A relative path either pins a sibling the test should be free to reshape, or spells a boundary as if it were local code. The fix is one of two moves: mock the boundary the collaborator itself reaches (`create-organization.test.ts` fakes `@workspace/db` and lets the real slug service run against it), or inject the collaborator as a parameter and pass a fake.
 
-That boundary rule is what the 80-odd mocks in the tree already do, and it is why a `vi.mock` in a service test is not a violation of "no mocking of internals": the module faked is infrastructure, not a neighbour. The rule is not a boundary rule in the not-disableable sense, so a genuine one-off is a disable comment with a reason.
+That boundary rule is what every mock in the tree already do, and it is why a `vi.mock` in a service test is not a violation of "no mocking of internals": the module faked is infrastructure, not a neighbour. The rule is not a boundary rule in the not-disableable sense, so a genuine one-off is a disable comment with a reason.
 
 ### A structural check is the fourth seam
 

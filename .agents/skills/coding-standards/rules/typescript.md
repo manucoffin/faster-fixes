@@ -9,9 +9,10 @@ Small, near-universal. Read for any `.ts` / `.tsx` work.
 - Use `interface` only for extensible contracts. **Prose only**: the rule above admits no
   exception, so an extensible contract that genuinely needs declaration merging is a disable
   comment with a reason.
-- An import used only as a type is written `import type { … }`, as a separate statement rather
-  than an inline `type` specifier. Enforced by `@typescript-eslint/consistent-type-imports` on
-  `apps/web/src/**`. It also keeps the client boundary honest: a client module may import server
+- An import used only as a type is marked as a type. Enforced by
+  `@typescript-eslint/consistent-type-imports` on `apps/web/src/**`, whose autofix writes a
+  separate `import type { … }` statement. Preferring that separate statement over an inline `type`
+  specifier is **prose only**. It also keeps the client boundary honest: a client module may import server
   code for its types alone, and the import says so.
 - Prefer union types over `enum`. Enforced by `local/no-restricted-patterns`, whose message names
   the alternative: a `const` object plus a union of its values.

@@ -5,7 +5,7 @@ Shared by the backend (tRPC `.input()`) and the frontend (form resolver), so thi
 ## Placement (apps/web)
 
 - A `*.schema.ts` lives in its scope's `_services/` folder (consumed by both the tRPC `.input()` and the client form resolver). See [backend.md](backend.md) and [architecture.md](architecture.md).
-- A schema must stay **pure-Zod**. `schema-must-be-pure-zod` is an allowlist: a schema may import `zod`, another `*.schema` file, `@workspace/db/generated/prisma/enums`, and the modules named in `schemaPurityOptions` in `packages/eslint-config/next.js`. Anything else is reported, whether or not anybody had met it before, because a schema is imported by client forms and drags whatever it reaches into the bundle. A type-only import is free.
+- A schema must stay **pure-Zod**. `local/schema-must-be-pure-zod` is an allowlist: a schema may import `zod`, another `*.schema` file, `@workspace/db/generated/prisma/enums`, and the modules named in `schemaPurityOptions` in `packages/eslint-config/next.js`. Anything else is reported, whether or not anybody had met it before, because a schema is imported by client forms and drags whatever it reaches into the bundle. A type-only import is free.
 - **A new exception is a named entry, not a disable comment.** Add the specifier to `schemaPurityOptions.allowImportPatterns` with a comment saying why the module is pure, and a reviewer reads it in the diff.
 - **A Zod enum that is domain vocabulary is not a `*.schema.ts`.** When the enum is the runtime validator for a glossary value that many modules read (rather than the input of one operation), it lives in `_types/` and keeps the glossary name: `_domains/feedback/_types/feedback-status.ts` exports `FeedbackStatusEnum` and `FeedbackStatus`. Filing it as a schema would force the `Input` suffix of the section below onto a glossary type. See [architecture.md](architecture.md).
 
@@ -38,8 +38,8 @@ Enforced by `local/require-schema-conventions` on `**/*.schema.ts`: a `*.schema.
 - **PascalCase**, suffixed with `Schema`: `CreateInvoiceSchema`.
 - **The prefix mirrors the service operation the schema validates** — the schema, the function, and the file all carry the same verb:
   - `create-invoice.ts` -> `createInvoice` -> `CreateInvoiceSchema`
-  - `archive-specialization.ts` -> `archiveSpecialization` -> `ArchiveSpecializationSchema`
-- The verb set follows [naming.md](naming.md): generic CRUD verbs by default, a precise domain verb (`Archive`, `Restore`, `Reorder`, ...) when the operation is a distinct domain transition. Banned synonyms of `update` (`edit`/`modify`/`save`/`change`) are banned here too: it is `UpdateClientSchema`, not `EditClientSchema`.
+  - `revoke-agent-token.ts` -> `revokeAgentToken` -> `RevokeAgentTokenSchema`
+- The verb set follows [naming.md](naming.md): generic CRUD verbs by default, a precise domain verb (`Restore`, `Revoke`, `Upgrade`, ...) when the operation is a distinct domain transition. Banned synonyms of `update` (`edit`/`modify`/`save`/`change`) are banned here too: it is `UpdateClientSchema`, not `EditClientSchema`.
 
 ## Type extraction
 
@@ -60,7 +60,7 @@ For those schemas, export a second type alongside `XInput`, named by replacing t
 
 ```ts
 export const CreateToolSchema = z.object({
-  title: z.string().min(1, "Le titre est requis"),
+  title: z.string().min(1, "Title is required"),
   order: z.number().int().min(0).optional().default(0),
 });
 

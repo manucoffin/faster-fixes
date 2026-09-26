@@ -4,7 +4,7 @@ How big a file may get and when to split it. Applies to any file you write or re
 
 ## Readability
 
-Flag and fix these, they are almost always mechanical. Three of the six are enforced; the rest
+Flag and fix these, they are almost always mechanical. Four of the six are enforced; the rest
 are review judgements.
 
 - Nested conditionals → early returns / guard clauses. **Prose only**, no rule.
@@ -15,8 +15,9 @@ are review judgements.
 - `else` after a `return` or a `throw` → drop it. Enforced by `no-else-return`.
 - `as unknown as Type` casts → fix the underlying type instead. Enforced by
   `local/no-restricted-patterns`, which spares `*.test.ts(x)`: a service test builds a partial fake
-  of the Prisma client and passes it through the dependency-injection seam. `// @ts-ignore` and
-  `// @ts-expect-error` without a reason are **prose only**.
+  of the Prisma client and passes it through the dependency-injection seam. `// @ts-ignore` is
+  banned outright and `// @ts-expect-error` needs a reason, both enforced by
+  `@typescript-eslint/ban-ts-comment` from the typescript-eslint recommended set.
 
 ## Size thresholds
 
@@ -67,7 +68,7 @@ _features/professional-editor/
   delete-professional-button.client.tsx    # self-contained: AlertDialog + mutation
 ```
 
-One feature folder per capability, never a feature nested in a feature (`no-feature-nesting`). A grown child promotes to a sibling.
+One feature folder per capability, never a feature nested in a feature (`local/no-feature-nesting`). A grown child promotes to a sibling.
 
 ## Form-state access across a layout boundary
 

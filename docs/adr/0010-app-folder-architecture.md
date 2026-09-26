@@ -47,7 +47,8 @@ The `src/app/` tree was organised around a root `_features/` folder whose direct
 Recorded 2026-09-20. `_features/` holds capability folders, and some scopes group several
 related capabilities under a shared area (`(authenticated)/_features/sidebar/organization/`,
 `settings/_features/jira/link-project/`). That grouping level is part of the convention and
-`no-feature-nesting` now enforces its limit:
+`no-feature-nesting` now enforces its limit (the depth only: the single-file bullet below is prose,
+since the rule does not count the files in a folder):
 
 - A file sits at most at `_features/<area>/<capability>/`. Two non-underscore folder segments
   before the file, no more. A third capability folder is a report: flatten it, or promote the
@@ -79,7 +80,9 @@ capability per folder, UI plus its container hook, no nesting) already holds as 
 This is an accepted deviation, not an oversight, and the decision behind it is still open:
 either the domains gain a `_features/` bucket and the six folders move, or this ADR is amended
 again to make the domain-root shape the convention. Until then a new domain capability follows
-the existing tree rather than creating the seventh exception in a new place.
+the existing tree rather than creating the seventh exception in a new place. The same holds for
+the promotion rule above: a route feature promoted to a domain lands as a capability folder at the
+domain root, `_domains/<x>/<capability>/`, not under a domain `_features/`.
 
 A hook read by more than one feature **inside one scope** is promoted to a capability folder of
 its own on that second consumer (`subscription/plan-gate/`, `inbox/_features/feedback-mutations/`)

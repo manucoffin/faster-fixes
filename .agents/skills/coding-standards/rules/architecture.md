@@ -43,7 +43,8 @@ src/app/
 ├── (authenticated)/
 ├── (public)/
 ├── admin/
-└── api/
+├── api/
+└── onboarding/
 ```
 
 **Anything at root `_*` is domain-agnostic.** It must not carry domain knowledge — those folders are slated for extraction into shared packages. Domain-bound code lives under `_domains/` or inside a route. Enforced by the root-bucket row of `local/no-cross-layer-import`: root `_components/`, `_providers/` and `_constants/` may not import `@/app/_domains/**`.
@@ -55,31 +56,31 @@ Layout chrome bound to one route group stays at the route tier: the public heade
 ## Domain layout
 
 ```
-_domains/animal/
-├── index.ts          # public API: only this is importable from other domains
-├── trpc-router.ts    # thin tRPC router for the domain (at the root)
-├── _features/
-│   ├── selector/
-│   ├── health/
-│   └── identity-form/
-├── _components/      # pure UI bound to this domain
-│   └── animal-avatar.client.tsx
-├── _helpers/         # pure behavioral functions
-│   ├── get-animal-age.ts
-│   └── physical-activity-labels.ts
-├── _types/           # standalone shared types (lazy)
-└── _services/        # data/IO layer (lazy)
-    ├── get-animal.ts
-    ├── create-animal.ts
-    └── animal.schema.ts
+_domains/subscription/
+├── index.ts                # public API: only this is importable from other domains
+├── trpc-router.ts          # thin tRPC router for the domain (at the root)
+├── plan-card/              # capability folders sit at the domain root (see below)
+├── plan-gate/
+│   └── use-plan-gate.ts
+├── upgrade-subscription/
+│   └── upgrade-subscription-button.client.tsx
+├── _components/            # pure UI bound to this domain (lazy)
+├── _helpers/               # pure behavioral functions
+│   └── get-subscription-status-label.ts
+├── _types/                 # standalone shared types (lazy)
+│   └── plan-limits.ts
+└── _services/              # data/IO layer (lazy)
+    ├── get-organization-subscription.ts
+    ├── upgrade-subscription.ts
+    └── upgrade-subscription.schema.ts
 ```
 
 - Each domain folder is named after a canonical term in `CONTEXT.md`.
 - `_services/`, `_helpers/`, `_types/` are created **lazily** — only when real shared code of that kind exists.
-- `_helpers/` is **pure** (no IO, no JSX, no React state). `_services/` is the only place IO lives outside a feature. The import half is enforced by the helper row of `local/no-cross-layer-import`: a helper imports neither the database, nor `next`, nor `react`. "No JSX, no React state" follows from the `react` ban; five named response and request builders are exempt, listed in `layerImportRows`.
+- `_helpers/` is **pure** (no IO, no JSX, no React state). `_services/` is the only place IO lives outside a feature. The import half is enforced by the helper row of `local/no-cross-layer-import`: a helper imports neither the database, nor `next`, nor `react`. "No JSX, no React state" follows from the `react` ban; five named modules that build or narrow a response or request are exempt, listed in `layerImportRows`.
 - **Database access lives in `_services/` or `src/server/`**, and the database package is reached through `@workspace/db`, `@workspace/db/types` and `@workspace/db/generated/prisma/enums`. Both are rows of `local/no-cross-layer-import` (ADR-0011, ADR-0013).
 - Purity is about IO, not about import direction: a helper may import a shared error class from its scope's `_services/` root. `_helpers/linear/verify-webhook-signature.ts` imports `IntegrationConfigurationError` from `_services/integration-configuration-error.ts` rather than the bucket growing a second copy of the class.
-- A Zod enum that is **domain vocabulary** rather than an operation input lives in `_types/`, not in `_services/` as a `*.schema.ts`. `_types/feedback-status.ts` exports `FeedbackStatusEnum` and `FeedbackStatus`: the DB column is free-form, so the enum is the only runtime validator, ten modules read it as vocabulary, and Zod is client-safe so the validator travels with the type it defines. Naming it `*.schema.ts` would force `FeedbackStatusInput` on a glossary type to satisfy a rule aimed at input schemas. See [schemas.md](schemas.md).
+- A Zod enum that is **domain vocabulary** rather than an operation input lives in `_types/`, not in `_services/` as a `*.schema.ts`. `_types/feedback-status.ts` exports `FeedbackStatusEnum` and `FeedbackStatus`: the DB column is free-form, so the enum is the only runtime validator, fifteen modules read it as vocabulary, and Zod is client-safe so the validator travels with the type it defines. Naming it `*.schema.ts` would force `FeedbackStatusInput` on a glossary type to satisfy a rule aimed at input schemas. See [schemas.md](schemas.md).
 - `trpc-router.ts` sits at the scope **root**, never inside `_services/` (services must not import tRPC, enforced by `local/services-no-trpc-import`). A router itself imports no Prisma: that is a row of `local/no-cross-layer-import`.
 - **Capability folders sit at the domain root, not under `_features/`.** Six live today: `auth/send-verification-email-button/`, `auth/stop-impersonate-button/`, `subscription/plan-card/`, `subscription/plan-gate/`, `subscription/upgrade-subscription/` and `project/active-project/`. This is an accepted deviation from ADR-0010 carried through the migration, not an oversight, and nothing lint-enforces it either way. The open decision is whether domains gain a `_features/` bucket or this becomes the documented shape; until it is taken, follow the existing tree rather than creating a domain `_features/` for a seventh. Route scopes are unaffected and keep `_features/`.
 - **A hook read by more than one feature in the same scope is promoted to a capability folder of its own** (`subscription/plan-gate/`, `inbox/_features/feedback-mutations/`), barrel-exported when the scope is a domain. A single-consumer hook moves inside the feature that consumes it. No `_hooks/` bucket is ever created inside a scope: a hook is a capability and a capability is a feature. This intra-scope trigger (a second _feature_ consumer) is distinct from the cross-route promotion rule below.
@@ -89,12 +90,12 @@ _domains/animal/
 Same buckets, scoped to the route, with the router colocated next to `page.tsx`:
 
 ```
-(authenticated)/mon-compte/
+(authenticated)/organization/
 ├── page.tsx
-├── layout.tsx
 ├── trpc-router.ts   # optional, when the route has procedures
 ├── _features/
-│   └── account-sidebar/
+│   ├── members/
+│   └── organization-tabs.client.tsx
 ├── _services/       # optional
 ├── _helpers/        # optional
 └── _components/     # optional
@@ -121,7 +122,7 @@ A folder qualifies as a feature if **at least one** is true:
 
 A folder that is only a presentational component with no logic → `_components/`. **No feature nested in a feature** — a grown child promotes to a sibling.
 
-**One grouping level, and a single-file feature needs no folder.** Enforced by `local/no-feature-nesting`:
+**One grouping level, and a single-file feature needs no folder.** The depth half is enforced by `local/no-feature-nesting`; the single-file half is **prose only** (the rule does not count files):
 
 - A file sits at most at `_features/<area>/<capability>/`: two non-underscore folder segments before the file. Several related capabilities may share an area folder (`(authenticated)/_features/sidebar/organization/`, `settings/_features/jira/link-project/`); a third capability folder is a lint error. Flatten it, or promote the inner capability to a sibling feature.
 - A feature that is one file sits directly in the features folder, `_features/<name>.client.tsx`. Give it a folder when it has a second file.
@@ -163,19 +164,19 @@ Three rows of that table are enforced: the client component suffix by `local/req
 - The barrel exports **contracts** (UI components, `*.schema.ts`, domain types, type-only re-exports from `_services/`), **never** service functions or the router. Enforced by the barrel row of `local/no-cross-layer-import`, which judges runtime edges only so a type-only re-export of a service's output type stays free.
 - **Other domains** import from `@/app/_domains/<x>` only — never `@/app/_domains/<x>/_services/...`. Enforced by `local/no-cross-domain-deep-import`. The barrel is addressed **by its alias**: a relative specifier landing in another domain is a violation at any depth, the barrel included (`../organization/index` fails), and `export … from` re-exports and dynamic `import()` are checked like static imports.
 - **Routes** and **`app/api/`** are the composition layer and may reach into domain internals. `src/server/**` may not: an always-on `no-restricted-imports` block forbids a deep import from there into the app tree, so the server folder reads a domain through its barrel. Its exemptions are named file by file in `packages/eslint-config/next.js`.
-- **A barrel exports only what a real cross-domain import asked for.** Live today: `feedback` exports the Feedback `Status` type and enum and the Diagnostic Trail line formatter, `organization` the Organization roles, `subscription` the Plan vocabulary and the plan gate hook. `auth`, `integration`, `project` and `user` are still `export {}`. Add an export when an import needs it, rather than publishing a surface no caller asked for.
-- **A barrel may export a client hook and server-read vocabulary side by side.** `subscription/index.ts` exports `usePlanGate` (a `'use client'` hook) next to `PLAN_LIMITS`, which nine `src/server/**` files read, so each of those pulls the hook module into its graph. This is benign and stays: Next replaces a client module with a client reference, and vitest loads the graph without ever executing a hook. If the pull ever becomes expensive, **move the hook out of the domain root; do not split the barrel or reopen the one-public-API rule.**
+- **A barrel exports only what a real cross-domain import asked for.** Live today: `feedback` exports the Feedback `Status` type and enum and the Diagnostic Trail line formatter, `organization` the Organization roles and the billing-role predicate, `subscription` the Plan vocabulary and the plan gate hook. `auth`, `integration`, `project` and `user` are still `export {}`. Add an export when an import needs it, rather than publishing a surface no caller asked for.
+- **A barrel may export a client hook and server-read vocabulary side by side.** `subscription/index.ts` exports `usePlanGate` (a `'use client'` hook) next to the Plan vocabulary (`PLAN_LIMITS` and the rest), which nine `src/server/**` files import through the barrel, so each of those pulls the hook module into its graph. This is benign and stays: Next replaces a client module with a client reference, and vitest loads the graph without ever executing a hook. If the pull ever becomes expensive, **move the hook out of the domain root; do not split the barrel or reopen the one-public-API rule.**
 - **No domain cycles.** Enforced by `src/app/_domains/domain-cycles.test.ts`, not by lint: a cycle is a property of the whole graph, so the check builds the graph from every import form under `_domains/` and fails `pnpm test` naming the domains in the cycle. The soft hierarchy hint stays prose only: low-level domains (`user`, `auth`) should not depend on high-level ones (`subscription`, `feedback`).
 
 ## Promotion rule
 
-When a **route feature** acquires a second consumer in a different route, **move** it to `_domains/<x>/_features/`. Don't extract a subset — move the whole feature, let the original become an import, then export from `index.ts` if another domain needs it.
+When a **route feature** acquires a second consumer in a different route, **move** it to a capability folder at the domain root, `_domains/<x>/<capability>/` (see the domain-root deviation under "Domain layout"). Don't extract a subset — move the whole feature, let the original become an import, then export from `index.ts` if another domain needs it.
 
 ## Recorded placement exceptions
 
 Each of these was argued and settled. They cut against a default stated elsewhere in this file, so they are written down rather than left to be "fixed" by the next reader.
 
-- **Per-provider subfolders are a domain-tier convention, not a route-tier one.** Inside `_domains/integration/`, each bucket is sub-structured by provider (`_services/jira/`, `_helpers/linear/`) per ADR-0014, and a file shared by several providers sits at the bucket root. Inside a **route** scope, the provider is carried in the service **name** instead: `(project)/settings/_services/` holds 58 flat files (`get-project-github-link.ts`, `list-accessible-jira-projects.ts`, `link-slack-channel.ts`). Do not reorganise a route `_services/` into provider subfolders.
+- **Per-provider subfolders are a domain-tier convention, not a route-tier one.** Inside `_domains/integration/`, each bucket is sub-structured by provider (`_services/jira/`, `_helpers/linear/`) per ADR-0014, and a file shared by several providers sits at the bucket root. Inside a **route** scope, the provider is carried in the service **name** instead: `(project)/settings/_services/` holds some sixty flat files (`get-project-github-link.ts`, `list-accessible-jira-projects.ts`, `link-slack-channel.ts`). Do not reorganise a route `_services/` into provider subfolders.
 - **Two scopes may hold a service of the same name only when the contract is the same.** `get-user.ts` may exist twice and the folder disambiguates, but when the inputs and the returned shape differ the name differs too: the onboarding creator is `create-onboarding-project.ts`, not a second `create-project.ts`, because the sidebar operation of the same entity takes different inputs and returns a different shape.
 - **`_components/dashboard/search-params.ts` stays in its sub-library.** The nuqs parsers are the period selector's URL contract; the root tier has no `_helpers/` bucket and inventing one for a single module would give it one inhabitant. Revisit only if a third consumer appears outside the sub-library. Known consequence, accepted and tracked rather than fixed: `admin/(dashboard)/_features/subscriptions-chart/subscriptions-chart.client.tsx` is a client component reaching a `/server` entrypoint through it (`nuqs/server`). No lint rule catches that shape.
 

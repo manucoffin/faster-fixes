@@ -2,7 +2,7 @@
 
 Consistent verb/resource/file naming for functions, methods, and files across the codebase, in any language.
 
-> For `apps/web/src/app/**` the read/write verb vocabulary is governed by the server-file-conventions ADR ([backend.md](backend.md)). The verbs below are aligned with it; where they differ, the backend rule wins inside `_services/`.
+> For `apps/web/src/app/**` the read/write verb vocabulary is governed by ADR-0011 (`docs/adr/0011-server-file-conventions.md`) and [backend.md](backend.md). The verbs below are aligned with it; where they differ, the backend rule wins inside `_services/`.
 
 ## Read verbs (never write)
 
@@ -21,13 +21,13 @@ Inside `apps/web/src/app/**/_services/`, enforced by `local/services-verb-prefix
 
 ## Write verbs
 
-The write set is **open**: prefer the **most precise accurate verb**. Unlike the read verbs above (a closed set you may not extend), writes are not enumerable, but they follow strict rules.
+The write set is **open but listed**: prefer the **most precise accurate verb**. Unlike the read verbs above (a closed set you may not extend), a new write verb is a one-line, reviewed addition to `serviceVerbOptions.writeVerbs`, and it follows strict rules.
 
 - **Default to a generic CRUD verb** when the operation is a plain field write (`create...`, `update...`, `delete...`, `upsert...`, `send...`, …).
-- **Prefer a precise domain verb** (e.g. `archive...`, `publish...`, `book...`) when the operation is a **distinct domain transition** — it has its own call site/entry point, a distinct authorization or invariant, or it is a state transition the domain language already names. Example: `archiveSpecialization`, not `updateSpecialization`, for the dedicated "Archive" action. Coin the verb from the ubiquitous language; you don't register it anywhere.
+- **Prefer a precise domain verb** (e.g. `restore...`, `revoke...`, `upgrade...`) when the operation is a **distinct domain transition** — it has its own call site/entry point, a distinct authorization or invariant, or it is a state transition the domain language already names. Example: `revokeReviewer`, not `updateReviewer`, for the dedicated "Revoke" action. Coin the verb from the ubiquitous language and add it to `serviceVerbOptions.writeVerbs` in the same diff (see below).
 - **A write verb must never collide with a read verb** (a mutation never starts with `get`/`list`/etc.), so the verb still tells you read-vs-write at a glance.
 - **No synonyms of `update`**: `modify...`, `edit...`, `save...`, `change...` are banned. If it is a plain field write, it is `update...`. Check the established verbs before coining a new one. Inside `apps/web` `_services/`, the established set is `serviceVerbOptions.writeVerbs` in `packages/eslint-config/next.js` and `services-verb-prefix` reports a verb that is not on it, so a coined verb is added there in the same diff.
-- `handle...` is reserved for event/webhook write-orchestrations (multi-step state transitions + side effects, e.g. `handleProPaidReward`).
+- `handle...` is reserved for event/webhook write-orchestrations (multi-step state transitions + side effects, e.g. `handleGitHubWebhook`).
 
 A function is a read **iff** it performs no writes.
 
@@ -58,5 +58,5 @@ listUsers(opts?: ListOptions)
 
 - kebab-case file names.
 - Match the CRUD verb in the file name: `get-user.ts` / `get-user-by-id.ts`, `list-users.ts`.
-- Prefix external operations with `fetch-`.
+- Outside `_services/`, prefix external operations with `fetch-`. Inside `_services/`, an external read uses a read verb (`get-github-stars.ts`).
 - In `apps/web` `_services/`, files are plain-named with the verb prefix and **no role suffix** (no `*.server.query.ts` / `*.trpc.*`).

@@ -13,8 +13,8 @@ The data/IO layer lives in a per-scope `_services/` folder; tRPC is thin transpo
 A file is a **read iff it performs no writes**, and a read may use only read verbs. Full vocabulary in [naming.md](naming.md). Two rules split the job: `local/services-verb-prefix` checks that the name carries a verb from the vocabulary, and `local/services-read-never-writes` checks that a read-verb name is true, by reporting a Prisma write method called on a database client from a `get-`, `list-`, `find-`, `search-`, `has-`, `is-` or `count-` file.
 
 - **Reads** (never write) — **CLOSED set, you may not extend it**: `get-` (one / by-id), `list-` (collections, single entrypoint with an options object — no `getAllX`/`getPaginatedX`), `find-` (nullable lookup), `search-` (query), `has-` / `is-` (IO-predicates), `count-`. A **computed read** (derives a result from queries but writes nothing — a feasibility check, slot suggestions, a preview) is still a read: use `get-` and name the **result noun** (`get-session-feasibility`, `get-session-slot-suggestions`), never a process verb (`evaluate-`, `suggest-`, `preview-`, `resolve-`, `compute-`).
-- **Writes** — **OPEN set, prefer the most precise accurate verb**. Generic CRUD verbs by default (`create-`, `update-`, `delete-`, `send-`, `upsert-`, `mark-`, `convert-`, `duplicate-`, `validate-`, `export-`, `handle-`); a precise domain verb (`archive-`, `restore-`, `reorder-`, `promote-`, …) is preferred when the operation is a **distinct domain transition** (its own entry point, a distinct authorization/invariant, or a state transition the domain already names). A write verb must **never** collide with a read verb. No synonyms of `update` (`edit-`/`modify-`/`save-`/`change-`). The enforced list is `serviceVerbOptions.writeVerbs` in `packages/eslint-config/next.js`: a verb the tree does not use yet is added there in the same diff as the service that needs it, which is how coining one stays a reviewed decision. Full guidance in [naming.md](naming.md).
-- **`handle-`** is the write-orchestration verb for event/webhook handlers (Stripe-event or lifecycle-hook entrypoints driving multi-step state transitions + side effects, e.g. `handle-pro-paid-reward.ts`).
+- **Writes** — **OPEN set, prefer the most precise accurate verb**. Generic CRUD verbs by default (`create-`, `update-`, `delete-`, `send-`, `upsert-`, `handle-`); a precise domain verb (`restore-`, `revoke-`, `upgrade-`, `unlink-`, …) is preferred when the operation is a **distinct domain transition** (its own entry point, a distinct authorization/invariant, or a state transition the domain already names). A write verb must **never** collide with a read verb. No synonyms of `update` (`edit-`/`modify-`/`save-`/`change-`). The enforced list is `serviceVerbOptions.writeVerbs` in `packages/eslint-config/next.js`: a verb the tree does not use yet is added there in the same diff as the service that needs it, which is how coining one stays a reviewed decision. Full guidance in [naming.md](naming.md).
+- **`handle-`** is the write-orchestration verb for event/webhook handlers (one webhook entrypoint per Tracker driving replay protection, state transitions and event emission, e.g. `integration/_services/linear/handle-linear-webhook.ts`).
 
 The **folder** sets the layer (`_services/` = IO); the **verb** sets the direction (read vs write).
 
@@ -27,11 +27,11 @@ The **folder** sets the layer (`_services/` = IO); the **verb** sets the directi
 
 ### A live external identifier survives a file move
 
-Renaming or relocating a `*.inngest.ts` service must not change its Inngest function `id`, its trigger `event` or `cron` strings, its concurrency key, retry count or idempotency key. Those strings are the running system's identity: changing one orphans in-flight runs. The same holds for a webhook deduplication key prefix (`webhook:<provider>:…` rows in `rateLimit`, with the SHA-256-of-raw-body fallback when the delivery header is absent), whose prefix resets replay protection across a deploy if edited. It is also why a `handle-` webhook service takes the raw body alongside the parsed payload. The Inngest client id stays in `src/server/inngest/index.ts`. When you move such a file, diff the identifier lines and confirm they are untouched.
+Renaming or relocating a `*.inngest.ts` service must not change its Inngest function `id`, its trigger `event` or `cron` strings, its concurrency key, retry count or idempotency key. Those strings are the running system's identity: changing one orphans in-flight runs. The same holds for a webhook deduplication key prefix (`webhook:<provider>:…` rows in `rateLimit`, with the SHA-256-of-raw-body fallback when the delivery header is absent), whose prefix resets replay protection across a deploy if edited. It is also why the Linear and Jira `handle-` webhook services take the raw body alongside the parsed payload (GitHub always sends a delivery id). The Inngest client id stays in `src/server/inngest/index.ts`. When you move such a file, diff the identifier lines and confirm they are untouched.
 
 ## Transport-agnostic services (Option B)
 
-- A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`), enforced by `local/services-no-trpc-import`, and never imports `next/server`, `next/headers` or `next/navigation` at runtime, enforced by the service row of `local/no-cross-layer-import`. It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
+- A `_services/` function **never imports tRPC** (`@/server/trpc`, `@/lib/trpc`, `@trpc/*`, type-only imports included), enforced by `local/services-no-trpc-import`, and never imports `next/server`, `next/headers` or `next/navigation` at runtime, enforced by the service row of `local/no-cross-layer-import`. It is callable from a tRPC procedure, an Inngest job, or a server action with no HTTP round-trip.
 - The **type source of truth** is the service's return type, exported from the service file as `<Service>Output`: `export type GetUserOutput = Awaited<ReturnType<typeof getUser>>`. The alias is named after the file's own service and built from `typeof` it, so a `ReturnType` of some other function does not stand in for it. Do **not** use `inferProcedureOutput` as the canonical output type: `require-service-output-type` reports it, and `inferRouterOutputs`, in consumer code.
 - A service **throws a `DomainError` subclass** for an expected failure, never `TRPCError` and never a bare `Error`. The vocabulary lives in `@/server/errors/domain-errors` (`NotFoundError`, `ConflictError`, `BadRequestError`, `ForbiddenError`, `PreconditionFailedError`) and exists since migration step 3, so an extracted service throws it from day one. The base tRPC procedure maps the code and the message back to a `TRPCError`, so no procedure try/catches for mapping. Authority: `docs/adr/0012-domain-errors-and-transport-mapping.md`; display channels in [errors.md](errors.md).
 
@@ -41,8 +41,8 @@ import { prisma } from "@workspace/db";
 
 import { NotFoundError } from "@/server/errors/domain-errors";
 
-export async function getAnimal(id: string) {
-  const animal = await prisma.animal.findUnique({ where: { id } });
+export async function getAnimal(id: string, db: typeof prisma = prisma) {
+  const animal = await db.animal.findUnique({ where: { id } });
   if (!animal) throw new NotFoundError("Animal not found.");
   return animal;
 }
@@ -82,13 +82,13 @@ One convention of this section is enforced: a `trpc-router.ts` imports no Prisma
 
 ```ts
 // _domains/animal/trpc-router.ts
-import { router } from "@/server/trpc/trpc";
+import { protectedProcedure, router } from "@/server/trpc/trpc";
+import { AnimalIdSchema } from "./_services/animal.schema";
 import { getAnimal } from "./_services/get-animal";
-import { animalIdSchema } from "./_services/animal.schema";
 
 export const animalRouter = router({
-  get: professionalProcedure
-    .input(animalIdSchema)
+  get: protectedProcedure
+    .input(AnimalIdSchema)
     .query(({ input }) => getAnimal(input.id)),
 });
 ```
@@ -112,7 +112,7 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 
 - A `'use server'` directive belongs **only** in a `*.server.action.ts` file, at module level or inside a function: a module-level one turns every export into a public endpoint, and a function-level one (an inline server action) mints the same endpoint under no name a reader can search for. A server component needs no directive, and an infrastructure helper must be called through a service that checks who is asking.
 - A client file (`'use client'` / `*.client.tsx`) must **not** import from a `_services/` path — **except** `*.schema.ts` and **type-only imports** (`import type { … }`): TS erases those at compile time, so they cannot leak server code into the bundle, and the service return type is the type source of truth. For runtime values, use a tRPC hook or a server component instead.
-- A client file must **not** import a **runtime value** from `@/server/**` either: the folder holds wiring and server-only cross-cutting abstractions, so the import leaks them into the bundle, and `instanceof DomainError` would not survive serialization anyway (branch on `error.data.code`). Type-only imports are free. A value a client legitimately needs does not belong in the server folder: it moves to `@/utils/` or `@/lib/`, as the public asset URL builder did (`@/utils/url/resolve-s3-url`). Any remaining exception is a named pattern in `packages/eslint-config/next.js`, not a disable comment.
+- A client file must **not** import a **runtime value** from `@/server/**` either: the folder holds wiring and server-only cross-cutting abstractions, so the import leaks them into the bundle, and `instanceof DomainError` would not survive serialization anyway (branch on `error.data.code`). Type-only imports are free. A value a client legitimately needs does not belong in the server folder: it moves to `@/utils/` or `@/lib/`, as the public asset URL builder did (`@/utils/url/resolve-s3-url`). Any exception would be a named pattern in `clientServerImportOptions` in `packages/eslint-config/next.js` (empty today), not a disable comment.
 - Container hooks (`use-*.ts`) own form state + mutation + optimistic update + toast + invalidation, returning `{ form, onSubmit, isPending }`. They live in their owning scope's `_features/` slice, next to the UI they drive. Extract a hook only on real logic or reuse; a trivial single `useQuery` stays inline.
 
 ## Enforced by ESLint
@@ -126,7 +126,7 @@ Inside `_services/`:
 
 - `services-verb-prefix`: the verb list, the banned `update` synonyms, the process verbs, `get-all-`/`get-paginated-`, the exempt module suffixes, and the exported function named after the file.
 - `services-read-never-writes`: a `get-`, `list-`, `find-`, `search-`, `has-`, `is-` or `count-` file may not call a Prisma write method on a database client.
-- `services-no-trpc-import`: no `@/server/trpc` or `@/lib/trpc` from a service.
+- `services-no-trpc-import`: no `@/server/trpc`, `@/lib/trpc` or `@trpc/*` from a service, type-only imports included.
 - `services-no-bare-error`: throw a `DomainError` subclass, not `new Error(...)`. Applies to `*.inngest.ts`, `*.schema.ts` and `index.ts` too, which the two verb rules exempt.
 
 Across the app source:
@@ -136,14 +136,14 @@ Across the app source:
 - `no-cross-layer-import`, the layer import table (`layerImportRows` in `next.js`). Nine rows: a domain barrel exports no service or router at runtime; a `trpc-router.ts` imports no Prisma; a helper imports neither the database, nor `next`, nor `react`; a service does not reach for `next/server`, `next/headers` or `next/navigation`; root `_components/`, `_providers/` and `_constants/` import no domain; `src/lib/` and `src/utils/` do not import the app tree; `@trpc/server` is confined to a router and `src/server/trpc/`; runtime database imports are confined to `_services/` and `src/server/`; the database package is reached through `@workspace/db`, `@workspace/db/types` and `@workspace/db/generated/prisma/enums`. `require-agent-auth.ts` is the one named service exemption.
 - `no-cross-domain-deep-import`: another domain is reached through its barrel, by alias, in every import form.
 - `no-restricted-imports` on `src/server/**`: the server folder does not reach into the app tree by deep path. Its exemptions are named file by file in `next.js`.
-- `no-default-export`, `no-restricted-patterns` (`enum`, `as unknown as`, `query.data ?? []`), `no-em-dash-in-copy` and the installed plugin rules (`@typescript-eslint/consistent-type-definitions`, `@typescript-eslint/consistent-type-imports`, `react/function-component-definition`, `no-nested-ternary`, `no-else-return`) apply to services like every other module. See [typescript.md](typescript.md) and [code-shape.md](code-shape.md).
+- `no-default-export`, `no-restricted-patterns` (`enum`, `as unknown as`, `query.data ?? []`), `no-em-dash-in-copy` and the installed plugin rules (`@typescript-eslint/consistent-type-definitions`, `@typescript-eslint/consistent-type-imports`, `react/function-component-definition`, `no-nested-ternary`, `no-else-return`, and the built-in `no-throw-literal`) apply to services like every other module. See [typescript.md](typescript.md) and [code-shape.md](code-shape.md).
 
 At the client/server boundary:
 
 - `no-client-import-of-services`: exempts `*.schema.ts` and type-only imports.
-- `no-client-import-of-server-folder`: no runtime import of `@/server/**` from a client module; type imports and the named allowlist excepted.
+- `no-client-import-of-server-folder`: no runtime import of `@/server/**` from a client module; type imports and the allowlist (`clientServerImportOptions`, empty today) excepted.
 - `no-client-domain-error-instanceof`: `instanceof DomainError` in a client module is a branch that is always false.
-- `require-use-client-suffix`: exempts `use-*` and the Next.js special files.
+- `require-use-client-suffix`: exempts `use-*`, `*.context.tsx` and the Next.js special files.
 - `require-server-action-suffix`: a `'use server'` directive at module or function level belongs only in a `*.server.action.ts`.
 
 On the folders and the schemas:

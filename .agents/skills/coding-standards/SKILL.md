@@ -13,7 +13,7 @@ them. **Do not read every rule file.**
 
 `docs/architecture/target-architecture.md` describes the live structure of `apps/web`: two tiers
 sharing one bucket set, transport-agnostic services under thin tRPC routers, and one domain-error
-vocabulary mapped exactly once per boundary. ADR-0010 to ADR-0014 in `docs/adr/` pin the decisions
+vocabulary mapped exactly once per boundary. ADR-0010 to ADR-0015 in `docs/adr/` pin the decisions
 behind it. The rule files under `rules/` are the working form of all of it, so read those first.
 
 Three facts settle most placement questions:
@@ -72,7 +72,7 @@ throwing service yet, so the helper lands with its first caller.
 - `rules/errors.md` — the four error display channels, route boundaries, anti-patterns.
 - `rules/naming.md` — CRUD read/write verb vocabulary, resource and file naming.
 - `rules/typescript.md` — type definition and inference standards.
-- `rules/testing.md` — Vitest harness, colocated `*.test.ts`, test only `_services/`/`_helpers/` for now.
+- `rules/testing.md` — Vitest harness, colocated `*.test.ts`, the four seams (pure functions, injected services, contract route handlers, structural checks), mocks at a boundary only.
 - `rules/code-shape.md` — file size thresholds, single-responsibility red flags, readability fixes, flag-vs-auto-fix.
 
 ## Maintaining this skill
