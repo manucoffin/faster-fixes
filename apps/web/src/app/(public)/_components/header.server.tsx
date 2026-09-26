@@ -19,10 +19,9 @@ import {
 } from "@workspace/ui/components/navigation-menu";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { GitHubStarsHeaderLink } from "../_features/github-stars/github-stars-header-link.client";
 import { MobileNav } from "./mobile-nav.client";
 import { ThemeToggle } from "@/app/_components/theme-toggle.client";
-
-const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 
 const leadingNavLinks = [{ href: "/docs", label: "Documentation" }] satisfies {
   href: string;
@@ -166,16 +165,7 @@ export async function Header() {
         <div className="flex shrink-0 items-center justify-end gap-2">
           <ThemeToggle size="icon" variant="ghost" />
 
-          <Button asChild variant="ghost" size="icon">
-            <a
-              href={GITHUB_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub repository"
-            >
-              <GithubIcon className="size-5" />
-            </a>
-          </Button>
+          <GitHubStarsHeaderLink />
 
           {session ? (
             <Button asChild>
