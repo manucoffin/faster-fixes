@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- [#199](https://github.com/manucoffin/faster-fixes/pull/199) [`9d43ac2`](https://github.com/manucoffin/faster-fixes/commit/9d43ac25e4435ea0b86d245fc9ecd9965c1f3b02) Thanks [@manucoffin](https://github.com/manucoffin)! - Add `subscribe(listener)` to the Widget instance returned by `init` and by `createWidget` from `@fasterfixes/widget/internal`. The listener is called after `isVisible`, `feedbackItems` or `showPins` changes, and not when a value is set to what it already was. `subscribe` returns a function that removes the listener, and `destroy()` removes every listener. Use it to keep your own UI in sync with the Widget without polling.
+
 ## 1.0.0
 
 ### Major Changes
