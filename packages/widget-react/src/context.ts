@@ -85,7 +85,9 @@ export const FeedbackContext = createContext<FeedbackContextValue | null>(null);
 export function useFeedbackContext() {
   const ctx = useContext(FeedbackContext);
   if (!ctx) {
-    throw new Error("useFeedbackContext must be used within a FeedbackProvider");
+    throw new Error(
+      "useFeedbackContext must be used within a FeedbackProvider",
+    );
   }
   return ctx;
 }

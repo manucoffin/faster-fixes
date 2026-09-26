@@ -36,5 +36,13 @@ export function useFeedback(): UseFeedbackReturn {
     setShowPins(!showPins);
   }, [setShowPins, showPins]);
 
-  return { show, hide, isVisible, startAnnotation, feedbackItems, togglePins, showPins };
+  return {
+    show,
+    hide,
+    isVisible,
+    startAnnotation,
+    feedbackItems,
+    togglePins,
+    showPins,
+  };
 }

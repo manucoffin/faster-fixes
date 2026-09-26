@@ -28,20 +28,22 @@ const text = await render(<WelcomeEmail name="John" verificationUrl="https://exa
 If no MCP tool is available, you can use the Resend SDK for Node.js to send the email, which can accept React components directly:
 
 ```tsx
-import { Resend } from 'resend';
-import { WelcomeEmail } from './emails/welcome';
+import { Resend } from "resend";
+import { WelcomeEmail } from "./emails/welcome";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const { data, error } = await resend.emails.send({
-  from: 'Acme <onboarding@resend.dev>',
-  to: ['user@example.com'],
-  subject: 'Welcome to Acme',
-  react: <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />
+  from: "Acme <onboarding@resend.dev>",
+  to: ["user@example.com"],
+  subject: "Welcome to Acme",
+  react: (
+    <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />
+  ),
 });
 
 if (error) {
-  console.error('Failed to send:', error);
+  console.error("Failed to send:", error);
 }
 ```
 
@@ -63,12 +65,12 @@ If using a template when sending with the Resend SDK for Node.js, the user can p
 
 ```tsx
 await resend.emails.send({
-  from: 'Acme <onboarding@resend.dev>',
-  to: ['user@example.com'],
-  subject: 'Welcome to Acme',
+  from: "Acme <onboarding@resend.dev>",
+  to: ["user@example.com"],
+  subject: "Welcome to Acme",
   template: {
-    id: '1245-1256-1234-1234',
-  }
+    id: "1245-1256-1234-1234",
+  },
 });
 ```
 
@@ -77,39 +79,43 @@ await resend.emails.send({
 **Nodemailer:**
 
 ```tsx
-import { render } from '@react-email/components';
-import nodemailer from 'nodemailer';
+import { render } from "@react-email/components";
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.example.com',
+  host: "smtp.example.com",
   port: 587,
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
 });
 
-const html = await render(<WelcomeEmail name="John" verificationUrl="https://example.com/verify" />);
+const html = await render(
+  <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />,
+);
 
 await transporter.sendMail({
-  from: 'noreply@example.com',
-  to: 'user@example.com',
-  subject: 'Welcome',
-  html
+  from: "noreply@example.com",
+  to: "user@example.com",
+  subject: "Welcome",
+  html,
 });
 ```
 
 **SendGrid:**
 
 ```tsx
-import { render } from '@react-email/components';
-import sgMail from '@sendgrid/mail';
+import { render } from "@react-email/components";
+import sgMail from "@sendgrid/mail";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const html = await render(<WelcomeEmail name="John" verificationUrl="https://example.com/verify" />);
+const html = await render(
+  <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />,
+);
 
 await sgMail.send({
-  to: 'user@example.com',
-  from: 'noreply@example.com',
-  subject: 'Welcome',
-  html
+  to: "user@example.com",
+  from: "noreply@example.com",
+  subject: "Welcome",
+  html,
 });
 ```

@@ -12,7 +12,7 @@ The widget previously embedded a per-Project `apiKey` (`ff_` + 256-bit random), 
 
 ## Allowed origins = domain + subdomains, not a free-form allowlist
 
-`projects` is the billed unit (Free 1 / Pro 5 / higher ∞) and a Project is *one website*. A free-form domain allowlist would let one Project serve unrelated sites under a single billable unit, **bypassing per-website pricing**. Instead, a Project's widget is allowed on its registered domain and any subdomain (`*.acme.com`) plus localhost. This covers the real need — staging / preview / app environments of the *same* site — without letting one Project span unrelated domains. An unrelated domain (`otherclient.com`) does not match and therefore requires its own Project, which is billed.
+`projects` is the billed unit (Free 1 / Pro 5 / higher ∞) and a Project is _one website_. A free-form domain allowlist would let one Project serve unrelated sites under a single billable unit, **bypassing per-website pricing**. Instead, a Project's widget is allowed on its registered domain and any subdomain (`*.acme.com`) plus localhost. This covers the real need — staging / preview / app environments of the _same_ site — without letting one Project span unrelated domains. An unrelated domain (`otherclient.com`) does not match and therefore requires its own Project, which is billed.
 
 ## Alternatives considered
 
@@ -27,5 +27,5 @@ The widget previously embedded a per-Project `apiKey` (`ff_` + 256-bit random), 
 - Rate limiting re-keys from `apiKeyHash` to `project.id` (identical behaviour for both resolution paths).
 - The `@fasterfixes/react` **`apiKey` prop name** and the **`X-API-Key` header** are retained for backward compatibility; the value is now a `publicId`. Renaming them is a breaking package change deferred to a future major version.
 - `validate-origin.ts` loosens to allow subdomains (suffix match with a leading-dot boundary, so `evil-acme.com` and `acme.com.evil.com` do not match). Strictly additive — existing exact-domain matches still pass.
-- The "regenerate API key" feature is retired. **Do not** re-introduce a secret widget key to "harden" the widget — the surface is public by design and the security lives in allowed origins + Reviewer token. The asymmetry with agent tokens (which *are* real secrets) is deliberate.
+- The "regenerate API key" feature is retired. **Do not** re-introduce a secret widget key to "harden" the widget — the surface is public by design and the security lives in allowed origins + Reviewer token. The asymmetry with agent tokens (which _are_ real secrets) is deliberate.
 - Step-by-step migration tasks live in `_internals/publishable-key-migration-plan.md`.

@@ -89,7 +89,7 @@ Feedback can be connected to external issue trackers so it lives where teams alr
 ### Linear
 
 - **Auth**: OAuth 2.0, workspace-wide; issues are attributed to the app (survives member departures). Tokens stored encrypted (AES-256-GCM).
-- **Faster Fixes → Linear**: status maps to Linear state *types* (`completed`/`canceled`/`started`/`unstarted`), not names, so custom workflows work.
+- **Faster Fixes → Linear**: status maps to Linear state _types_ (`completed`/`canceled`/`started`/`unstarted`), not names, so custom workflows work.
 - **Linear → Faster Fixes**: state type drives feedback status (`completed` → `resolved`, `canceled` → `closed`, `started` → `in_progress`, others → `new`).
 - Per-team default state, labels, and priority are configurable, with health tracking when configured states/labels go stale.
 

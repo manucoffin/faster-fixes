@@ -63,15 +63,15 @@ The color is applied as a `--ff-accent` CSS custom property on the widget root. 
 
 ### `FeedbackProvider`
 
-| Prop         | Type                  | Required | Description                                                       |
-| ------------ | --------------------- | -------- | ---------------------------------------------------------------- |
-| `projectId`  | `string`              | Yes      | Your Faster Fixes Project ID (found in project settings)         |
-| `apiKey`     | `string`              | No       | Deprecated alias for `projectId`; removed in a future major.     |
-| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)      |
-| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`)   |
-| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)               |
-| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                          |
-| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                            |
+| Prop         | Type                  | Required | Description                                                    |
+| ------------ | --------------------- | -------- | -------------------------------------------------------------- |
+| `projectId`  | `string`              | Yes      | Your Faster Fixes Project ID (found in project settings)       |
+| `apiKey`     | `string`              | No       | Deprecated alias for `projectId`; removed in a future major.   |
+| `apiOrigin`  | `string`              | No       | Custom API origin (default: `https://www.faster-fixes.com`)    |
+| `color`      | `string`              | No       | Widget accent color — any CSS color value (default: `#02527E`) |
+| `position`   | `WidgetPosition`      | No       | Floating button position (default: `bottom-right`)             |
+| `classNames` | `Partial<ClassNames>` | No       | CSS class overrides for widget elements                        |
+| `labels`     | `Partial<Labels>`     | No       | Custom UI text labels                                          |
 
 ### `useFeedback` hook
 

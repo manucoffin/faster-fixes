@@ -6,7 +6,11 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
-import { generateSelectors, captureElementContext, getBrowserInfo } from "@fasterfixes/core";
+import {
+  generateSelectors,
+  captureElementContext,
+  getBrowserInfo,
+} from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import {
   popoverStyle,
@@ -45,7 +49,8 @@ export function CommentPopover() {
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const frozenStyleRef = useRef<React.CSSProperties | null>(null);
 
-  const isOpen = mode === "selected" || mode === "submitting" || mode === "error";
+  const isOpen =
+    mode === "selected" || mode === "submitting" || mode === "error";
 
   const { refs, floatingStyles } = useFloating({
     open: isOpen || fadingOut,
@@ -59,9 +64,12 @@ export function CommentPopover() {
   });
 
   // Clean up timer on unmount
-  useEffect(() => () => {
-    if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
+    },
+    [],
+  );
 
   function resetState() {
     setComment("");
@@ -158,9 +166,7 @@ export function CommentPopover() {
       setFadingOut(true);
       fadeTimerRef.current = setTimeout(resetState, FADEOUT_DURATION);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : labels.errorMessage,
-      );
+      setError(err instanceof Error ? err.message : labels.errorMessage);
       setMode("error");
     }
   }
@@ -210,7 +216,9 @@ export function CommentPopover() {
           ? frozenStyleRef.current
           : floatingStyles),
         ...(fadingOut
-          ? { animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards` }
+          ? {
+              animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards`,
+            }
           : undefined),
       }}
       data-ff-widget
@@ -270,7 +278,10 @@ export function CommentPopover() {
               type="button"
               style={{
                 ...primaryButtonStyle(),
-                opacity: mode === "submitting" || !comment.trim() || fadingOut ? 0.6 : 1,
+                opacity:
+                  mode === "submitting" || !comment.trim() || fadingOut
+                    ? 0.6
+                    : 1,
               }}
               onClick={handleSubmit}
               disabled={mode === "submitting" || !comment.trim() || fadingOut}

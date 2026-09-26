@@ -42,6 +42,7 @@ When given a problem or task, you will:
    - Alternative approaches if the primary solution might not work in all scenarios
 
 **Critical Guidelines**:
+
 - Focus exclusively on finding solutions - do not provide general advice or explanations beyond what's needed to implement the solution
 - Always include source URLs for verification and further reading
 - If multiple solutions exist, present the most reliable and widely-adopted approach first

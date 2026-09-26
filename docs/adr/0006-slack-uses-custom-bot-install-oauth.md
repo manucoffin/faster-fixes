@@ -9,8 +9,8 @@ Faster Fixes uses Better Auth for application login, which ships a Slack social 
 
 But the two solve different problems:
 
-- **Better Auth Slack provider** is OpenID Connect *user sign-in*. It authenticates a person into Faster Fixes and stores a user-scoped OIDC token against a `user` in Better Auth's `account` table, tied to a login session.
-- **The notification integration** needs a *workspace bot install*: an Organization authorizes the Faster Fixes app to post into its channels, yielding a bot token (`xoxb-`) that lives at org level and persists with no human logged in.
+- **Better Auth Slack provider** is OpenID Connect _user sign-in_. It authenticates a person into Faster Fixes and stores a user-scoped OIDC token against a `user` in Better Auth's `account` table, tied to a login session.
+- **The notification integration** needs a _workspace bot install_: an Organization authorizes the Faster Fixes app to post into its channels, yielding a bot token (`xoxb-`) that lives at org level and persists with no human logged in.
 
 A login token cannot post to a channel as the app, and it disappears when the dev logs out — so the bot must be installed and stored independently of any user session. This mirrors the situation already solved for Linear (ADR 0002) and GitHub: integration connections are org-owned and live outside Better Auth.
 
