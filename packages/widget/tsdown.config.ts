@@ -13,15 +13,16 @@ export default defineConfig([
     platform: "browser",
   },
   {
-    // The script embed: one self-contained file with core bundled in, served
-    // from the CDN as `dist/widget.iife.js`.
+    // The script embed: one self-contained file served from the CDN as
+    // `dist/widget.iife.js`. A dependency left out here becomes an undefined
+    // global and the script throws on load.
     entry: { widget: "./src/script.ts" },
     format: "iife",
     dts: false,
     clean: false,
     minify: true,
     platform: "browser",
-    deps: { alwaysBundle: ["@fasterfixes/core"] },
+    deps: { alwaysBundle: ["@fasterfixes/core", "@floating-ui/dom"] },
     onSuccess(config) {
       const file = readFileSync(join(config.outDir, "widget.iife.js"));
       console.log(
