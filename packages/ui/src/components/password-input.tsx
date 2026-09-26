@@ -1,14 +1,22 @@
 "use client";
 
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@workspace/ui/components/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@workspace/ui/components/input-group";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-interface PasswordInputProps extends Omit<React.ComponentProps<"input">, "type"> {
+type PasswordInputProps = {
   showToggle?: boolean;
-}
+} & Omit<React.ComponentProps<"input">, "type">;
 
-export const PasswordInput = ({ showToggle = true, ...props }: PasswordInputProps) => {
+export function PasswordInput({
+  showToggle = true,
+  ...props
+}: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -31,8 +39,5 @@ export const PasswordInput = ({ showToggle = true, ...props }: PasswordInputProp
         )}
       </InputGroupAddon>
     </InputGroup>
-
   );
-};
-
-
+}

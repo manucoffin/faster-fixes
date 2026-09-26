@@ -1,6 +1,6 @@
 type Props = React.ComponentPropsWithoutRef<"svg">;
 
-export const McpIcon = ({ className, ...props }: Props) => {
+export function McpIcon({ className, ...props }: Props) {
   return (
     <svg
       className={className}
@@ -15,4 +15,4 @@ export const McpIcon = ({ className, ...props }: Props) => {
       <path d="M14.485 4.703a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a4.115 4.115 0 000 5.9 4.314 4.314 0 006.016 0l7.12-6.982a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a2.588 2.588 0 01-3.61 0 2.47 2.47 0 010-3.54l7.12-6.982z" />
     </svg>
   );
-};
+}

@@ -1,6 +1,6 @@
 type Props = React.ComponentPropsWithoutRef<"svg">;
 
-export const GoogleIcon = ({ className, ...props }: Props) => {
+export function GoogleIcon({ className, ...props }: Props) {
   return (
     <svg
       className={className}
@@ -29,4 +29,4 @@ export const GoogleIcon = ({ className, ...props }: Props) => {
       />
     </svg>
   );
-};
+}

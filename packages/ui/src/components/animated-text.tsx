@@ -3,15 +3,12 @@
 import { motion } from "framer-motion";
 import React from "react";
 
-interface AnimatedTextProps {
+type AnimatedTextProps = {
   children: React.ReactNode;
   className?: string;
-}
+};
 
-export function AnimatedText({
-  children,
-  className = "",
-}: AnimatedTextProps) {
+export function AnimatedText({ children, className = "" }: AnimatedTextProps) {
   return (
     <motion.div
       className={`relative inline-block ${className}`}

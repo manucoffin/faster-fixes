@@ -1,6 +1,6 @@
 type Props = React.ComponentPropsWithoutRef<"svg">;
 
-export const ClaudeCodeIcon = ({ className, ...props }: Props) => {
+export function ClaudeCodeIcon({ className, ...props }: Props) {
   return (
     <svg
       className={className}
@@ -17,4 +17,4 @@ export const ClaudeCodeIcon = ({ className, ...props }: Props) => {
       />
     </svg>
   );
-};
+}
