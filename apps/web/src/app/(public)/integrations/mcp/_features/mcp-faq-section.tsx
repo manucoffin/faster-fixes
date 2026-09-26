@@ -11,7 +11,9 @@ import type { ReactNode } from "react";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
-function DocLink({ href, children }: { href: Route; children: ReactNode }) {
+type DocLinkProps = { href: Route; children: ReactNode };
+
+function DocLink({ href, children }: DocLinkProps) {
   return (
     <Link
       href={href}

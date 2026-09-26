@@ -10,9 +10,8 @@ import { UserInformationCardLoading } from "./_features/user-information/user-in
 import { UserInformationCard } from "./_features/user-information/user-information-card.server";
 import { findUserName } from "../_services/find-user-name";
 
-export default async function AdminUserDetailsPage(props: PageParams) {
-  const params = await props.params;
-  const { id } = params;
+export default async function AdminUserDetailsPage({ params }: PageParams) {
+  const { id } = await params;
 
   if (!id) {
     return notFound();

@@ -87,7 +87,11 @@ export function ViewDiagnosticsDialog({
   );
 }
 
-function DiagnosticsTabs({ trail }: { trail: DiagnosticTrail }) {
+type DiagnosticsTabsProps = {
+  trail: DiagnosticTrail;
+};
+
+function DiagnosticsTabs({ trail }: DiagnosticsTabsProps) {
   const consoleCount = trail.console.length;
   const networkCount = trail.network.length;
 
@@ -125,7 +129,11 @@ function DiagnosticsTabs({ trail }: { trail: DiagnosticTrail }) {
   );
 }
 
-function ConsoleRow({ entry }: { entry: ConsoleEntry }) {
+type ConsoleRowProps = {
+  entry: ConsoleEntry;
+};
+
+function ConsoleRow({ entry }: ConsoleRowProps) {
   const isError = entry.level === "error" || entry.level === "warn";
   return (
     <li className="flex gap-2 px-3 py-1.5 font-mono text-xs">
@@ -141,7 +149,11 @@ function ConsoleRow({ entry }: { entry: ConsoleEntry }) {
   );
 }
 
-function NetworkRow({ entry }: { entry: NetworkEntry }) {
+type NetworkRowProps = {
+  entry: NetworkEntry;
+};
+
+function NetworkRow({ entry }: NetworkRowProps) {
   const failed = entry.status === 0 || entry.status >= 400;
   return (
     <li className="flex items-center gap-2 px-3 py-1.5 font-mono text-xs">
@@ -165,7 +177,11 @@ function NetworkRow({ entry }: { entry: NetworkEntry }) {
   );
 }
 
-function EmptyRow({ text }: { text: string }) {
+type EmptyRowProps = {
+  text: string;
+};
+
+function EmptyRow({ text }: EmptyRowProps) {
   return (
     <p className="py-8 text-center text-sm text-muted-foreground">{text}</p>
   );

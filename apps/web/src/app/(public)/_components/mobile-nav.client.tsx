@@ -20,13 +20,12 @@ type IntegrationLink = {
   icon?: React.ReactNode;
 };
 
-export function MobileNav({
-  links,
-  integrationLinks,
-}: {
+type MobileNavProps = {
   links: NavLink[];
   integrationLinks?: IntegrationLink[];
-}) {
+};
+
+export function MobileNav({ links, integrationLinks }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 

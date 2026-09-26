@@ -17,7 +17,11 @@ const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(
   undefined,
 );
 
-export function BreadcrumbProvider({ children }: { children: ReactNode }) {
+type BreadcrumbProviderProps = {
+  children: ReactNode;
+};
+
+export function BreadcrumbProvider({ children }: BreadcrumbProviderProps) {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
 
   return (

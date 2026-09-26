@@ -135,7 +135,9 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
 
 const headers = ["FasterFixes", "Userback"] as const;
 
-function CellIcon({ type }: { type: CellType }) {
+type CellIconProps = { type: CellType };
+
+function CellIcon({ type }: CellIconProps) {
   if (type === "yes") {
     return <CheckIcon className="size-5 text-success" aria-label="Yes" />;
   }

@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 
-export function TableOfContents({ headings }: { headings: Toc }) {
+type TableOfContentsProps = { headings: Toc };
+
+export function TableOfContents({ headings }: TableOfContentsProps) {
   if (headings.length === 0) return null;
 
   return (

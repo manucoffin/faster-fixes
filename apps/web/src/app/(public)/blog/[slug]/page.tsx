@@ -72,11 +72,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+type BlogPostPageProps = { params: Promise<Params> };
+
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const page = blogSource.getPage([slug]);
   if (!page) notFound();

@@ -225,7 +225,9 @@ function AnimatedState() {
 
 const COLLABORATOR = { name: "Marie, CEO", color: "#ec4899" }; // pink-500
 
-function Cursor({ x, y }: { x: number; y: number }) {
+type CursorProps = { x: number; y: number };
+
+function Cursor({ x, y }: CursorProps) {
   return (
     <div
       className="pointer-events-none absolute z-20 transition-[left,top] duration-75 ease-out"
@@ -250,17 +252,14 @@ function Cursor({ x, y }: { x: number; y: number }) {
   );
 }
 
-function Pin({
-  x,
-  y,
-  resolved,
-  showRing,
-}: {
+type PinProps = {
   x: number;
   y: number;
   resolved: boolean;
   showRing?: boolean;
-}) {
+};
+
+function Pin({ x, y, resolved, showRing }: PinProps) {
   return (
     <div
       className="absolute -translate-x-1/2 -translate-y-1/2"
@@ -292,17 +291,14 @@ function Pin({
   );
 }
 
-function Bubble({
-  x,
-  y,
-  text,
-  resolved,
-}: {
+type BubbleProps = {
   x: number;
   y: number;
   text: string;
   resolved?: boolean;
-}) {
+};
+
+function Bubble({ x, y, text, resolved }: BubbleProps) {
   return (
     <div
       className={`absolute z-10 rounded border px-2 py-1 whitespace-nowrap ${

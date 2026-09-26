@@ -38,15 +38,17 @@ export const flowAnimationStyles = `
 }
 `;
 
+type TerminalFrameProps = {
+  title: string;
+  children: React.ReactNode;
+  contentClassName?: string;
+};
+
 export function TerminalFrame({
   title,
   children,
   contentClassName,
-}: {
-  title: string;
-  children: React.ReactNode;
-  contentClassName?: string;
-}) {
+}: TerminalFrameProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
       <div className="flex items-center gap-1.5 border-b border-zinc-800/80 px-3 py-2">

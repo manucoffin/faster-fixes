@@ -9,7 +9,9 @@ import { LoaderIcon, StarIcon } from "lucide-react";
 
 const GITHUB_REPO_URL = "https://github.com/manucoffin/faster-fixes";
 
-function StarsBadge({ stars }: { stars: number }) {
+type StarsBadgeProps = { stars: number };
+
+function StarsBadge({ stars }: StarsBadgeProps) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
       <StarIcon className="size-3" />

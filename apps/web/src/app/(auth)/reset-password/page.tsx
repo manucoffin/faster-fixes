@@ -106,9 +106,8 @@ function ResetPasswordOutcome({
   );
 }
 
-export default async function ResetPasswordPage(props: PageParams) {
-  const searchParams = await props.searchParams;
-  const { success, error, token } = searchParams;
+export default async function ResetPasswordPage({ searchParams }: PageParams) {
+  const { success, error, token } = await searchParams;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">

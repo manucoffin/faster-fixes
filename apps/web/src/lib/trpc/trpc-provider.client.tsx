@@ -15,11 +15,11 @@ const trpcClient = createTRPCClient<AppRouter>({
   ],
 });
 
-export function TRPCProviderWrapper(
-  props: Readonly<{
-    children: React.ReactNode;
-  }>,
-) {
+type TRPCProviderWrapperProps = {
+  children: React.ReactNode;
+};
+
+export function TRPCProviderWrapper({ children }: TRPCProviderWrapperProps) {
   // NOTE: Avoid useState when initializing the query client if you don't
   //       have a suspense boundary between this and the code that may
   //       suspend because React will throw away the client on the initial
@@ -29,7 +29,7 @@ export function TRPCProviderWrapper(
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {props.children}
+        {children}
       </TRPCProvider>
     </QueryClientProvider>
   );

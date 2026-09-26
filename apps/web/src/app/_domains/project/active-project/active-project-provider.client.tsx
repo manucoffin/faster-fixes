@@ -52,7 +52,13 @@ const ActiveProjectContext = createContext<
   ActiveProjectContextType | undefined
 >(undefined);
 
-export function ActiveProjectProvider({ children }: { children: ReactNode }) {
+type ActiveProjectProviderProps = {
+  children: ReactNode;
+};
+
+export function ActiveProjectProvider({
+  children,
+}: ActiveProjectProviderProps) {
   const trpc = useTRPC();
   const { data: activeOrg } = useActiveOrganization();
   const [activeProjectId, setActiveProjectIdState] = useState<string | null>(
