@@ -32,40 +32,25 @@ TypeScript, so this is a review judgement rather than a failure.
 
 ## Type-aware checks
 
-Enforced on every workspace's `src/**` through the TypeScript project service, so the generated
-types (package builds, Prisma client, Next.js route types) must exist before lint runs. Each one
-catches what `tsc` accepts:
+Lint runs the type-aware rules on every workspace's `src/**`; the full list is in
+`packages/eslint-config/README.md`. Its message says what is wrong. This section covers only the
+rules whose fix is specific to this repo, and none of them is fixed with a cast, a `!` or a disable
+comment:
 
-- `await-thenable` and `no-misused-promises`: an `await` on a non-promise, or an async function
-  passed where a sync callback is expected. JSX attributes are exempt (`onClick={async () => …}`).
-- `no-floating-promises`: every promise is awaited, returned or marked `void`. Return or await an
-  invalidation in `onSuccess`/`onSettled` so the mutation stays pending until fresh data lands;
-  `void` is for a deliberate fire-and-forget, such as a `nuqs` setter.
-- The `no-unsafe-*` family: an `any` assigned, passed as an argument, read from, returned or called,
-  and an enum compared to an untyped literal. Data from outside the type system (`JSON.parse`,
-  `postMessage`, a fetch body, a webhook payload) is parsed with Zod rather than cast with `as T`.
-  Inngest events are typed once, in `src/server/inngest/events.ts`, so `event.data` is never `any`.
-  `no-unsafe-assignment` is off in `*.test.ts(x)`, where a loosely typed assertion value is the point.
-- `restrict-template-expressions` and `no-base-to-string`: a value that would print
-  `[object Object]`. Narrow `unknown` to a string first (`typeof x === "string"`).
-- `no-deprecated`: an API marked `@deprecated`. Use the replacement its message names
-  (`z.email()`, `z.url()`, `z.uuid()`, `z.flattenError()`).
-- `only-throw-error`: only `Error` instances are thrown.
-- `switch-exhaustiveness-check`: a `switch` over a union handles every member or has a `default`.
-- `no-unnecessary-condition`: a `?.`, `??` or `if` the types already settle. Drop the guard when the
-  type is right; fix the type at its source when it lies (external data, a mistyped library value).
-  Never silence it with a cast.
-- `prefer-nullish-coalescing`: `??` over `||`. When `""`, `0` or `false` must fall back too, write
-  the comparison out (`value === "" ? fallback : value`).
-- `no-non-null-assertion`: no `x!`. Narrow with a guard, or throw a named error when the invariant
-  breaks (a domain error in a service). A required environment variable is read with
+- `no-floating-promises`: return or await an invalidation in `onSuccess`/`onSettled` so the
+  mutation stays pending until fresh data lands. `void` is for a deliberate fire-and-forget, such as
+  a `nuqs` setter.
+- The `no-unsafe-*` family: data from outside the type system (`JSON.parse`, `postMessage`, a fetch
+  body, a webhook payload) is parsed with Zod rather than cast with `as T`. Inngest events are typed
+  once, in `src/server/inngest/events.ts`, so `event.data` is never `any`.
+- `no-unnecessary-condition`: drop the guard when the type is right; fix the type at its source when
+  it lies (external data, a mistyped library value).
+- `no-non-null-assertion`: narrow with a guard, or throw a named error when the invariant breaks (a
+  domain error in a service). A required environment variable is read with
   `requireEnv("NAME", process.env.NAME)` (`@/utils/environment/require-env`), and the auth origin
   with `getAuthBaseUrl()` (`@/utils/url/get-auth-base-url`). Off in `*.test.ts(x)`.
-- `return-await: in-try-catch`: a promise returned inside `try` is awaited, so its rejection reaches
-  the `catch`; elsewhere it is returned bare.
-
-Syntactic, on the same glob: `no-console` (`console.info`, `warn` and `error` are the deliberate log
-lines; `log` and `debug` are debugging leftovers), `prefer-template` and `curly: multi-line`.
+- `prefer-nullish-coalescing`: when `""`, `0` or `false` must fall back too, write the comparison
+  out (`value === "" ? fallback : value`).
 
 ## Language
 
