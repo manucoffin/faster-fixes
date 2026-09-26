@@ -4,7 +4,7 @@ import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { DomainError } from "@/server/errors/domain-errors";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import type { Context } from "./context";
 
 // The one sentence a User reads for a failure nobody planned for. Every
@@ -32,7 +32,7 @@ const t = initTRPC.context<Context>().create({
         ...shape.data,
         zodError:
           error.code === "BAD_REQUEST" && error.cause instanceof ZodError
-            ? error.cause.flatten()
+            ? z.flattenError(error.cause)
             : null,
       },
     };

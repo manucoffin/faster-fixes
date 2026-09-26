@@ -68,7 +68,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     const parsed = UpdateFeedbackSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: parsed.error.flatten() },
+        { error: "Validation failed", details: z.flattenError(parsed.error) },
         { status: 422 },
       );
     }

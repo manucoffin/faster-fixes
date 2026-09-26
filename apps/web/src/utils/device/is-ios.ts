@@ -1,13 +1,7 @@
 export function isIOS() {
   return (
-    [
-      "iPad Simulator",
-      "iPhone Simulator",
-      "iPod Simulator",
-      "iPad",
-      "iPhone",
-      "iPod",
-    ].includes(navigator.platform) ||
+    // Simulators report the device name in the user agent too.
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     // iPad on iOS 13 detection
     (navigator.userAgent.includes("Mac") && "ontouchend" in document)
   );

@@ -4,6 +4,7 @@ import { findReviewerByToken } from "@/app/_domains/project/_services/find-revie
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createFeedback } from "./_services/create-feedback";
 import { CreateFeedbackSchema } from "./_services/create-feedback.schema";
 import { createFeedbackScreenshot } from "./_services/create-feedback-screenshot";
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
   const parsed = CreateFeedbackSchema.safeParse(parsedJson);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten() },
+      { error: "Validation failed", details: z.flattenError(parsed.error) },
       { status: 422 },
     );
   }

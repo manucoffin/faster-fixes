@@ -22,7 +22,7 @@ const DiagnosticTrailSchema = z.object({
 
 export const CreateFeedbackSchema = z.object({
   comment: z.string().trim().min(1),
-  pageUrl: z.string().url(),
+  pageUrl: z.url(),
   selector: z.string().optional(),
   clickX: z.number().optional(),
   clickY: z.number().optional(),

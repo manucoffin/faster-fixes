@@ -21,7 +21,7 @@ export type UpdateFeedbackStatusInput = z.infer<
   typeof UpdateFeedbackStatusSchema
 >;
 
-export const FeedbackIdSchema = z.string().uuid();
+export const FeedbackIdSchema = z.uuid();
 
 const FeedbackItemSchema = z.object({
   comment: z.string().trim().min(1),

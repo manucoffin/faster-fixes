@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 const InviteMemberFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 });
 
 type InviteMemberFormInputs = z.infer<typeof InviteMemberFormSchema>;
