@@ -1,5 +1,11 @@
 # @fasterfixes/mcp
 
+## 0.0.6
+
+### Patch Changes
+
+- [#173](https://github.com/manucoffin/faster-fixes/pull/173) [`24fa3b3`](https://github.com/manucoffin/faster-fixes/commit/24fa3b338844a4b35147ac18fbbda9642d9904e7) Thanks [@manucoffin](https://github.com/manucoffin)! - `create_feedbacks` tool: the summary returned when the plan limit is reached separates its two sentences with a colon rather than an em dash. No behavioral change.
+
 ## 0.0.5
 
 - `list_feedbacks` tool description now states that captured console logs and network requests (the Diagnostic Trail) are included in the returned feedback. No behavioral change — the trail already flows through from the agent API; this just makes it discoverable to the calling agent.
