@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.12
+
+### Patch Changes
+
+- [#173](https://github.com/manucoffin/faster-fixes/pull/173) [`69e80e5`](https://github.com/manucoffin/faster-fixes/commit/69e80e563af5685cbcae11b511cbfa0c0a674db6) Thanks [@manucoffin](https://github.com/manucoffin)! - Diagnostic Trail: a console argument that `JSON.stringify` cannot represent is now recorded as `[Unserializable]` instead of `[object Object]`. Internal typing cleanup in both packages, with no public API change.
+
+- [#173](https://github.com/manucoffin/faster-fixes/pull/173) [`68548c8`](https://github.com/manucoffin/faster-fixes/commit/68548c875c5a3ff52753ec70b4ec1668cdccee56) Thanks [@manucoffin](https://github.com/manucoffin)! - Internal cleanup for the React Compiler lint rules: popovers, pins and the feedback list no longer read refs during render or set state synchronously inside effects. No public API change; a few state updates now land one frame earlier.
+
+- [#173](https://github.com/manucoffin/faster-fixes/pull/173) [`e904154`](https://github.com/manucoffin/faster-fixes/commit/e90415436338f37e512a2fc9698197f4d5bbc528) Thanks [@manucoffin](https://github.com/manucoffin)! - Internal typing cleanup: null checks, fallbacks and non-null assertions now match the real types. No public API change. A feedback status the widget does not know still renders with the `new` color, and an invalid `position` still falls back to `bottom-right`.
+- Updated dependencies [[`5ec51c6`](https://github.com/manucoffin/faster-fixes/commit/5ec51c67e79287bc8ee457d8df2c29b25225476d), [`69e80e5`](https://github.com/manucoffin/faster-fixes/commit/69e80e563af5685cbcae11b511cbfa0c0a674db6), [`e904154`](https://github.com/manucoffin/faster-fixes/commit/e90415436338f37e512a2fc9698197f4d5bbc528)]:
+  - @fasterfixes/core@0.0.8
+
 ## 0.0.11
 
 ### Patch Changes
