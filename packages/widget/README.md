@@ -30,7 +30,7 @@ The tag works in the `<head>` with `defer`, at the end of the `<body>`, or injec
 | `data-position`            | No       | Floating button placement. Defaults to `bottom-right`.                            |
 | `data-capture-diagnostics` | No       | Set to `"false"` to disable the Diagnostic Trail. Enabled by default.             |
 
-`labels` cannot be set through attributes. Use `init` for them.
+`labels` cannot be set through attributes. To set them, or to pass the full option object, see Manual initialization below.
 
 ### Manual initialization
 

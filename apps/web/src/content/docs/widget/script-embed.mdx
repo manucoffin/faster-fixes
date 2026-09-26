@@ -1,9 +1,7 @@
 ---
 title: Script Embed
-description: Install the Faster Fixes widget on any website with one script tag, no build step required.
+description: "Install the widget on any site: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte or another framework."
 ---
-
-The script embed installs the widget on any site: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte or another framework. It ships no framework runtime and renders inside a Shadow DOM, so your site's CSS does not affect it.
 
 ## Snippet
 
@@ -43,7 +41,7 @@ The widget stays hidden from your public visitors. It appears only when a Review
 ></script>
 ```
 
-Custom `labels` cannot be set through attributes. Use `init` for them.
+Custom `labels` cannot be set through attributes. To set them, or to pass the full option object, see [Manual initialization](#manual-initialization) below.
 
 ## Manual initialization
 
@@ -78,6 +76,22 @@ onUnmounted(() => {
 The same pattern applies to `ngOnInit` and `ngOnDestroy` in Angular, and to `onMount` in Svelte.
 
 Calling `init` while a widget is already mounted destroys the previous instance first, so the widget never mounts twice. After initialization, `window.FasterFixes.instance` holds the current instance.
+
+## Install from npm
+
+With a bundler, install the package and import `init` instead of loading the CDN script. The package ships an ESM entry with TypeScript types.
+
+```package-install
+@fasterfixes/widget
+```
+
+```ts
+import { init } from "@fasterfixes/widget";
+
+const widget = init({ projectId: "proj_your_project_id" });
+```
+
+The [options](#options) and the [instance](#instance) below apply to both entry points. `window.FasterFixes` is only defined by the CDN script.
 
 ## Options
 
@@ -116,19 +130,3 @@ Use the instance to drive the widget from your own controls:
   Report an issue
 </button>
 ```
-
-## Install from npm
-
-With a bundler, install the package and import `init` instead of loading the CDN script. The package ships an ESM entry with TypeScript types.
-
-```package-install
-@fasterfixes/widget
-```
-
-```ts
-import { init } from "@fasterfixes/widget";
-
-const widget = init({ projectId: "proj_your_project_id" });
-```
-
-The options and the instance are the same as above. `window.FasterFixes` is only defined by the CDN script.

@@ -3,9 +3,9 @@
   "defaultOpen": true,
   "pages": [
     "react",
+    "use-feedback-hook",
     "script-embed",
     "customization",
-    "use-feedback-hook",
-    "other-frameworks"
+    "headless-client"
   ]
 }
