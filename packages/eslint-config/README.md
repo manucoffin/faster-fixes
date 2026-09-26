@@ -74,6 +74,12 @@ component is an `export function`) and `local/require-named-props-type` (props
 in a named type, destructured in the signature) for the web app and the React
 packages.
 
+Both React configs (`next.js`, `react-internal.js`) spread the
+`recommended-latest` preset of `eslint-plugin-react-hooks` v7: the rules of
+hooks plus the React Compiler rules (`set-state-in-effect`, `refs`, `purity`,
+`immutability`, `static-components`, ...). The compiler itself is not enabled;
+the rules report the patterns it could not optimise, which usually hide a bug.
+
 Severity is binary: `severity.js` promotes every `warn` a plugin preset ships
 (react-hooks, Next.js, turbo) to `error`, and `binary-severity.test.js` holds
 every exported config to it.

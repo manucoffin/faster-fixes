@@ -153,6 +153,7 @@ On the folders and the schemas:
 - `schema-must-be-pure-zod` and `require-schema-conventions` on `**/*.schema.ts`. See [schemas.md](schemas.md).
 - `no-raw-tailwind-colors` on class strings, and `no-relative-test-mock` on `*.test.ts(x)`. See [frontend.md](frontend.md) and [testing.md](testing.md).
 - `require-named-props-type` on component props, `no-form-state-prop` and `no-form-mutation-in-effect` on react-hook-form, and `error-boundary-renders-error-screen` on `error.tsx` / `global-error.tsx`. See [frontend.md](frontend.md), [code-shape.md](code-shape.md) and [errors.md](errors.md).
+- The `eslint-plugin-react-hooks` v7 preset (`recommended-latest`) on every React module: the rules of hooks, `exhaustive-deps` and the React Compiler rules (`set-state-in-effect`, `refs`, `purity`, `immutability`, `static-components`, `incompatible-library`, ...). Each rule's message says what to do instead.
 
 The five boundary rules (`no-client-import-of-server-folder`, `no-client-import-of-services`,
 `no-cross-domain-deep-import`, `no-cross-layer-import`, `require-server-action-suffix`) and the

@@ -28,7 +28,10 @@ export const config = withBinarySeverity([
     },
     settings: { react: { version: "detect" } },
     rules: {
-      ...pluginReactHooks.configs.recommended.rules,
+      // v7 preset: the React Compiler rules (`set-state-in-effect`, `refs`,
+      // `purity`, `immutability`, `static-components`, ...) report the
+      // patterns the compiler cannot optimise and that usually hide a bug.
+      ...pluginReactHooks.configs["recommended-latest"].rules,
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
