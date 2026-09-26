@@ -10,10 +10,7 @@ Export pattern:
 - Never use default exports, anywhere under `src/`. The Next.js special files (`page`, `layout`, `error`, `not-found`, `sitemap`, `manifest`, …) are the one exception: the framework requires a default export from them. Enforced by `local/no-default-export`, which also reports `export { X as default }` and reads the special file names from one anchored list in `packages/eslint-config/next.js`.
 - Use named exports consistently.
 
-Props pattern (**prose only**, no rule):
-
-- Pass a props object as the first parameter.
-- Define a separate props type, destructure in the parameter list, type it inline.
+Props pattern: a named `<Component>Props` type, destructured in the parameter list. Enforced by `local/require-named-props-type`, which reports an inline type literal in the signature (alone or in an intersection) and an undestructured `props` parameter.
 
 ```tsx
 type MyComponentProps = {

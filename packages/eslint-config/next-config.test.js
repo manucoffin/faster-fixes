@@ -1301,6 +1301,7 @@ describe("the style rules", () => {
     "@typescript-eslint/consistent-type-definitions",
     "@typescript-eslint/consistent-type-imports",
     "react/function-component-definition",
+    "local/require-named-props-type",
     "no-nested-ternary",
     "no-else-return",
   ];
@@ -1367,6 +1368,24 @@ describe("the style rules", () => {
       await messagesFor(
         FEATURE,
         `export function Stars() {\n  return <span />;\n}\n`,
+        rule,
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports inline props and accepts a named, destructured props type", async () => {
+    const rule = "local/require-named-props-type";
+    const reported = await messagesFor(
+      FEATURE,
+      `export function Stars({ count }: { count: number }) {\n  return <span>{count}</span>;\n}\n`,
+      rule,
+    );
+
+    expect(reported.map((message) => message.severity)).toEqual([2]);
+    expect(
+      await messagesFor(
+        FEATURE,
+        `type StarsProps = { count: number };\nexport function Stars({ count }: StarsProps) {\n  return <span>{count}</span>;\n}\n`,
         rule,
       ),
     ).toEqual([]);

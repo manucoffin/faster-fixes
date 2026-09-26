@@ -35,6 +35,9 @@ const EXPECTED_CITATIONS = {
   // transport error mapping (0012), the package entry points (0013).
   "no-cross-layer-import.js": ["0010", "0011", "0012", "0013"],
   "require-inngest-function-placement.js": ["0011"],
+  // A component-shape convention of the coding standards: the props contract
+  // is a named type, which no architecture decision discusses.
+  "require-named-props-type.js": [],
   // A repo-wide naming convention of the coding standards, with no
   // architecture decision behind it: no ADR discusses default exports, and the
   // one exception the rule carries (the Next.js special files) comes from the

@@ -67,7 +67,9 @@ route types before it lints. `next-config.test.js` lints made-up paths, so it
 switches them off with `disableTypeChecked`.
 
 `component-shape.js` holds `react/function-component-definition` (a named
-component is an `export function`) for the web app and the React packages.
+component is an `export function`) and `local/require-named-props-type` (props
+in a named type, destructured in the signature) for the web app and the React
+packages.
 
 Severity is binary: `severity.js` promotes every `warn` a plugin preset ships
 (react-hooks, Next.js, turbo) to `error`, and `binary-severity.test.js` holds
