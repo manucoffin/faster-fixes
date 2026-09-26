@@ -19,8 +19,8 @@
 - The user MAY delete files. If a file is already deleted (shows as `deleted` in git status), do NOT restore it — include the deletion as-is in the commit.
 - If env vars change, update `.env.example` only.
 - Never run a bare `pnpm install` to "refresh" anything. `pnpm-lock.yaml` is committed with Prettier's quoting (lint-staged reformats it), and pnpm rewrites it with its own, producing a ~20,000-line diff unrelated to your change. Install only when you are deliberately adding or removing a dependency, and check the lockfile diff before committing.
-- Never run production database migrations (`pnpm migrate:prod`).
-- Only run development migrations (`pnpm migrate:dev`); production migration execution is user-managed.
+- Never run production database migrations (`pnpm --filter @workspace/db migrate:prod`).
+- Only run development migrations (`pnpm --filter @workspace/db migrate:dev`); production migration execution is user-managed.
 - Code identifiers, comments, filenames, schemas: English only.
 - User-facing UI copy: English only. Professional, clear, and concise — match the tone of serious developer tools (e.g., Vercel, Linear, Stripe). No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated wording.
 - Never use the em dash character (`—`) in user-facing text. Use a comma, colon, or period instead.
@@ -41,12 +41,12 @@ All coding standards for this project live in the `coding-standards` skill at `.
 
 ## Required checks before done
 
-- **On a fresh clone, generate before you check.** The Prisma client, the published package builds and the Next.js route types are all untracked, so `pnpm typecheck` reports errors unrelated to your change until you have run `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and `npx next typegen` (from `apps/web`).
+- **On a fresh clone, generate before you check.** The Prisma client, the published package builds and the Next.js route types are all untracked, so `pnpm typecheck` reports errors unrelated to your change until you have run `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and `pnpm --filter web exec next typegen`.
 - Run from repo root: `pnpm typecheck`.
 - Run from repo root: `pnpm test`.
 - Run from repo root: `pnpm lint` (all workspaces). Zero warnings tolerated: it runs with `--max-warnings 0`, so a warning fails it just like an error. Every convention rule is at `error` and reports nothing, which means any report is a regression.
-- If DB schema changed: run required `packages/database` generation/migration commands.
-- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `_domains/integration/_services/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
+- If DB schema changed: run `pnpm --filter @workspace/db migrate:dev`, then `pnpm --filter @workspace/db db:gen`.
+- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `apps/web/src/app/_domains/integration/_services/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
 - Never declare completion while required checks fail.
 - The pre-commit hook runs the same checks: lint-staged (Prettier on every staged file, ESLint with zero warnings on staged `ts`, `tsx`, `js`, `jsx` files), then `pnpm typecheck` and `pnpm test`. There is one lint mode, so the hook enforces every convention rule (ADR-0015). The hook only sees staged files and `--no-verify` skips it, which is why CI runs the same commands.
 
@@ -81,12 +81,6 @@ Default canonical vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 
 Single-context repo. Glossary at `CONTEXT.md`; ADRs in `docs/adr/`. See `docs/agents/domain.md`.
 
-<!-- BEGIN:nextjs-agent-rules -->
+## Next.js
 
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+`apps/web` runs a Next.js version with breaking changes against your training data. Before writing Next.js code, read the relevant guide in `apps/web/node_modules/next/dist/docs/` (see `apps/web/AGENTS.md`).
