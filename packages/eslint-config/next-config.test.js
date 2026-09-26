@@ -126,7 +126,7 @@ describe("the schema rules wiring", () => {
     expect(severity).toBe("error");
     expect(Object.keys(options)).toEqual(["allowImportPatterns"]);
     expect(options.allowImportPatterns).toEqual([
-      "/_domains/feedback/_types/feedback-status$",
+      "^@/app/_domains/feedback$",
       "/_domains/project/_helpers/normalize-domain$",
       "^@/app/_domains/subscription$",
     ]);
@@ -165,7 +165,7 @@ describe("the schema rules wiring", () => {
     const namedExceptions = [
       [
         "src/app/api/v1/agent/_services/agent.schema.ts",
-        "@/app/_domains/feedback/_types/feedback-status",
+        "@/app/_domains/feedback",
       ],
       [
         "src/app/_domains/project/_services/domain.schema.ts",

@@ -27,11 +27,10 @@ const schemaConventionOptions = {
 // server folder deep-import exemptions below.
 const schemaPurityOptions = {
   allowImportPatterns: [
-    // Glossary vocabulary, not an operation input: a Zod enum for a CONTEXT.md
-    // value lives in `_types/` rather than in a schema file, so the schema that
-    // validates that value has to reach for it there. The module is Zod and
-    // string literals.
-    "/_domains/feedback/_types/feedback-status$",
+    // The status vocabulary of the feedback domain, read through that domain's
+    // barrel, which is the only sanctioned cross-domain specifier. The enum is
+    // Zod and string literals; the barrel's other export is a pure formatter.
+    "^@/app/_domains/feedback$",
     // A pure string helper: the domain schema normalises a host name inside a
     // `transform`, and the helper has no import of its own.
     "/_domains/project/_helpers/normalize-domain$",

@@ -1,4 +1,4 @@
-import { FeedbackStatusEnum } from "@/app/_domains/feedback/_types/feedback-status";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 
 // "resolved" and "closed" (rendered as "Archived") are both terminal states;

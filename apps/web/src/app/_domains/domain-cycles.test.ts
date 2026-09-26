@@ -183,7 +183,7 @@ describe("domainImportsIn", () => {
   it("reads a relative specifier by where it lands", () => {
     const imports = domainImportsIn(
       file,
-      `import { status } from "../../feedback/_types/feedback-status";`,
+      `import { status } from "../../feedback/_helpers/feedback-status";`,
     );
 
     expect([...imports]).toEqual(["feedback"]);

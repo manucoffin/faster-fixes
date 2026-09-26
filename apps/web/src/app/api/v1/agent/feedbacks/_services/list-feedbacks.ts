@@ -1,4 +1,4 @@
-import type { FeedbackStatus } from "@/app/_domains/feedback/_types/feedback-status";
+import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";

@@ -1,4 +1,4 @@
-import { FeedbackStatusEnum } from "@/app/_domains/feedback/_types/feedback-status";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import { z } from "zod";
 
 export const ListFeedbacksQuerySchema = z.object({
