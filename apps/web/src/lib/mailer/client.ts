@@ -4,16 +4,4 @@ import { createMailer } from "./mailer-factory";
 
 export const mailer = createMailer();
 
-// Re-export types for convenience
-export type {
-  AddContactToSegmentOptions,
-  Contact,
-  CreateContactOptions,
-  EmailAttachment,
-  EmailResponse,
-  Mailer,
-  MailOptions,
-  UpdateContactOptions,
-} from "./types";
-
-export { EmailError } from "./types";
+export type { Mailer } from "./types";

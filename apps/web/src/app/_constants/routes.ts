@@ -1,4 +1,3 @@
-export const rootUrl = "/";
 export const loginUrl = "/login";
 export const signupUrl = "/signup";
 export const forgotPasswordUrl = "/forgot-password";

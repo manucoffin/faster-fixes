@@ -1,6 +1,3 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-
 const ALLOWED_HEADERS = ["X-API-Key", "X-Reviewer-Token", "Content-Type"].join(
   ", ",
 );
@@ -22,36 +19,4 @@ export function corsHeaders(origin: string): Record<string, string> {
     "Access-Control-Allow-Headers": ALLOWED_HEADERS,
     "Access-Control-Max-Age": MAX_AGE,
   };
-}
-
-/**
- * Handles OPTIONS preflight requests.
- * Call this from route handlers that need CORS.
- */
-export function handlePreflight(req: NextRequest): NextResponse | null {
-  if (req.method !== "OPTIONS") return null;
-
-  const origin = req.headers.get("origin");
-  if (!origin) {
-    return new NextResponse(null, { status: 204 });
-  }
-
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders(origin),
-  });
-}
-
-/**
- * Wraps a NextResponse with CORS headers derived from the request origin.
- */
-export function withCors(req: NextRequest, res: NextResponse): NextResponse {
-  const origin = req.headers.get("origin");
-  if (origin) {
-    const headers = corsHeaders(origin);
-    for (const [key, value] of Object.entries(headers)) {
-      res.headers.set(key, value);
-    }
-  }
-  return res;
 }

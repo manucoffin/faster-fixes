@@ -55,6 +55,7 @@ export async function exchangeOAuthCode(
   return (await res.json()) as LinearOAuthTokenResponse;
 }
 
+/** @public Not wired yet: no code path refreshes an expired Linear token. */
 export async function refreshAccessToken(
   refreshToken: string,
 ): Promise<LinearOAuthTokenResponse> {

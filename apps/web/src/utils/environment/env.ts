@@ -69,54 +69,10 @@ export function getEnvironmentInfo(): EnvironmentInfo {
 }
 
 /**
- * Quick check if we're in production environment
- */
-export function isProduction(): boolean {
-  return getEnvironmentInfo().isProduction;
-}
-
-/**
- * Quick check if we're in preview environment (Vercel previews)
- */
-export function isPreview(): boolean {
-  return getEnvironmentInfo().isPreview;
-}
-
-/**
  * Quick check if we're in development environment
  */
 export function isDevelopment(): boolean {
   return getEnvironmentInfo().isDevelopment;
-}
-
-/**
- * Quick check if we're in test environment
- */
-export function isTest(): boolean {
-  return getEnvironmentInfo().isTest;
-}
-
-/**
- * Quick check if we're running on Vercel (any environment)
- */
-export function isVercel(): boolean {
-  return getEnvironmentInfo().isVercel;
-}
-
-/**
- * Quick check if we're running locally (not on Vercel)
- */
-export function isLocal(): boolean {
-  return getEnvironmentInfo().isLocal;
-}
-
-/**
- * Check if we're in a "safe" environment for debugging/development features
- * Returns true for development, preview, and test environments
- */
-export function isSafeForDebugging(): boolean {
-  const env = getEnvironmentInfo();
-  return env.isDevelopment || env.isPreview || env.isTest;
 }
 
 /**

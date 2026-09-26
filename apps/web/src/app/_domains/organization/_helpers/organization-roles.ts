@@ -18,7 +18,3 @@ export function canManageMembers(role: string): boolean {
 export function canManageBilling(role: string): boolean {
   return role === "owner";
 }
-
-export function canManageInvitations(role: string): boolean {
-  return role === "owner" || role === "admin";
-}
