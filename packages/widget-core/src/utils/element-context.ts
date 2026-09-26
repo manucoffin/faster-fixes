@@ -17,11 +17,11 @@ function describeElement(el: Element): string {
 
   const label =
     el.getAttribute("aria-label") ??
-    (el as HTMLInputElement).placeholder ??
+    // Only form controls have `placeholder`; on any other element it is undefined
+    (el as Partial<HTMLInputElement>).placeholder ??
     el.getAttribute("alt") ??
     el.getAttribute("title") ??
-    el.textContent?.trim().slice(0, 50) ??
-    null;
+    el.textContent.trim().slice(0, 50);
 
   const typeAttr = el.getAttribute("type");
   const roleAttr = el.getAttribute("role");
@@ -41,13 +41,13 @@ function describeElement(el: Element): string {
 function collectNearbyText(el: Element, maxLength = 200): string {
   const parts: string[] = [];
 
-  const prev = el.previousElementSibling?.textContent?.trim();
+  const prev = el.previousElementSibling?.textContent.trim();
   if (prev) parts.push(prev);
 
-  const self = el.textContent?.trim();
+  const self = el.textContent.trim();
   if (self) parts.push(self);
 
-  const next = el.nextElementSibling?.textContent?.trim();
+  const next = el.nextElementSibling?.textContent.trim();
   if (next) parts.push(next);
 
   const joined = parts.join(" | ");

@@ -6,8 +6,8 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
-import { STATUS_COLORS } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import {
   popoverStyle,
   textareaStyle,
@@ -125,23 +125,22 @@ export function PinPopover() {
 
   if (!currentFeedback) return null;
 
-  const statusColor =
-    STATUS_COLORS[currentFeedback.status] ?? STATUS_COLORS.new;
+  const statusColor = getStatusColor(currentFeedback.status);
 
-  function handleStartEdit() {
-    setEditComment(currentFeedback!.comment);
+  const handleStartEdit = () => {
+    setEditComment(currentFeedback.comment);
     setIsEditing(true);
     setError(null);
-  }
+  };
 
-  async function handleSave() {
+  const handleSave = async () => {
     if (!editComment.trim()) return;
     setIsSaving(true);
     setError(null);
 
     try {
       await client.updateFeedback(
-        currentFeedback!.id,
+        currentFeedback.id,
         { comment: editComment.trim() },
         reviewerToken,
       );
@@ -153,21 +152,21 @@ export function PinPopover() {
     } finally {
       setIsSaving(false);
     }
-  }
+  };
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
 
     try {
-      await client.deleteFeedback(currentFeedback!.id, reviewerToken);
+      await client.deleteFeedback(currentFeedback.id, reviewerToken);
       setActiveFeedback(null);
       await refreshFeedback();
     } catch (err) {
       setError(err instanceof Error ? err.message : labels.errorMessage);
       setIsDeleting(false);
     }
-  }
+  };
 
   function handleClose() {
     setIsEditing(false);

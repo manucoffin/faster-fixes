@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
+import { resolveElement } from "@fasterfixes/core";
 import type { FeedbackItem, SelectorStrategies } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import { pinStyle } from "../styles.js";
 import {
   clamp,
@@ -50,7 +51,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     const metadata = item.metadata as Record<string, unknown> | null;
     const strategies = metadata?.selectors as SelectorStrategies | undefined;
     const pinAnchor = getPinAnchor(item.metadata);
-    const hasSelector = !!(item.selector || strategies);
+    const hasSelector = !!item.selector || !!strategies;
     const el = hasSelector ? resolveElement(item.selector, strategies) : null;
 
     if (el) {
@@ -161,7 +162,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   if (!position) return null;
 
   const isActive = activeFeedback?.id === item.id;
-  const statusColor = STATUS_COLORS[item.status] ?? STATUS_COLORS.new;
+  const statusColor = getStatusColor(item.status);
 
   return (
     <button

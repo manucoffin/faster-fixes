@@ -184,9 +184,7 @@ export function CommentPopover() {
       }
 
       // Full capture too slow — retry without images/videos for a fast lightweight capture
-      if (!screenshot) {
-        screenshot = await captureViewportScreenshot({ lightweight: true });
-      }
+      screenshot ??= await captureViewportScreenshot({ lightweight: true });
 
       if (!screenshot) return;
 

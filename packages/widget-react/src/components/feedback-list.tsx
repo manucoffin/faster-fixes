@@ -1,7 +1,8 @@
 import type { SelectorStrategies } from "@fasterfixes/core";
-import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
+import { resolveElement } from "@fasterfixes/core";
 import { useEffect, useRef, useState } from "react";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import {
   feedbackListItemStyle,
   feedbackListStyle,
@@ -113,7 +114,7 @@ export function FeedbackList() {
         </div>
       ) : (
         visibleItems.map((item) => {
-          const statusColor = STATUS_COLORS[item.status] ?? STATUS_COLORS.new;
+          const statusColor = getStatusColor(item.status);
 
           return (
             <div

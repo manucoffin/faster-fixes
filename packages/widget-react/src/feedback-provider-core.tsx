@@ -140,7 +140,8 @@ export function FeedbackProviderCore({
   // Initial feedback load
   useEffect(() => {
     let cancelled = false;
-    void (async () => {
+    // Not an IIFE: TypeScript would narrow `cancelled` to false inside it and miss the cleanup
+    const loadFeedback = async () => {
       try {
         const res = await client.getFeedback(reviewerToken);
         if (!cancelled) {
@@ -151,7 +152,8 @@ export function FeedbackProviderCore({
       } finally {
         if (!cancelled) setFeedbackLoaded(true);
       }
-    })();
+    };
+    void loadFeedback();
     return () => {
       cancelled = true;
     };
@@ -187,8 +189,9 @@ export function FeedbackProviderCore({
       !feedbackLoaded ||
       feedbackItems.length === 0 ||
       pendingFeedbackHandled.current
-    )
+    ) {
       return;
+    }
     try {
       const pendingId = sessionStorage.getItem("ff_pending_feedback");
       if (!pendingId) return;
@@ -293,8 +296,11 @@ export function FeedbackProviderCore({
     };
   }, []);
 
+  // why: a JS consumer can pass a position outside WidgetPosition
+  const positionStyles: Partial<Record<string, React.CSSProperties>> =
+    POSITION_STYLES;
   const posStyle =
-    POSITION_STYLES[effectivePosition] ?? POSITION_STYLES["bottom-right"];
+    positionStyles[effectivePosition] ?? POSITION_STYLES["bottom-right"];
 
   const show = () => setIsVisible(true);
   const hide = () => {
