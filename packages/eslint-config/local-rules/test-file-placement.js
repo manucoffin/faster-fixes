@@ -18,6 +18,11 @@
 // A `*.spec.ts(x)` name and a `__tests__/` folder are reported too: the
 // harness only collects `*.test.ts(x)`, so a spec file never runs, and a
 // separate test folder breaks the colocation above.
+//
+// The one exception is an `e2e/` folder at the root of a workspace: Playwright
+// specs drive the running app through a browser, so they have no subject to
+// sit beside. There the naming flips: Playwright collects `*.spec.ts` and
+// Vitest never looks, so a `*.test.ts(x)` in `e2e/` runs in neither harness.
 
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -30,6 +35,7 @@ const TESTS_FOLDER = "__tests__";
 const SUBJECT_EXTENSIONS = [".ts", ".tsx"];
 
 const APP_SEGMENT = "/src/app/";
+const E2E_SEGMENT_RE = /\/(?:apps|packages)\/[^/]+\/e2e\//;
 const TESTABLE_BUCKETS = new Set(["_helpers", "_services"]);
 const ROUTE_TEST_RE = /^route\.test\.tsx?$/;
 
@@ -53,7 +59,7 @@ export const testFilePlacementRule = {
     type: "problem",
     docs: {
       description:
-        "A test sits next to the module it tests, under the same basename, and inside `src/app/` only in `_helpers/`, `_services/` or beside a route handler. Structural checks are named in the config.",
+        "A test sits next to the module it tests, under the same basename, and inside `src/app/` only in `_helpers/`, `_services/` or beside a route handler. Structural checks are named in the config. End-to-end specs live in a workspace `e2e/` folder as `*.spec.ts`.",
     },
     schema: [
       {
@@ -70,6 +76,8 @@ export const testFilePlacementRule = {
     messages: {
       specName:
         "The harness collects `*.test.ts(x)` files only, so this file never runs. Rename it to `{{ suggested }}`.",
+      e2eTestName:
+        "Playwright collects `*.spec.ts` files in `e2e/` and Vitest does not look there, so this file never runs. Rename it to `{{ suggested }}`.",
       testsFolder:
         "A test sits next to the file it tests, not in a `__tests__/` folder, so the pair moves and renames together. Move this file beside its subject.",
       missingSubject:
@@ -85,6 +93,16 @@ export const testFilePlacementRule = {
 
     return {
       Program(node) {
+        if (E2E_SEGMENT_RE.test(filename)) {
+          if (TEST_RE.test(basename)) {
+            context.report({
+              node,
+              messageId: "e2eTestName",
+              data: { suggested: basename.replace(".test.", ".spec.") },
+            });
+          }
+          return;
+        }
         if (SPEC_RE.test(basename)) {
           context.report({
             node,

@@ -1,0 +1,21 @@
+---
+title: Headless Client
+description: Build your own feedback UI on top of the Faster Fixes core client.
+---
+
+To build your own feedback UI, use the core client directly:
+
+```package-install
+@fasterfixes/core
+```
+
+```ts
+import { FasterFixesClient } from "@fasterfixes/core";
+
+const client = new FasterFixesClient({
+  apiKey: "proj_your_project_id",
+  apiOrigin: "https://www.faster-fixes.com", // optional
+});
+```
+
+The core package provides the API client, selector generation utilities, and browser info helpers without any framework dependency. See the [Feedback API](/docs/api-reference/feedback-api) for all available endpoints.

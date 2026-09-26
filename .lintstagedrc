@@ -3,6 +3,7 @@
   "apps/web/**/*.{ts,tsx,js,jsx}": "pnpm --filter web exec eslint --max-warnings 0",
   "packages/ui/**/*.{ts,tsx,js,jsx}": "pnpm --filter @workspace/ui exec eslint --max-warnings 0",
   "packages/mcp/**/*.{ts,tsx,js,jsx}": "pnpm --filter @fasterfixes/mcp exec eslint --max-warnings 0",
+  "packages/widget/**/*.{ts,tsx,js,jsx}": "pnpm --filter @fasterfixes/widget exec eslint --max-warnings 0",
   "packages/widget-core/**/*.{ts,tsx,js,jsx}": "pnpm --filter @fasterfixes/core exec eslint --max-warnings 0",
   "packages/widget-react/**/*.{ts,tsx,js,jsx}": "pnpm --filter @fasterfixes/react exec eslint --max-warnings 0"
 }

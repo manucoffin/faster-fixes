@@ -1,75 +1,121 @@
 ---
 title: Customization
-description: Customize widget appearance with custom CSS classes and text labels.
+description: Customize the widget's text labels and theme it with CSS custom properties.
 ---
 
-## Custom CSS classes
+Both embeds accept the same `color`, `position` and `labels` options. The script embed is also themed with CSS custom properties and `::part()` selectors.
 
-Override the default widget styles using the `classNames` prop:
+## Labels
 
-```tsx
-<FeedbackProvider
-  projectId="proj_your_project_id"
-  classNames={{
-    button: "my-custom-button",
-    popover: "my-custom-popover",
-    textarea: "my-custom-textarea",
-  }}
->
-  {children}
-</FeedbackProvider>
-```
+Every string the widget displays or announces to screen readers comes from `labels`. Pass partial overrides: omitted keys keep their English default.
 
-### Available `classNames` keys
-
-| Key                | Description                           |
-| ------------------ | ------------------------------------- |
-| `button`           | The floating action button            |
-| `popover`          | The comment popover container         |
-| `textarea`         | The feedback text input               |
-| `pin`              | Feedback pins on the page             |
-| `overlay`          | The annotation overlay                |
-| `successState`     | Success message after submission      |
-| `errorState`       | Error message on failure              |
-| `feedbackList`     | The feedback list panel               |
-| `feedbackListItem` | Individual items in the feedback list |
-
-## Custom labels
-
-Override the default text strings using the `labels` prop:
+With the React embed:
 
 ```tsx
 <FeedbackProvider
   projectId="proj_your_project_id"
   labels={{
-    submitButton: "Send feedback",
-    cancelButton: "Cancel",
-    textareaPlaceholder: "Describe the issue...",
-    successMessage: "Feedback submitted",
+    submitButton: "Send",
+    cancelButton: "Discard",
+    textareaPlaceholder: "What should change?",
   }}
 >
   {children}
 </FeedbackProvider>
 ```
 
-The `labels` prop accepts partial overrides: only specify the strings you want to change.
+With the script embed:
+
+```js
+window.FasterFixes.init({
+  projectId: "proj_your_project_id",
+  labels: {
+    submitButton: "Send",
+    cancelButton: "Discard",
+    textareaPlaceholder: "What should change?",
+    pinAriaLabel: (comment) => `Reported issue: ${comment}`,
+  },
+});
+```
 
 ### Available `labels` keys
 
-| Key                   | Default                      |
-| --------------------- | ---------------------------- |
-| `submitButton`        | `"Submit"`                   |
-| `cancelButton`        | `"Cancel"`                   |
-| `textareaPlaceholder` | `"Describe the issue..."`    |
-| `successMessage`      | `"Feedback sent"`            |
-| `closeButton`         | `"Close"`                    |
-| `retryButton`         | `"Retry"`                    |
-| `errorMessage`        | `"Something went wrong"`     |
-| `deleteConfirm`       | `"Delete this feedback?"`    |
-| `deleteButton`        | `"Delete"`                   |
-| `editButton`          | `"Edit"`                     |
-| `saveButton`          | `"Save"`                     |
-| `showResolved`        | `"Show resolved"`            |
-| `hideResolved`        | `"Hide resolved"`            |
-| `feedbackListTitle`   | `"Feedback"`                 |
-| `emptyList`           | `"No feedback on this page"` |
+| Key                   | Default                                   | Used for                                                                      |
+| --------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `submitButton`        | `"Submit"`                                | Submit button of the comment popover                                          |
+| `cancelButton`        | `"Cancel"`                                | Cancel button of the comment popover                                          |
+| `textareaPlaceholder` | `"Describe the issue..."`                 | Placeholder of the comment field                                              |
+| `retryButton`         | `"Retry"`                                 | Retry button after a failed submission                                        |
+| `errorMessage`        | `"Something went wrong"`                  | Message after a failed submission                                             |
+| `deleteConfirm`       | `"Delete this feedback?"`                 | Confirmation before deleting a Feedback                                       |
+| `deleteButton`        | `"Delete"`                                | Delete action on a pin                                                        |
+| `editButton`          | `"Edit"`                                  | Edit action on a pin                                                          |
+| `saveButton`          | `"Save"`                                  | Save action when editing a Feedback                                           |
+| `showResolved`        | `"Show resolved"`                         | Feedback list filter                                                          |
+| `hideResolved`        | `"Hide resolved"`                         | Feedback list filter                                                          |
+| `feedbackListTitle`   | `"Feedback"`                              | Title of the Feedback list                                                    |
+| `emptyList`           | `"No feedback on this page"`              | Feedback list with no items                                                   |
+| `closeButton`         | `"Close"`                                 | Accessible name of the pin popover close control                              |
+| `startFeedback`       | `"Start feedback"`                        | Accessible name of the floating button                                        |
+| `exitFeedbackMode`    | `"Exit feedback mode"`                    | Accessible name of the exit control                                           |
+| `showFeedbackList`    | `"Show feedback list"`                    | Accessible name of the list control, list closed                              |
+| `hideFeedbackList`    | `"Hide feedback list"`                    | Accessible name of the list control, list open                                |
+| `showMarkers`         | `"Show markers"`                          | Accessible name of the pins control, pins hidden                              |
+| `hideMarkers`         | `"Hide markers"`                          | Accessible name of the pins control, pins shown                               |
+| `brandingLink`        | `"Powered by FasterFixes"`                | Branding link, when the Project shows branding                                |
+| `pinAriaLabel`        | `` (comment) => `Feedback: ${comment}` `` | Accessible name of a pin. A function that receives an excerpt of the comment. |
+| `successMessage`      | `"Feedback sent"`                         | Not displayed. Kept so existing `labels` objects remain valid.                |
+
+The React embed reads the keys from `submitButton` to `emptyList`. The script embed reads every key except `successMessage`.
+
+## Color and position
+
+The `color` option sets the accent color and accepts any CSS color value, including CSS variables. The `position` option places the floating button. See [Color](/docs/widget/react#color) and [Position](/docs/widget/react#position) for the values.
+
+## CSS custom properties
+
+The script embed renders inside an open Shadow DOM, so your site's styles, resets and `!important` rules do not reach it. Theme it by setting CSS custom properties on its host element, `[data-ff-widget]`:
+
+```css
+[data-ff-widget] {
+  --ff-background: #ffffff;
+  --ff-foreground: #18181b;
+  --ff-radius: 4px;
+  --ff-font-family: "Inter", sans-serif;
+}
+```
+
+| Property           | Default                                                             | Description                                          |
+| ------------------ | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| `--ff-accent`      | The `color` option, `#02527E` when unset                            | Buttons, controls, element highlight and focus rings |
+| `--ff-background`  | `#1c1c1c`                                                           | Popover and list background                          |
+| `--ff-foreground`  | `#e4e4e7`                                                           | Text color                                           |
+| `--ff-radius`      | `8px`                                                               | Corner radius of popovers and lists                  |
+| `--ff-font-family` | `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` | Font of every widget element                         |
+| `--ff-z-index`     | `2147483647`                                                        | Stacking level of the widget                         |
+
+Prefer the `color` option over `--ff-accent`, so the accent stays in one place.
+
+## Parts
+
+To style an element beyond the custom properties, target it with `::part()`:
+
+```css
+[data-ff-widget]::part(button) {
+  box-shadow: none;
+}
+```
+
+| Part        | Element                                 |
+| ----------- | --------------------------------------- |
+| `button`    | The floating action button              |
+| `overlay`   | The annotation overlay                  |
+| `popover`   | The comment popover and the pin popover |
+| `textarea`  | The comment field                       |
+| `pin`       | Each Feedback pin on the page           |
+| `list`      | The Feedback list panel                 |
+| `list-item` | Each item of the Feedback list          |
+
+## `classNames` (React only, deprecated)
+
+The React embed accepts a `classNames` prop with the keys `button`, `popover`, `textarea`, `pin`, `overlay`, `successState`, `errorState`, `feedbackList` and `feedbackListItem`. It is deprecated: the widget's own styles take precedence over the classes, so they have no visible effect. The script embed does not offer it. Use CSS custom properties and `::part()` instead.

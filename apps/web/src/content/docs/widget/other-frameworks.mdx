@@ -1,9 +1,17 @@
 ---
 title: Other Frameworks
-description: Use Faster Fixes with non-React frameworks via the core client.
+description: Use Faster Fixes on Vue, Angular, Svelte and any non-React site.
 ---
 
-We are actively working on integrations for other frameworks. In the meantime, you can use the core client directly:
+## Script embed
+
+The [script embed](/docs/widget/script-embed) installs the widget on any site with one `<script>` tag, including WordPress, Webflow, static HTML, and apps built with Vue, Angular or Svelte. It offers the same options and instance methods as the React embed. In a framework app, call `window.FasterFixes.init` from a mount hook, as shown in [Manual initialization](/docs/widget/script-embed#manual-initialization).
+
+With a bundler, install `@fasterfixes/widget` and import `init` instead. See [Install from npm](/docs/widget/script-embed#install-from-npm).
+
+## Headless client
+
+To build your own feedback UI, use the core client directly:
 
 ```package-install
 @fasterfixes/core
@@ -13,9 +21,9 @@ We are actively working on integrations for other frameworks. In the meantime, y
 import { FasterFixesClient } from "@fasterfixes/core";
 
 const client = new FasterFixesClient({
-  apiKey: "your-api-key",
+  apiKey: "proj_your_project_id",
   apiOrigin: "https://www.faster-fixes.com", // optional
 });
 ```
 
-The core package provides the API client, selector generation utilities, and browser info helpers without any React dependency. See the [Feedback API](/docs/api-reference/feedback-api) for all available endpoints.
+The core package provides the API client, selector generation utilities, and browser info helpers without any framework dependency. See the [Feedback API](/docs/api-reference/feedback-api) for all available endpoints.

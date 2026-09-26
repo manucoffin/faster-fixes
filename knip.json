@@ -13,7 +13,7 @@
       "entry": ["src/app/**/page.mdx", "mdx-components.tsx"],
       "ignoreFiles": ["src/app/_domains/*/index.ts"],
       "ignoreBinaries": ["portless", "stripe"],
-      "ignoreDependencies": ["@tailwindcss/postcss"]
+      "ignoreDependencies": ["@tailwindcss/postcss", "@fasterfixes/widget"]
     },
     "packages/database": {
       "ignoreDependencies": ["@prisma/client"]

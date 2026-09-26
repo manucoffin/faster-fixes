@@ -1,7 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider.client";
-import { FeedbackProvider } from "@fasterfixes/react";
+// import { FeedbackProvider } from "@fasterfixes/react";
 import { Analytics } from "@vercel/analytics/next";
 import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
@@ -76,7 +76,8 @@ export default function RootLayout({
               <NuqsAdapter>
                 <StopImpersonateButton />
 
-                <FeedbackProvider
+                {/* QA #171: React embed disabled, script embed below */}
+                {/* <FeedbackProvider
                   projectId={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
                   apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
                   classNames={{
@@ -85,9 +86,9 @@ export default function RootLayout({
                   }}
                   position="bottom-right"
                   captureDiagnostics={true}
-                >
-                  <RootProvider>{children}</RootProvider>
-                </FeedbackProvider>
+                > */}
+                <RootProvider>{children}</RootProvider>
+                {/* </FeedbackProvider> */}
 
                 <Toaster />
               </NuqsAdapter>
@@ -95,13 +96,17 @@ export default function RootLayout({
           </ConsentProvider>
         </ThemeProvider>
 
-        <Analytics />
+        {/* QA #171: local IIFE build served by the dev-only e2e route, the CDN @1 is not published yet */}
         <Script
-          defer
-          src="https://umami-analytics-swart.vercel.app/script.js"
-          data-website-id="8308ff4b-0aab-4cee-9042-359d0217a5e8"
+          src="/e2e/widget.iife.js"
+          data-project-id={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
+          data-api-origin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
+          data-position="bottom-right"
+          data-capture-diagnostics="true"
           strategy="afterInteractive"
         />
+
+        <Analytics />
       </body>
     </html>
   );

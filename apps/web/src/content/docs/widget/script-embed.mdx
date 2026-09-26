@@ -1,0 +1,132 @@
+---
+title: Script Embed
+description: "Install the widget on any site: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte or another framework."
+---
+
+## Snippet
+
+Paste this tag into your site, replacing the Project ID with your own:
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"
+  data-project-id="proj_your_project_id"
+  defer
+></script>
+```
+
+Get your Project ID in [Project Settings](https://faster-fixes.com/settings).
+
+The tag works in the `<head>` with `defer`, at the end of the `<body>`, or injected after the page has loaded. The `@1` channel serves every 1.x release: you receive fixes without editing the snippet, and a breaking change only ships under a new major version.
+
+The widget stays hidden from your public visitors. It appears only when a Reviewer token is present and the widget is enabled for the Project. See [Reviewer Tokens](/docs/concepts/reviewer-tokens).
+
+## Attributes
+
+| Attribute                  | Required | Description                                                                                         |
+| -------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `data-project-id`          | Yes      | Your Project ID. Without it, the script loads but does not initialize the widget.                   |
+| `data-api-origin`          | No       | API base URL. Defaults to `https://www.faster-fixes.com`                                            |
+| `data-color`               | No       | Accent color. Accepts any CSS color value. Defaults to `#02527E`                                    |
+| `data-position`            | No       | Floating button placement. Defaults to `bottom-right`. See [Position](/docs/widget/react#position). |
+| `data-capture-diagnostics` | No       | Set to `"false"` to disable the Diagnostic Trail. Enabled by default.                               |
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"
+  data-project-id="proj_your_project_id"
+  data-color="#7c3aed"
+  data-position="bottom-left"
+  defer
+></script>
+```
+
+Custom `labels` cannot be set through attributes. To set them, or to pass the full option object, see [Manual initialization](#manual-initialization) below.
+
+## Manual initialization
+
+Leave out `data-project-id` to load the script without mounting the widget, then call `window.FasterFixes.init` yourself. Use this to pass the full option object, or to start the widget from a framework's mount hook.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"></script>
+<script>
+  window.FasterFixes.init({
+    projectId: "proj_your_project_id",
+    labels: { submitButton: "Send" },
+  });
+</script>
+```
+
+In a Vue, Angular or Svelte app, place the tag before your application bundle so `window.FasterFixes` exists when your components mount. Initialize the widget in the mount hook and destroy it when the component unmounts:
+
+```js title="Vue"
+import { onMounted, onUnmounted } from "vue";
+
+let widget;
+
+onMounted(() => {
+  widget = window.FasterFixes.init({ projectId: "proj_your_project_id" });
+});
+
+onUnmounted(() => {
+  widget?.destroy();
+});
+```
+
+The same pattern applies to `ngOnInit` and `ngOnDestroy` in Angular, and to `onMount` in Svelte.
+
+Calling `init` while a widget is already mounted destroys the previous instance first, so the widget never mounts twice. After initialization, `window.FasterFixes.instance` holds the current instance.
+
+## Install from npm
+
+With a bundler, install the package and import `init` instead of loading the CDN script. The package ships an ESM entry with TypeScript types.
+
+```package-install
+@fasterfixes/widget
+```
+
+```ts
+import { init } from "@fasterfixes/widget";
+
+const widget = init({ projectId: "proj_your_project_id" });
+```
+
+The [options](#options) and the [instance](#instance) below apply to both entry points. `window.FasterFixes` is only defined by the CDN script.
+
+## Options
+
+`init` accepts one option object:
+
+| Option               | Type              | Default                        | Description                                                                                       |
+| -------------------- | ----------------- | ------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `projectId`          | `string`          | Required                       | Your Project ID, `proj_...`                                                                       |
+| `apiOrigin`          | `string`          | `https://www.faster-fixes.com` | API base URL                                                                                      |
+| `color`              | `string`          | `#02527E`                      | Accent color. Accepts any CSS color value.                                                        |
+| `position`           | `WidgetPosition`  | `bottom-right`                 | Floating button placement                                                                         |
+| `labels`             | `Partial<Labels>` | English defaults               | Replaces any visible or announced string. See [Customization](/docs/widget/customization#labels). |
+| `captureDiagnostics` | `boolean`         | `true`                         | Records the console and network history leading to a report                                       |
+
+An unknown `position`, a `projectId` that is not a non-empty string, or a `labels` value that is not an object prevents the widget from mounting. Development builds log a console error that names the option.
+
+## Instance
+
+`init` returns the widget instance. Its members match the [`useFeedback` hook](/docs/widget/use-feedback-hook) of the React package:
+
+| Member              | Description                                                                  |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `show()`            | Shows the widget after `hide()`                                              |
+| `hide()`            | Removes the widget from the page until `show()`                              |
+| `isVisible`         | `true` while the widget is on the page                                       |
+| `startAnnotation()` | Shows the widget and enters annotation mode                                  |
+| `feedbackItems`     | The Feedback items of the Project loaded so far                              |
+| `togglePins()`      | Hides or shows every pin on the page                                         |
+| `showPins`          | `true` while pins are shown                                                  |
+| `destroy()`         | Removes the widget, stops the Diagnostic Trail, and restores patched globals |
+
+Use the instance to drive the widget from your own controls:
+
+```html
+<button type="button" onclick="window.FasterFixes.instance?.startAnnotation()">
+  Report an issue
+</button>
+```

@@ -9,6 +9,16 @@ const nextConfig = {
     authInterrupts: true,
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/docs/widget/other-frameworks",
+        destination: "/docs/widget/script-embed",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
