@@ -286,7 +286,10 @@ test.describe("script embed style and labels", () => {
     });
 
     const start = page.getByRole("button", { name: "Start feedback" });
-    await expect(start).toHaveCSS("background-color", "rgb(22, 163, 74)");
+    await expect(page.locator('[part="button"]')).toHaveCSS(
+      "background-color",
+      "rgb(22, 163, 74)",
+    );
 
     await start.click();
     await page.locator("h1").click();

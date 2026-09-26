@@ -29,7 +29,10 @@ test.describe("script embed", () => {
 
     const button = page.getByRole("button", { name: "Start feedback" });
     await expect(button).toBeVisible();
-    await expect(button).toHaveCSS("background-color", "rgb(22, 163, 74)");
+    await expect(page.locator('[part="button"]')).toHaveCSS(
+      "background-color",
+      "rgb(22, 163, 74)",
+    );
 
     const box = await button.boundingBox();
     const viewport = page.viewportSize();
