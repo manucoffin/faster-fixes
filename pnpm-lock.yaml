@@ -593,18 +593,9 @@ importers:
 
   packages/widget-react:
     dependencies:
-      "@fasterfixes/core":
-        specifier: workspace:*
-        version: link:../widget-core
       "@fasterfixes/widget":
         specifier: workspace:*
         version: link:../widget
-      "@floating-ui/react":
-        specifier: ^0.27.16
-        version: 0.27.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      modern-screenshot:
-        specifier: ^4.6.8
-        version: 4.6.8
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -2489,21 +2480,6 @@ packages:
     peerDependencies:
       react: 19.3.0
       react-dom: 19.3.0
-
-  "@floating-ui/react@0.27.16":
-    resolution:
-      {
-        integrity: sha512-9O8N4SeG2z++TSM8QA/KTeKFBVCNEz/AGS7gWPJf6KFRzmRWixFRnCnkPHRDwSVZW6QPDO6uT0P2SpWNKCc9/g==,
-      }
-    peerDependencies:
-      react: 19.3.0
-      react-dom: 19.3.0
-
-  "@floating-ui/utils@0.2.10":
-    resolution:
-      {
-        integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==,
-      }
 
   "@floating-ui/utils@0.2.11":
     resolution:
@@ -15741,16 +15717,6 @@ snapshots:
       "@floating-ui/dom": 1.7.6
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-
-  "@floating-ui/react@0.27.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)":
-    dependencies:
-      "@floating-ui/react-dom": 2.1.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@floating-ui/utils": 0.2.10
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-      tabbable: 6.4.0
-
-  "@floating-ui/utils@0.2.10": {}
 
   "@floating-ui/utils@0.2.11": {}
 

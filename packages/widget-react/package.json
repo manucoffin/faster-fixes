@@ -49,14 +49,6 @@
       },
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./internal": {
-      "import": {
-        "types": "./dist/internal.d.ts",
-        "default": "./dist/internal.js"
-      },
-      "types": "./dist/internal.d.ts",
-      "default": "./dist/internal.js"
     }
   },
   "files": [
@@ -69,10 +61,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@fasterfixes/core": "workspace:*",
-    "@fasterfixes/widget": "workspace:*",
-    "@floating-ui/react": "^0.27.16",
-    "modern-screenshot": "^4.6.8"
+    "@fasterfixes/widget": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",
