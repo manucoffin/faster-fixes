@@ -19,7 +19,7 @@ test.describe("homepage demo", () => {
       page.getByRole("button", { name: /^Feedback: The CTA contrast/ }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /^Feedback: Should we mention/ }),
+      page.getByRole("button", { name: /^Feedback: Should we say/ }),
     ).toBeVisible();
   });
 
