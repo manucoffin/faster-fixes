@@ -64,6 +64,15 @@ Such a test sits next to the folder it checks and proves both halves: the scan i
 
 Because component tests are out of scope, the harness carries no DOM tooling. `jsdom` and `@testing-library/react` are added the day the first component test exists, not before.
 
+## End-to-end specs: the Widget in a real browser
+
+The Widget is the one piece of UI with an end-to-end suite, because it runs on pages the app does not own and its contract is what a customer's page sees. The harness is **Playwright**, in `apps/web/e2e/`, run with `pnpm --filter web test:e2e` (CI job "Widget end to end"). `apps/web/playwright.config.ts` starts `next dev` on port 3100 with placeholder env values, so the suite needs no database and no `.env`. Stop your own `next dev` in `apps/web` first: Next.js refuses a second dev server for the same directory.
+
+- **Placement, enforced by `local/test-file-placement`:** specs live in the workspace `e2e/` folder and are named `*.spec.ts`, the one place that name is right. A `*.test.ts` there is reported, since Playwright collects specs only and Vitest only reads `src/`. Support modules sit beside the specs under ordinary names.
+- **No backend.** `e2e/widget-api-stub.ts` answers every widget HTTP API endpoint by route interception on an unresolvable origin (`NEXT_PUBLIC_FF_API_ORIGIN`), with bodies shaped like the real handlers, and records each request for assertions. A request the stub misses fails rather than reaching a server. The app's own session request is answered in the spec for the same reason.
+- **One scenario, every fixture.** A fixture is a page that installs the Widget, listed in `e2e/widget-fixtures.ts`. `widget.spec.ts` loops over the list, so a new Embed is covered by adding an entry, never by copying a scenario.
+- **Assert what a Reviewer or the customer's page observes:** the DOM by role and accessible name, `localStorage`, the address bar and the stubbed requests. The same "good test" rules below apply.
+
 ## What makes a good test
 
 **Prose only**, no rule, apart from the mock boundary already covered by `local/no-relative-test-mock`.

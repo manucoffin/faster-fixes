@@ -20,6 +20,7 @@ const ruleTester = new RuleTester({
 const root = mkdtempSync(join(tmpdir(), "test-file-placement-"));
 const SRC = join(root, "apps/web/src").replace(/\\/g, "/");
 const APP = `${SRC}/app`;
+const E2E = join(root, "apps/web/e2e").replace(/\\/g, "/");
 
 const SUBJECTS = [
   `${APP}/_domains/project/_helpers/is-allowed-origin.ts`,
@@ -72,6 +73,16 @@ ruleTester.run("test-file-placement", testFilePlacementRule, {
       options: STRUCTURAL,
     },
     {
+      name: "a Playwright spec in the workspace e2e folder",
+      filename: `${E2E}/widget.spec.ts`,
+      code: CODE,
+    },
+    {
+      name: "a support module in the workspace e2e folder",
+      filename: `${E2E}/widget-api-stub.ts`,
+      code: CODE,
+    },
+    {
       name: "a non-test module is ignored",
       filename: `${APP}/_domains/project/_helpers/is-allowed-origin.ts`,
       code: CODE,
@@ -116,6 +127,25 @@ ruleTester.run("test-file-placement", testFilePlacementRule, {
     {
       name: "a spec file the harness never collects",
       filename: `${APP}/_domains/project/_helpers/is-allowed-origin.spec.ts`,
+      code: CODE,
+      errors: [
+        {
+          messageId: "specName",
+          data: { suggested: "is-allowed-origin.test.ts" },
+        },
+      ],
+    },
+    {
+      name: "a test-named file in the e2e folder that neither harness collects",
+      filename: `${E2E}/widget.test.ts`,
+      code: CODE,
+      errors: [
+        { messageId: "e2eTestName", data: { suggested: "widget.spec.ts" } },
+      ],
+    },
+    {
+      name: "an e2e folder nested inside src is not the workspace e2e folder",
+      filename: `${APP}/_domains/project/_helpers/e2e/is-allowed-origin.spec.ts`,
       code: CODE,
       errors: [
         {
