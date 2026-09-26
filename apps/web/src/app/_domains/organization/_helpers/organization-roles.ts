@@ -7,7 +7,9 @@ export const ORGANIZATION_ROLES = {
 export type OrganizationRole = keyof typeof ORGANIZATION_ROLES;
 
 export function getRoleLabel(role: string): string {
-  return ORGANIZATION_ROLES[role as OrganizationRole] ?? role;
+  // Widened so an unknown role reads as `undefined` instead of being cast into a key.
+  const labels: Record<string, string> = ORGANIZATION_ROLES;
+  return labels[role] ?? role;
 }
 
 export function canManageMembers(role: string): boolean {

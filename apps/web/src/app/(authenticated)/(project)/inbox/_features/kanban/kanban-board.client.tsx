@@ -90,8 +90,8 @@ export function KanbanBoard({
       map[item.status]?.push(item);
     }
     // Sort each column
-    for (const key of Object.keys(map)) {
-      map[key] = sortFeedback(map[key]!, sort);
+    for (const [key, items] of Object.entries(map)) {
+      map[key] = sortFeedback(items, sort);
     }
     return map;
   }, [filtered, sort]);

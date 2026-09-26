@@ -57,8 +57,8 @@ export function SidebarUserDropdown() {
 
   const isAdmin = session?.user.role === "admin";
   const userName =
-    session?.user.firstName && session?.user.lastName
-      ? `${session?.user.firstName} ${session?.user.lastName}`
+    session?.user.firstName && session.user.lastName
+      ? `${session.user.firstName} ${session.user.lastName}`
       : "User";
 
   const userImage = session?.user.image;

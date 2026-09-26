@@ -52,7 +52,7 @@ export const customSessionPlugin = customSession(async ({ user, session }) => {
       ...user,
       firstName: userData?.profile?.firstName,
       lastName: userData?.profile?.lastName,
-      role: userData?.role || "user",
+      role: userData?.role ?? "user",
       onboardingCompleted: userData?.onboardingCompleted,
     },
     session: {

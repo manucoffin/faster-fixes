@@ -97,9 +97,9 @@ export class PlunkMailer implements Mailer {
             // Failed to parse error response
           }
           const errorMessage =
-            (typeof errorData.message === "string"
+            typeof errorData.message === "string" && errorData.message !== ""
               ? errorData.message
-              : null) || `HTTP ${response.status}: ${response.statusText}`;
+              : `HTTP ${response.status}: ${response.statusText}`;
           throw new EmailError(
             errorMessage,
             typeof errorData.code === "string"
@@ -185,9 +185,9 @@ export class PlunkMailer implements Mailer {
             // Failed to parse error response
           }
           const errorMessage =
-            (typeof errorData.message === "string"
+            typeof errorData.message === "string" && errorData.message !== ""
               ? errorData.message
-              : null) || `HTTP ${response.status}: ${response.statusText}`;
+              : `HTTP ${response.status}: ${response.statusText}`;
           throw new EmailError(
             errorMessage,
             typeof errorData.code === "string"
@@ -272,9 +272,9 @@ export class PlunkMailer implements Mailer {
             // Failed to parse error response
           }
           const errorMessage =
-            (typeof errorData.message === "string"
+            typeof errorData.message === "string" && errorData.message !== ""
               ? errorData.message
-              : null) || `HTTP ${response.status}: ${response.statusText}`;
+              : `HTTP ${response.status}: ${response.statusText}`;
           throw new EmailError(
             errorMessage,
             typeof errorData.code === "string"
@@ -316,9 +316,9 @@ export class PlunkMailer implements Mailer {
             // Failed to parse error response
           }
           const errorMessage =
-            (typeof errorData.message === "string"
+            typeof errorData.message === "string" && errorData.message !== ""
               ? errorData.message
-              : null) || `HTTP ${response.status}: ${response.statusText}`;
+              : `HTTP ${response.status}: ${response.statusText}`;
           throw new EmailError(
             errorMessage,
             typeof errorData.code === "string"

@@ -5,17 +5,15 @@ import {
   PLAN_LIMITS,
   SubscriptionPlanName,
 } from "../_helpers/subscription-plans";
-import type { FeatureGate, PlanLimits } from "../_types/plan-limits";
+import type { FeatureGate } from "../_types/plan-limits";
 
 export function usePlanGate() {
   const { data: session } = useSession();
 
-  const planName =
-    (session?.session?.activePlanName as SubscriptionPlanName) ??
-    SubscriptionPlanName.Free;
+  const planName = (session?.session.activePlanName ??
+    SubscriptionPlanName.Free) as SubscriptionPlanName;
   const limits =
-    (session?.session?.activePlanLimits as PlanLimits) ??
-    PLAN_LIMITS[SubscriptionPlanName.Free];
+    session?.session.activePlanLimits ?? PLAN_LIMITS[SubscriptionPlanName.Free];
 
   return {
     plan: planName,

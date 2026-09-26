@@ -1,9 +1,5 @@
 import { auth } from "@/server/auth";
-import {
-  BadRequestError,
-  ConflictError,
-  DomainError,
-} from "@/server/errors/domain-errors";
+import { ConflictError, DomainError } from "@/server/errors/domain-errors";
 
 export async function registerUser({
   email,
@@ -13,7 +9,10 @@ export async function registerUser({
   password: string;
 }) {
   try {
-    const name = email.split("@")[0] || email;
+    const localPart = email.split("@")[0];
+    // An address starting with "@" has an empty local part, so the whole address becomes the name.
+    const name =
+      localPart === undefined || localPart === "" ? email : localPart;
     const data = await auth.api.signUpEmail({
       body: {
         name,
@@ -21,10 +20,6 @@ export async function registerUser({
         password,
       },
     });
-
-    if (!data) {
-      throw new BadRequestError("Account creation failed");
-    }
 
     return data.user;
   } catch (error) {

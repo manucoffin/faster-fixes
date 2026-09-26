@@ -40,7 +40,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
     update: {
       // Better Auth passes the updated user directly, not { data, oldData }
       after: async (user) => {
-        console.log(`[audit] user.updated userId=${user.id}`);
+        console.info(`[audit] user.updated userId=${user.id}`);
       },
     },
   },
@@ -66,7 +66,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
           return {
             data: {
               ...session,
-              activeOrganizationId: defaultOrg?.id || null,
+              activeOrganizationId: defaultOrg?.id ?? null,
             },
           };
         } catch (error) {
@@ -85,7 +85,7 @@ export const databaseHooks: NonNullable<BetterAuthOptions["databaseHooks"]> = {
         }
       },
       after: async (session) => {
-        console.log(`[audit] session.created userId=${session.userId}`);
+        console.info(`[audit] session.created userId=${session.userId}`);
       },
     },
   },

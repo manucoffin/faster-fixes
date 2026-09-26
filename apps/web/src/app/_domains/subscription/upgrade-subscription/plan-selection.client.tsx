@@ -111,9 +111,8 @@ export function PlanSelection() {
                 const features = PLAN_FEATURES[planName];
                 const isHighlighted = planName === SubscriptionPlanName.Pro;
 
-                const price = selectedPrice
-                  ? selectedPrice.unit_amount! / 100
-                  : 0;
+                // A tiered or custom price has no unit amount.
+                const price = (selectedPrice?.unit_amount ?? 0) / 100;
 
                 return (
                   <PlanCard

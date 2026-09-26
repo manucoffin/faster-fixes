@@ -41,8 +41,8 @@ vi.mock("@/server/storage", () => ({
   },
 }));
 
-// The router is built at module load and reads the bucket name from the
-// environment there, so the stub has to precede the import.
+// The router reads the bucket name from the environment on each request, and
+// fails when it is missing.
 vi.stubEnv("STORAGE_BUCKET_NAME", BUCKET);
 
 const { POST } = await import("./route");

@@ -27,9 +27,9 @@ export function formatIssueTitle(comment: string): string {
   const truncated = comment.slice(0, 80);
   const lastSpace = truncated.lastIndexOf(" ");
   if (lastSpace > 40) {
-    return truncated.slice(0, lastSpace) + "...";
+    return `${truncated.slice(0, lastSpace)}...`;
   }
-  return truncated + "...";
+  return `${truncated}...`;
 }
 
 export function formatIssueBody(feedback: FeedbackForIssue): string {

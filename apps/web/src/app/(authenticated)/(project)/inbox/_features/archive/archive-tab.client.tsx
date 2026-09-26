@@ -1,6 +1,5 @@
 "use client";
 
-import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { DataTable } from "@/app/_components/data-table.client";
 import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
@@ -31,9 +30,11 @@ import { Archive } from "lucide-react";
 
 type ArchivedItem = ListArchivedFeedbackOutput["items"][number];
 
-export function ArchiveTab() {
-  const { activeProject } = useActiveProject();
-  const projectId = activeProject!.id;
+type ArchiveTabProps = {
+  projectId: string;
+};
+
+export function ArchiveTab({ projectId }: ArchiveTabProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [page, setPage] = React.useState(1);
@@ -119,10 +120,11 @@ export function ArchiveTab() {
         header: "Assignee",
         cell: ({ row }) => {
           const assignee = row.original.assignee;
-          if (!assignee)
+          if (!assignee) {
             return (
               <span className="text-xs text-muted-foreground">Unassigned</span>
             );
+          }
           return (
             <div className="flex items-center gap-1.5">
               <Avatar className="size-5">
@@ -133,7 +135,7 @@ export function ArchiveTab() {
                   className="object-cover"
                 />
                 <AvatarFallback className="text-[10px]">
-                  {assignee.name?.charAt(0)?.toUpperCase() ?? "?"}
+                  {assignee.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm">{assignee.name}</span>

@@ -25,7 +25,7 @@ export function UpgradeSubscriptionDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {trigger || <Button variant="outline">Change plan</Button>}
+        {trigger ?? <Button variant="outline">Change plan</Button>}
       </DialogTrigger>
       <DialogContent className="h-full w-full max-w-full overflow-y-auto sm:max-h-[95svh] sm:max-w-[90svw] md:h-fit xl:max-w-[60svw]">
         <DialogHeader className="h-fit">

@@ -48,8 +48,9 @@ export const handleJiraOAuthRevoked = inngest.createFunction(
       });
     }
 
-    if (installation.reconnectNotifiedAt)
+    if (installation.reconnectNotifiedAt) {
       return { skipped: "already_notified" };
+    }
 
     // Only owners and admins can complete the OAuth flow (/api/jira/install
     // rejects everyone else), so notifying members would be a dead end.

@@ -48,7 +48,7 @@ export function UpdateOrganizationForm() {
       name: "",
     },
     values: activeOrg
-      ? { organizationId: activeOrg.id, name: activeOrg.name ?? "" }
+      ? { organizationId: activeOrg.id, name: activeOrg.name }
       : undefined,
   });
 

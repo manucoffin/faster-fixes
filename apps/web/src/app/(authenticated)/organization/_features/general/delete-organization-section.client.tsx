@@ -86,7 +86,13 @@ function DeleteOrganizationCard({
       });
 
       if (result.error) {
-        toast.error(result.error.message || "Error deleting organization.");
+        // An empty message falls back too, so the toast is never blank.
+        const { message } = result.error;
+        toast.error(
+          message === undefined || message === ""
+            ? "Error deleting organization."
+            : message,
+        );
         return;
       }
 

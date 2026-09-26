@@ -32,7 +32,7 @@ export const sendWelcomeEmail = inngest.createFunction(
     // Inngest functions in this directory.
     const body = await render(
       createElement<WelcomeEmailProps>(WelcomeEmail, {
-        userName: user.name ?? undefined,
+        userName: user.name,
       }),
     );
 

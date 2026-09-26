@@ -21,7 +21,8 @@ export async function getFeedbackStateId(args: {
 }): Promise<ResolvedState | null> {
   const { client, link, feedbackStatus } = args;
   const states = await getTeamStates(client, link.teamId);
-  if (states.length === 0) return null;
+  const [firstState] = states;
+  if (!firstState) return null;
 
   // For "new", prefer the link's defaultStateId (user-picked); otherwise pick by type.
   if (feedbackStatus === "new") {
@@ -32,7 +33,7 @@ export async function getFeedbackStateId(args: {
         s.type === "unstarted" || s.type === "backlog" || s.type === "triage",
     );
     if (fallback) return { stateId: fallback.id, fellBack: true };
-    return { stateId: states[0]!.id, fellBack: true };
+    return { stateId: firstState.id, fellBack: true };
   }
 
   const preferredType = linearStateTypeForFeedbackStatus(feedbackStatus);
@@ -55,7 +56,7 @@ export async function getFeedbackStateId(args: {
     );
     if (alt) return { stateId: alt.id, fellBack: true };
   }
-  return { stateId: states[0]!.id, fellBack: true };
+  return { stateId: firstState.id, fellBack: true };
 }
 
 export type GetFeedbackStateIdOutput = Awaited<

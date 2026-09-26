@@ -130,8 +130,8 @@ export function formatDiagnosticTrailLines(
   trail: DiagnosticTrail | null | undefined,
 ): string[] {
   if (!trail) return [];
-  const consoleEntries = trail.console ?? [];
-  const networkEntries = trail.network ?? [];
+  const consoleEntries = trail.console;
+  const networkEntries = trail.network;
   if (consoleEntries.length === 0 && networkEntries.length === 0) return [];
 
   const lines: string[] = [];

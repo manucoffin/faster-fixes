@@ -1,4 +1,5 @@
 import { ForbiddenError } from "@/server/errors/domain-errors";
+import { getAppUrl } from "@/utils/url/get-app-url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getFullOrganization = vi.fn();
@@ -44,7 +45,7 @@ describe("createBillingPortal", () => {
     expect(createBillingPortalSession).toHaveBeenCalledWith({
       body: {
         referenceId: "org_1",
-        returnUrl: `${process.env.BASE_URL || "http://localhost:3000"}/account/billing`,
+        returnUrl: `${getAppUrl()}/account/billing`,
         customerType: "organization",
       },
       headers,

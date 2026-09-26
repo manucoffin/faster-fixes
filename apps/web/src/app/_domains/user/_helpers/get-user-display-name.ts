@@ -17,5 +17,7 @@ export const getUserDisplayName = (
     return `${user.profile.firstName} ${user.profile.lastName}`;
   }
 
-  return user.name || ANONYMOUS_USER_NAME;
+  if (!user.name) return ANONYMOUS_USER_NAME;
+
+  return user.name;
 };

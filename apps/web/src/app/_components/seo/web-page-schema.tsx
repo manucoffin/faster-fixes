@@ -35,7 +35,7 @@ export function WebPageSchema({
       mainEntity: { "@id": aboutId },
     }),
     isPartOf: {
-      "@id": url.split("/").slice(0, 3).join("/") + "#website",
+      "@id": `${url.split("/").slice(0, 3).join("/")}#website`,
     },
   };
 

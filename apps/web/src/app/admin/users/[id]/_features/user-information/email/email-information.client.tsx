@@ -44,9 +44,6 @@ export function EmailInformation({ userId }: EmailInformationProps) {
     Empty: <div />,
     Success: (query) => {
       const emailData = query.data;
-      if (!emailData) {
-        return <div />;
-      }
       return (
         <div className="flex items-center gap-2">
           <div>

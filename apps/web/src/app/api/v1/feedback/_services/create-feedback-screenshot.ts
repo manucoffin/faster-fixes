@@ -1,5 +1,6 @@
 import { s3Client } from "@/server/storage";
 import { createAsset } from "@/server/storage/create-asset";
+import { requireEnv } from "@/utils/environment/require-env";
 import { putObject } from "@better-upload/server/helpers";
 import crypto from "crypto";
 
@@ -21,14 +22,11 @@ export async function createFeedbackScreenshot({
   contentType,
   body,
 }: CreateFeedbackScreenshotInput) {
-  const ext = contentType.split("/")[1] || "png";
+  const ext = contentType.split("/")[1] ?? "png";
   const key = `feedback-screenshots/${projectId}/${crypto.randomUUID()}.${ext}`;
-  const bucket = process.env.STORAGE_BUCKET_NAME!;
-  console.info(
-    "[feedback] uploading screenshot, key:",
-    key,
-    "| bucket:",
-    bucket,
+  const bucket = requireEnv(
+    "STORAGE_BUCKET_NAME",
+    process.env.STORAGE_BUCKET_NAME,
   );
 
   await putObject(s3Client, {

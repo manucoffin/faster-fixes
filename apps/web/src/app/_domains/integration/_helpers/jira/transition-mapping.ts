@@ -82,12 +82,13 @@ export function resolveJiraTransition(args: {
   const doneTransitions = transitions.filter(
     (t) => t.toStatusCategory === CATEGORY_DONE,
   );
-  if (doneTransitions.length === 0) return null;
+  const [firstDoneTransition] = doneTransitions;
+  if (!firstDoneTransition) return null;
 
   const chosen =
     PREFERRED_DONE_STATUS_NAMES.map((name) =>
       doneTransitions.find((t) => t.toStatusName.toLowerCase() === name),
-    ).find(Boolean) ?? doneTransitions[0]!;
+    ).find(Boolean) ?? firstDoneTransition;
 
   return {
     transitionId: chosen.id,

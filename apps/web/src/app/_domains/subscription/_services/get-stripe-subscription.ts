@@ -35,7 +35,7 @@ export async function getStripeSubscription(
       id: subscription.id,
       items: subscription.items.data,
       // Get the price from the first item (most subscriptions have one)
-      currentPriceId: subscription.items.data[0]?.price?.id,
+      currentPriceId: subscription.items.data[0]?.price.id,
     };
   } catch (error) {
     if (isUnknownStripeResource(error)) {

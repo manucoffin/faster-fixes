@@ -6,8 +6,9 @@ function isValidDomain(value: string): boolean {
   for (const part of parts) {
     if (!LABEL_REGEX.test(part)) return false;
   }
+  const tld = parts[parts.length - 1];
   // TLD must be at least two letters (no all-numeric, no IP)
-  return /^[a-z]{2,}$/.test(parts[parts.length - 1]!);
+  return tld !== undefined && /^[a-z]{2,}$/.test(tld);
 }
 
 /**
@@ -28,7 +29,8 @@ export function normalizeDomain(input: string): string | null {
       return null;
     }
   } else {
-    value = value.split("/")[0]!.split("?")[0]!.split("#")[0]!;
+    // Drop everything from the first path, query or fragment delimiter.
+    value = value.replace(/[/?#].*/s, "");
   }
 
   value = value.replace(/:\d+$/, "");

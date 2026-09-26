@@ -82,27 +82,26 @@ export function SubscriptionEditDialog({
   const form = useForm<UpdateSubscriptionInput>({
     resolver: zodResolver(UpdateSubscriptionSchema),
     defaultValues: {
-      id: subscription?.id,
-      organizationId: subscription?.organizationId || "",
+      id: subscription.id,
+      organizationId: subscription.organizationId ?? "",
       // The subscription plan column is a free-form string in the database, so
       // an admin override can carry a value outside the current plan names.
-      plan: (subscription?.plan as SubscriptionPlanName) || PAID_PLAN_NAMES[0],
-      status:
-        (subscription?.status as SubscriptionStatus) ||
-        SubscriptionStatus.Active,
-      periodStart: subscription?.periodStart
+      plan: subscription.plan as SubscriptionPlanName,
+      status: (subscription.status ??
+        SubscriptionStatus.Active) as SubscriptionStatus,
+      periodStart: subscription.periodStart
         ? new Date(subscription.periodStart)
         : undefined,
-      periodEnd: subscription?.periodEnd
+      periodEnd: subscription.periodEnd
         ? new Date(subscription.periodEnd)
         : undefined,
-      trialStart: subscription?.trialStart
+      trialStart: subscription.trialStart
         ? new Date(subscription.trialStart)
         : undefined,
-      trialEnd: subscription?.trialEnd
+      trialEnd: subscription.trialEnd
         ? new Date(subscription.trialEnd)
         : undefined,
-      cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd || false,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd ?? false,
       // stripeCustomerId: subscription?.stripeCustomerId || "",
       // stripeSubscriptionId: subscription?.stripeSubscriptionId || "",
     },

@@ -6,25 +6,24 @@ export async function getUniqueOrganizationSlug(
   existingOrganizationId?: string,
 ) {
   const slug = slugify(name, { lower: true, strict: true });
-  let counter = 0;
-  let finalSlug = slug;
 
-  // Keep checking until we find an available slug
-  while (true) {
+  const isSlugTaken = async (candidate: string) => {
     const existingOrganization = await prisma.organization.findFirst({
       where: {
-        slug: finalSlug,
+        slug: candidate,
         // Exclude the current organization when one is being renamed.
         ...(existingOrganizationId
           ? { id: { not: existingOrganizationId } }
           : {}),
       },
     });
+    return existingOrganization !== null;
+  };
 
-    if (!existingOrganization) {
-      break;
-    }
+  let counter = 0;
+  let finalSlug = slug;
 
+  while (await isSlugTaken(finalSlug)) {
     counter++;
     finalSlug = `${slug}-${counter}`;
   }

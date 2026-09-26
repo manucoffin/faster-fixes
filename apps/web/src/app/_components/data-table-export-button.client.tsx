@@ -18,7 +18,7 @@ export function DataTableExportButton({
 }: DataTableExportButtonProps) {
   const handleExport = React.useCallback(() => {
     try {
-      if (!data || data.length === 0) {
+      if (data.length === 0) {
         console.warn("No data to export");
         return;
       }
@@ -32,7 +32,10 @@ export function DataTableExportButton({
 
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().split("T")[0];
-      const finalFilename = filename || `export-${timestamp}.csv`;
+      const finalFilename =
+        filename === undefined || filename === ""
+          ? `export-${timestamp}.csv`
+          : filename;
 
       // Write and trigger download with proper UTF-8 encoding
       XLSX.writeFile(wb, finalFilename, { bookType: "csv" });

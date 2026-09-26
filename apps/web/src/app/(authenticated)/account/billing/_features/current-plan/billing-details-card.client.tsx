@@ -99,14 +99,14 @@ export function BillingDetailsCard({
                 {billingLabel}
               </span>
               <span className="text-sm font-medium">
-                {priceHT} {price.currency?.toUpperCase()}
+                {priceHT} {price.currency.toUpperCase()}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">VAT (20%)</span>
               <span className="text-sm font-medium">
-                {(priceValue * 0.2).toFixed(2)} {price.currency?.toUpperCase()}
+                {(priceValue * 0.2).toFixed(2)} {price.currency.toUpperCase()}
               </span>
             </div>
 
@@ -116,7 +116,7 @@ export function BillingDetailsCard({
                   Free trial
                 </span>
                 <span className="text-sm font-medium">
-                  -{priceTTC} {price.currency?.toUpperCase()}
+                  -{priceTTC} {price.currency.toUpperCase()}
                 </span>
               </div>
             )}
@@ -126,9 +126,9 @@ export function BillingDetailsCard({
             <span className="font-medium">Total incl. tax</span>
             <span className="font-semibold">
               {subscriptionStatus === SubscriptionStatus.Trialing ? (
-                <span className="">0 {price.currency?.toUpperCase()}</span>
+                <span className="">0 {price.currency.toUpperCase()}</span>
               ) : (
-                `${priceTTC} ${price.currency?.toUpperCase()}`
+                `${priceTTC} ${price.currency.toUpperCase()}`
               )}
             </span>
           </div>

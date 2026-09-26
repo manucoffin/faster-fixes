@@ -45,7 +45,8 @@ export async function listAccessibleRepos(
   }[] = [];
 
   let page = 1;
-  while (true) {
+  let hasNextPage = true;
+  while (hasNextPage) {
     const response = await octokit.request("GET /installation/repositories", {
       per_page: 100,
       page,
@@ -69,7 +70,7 @@ export async function listAccessibleRepos(
       });
     }
 
-    if (data.repositories.length < 100) break;
+    hasNextPage = data.repositories.length === 100;
     page++;
   }
 

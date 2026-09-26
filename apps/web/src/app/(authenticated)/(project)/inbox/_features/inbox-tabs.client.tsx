@@ -28,7 +28,10 @@ import { KanbanBoard } from "./kanban/kanban-board.client";
 
 export function InboxTabs() {
   const { activeProject } = useActiveProject();
-  const projectId = activeProject!.id;
+  if (!activeProject) {
+    throw new Error("InboxTabs must render under an active Project.");
+  }
+  const projectId = activeProject.id;
   const trpc = useTRPC();
 
   const [view, setView] = useQueryState(
@@ -149,7 +152,7 @@ export function InboxTabs() {
         </TabsContent>
 
         <TabsContent value="archive" className="mt-4">
-          <ArchiveTab />
+          <ArchiveTab projectId={projectId} />
         </TabsContent>
       </Tabs>
 

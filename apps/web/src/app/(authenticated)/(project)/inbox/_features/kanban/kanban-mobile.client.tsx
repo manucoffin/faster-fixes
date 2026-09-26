@@ -15,8 +15,10 @@ import { getColumnSelectionState } from "./column-selection-state";
 
 type FeedbackItem = ListFeedbackOutput[number];
 
+type KanbanColumn = { id: string; title: string };
+
 type KanbanMobileProps = {
-  columns: readonly { id: string; title: string }[];
+  columns: readonly [KanbanColumn, ...KanbanColumn[]];
   grouped: Record<string, FeedbackItem[]>;
   selectedIds: Set<string>;
   toolbar: React.ReactNode;
@@ -34,9 +36,7 @@ export function KanbanMobile({
   onToggleSelectAll,
   onSelectFeedback,
 }: KanbanMobileProps) {
-  const [activeColumn, setActiveColumn] = React.useState<string>(
-    columns[0]!.id,
-  );
+  const [activeColumn, setActiveColumn] = React.useState<string>(columns[0].id);
 
   return (
     <Tabs

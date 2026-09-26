@@ -53,14 +53,7 @@ export function OrganizationMembersTab() {
 
   const currentRole = memberRoleData?.role;
 
-  const members = (activeOrg as Record<string, unknown>)?.members as
-    | Array<{
-        id: string;
-        userId: string;
-        role: string;
-        user: { id: string; name: string; email: string; image?: string };
-      }>
-    | undefined;
+  const members = activeOrg?.members;
 
   const canManage = currentRole === "owner" || currentRole === "admin";
   const isOwner = currentRole === "owner";
@@ -134,10 +127,7 @@ export function OrganizationMembersTab() {
                         />
                       )}
                       <AvatarFallback>
-                        <Facehash
-                          name={member.user.email ?? memberName}
-                          size={32}
-                        />
+                        <Facehash name={member.user.email} size={32} />
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{memberName}</span>

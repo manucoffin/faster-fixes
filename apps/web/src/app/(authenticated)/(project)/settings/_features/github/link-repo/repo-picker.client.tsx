@@ -43,11 +43,13 @@ export function RepoPicker({ projectId, repos }: RepoPickerProps) {
     if (!repo) return;
 
     const [owner, name] = repo.fullName.split("/");
+    if (!owner || !name) return;
+
     linkMutation.mutate({
       projectId,
       repoId: repo.id,
-      repoOwner: owner!,
-      repoName: name!,
+      repoOwner: owner,
+      repoName: name,
       repoFullName: repo.fullName,
     });
   };

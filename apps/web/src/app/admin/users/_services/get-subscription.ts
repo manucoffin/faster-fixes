@@ -37,7 +37,7 @@ export async function getSubscription({ userId }: { userId: string }) {
 
   // A User without a default Organization, or one whose Organization has no
   // Subscription, is a free account rather than an error.
-  return user?.members[0]?.organization?.subscription ?? null;
+  return user?.members[0]?.organization.subscription ?? null;
 }
 
 export type GetSubscriptionOutput = Awaited<ReturnType<typeof getSubscription>>;

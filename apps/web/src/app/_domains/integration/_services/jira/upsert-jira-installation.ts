@@ -3,6 +3,7 @@ import {
   buildEvent,
   jiraWebhooksRefreshRequestedEvent,
 } from "@/server/inngest/events";
+import { BadRequestError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 
 import type { JiraAccessibleResource, JiraTokenResponse } from "./jira-client";
@@ -39,7 +40,10 @@ export async function upsertJiraInstallation({
   tokens: JiraTokenResponse;
 }) {
   const siteSelectionPending = sites.length > 1;
-  const provisional = sites[0]!;
+  const [provisional] = sites;
+  if (!provisional) {
+    throw new BadRequestError("The Jira grant does not cover any site.");
+  }
 
   const installationColumns = {
     cloudId: provisional.id,

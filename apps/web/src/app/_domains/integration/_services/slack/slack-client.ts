@@ -75,7 +75,7 @@ export async function exchangeOAuthCode({
     !data.bot_user_id ||
     !data.scope ||
     !data.team?.id ||
-    !data.team?.name
+    !data.team.name
   ) {
     throw new SlackRequestError(
       "Slack OAuth response is missing required fields.",
@@ -133,7 +133,8 @@ export async function listPublicChannels(
       channels.push({ id: channel.id, name: channel.name });
     }
 
-    cursor = data.response_metadata?.next_cursor || undefined;
+    // Slack marks the last page with an empty `next_cursor`.
+    cursor = data.response_metadata?.next_cursor;
     if (!cursor) {
       break;
     }

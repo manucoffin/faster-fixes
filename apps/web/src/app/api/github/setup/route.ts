@@ -2,6 +2,7 @@ import { findInstallingMember } from "@/app/_domains/integration/_services/find-
 import { findGitHubInstallationAccount } from "@/app/_domains/integration/_services/github/find-github-installation-account";
 import { upsertGitHubInstallation } from "@/app/_domains/integration/_services/github/upsert-github-installation";
 import { auth } from "@/server/auth";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
   const installationId = searchParams.get("installation_id");
   const setupAction = searchParams.get("setup_action");
 
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const orgSettingsUrl = `${baseUrl}/integrations`;
 
   if (!installationId) {

@@ -1,7 +1,12 @@
 import { auth } from "@/server/auth";
-import { BadRequestError, ConflictError } from "@/server/errors/domain-errors";
+import { ConflictError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import { randomBytes } from "crypto";
+
+// The admin form sends "" for a name left blank, which is stored as no value.
+function emptyToNull(value: string | undefined) {
+  return value === undefined || value === "" ? null : value;
+}
 
 export async function createUser(
   {
@@ -39,24 +44,17 @@ export async function createUser(
     throw error;
   }
 
-  if (!data?.user) {
-    throw new BadRequestError("Failed to create account");
-  }
-
   const userId = data.user.id;
 
   if (firstName || lastName) {
+    const names = {
+      firstName: emptyToNull(firstName),
+      lastName: emptyToNull(lastName),
+    };
     await db.profile.upsert({
       where: { userId },
-      update: {
-        firstName: firstName || null,
-        lastName: lastName || null,
-      },
-      create: {
-        userId,
-        firstName: firstName || null,
-        lastName: lastName || null,
-      },
+      update: names,
+      create: { userId, ...names },
     });
   }
 

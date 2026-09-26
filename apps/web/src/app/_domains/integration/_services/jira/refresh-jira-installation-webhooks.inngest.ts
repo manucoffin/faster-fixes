@@ -67,11 +67,14 @@ export const refreshJiraInstallationWebhooks = inngest.createFunction(
     const failedLinkIds: string[] = [];
 
     for (const link of installation.projectLinks) {
+      // Always set: the query keeps only links with a registration.
+      const { webhookRegistrationId } = link;
+      if (!webhookRegistrationId) continue;
       try {
         await refreshProjectJiraWebhook(
           {
             id: link.id,
-            webhookRegistrationId: link.webhookRegistrationId!,
+            webhookRegistrationId,
             linkHealthIssue: link.linkHealthIssue,
           },
           accessToken,

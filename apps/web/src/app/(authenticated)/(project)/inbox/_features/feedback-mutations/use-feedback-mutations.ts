@@ -6,7 +6,10 @@ import { toast } from "sonner";
 
 export function useFeedbackMutations() {
   const { activeProject } = useActiveProject();
-  const projectId = activeProject!.id;
+  if (!activeProject) {
+    throw new Error("useFeedbackMutations requires an active Project.");
+  }
+  const projectId = activeProject.id;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 

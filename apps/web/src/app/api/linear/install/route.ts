@@ -5,12 +5,13 @@ import {
   createOAuthState,
   setOAuthStateCookie,
 } from "@/app/_domains/integration/_services/oauth-state-cookie";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import { type NextRequest, NextResponse } from "next/server";
 
 const LINEAR_OAUTH_AUTHORIZE_URL = "https://linear.app/oauth/authorize";
 
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const integrationsUrl = `${baseUrl}/integrations`;
 
   const session = await auth.api.getSession({ headers: req.headers });

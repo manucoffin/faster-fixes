@@ -89,7 +89,7 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
   }, [period.from, period.to]);
 
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
-    if (newDateRange?.from && newDateRange?.to) {
+    if (newDateRange?.from && newDateRange.to) {
       void setPeriod({
         from: newDateRange.from.toISOString().split("T")[0],
         to: newDateRange.to.toISOString().split("T")[0],
@@ -104,7 +104,7 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
   };
 
   const formatDateRange = (range: DateRange | undefined) => {
-    if (!range?.from || !range?.to) {
+    if (!range?.from || !range.to) {
       return "Select a period";
     }
 
@@ -141,7 +141,7 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
           {/* Calendar */}
           <Calendar
             mode="range"
-            defaultMonth={dateRange?.from}
+            defaultMonth={dateRange.from}
             selected={dateRange}
             onSelect={handleDateRangeChange}
             numberOfMonths={2}

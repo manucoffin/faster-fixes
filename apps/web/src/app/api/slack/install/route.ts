@@ -6,12 +6,13 @@ import {
 import { hasSlackIntegrationAccess } from "@/app/_domains/integration/_services/slack/has-slack-integration-access";
 import { SLACK_OAUTH_SCOPES } from "@/app/_domains/integration/_services/slack/slack-client";
 import { randomBytes } from "crypto";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import { type NextRequest, NextResponse } from "next/server";
 
 const SLACK_OAUTH_AUTHORIZE_URL = "https://slack.com/oauth/v2/authorize";
 
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const integrationsUrl = `${baseUrl}/integrations`;
 
   const session = await auth.api.getSession({ headers: req.headers });

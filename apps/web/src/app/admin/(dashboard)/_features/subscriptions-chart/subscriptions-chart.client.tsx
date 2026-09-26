@@ -146,9 +146,10 @@ export function SubscriptionsChart() {
 
               <ChartTooltip
                 content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
+                  const firstEntry = payload?.[0];
+                  if (!active || !firstEntry) return null;
 
-                  const data = payload[0]!.payload as MonthData;
+                  const data = firstEntry.payload as MonthData;
                   return (
                     <div className="rounded-lg border bg-background p-3 shadow-md">
                       <div className="font-medium">{data.fullLabel}</div>

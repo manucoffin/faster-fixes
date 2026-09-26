@@ -24,7 +24,7 @@ export async function AccountCard({ userId }: AccountCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-2">
-          <ImpersonateUserButton userId={userId} userEmail={email || ""} />
+          <ImpersonateUserButton userId={userId} userEmail={email ?? ""} />
           {hasCredentialProvider && (
             <RequestPasswordResetButton userId={userId} />
           )}

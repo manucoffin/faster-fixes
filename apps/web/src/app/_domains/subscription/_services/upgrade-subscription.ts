@@ -26,7 +26,7 @@ export async function upgradeSubscription({
       plan: planName,
       referenceId: activeOrganization.id,
       customerType: "organization",
-      annual: annual || false,
+      annual: annual ?? false,
       successUrl: `${appUrl}/account/billing?success=true`,
       cancelUrl: `${appUrl}/account/billing?cancelled=true`,
       disableRedirect: true,

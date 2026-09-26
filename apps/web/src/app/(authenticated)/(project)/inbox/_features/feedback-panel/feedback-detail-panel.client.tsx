@@ -126,9 +126,13 @@ export function FeedbackDetailPanel({
           {feedback.metadata &&
             (() => {
               const md = feedback.metadata;
-              const hasContext =
-                md.elementDescription || md.reactComponentPath || md.sourceFile;
-              if (!hasContext) return null;
+              if (
+                !md.elementDescription &&
+                !md.reactComponentPath &&
+                !md.sourceFile
+              ) {
+                return null;
+              }
               return (
                 <>
                   <Separator />

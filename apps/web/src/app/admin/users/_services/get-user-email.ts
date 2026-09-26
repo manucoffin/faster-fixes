@@ -1,7 +1,7 @@
 import { prisma } from "@workspace/db";
 
 export async function getUserEmail({ userId }: { userId: string }) {
-  return await prisma.user.findUnique({
+  return prisma.user.findUnique({
     where: { id: userId },
     select: {
       id: true,

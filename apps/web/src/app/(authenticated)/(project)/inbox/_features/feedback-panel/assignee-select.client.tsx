@@ -65,7 +65,7 @@ export function AssigneeSelect({ feedbackId, value }: AssigneeSelectProps) {
                     className="object-cover"
                   />
                   <AvatarFallback className="text-[10px]">
-                    {member.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    {member.name?.charAt(0).toUpperCase() ?? "?"}
                   </AvatarFallback>
                 </Avatar>
                 {member.name ?? "Unknown"}

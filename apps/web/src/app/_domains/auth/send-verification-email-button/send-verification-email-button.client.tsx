@@ -38,7 +38,7 @@ export function SendVerificationEmailButton({
         },
         onError: (error) => {
           toast.error(
-            error?.message || "An error occurred while sending the email",
+            error.message || "An error occurred while sending the email",
           );
         },
       });

@@ -99,7 +99,7 @@ function KanbanCardView({
                 className="object-cover"
               />
               <AvatarFallback className="text-[10px]">
-                {feedback.assignee.name?.charAt(0)?.toUpperCase() ?? "?"}
+                {feedback.assignee.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           ) : (

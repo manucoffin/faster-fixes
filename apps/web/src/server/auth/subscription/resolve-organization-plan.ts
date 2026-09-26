@@ -71,7 +71,7 @@ function buildFreePlan(subscription: Subscription | null): ResolvedPlan {
   return {
     planName: SubscriptionPlanName.Free,
     limits: PLAN_LIMITS[SubscriptionPlanName.Free],
-    status: (subscription?.status as SubscriptionStatus) ?? null,
+    status: (subscription?.status ?? null) as SubscriptionStatus | null,
     subscription,
     isFreePlan: true,
   };
@@ -81,10 +81,10 @@ function buildPaidPlan(
   subscription: Subscription,
   status: SubscriptionStatus,
 ): ResolvedPlan {
-  const planName =
-    (subscription.plan as SubscriptionPlanName) || SubscriptionPlanName.Free;
-  const limits =
-    PLAN_LIMITS[planName] ?? PLAN_LIMITS[SubscriptionPlanName.Free];
+  const planName = isSubscriptionPlanName(subscription.plan)
+    ? subscription.plan
+    : SubscriptionPlanName.Free;
+  const limits = PLAN_LIMITS[planName];
 
   return {
     planName,
@@ -93,4 +93,8 @@ function buildPaidPlan(
     subscription,
     isFreePlan: planName === SubscriptionPlanName.Free,
   };
+}
+
+function isSubscriptionPlanName(value: string): value is SubscriptionPlanName {
+  return Object.values<string>(SubscriptionPlanName).includes(value);
 }

@@ -25,7 +25,7 @@ export async function createAgentToken(
     throw new ForbiddenError("Access denied.");
   }
 
-  const raw = "ff_agent_" + crypto.randomBytes(32).toString("hex");
+  const raw = `ff_agent_${crypto.randomBytes(32).toString("hex")}`;
   const hash = crypto.createHash("sha256").update(raw).digest("hex");
   const lastFour = raw.slice(-4);
 

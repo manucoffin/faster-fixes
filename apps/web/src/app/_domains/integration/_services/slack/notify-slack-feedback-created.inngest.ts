@@ -35,8 +35,9 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
     if (!feedback) return { skipped: "feedback_not_found" };
 
     // Idempotency: never post twice for the same feedback.
-    if (feedback.slackMessage)
+    if (feedback.slackMessage) {
       return { skipped: "slack_message_already_exists" };
+    }
 
     const link = feedback.project.slackLink;
     if (!link) return { skipped: "no_slack_link" };

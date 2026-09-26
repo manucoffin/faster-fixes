@@ -16,7 +16,8 @@ export async function deleteFeedbacks(
     include: { project: { select: { organizationId: true } } },
   });
 
-  if (feedbackItems.length === 0) {
+  const [firstItem] = feedbackItems;
+  if (!firstItem) {
     throw new NotFoundError("Feedback not found.");
   }
 
@@ -26,8 +27,6 @@ export async function deleteFeedbacks(
       "Only archived feedback can be permanently deleted.",
     );
   }
-
-  const firstItem = feedbackItems[0]!;
 
   // Membership in the Feedback's Organization needs the loaded rows, so the
   // denial lives here rather than at the transport edge.

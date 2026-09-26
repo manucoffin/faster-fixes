@@ -2,7 +2,7 @@ import { prisma } from "@workspace/db";
 import type { CreateSubscriptionInput } from "./create-subscription.schema";
 
 export async function createSubscription(input: CreateSubscriptionInput) {
-  return await prisma.subscription.create({
+  return prisma.subscription.create({
     data: {
       plan: input.plan,
       referenceId: input.organizationId,

@@ -31,7 +31,7 @@ export const SubscriptionStatusBanner = () => {
       }
 
       if (subscription.cancelAtPeriodEnd) {
-        const canceledAt = new Date(subscription.periodEnd || "");
+        const canceledAt = new Date(subscription.periodEnd ?? "");
         const formattedDate = formatDate(canceledAt);
 
         return (
@@ -58,7 +58,7 @@ export const SubscriptionStatusBanner = () => {
       }
 
       if (subscription.status === SubscriptionStatus.Trialing) {
-        const trialEnd = new Date(subscription.trialEnd || "");
+        const trialEnd = new Date(subscription.trialEnd ?? "");
         const formattedDate = formatDate(trialEnd);
 
         return (

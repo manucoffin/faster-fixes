@@ -6,7 +6,7 @@ import { makeQueryClient } from "./query-client";
 export const { TRPCProvider, useTRPC, useTRPCClient } =
   createTRPCContext<AppRouter>();
 
-let clientQueryClientSingleton: QueryClient;
+let clientQueryClientSingleton: QueryClient | undefined;
 export function getQueryClient() {
   if (typeof window === "undefined") {
     // Server: always make a new query client

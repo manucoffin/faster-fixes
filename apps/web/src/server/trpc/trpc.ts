@@ -74,7 +74,7 @@ export const protectedProcedure = publicProcedure
   .use((opts) => {
     const { session } = opts.ctx;
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session || !session.user.id) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
       });

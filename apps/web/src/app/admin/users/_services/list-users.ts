@@ -36,7 +36,7 @@ const userSelect = {
 type HydratedUser = Prisma.UserGetPayload<{ select: typeof userSelect }>;
 
 const defaultOrgId = (user: HydratedUser) =>
-  user.members[0]?.organization?.id ?? null;
+  user.members[0]?.organization.id ?? null;
 
 // Feedback "per user" = submissions collected across the user's default-org
 // projects. There's no direct user→feedback FK, so counts are aggregated per

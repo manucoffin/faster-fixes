@@ -17,7 +17,7 @@ export async function toggleEmailVerified(
     throw new NotFoundError("User not found");
   }
 
-  return await db.user.update({
+  return db.user.update({
     where: { id: userId },
     data: { emailVerified },
     select: {

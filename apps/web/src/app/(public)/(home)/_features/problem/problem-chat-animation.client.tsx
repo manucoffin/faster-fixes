@@ -123,10 +123,10 @@ export function ProblemChatAnimation() {
   const activePhase = (() => {
     let idx = 0;
     let active = -1;
-    for (let p = 0; p < phases.length; p++) {
+    phases.forEach((phase, p) => {
       if (visibleCount > idx) active = p;
-      idx += phases[p]!.messages.length;
-    }
+      idx += phase.messages.length;
+    });
     return active;
   })();
 

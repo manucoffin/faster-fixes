@@ -49,8 +49,8 @@ export function SidebarUserDropdown() {
   const handleSignOut = useSignOut();
 
   const userName =
-    session?.user.firstName && session?.user.lastName
-      ? `${session?.user.firstName} ${session?.user.lastName}`
+    session?.user.firstName && session.user.lastName
+      ? `${session.user.firstName} ${session.user.lastName}`
       : "User";
 
   const userImage = session?.user.image;

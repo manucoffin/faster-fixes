@@ -11,10 +11,11 @@ import {
   isValidOAuthState,
 } from "@/app/_domains/integration/_services/oauth-state-cookie";
 import { auth } from "@/server/auth";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const integrationsUrl = `${baseUrl}/integrations`;
   const { searchParams } = req.nextUrl;
 

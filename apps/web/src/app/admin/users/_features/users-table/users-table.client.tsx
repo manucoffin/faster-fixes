@@ -23,9 +23,9 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
     ),
     cell: ({ row, getValue }) => {
       const name = getValue<string>();
-      const organizationName = row.original.members[0]?.organization?.name;
+      const organizationName = row.original.members[0]?.organization.name;
       const subscriptionPlan =
-        row.original.members[0]?.organization?.subscription?.plan;
+        row.original.members[0]?.organization.subscription?.plan;
 
       return (
         <div className="flex flex-col gap-1">
@@ -46,7 +46,7 @@ const columns: ColumnDef<ListUsersOutput["users"][number]>[] = [
               )}
             </div>
             <div className="text-xs text-muted-foreground">
-              {organizationName || "N/A"}
+              {organizationName ?? "N/A"}
             </div>
           </Link>
         </div>
@@ -165,9 +165,10 @@ export function UsersTable() {
       page: currentPage,
       pageSize,
       sortBy:
-        (sortBy as "name" | "email" | "createdAt" | "feedbackCount") ||
-        undefined,
-      sortOrder: (sortOrder as "asc" | "desc") || undefined,
+        sortBy === ""
+          ? undefined
+          : (sortBy as "name" | "email" | "createdAt" | "feedbackCount"),
+      sortOrder: sortOrder === "" ? undefined : (sortOrder as "asc" | "desc"),
     }),
   );
 
@@ -190,7 +191,7 @@ export function UsersTable() {
       void setSortOrder("");
     } else {
       const sort = newSorting[0];
-      void setSortBy(sort?.id || null);
+      void setSortBy(sort?.id ?? null);
       void setSortOrder(sort?.desc ? "desc" : "asc");
       // Reset to first page when sorting changes
       void setCurrentPage(1);
@@ -200,7 +201,7 @@ export function UsersTable() {
   return (
     <DataTable
       columns={columns}
-      data={data?.users || []}
+      data={data?.users ?? []}
       pageCount={pageCount}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}
@@ -214,7 +215,7 @@ export function UsersTable() {
       exportConfig={{
         enabled: true,
         filename: `users-${new Date().toISOString().split("T")[0]}.csv`,
-        data: exportData || [],
+        data: exportData ?? [],
       }}
     />
   );

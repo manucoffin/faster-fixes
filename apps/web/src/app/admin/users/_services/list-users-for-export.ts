@@ -48,8 +48,8 @@ export async function listUsersForExport({ search }: ListUsersForExportInput) {
   });
 
   return users.map((user) => ({
-    firstName: user.profile?.firstName || "",
-    lastName: user.profile?.lastName || "",
+    firstName: user.profile?.firstName ?? "",
+    lastName: user.profile?.lastName ?? "",
     email: user.email || "",
   }));
 }

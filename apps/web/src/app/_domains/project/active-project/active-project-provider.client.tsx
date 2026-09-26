@@ -92,10 +92,10 @@ export function ActiveProjectProvider({
 
   // Auto-select first project when none is active
   useEffect(() => {
-    if (!isPending && !validatedProject && projects && projects.length > 0) {
-      const firstId = projects[0]!.id;
-      setCookie(firstId);
-      setActiveProjectIdState(firstId);
+    const firstProject = projects?.[0];
+    if (!isPending && !validatedProject && firstProject) {
+      setCookie(firstProject.id);
+      setActiveProjectIdState(firstProject.id);
     }
   }, [isPending, validatedProject, projects]);
 

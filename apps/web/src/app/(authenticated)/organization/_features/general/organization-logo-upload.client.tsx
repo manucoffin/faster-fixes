@@ -25,9 +25,7 @@ export function OrganizationLogoUpload() {
   );
 
   const orgName = activeOrg?.name ?? "organization";
-  const orgLogo = (activeOrg as Record<string, unknown>)?.logo as
-    | string
-    | undefined;
+  const orgLogo = activeOrg?.logo;
 
   // Clean up blob URL on unmount
   useEffect(() => {

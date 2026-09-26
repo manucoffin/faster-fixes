@@ -7,6 +7,7 @@ import {
 import { createJiraIssue as createIssue } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -76,7 +77,7 @@ export const createJiraIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
-    const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+    const baseUrl = getAuthBaseUrl();
 
     const description = formatIssueAdf({
       comment: feedback.comment,

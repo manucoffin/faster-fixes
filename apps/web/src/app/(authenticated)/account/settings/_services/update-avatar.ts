@@ -1,4 +1,5 @@
 import { s3Client } from "@/server/storage";
+import { requireEnv } from "@/utils/environment/require-env";
 import { deleteObject } from "@better-upload/server/helpers";
 import { prisma } from "@workspace/db";
 
@@ -13,7 +14,10 @@ export async function updateAvatar({ userId }: { userId: string }) {
   if (user.image && !user.image.startsWith("http")) {
     try {
       await deleteObject(s3Client, {
-        bucket: process.env.STORAGE_BUCKET_NAME!,
+        bucket: requireEnv(
+          "STORAGE_BUCKET_NAME",
+          process.env.STORAGE_BUCKET_NAME,
+        ),
         key: user.image,
       });
     } catch (error) {

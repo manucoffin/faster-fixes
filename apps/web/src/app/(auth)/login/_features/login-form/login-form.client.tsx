@@ -54,11 +54,18 @@ export function LoginForm() {
           setUnverifiedEmail(form.getValues("email"));
           return;
         }
-        const message = error.message || "Sign in failed. Please try again.";
+        const message =
+          error.message === ""
+            ? "Sign in failed. Please try again."
+            : error.message;
         form.setError("root", { message });
       },
       onSuccess: () => {
-        router.push((nextUrl || defaultRedirect) as Route);
+        router.push(
+          (nextUrl === null || nextUrl === ""
+            ? defaultRedirect
+            : nextUrl) as Route,
+        );
       },
     }),
   );

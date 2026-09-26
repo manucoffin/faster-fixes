@@ -1,6 +1,7 @@
 import { SUBSCRIPTION_PLANS } from "@/server/auth/config/subscription-plans";
 import { authorizeBillingReference } from "@/server/auth/subscription/authorize-billing-reference";
 import { stripeApi } from "@/server/stripe";
+import { requireEnv } from "@/utils/environment/require-env";
 import { stripe } from "@better-auth/stripe";
 import { prisma } from "@workspace/db";
 
@@ -61,7 +62,12 @@ export const stripePlugin = stripe({
       params: {
         allow_promotion_codes: true,
         subscription_data: {
-          default_tax_rates: [process.env.STRIPE_DEFAULT_TAX_RATE_ID!],
+          default_tax_rates: [
+            requireEnv(
+              "STRIPE_DEFAULT_TAX_RATE_ID",
+              process.env.STRIPE_DEFAULT_TAX_RATE_ID,
+            ),
+          ],
           ...(plan.freeTrial?.days && {
             trial_period_days: plan.freeTrial.days,
           }),

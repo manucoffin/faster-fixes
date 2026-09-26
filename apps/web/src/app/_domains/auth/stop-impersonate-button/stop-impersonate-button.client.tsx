@@ -46,7 +46,7 @@ export function StopImpersonateButton() {
   };
 
   // Only show button if user is being impersonated
-  const isImpersonated = !!session?.session?.impersonatedBy;
+  const isImpersonated = !!session?.session.impersonatedBy;
 
   if (!isImpersonated) {
     return null;
@@ -70,7 +70,7 @@ export function StopImpersonateButton() {
             <AlertDialogTitle>Stop impersonation?</AlertDialogTitle>
             <AlertDialogDescription>
               You will return to your admin account. Access to the account of
-              user {session?.user?.email} will be revoked.
+              user {session.user.email} will be revoked.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

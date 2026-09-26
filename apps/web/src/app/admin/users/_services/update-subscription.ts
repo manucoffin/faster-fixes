@@ -17,7 +17,7 @@ export async function updateSubscription(
     throw new NotFoundError("Subscription not found");
   }
 
-  return await db.subscription.update({
+  return db.subscription.update({
     where: { id: input.id },
     data: {
       plan: input.plan,

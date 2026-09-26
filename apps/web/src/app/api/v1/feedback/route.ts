@@ -15,11 +15,6 @@ const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 // POST /api/v1/feedback — submit new feedback (multipart)
 export async function POST(req: NextRequest) {
-  console.info(
-    "[feedback] POST /api/v1/feedback, content-type:",
-    req.headers.get("content-type"),
-  );
-
   const project = await findProjectByPublicId(req.headers.get("x-api-key"));
   if (!project) {
     console.warn("[feedback] unauthorized: invalid API key");
@@ -97,12 +92,6 @@ export async function POST(req: NextRequest) {
   // Handle optional screenshot upload
   let screenshotId: string | undefined;
   const screenshotField = formData.get("screenshot");
-  console.info(
-    "[feedback] screenshot field present:",
-    screenshotField !== null,
-    "| instanceof File:",
-    screenshotField instanceof File,
-  );
   if (screenshotField !== null && !(screenshotField instanceof File)) {
     console.warn(
       "[feedback] screenshot field is not a File, type:",
@@ -119,19 +108,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.info(
-      "[feedback] screenshot file, name:",
-      screenshotField.name,
-      "| type:",
-      screenshotField.type,
-      "| size:",
-      screenshotField.size,
-    );
     // A storage failure is not a reason to lose the Feedback: the submit goes
     // on without the screenshot, as it always has.
     try {
       const buffer = Buffer.from(await screenshotField.arrayBuffer());
-      console.info("[feedback] screenshot buffer length:", buffer.length);
       if (buffer.length > 5 * 1024 * 1024) {
         console.warn("[feedback] screenshot exceeds 5MB limit:", buffer.length);
         return NextResponse.json(
