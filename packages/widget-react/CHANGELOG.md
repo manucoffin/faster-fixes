@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.13
+
+### Patch Changes
+
+- [#197](https://github.com/manucoffin/faster-fixes/pull/197) [`9ec2011`](https://github.com/manucoffin/faster-fixes/commit/9ec2011155c0eb66d95485c5c98b862d2fc0ccdd) Thanks [@manucoffin](https://github.com/manucoffin)! - The comment and pin popovers now stay inside the viewport when the selected element is taller than the screen. When neither side of the element has room, the popover sits against the visible edge of the viewport, over the element, instead of rendering off screen.
+- Updated dependencies [[`571b6f9`](https://github.com/manucoffin/faster-fixes/commit/571b6f9f9a00104ece629d6ce45dfb64846e78d8)]:
+  - @fasterfixes/core@0.1.0
+
 ## 0.0.12
 
 ### Patch Changes
