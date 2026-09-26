@@ -5,6 +5,7 @@ import { createDeferredWidget, createInertWidget } from "./instance.js";
 import type { Widget } from "./instance.js";
 import { validateOptions } from "./options.js";
 import type { WidgetOptions } from "./options.js";
+import { whenBodyReady } from "./script-options.js";
 
 let current: Widget | null = null;
 
@@ -22,9 +23,9 @@ function start(input: unknown): Widget {
   });
   const deferred = createDeferredWidget();
 
-  client
-    .getConfig()
-    .then((config) => {
+  // The script tag may run in the head, before `document.body` exists.
+  Promise.all([client.getConfig(), whenBodyReady(document)])
+    .then(([config]) => {
       // A later `init` or `destroy` may have landed while the request ran.
       if (deferred.destroyed) return;
       deferred.attach(
