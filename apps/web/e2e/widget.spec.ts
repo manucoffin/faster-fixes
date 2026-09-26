@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test";
 import type { Locator } from "@playwright/test";
 
 import {
+  selectOutsideDismissableDrawer,
+  submitInsideFocusTrap,
+} from "./host-dialog";
+import {
   REVIEWER_TOKEN,
   seedReviewerToken,
   STORAGE_KEY_TOKEN,
@@ -511,6 +515,18 @@ for (const fixture of WIDGET_FIXTURES) {
 
       await expect.poll(() => api.createdFeedback().length).toBe(1);
       expect(api.createdFeedback()[0]?.comment).toBe("Retry after a failure");
+    });
+
+    test("keeps focus in the comment popover inside a focus-trapping dialog", async ({
+      page,
+    }) => {
+      await submitInsideFocusTrap(page, fixture.path, "bubble");
+    });
+
+    test("selecting an element does not close a drawer that closes on outside presses", async ({
+      page,
+    }) => {
+      await selectOutsideDismissableDrawer(page, fixture.path, "bubble");
     });
   });
 }

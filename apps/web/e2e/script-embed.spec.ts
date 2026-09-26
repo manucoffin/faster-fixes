@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  selectOutsideDismissableDrawer,
+  submitInsideFocusTrap,
+} from "./host-dialog";
 import { seedReviewerToken } from "./reviewer-token";
 import {
   stubWidgetApi,
@@ -209,6 +213,19 @@ test.describe("script embed", () => {
     await expect(row).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  });
+
+  // The React Embed only defends against bubble-phase listeners.
+  test("keeps focus in the comment popover against a capture-phase focus trap", async ({
+    page,
+  }) => {
+    await submitInsideFocusTrap(page, FIXTURE_PATH, "capture");
+  });
+
+  test("selecting an element does not close a drawer listening in the capture phase", async ({
+    page,
+  }) => {
+    await selectOutsideDismissableDrawer(page, FIXTURE_PATH, "capture");
   });
 });
 

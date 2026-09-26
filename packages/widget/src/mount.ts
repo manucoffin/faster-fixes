@@ -10,6 +10,7 @@ import { createAnnotationMode } from "./annotation.js";
 import { createCommentPopover } from "./comment-popover.js";
 import { createFeedbackList } from "./feedback-list.js";
 import { buildFeedbackPayload } from "./feedback-payload.js";
+import { guardHost } from "./host-guard.js";
 import type { Widget } from "./instance.js";
 import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
@@ -74,6 +75,7 @@ export function mountWidget({
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(WIDGET_CSS);
   shadow.adoptedStyleSheets = [sheet];
+  const unguardHost = guardHost(host, shadow);
 
   // Starts at mount, stops on destroy: an opted-out site never patches globals.
   let recorder: DiagnosticsRecorder | null = null;
@@ -328,6 +330,7 @@ export function mountWidget({
       recorder?.stop();
       recorder = null;
       pinLayer.destroy();
+      unguardHost();
       host.remove();
     },
   };

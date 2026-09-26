@@ -79,10 +79,13 @@ export function createAnnotationMode(
       if (listening) return;
       listening = new AbortController();
       const options = { capture: true, signal: listening.signal };
+      // Captured on the window so they run before any document-level
+      // outside-click handler a host dialog or drawer registered first.
+      const view = document.defaultView ?? window;
       document.addEventListener("mousemove", handleMouseMove, options);
-      document.addEventListener("click", handleClick, options);
-      document.addEventListener("mousedown", handlePress, options);
-      document.addEventListener("pointerdown", handlePress, options);
+      view.addEventListener("click", handleClick, options);
+      view.addEventListener("mousedown", handlePress, options);
+      view.addEventListener("pointerdown", handlePress, options);
       document.addEventListener("keydown", handleKeyDown, options);
       previousCursor = document.body.style.cursor;
       document.body.style.cursor = "crosshair";
