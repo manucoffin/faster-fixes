@@ -256,7 +256,10 @@ for (const fixture of WIDGET_FIXTURES) {
         name: "Feedback: The heading is misaligned",
       });
       await expect(pin).toBeVisible();
-      await expect(pin).toHaveCSS("background-color", "rgb(239, 68, 68)");
+      await expect(pin.locator(".pin-dot")).toHaveCSS(
+        "background-color",
+        "rgb(239, 68, 68)",
+      );
       await expectPinAt(pin, page.locator("h1"), 0.5);
       await expect(
         page.getByRole("button", { name: /^Feedback: / }),
@@ -320,9 +323,11 @@ for (const fixture of WIDGET_FIXTURES) {
         page.getByRole("button", { name: "Hide feedback list" }),
       ).toBeVisible();
 
-      await expect(
-        page.getByText("The heading overlaps the logo", { exact: true }),
-      ).toBeVisible();
+      // The pin label repeats the comment, so match the list row by its name.
+      const row = page.getByRole("button", {
+        name: /^The heading overlaps the logo/,
+      });
+      await expect(row).toBeVisible();
       const resolved = page.getByText("Already fixed", { exact: true });
       await expect(resolved).toBeHidden();
 
@@ -332,9 +337,7 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(resolved).toBeHidden();
 
       await page.getByRole("button", { name: "Hide feedback list" }).click();
-      await expect(
-        page.getByText("The heading overlaps the logo", { exact: true }),
-      ).toBeHidden();
+      await expect(row).toBeHidden();
     });
 
     test("activates a list row of the current page", async ({
@@ -350,7 +353,7 @@ for (const fixture of WIDGET_FIXTURES) {
       await page.getByRole("button", { name: "Start feedback" }).click();
       await page.getByRole("button", { name: "Show feedback list" }).click();
       await page
-        .getByText("The heading is misaligned", { exact: true })
+        .getByRole("button", { name: /^The heading is misaligned/ })
         .click();
 
       await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
@@ -486,9 +489,10 @@ for (const fixture of WIDGET_FIXTURES) {
         name: "Feedback: The heading is misaligned",
       });
       await pin.click();
-      // The script embed keeps the closed list's rows in the DOM, hidden.
       await expect(
-        page.getByText("The heading is misaligned").filter({ visible: true }),
+        page
+          .getByRole("paragraph")
+          .filter({ hasText: "The heading is misaligned" }),
       ).toBeVisible();
       await expect(page.getByText("E2E Reviewer")).toBeVisible();
 
