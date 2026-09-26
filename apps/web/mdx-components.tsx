@@ -41,7 +41,10 @@ export function getContentMDXComponents(
   };
 }
 
-// Next.js MDX global provider — defaults to content (non-docs) components
+/**
+ * Next.js MDX global provider, defaults to content (non-docs) components.
+ * @alias
+ */
 export const useMDXComponents = getContentMDXComponents;
 
 declare global {
