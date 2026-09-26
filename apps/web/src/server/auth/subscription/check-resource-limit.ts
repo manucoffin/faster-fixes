@@ -31,7 +31,7 @@ export async function checkResourceLimit(
   prisma: PrismaClient,
 ): Promise<ResourceCheckResult> {
   const plan = await resolveOrganizationPlan(organizationId, prisma);
-  const limit = plan.limits[resource] as number;
+  const limit = plan.limits[resource];
 
   if (limit === Infinity) {
     return { allowed: true };

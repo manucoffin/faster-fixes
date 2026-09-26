@@ -156,9 +156,7 @@ export async function listUsers({
 
   // Build orderBy clause
   const orderBy =
-    sortBy && sortOrder
-      ? { [sortBy]: sortOrder as "asc" | "desc" }
-      : { name: "asc" as const };
+    sortBy && sortOrder ? { [sortBy]: sortOrder } : { name: "asc" as const };
 
   const [users, count] = await Promise.all([
     prisma.user.findMany({

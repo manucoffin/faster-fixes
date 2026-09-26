@@ -125,7 +125,7 @@ export function FeedbackDetailPanel({
           {/* Element context from metadata */}
           {feedback.metadata &&
             (() => {
-              const md = feedback.metadata as Record<string, unknown>;
+              const md = feedback.metadata;
               const hasContext =
                 md.elementDescription || md.reactComponentPath || md.sourceFile;
               if (!hasContext) return null;

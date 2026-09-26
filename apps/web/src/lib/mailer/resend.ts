@@ -94,7 +94,7 @@ export class ResendMailer implements Mailer {
       }
 
       return {
-        id: data!.id,
+        id: data.id,
         email: options.email,
         subscribed: options.subscribed,
         data: options.data ?? {},
@@ -110,7 +110,7 @@ export class ResendMailer implements Mailer {
         throw new EmailError(error.message, error.name);
       }
 
-      return mapResendContact(data!);
+      return mapResendContact(data);
     },
 
     update: async (options: UpdateContactOptions): Promise<Contact> => {

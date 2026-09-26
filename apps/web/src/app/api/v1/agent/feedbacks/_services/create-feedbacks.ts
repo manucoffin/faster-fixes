@@ -54,7 +54,7 @@ export async function createFeedbacks(
   // Reject the whole batch upfront if it would cross the plan limit, so the
   // caller can split or upgrade rather than landing in a half-imported state.
   const plan = await resolveOrganizationPlan(organizationId, db);
-  const limit = plan.limits.feedbacks as number;
+  const limit = plan.limits.feedbacks;
   if (limit !== Infinity) {
     const current = await db.feedback.count({
       where: { project: { organizationId } },

@@ -37,7 +37,7 @@ export function getMinimumRequiredPlanForResource(
   currentCount: number,
 ): SubscriptionPlanName {
   for (const plan of PLAN_ORDER) {
-    const limit = PLAN_LIMITS[plan][resource] as number;
+    const limit = PLAN_LIMITS[plan][resource];
     if (limit === Infinity || currentCount < limit) return plan;
   }
   return "agency" as SubscriptionPlanName;

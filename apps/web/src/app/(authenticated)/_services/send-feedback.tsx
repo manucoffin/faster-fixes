@@ -22,9 +22,7 @@ export async function sendFeedback(
     select: { email: true },
   });
 
-  const adminEmails = adminUsers
-    .map((u) => u.email)
-    .filter(Boolean) as string[];
+  const adminEmails = adminUsers.map((u) => u.email).filter(Boolean);
 
   // An instance with no administrator cannot receive feedback: that is a
   // precondition on the instance, not a server fault.

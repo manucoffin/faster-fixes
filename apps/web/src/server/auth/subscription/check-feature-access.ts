@@ -1,4 +1,4 @@
-import type { FeatureGate, PlanLimits } from "@/app/_domains/subscription";
+import type { FeatureGate } from "@/app/_domains/subscription";
 import type { PrismaClient } from "@workspace/db/types";
 import { getMinimumRequiredPlanForFeature, type PlanDenial } from "./denial";
 import { resolveOrganizationPlan } from "./resolve-organization-plan";
@@ -17,7 +17,7 @@ export async function checkFeatureAccess(
 ): Promise<FeatureCheckResult> {
   const plan = await resolveOrganizationPlan(organizationId, prisma);
 
-  if ((plan.limits as PlanLimits)[feature] === true) {
+  if (plan.limits[feature] === true) {
     return { allowed: true };
   }
 
