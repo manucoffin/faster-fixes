@@ -17,6 +17,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@workspace/ui/components/navigation-menu";
+import { cn } from "@workspace/ui/lib/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { GitHubStarsHeaderLink } from "../_features/github-stars/github-stars-header-link.client";
@@ -82,22 +83,24 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/40 bg-background">
-      <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
-        {/* Left: hamburger on mobile, logo on desktop */}
+      <div className="flex h-16 items-center justify-between gap-4 px-4 md:grid md:grid-cols-[1fr_auto_1fr]">
+        {/* Left: hamburger on mobile (the menu links home, so the logo is dropped to save room), logo on desktop */}
         <div className="flex items-center">
           {isCloud() && (
             <div className="md:hidden">
-              <MobileNav links={navLinks} integrationLinks={integrationLinks} />
+              <MobileNav
+                links={[{ href: "/", label: "Home" }, ...navLinks]}
+                integrationLinks={integrationLinks}
+              />
             </div>
           )}
-          <AppLogo className="hidden shrink-0 md:flex" />
+          <AppLogo className={cn("shrink-0", isCloud() && "hidden md:flex")} />
         </div>
 
-        {/* Center: logo on mobile, nav on desktop */}
-        <div className="flex justify-center">
-          <AppLogo className="shrink-0 md:hidden" />
+        {/* Center: nav on desktop */}
+        <div className="hidden justify-center md:flex">
           {isCloud() && (
-            <NavigationMenu className="hidden md:flex" viewport={false}>
+            <NavigationMenu viewport={false}>
               <NavigationMenuList className="gap-8">
                 {leadingNavLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
