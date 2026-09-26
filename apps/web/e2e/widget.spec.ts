@@ -1,4 +1,6 @@
+import type { FeedbackItem } from "@fasterfixes/core";
 import { expect, test } from "@playwright/test";
+import type { Locator } from "@playwright/test";
 
 import {
   REVIEWER_TOKEN,
@@ -8,6 +10,45 @@ import {
 } from "./reviewer-token";
 import { stubWidgetApi } from "./widget-api-stub";
 import { WIDGET_FIXTURES } from "./widget-fixtures";
+
+function stubbedItem(
+  pageUrl: string,
+  overrides: Partial<FeedbackItem> = {},
+): FeedbackItem {
+  return {
+    id: "fb_stubbed",
+    status: "new",
+    comment: "The heading is misaligned",
+    pageUrl,
+    clickX: 10,
+    clickY: 10,
+    selector: "h1",
+    screenshotUrl: null,
+    reviewer: { id: "e2e-reviewer", name: "E2E Reviewer" },
+    createdAt: new Date().toISOString(),
+    metadata: {
+      pinAnchor: { x: 0.5, y: 0.5 },
+      pinPlacement: { mode: "document", targetKind: "normal" },
+    },
+    ...overrides,
+  };
+}
+
+// The pin sits just right of its anchor, vertically centred on it.
+async function expectPinAt(pin: Locator, target: Locator, anchorX: number) {
+  const pinBox = await pin.boundingBox();
+  const targetBox = await target.boundingBox();
+  expect(pinBox).not.toBeNull();
+  expect(targetBox).not.toBeNull();
+  if (!pinBox || !targetBox) return;
+  expect(pinBox.x).toBeGreaterThanOrEqual(targetBox.x);
+  expect(pinBox.x).toBeLessThanOrEqual(
+    targetBox.x + targetBox.width * anchorX + 6,
+  );
+  const pinCenter = pinBox.y + pinBox.height / 2;
+  expect(pinCenter).toBeGreaterThanOrEqual(targetBox.y - 1);
+  expect(pinCenter).toBeLessThanOrEqual(targetBox.y + targetBox.height + 1);
+}
 
 for (const fixture of WIDGET_FIXTURES) {
   test.describe(fixture.name, () => {
@@ -129,6 +170,84 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(page.getByPlaceholder("Describe the issue...")).toHaveCount(
         0,
       );
+    });
+
+    test("shows a submitted Feedback as a pin on its element", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const target = page.locator("h1");
+      await target.click();
+      await page
+        .getByPlaceholder("Describe the issue...")
+        .fill("The heading overlaps the logo");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      const pin = page.getByRole("button", {
+        name: "Feedback: The heading overlaps the logo",
+      });
+      await expect(pin).toBeVisible();
+      await expectPinAt(pin, target, 1);
+    });
+
+    test("renders the open Feedback of the page as pins on load", async ({
+      page,
+      baseURL,
+    }) => {
+      const pageUrl = new URL(fixture.path, baseURL).href;
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(pageUrl),
+          stubbedItem(pageUrl, {
+            id: "fb_resolved",
+            status: "resolved",
+            comment: "Already fixed",
+          }),
+          stubbedItem(new URL("/elsewhere", baseURL).href, {
+            id: "fb_elsewhere",
+            comment: "On another page",
+          }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const pin = page.getByRole("button", {
+        name: "Feedback: The heading is misaligned",
+      });
+      await expect(pin).toBeVisible();
+      await expect(pin).toHaveCSS("background-color", "rgb(239, 68, 68)");
+      await expectPinAt(pin, page.locator("h1"), 0.5);
+      await expect(
+        page.getByRole("button", { name: /^Feedback: / }),
+      ).toHaveCount(1);
+    });
+
+    test("hides and shows the pins with the markers control", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [stubbedItem(new URL(fixture.path, baseURL).href)],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const pin = page.getByRole("button", {
+        name: "Feedback: The heading is misaligned",
+      });
+      await expect(pin).toBeVisible();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Hide markers" }).click();
+      await expect(pin).toBeHidden();
+
+      await page.getByRole("button", { name: "Show markers" }).click();
+      await expect(pin).toBeVisible();
     });
 
     test("shows the server error with retry and cancel", async ({ page }) => {

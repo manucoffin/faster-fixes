@@ -109,6 +109,10 @@ export const WIDGET_CSS = `
     background-color: rgba(255, 255, 255, 0.3);
   }
 
+  .control-pressed {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
   .control:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 1px;
@@ -122,6 +126,47 @@ export const WIDGET_CSS = `
     background-color: color-mix(in srgb, var(--ff-accent) 10%, transparent);
     pointer-events: none;
     transition: all 0.1s ease;
+  }
+
+  .highlight {
+    position: fixed;
+    z-index: calc(var(--ff-z-index) - 2);
+    border: 2px solid var(--ff-accent);
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--ff-accent) 10%, transparent);
+    pointer-events: none;
+  }
+
+  .pin {
+    all: initial;
+    position: absolute;
+    z-index: calc(var(--ff-z-index) - 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #27272a;
+    border-radius: 50%;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.15s ease;
+  }
+
+  .pin:hover {
+    transform: scale(1.15);
+  }
+
+  .pin:focus-visible {
+    outline: 2px solid var(--ff-accent);
+    outline-offset: 2px;
+  }
+
+  .pin svg {
+    display: block;
   }
 
   .popover {
@@ -266,6 +311,7 @@ export const WIDGET_CSS = `
     .button,
     .controls,
     .overlay,
+    .pin,
     .popover.fading,
     .tooltip {
       animation: none;

@@ -2,6 +2,7 @@ import { createDiagnosticsRecorder } from "@fasterfixes/core";
 import type {
   DiagnosticsRecorder,
   FeedbackClient,
+  FeedbackItem,
   WidgetPosition,
 } from "@fasterfixes/core";
 
@@ -11,6 +12,7 @@ import { buildFeedbackPayload } from "./feedback-payload.js";
 import type { Widget } from "./instance.js";
 import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
+import { createPinLayer } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
@@ -23,6 +25,15 @@ type MountInput = {
 
 // `selected` covers the comment popover in every state: typing, submitting, error.
 type WidgetMode = "idle" | "annotating" | "selected";
+
+// Resolved and closed Feedback stay in the list but get no pin.
+function isOpenOnPage(item: FeedbackItem, url: string) {
+  return (
+    item.pageUrl === url &&
+    item.status !== "resolved" &&
+    item.status !== "closed"
+  );
+}
 
 function stackAlignment(position: WidgetPosition) {
   if (position.includes("bottom")) return "flex-end";
@@ -83,6 +94,31 @@ export function mountWidget({
   overlay.setAttribute("part", "overlay");
   overlay.hidden = true;
 
+  const highlight = document.createElement("div");
+  highlight.className = "highlight";
+  highlight.hidden = true;
+  shadow.appendChild(highlight);
+
+  const pinLayer = createPinLayer(document, shadow, options.labels, highlight);
+  let feedbackItems: FeedbackItem[] = [];
+  let showPins = true;
+
+  function setFeedbackItems(next: FeedbackItem[]) {
+    feedbackItems = next;
+    pinLayer.render(
+      next.filter((item) => isOpenOnPage(item, window.location.href)),
+    );
+  }
+
+  async function loadFeedback() {
+    try {
+      const { feedback } = await client.getFeedback(reviewerToken);
+      if (!destroyed) setFeedbackItems(feedback);
+    } catch {
+      // The Widget works without pins when the list cannot be loaded
+    }
+  }
+
   const annotation = createAnnotationMode(document, overlay, {
     onSelect(element, click) {
       setMode("selected");
@@ -95,7 +131,7 @@ export function mountWidget({
   const popover = createCommentPopover(document, shadow, options.labels, {
     async onSubmit(comment) {
       if (!selection) return;
-      await client.createFeedback(
+      const created = await client.createFeedback(
         buildFeedbackPayload({
           comment,
           element: selection.element,
@@ -104,6 +140,9 @@ export function mountWidget({
         }),
         reviewerToken,
       );
+      if (destroyed) return;
+      setFeedbackItems([...feedbackItems, created]);
+      void loadFeedback();
     },
     onClose() {
       if (mode === "selected") setMode("idle");
@@ -113,6 +152,7 @@ export function mountWidget({
   const toolbar = createToolbar(document, options, {
     onStart: () => setMode("annotating"),
     onExit: () => setMode("idle"),
+    onTogglePins: togglePins,
   });
 
   const stack = document.createElement("div");
@@ -124,6 +164,13 @@ export function mountWidget({
   let visible = true;
   let destroyed = false;
   document.body.appendChild(host);
+  void loadFeedback();
+
+  function togglePins() {
+    showPins = !showPins;
+    pinLayer.setShown(showPins);
+    toolbar.setPinsShown(showPins);
+  }
 
   function show() {
     if (destroyed || visible) return;
@@ -147,12 +194,22 @@ export function mountWidget({
       show();
       setMode("annotating");
     },
+    get feedbackItems() {
+      return feedbackItems;
+    },
+    togglePins() {
+      if (!destroyed) togglePins();
+    },
+    get showPins() {
+      return showPins;
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
       setMode("idle");
       recorder?.stop();
       recorder = null;
+      pinLayer.destroy();
       host.remove();
     },
   };

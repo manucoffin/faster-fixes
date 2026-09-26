@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   computePinAnchor,
@@ -6,6 +6,8 @@ import {
   getPinAnchor,
   getPinPlacementMetadata,
   getViewportAnchoringKind,
+  PIN_SIZE,
+  placePin,
 } from "./pin-placement.js";
 
 // A chain of stand-in elements, target first, each child of the next. The
@@ -133,5 +135,139 @@ describe("reading stored metadata", () => {
     expect(getPinPlacementMetadata({ pinPlacement: { mode: "page" } })).toBe(
       null,
     );
+  });
+});
+
+describe("placePin", () => {
+  const view = { width: 1000, height: 800, scrollX: 0, scrollY: 0 };
+  const rect = { left: 100, top: 200, width: 200, height: 100 };
+  const normal = () => "normal" as const;
+
+  function onElement(
+    metadata: unknown,
+    target: Partial<{ rect: typeof rect; kind: "normal" | "fixed" }> = {},
+    pinView = view,
+  ) {
+    return placePin(
+      { clickX: null, clickY: null, metadata },
+      {
+        rect: target.rect ?? rect,
+        readTargetKind: () => target.kind ?? "normal",
+      },
+      pinView,
+    );
+  }
+
+  it("places the pin right of the stored anchor, centred on it", () => {
+    expect(onElement({ pinAnchor: { x: 0.5, y: 0.5 } })).toEqual({
+      mode: "document",
+      left: 200 + 4,
+      top: 250 - PIN_SIZE / 2,
+    });
+  });
+
+  it("uses the top right corner for a pin stored without an anchor", () => {
+    expect(onElement(null)).toEqual({
+      mode: "document",
+      left: 300 + 4,
+      top: 200,
+    });
+  });
+
+  it("flips to the left of the anchor when the pin would overflow", () => {
+    const edge = { left: 900, top: 200, width: 100, height: 100 };
+    expect(onElement({ pinAnchor: { x: 0.9, y: 0 } }, { rect: edge })).toEqual(
+      expect.objectContaining({ left: 990 - PIN_SIZE - 4 }),
+    );
+  });
+
+  it("clamps the pin inside the viewport width", () => {
+    const offscreen = { left: -300, top: 200, width: 100, height: 100 };
+    expect(
+      onElement({ pinAnchor: { x: 0, y: 0 } }, { rect: offscreen }),
+    ).toEqual(expect.objectContaining({ left: 0 }));
+  });
+
+  it("moves an anchorless pin up to the element's bottom when it overflows", () => {
+    const low = { left: 100, top: 790, width: 100, height: 8 };
+    expect(onElement(null, { rect: low })).toEqual(
+      expect.objectContaining({ top: 798 - PIN_SIZE }),
+    );
+  });
+
+  it("adds the scroll offset in document mode", () => {
+    const scrolled = { ...view, scrollX: 10, scrollY: 500 };
+    expect(onElement({ pinAnchor: { x: 0, y: 0 } }, {}, scrolled)).toEqual({
+      mode: "document",
+      left: 104 + 10,
+      top: 200 - PIN_SIZE / 2 + 500,
+    });
+  });
+
+  it("stays in viewport coordinates and clamps vertically for a fixed element", () => {
+    const scrolled = { ...view, scrollY: 500 };
+    const top = { left: 100, top: 0, width: 200, height: 40 };
+    expect(
+      onElement(
+        { pinAnchor: { x: 0, y: 0 } },
+        { rect: top, kind: "fixed" },
+        scrolled,
+      ),
+    ).toEqual({ mode: "viewport", left: 104, top: 0 });
+  });
+
+  it("prefers the stored placement over the element's current kind", () => {
+    const readTargetKind = vi.fn(normal);
+    const pinPlacement = { mode: "viewport", targetKind: "sticky" };
+    expect(
+      placePin(
+        { clickX: null, clickY: null, metadata: { pinPlacement } },
+        { rect, readTargetKind },
+        view,
+      ),
+    ).toEqual(expect.objectContaining({ mode: "viewport" }));
+    expect(readTargetKind).not.toHaveBeenCalled();
+  });
+
+  it("hides the pin of an element with no box", () => {
+    const empty = { left: 0, top: 0, width: 0, height: 0 };
+    expect(onElement(null, { rect: empty })).toBeNull();
+  });
+
+  describe("without an element", () => {
+    it("hides a pin stored with selector strategies", () => {
+      expect(
+        placePin(
+          { clickX: 10, clickY: 20, metadata: { selectors: { css: "h1" } } },
+          null,
+          view,
+        ),
+      ).toBeNull();
+    });
+
+    it("falls back to the stored document point", () => {
+      const pinPlacement = {
+        mode: "document",
+        documentPoint: { x: 10, y: 900 },
+      };
+      expect(
+        placePin({ clickX: 10, clickY: 20, metadata: { pinPlacement } }, null, {
+          ...view,
+          scrollY: 880,
+        }),
+      ).toEqual({ mode: "document", left: 10, top: 900 });
+    });
+
+    it("falls back to the click coordinates", () => {
+      expect(placePin({ clickX: 10, clickY: 20 }, null, view)).toEqual({
+        mode: "viewport",
+        left: 10,
+        top: 20,
+      });
+    });
+
+    it("hides a pin with nothing to place it by", () => {
+      expect(placePin({ clickX: null, clickY: 20 }, null, view)).toBeNull();
+    });
   });
 });

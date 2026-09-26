@@ -1,10 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { FeedbackItem } from "@fasterfixes/core";
+
 import { createDeferredWidget, createInertWidget } from "./instance.js";
 import type { Widget } from "./instance.js";
 
-function createFakeWidget() {
+function createFakeWidget(items: FeedbackItem[] = []) {
   let visible = true;
+  let pins = true;
   const widget = {
     show: vi.fn(() => {
       visible = true;
@@ -18,6 +21,13 @@ function createFakeWidget() {
     startAnnotation: vi.fn(() => {
       visible = true;
     }),
+    feedbackItems: items,
+    togglePins: vi.fn(() => {
+      pins = !pins;
+    }),
+    get showPins() {
+      return pins;
+    },
     destroy: vi.fn(() => {
       visible = false;
     }),
@@ -85,6 +95,43 @@ describe("createDeferredWidget", () => {
     deferred.attach(mounted);
 
     expect(mounted.startAnnotation).not.toHaveBeenCalled();
+  });
+
+  it("has no Feedback items and shows pins before the Widget mounts", () => {
+    const { widget } = createDeferredWidget();
+
+    expect(widget.feedbackItems).toEqual([]);
+    expect(widget.showPins).toBe(true);
+  });
+
+  it("reads the mounted Widget's Feedback items", () => {
+    const items = [{ id: "fb_1" } as FeedbackItem];
+    const deferred = createDeferredWidget();
+    deferred.attach(createFakeWidget(items));
+
+    expect(deferred.widget.feedbackItems).toBe(items);
+  });
+
+  it("applies a pins toggle requested before the Widget mounted", () => {
+    const deferred = createDeferredWidget();
+    deferred.widget.togglePins();
+    expect(deferred.widget.showPins).toBe(false);
+
+    const mounted = createFakeWidget();
+    deferred.attach(mounted);
+
+    expect(mounted.togglePins).toHaveBeenCalledOnce();
+    expect(deferred.widget.showPins).toBe(false);
+  });
+
+  it("forwards togglePins after attach", () => {
+    const deferred = createDeferredWidget();
+    deferred.attach(createFakeWidget());
+
+    deferred.widget.togglePins();
+    expect(deferred.widget.showPins).toBe(false);
+    deferred.widget.togglePins();
+    expect(deferred.widget.showPins).toBe(true);
   });
 
   it("destroys the mounted Widget and ignores later calls", () => {

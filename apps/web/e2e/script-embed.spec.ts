@@ -81,13 +81,52 @@ test.describe("script embed", () => {
     await page.locator("#primary-action").click();
     await expect(page.getByPlaceholder("Describe the issue...")).toBeFocused();
   });
+
+  test("exposes the loaded Feedback and the pins toggle on the instance", async ({
+    page,
+  }) => {
+    await page.goto(FIXTURE_PATH);
+    await expect(
+      page.getByRole("button", { name: "Start feedback" }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.locator("h1").click();
+    await page.getByPlaceholder("Describe the issue...").fill("Pinned");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    const pin = page.getByRole("button", { name: "Feedback: Pinned" });
+    await expect(pin).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() => window.FasterFixes?.instance?.feedbackItems.length),
+      )
+      .toBe(1);
+
+    expect(
+      await page.evaluate(() => {
+        window.FasterFixes?.instance?.togglePins();
+        return window.FasterFixes?.instance?.showPins;
+      }),
+    ).toBe(false);
+    await expect(pin).toBeHidden();
+
+    await page.evaluate(() => window.FasterFixes?.instance?.togglePins());
+    await expect(pin).toBeVisible();
+  });
 });
 
 declare global {
   interface Window {
     FasterFixes?: {
       init: (options: unknown) => unknown;
-      instance?: { hide: () => void; startAnnotation: () => void };
+      instance?: {
+        hide: () => void;
+        startAnnotation: () => void;
+        readonly feedbackItems: readonly { id: string }[];
+        togglePins: () => void;
+        readonly showPins: boolean;
+      };
     };
   }
 }

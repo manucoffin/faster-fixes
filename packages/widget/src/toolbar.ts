@@ -7,12 +7,15 @@ import type { ResolvedDisplayOptions } from "./options.js";
 type ToolbarActions = {
   onStart: () => void;
   onExit: () => void;
+  onTogglePins: () => void;
 };
 
 export type Toolbar = {
   element: HTMLElement;
   /** Collapsed shows the start button, active shows the controls. */
   setActive: (active: boolean) => void;
+  /** Reflects whether pins are shown in the markers control. */
+  setPinsShown: (shown: boolean) => void;
 };
 
 function tooltipSide(position: WidgetPosition) {
@@ -38,11 +41,17 @@ function createControl(
   const control = document.createElement("button");
   control.type = "button";
   control.className = "control";
-  control.setAttribute("aria-label", label);
-  control.appendChild(createIcon(document, icon, 16));
-  control.appendChild(createTooltip(document, label, side));
   control.addEventListener("click", onClick);
-  return control;
+  const tooltip = createTooltip(document, label, side);
+  control.append(createIcon(document, icon, 16), tooltip);
+
+  function setContent(nextLabel: string, nextIcon: IconName) {
+    control.setAttribute("aria-label", nextLabel);
+    tooltip.textContent = nextLabel;
+    control.firstChild?.replaceWith(createIcon(document, nextIcon, 16));
+  }
+  control.setAttribute("aria-label", label);
+  return { control, setContent };
 }
 
 /**
@@ -52,7 +61,7 @@ function createControl(
 export function createToolbar(
   document: Document,
   { labels, position }: ResolvedDisplayOptions,
-  { onStart, onExit }: ToolbarActions,
+  { onStart, onExit, onTogglePins }: ToolbarActions,
 ): Toolbar {
   const side = tooltipSide(position);
   const toolbar = document.createElement("div");
@@ -70,8 +79,24 @@ export function createToolbar(
   const controls = document.createElement("div");
   controls.className = "controls";
   controls.hidden = true;
-  controls.appendChild(
-    createControl(document, labels.exitFeedbackMode, "close", side, onExit),
+  const exit = createControl(
+    document,
+    labels.exitFeedbackMode,
+    "close",
+    side,
+    onExit,
+  );
+  const markers = createControl(
+    document,
+    labels.hideMarkers,
+    "eye",
+    side,
+    onTogglePins,
+  );
+  controls.append(
+    ...(position.includes("top")
+      ? [exit.control, markers.control]
+      : [markers.control, exit.control]),
   );
 
   toolbar.append(trigger, controls);
@@ -86,8 +111,15 @@ export function createToolbar(
       controls.hidden = !active;
       // Keeps keyboard users on the toolbar when the button they pressed hides.
       if (focusWasInside) {
-        (active ? controls.querySelector("button") : trigger)?.focus();
+        (active ? exit.control : trigger).focus();
       }
+    },
+    setPinsShown(shown) {
+      markers.setContent(
+        shown ? labels.hideMarkers : labels.showMarkers,
+        shown ? "eye" : "eyeOff",
+      );
+      markers.control.classList.toggle("control-pressed", !shown);
     },
   };
 }

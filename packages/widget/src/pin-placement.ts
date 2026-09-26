@@ -129,3 +129,95 @@ export function getPinPlacementMetadata(
     targetKind: readTargetKind(record.targetKind),
   };
 }
+
+export const PIN_SIZE = 24;
+const PIN_GAP = 4;
+
+export type PinPosition = {
+  mode: PinPlacementMode;
+  top: number;
+  left: number;
+};
+
+export type PinView = {
+  width: number;
+  height: number;
+  scrollX: number;
+  scrollY: number;
+};
+
+type PinItem = {
+  clickX: number | null;
+  clickY: number | null;
+  metadata?: unknown;
+};
+
+type PinTarget = {
+  rect: Rect;
+  /** Read only when the stored placement does not say, since it walks ancestors. */
+  readTargetKind: () => PinTargetKind;
+};
+
+function placeOnTarget(
+  metadata: unknown,
+  { rect, readTargetKind }: PinTarget,
+  view: PinView,
+): PinPosition | null {
+  // An element with no box, e.g. inside a closed dialog, is not on screen.
+  if (rect.width === 0 && rect.height === 0) return null;
+
+  const pinAnchor = getPinAnchor(metadata);
+  const stored = getPinPlacementMetadata(metadata);
+  const targetKind = stored?.targetKind ?? readTargetKind();
+  const mode =
+    stored?.mode ?? (targetKind === "normal" ? "document" : "viewport");
+
+  // Pins stored before the anchor existed sit on the element's top right corner.
+  const anchorX = pinAnchor
+    ? rect.left + rect.width * pinAnchor.x
+    : rect.left + rect.width;
+  const anchorY = pinAnchor ? rect.top + rect.height * pinAnchor.y : rect.top;
+
+  let left = anchorX + PIN_GAP;
+  if (left + PIN_SIZE > view.width) left = anchorX - PIN_SIZE - PIN_GAP;
+  left = clamp(left, 0, view.width - PIN_SIZE);
+
+  let top = pinAnchor ? anchorY - PIN_SIZE / 2 : rect.top;
+  if (!pinAnchor && top + PIN_SIZE > view.height) {
+    top = rect.top + rect.height - PIN_SIZE;
+  }
+  if (mode === "viewport") top = clamp(top, 0, view.height - PIN_SIZE);
+
+  return mode === "document"
+    ? { mode, top: top + view.scrollY, left: left + view.scrollX }
+    : { mode, top, left };
+}
+
+/**
+ * Where the pin for `item` goes, from its resolved element when there is one,
+ * else from the stored points. `document` positions are page coordinates for
+ * an absolutely positioned pin, `viewport` ones are for a fixed pin. `null`
+ * hides the pin.
+ */
+export function placePin(
+  item: PinItem,
+  target: PinTarget | null,
+  view: PinView,
+): PinPosition | null {
+  if (target) return placeOnTarget(item.metadata, target, view);
+
+  // A pin stored with selector strategies was on a transient element, such as
+  // a closed dialog, so it hides. Older pins fall back to their stored points.
+  if (readMetadataRecord(item.metadata)?.selectors) return null;
+  if (item.clickX == null || item.clickY == null) return null;
+
+  const stored = getPinPlacementMetadata(item.metadata);
+  if (stored?.mode === "document" && stored.documentPoint) {
+    return {
+      mode: "document",
+      top: stored.documentPoint.y,
+      left: stored.documentPoint.x,
+    };
+  }
+  return { mode: "viewport", top: item.clickY, left: item.clickX };
+}
