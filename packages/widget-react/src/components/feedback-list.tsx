@@ -1,6 +1,6 @@
 import type { SelectorStrategies } from "@fasterfixes/core";
 import { resolveElement } from "@fasterfixes/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFeedbackContext } from "../context.js";
 import { getStatusColor } from "../get-status-color.js";
 import {
@@ -26,25 +26,14 @@ export function FeedbackList() {
 
   // Delayed unmount: stay mounted during exit animation
   const [mounted, setMounted] = useState(showList);
-  const [exiting, setExiting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  if (showList && !mounted) setMounted(true);
+  const exiting = mounted && !showList;
 
   useEffect(() => {
-    if (showList) {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-      setExiting(false);
-      setMounted(true);
-    } else if (mounted) {
-      setExiting(true);
-      timerRef.current = setTimeout(() => {
-        setMounted(false);
-        setExiting(false);
-      }, EXIT_DURATION);
-    }
-    return () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-    };
-  }, [showList, mounted]);
+    if (!exiting) return;
+    const timer = setTimeout(() => setMounted(false), EXIT_DURATION);
+    return () => clearTimeout(timer);
+  }, [exiting]);
 
   if (!mounted) return null;
 

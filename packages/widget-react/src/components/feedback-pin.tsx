@@ -134,6 +134,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   }, [item.selector, item.clickX, item.clickY, item.metadata]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- measures the target element's rect, which only exists in the DOM after commit
     updatePosition();
     window.addEventListener("resize", updatePosition, { passive: true });
     window.addEventListener("load", updatePosition);

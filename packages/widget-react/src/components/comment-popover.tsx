@@ -47,12 +47,18 @@ export function CommentPopover() {
   const [fadingOut, setFadingOut] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const frozenStyleRef = useRef<React.CSSProperties | null>(null);
+  const [frozenStyle, setFrozenStyle] = useState<React.CSSProperties | null>(
+    null,
+  );
 
   const isOpen =
     mode === "selected" || mode === "submitting" || mode === "error";
 
-  const { refs, floatingStyles } = useFloating({
+  const {
+    refs: { setFloating },
+    elements,
+    floatingStyles,
+  } = useFloating({
     open: isOpen || fadingOut,
     elements: {
       reference: selectedElement,
@@ -75,7 +81,7 @@ export function CommentPopover() {
     setComment("");
     setError(null);
     setFadingOut(false);
-    frozenStyleRef.current = null;
+    setFrozenStyle(null);
     setSelectedElement(null);
     setClickCoords(null);
     setScreenshotBlob(null);
@@ -149,15 +155,15 @@ export function CommentPopover() {
       void refreshFeedback();
 
       // Freeze the current position before fading so Floating UI recalc can't move it
-      const floatingEl = refs.floating.current;
+      const floatingEl = elements.floating;
       if (floatingEl) {
         const rect = floatingEl.getBoundingClientRect();
-        frozenStyleRef.current = {
+        setFrozenStyle({
           position: "fixed",
           top: rect.top,
           left: rect.left,
           width: rect.width,
-        };
+        });
       }
 
       setComment("");
@@ -206,13 +212,11 @@ export function CommentPopover() {
 
   return (
     <div
-      ref={refs.setFloating}
+      ref={setFloating}
       className={`ff-popover ${classNames.popover ?? ""}`}
       style={{
         ...popoverStyle,
-        ...(fadingOut && frozenStyleRef.current
-          ? frozenStyleRef.current
-          : floatingStyles),
+        ...(fadingOut && frozenStyle ? frozenStyle : floatingStyles),
         ...(fadingOut
           ? {
               animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards`,

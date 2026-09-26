@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import {
   createDiagnosticsRecorder,
@@ -85,7 +92,13 @@ export function FeedbackProviderCore({
     null,
   );
   const [feedbackLoaded, setFeedbackLoaded] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  // The portal mounts to document.body, which is unavailable during SSR: the
+  // server snapshot keeps it out of the server render and of hydration.
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
   const pendingFeedbackHandled = useRef(false);
   const portalCleanupRef = useRef<(() => void) | null>(null);
@@ -116,12 +129,6 @@ export function FeedbackProviderCore({
     () => recorderRef.current?.snapshot(),
     [],
   );
-
-  // The portal mounts to document.body, which is unavailable during SSR.
-  // Defer all DOM-touching render until after hydration.
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Diagnostic Trail: instrument console + network for the lifetime of the
   // widget. Gated by captureDiagnostics so an opted-out site never patches
@@ -416,4 +423,9 @@ function stackAlignment(position: string) {
   if (position.includes("bottom")) return "flex-end";
   if (position.includes("top")) return "flex-start";
   return "center";
+}
+
+// Nothing to subscribe to: only the server and client snapshots differ.
+function subscribeToNothing() {
+  return () => {};
 }
