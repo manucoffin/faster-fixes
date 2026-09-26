@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { WIDGET_API_ORIGIN } from "./e2e/widget-api-stub";
+import { WIDGET_API_ORIGIN, WIDGET_PROJECT_ID } from "./e2e/widget-api-stub";
 
 const PORT = 3100;
 
@@ -23,7 +23,7 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 180_000,
     env: {
-      NEXT_PUBLIC_FF_API_KEY: "proj_e2e",
+      NEXT_PUBLIC_FF_API_KEY: WIDGET_PROJECT_ID,
       // Unresolvable on purpose: every widget request is answered by the route stub,
       // and one the stub misses fails instead of reaching a real backend.
       NEXT_PUBLIC_FF_API_ORIGIN: WIDGET_API_ORIGIN,

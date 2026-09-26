@@ -6,6 +6,7 @@ import type {
 import type { Page, Request, Route } from "@playwright/test";
 
 export const WIDGET_API_ORIGIN = "http://widget-api.e2e.test";
+export const WIDGET_PROJECT_ID = "proj_e2e";
 
 const ENABLED_CONFIG: WidgetConfig = { enabled: true, branding: false };
 

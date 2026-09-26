@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  REVIEWER_TOKEN,
+  seedReviewerToken,
+  STORAGE_KEY_TOKEN,
+  URL_PARAM_TOKEN,
+} from "./reviewer-token";
 import { stubWidgetApi } from "./widget-api-stub";
 import { WIDGET_FIXTURES } from "./widget-fixtures";
-
-// Frozen literals rather than core's constants: a rename in core would silently
-// log out every Reviewer, and this suite is where that must fail.
-const STORAGE_KEY_TOKEN = "ff_reviewer_token";
-const URL_PARAM_TOKEN = "ff_token";
-const REVIEWER_TOKEN = "rt_e2e_reviewer";
 
 for (const fixture of WIDGET_FIXTURES) {
   test.describe(fixture.name, () => {
@@ -55,10 +55,7 @@ for (const fixture of WIDGET_FIXTURES) {
       await stubWidgetApi(page, {
         config: { enabled: true, branding: false },
       });
-      await page.addInitScript(
-        ([key, token]) => window.localStorage.setItem(key, token),
-        [STORAGE_KEY_TOKEN, REVIEWER_TOKEN] as const,
-      );
+      await seedReviewerToken(page);
 
       await page.goto(fixture.path);
 
