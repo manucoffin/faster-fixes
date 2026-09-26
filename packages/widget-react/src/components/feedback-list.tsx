@@ -1,4 +1,4 @@
-import type { FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
+import type { SelectorStrategies } from "@fasterfixes/core";
 import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
 import { useEffect, useRef, useState } from "react";
 import { useFeedbackContext } from "../context.js";
@@ -113,8 +113,7 @@ export function FeedbackList() {
         </div>
       ) : (
         visibleItems.map((item) => {
-          const statusColor =
-            STATUS_COLORS[item.status as FeedbackStatus] ?? STATUS_COLORS.new;
+          const statusColor = STATUS_COLORS[item.status] ?? STATUS_COLORS.new;
 
           return (
             <div
@@ -123,8 +122,9 @@ export function FeedbackList() {
               style={feedbackListItemStyle}
               onClick={() => {
                 if (item.pageUrl === window.location.href) {
-                  const strategies = (item.metadata as Record<string, unknown> | null)
-                    ?.selectors as SelectorStrategies | undefined;
+                  const strategies = (
+                    item.metadata as Record<string, unknown> | null
+                  )?.selectors as SelectorStrategies | undefined;
                   const el = resolveElement(item.selector, strategies);
                   el?.scrollIntoView({
                     behavior: "smooth",

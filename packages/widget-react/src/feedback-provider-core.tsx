@@ -386,11 +386,7 @@ export function FeedbackProviderCore({
                 flexDirection: effectivePosition.includes("right")
                   ? "row-reverse"
                   : "row",
-                alignItems: effectivePosition.includes("bottom")
-                  ? "flex-end"
-                  : effectivePosition.includes("top")
-                    ? "flex-start"
-                    : "center",
+                alignItems: stackAlignment(effectivePosition),
                 gap: 8,
                 zIndex: Z_WIDGET,
                 pointerEvents: "auto",
@@ -407,4 +403,11 @@ export function FeedbackProviderCore({
         )}
     </FeedbackContext.Provider>
   );
+}
+
+// The widget stack hugs the screen edge it is anchored to.
+function stackAlignment(position: string) {
+  if (position.includes("bottom")) return "flex-end";
+  if (position.includes("top")) return "flex-start";
+  return "center";
 }

@@ -7,7 +7,6 @@ import {
   shift,
 } from "@floating-ui/react";
 import { STATUS_COLORS } from "@fasterfixes/core";
-import type { FeedbackStatus } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
 import {
   popoverStyle,
@@ -127,7 +126,7 @@ export function PinPopover() {
   if (!currentFeedback) return null;
 
   const statusColor =
-    STATUS_COLORS[currentFeedback.status as FeedbackStatus] ?? STATUS_COLORS.new;
+    STATUS_COLORS[currentFeedback.status] ?? STATUS_COLORS.new;
 
   function handleStartEdit() {
     setEditComment(currentFeedback!.comment);
@@ -176,6 +175,8 @@ export function PinPopover() {
     setError(null);
     setActiveFeedback(null);
   }
+
+  const mode = popoverMode(isEditing, showDeleteConfirm);
 
   return (
     <div
@@ -238,7 +239,7 @@ export function PinPopover() {
         </p>
       )}
 
-      {isEditing ? (
+      {mode === "edit" && (
         <>
           <textarea
             className={`ff-textarea ${classNames.textarea ?? ""}`}
@@ -277,7 +278,8 @@ export function PinPopover() {
             </button>
           </div>
         </>
-      ) : showDeleteConfirm ? (
+      )}
+      {mode === "confirm-delete" && (
         <div>
           <p style={{ margin: "0 0 10px", fontSize: 13 }}>
             {labels.deleteConfirm}
@@ -306,7 +308,8 @@ export function PinPopover() {
             </button>
           </div>
         </div>
-      ) : (
+      )}
+      {mode === "view" && (
         <>
           <p style={{ margin: "0 0 10px", whiteSpace: "pre-wrap" }}>
             {currentFeedback.comment}
@@ -331,4 +334,11 @@ export function PinPopover() {
       )}
     </div>
   );
+}
+
+// Editing wins over the delete confirmation, which wins over the read view.
+function popoverMode(isEditing: boolean, showDeleteConfirm: boolean) {
+  if (isEditing) return "edit";
+  if (showDeleteConfirm) return "confirm-delete";
+  return "view";
 }
