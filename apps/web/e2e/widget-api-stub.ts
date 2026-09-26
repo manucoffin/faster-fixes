@@ -27,6 +27,8 @@ type WidgetApiStub = {
   requestsTo: (method: string, path: string | RegExp) => StubbedRequest[];
   /** The payload of every create request, in order. */
   createdFeedback: () => (CreateFeedbackData | null)[];
+  /** The id the stub gave each created item, in order. */
+  createdIds: () => string[];
 };
 
 // The widget calls the API cross-origin with custom headers, so every answer,
@@ -82,6 +84,7 @@ export async function stubWidgetApi(
 ): Promise<WidgetApiStub> {
   const requests: StubbedRequest[] = [];
   let items = [...feedback];
+  const createdIds: string[] = [];
 
   await page.route(`${WIDGET_API_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -104,6 +107,7 @@ export async function stubWidgetApi(
     if (pathname === "/api/v1/feedback" && method === "POST") {
       const created = toCreatedItem(readCreateData(body));
       items = [...items, created];
+      createdIds.push(created.id);
       return json(route, 201, created);
     }
 
@@ -153,5 +157,6 @@ export async function stubWidgetApi(
       requestsTo("POST", "/api/v1/feedback").map((request) =>
         readCreateData(request.body),
       ),
+    createdIds: () => [...createdIds],
   };
 }

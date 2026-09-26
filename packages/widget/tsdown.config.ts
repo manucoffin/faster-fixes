@@ -22,7 +22,13 @@ export default defineConfig([
     clean: false,
     minify: true,
     platform: "browser",
-    deps: { alwaysBundle: ["@fasterfixes/core", "@floating-ui/dom"] },
+    deps: {
+      alwaysBundle: [
+        "@fasterfixes/core",
+        "@floating-ui/dom",
+        "modern-screenshot",
+      ],
+    },
     onSuccess(config) {
       const file = readFileSync(join(config.outDir, "widget.iife.js"));
       console.log(

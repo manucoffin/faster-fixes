@@ -153,6 +153,38 @@ for (const fixture of WIDGET_FIXTURES) {
       ).toBe("H1");
     });
 
+    test("attaches a screenshot to the created Feedback", async ({ page }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.locator("h1").click();
+      const comment = page.getByPlaceholder("Describe the issue...");
+      await comment.fill("The heading overlaps the logo");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      // The success state does not wait for the upload.
+      await expect(comment).toBeHidden();
+      expect(api.createdIds()).toHaveLength(1);
+
+      const screenshotPath = /^\/api\/v1\/feedback\/[^/]+\/screenshot$/;
+      await expect
+        .poll(() => api.requestsTo("PUT", screenshotPath).length, {
+          timeout: 15_000,
+        })
+        .toBe(1);
+      const [attach] = api.requestsTo("PUT", screenshotPath);
+      expect(attach?.path).toBe(
+        `/api/v1/feedback/${api.createdIds()[0]}/screenshot`,
+      );
+      const body = attach?.body?.toString("latin1") ?? "";
+      expect(body).toContain('name="screenshot"; filename="screenshot.png"');
+      expect(body).toContain("Content-Type: image/png");
+      // PNG signature
+      expect(body).toContain("\x89PNG");
+    });
+
     test("leaves annotation mode on Escape without selecting", async ({
       page,
     }) => {

@@ -73,7 +73,8 @@
   },
   "dependencies": {
     "@fasterfixes/core": "workspace:*",
-    "@floating-ui/dom": "^1.7.4"
+    "@floating-ui/dom": "^1.7.4",
+    "modern-screenshot": "^4.6.8"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

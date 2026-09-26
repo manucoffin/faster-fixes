@@ -14,6 +14,8 @@ import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
 import { createPinLayer } from "./pins.js";
 import { getPositionStyle } from "./position.js";
+import { captureViewportScreenshot } from "./screenshot.js";
+import { settleScreenshot } from "./screenshot-fallback.js";
 import { WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
 
@@ -76,7 +78,11 @@ export function mountWidget({
   }
 
   let mode: WidgetMode = "idle";
-  let selection: { element: Element; click: PinPoint } | null = null;
+  let selection: {
+    element: Element;
+    click: PinPoint;
+    screenshot: Promise<Blob | null>;
+  } | null = null;
 
   function setMode(next: WidgetMode) {
     mode = next;
@@ -119,10 +125,29 @@ export function mountWidget({
     }
   }
 
+  // Best-effort and never awaited by the submit: a missing screenshot is not an error.
+  async function attachScreenshot(
+    feedbackId: string,
+    pending: Promise<Blob | null>,
+  ) {
+    const screenshot = await settleScreenshot(
+      pending,
+      captureViewportScreenshot,
+    );
+    if (!screenshot) return;
+    try {
+      await client.attachScreenshot(feedbackId, screenshot, reviewerToken);
+      if (!destroyed) void loadFeedback();
+    } catch (err) {
+      console.warn("[faster-fixes] screenshot upload failed:", err);
+    }
+  }
+
   const annotation = createAnnotationMode(document, overlay, {
     onSelect(element, click) {
       setMode("selected");
-      selection = { element, click };
+      // Started before the popover opens; the host is excluded from the capture either way.
+      selection = { element, click, screenshot: captureViewportScreenshot() };
       popover.open(element);
     },
     onCancel: () => setMode("idle"),
@@ -131,6 +156,7 @@ export function mountWidget({
   const popover = createCommentPopover(document, shadow, options.labels, {
     async onSubmit(comment) {
       if (!selection) return;
+      const { screenshot } = selection;
       const created = await client.createFeedback(
         buildFeedbackPayload({
           comment,
@@ -140,6 +166,7 @@ export function mountWidget({
         }),
         reviewerToken,
       );
+      void attachScreenshot(created.id, screenshot);
       if (destroyed) return;
       setFeedbackItems([...feedbackItems, created]);
       void loadFeedback();
