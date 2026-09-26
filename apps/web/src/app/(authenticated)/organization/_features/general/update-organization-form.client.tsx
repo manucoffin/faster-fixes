@@ -15,14 +15,11 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";
-import {
-  UpdateOrganizationInputs,
-  UpdateOrganizationSchema,
-} from "./update-organization.schema";
+import type { UpdateOrganizationInput } from "../../_services/update-organization.schema";
+import { UpdateOrganizationSchema } from "../../_services/update-organization.schema";
 
 export function UpdateOrganizationForm() {
   const trpc = useTRPC();
@@ -43,24 +40,21 @@ export function UpdateOrganizationForm() {
     }),
   );
 
-  const form = useForm<UpdateOrganizationInputs>({
+  const form = useForm<UpdateOrganizationInput>({
     resolver: zodResolver(UpdateOrganizationSchema),
     defaultValues: {
       organizationId: "",
       name: "",
     },
     values: activeOrg
-      ? { organizationId: activeOrg.id, name: activeOrg.name ?? "" }
+      ? { organizationId: activeOrg.id, name: activeOrg.name }
       : undefined,
   });
 
-  const nameValue = form.watch("name");
-  const slugPreview = React.useMemo(
-    () => slugify(nameValue, { lower: true, strict: true }),
-    [nameValue],
-  );
+  const nameValue = useWatch({ control: form.control, name: "name" });
+  const slugPreview = slugify(nameValue, { lower: true, strict: true });
 
-  const onSubmit = (data: UpdateOrganizationInputs) => {
+  const onSubmit = (data: UpdateOrganizationInput) => {
     updateOrganization.mutate(data);
   };
 
@@ -71,7 +65,7 @@ export function UpdateOrganizationForm() {
         className="flex flex-col gap-6"
       >
         {form.formState.errors.root && (
-          <p className="text-destructive text-sm">
+          <p className="text-sm text-destructive">
             {form.formState.errors.root.message}
           </p>
         )}

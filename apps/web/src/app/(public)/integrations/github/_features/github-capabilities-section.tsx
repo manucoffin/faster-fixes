@@ -29,14 +29,14 @@ export function GithubCapabilitiesSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             What lands in GitHub
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Everything lands in the issue
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            Client feedback, dev context, and status — synchronized between
+          <p className="mt-4 text-lg text-muted-foreground">
+            Client feedback, dev context, and status stay synchronized between
             the Faster Fixes inbox and your GitHub repository.
           </p>
         </div>

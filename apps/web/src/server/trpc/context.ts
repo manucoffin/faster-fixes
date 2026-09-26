@@ -1,5 +1,5 @@
 import { auth } from "@/server/auth";
-import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { prisma } from "@workspace/db";
 import { headers } from "next/headers";
 

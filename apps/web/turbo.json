@@ -2,6 +2,11 @@
   "$schema": "https://turborepo.dev/schema.v2.json",
   "extends": ["//"],
   "tasks": {
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "env": ["TZ"]
+    },
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"],
@@ -20,6 +25,7 @@
         "PRO_YEARLY_PRICE_ID",
         "AGENCY_MONTHLY_PRICE_ID",
         "AGENCY_YEARLY_PRICE_ID",
+        "STRIPE_DEFAULT_TAX_RATE_ID",
 
         "PLUNK_SECRET_KEY",
         "RESEND_API_KEY",
@@ -31,6 +37,7 @@
         "R2_ACCOUNT_ID",
         "R2_ACCESS_KEY_ID",
         "R2_SECRET_ACCESS_KEY",
+        "AWS_REGION",
 
         "LINEAR_CLIENT_ID",
         "LINEAR_CLIENT_SECRET",
@@ -46,7 +53,11 @@
 
         "SLACK_CLIENT_ID",
         "SLACK_CLIENT_SECRET",
-        "SLACK_TOKEN_ENCRYPTION_KEY"
+        "SLACK_TOKEN_ENCRYPTION_KEY",
+
+        "GITHUB_APP_ID",
+        "GITHUB_PRIVATE_KEY",
+        "GITHUB_WEBHOOK_SECRET"
       ]
     }
   }

@@ -1,13 +1,9 @@
 "use client";
 
-import { UpgradeSubscriptionDialog } from "@/app/_features/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
+import { UpgradeSubscriptionDialog } from "@/app/_domains/subscription/upgrade-subscription/upgrade-subscription-dialog.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PLAN_FEATURES,
-  SUBSCRIPTION_PLANS,
-  SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+import { PLAN_FEATURES, SubscriptionStatus } from "@/app/_domains/subscription";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -32,17 +28,14 @@ import { ManageSubscriptionButton } from "../manage-subscription/manage-subscrip
 import { BillingDetailsCard } from "./billing-details-card.client";
 import { StatusIndicators } from "./status-indicators.client";
 
-interface CurrentPlanProps {
-  organizationId: string;
-}
-
-export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
+export function CurrentPlanCard() {
   const trpc = useTRPC();
 
-  const getActiveSubscriptionQuery =
-    useQuery(trpc.authenticated.account.billing.subscription.get.queryOptions());
+  const getOrganizationSubscriptionQuery = useQuery(
+    trpc.authenticated.account.billing.subscription.get.queryOptions(),
+  );
 
-  return matchQueryStatus(getActiveSubscriptionQuery, {
+  return matchQueryStatus(getOrganizationSubscriptionQuery, {
     Loading: (
       <Card>
         <CardHeader>
@@ -117,8 +110,6 @@ export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
       </Card>
     ),
     Success: ({ data: subscription }) => {
-      const plan = SUBSCRIPTION_PLANS.find((p) => p.name === subscription.plan);
-
       const formatDate = (date: string | Date) =>
         new Date(date).toLocaleDateString("en-US", {
           day: "numeric",
@@ -137,9 +128,7 @@ export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-2xl">
                 Subscription{" "}
-                <span className="capitalize">
-                  {plan?.name || subscription.plan}
-                </span>
+                <span className="capitalize">{subscription.plan}</span>
               </CardTitle>
 
               <StatusIndicators
@@ -164,7 +153,7 @@ export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
                       .filter((feature) => feature.id !== "kylo_features")
                       .map((feature, index) => (
                         <div key={index} className="flex items-start gap-3">
-                          <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
+                          <Check className="mt-0.5 size-4 shrink-0 text-success" />
                           <p className="text-sm">{feature.label}</p>
                         </div>
                       ))}
@@ -185,7 +174,7 @@ export function CurrentPlanCard({ organizationId }: CurrentPlanProps) {
 
           <CardFooter className="flex justify-end">
             {subscription.status === SubscriptionStatus.Active ||
-              subscription.status === SubscriptionStatus.Trialing ? (
+            subscription.status === SubscriptionStatus.Trialing ? (
               <div className="flex gap-2 pt-4">
                 {/* {!subscription.cancelAtPeriodEnd &&
                   subscription.stripeSubscriptionId && (

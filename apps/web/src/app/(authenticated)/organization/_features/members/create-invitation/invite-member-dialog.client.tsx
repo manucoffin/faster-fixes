@@ -1,6 +1,5 @@
 "use client";
 
-import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,7 +26,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 const InviteMemberFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 });
 
 type InviteMemberFormInputs = z.infer<typeof InviteMemberFormSchema>;
@@ -42,7 +41,6 @@ export function InviteMemberDialog({
   onOpenChange,
 }: InviteMemberDialogProps) {
   const trpc = useTRPC();
-  const { data: activeOrg } = useActiveOrganization();
   const queryClient = useQueryClient();
 
   const form = useForm<InviteMemberFormInputs>({
@@ -61,7 +59,7 @@ export function InviteMemberDialog({
     trpc.authenticated.organization.invitation.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.get.queryFilter(),
+          trpc.authenticated.organization.invitation.list.queryFilter(),
         );
         toast.success("Invitation sent successfully");
         handleOpenChange(false);
@@ -75,10 +73,7 @@ export function InviteMemberDialog({
   );
 
   const onSubmit = (data: InviteMemberFormInputs) => {
-    if (!activeOrg) return;
-
     createInvitation.mutate({
-      organizationId: activeOrg.id,
       email: data.email,
       role: "member",
     });
@@ -100,7 +95,7 @@ export function InviteMemberDialog({
             className="flex flex-col gap-4"
           >
             {form.formState.errors.root && (
-              <p className="text-destructive text-sm">
+              <p className="text-sm text-destructive">
                 {form.formState.errors.root.message}
               </p>
             )}

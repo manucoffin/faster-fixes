@@ -1,10 +1,11 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import type { SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
-  SUBSCRIPTION_PLANS,
+  PAID_PLAN_NAMES,
   SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton } from "@workspace/ui/components/action-button";
@@ -47,25 +48,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserOrganizationSelect } from "../organization-select/user-organization-select.client";
-import {
-  UpdateSubscriptionInputs,
-  UpdateSubscriptionSchema,
-} from "./subscription.schema";
+import type { GetSubscriptionOutput } from "@/app/admin/users/_services/get-subscription";
+import type { UpdateSubscriptionInput } from "@/app/admin/users/_services/update-subscription.schema";
+import { UpdateSubscriptionSchema } from "@/app/admin/users/_services/update-subscription.schema";
 
-interface SubscriptionEditDialogProps {
+type SubscriptionEditDialogProps = {
   userId: string;
-  subscription: any;
-}
+  subscription: NonNullable<GetSubscriptionOutput>;
+};
 
 export function SubscriptionEditDialog({
   userId,
   subscription,
 }: SubscriptionEditDialogProps) {
-  const subscriptionPlans = SUBSCRIPTION_PLANS.map((plan, index) => ({
-    id: index + 1,
-    name: plan.name,
-  }));
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -74,47 +69,46 @@ export function SubscriptionEditDialog({
       onSuccess: () => {
         toast.success("Subscription updated successfully");
         setOpen(false);
-        queryClient.invalidateQueries(
+        return queryClient.invalidateQueries(
           trpc.admin.users.subscription.get.queryFilter(),
         );
       },
-      onError: (error: any) => {
-        toast.error(
-          error.message || "Failed to update subscription",
-        );
+      onError: (error) => {
+        toast.error(error.message || "Failed to update subscription");
       },
     }),
   );
 
-  const form = useForm<UpdateSubscriptionInputs>({
+  const form = useForm<UpdateSubscriptionInput>({
     resolver: zodResolver(UpdateSubscriptionSchema),
     defaultValues: {
-      id: subscription?.id,
-      organizationId: subscription?.organizationId || "",
-      plan: (subscription?.plan as any) || subscriptionPlans[0]?.name,
-      status:
-        (subscription?.status as SubscriptionStatus) ||
-        SubscriptionStatus.Active,
-      periodStart: subscription?.periodStart
+      id: subscription.id,
+      organizationId: subscription.organizationId ?? "",
+      // The subscription plan column is a free-form string in the database, so
+      // an admin override can carry a value outside the current plan names.
+      plan: subscription.plan as SubscriptionPlanName,
+      status: (subscription.status ??
+        SubscriptionStatus.Active) as SubscriptionStatus,
+      periodStart: subscription.periodStart
         ? new Date(subscription.periodStart)
         : undefined,
-      periodEnd: subscription?.periodEnd
+      periodEnd: subscription.periodEnd
         ? new Date(subscription.periodEnd)
         : undefined,
-      trialStart: subscription?.trialStart
+      trialStart: subscription.trialStart
         ? new Date(subscription.trialStart)
         : undefined,
-      trialEnd: subscription?.trialEnd
+      trialEnd: subscription.trialEnd
         ? new Date(subscription.trialEnd)
         : undefined,
-      cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd || false,
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd ?? false,
       // stripeCustomerId: subscription?.stripeCustomerId || "",
       // stripeSubscriptionId: subscription?.stripeSubscriptionId || "",
     },
     mode: "onChange",
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: UpdateSubscriptionInput) => {
     if (!data.id) {
       toast.error("Missing subscription ID");
       return;
@@ -204,9 +198,9 @@ export function SubscriptionEditDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {subscriptionPlans.map((plan: any) => (
-                        <SelectItem key={plan.name} value={plan.name}>
-                          {plan.name}
+                      {PAID_PLAN_NAMES.map((planName) => (
+                        <SelectItem key={planName} value={planName}>
+                          {planName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -269,7 +263,7 @@ export function SubscriptionEditDialog({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          initialFocus
+                          autoFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -309,7 +303,7 @@ export function SubscriptionEditDialog({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          initialFocus
+                          autoFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -352,7 +346,7 @@ export function SubscriptionEditDialog({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          initialFocus
+                          autoFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -392,7 +386,7 @@ export function SubscriptionEditDialog({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          initialFocus
+                          autoFocus
                         />
                       </PopoverContent>
                     </Popover>

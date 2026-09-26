@@ -17,6 +17,7 @@ export function ScreenshotDialog({ src }: ScreenshotDialogProps) {
     <Dialog>
       <DialogTrigger asChild>
         <button type="button" className="cursor-zoom-in">
+          {/* eslint-disable-next-line @next/next/no-img-element -- screenshots come from the deployment's own storage host, which is not in the static remotePatterns allowlist */}
           <img
             src={src}
             alt="Feedback screenshot"
@@ -29,6 +30,7 @@ export function ScreenshotDialog({ src }: ScreenshotDialogProps) {
         <DialogDescription className="sr-only">
           Full-size feedback screenshot
         </DialogDescription>
+        {/* eslint-disable-next-line @next/next/no-img-element -- screenshots come from the deployment's own storage host, which is not in the static remotePatterns allowlist */}
         <img
           src={src}
           alt="Feedback screenshot"

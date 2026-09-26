@@ -3,13 +3,13 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 
-interface HeroDotBackgroundProps {
+type HeroDotBackgroundProps = {
   fontSize?: number;
   spacing?: number;
   highlightRadius?: number;
   className?: string;
   children?: React.ReactNode;
-}
+};
 
 export function HeroDotBackground({
   fontSize = 8,
@@ -163,7 +163,7 @@ export function HeroDotBackground({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="text-muted-foreground pointer-events-none absolute inset-0 z-0"
+        className="pointer-events-none absolute inset-0 z-0 text-muted-foreground"
       />
       <div className="relative z-10">{children}</div>
     </div>

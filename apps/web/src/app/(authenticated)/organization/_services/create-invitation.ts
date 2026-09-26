@@ -1,0 +1,50 @@
+import { auth } from "@/server/auth";
+import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
+import { APIError } from "better-auth/api";
+import { prisma } from "@workspace/db";
+import type { CreateInvitationInput } from "./create-invitation.schema";
+
+export async function createInvitation(
+  {
+    organizationId,
+    email,
+    role,
+    userId,
+    headers,
+  }: CreateInvitationInput & {
+    organizationId: string;
+    userId: string;
+    headers: Headers;
+  },
+  db: typeof prisma = prisma,
+) {
+  // The denial needs the loaded membership and its role, so it belongs here.
+  // The seat limit is a plan fact and stays on the procedure.
+  const membership = await db.member.findFirst({
+    where: {
+      organizationId,
+      userId,
+      role: { in: ["owner", "admin"] },
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenError("You do not have permission to invite members.");
+  }
+
+  try {
+    return await auth.api.createInvitation({
+      body: { email, role, organizationId },
+      headers,
+    });
+  } catch (error) {
+    // Better Auth reports an already invited member or an invalid address as a
+    // 4xx APIError whose message is the copy the dialog shows. Anything else is
+    // an outage and keeps its 500 masking.
+    if (error instanceof APIError && error.statusCode < 500) {
+      throw new BadRequestError(error.message);
+    }
+
+    throw error;
+  }
+}

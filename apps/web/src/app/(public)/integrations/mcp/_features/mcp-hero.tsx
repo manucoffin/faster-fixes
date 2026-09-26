@@ -27,15 +27,15 @@ export function McpHero() {
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             MCP server
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
             Client feedback, wired to your coding agent
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            A client leaves feedback on your staging site. Your agent fetches it
-            — with the page URL, the exact DOM element, console logs, network
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+            A client leaves feedback on your staging site. Your agent fetches
+            it, with the page URL, the exact DOM element, console logs, network
             requests, a screenshot, and full browser context already attached.
             It fixes the code and marks the item resolved. No copy-pasting, no
             &ldquo;can you reproduce this?&rdquo;
@@ -60,20 +60,20 @@ export function McpHero() {
           </div>
 
           <div className="mt-12 flex flex-col items-center">
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               Works with your favorite tools
             </p>
             <ul className="mt-5 flex flex-wrap items-center justify-center gap-3">
               {tools.map(({ label, Icon }) => (
                 <li
                   key={label}
-                  className="bg-muted/30 flex items-center gap-2 rounded-full border px-4 py-2"
+                  className="flex items-center gap-2 rounded-full border bg-muted/30 px-4 py-2"
                 >
                   <Icon className="size-4 shrink-0" />
                   <span className="text-sm font-medium">{label}</span>
                 </li>
               ))}
-              <li className="bg-muted/30 flex items-center gap-2 rounded-full border px-4 py-2">
+              <li className="flex items-center gap-2 rounded-full border bg-muted/30 px-4 py-2">
                 <McpIcon className="size-4 shrink-0" />
                 <span className="text-sm font-medium">
                   Any agent that speaks the Model Context Protocol

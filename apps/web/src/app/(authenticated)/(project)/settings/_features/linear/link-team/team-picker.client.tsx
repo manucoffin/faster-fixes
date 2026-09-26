@@ -1,8 +1,15 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -19,13 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { useForm } from "react-hook-form";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkLinearTeamSchema,
-  type LinkLinearTeamSchemaType,
-} from "./link-team.schema";
-import type { ListAccessibleLinearTeamsOutput } from "./list-accessible-teams.trpc.query";
+  type LinkLinearTeamInput,
+} from "../../../_services/link-linear-team.schema";
+import type { ListAccessibleLinearTeamsOutput } from "../../../_services/list-accessible-linear-teams";
 
 type TeamPickerProps = {
   projectId: string;
@@ -44,7 +52,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const form = useForm<LinkLinearTeamSchemaType>({
+  const form = useForm<LinkLinearTeamInput>({
     resolver: zodResolver(LinkLinearTeamSchema),
     defaultValues: {
       projectId,
@@ -58,7 +66,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
     },
   });
 
-  const teamId = form.watch("teamId");
+  const teamId = useWatch({ control: form.control, name: "teamId" });
 
   const statesQuery = useQuery(
     trpc.authenticated.projects.linear.listTeamStates.queryOptions(
@@ -69,8 +77,8 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
 
   const linkMutation = useMutation(
     trpc.authenticated.projects.linear.linkTeam.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.linear.getLink.queryKey({
             projectId,
           }),
@@ -84,7 +92,7 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
     }),
   );
 
-  const onSubmit = (data: LinkLinearTeamSchemaType) => {
+  const onSubmit = (data: LinkLinearTeamInput) => {
     linkMutation.mutate(data);
   };
 
@@ -136,32 +144,47 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
           )}
         />
 
-        {teamId && (
-          <FormField
-            control={form.control}
-            name="defaultStateId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Default state for new feedback</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a state" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {statesQuery.data?.map((state) => (
-                      <SelectItem key={state.id} value={state.id}>
-                        {state.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {teamId &&
+          matchQueryStatus(statesQuery, {
+            Loading: <Skeleton className="h-16 w-full" />,
+            Errored: (error) => (
+              <Alert variant="destructive">
+                <AlertTitle>Failed to load the team states</AlertTitle>
+                <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+              </Alert>
+            ),
+            Empty: (
+              <p className="text-sm text-muted-foreground">
+                This team has no workflow state available.
+              </p>
+            ),
+            Success: ({ data: states }) => (
+              <FormField
+                control={form.control}
+                name="defaultStateId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Default state for new feedback</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a state" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {states.map((state) => (
+                          <SelectItem key={state.id} value={state.id}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ),
+          })}
 
         <FormField
           control={form.control}

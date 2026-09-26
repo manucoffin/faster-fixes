@@ -4,12 +4,12 @@ type Props = React.ComponentPropsWithoutRef<"section"> & {
   containerClasseName?: string;
 };
 
-export const Section = ({
+export function Section({
   children,
   className,
   containerClasseName,
   ...props
-}: Props) => {
+}: Props) {
   return (
     <section className={cn("w-full py-16 md:py-32", className)} {...props}>
       <div
@@ -22,4 +22,4 @@ export const Section = ({
       </div>
     </section>
   );
-};
+}

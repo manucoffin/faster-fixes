@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: 'Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo''s documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".'
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
@@ -31,16 +31,39 @@ Look for the originating spec, in this order:
 3. A spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
-### 3. Identify the standards sources
+### 3. Route to the standards that apply
 
-Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+**The single source of truth for this repo's conventions is the `coding-standards` skill** (`.agents/skills/coding-standards/`, symlinked at `.claude/skills/coding-standards/`). It is a router: `SKILL.md` holds a routing table, the rules live in `rules/*.md`. Do not review against a private copy of the rules, and do not paste the rules into this file: they change, this file does not.
 
-On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
+Classify the files in the diff, then collect the rule files to load. Do not load all of them.
+
+| A changed file is…                                                  | Load                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| New, moved, or renamed anywhere in `apps/web/src/app/`              | `rules/architecture.md`                                      |
+| Under `_services/`, or a `trpc-router.ts`                           | `rules/backend.md` + `rules/naming.md`                       |
+| A `*.schema.ts`                                                     | `rules/schemas.md`                                           |
+| A `*.client.tsx` / `*.server.tsx` / any `.tsx`                      | `rules/frontend.md`                                          |
+| A form or a `use-*.ts` container hook                               | `rules/frontend.md` + `rules/schemas.md` + `rules/errors.md` |
+| An `error.tsx` / `not-found.tsx`, or throws/catches a `DomainError` | `rules/errors.md`                                            |
+| A `*.test.ts`                                                       | `rules/testing.md`                                           |
+| Any `.ts` / `.tsx` at all                                           | `rules/typescript.md` + `rules/code-shape.md`                |
+
+Also read any repo-level convention doc the diff touches (`docs/adr/*` referenced by a rule file, `docs/product/ubiquitous-language.md` for domain terms).
+
+### 3b. Subtract what tooling already enforces
+
+Never report a finding that `pnpm lint` already catches: it is noise, and the fix step runs it anyway. Read the current list from `packages/eslint-config/local-rules/` (each rule file has a `description`) rather than trusting a hardcoded list. At time of writing it covers: default exports, `use client` / `.client.tsx` suffix pairing, raw Tailwind palette colors, schema naming (`*Schema` / `*Input`), pure-Zod schemas, service return-type exports, `_services/` verb prefixes, `_services/` tRPC imports, `_services/` bare `Error` throws, client imports of `_services/` and of `@/server/errors/*`, cross-domain deep imports, deprecated error imports, and feature nesting.
+
+### 3c. The smell baseline
+
+On top of what the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
 - **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
-- **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation. Like any standard here, skip anything tooling already enforces.
+- **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation.
 
-Each smell reads *what it is* → *how to fix*; match it against the diff:
+`rules/code-shape.md` already covers the local readability set (nested conditionals, ternaries, boolean flags, repeated expressions, `as unknown as`). The baseline below is the structural layer on top of it; do not double-report the same hunk under both.
+
+Each smell reads _what it is_ → _how to fix_; match it against the diff:
 
 - **Mysterious Name**: a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no honest name comes, the design's murky.
 - **Duplicated Code**: the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.

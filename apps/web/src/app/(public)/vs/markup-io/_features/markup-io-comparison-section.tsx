@@ -21,7 +21,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: "Free forever — self-hosted or hosted" },
+      { type: "yes", note: "Free forever: self-hosted or hosted" },
       { type: "no", note: "Removed January 2025" },
     ],
   },
@@ -74,17 +74,17 @@ const headers = ["FasterFixes", "Markup.io"] as const;
 
 function renderCell(cell: Cell) {
   if (typeof cell === "string") {
-    return <span className="text-muted-foreground text-sm">{cell}</span>;
+    return <span className="text-sm text-muted-foreground">{cell}</span>;
   }
   return (
     <div className="flex flex-col gap-1">
       {cell.type === "yes" ? (
-        <CheckIcon className="text-success size-5" aria-label="Yes" />
+        <CheckIcon className="size-5 text-success" aria-label="Yes" />
       ) : (
-        <XIcon className="text-destructive size-5" aria-label="No" />
+        <XIcon className="size-5 text-destructive" aria-label="No" />
       )}
       {cell.note && (
-        <span className="text-muted-foreground text-xs">{cell.note}</span>
+        <span className="text-xs text-muted-foreground">{cell.note}</span>
       )}
     </div>
   );
@@ -92,10 +92,10 @@ function renderCell(cell: Cell) {
 
 export function MarkupIoComparisonSection() {
   return (
-    <section className="bg-muted/30 w-full border-y py-16 md:py-24">
+    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Compare
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">

@@ -35,7 +35,7 @@ export function OnboardingWizard() {
   const completeOnboarding = useMutation(
     trpc.onboarding.complete.mutationOptions({
       onSuccess: () => {
-        window.location.href = "/inbox";
+        window.location.assign("/inbox");
       },
     }),
   );
@@ -53,7 +53,7 @@ export function OnboardingWizard() {
     <div className="flex flex-col gap-8">
       {currentStep < 3 && <Stepper currentStep={currentStep} />}
 
-      <div className="bg-card rounded-xl border p-6">
+      <div className="rounded-xl border bg-card p-6">
         {currentStep === 0 && (
           <ProjectNameStep
             name={name}

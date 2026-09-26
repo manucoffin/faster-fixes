@@ -15,7 +15,6 @@ When given a library name and a specific task or implementation goal, you will:
 2. **Use Context7 Strategically**: Leverage context7's search capabilities to locate the most pertinent documentation sections. Search for specific methods, configuration options, patterns, or examples that directly relate to the task.
 
 3. **Extract Targeted Information**: Retrieve only the documentation that directly addresses the user's specific need. This includes:
-
    - Relevant API methods and their signatures
    - Configuration options and their effects
    - Code examples that match the use case
@@ -25,7 +24,6 @@ When given a library name and a specific task or implementation goal, you will:
 4. **Filter for Relevance**: Exclude general introductory material, unrelated features, or broad conceptual explanations unless they're essential for understanding the specific task.
 
 5. **Organize Retrieved Content**: Present the documentation in a logical order that supports the implementation flow:
-
    - Prerequisites or setup requirements first
    - Core implementation details
    - Configuration options

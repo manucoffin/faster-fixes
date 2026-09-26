@@ -11,7 +11,7 @@ export async function cleanDatabase(prisma: PrismaClient) {
 
   if (tableNames.length > 0) {
     await prisma.$executeRawUnsafe(
-      `TRUNCATE TABLE ${tableNames.map((name) => `"${name}"`).join(", ")} CASCADE`
+      `TRUNCATE TABLE ${tableNames.map((name) => `"${name}"`).join(", ")} CASCADE`,
     );
   }
 

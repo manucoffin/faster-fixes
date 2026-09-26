@@ -3,7 +3,11 @@
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
-import type { ConsoleEntry, DiagnosticTrail, NetworkEntry } from "@fasterfixes/core";
+import type {
+  ConsoleEntry,
+  DiagnosticTrail,
+  NetworkEntry,
+} from "@fasterfixes/core";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -67,12 +71,12 @@ export function ViewDiagnosticsDialog({
             </div>
           ),
           Errored: (
-            <p className="text-muted-foreground py-8 text-center text-sm">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               Could not load diagnostics.
             </p>
           ),
           Empty: (
-            <p className="text-muted-foreground py-8 text-center text-sm">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               No diagnostics were captured for this feedback.
             </p>
           ),
@@ -83,7 +87,11 @@ export function ViewDiagnosticsDialog({
   );
 }
 
-function DiagnosticsTabs({ trail }: { trail: DiagnosticTrail }) {
+type DiagnosticsTabsProps = {
+  trail: DiagnosticTrail;
+};
+
+function DiagnosticsTabs({ trail }: DiagnosticsTabsProps) {
   const consoleCount = trail.console.length;
   const networkCount = trail.network.length;
 
@@ -121,7 +129,11 @@ function DiagnosticsTabs({ trail }: { trail: DiagnosticTrail }) {
   );
 }
 
-function ConsoleRow({ entry }: { entry: ConsoleEntry }) {
+type ConsoleRowProps = {
+  entry: ConsoleEntry;
+};
+
+function ConsoleRow({ entry }: ConsoleRowProps) {
   const isError = entry.level === "error" || entry.level === "warn";
   return (
     <li className="flex gap-2 px-3 py-1.5 font-mono text-xs">
@@ -137,11 +149,17 @@ function ConsoleRow({ entry }: { entry: ConsoleEntry }) {
   );
 }
 
-function NetworkRow({ entry }: { entry: NetworkEntry }) {
+type NetworkRowProps = {
+  entry: NetworkEntry;
+};
+
+function NetworkRow({ entry }: NetworkRowProps) {
   const failed = entry.status === 0 || entry.status >= 400;
   return (
     <li className="flex items-center gap-2 px-3 py-1.5 font-mono text-xs">
-      <span className="text-muted-foreground w-12 shrink-0">{entry.method}</span>
+      <span className="w-12 shrink-0 text-muted-foreground">
+        {entry.method}
+      </span>
       <span className="flex-1 truncate" title={entry.url}>
         {entry.url}
       </span>
@@ -152,15 +170,19 @@ function NetworkRow({ entry }: { entry: NetworkEntry }) {
       >
         {entry.status === 0 ? "err" : entry.status}
       </span>
-      <span className="text-muted-foreground w-14 shrink-0 text-right">
+      <span className="w-14 shrink-0 text-right text-muted-foreground">
         {Math.round(entry.duration)}ms
       </span>
     </li>
   );
 }
 
-function EmptyRow({ text }: { text: string }) {
+type EmptyRowProps = {
+  text: string;
+};
+
+function EmptyRow({ text }: EmptyRowProps) {
   return (
-    <p className="text-muted-foreground py-8 text-center text-sm">{text}</p>
+    <p className="py-8 text-center text-sm text-muted-foreground">{text}</p>
   );
 }

@@ -18,7 +18,7 @@ const tools: Tool[] = [
   },
   {
     name: "update_feedback_status",
-    body: "Move an item through its lifecycle — new → in progress → resolved → closed — so your dashboard reflects real progress as the agent works.",
+    body: "Move an item through its lifecycle, new → in progress → resolved → closed, so your dashboard reflects real progress as the agent works.",
     code: 'update_feedback_status(\n  feedback_id="2a4f8c1e-9b3d-4c7a-8e21-5f6b0d9c1a2e",\n  status="resolved"\n)',
   },
   {
@@ -30,10 +30,10 @@ const tools: Tool[] = [
 
 export function McpToolsSection() {
   return (
-    <section className="bg-muted/50 w-full py-16 md:py-24">
+    <section className="w-full bg-muted/50 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Three MCP tools
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
@@ -45,22 +45,22 @@ export function McpToolsSection() {
           {tools.map((tool) => (
             <div
               key={tool.name}
-              className="bg-background grid grid-cols-1 gap-6 rounded-xl border p-6 md:grid-cols-2 md:items-center"
+              className="grid grid-cols-1 gap-6 rounded-xl border bg-background p-6 md:grid-cols-2 md:items-center"
             >
               <div>
                 <h3 className="font-mono text-lg font-semibold">{tool.name}</h3>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
+                <p className="mt-2 leading-relaxed text-muted-foreground">
                   {tool.body}
                 </p>
               </div>
-              <pre className="bg-muted text-muted-foreground overflow-x-auto rounded-lg p-4 text-sm">
+              <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm text-muted-foreground">
                 <code>{tool.code}</code>
               </pre>
             </div>
           ))}
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-muted-foreground">
           See the{" "}
           <Link
             href={"/docs/mcp/tools" as Route}

@@ -13,8 +13,13 @@ function CopyableText({
   const ref = React.useRef<HTMLSpanElement>(null);
 
   const handleCopy = async () => {
-    const text = ref.current?.textContent?.trim() ?? "";
-    await navigator.clipboard.writeText(text);
+    const text = ref.current?.textContent.trim() ?? "";
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Clipboard access denied or unavailable: leave the copied state unset
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -28,7 +33,7 @@ function CopyableText({
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleCopy();
+          void handleCopy();
         }
       }}
       className={cn(

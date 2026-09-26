@@ -12,22 +12,28 @@ import {
 } from "@workspace/ui/components/table";
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
 
-import type { GetReviewersOutput } from "./get-reviewers.trpc.query";
+import type { ListReviewersOutput } from "../_services/list-reviewers";
 import { DeleteReviewerButton } from "./delete/delete-reviewer-button.client";
 import { RestoreReviewerButton } from "./restore/restore-reviewer-button.client";
 import { RevokeReviewerButton } from "./revoke/revoke-reviewer-button.client";
 
 type ReviewersTableProps = {
   projectId: string;
-  reviewers: GetReviewersOutput;
+  reviewers: ListReviewersOutput;
 };
 
 export function ReviewersTable({ projectId, reviewers }: ReviewersTableProps) {
   const [copied, setCopied] = React.useState<string | null>(null);
 
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      toast.error("Could not copy the link to the clipboard");
+      return;
+    }
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   };
@@ -63,7 +69,7 @@ export function ReviewersTable({ projectId, reviewers }: ReviewersTableProps) {
               >
                 {copied === reviewer.id ? (
                   <>
-                    <Check className="text-success size-3" />
+                    <Check className="size-3 text-success" />
                     Copied
                   </>
                 ) : (

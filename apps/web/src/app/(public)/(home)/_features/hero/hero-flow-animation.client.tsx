@@ -50,7 +50,11 @@ export function HeroFlowAnimation() {
 
 function StaticState() {
   return (
-    <div className="flex w-full flex-col gap-4" role="img" aria-label={ARIA_LABEL}>
+    <div
+      className="flex w-full flex-col gap-4"
+      role="img"
+      aria-label={ARIA_LABEL}
+    >
       <TerminalFrame
         title="yourapp.com"
         contentClassName="relative px-4 py-3 h-[220px]"
@@ -134,7 +138,11 @@ function AnimatedState() {
   const agentActive = elapsed >= T.exit && elapsed < T.fix2 + 400;
 
   return (
-    <div className="flex w-full flex-col gap-4" role="img" aria-label={ARIA_LABEL}>
+    <div
+      className="flex w-full flex-col gap-4"
+      role="img"
+      aria-label={ARIA_LABEL}
+    >
       <style dangerouslySetInnerHTML={{ __html: heroAnimStyles }} />
       <TerminalFrame
         title="yourapp.com"
@@ -217,7 +225,9 @@ function AnimatedState() {
 
 const COLLABORATOR = { name: "Marie, CEO", color: "#ec4899" }; // pink-500
 
-function Cursor({ x, y }: { x: number; y: number }) {
+type CursorProps = { x: number; y: number };
+
+function Cursor({ x, y }: CursorProps) {
   return (
     <div
       className="pointer-events-none absolute z-20 transition-[left,top] duration-75 ease-out"
@@ -242,17 +252,14 @@ function Cursor({ x, y }: { x: number; y: number }) {
   );
 }
 
-function Pin({
-  x,
-  y,
-  resolved,
-  showRing,
-}: {
+type PinProps = {
   x: number;
   y: number;
   resolved: boolean;
   showRing?: boolean;
-}) {
+};
+
+function Pin({ x, y, resolved, showRing }: PinProps) {
   return (
     <div
       className="absolute -translate-x-1/2 -translate-y-1/2"
@@ -284,17 +291,14 @@ function Pin({
   );
 }
 
-function Bubble({
-  x,
-  y,
-  text,
-  resolved,
-}: {
+type BubbleProps = {
   x: number;
   y: number;
   text: string;
   resolved?: boolean;
-}) {
+};
+
+function Bubble({ x, y, text, resolved }: BubbleProps) {
   return (
     <div
       className={`absolute z-10 rounded border px-2 py-1 whitespace-nowrap ${
@@ -391,7 +395,7 @@ function useElapsed(loopMs: number, tickMs: number) {
     let id = 0;
     const tick = () => {
       setElapsed((performance.now() - start) % loopMs);
-      id = window.setTimeout(tick, tickMs) as unknown as number;
+      id = window.setTimeout(tick, tickMs);
     };
     tick();
     return () => clearTimeout(id);

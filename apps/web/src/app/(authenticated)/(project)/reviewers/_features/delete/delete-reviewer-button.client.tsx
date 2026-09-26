@@ -33,8 +33,8 @@ export function DeleteReviewerButton({
 
   const deleteReviewer = useMutation(
     trpc.authenticated.projects.reviewer.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
           trpc.authenticated.projects.reviewer.list.queryOptions({ projectId }),
         );
         toast.success("Reviewer deleted");

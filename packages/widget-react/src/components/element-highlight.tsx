@@ -24,6 +24,7 @@ export function ElementHighlight() {
   }, [highlightSelector]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- measures the highlighted element's rect, which only exists in the DOM after commit
     updateRect();
     if (!highlightSelector) return;
 

@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { ExternalLink } from "lucide-react";
-import type { GetProjectLinearLinkOutput } from "./get-project-linear-link.trpc.query";
+import type { GetProjectLinearLinkOutput } from "../../_services/get-project-linear-link";
 import { UnlinkTeamButton } from "./unlink-team/unlink-team-button.client";
 import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.client";
 

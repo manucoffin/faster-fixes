@@ -12,7 +12,7 @@ const contents = [
   },
   {
     title: "Comment and screenshot",
-    body: "The reviewer's comment and the captured screenshot, posted inline as an image block — the report reads in full without leaving Slack.",
+    body: "The reviewer's comment and the captured screenshot, posted inline as an image block. The report reads in full without leaving Slack.",
   },
   {
     title: "Status badge and deep link",
@@ -25,15 +25,15 @@ export function SlackMessageSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             What lands in every Slack message
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Enough context to triage without opening the dashboard
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Each notification carries the reviewer, the page, the comment, and
-            the screenshot — the team can decide what to do with a report
+            the screenshot. The team can decide what to do with a report
             straight from the channel.
           </p>
         </div>

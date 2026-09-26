@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
-import type { FeedbackItem, FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
+import { resolveElement } from "@fasterfixes/core";
+import type { FeedbackItem, SelectorStrategies } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import { pinStyle } from "../styles.js";
 import {
   clamp,
@@ -21,21 +22,27 @@ type PinPosition = {
   left: number;
 };
 
-const PinIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    stroke="none"
-  >
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
+function PinIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="none"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
 
 export function FeedbackPin({ item }: FeedbackPinProps) {
-  const { classNames, setActiveFeedback, activeFeedback, setHighlightSelector } =
-    useFeedbackContext();
+  const {
+    classNames,
+    setActiveFeedback,
+    activeFeedback,
+    setHighlightSelector,
+  } = useFeedbackContext();
   const [position, setPosition] = useState<PinPosition | null>(null);
 
   const PIN_SIZE = 24;
@@ -44,7 +51,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     const metadata = item.metadata as Record<string, unknown> | null;
     const strategies = metadata?.selectors as SelectorStrategies | undefined;
     const pinAnchor = getPinAnchor(item.metadata);
-    const hasSelector = !!(item.selector || strategies);
+    const hasSelector = !!item.selector || !!strategies;
     const el = hasSelector ? resolveElement(item.selector, strategies) : null;
 
     if (el) {
@@ -58,12 +65,18 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
 
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const anchorX = pinAnchor ? rect.left + rect.width * pinAnchor.x : rect.right;
-      const anchorY = pinAnchor ? rect.top + rect.height * pinAnchor.y : rect.top;
+      const anchorX = pinAnchor
+        ? rect.left + rect.width * pinAnchor.x
+        : rect.right;
+      const anchorY = pinAnchor
+        ? rect.top + rect.height * pinAnchor.y
+        : rect.top;
       const storedPlacement = getPinPlacementMetadata(item.metadata);
-      const targetKind = storedPlacement?.targetKind ?? getViewportAnchoringKind(el);
+      const targetKind =
+        storedPlacement?.targetKind ?? getViewportAnchoringKind(el);
       const mode: PinPlacementMode =
-        storedPlacement?.mode ?? (targetKind === "normal" ? "document" : "viewport");
+        storedPlacement?.mode ??
+        (targetKind === "normal" ? "document" : "viewport");
 
       // Horizontal: prefer the click side for newer pins, otherwise use the element edge.
       let left = anchorX + 4;
@@ -97,7 +110,10 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
     // Fall back to stored coordinates
     if (item.clickX != null && item.clickY != null) {
       const storedPlacement = getPinPlacementMetadata(item.metadata);
-      if (storedPlacement?.mode === "document" && storedPlacement.documentPoint) {
+      if (
+        storedPlacement?.mode === "document" &&
+        storedPlacement.documentPoint
+      ) {
         setPosition({
           mode: "document",
           top: storedPlacement.documentPoint.y,
@@ -118,6 +134,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   }, [item.selector, item.clickX, item.clickY, item.metadata]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- measures the target element's rect, which only exists in the DOM after commit
     updatePosition();
     window.addEventListener("resize", updatePosition, { passive: true });
     window.addEventListener("load", updatePosition);
@@ -146,7 +163,7 @@ export function FeedbackPin({ item }: FeedbackPinProps) {
   if (!position) return null;
 
   const isActive = activeFeedback?.id === item.id;
-  const statusColor = STATUS_COLORS[item.status as FeedbackStatus] ?? STATUS_COLORS.new;
+  const statusColor = getStatusColor(item.status);
 
   return (
     <button

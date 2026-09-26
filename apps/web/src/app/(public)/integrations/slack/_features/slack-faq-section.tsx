@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -32,12 +32,12 @@ export const slackFaqs: RichFaqItem[] = [
     question:
       "Does Faster Fixes post a new Slack message for every status update?",
     answer:
-      "No. The original message is edited in place as the feedback status changes — new, in progress, resolved, closed. The channel keeps one message per piece of feedback instead of a stream of status-change alerts.",
+      "No. The original message is edited in place as the feedback status changes: new, in progress, resolved, closed. The channel keeps one message per piece of feedback instead of a stream of status-change alerts.",
   },
   {
     question: "What information is included in each Slack notification?",
     answer:
-      "The reviewer name, page URL, comment, screenshot, a current status badge, and an Open in Faster Fixes link. The full diagnostic trail — DOM selector, browser info, console logs, network requests — stays in the dashboard behind that link.",
+      "The reviewer name, page URL, comment, screenshot, a current status badge, and an Open in Faster Fixes link. The full diagnostic trail stays in the dashboard behind that link: DOM selector, browser info, console logs, network requests.",
   },
   {
     question: "Can I send different projects to different Slack channels?",
@@ -47,15 +47,12 @@ export const slackFaqs: RichFaqItem[] = [
   {
     question: "Does the Slack integration create tasks or issues?",
     answer:
-      "No. Slack is a one-way notification channel — it announces feedback and updates the status badge. For two-way issue tracking, use the GitHub or Linear integrations, which create issues and sync status both ways.",
+      "No. Slack is a one-way notification channel: it announces feedback and updates the status badge. For two-way issue tracking, use the GitHub or Linear integrations, which create issues and sync status both ways.",
     content: (
-      <p className="text-muted-foreground text-lg md:text-xl">
-        No. Slack is a one-way notification channel — it announces feedback and
+      <p className="text-lg text-muted-foreground md:text-xl">
+        No. Slack is a one-way notification channel: it announces feedback and
         updates the status badge. For two-way issue tracking, use the{" "}
-        <DocLink href={"/docs/integrations/github" as Route}>
-          GitHub
-        </DocLink>{" "}
-        or{" "}
+        <DocLink href={"/docs/integrations/github" as Route}>GitHub</DocLink> or{" "}
         <DocLink href={"/docs/integrations/linear" as Route}>Linear</DocLink>{" "}
         integrations, which create issues and sync status both ways.
       </p>
@@ -66,7 +63,7 @@ export const slackFaqs: RichFaqItem[] = [
     answer:
       "The Slack message updates to a 🤖 Resolved by agent badge, so the team can tell automated resolutions from ones a person closed. This happens when a coding agent resolves feedback through the Faster Fixes MCP server.",
     content: (
-      <p className="text-muted-foreground text-lg md:text-xl">
+      <p className="text-lg text-muted-foreground md:text-xl">
         The Slack message updates to a 🤖 Resolved by agent badge, so the team
         can tell automated resolutions from ones a person closed. This happens
         when a coding agent resolves feedback through the Faster Fixes{" "}
@@ -77,7 +74,7 @@ export const slackFaqs: RichFaqItem[] = [
   {
     question: "Do my clients need a Slack account?",
     answer:
-      "No. Clients submit feedback through the widget on your site. Only your internal team needs Slack — the notifications go to your workspace, not theirs.",
+      "No. Clients submit feedback through the widget on your site. Only your internal team needs Slack. The notifications go to your workspace, not theirs.",
   },
 ];
 
@@ -100,7 +97,7 @@ export function SlackFaqSection() {
                 </AccordionTrigger>
                 <AccordionContent>
                   {faq.content ?? (
-                    <p className="text-muted-foreground text-lg md:text-xl">
+                    <p className="text-lg text-muted-foreground md:text-xl">
                       {faq.answer}
                     </p>
                   )}

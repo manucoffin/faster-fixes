@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
+import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -39,11 +39,11 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
 
   const deleteProject = useMutation(
     trpc.authenticated.projects.delete.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         if (activeProject?.id === projectId) {
           clearActiveProject();
         }
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.list.queryKey(),
         });
         router.push("/inbox");

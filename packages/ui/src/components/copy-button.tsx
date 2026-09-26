@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, buttonVariants } from "@workspace/ui/components/button";
+import type { buttonVariants } from "@workspace/ui/components/button";
+import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";

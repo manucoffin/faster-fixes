@@ -13,21 +13,21 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface OrganizationInvitationProps {
+type OrganizationInvitationProps = {
   organizationName?: string;
   inviterName?: string;
   invitationLink?: string;
   role?: string;
-}
+};
 
 const baseUrl = getAppUrl();
 
-export const OrganizationInvitation = ({
+export function OrganizationInvitation({
   organizationName = "My organization",
   inviterName = "A user",
   invitationLink = `${baseUrl}/organization/invitations`,
   role = "member",
-}: OrganizationInvitationProps) => {
+}: OrganizationInvitationProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -44,9 +44,9 @@ export const OrganizationInvitation = ({
               </Text>
 
               <Text className="mt-0 mb-[24px] text-[16px] leading-[24px] text-foreground">
-                <strong>{inviterName}</strong> has invited you to join
-                the organization <strong>{organizationName}</strong> as
-                a <strong>{role}</strong>.
+                <strong>{inviterName}</strong> has invited you to join the
+                organization <strong>{organizationName}</strong> as a{" "}
+                <strong>{role}</strong>.
               </Text>
 
               <Text className="mt-0 mb-[32px] text-[16px] leading-[24px] text-foreground">
@@ -63,8 +63,8 @@ export const OrganizationInvitation = ({
               </Section>
 
               <Text className="mt-0 mb-[24px] text-[14px] leading-[20px] text-muted-foreground">
-                If you can&apos;t click the button, copy and paste this
-                link into your browser:
+                If you can&apos;t click the button, copy and paste this link
+                into your browser:
               </Text>
 
               <Text className="mt-0 mb-[32px] text-[14px] break-all text-muted-foreground">
@@ -74,8 +74,8 @@ export const OrganizationInvitation = ({
               <Hr className="my-[32px] border-border" />
 
               <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
-                If you weren&apos;t expecting this invitation, you can
-                safely ignore this email.
+                If you weren&apos;t expecting this invitation, you can safely
+                ignore this email.
               </Text>
             </Section>
           </Container>
@@ -83,4 +83,4 @@ export const OrganizationInvitation = ({
       </Tailwind>
     </Html>
   );
-};
+}

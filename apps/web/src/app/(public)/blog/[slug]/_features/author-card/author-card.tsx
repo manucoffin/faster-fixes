@@ -16,14 +16,14 @@ export function AuthorCard() {
       />
       <div className="flex-1">
         <p className="font-semibold">{AUTHOR.name}</p>
-        <p className="text-muted-foreground text-lg">{AUTHOR.bio}</p>
+        <p className="text-lg text-muted-foreground">{AUTHOR.bio}</p>
         <div className="mt-2 flex items-center gap-3">
           <a
             href={AUTHOR.website}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Visit ${AUTHOR.name}'s personal website`}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground transition-colors hover:text-foreground"
           >
             <Globe className="size-5" />
           </a>
@@ -41,7 +41,7 @@ export function AuthorCard() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`View ${AUTHOR.name}'s GitHub profile`}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground transition-colors hover:text-foreground"
           >
             <GithubIcon className="size-5" />
           </a>

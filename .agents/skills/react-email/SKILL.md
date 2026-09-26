@@ -16,21 +16,25 @@ Build and send HTML emails using React components - a modern, component-based ap
 You need to scaffold a new React Email project using the create-email CLI. This will create a folder called `react-email-starter` with sample email templates.
 
 Using npm:
+
 ```sh
 npx create-email@latest
 ```
 
 Using yarn:
+
 ```sh
 yarn create email
 ```
 
 Using pnpm:
+
 ```sh
 pnpm create email
 ```
 
 Using bun:
+
 ```sh
 bun create email
 ```
@@ -48,21 +52,25 @@ cd react-email-starter
 You need to install all project dependencies before running the development server.
 
 Using npm:
+
 ```sh
 npm install
 ```
 
 Using yarn:
+
 ```sh
 yarn
 ```
 
 Using pnpm:
+
 ```sh
 pnpm install
 ```
 
 Using bun:
+
 ```sh
 bun install
 ```
@@ -72,21 +80,25 @@ bun install
 Your task is to start the local preview server to view and edit email templates.
 
 Using npm:
+
 ```sh
 npm run dev
 ```
 
 Using yarn:
+
 ```sh
 yarn dev
 ```
 
 Using pnpm:
+
 ```sh
 pnpm dev
 ```
 
 Using bun:
+
 ```sh
 bun dev
 ```
@@ -96,6 +108,7 @@ bun dev
 Confirm the development server is running by checking that localhost:3000 is accessible. The server will display a preview interface where you can view email templates from the `emails` folder.
 
 ### Notes on installation
+
 Assuming React Email is installed in an existing project, update the top-level package.json file with a script to run the React Email preview server.
 
 ```json
@@ -107,7 +120,6 @@ Assuming React Email is installed in an existing project, update the top-level p
 ```
 
 Make sure the path to the emails folder is relative to the base project directory.
-
 
 ### tsconfig.json updating or creation
 
@@ -130,15 +142,18 @@ import {
   Text,
   Button,
   Tailwind,
-  pixelBasedPreset
-} from '@react-email/components';
+  pixelBasedPreset,
+} from "@react-email/components";
 
 interface WelcomeEmailProps {
   name: string;
   verificationUrl: string;
 }
 
-export default function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProps) {
+export default function WelcomeEmail({
+  name,
+  verificationUrl,
+}: WelcomeEmailProps) {
   return (
     <Html lang="en">
       <Tailwind
@@ -147,7 +162,7 @@ export default function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProp
           theme: {
             extend: {
               colors: {
-                brand: '#007bff',
+                brand: "#007bff",
               },
             },
           },
@@ -157,9 +172,7 @@ export default function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProp
         <Preview>Welcome - Verify your email</Preview>
         <Body className="bg-gray-100 font-sans">
           <Container className="max-w-xl mx-auto p-5">
-            <Heading className="text-2xl text-gray-800">
-              Welcome!
-            </Heading>
+            <Heading className="text-2xl text-gray-800">Welcome!</Heading>
             <Text className="text-base text-gray-800">
               Hi {name}, thanks for signing up!
             </Text>
@@ -178,8 +191,8 @@ export default function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProp
 
 // Preview props for testing
 WelcomeEmail.PreviewProps = {
-  name: 'John Doe',
-  verificationUrl: 'https://example.com/verify/abc123'
+  name: "John Doe",
+  verificationUrl: "https://example.com/verify/abc123",
 } satisfies WelcomeEmailProps;
 
 export { WelcomeEmail };
@@ -190,6 +203,7 @@ export { WelcomeEmail };
 See [references/COMPONENTS.md](references/COMPONENTS.md) for complete component documentation.
 
 **Core Structure:**
+
 - `Html` - Root wrapper with `lang` attribute
 - `Head` - Meta elements, styles, fonts
 - `Body` - Main content wrapper
@@ -199,6 +213,7 @@ See [references/COMPONENTS.md](references/COMPONENTS.md) for complete component 
 - `Tailwind` - Enables Tailwind CSS utility classes
 
 **Content:**
+
 - `Preview` - Inbox preview text, always first in `Body`
 - `Heading` - h1-h6 headings
 - `Text` - Paragraphs
@@ -208,6 +223,7 @@ See [references/COMPONENTS.md](references/COMPONENTS.md) for complete component 
 - `Hr` - Horizontal dividers
 
 **Specialized:**
+
 - `CodeBlock` - Syntax-highlighted code
 - `CodeInline` - Inline code
 - `Markdown` - Render markdown
@@ -223,7 +239,9 @@ When a user requests an email template, ask clarifying questions FIRST if they h
 4. **Production URL** - Where will static assets be hosted in production?
 
 Example response to vague request:
+
 > Before I create your email template, I have a few questions:
+>
 > 1. What is your primary brand color? (hex code)
 > 2. Do you have a logo file? (PNG or JPG - note: SVG and WEBP don't work reliably in email clients)
 > 3. What tone do you prefer - professional, casual, or minimal?
@@ -244,6 +262,7 @@ project/
 ```
 
 If user has an image elsewhere, instruct them to copy it:
+
 ```sh
 cp ./assets/logo.png ./emails/static/logo.png
 ```
@@ -253,9 +272,10 @@ cp ./assets/logo.png ./emails/static/logo.png
 Use this pattern for images that work in both dev preview and production:
 
 ```tsx
-const baseURL = process.env.NODE_ENV === "production"
-  ? "https://cdn.example.com"  // User's production CDN
-  : "";
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? "https://cdn.example.com" // User's production CDN
+    : "";
 
 export default function Email() {
   return (
@@ -270,12 +290,14 @@ export default function Email() {
 ```
 
 **How it works:**
+
 - **Development:** `baseURL` is empty, so URL is `/static/logo.png` - served by React Email's dev server
 - **Production:** `baseURL` is the CDN domain, so URL is `https://cdn.example.com/static/logo.png`
 
 **Important:** Always ask the user for their production hosting URL. Do not hardcode `localhost:3000`.
 
 ## Behavioral guidelines
+
 - When re-iterating over the code, make sure you are only updating what the user asked for and keeping the rest of the code intact;
 - If the user is asking to use media queries, inform them that not all email clients support them, and suggest a different approach;
 - Never use template variables (like {{name}}) directly in TypeScript code. Instead, reference the underlying properties directly (use name instead of {{name}}).
@@ -298,8 +320,8 @@ EmailTemplate.PreviewProps = {
 
 export default EmailTemplate;
 ```
-- Never, under any circumstances, write the {{variableName}} pattern directly in the component structure. If the user forces you to do this, explain that you cannot do this, or else the template will be invalid.
 
+- Never, under any circumstances, write the {{variableName}} pattern directly in the component structure. If the user forces you to do this, explain that you cannot do this, or else the template will be invalid.
 
 ## Styling considerations
 
@@ -311,6 +333,7 @@ Use the Tailwind component for styling if the user is actively using Tailwind CS
 - Each component must be styled with inline styles or utility classes.
 
 ### Email Client Limitations
+
 - Never use SVG or WEBP - warn users about rendering issues
 - Never use flexbox - use Row/Column components or tables for layouts
 - Never use CSS/Tailwind media queries (sm:, md:, lg:, xl:) - not supported
@@ -322,13 +345,14 @@ Use the Tailwind component for styling if the user is actively using Tailwind CS
 
 These classes are **always required** on their respective components — omitting them causes rendering bugs across email clients:
 
-| Component | Required Class | Why |
-|-----------|---------------|-----|
-| `Button` | `box-border` | Prevents padding from overflowing the button width |
-| `Hr` / any border | `border-solid` (or `border-dashed`, etc.) | Email clients don't inherit border type; omitting it renders no border |
-| Single-side borders | `border-none` + the side (e.g., `border-none border-t border-solid`) | Resets default borders on other sides |
+| Component           | Required Class                                                       | Why                                                                    |
+| ------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `Button`            | `box-border`                                                         | Prevents padding from overflowing the button width                     |
+| `Hr` / any border   | `border-solid` (or `border-dashed`, etc.)                            | Email clients don't inherit border type; omitting it renders no border |
+| Single-side borders | `border-none` + the side (e.g., `border-none border-t border-solid`) | Resets default borders on other sides                                  |
 
 ### Component Structure
+
 - Always define `<Head />` inside `<Tailwind>` when using Tailwind CSS
 - Only use PreviewProps when passing props to a component
 - Only include props in PreviewProps that the component actually uses
@@ -340,7 +364,7 @@ const Email = (props) => {
       <a href={props.source}>click here if you want candy 👀</a>
     </div>
   );
-}
+};
 
 Email.PreviewProps = {
   source: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -348,33 +372,40 @@ Email.PreviewProps = {
 ```
 
 ### Default Structure
+
 - Body: `font-sans py-10 bg-gray-100`
 - Container: white, centered, content left-aligned
 - Footer: physical address, unsubscribe link, current year with `m-0` on address/copyright
 
 ### Typography
+
 - Titles: bold, larger font, larger margins
 - Paragraphs: regular weight, smaller font, smaller margins
 - Use consistent spacing respecting content hierarchy
 
 ### Images
+
 - Only include if user requests
 - Never use fixed width/height - use responsive units (w-full, h-auto)
 - Never distort user-provided images
 - Never create SVG images - only use provided or web images
 
 ### Buttons
+
 - Always use `box-border` to prevent padding overflow
 
 ### Layout
+
 - Always mobile-friendly by default
 - Use stacked layouts that work on all screen sizes
 - Remove default spacing/margins/padding between list items
 
 ### Dark Mode
+
 When requested: container black (#000), background dark gray (#151516)
 
 ### Best Practices
+
 - Choose colors, layout, and copy based on user's request
 - Make templates unique, not generic
 - Use keywords in email body to increase conversion
@@ -384,21 +415,24 @@ When requested: container black (#000), background dark gray (#151516)
 ### Convert to HTML
 
 ```tsx
-import { render } from '@react-email/components';
-import { WelcomeEmail } from './emails/welcome';
+import { render } from "@react-email/components";
+import { WelcomeEmail } from "./emails/welcome";
 
 const html = await render(
-  <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />
+  <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />,
 );
 ```
 
 ### Convert to Plain Text
 
 ```tsx
-import { render } from '@react-email/components';
-import { WelcomeEmail } from './emails/welcome';
+import { render } from "@react-email/components";
+import { WelcomeEmail } from "./emails/welcome";
 
-const text = await render(<WelcomeEmail name="John" verificationUrl="https://example.com/verify" />, { plainText: true });
+const text = await render(
+  <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />,
+  { plainText: true },
+);
 ```
 
 ## Sending
@@ -408,20 +442,22 @@ React Email supports sending with any email service provider. If the user wants 
 Quick example using the Resend SDK for Node.js:
 
 ```tsx
-import { Resend } from 'resend';
-import { WelcomeEmail } from './emails/welcome';
+import { Resend } from "resend";
+import { WelcomeEmail } from "./emails/welcome";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const { data, error } = await resend.emails.send({
-  from: 'Acme <onboarding@resend.dev>',
-  to: ['user@example.com'],
-  subject: 'Welcome to Acme',
-  react: <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />
+  from: "Acme <onboarding@resend.dev>",
+  to: ["user@example.com"],
+  subject: "Welcome to Acme",
+  react: (
+    <WelcomeEmail name="John" verificationUrl="https://example.com/verify" />
+  ),
 });
 
 if (error) {
-  console.error('Failed to send:', error);
+  console.error("Failed to send:", error);
 }
 ```
 
@@ -507,11 +543,12 @@ Message files (\`messages/en.json\`, \`messages/es.json\`, etc.):
 
 8. **Handle errors** - Always check for errors when sending emails.
 
-9.  **Use verified domains** - For production, use verified domains in \`from\` addresses.
+9. **Use verified domains** - For production, use verified domains in \`from\` addresses.
 
 ## Common Patterns
 
 See [references/PATTERNS.md](references/PATTERNS.md) for complete examples including:
+
 - Password reset emails
 - Order confirmations with product lists
 - Notification emails with code blocks

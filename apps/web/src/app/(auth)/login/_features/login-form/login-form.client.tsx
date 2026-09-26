@@ -1,7 +1,9 @@
 "use client";
 
 import { defaultRedirect, forgotPasswordUrl } from "@/app/_constants/routes";
-import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
+import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
+import type { SignInUserInput } from "@/app/_domains/auth/_services/sign-in-user.schema";
+import { SignInUserSchema } from "@/app/_domains/auth/_services/sign-in-user.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -27,7 +29,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { LoginInputs, LoginSchema } from "./login.schema";
 
 export function LoginForm() {
   const trpc = useTRPC();
@@ -36,8 +37,8 @@ export function LoginForm() {
   const nextUrl = searchParams.get("nextUrl");
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
-  const form = useForm<LoginInputs>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<SignInUserInput>({
+    resolver: zodResolver(SignInUserSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -45,17 +46,26 @@ export function LoginForm() {
   });
 
   const loginMutation = useMutation(
-    trpc.auth.login.mutationOptions({
+    trpc.auth.signInUser.mutationOptions({
       onError: (error) => {
-        if (error.message === "EMAIL_NOT_VERIFIED") {
+        // PRECONDITION_FAILED is reserved by the sign-in service for an
+        // unverified email, so the branch never reads the copy.
+        if (error.data?.code === "PRECONDITION_FAILED") {
           setUnverifiedEmail(form.getValues("email"));
           return;
         }
-        const message = error.message || "Sign in failed. Please try again.";
+        const message =
+          error.message === ""
+            ? "Sign in failed. Please try again."
+            : error.message;
         form.setError("root", { message });
       },
       onSuccess: () => {
-        router.push((nextUrl || defaultRedirect) as Route);
+        router.push(
+          (nextUrl === null || nextUrl === ""
+            ? defaultRedirect
+            : nextUrl) as Route,
+        );
       },
     }),
   );
@@ -127,7 +137,7 @@ export function LoginForm() {
                 <FormLabel>Password</FormLabel>
                 <Link
                   href={forgotPasswordUrl}
-                  className="text-primary text-xs hover:underline"
+                  className="text-xs text-primary hover:underline"
                 >
                   Forgot?
                 </Link>

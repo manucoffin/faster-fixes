@@ -1,6 +1,6 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -22,7 +22,7 @@ export function SlackSection({ projectId }: SlackSectionProps) {
   if (!canAccess("slackIntegration")) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Slack integration is available on paid plans.
         </p>
         <Button className="w-fit" asChild>
@@ -61,7 +61,7 @@ function SlackSectionInner({ orgId, projectId }: SlackSectionInnerProps) {
     ),
     Empty: (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Connect Slack in organization settings to pick a channel.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>
@@ -108,7 +108,7 @@ function PickChannel({ projectId }: PickChannelProps) {
           </Alert>
         ),
         Empty: (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             No channels available. Invite the bot to a channel in Slack first.
           </p>
         ),
@@ -120,7 +120,10 @@ function PickChannel({ projectId }: PickChannelProps) {
               selectedChannelId={link?.channelId ?? ""}
             />
             {link ? (
-              <SlackEnabledSwitch projectId={projectId} checked={link.enabled} />
+              <SlackEnabledSwitch
+                projectId={projectId}
+                checked={link.enabled}
+              />
             ) : null}
           </div>
         ),

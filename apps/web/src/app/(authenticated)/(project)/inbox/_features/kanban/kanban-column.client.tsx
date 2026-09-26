@@ -4,10 +4,11 @@ import { useDroppable } from "@dnd-kit/core";
 import { Badge } from "@workspace/ui/components/badge";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
+import { getColumnSelectionState } from "./column-selection-state";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanColumnHeaderProps = {
   id: string;
@@ -26,14 +27,10 @@ export function KanbanColumnHeader({
   itemIds,
   onToggleSelectAll,
 }: KanbanColumnHeaderProps) {
-  const allSelected =
-    itemIds.length > 0 && itemIds.every((id) => selectedIds.has(id));
-  const someSelected = itemIds.some((id) => selectedIds.has(id));
-
   return (
     <div className="flex items-center gap-2">
       <Checkbox
-        checked={allSelected ? true : someSelected ? "indeterminate" : false}
+        checked={getColumnSelectionState(itemIds, selectedIds)}
         onCheckedChange={() => onToggleSelectAll(id, itemIds)}
       />
       <h3 className="text-sm font-medium">{title}</h3>
@@ -70,7 +67,7 @@ export function KanbanColumnBody({
       )}
     >
       {items.length === 0 ? (
-        <div className="text-muted-foreground py-8 text-center text-sm">
+        <div className="py-8 text-center text-sm text-muted-foreground">
           No items
         </div>
       ) : (

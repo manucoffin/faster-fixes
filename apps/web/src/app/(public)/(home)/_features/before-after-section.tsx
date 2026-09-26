@@ -19,7 +19,7 @@ export function BeforeAfterSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             The difference
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
@@ -29,7 +29,7 @@ export function BeforeAfterSection() {
 
         <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 items-stretch gap-6 md:grid-cols-2">
           {/* Without */}
-          <div className="bg-card flex flex-col rounded-xl border p-7">
+          <div className="flex flex-col rounded-xl border bg-card p-7">
             <span className="mb-5 block text-sm font-semibold tracking-wider text-red-400 uppercase">
               Without FasterFixes
             </span>
@@ -37,7 +37,7 @@ export function BeforeAfterSection() {
               {withoutItems.map((item) => (
                 <li
                   key={item}
-                  className="text-muted-foreground flex items-start gap-3 text-lg leading-relaxed"
+                  className="flex items-start gap-3 text-lg leading-relaxed text-muted-foreground"
                 >
                   <XIcon className="mt-1 size-5 shrink-0 text-red-400" />
                   <span>{item}</span>
@@ -52,7 +52,7 @@ export function BeforeAfterSection() {
           </div>
 
           {/* With */}
-          <div className="bg-card flex flex-col rounded-xl border p-7">
+          <div className="flex flex-col rounded-xl border bg-card p-7">
             <span className="mb-5 block text-sm font-semibold tracking-wider text-emerald-400 uppercase">
               With FasterFixes
             </span>

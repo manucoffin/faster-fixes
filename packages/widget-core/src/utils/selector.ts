@@ -150,7 +150,9 @@ export function generateSelectors(el: Element): {
   );
   if (stableClasses.length > 0) {
     const tag = el.tagName.toLowerCase();
-    const classSelector = stableClasses.map((c) => `.${CSS.escape(c)}`).join("");
+    const classSelector = stableClasses
+      .map((c) => `.${CSS.escape(c)}`)
+      .join("");
     const selector = `${tag}${classSelector}`;
     if (isUnique(selector)) {
       strategies.stableClasses = selector;

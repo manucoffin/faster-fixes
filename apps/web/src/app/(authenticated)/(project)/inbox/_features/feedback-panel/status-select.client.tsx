@@ -1,6 +1,6 @@
 "use client";
 
-import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
+import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/feedback-mutations/use-feedback-mutations";
 import {
   Select,
   SelectContent,
@@ -21,15 +21,12 @@ type StatusSelectProps = {
   value: string;
 };
 
-export function StatusSelect({
-  feedbackId,
-  value,
-}: StatusSelectProps) {
+export function StatusSelect({ feedbackId, value }: StatusSelectProps) {
   const { updateStatus } = useFeedbackMutations();
 
   return (
     <div>
-      <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+      <h4 className="mb-2 text-xs font-medium text-muted-foreground uppercase">
         Status
       </h4>
       <Select

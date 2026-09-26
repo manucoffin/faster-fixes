@@ -10,10 +10,10 @@ import {
 } from "@workspace/ui/components/popover";
 import { cn } from "@workspace/ui/lib/utils";
 
-interface PasswordRule {
+type PasswordRule = {
   label: string;
   test: (password: string) => boolean;
-}
+};
 
 const defaultRules: PasswordRule[] = [
   { label: "At least 8 characters", test: (p) => p.length >= 8 },
@@ -25,15 +25,15 @@ const defaultRules: PasswordRule[] = [
   },
 ];
 
-interface PasswordStrengthIndicatorProps {
+type PasswordStrengthIndicatorProps = {
   password: string;
   rules?: PasswordRule[];
-}
+};
 
-const PasswordStrengthIndicator = ({
+function PasswordStrengthIndicator({
   password,
   rules = defaultRules,
-}: PasswordStrengthIndicatorProps) => {
+}: PasswordStrengthIndicatorProps) {
   const results = useMemo(
     () =>
       rules.map((rule) => ({
@@ -109,7 +109,7 @@ const PasswordStrengthIndicator = ({
       </div>
     </div>
   );
-};
+}
 
 export { PasswordStrengthIndicator };
 export type { PasswordRule, PasswordStrengthIndicatorProps };

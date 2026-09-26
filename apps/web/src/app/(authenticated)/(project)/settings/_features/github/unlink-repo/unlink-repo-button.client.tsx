@@ -27,8 +27,8 @@ export function UnlinkRepoButton({ projectId }: UnlinkRepoButtonProps) {
 
   const unlinkMutation = useMutation(
     trpc.authenticated.projects.github.unlinkRepo.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.github.getLink.queryKey({
             projectId,
           }),

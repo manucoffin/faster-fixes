@@ -5,7 +5,7 @@ description: Install the fix-feedback skill to give your AI agent a one-command 
 
 The **fix-feedback** skill teaches your AI coding agent the full Faster Fixes workflow: fetch pending feedback, locate the relevant code, apply fixes, and mark items as resolved.
 
-It works alongside the [MCP server](/docs/mcp/setup) — the MCP provides the tools, the skill provides the workflow.
+It works alongside the [MCP server](/docs/mcp/setup): the MCP provides the tools, the skill provides the workflow.
 
 ## Install
 
@@ -19,11 +19,11 @@ npx skills add manucoffin/faster-fixes --skill fix-feedback
 
 When you say something like "fix feedback" or "check for new client reports", the skill guides your agent through:
 
-1. **Fetch** — Calls `list_feedbacks` with `status: "new"` to get pending items
-2. **Mark in progress** — Updates each item to `in_progress` so your team knows it's being handled
-3. **Locate and fix** — Uses the component path, CSS selector, and screenshot to find and fix the code
-4. **Mark resolved** — Updates the status to `resolved` after the fix is applied
-5. **Summarize** — Reports what was fixed and what was skipped
+1. **Fetch**: calls `list_feedbacks` with `status: "new"` to get pending items
+2. **Mark in progress**: updates each item to `in_progress` so your team knows it's being handled
+3. **Locate and fix**: uses the component path, CSS selector, and screenshot to find and fix the code
+4. **Mark resolved**: updates the status to `resolved` after the fix is applied
+5. **Summarize**: reports what was fixed and what was skipped
 
 The skill also handles read-only requests. If you just want to see what's been reported without fixing anything, it fetches and presents the feedback without modifying code or statuses.
 
@@ -39,4 +39,4 @@ Skipped items are flagged in the summary so you can triage them manually.
 
 ## Prerequisites
 
-The [MCP server](/docs/mcp/setup) must be configured before the skill can work. The skill calls the MCP tools under the hood — without them, it has nothing to fetch from.
+The [MCP server](/docs/mcp/setup) must be configured before the skill can work. The skill calls the MCP tools under the hood. Without them, it has nothing to fetch from.

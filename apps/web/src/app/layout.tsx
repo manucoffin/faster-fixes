@@ -1,6 +1,6 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
-import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider";
+import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider.client";
 import { FeedbackProvider } from "@fasterfixes/react";
 import { Analytics } from "@vercel/analytics/next";
 import "@workspace/ui/globals.css";
@@ -11,8 +11,8 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
-import { StopImpersonateButton } from "./_features/auth/stop-impersonate-button/stop-impersonate-button.client";
-import { ConsentProvider } from "./_features/c15t/consent-provider";
+import { StopImpersonateButton } from "./_domains/auth/stop-impersonate-button/stop-impersonate-button.client";
+import { ConsentProvider } from "./_providers/consent-provider.client";
 
 const fontSans = Space_Grotesk({
   subsets: ["latin"],

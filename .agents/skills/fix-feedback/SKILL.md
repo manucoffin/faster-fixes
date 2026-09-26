@@ -60,6 +60,7 @@ For each feedback item, follow this sequence:
 ### Step 3: Summarize
 
 After processing all items, provide a brief summary:
+
 - How many feedbacks were processed
 - What was fixed for each one (one line per item)
 - Any feedbacks that were skipped, and why

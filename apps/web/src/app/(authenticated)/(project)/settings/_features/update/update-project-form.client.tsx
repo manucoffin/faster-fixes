@@ -1,13 +1,18 @@
 "use client";
 
-import {
-  UpdateProjectInputs,
-  UpdateProjectSchema,
-} from "@/app/(authenticated)/(project)/settings/_features/update/update-project.schema";
+import type { GetProjectOutput } from "@/app/(authenticated)/(project)/settings/_services/get-project";
+import type { UpdateProjectInput } from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
+import { UpdateProjectSchema } from "@/app/(authenticated)/(project)/settings/_services/update-project.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import { CopyableText } from "@workspace/ui/components/copyable-text";
 import {
@@ -29,6 +34,7 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Switch } from "@workspace/ui/components/switch";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -39,21 +45,58 @@ type UpdateProjectFormProps = {
 
 export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
-  const { data: project } = useQuery(
+  const projectQuery = useQuery(
     trpc.authenticated.projects.get.queryOptions({ projectId }),
   );
 
+  return matchQueryStatus(projectQuery, {
+    Loading: (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    ),
+    Errored: (error) => (
+      <Alert variant="destructive">
+        <AlertTitle>Failed to load the project</AlertTitle>
+        <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+      </Alert>
+    ),
+    // The service throws when the Project is missing, so this branch only
+    // narrows the loaded data for the fields below.
+    Empty: (
+      <p className="text-sm text-muted-foreground">
+        This project is unavailable.
+      </p>
+    ),
+    Success: ({ data: project }) => (
+      <UpdateProjectFields projectId={projectId} project={project} />
+    ),
+  });
+}
+
+type UpdateProjectFieldsProps = {
+  projectId: string;
+  project: GetProjectOutput;
+};
+
+function UpdateProjectFields({ projectId, project }: UpdateProjectFieldsProps) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
   const updateProject = useMutation(
     trpc.authenticated.projects.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(
-          trpc.authenticated.projects.get.queryOptions({ projectId }),
-        );
-        queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.list.queryKey(),
-        });
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.authenticated.projects.get.queryOptions({ projectId }),
+          ),
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.list.queryKey(),
+          }),
+        ]);
         toast.success("Project updated");
       },
       onError: (error) => {
@@ -62,25 +105,17 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
     }),
   );
 
-  const form = useForm<UpdateProjectInputs>({
+  const form = useForm<UpdateProjectInput>({
     resolver: zodResolver(UpdateProjectSchema),
-    defaultValues: {
+    values: {
       projectId,
-      name: "",
-      domain: "",
-      widgetEnabled: true,
+      name: project.name,
+      domain: project.domain,
+      widgetEnabled: project.widgetConfig?.enabled ?? true,
     },
-    values: project
-      ? {
-          projectId,
-          name: project.name,
-          domain: project.domain,
-          widgetEnabled: project.widgetConfig?.enabled ?? true,
-        }
-      : undefined,
   });
 
-  const onSubmit = (data: UpdateProjectInputs) => {
+  const onSubmit = (data: UpdateProjectInput) => {
     updateProject.mutate(data);
   };
 
@@ -100,8 +135,8 @@ export function UpdateProjectForm({ projectId }: UpdateProjectFormProps) {
 
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-medium">Project ID</Label>
-          <CopyableText className="bg-muted w-fit rounded-md px-3 py-1.5 font-mono text-sm">
-            {project?.publicId ?? "..."}
+          <CopyableText className="w-fit rounded-md bg-muted px-3 py-1.5 font-mono text-sm">
+            {project.publicId}
           </CopyableText>
         </div>
 

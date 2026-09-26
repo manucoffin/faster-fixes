@@ -1,11 +1,6 @@
-import {
-  SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
-import type { PrismaClient } from "@workspace/db/generated/prisma/client";
-import {
-  getMinimumRequiredPlanForResource,
-  type PlanDenial,
-} from "./denial";
+import { SubscriptionPlanName } from "@/app/_domains/subscription";
+import type { PrismaClient } from "@workspace/db/types";
+import { getMinimumRequiredPlanForResource, type PlanDenial } from "./denial";
 import { resolveOrganizationPlan } from "./resolve-organization-plan";
 
 export type OrganizationCheckResult =
@@ -47,7 +42,10 @@ export async function checkOrganizationLimit(
         current: orgCount,
         limit: 1,
         planName: SubscriptionPlanName.Free,
-        minimumRequiredPlan: getMinimumRequiredPlanForResource("organizations", orgCount),
+        minimumRequiredPlan: getMinimumRequiredPlanForResource(
+          "organizations",
+          orgCount,
+        ),
       },
     },
   };

@@ -16,7 +16,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import type { GetLinearInstallationOutput } from "./get-linear-installation.trpc.query";
+import type { GetLinearInstallationOutput } from "../../_services/get-linear-installation";
 
 type LinearConnectedProps = {
   installation: NonNullable<GetLinearInstallationOutput>;
@@ -28,8 +28,8 @@ export function LinearConnected({ installation }: LinearConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.linear.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.linear.getInstallation.queryKey(),
         });
@@ -45,7 +45,7 @@ export function LinearConnected({ installation }: LinearConnectedProps) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
         <span className="font-medium">{installation.linearOrgName}</span>
-        <span className="text-muted-foreground text-sm">
+        <span className="text-sm text-muted-foreground">
           Connected
           {installation.installedByName
             ? ` by ${installation.installedByName}`

@@ -12,12 +12,12 @@ import {
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-interface UserOrganizationSelectProps {
+type UserOrganizationSelectProps = {
   userId: string;
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
-}
+};
 
 export function UserOrganizationSelect({
   userId,
@@ -35,12 +35,12 @@ export function UserOrganizationSelect({
   return matchQueryStatus(organizationsQuery, {
     Loading: <Skeleton className="h-10 w-full rounded-md" />,
     Errored: (error) => (
-      <div className="text-sm text-red-500">
+      <div className="text-sm text-destructive">
         Failed to load organizations: {String(error)}
       </div>
     ),
     Empty: (
-      <div className="text-muted-foreground text-sm">
+      <div className="text-sm text-muted-foreground">
         No organization found for this user
       </div>
     ),
@@ -50,7 +50,7 @@ export function UserOrganizationSelect({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          {organizationsQuery.data?.map((org: any) => (
+          {organizationsQuery.data?.map((org) => (
             <SelectItem key={org.id} value={org.id}>
               {org.name}
             </SelectItem>

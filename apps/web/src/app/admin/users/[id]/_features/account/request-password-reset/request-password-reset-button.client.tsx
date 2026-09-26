@@ -20,26 +20,24 @@ type RequestPasswordResetButtonProps = {
   userId: string;
 };
 
-export const RequestPasswordResetButton = ({
+export function RequestPasswordResetButton({
   userId,
-}: RequestPasswordResetButtonProps) => {
+}: RequestPasswordResetButtonProps) {
   const trpc = useTRPC();
-  const requestPasswordResetMutation =
-    useMutation(trpc.admin.users.password.requestReset.mutationOptions({
+  const requestPasswordResetMutation = useMutation(
+    trpc.admin.users.password.requestReset.mutationOptions({
       onSuccess: () => {
         toast.success("Success", {
-          description:
-            "A password reset email has been sent to the user",
+          description: "A password reset email has been sent to the user",
         });
       },
       onError: (error) => {
         toast.error("Error", {
-          description:
-            error.message ||
-            "Failed to send password reset link",
+          description: error.message || "Failed to send password reset link",
         });
       },
-    }));
+    }),
+  );
 
   const handleRequestReset = () => {
     requestPasswordResetMutation.mutate({ userId });
@@ -57,9 +55,7 @@ export const RequestPasswordResetButton = ({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Send a password reset link?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Send a password reset link?</AlertDialogTitle>
           <AlertDialogDescription>
             An email with a password reset link will be sent to the user. The
             user will then be able to create a new password.
@@ -71,12 +67,10 @@ export const RequestPasswordResetButton = ({
             onClick={handleRequestReset}
             disabled={requestPasswordResetMutation.isPending}
           >
-            {requestPasswordResetMutation.isPending
-              ? "Sending..."
-              : "Send"}
+            {requestPasswordResetMutation.isPending ? "Sending..." : "Send"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}

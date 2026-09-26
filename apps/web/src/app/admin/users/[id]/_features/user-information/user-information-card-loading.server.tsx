@@ -16,39 +16,35 @@ export async function UserInformationCardLoading() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-muted-foreground text-sm">Email</p>
+            <p className="text-sm text-muted-foreground">Email</p>
             <Skeleton className="h-5 w-full" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">Name</p>
+            <p className="text-sm text-muted-foreground">Name</p>
             <Skeleton className="h-5 w-4/5" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">
-              User type
-            </p>
+            <p className="text-sm text-muted-foreground">User type</p>
             <Skeleton className="h-5 w-3/5" />
           </div>
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-muted-foreground mb-2 text-sm">Role</p>
+          <p className="mb-2 text-sm text-muted-foreground">Role</p>
           <Skeleton className="h-6 w-20" />
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-muted-foreground mb-2 text-sm">
-            Account details
-          </p>
+          <p className="mb-2 text-sm text-muted-foreground">Account details</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Onboarding completed
               </p>
               <Skeleton className="h-5 w-24" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Newsletter opted in
               </p>
               <Skeleton className="h-5 w-28" />

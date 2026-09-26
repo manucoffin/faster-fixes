@@ -4,7 +4,7 @@ import {
   PLAN_LIMITS,
   type PlanLimits,
   type SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 
 export type ResourceLimitMetadata = {
   resource: LimitableResource;
@@ -26,14 +26,18 @@ export type PlanDenial =
   | { reason: "UNAUTHENTICATED"; metadata: null }
   | { reason: "NO_ACTIVE_ORGANIZATION"; metadata: null };
 
-const PLAN_ORDER: SubscriptionPlanName[] = ["free", "pro", "agency"] as const as SubscriptionPlanName[];
+const PLAN_ORDER: SubscriptionPlanName[] = [
+  "free",
+  "pro",
+  "agency",
+] as const as SubscriptionPlanName[];
 
 export function getMinimumRequiredPlanForResource(
   resource: LimitableResource,
   currentCount: number,
 ): SubscriptionPlanName {
   for (const plan of PLAN_ORDER) {
-    const limit = PLAN_LIMITS[plan][resource] as number;
+    const limit = PLAN_LIMITS[plan][resource];
     if (limit === Infinity || currentCount < limit) return plan;
   }
   return "agency" as SubscriptionPlanName;

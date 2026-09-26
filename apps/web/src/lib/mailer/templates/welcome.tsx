@@ -10,11 +10,11 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-export interface WelcomeEmailProps {
+export type WelcomeEmailProps = {
   userName?: string;
-}
+};
 
-export const WelcomeEmail = ({ userName }: WelcomeEmailProps) => {
+export function WelcomeEmail({ userName }: WelcomeEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -60,4 +60,4 @@ export const WelcomeEmail = ({ userName }: WelcomeEmailProps) => {
       </Tailwind>
     </Html>
   );
-};
+}

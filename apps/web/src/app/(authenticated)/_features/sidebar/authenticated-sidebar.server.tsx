@@ -1,4 +1,4 @@
-import { AppLogoMark } from "@/app/_features/core/logo/app-logo";
+import { AppLogoMark } from "@/app/_components/app-logo";
 import {
   Sidebar,
   SidebarContent,
@@ -15,9 +15,9 @@ import { OrganizationSwitcher } from "./organization/organization-switcher.clien
 import { ProjectNavigation } from "./project/project-navigation.client";
 import { SidebarUserDropdown } from "./sidebar-user-dropdown.client";
 
-export const AuthenticatedSidebar = async ({
+export async function AuthenticatedSidebar({
   ...props
-}: React.ComponentProps<typeof Sidebar>) => {
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -39,7 +39,7 @@ export const AuthenticatedSidebar = async ({
               <a href="/docs" target="_blank" rel="noopener noreferrer">
                 <BookOpen />
                 <span>Documentation</span>
-                <ArrowUpRight className="text-muted-foreground size-3.5" />
+                <ArrowUpRight className="size-3.5 text-muted-foreground" />
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -48,4 +48,4 @@ export const AuthenticatedSidebar = async ({
       </SidebarFooter>
     </Sidebar>
   );
-};
+}

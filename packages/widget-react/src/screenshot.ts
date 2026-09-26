@@ -22,7 +22,8 @@ function reanchorFixedElements(cloned: Node, scrollX: number, scrollY: number) {
   for (const el of cloned.querySelectorAll<HTMLElement>("[style]")) {
     if (el.style.position !== "fixed") continue;
     // Prepend so the offset applies in body coordinates, after the element's own transform
-    el.style.transform = `translate(${scrollX}px, ${scrollY}px) ${el.style.transform}`.trim();
+    el.style.transform =
+      `translate(${scrollX}px, ${scrollY}px) ${el.style.transform}`.trim();
   }
 }
 

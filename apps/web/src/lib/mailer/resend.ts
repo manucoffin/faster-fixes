@@ -4,16 +4,16 @@ import { Resend } from "resend";
 
 import { isDevelopment } from "@/utils/environment/env";
 
-import {
+import type {
   AddContactToSegmentOptions,
   Contact,
   CreateContactOptions,
-  EmailError,
   EmailResponse,
   Mailer,
   MailOptions,
   UpdateContactOptions,
 } from "./types";
+import { EmailError } from "./types";
 
 const DEV_TEST_EMAIL = "delivered@resend.dev";
 
@@ -26,13 +26,6 @@ export class ResendMailer implements Mailer {
 
   public emails = {
     send: async (options: MailOptions): Promise<EmailResponse> => {
-      if (!options.body && !options.templateId) {
-        throw new EmailError(
-          "Email body or templateId is required",
-          "MISSING_BODY"
-        );
-      }
-
       const to = isDevelopment() ? DEV_TEST_EMAIL : options.to;
 
       const attachments = options.attachments?.map((attachment) => ({
@@ -41,25 +34,34 @@ export class ResendMailer implements Mailer {
         contentType: attachment.type,
       }));
 
-      const { data, error } = options.templateId
-        ? await this.client.emails.send({
-            to,
-            template: {
-              id: String(options.templateId),
-              ...(options.params && { variables: options.params }),
-            },
-            ...(options.from && { from: options.from }),
-            ...(options.subject && { subject: options.subject }),
-            ...(attachments && { attachments }),
-          })
-        : await this.client.emails.send({
-            from: options.from,
-            to,
-            subject: options.subject,
-            html: options.body!,
-            ...(attachments && { attachments }),
-          });
+      let result;
+      if (options.templateId) {
+        result = await this.client.emails.send({
+          to,
+          template: {
+            id: String(options.templateId),
+            ...(options.params && { variables: options.params }),
+          },
+          ...(options.from && { from: options.from }),
+          ...(options.subject && { subject: options.subject }),
+          ...(attachments && { attachments }),
+        });
+      } else if (options.body) {
+        result = await this.client.emails.send({
+          from: options.from,
+          to,
+          subject: options.subject,
+          html: options.body,
+          ...(attachments && { attachments }),
+        });
+      } else {
+        throw new EmailError(
+          "Email body or templateId is required",
+          "MISSING_BODY",
+        );
+      }
 
+      const { data, error } = result;
       if (error) {
         throw new EmailError(error.message, error.name);
       }
@@ -67,7 +69,7 @@ export class ResendMailer implements Mailer {
       return {
         success: true,
         message: "Email sent successfully",
-        data: data ?? undefined,
+        data,
       };
     },
   };
@@ -80,7 +82,7 @@ export class ResendMailer implements Mailer {
         throw new EmailError(error.message, error.name);
       }
 
-      return (data?.data ?? []).map(mapResendContact);
+      return data.data.map(mapResendContact);
     },
 
     create: async (options: CreateContactOptions): Promise<Contact> => {
@@ -94,7 +96,7 @@ export class ResendMailer implements Mailer {
       }
 
       return {
-        id: data!.id,
+        id: data.id,
         email: options.email,
         subscribed: options.subscribed,
         data: options.data ?? {},
@@ -110,20 +112,11 @@ export class ResendMailer implements Mailer {
         throw new EmailError(error.message, error.name);
       }
 
-      return mapResendContact(data!);
+      return mapResendContact(data);
     },
 
     update: async (options: UpdateContactOptions): Promise<Contact> => {
-      if (!options.id && !options.email) {
-        throw new EmailError(
-          "Either id or email must be provided",
-          "MISSING_IDENTIFIER"
-        );
-      }
-
-      const identifier = options.id
-        ? ({ id: options.id } as const)
-        : ({ email: options.email! } as const);
+      const identifier = getContactIdentifier(options);
 
       const { data, error } = await this.client.contacts.update({
         ...identifier,
@@ -137,19 +130,7 @@ export class ResendMailer implements Mailer {
       }
 
       // Resend update returns minimal data, fetch the full contact
-      const contactId = data?.id ?? options.id;
-      if (contactId) {
-        return this.contacts.get(contactId);
-      }
-
-      return {
-        id: data?.id ?? "",
-        email: options.email ?? "",
-        subscribed: options.subscribed ?? true,
-        data: options.data ?? {},
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      return this.contacts.get(data.id);
     },
 
     delete: async (id: string): Promise<Contact> => {
@@ -165,20 +146,13 @@ export class ResendMailer implements Mailer {
       return contact;
     },
 
-    addToSegment: async (options: AddContactToSegmentOptions): Promise<void> => {
-      if (!options.id && !options.email) {
-        throw new EmailError(
-          "Either id or email must be provided",
-          "MISSING_IDENTIFIER"
-        );
-      }
-
-      const identifier = options.id
-        ? ({ contactId: options.id } as const)
-        : ({ email: options.email! } as const);
+    addToSegment: async (
+      options: AddContactToSegmentOptions,
+    ): Promise<void> => {
+      const identifier = getContactIdentifier(options);
 
       const { error } = await this.client.contacts.segments.add({
-        ...identifier,
+        ...("id" in identifier ? { contactId: identifier.id } : identifier),
         segmentId: options.segmentId,
       });
 
@@ -187,6 +161,22 @@ export class ResendMailer implements Mailer {
       }
     },
   };
+}
+
+function getContactIdentifier(options: {
+  id?: string;
+  email?: string;
+}): { id: string } | { email: string } {
+  if (options.id) {
+    return { id: options.id };
+  }
+  if (options.email) {
+    return { email: options.email };
+  }
+  throw new EmailError(
+    "Either id or email must be provided",
+    "MISSING_IDENTIFIER",
+  );
 }
 
 function mapResendContact(contact: {

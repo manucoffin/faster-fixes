@@ -2,6 +2,7 @@ import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import { VerifyEmail } from "@/lib/mailer/templates/verify-email";
 import { inngest } from "@/server/inngest";
+import { buildEvent, userEmailVerifiedEvent } from "@/server/inngest/events";
 import { render } from "@react-email/components";
 import { prisma } from "@workspace/db";
 import type { BetterAuthOptions } from "better-auth";
@@ -17,12 +18,9 @@ export const emailVerification: NonNullable<
 
     // Hand off the welcome email to Inngest so a mailer outage can't fail
     // verification, and delivery is retried independently.
-    await inngest.send({
-      name: "user/email-verified",
-      data: { userId: user.id },
-    });
+    await inngest.send(buildEvent(userEmailVerifiedEvent, { userId: user.id }));
   },
-  sendVerificationEmail: async ({ user, url }, ctx) => {
+  sendVerificationEmail: async ({ user, url }) => {
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
     });

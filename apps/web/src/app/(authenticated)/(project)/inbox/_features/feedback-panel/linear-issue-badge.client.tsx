@@ -5,21 +5,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { toast } from "sonner";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
 type LinearIssueBadgeProps = {
-  issueLink: GetFeedbackOutput[number]["linearIssueLink"];
+  issueLink: ListFeedbackOutput[number]["linearIssueLink"];
   feedbackId: string;
   hasLinearLink: boolean;
   projectId: string;
 };
 
+// The two greys separate backlog from unstarted; the opacity modifier keeps
+// them distinguishable while both follow the theme.
 const STATE_TYPE_COLOR: Record<string, string> = {
   triage: "bg-purple-500",
-  backlog: "bg-slate-400",
-  unstarted: "bg-slate-500",
+  backlog: "bg-muted-foreground/60",
+  unstarted: "bg-muted-foreground",
   started: "bg-blue-500",
-  completed: "bg-emerald-500",
+  completed: "bg-success",
   canceled: "bg-rose-500",
 };
 
@@ -34,8 +36,8 @@ export function LinearIssueBadge({
 
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createLinearIssue.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.list.queryKey({
             projectId,
           }),
@@ -48,15 +50,18 @@ export function LinearIssueBadge({
 
   if (issueLink) {
     const dotColor =
-      STATE_TYPE_COLOR[issueLink.issueStateType] ?? "bg-slate-400";
+      STATE_TYPE_COLOR[issueLink.issueStateType] ?? "bg-muted-foreground/60";
     return (
       <a
         href={issueLink.issueUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span className={`size-2 rounded-full ${dotColor}`} aria-hidden="true" />
+        <span
+          className={`size-2 rounded-full ${dotColor}`}
+          aria-hidden="true"
+        />
         <span>{issueLink.issueIdentifier}</span>
       </a>
     );

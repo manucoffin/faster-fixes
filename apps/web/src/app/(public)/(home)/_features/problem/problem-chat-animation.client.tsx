@@ -1,7 +1,8 @@
 "use client";
 
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { ImageIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { TerminalFrame } from "../how-it-works/flow-animations";
 
 type ChatMessage = { text: string; isImage?: boolean };
@@ -60,23 +61,11 @@ const allMessages = phases.flatMap((phase, phaseIndex) =>
 // --- scroll-driven progress ---
 
 function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
-  const [progress, setProgress] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const isDesktop = !useIsMobile();
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  useEffect(() => {
-    // mobile: show everything immediately
-    if (!isDesktop) {
-      setProgress(1);
-      return;
-    }
+    if (!isDesktop) return;
 
     let ticking = false;
     const onScroll = () => {
@@ -103,7 +92,21 @@ function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [ref, isDesktop]);
 
-  return progress;
+  // mobile: show everything immediately
+  return isDesktop ? progress : 1;
+}
+
+function subscribeToNothing() {
+  return () => {};
+}
+
+// False on the server and during hydration, true afterwards: until then every message stays visible.
+function useIsHydrated() {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
 }
 
 // --- component ---
@@ -111,9 +114,7 @@ function useScrollProgress(ref: React.RefObject<HTMLDivElement | null>) {
 export function ProblemChatAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const progress = useScrollProgress(sectionRef);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsHydrated();
 
   // messages fill across 0–85 % of scroll, last 15 % is breathing room
   const msgProgress = Math.min(progress / 0.85, 1);
@@ -123,10 +124,10 @@ export function ProblemChatAnimation() {
   const activePhase = (() => {
     let idx = 0;
     let active = -1;
-    for (let p = 0; p < phases.length; p++) {
+    phases.forEach((phase, p) => {
       if (visibleCount > idx) active = p;
-      idx += phases[p]!.messages.length;
-    }
+      idx += phase.messages.length;
+    });
     return active;
   })();
 
@@ -180,7 +181,7 @@ export function ProblemChatAnimation() {
                 return (
                   <div
                     key={phase.card.title}
-                    className="bg-background rounded-xl border p-7 transition-all duration-500 ease-out"
+                    className="rounded-xl border bg-background p-7 transition-all duration-500 ease-out"
                     style={{
                       opacity: show ? 1 : 0,
                       transform: show ? "translateY(0)" : "translateY(12px)",
@@ -189,7 +190,7 @@ export function ProblemChatAnimation() {
                     <h3 className="text-lg font-semibold">
                       {phase.card.title}
                     </h3>
-                    <p className="text-muted-foreground mt-3 text-base leading-relaxed">
+                    <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                       {phase.card.description}
                     </p>
                   </div>

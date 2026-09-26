@@ -25,7 +25,7 @@ export function WebsiteUrlStep({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">What&apos;s the website domain?</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           The domain of the website where you&apos;ll install the feedback
           widget. www. and protocol variants are matched automatically.
         </p>
@@ -46,7 +46,7 @@ export function WebsiteUrlStep({
           disabled={isPending}
           autoFocus
         />
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
 
       <div className="flex items-center justify-between">

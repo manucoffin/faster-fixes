@@ -1,9 +1,9 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { RuttlBreadcrumb } from "./_features/ruttl-breadcrumb";
@@ -17,9 +17,9 @@ import { RuttlPricingSection } from "./_features/ruttl-pricing-section";
 import { RuttlWhySwitchSection } from "./_features/ruttl-why-switch-section";
 
 const pageUrl = `${APP_URL}/vs/ruttl`;
-const title = `Ruttl Alternative — Open-Source, No Per-Seat Pricing | ${SITE_NAME}`;
+const title = `Ruttl Alternative: Open-Source, No Per-Seat Pricing | ${SITE_NAME}`;
 const description =
-  "Ruttl charges $18/user/month — $90/mo for a 5-person team. FasterFixes is open-source, self-hostable, flat-rate, with an MCP server for AI coding agents.";
+  "Ruttl charges $18/user/month, or $90/mo for a 5-person team. FasterFixes is open-source, self-hostable, flat-rate, with an MCP server for AI coding agents.";
 const datePublished = "2026-05-12T00:00:00.000Z";
 const dateModified = "2026-05-12T00:00:00.000Z";
 

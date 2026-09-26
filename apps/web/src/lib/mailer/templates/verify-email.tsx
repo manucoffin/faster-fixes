@@ -12,11 +12,11 @@ import {
 
 import { emailTailwindConfig } from "./tailwind.config";
 
-interface VerifyEmailProps {
+type VerifyEmailProps = {
   verificationLink?: string;
-}
+};
 
-export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
+export function VerifyEmail({ verificationLink }: VerifyEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
@@ -33,8 +33,8 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
               </Text>
 
               <Text className="mt-0 mb-[32px] text-[16px] leading-[24px] text-foreground">
-                Thank you for signing up! To complete your account setup,
-                please click the button below to verify your email address.
+                Thank you for signing up! To complete your account setup, please
+                click the button below to verify your email address.
               </Text>
 
               <Section className="mb-[32px] text-center">
@@ -47,8 +47,8 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
               </Section>
 
               <Text className="mt-0 mb-[24px] text-[14px] leading-[20px] text-muted-foreground">
-                If you can&apos;t click the button, copy and paste this
-                link into your browser:
+                If you can&apos;t click the button, copy and paste this link
+                into your browser:
               </Text>
 
               <Text className="mt-0 mb-[32px] text-[14px] break-all text-muted-foreground">
@@ -58,8 +58,8 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
               <Hr className="my-[32px] border-border" />
 
               <Text className="mt-0 mb-[8px] text-[12px] text-muted-foreground">
-                If you didn&apos;t create an account, you can safely
-                ignore this email.
+                If you didn&apos;t create an account, you can safely ignore this
+                email.
               </Text>
             </Section>
           </Container>
@@ -67,4 +67,4 @@ export const VerifyEmail = ({ verificationLink }: VerifyEmailProps) => {
       </Tailwind>
     </Html>
   );
-};
+}

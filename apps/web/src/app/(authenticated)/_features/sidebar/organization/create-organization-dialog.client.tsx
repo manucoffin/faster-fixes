@@ -24,10 +24,8 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  CreateOrganizationInputs,
-  CreateOrganizationSchema,
-} from "@/app/_features/organization/create-organization.schema";
+import type { CreateOrganizationInput } from "@/app/_domains/organization/_services/create-organization.schema";
+import { CreateOrganizationSchema } from "@/app/_domains/organization/_services/create-organization.schema";
 
 type CreateOrganizationDialogProps = {
   open: boolean;
@@ -41,13 +39,13 @@ export function CreateOrganizationDialog({
   const trpc = useTRPC();
   const { refetch: refetchOrganizations } = useListOrganizations();
 
-  const form = useForm<CreateOrganizationInputs>({
+  const form = useForm<CreateOrganizationInput>({
     resolver: zodResolver(CreateOrganizationSchema),
     defaultValues: { name: "" },
   });
 
-  const createOrganization =
-    useMutation(trpc.organization.create.mutationOptions({
+  const createOrganization = useMutation(
+    trpc.organization.create.mutationOptions({
       onSuccess: async (data) => {
         await organization.setActive({ organizationId: data.id });
         await refetchOrganizations();
@@ -56,12 +54,11 @@ export function CreateOrganizationDialog({
       },
       onError: (error) => {
         form.setError("root", {
-          message:
-            error.message ||
-            "Error creating organization.",
+          message: error.message || "Error creating organization.",
         });
       },
-    }));
+    }),
+  );
 
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
@@ -70,7 +67,7 @@ export function CreateOrganizationDialog({
     }
   };
 
-  const onSubmit = (data: CreateOrganizationInputs) => {
+  const onSubmit = (data: CreateOrganizationInput) => {
     createOrganization.mutate(data);
   };
 
@@ -123,9 +120,7 @@ export function CreateOrganizationDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={createOrganization.isPending}>
-                {createOrganization.isPending
-                  ? "Creating..."
-                  : "Create"}
+                {createOrganization.isPending ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>

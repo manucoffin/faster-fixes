@@ -1,0 +1,40 @@
+import { projectsRouter } from "@/app/(authenticated)/(project)/trpc-router";
+import { accountRouter } from "@/app/(authenticated)/account/trpc-router";
+import { integrationsRouter } from "@/app/(authenticated)/integrations/trpc-router";
+import { organizationRouter } from "@/app/(authenticated)/organization/trpc-router";
+import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
+import { protectedProcedure, router } from "@/server/trpc/trpc";
+import { createProject } from "./_services/create-project";
+import { CreateProjectSchema } from "./_services/create-project.schema";
+import { sendFeedback } from "./_services/send-feedback";
+import { SendFeedbackSchema } from "./_services/send-feedback.schema";
+
+export const authenticatedRouter = router({
+  account: accountRouter,
+  organization: organizationRouter,
+  integrations: integrationsRouter,
+  projects: projectsRouter,
+
+  // The two operations the authenticated shell owns itself: the sidebar's
+  // create-project dialog and the header's feedback popover.
+  createProject: protectedProcedure
+    .use(enforceLimit("projects"))
+    .input(CreateProjectSchema)
+    .mutation(({ input, ctx }) =>
+      createProject({
+        organizationId: ctx.organizationId,
+        userId: ctx.session.user.id,
+        name: input.name,
+        domain: input.domain,
+      }),
+    ),
+  sendFeedback: protectedProcedure
+    .input(SendFeedbackSchema)
+    .mutation(({ input, ctx }) =>
+      sendFeedback({
+        message: input.message,
+        senderName: ctx.session.user.name,
+        senderEmail: ctx.session.user.email,
+      }),
+    ),
+});

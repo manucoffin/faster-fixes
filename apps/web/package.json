@@ -10,10 +10,11 @@
     "start": "next start",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --fix .",
-    "lint:agent-rules": "ESLINT_AGENT_RULES=1 eslint --max-warnings 0 .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
-    "inngest": "pnpm dlx inngest-cli@latest dev"
+    "inngest": "pnpm dlx inngest-cli@latest dev",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@better-auth/stripe": "^1.5.4",
@@ -21,8 +22,6 @@
     "@better-upload/server": "^3.0.14",
     "@c15t/nextjs": "^1.8.3",
     "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
     "@fasterfixes/core": "workspace:*",
     "@fasterfixes/react": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
@@ -37,7 +36,6 @@
     "@trpc/server": "^11.8.1",
     "@trpc/tanstack-react-query": "^11.8.1",
     "@vercel/analytics": "^2.0.1",
-    "@vercel/blob": "^2.3.1",
     "@workspace/db": "workspace:*",
     "@workspace/ui": "workspace:*",
     "better-auth": "^1.5.4",
@@ -50,14 +48,12 @@
     "inngest": "^4.2.4",
     "lucide-react": "^0.475.0",
     "motion": "^12.38.0",
-    "next": "16.2.1",
+    "next": "16.3.5",
     "next-themes": "^0.4.6",
     "nuqs": "^2.8.6",
-    "react": "19.2.4",
+    "react": "19.3.0",
     "react-day-picker": "^9.13.0",
-    "react-dom": "19.2.4",
-    "react-dropzone": "^15.0.0",
-    "react-email": "^5.2.5",
+    "react-dom": "19.3.0",
     "react-hook-form": "^7.71.1",
     "recharts": "2.15.4",
     "resend": "^6.9.3",
@@ -72,25 +68,24 @@
   "devDependencies": {
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@next/mdx": "^16.2.1",
     "@tailwindcss/postcss": "^4.1.17",
-    "@tanstack/eslint-plugin-query": "^5.91.2",
     "@types/mdx": "^2.0.13",
     "@types/node": "^20.19.25",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.1",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "remark-gfm": "^4.0.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.14",
-      "@types/react-dom": "19.2.3"
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0"
     }
   }
 }

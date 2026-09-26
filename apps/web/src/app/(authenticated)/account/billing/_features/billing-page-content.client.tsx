@@ -1,19 +1,13 @@
 "use client";
 
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
-import { PlanSelection } from "@/app/_features/subscription/upgrade-subscription/plan-selection.client";
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
+import { PlanSelection } from "@/app/_domains/subscription/upgrade-subscription/plan-selection.client";
+import { usePlanGate } from "@/app/_domains/subscription";
 import { CurrentPlanCard } from "./current-plan/current-plan-card.client";
 import { PastInvoicesCard } from "./past-invoices/past-invoices-card.client";
 import { SubscriptionStatusBanner } from "./subscription-status/subscription-status-banner.client";
 
-interface BillingPageContentProps {
-  organizationId: string;
-}
-
-export function BillingPageContent({
-  organizationId,
-}: BillingPageContentProps) {
+export function BillingPageContent() {
   const { isFreePlan } = usePlanGate();
 
   if (isFreePlan) {
@@ -22,7 +16,7 @@ export function BillingPageContent({
         title="Subscribe"
         breadcrumbs={[{ label: "My Account" }, { label: "Subscribe" }]}
       >
-        <p className="text-muted-foreground mb-6">
+        <p className="mb-6 text-muted-foreground">
           Select the plan that best fits your needs.
         </p>
         <div className="max-w-3xl">
@@ -42,7 +36,7 @@ export function BillingPageContent({
       <div className="mt-4">
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="lg:w-3/5">
-            <CurrentPlanCard organizationId={organizationId} />
+            <CurrentPlanCard />
           </div>
 
           <div className="lg:w-2/5">

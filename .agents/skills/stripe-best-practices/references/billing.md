@@ -23,11 +23,11 @@ For self-service subscription management (upgrades, downgrades, cancellation, pa
 - Don’t build manual subscription renewal loops using raw PaymentIntents. Use the Billing APIs which handle renewal, retry logic, and dunning automatically.
 - Don’t use the deprecated `plan` object. Use [Prices](https://docs.stripe.com/api/prices.md) instead.
 - Don’t skip tax setup. See [Collect taxes for recurring payments](https://docs.stripe.com/billing/taxes/collect-taxes.md).
-- *Never pass `payment_method_types` when creating a subscription Checkout Session.* Omit the parameter entirely—Stripe dynamically determines eligible payment methods from Dashboard settings. Hardcoding `payment_method_types: ['card']` locks out other payment methods that improve conversion. See [dynamic payment methods](https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods.md). Correct pattern:
+- _Never pass `payment_method_types` when creating a subscription Checkout Session._ Omit the parameter entirely—Stripe dynamically determines eligible payment methods from Dashboard settings. Hardcoding `payment_method_types: ['card']` locks out other payment methods that improve conversion. See [dynamic payment methods](https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods.md). Correct pattern:
 
 ```ts
 const session = await stripe.checkout.sessions.create({
-  mode: 'subscription',
+  mode: "subscription",
   // Do NOT include payment_method_types here — let Stripe handle it dynamically
   line_items: [{ price: priceId, quantity: 1 }],
   subscription_data: { trial_period_days: 14 },

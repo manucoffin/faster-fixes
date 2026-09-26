@@ -12,13 +12,13 @@ export function OpenSourceHero() {
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Open source · AGPL-3.0
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
             Open-source feedback widget for developers
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Self-host the dashboard, the widget API, and the MCP server. Own
             your feedback pipeline end-to-end. No per-seat pricing, no vendor
             lock-in.
@@ -43,7 +43,7 @@ export function OpenSourceHero() {
             </Button>
           </div>
 
-          <p className="text-muted-foreground mt-6 text-sm">
+          <p className="mt-6 text-sm text-muted-foreground">
             Prefer the hosted version?{" "}
             <Link
               href={signupUrl}

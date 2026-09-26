@@ -1,18 +1,18 @@
 import { auth } from "@/server/auth";
-import { checkFeatureAccess } from "@/server/auth/subscription";
 import {
   SLACK_OAUTH_STATE_COOKIE,
   SLACK_OAUTH_STATE_COOKIE_MAX_AGE_S,
-} from "@/server/slack/oauth-state-cookie";
-import { SLACK_OAUTH_SCOPES } from "@/server/slack/slack-client";
-import { prisma } from "@workspace/db";
+} from "@/app/_domains/integration/_helpers/slack/oauth-state-cookie";
+import { hasSlackIntegrationAccess } from "@/app/_domains/integration/_services/slack/has-slack-integration-access";
+import { SLACK_OAUTH_SCOPES } from "@/app/_domains/integration/_services/slack/slack-client";
 import { randomBytes } from "crypto";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import { type NextRequest, NextResponse } from "next/server";
 
 const SLACK_OAUTH_AUTHORIZE_URL = "https://slack.com/oauth/v2/authorize";
 
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const integrationsUrl = `${baseUrl}/integrations`;
 
   const session = await auth.api.getSession({ headers: req.headers });
@@ -29,12 +29,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${integrationsUrl}?error=no_active_org`);
   }
 
-  const featureAccess = await checkFeatureAccess(
+  const planAllowsSlack = await hasSlackIntegrationAccess(
     activeOrganization.id,
-    "slackIntegration",
-    prisma,
   );
-  if (!featureAccess.allowed) {
+  if (!planAllowsSlack) {
     return NextResponse.redirect(`${integrationsUrl}?error=upgrade_required`);
   }
 

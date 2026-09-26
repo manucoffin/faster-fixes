@@ -18,10 +18,10 @@ export function RejectInvitationButton({
 
   const rejectMutation = useMutation(
     trpc.authenticated.organization.invitation.reject.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Invitation declined");
-        queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.getReceived.queryFilter(),
+        await queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.listReceived.queryFilter(),
         );
       },
       onError: (error) => {

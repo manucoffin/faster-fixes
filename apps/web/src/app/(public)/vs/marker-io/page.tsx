@@ -1,10 +1,10 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { MarkerIoBreadcrumb } from "./_features/marker-io-breadcrumb";
 import { MarkerIoComparisonSection } from "./_features/marker-io-comparison-section";

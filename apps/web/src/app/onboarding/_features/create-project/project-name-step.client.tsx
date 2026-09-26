@@ -19,8 +19,9 @@ export function ProjectNameStep({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">What&apos;s your project called?</h1>
-        <p className="text-muted-foreground text-sm">
-          A project represents the client website where you&apos;ll collect feedback.
+        <p className="text-sm text-muted-foreground">
+          A project represents the client website where you&apos;ll collect
+          feedback.
         </p>
       </div>
 
@@ -40,11 +41,7 @@ export function ProjectNameStep({
         />
       </div>
 
-      <Button
-        onClick={onNext}
-        disabled={!name.trim()}
-        className="self-end"
-      >
+      <Button onClick={onNext} disabled={!name.trim()} className="self-end">
         Continue
         <ArrowRight className="size-4" />
       </Button>

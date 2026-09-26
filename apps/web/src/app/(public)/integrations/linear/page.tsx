@@ -1,7 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { LinearBreadcrumb } from "./_features/linear-breadcrumb";
 import { LinearCapabilitiesSection } from "./_features/linear-capabilities-section";
@@ -16,7 +16,7 @@ const title = "Linear Integration: Client Feedback → Linear Issues, Auto";
 const description =
   "Client feedback lands in Linear automatically, with screenshot, CSS selector, React component path, and full browser context. No manual triage.";
 const ogImageAlt =
-  "FasterFixes Linear integration — visual feedback creating a Linear issue with screenshot and dev context attached";
+  "FasterFixes Linear integration: visual feedback creating a Linear issue with screenshot and dev context attached";
 const datePublished = "2026-05-06T00:00:00.000Z";
 const dateModified = "2026-05-06T00:00:00.000Z";
 

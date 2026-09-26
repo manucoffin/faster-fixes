@@ -5,7 +5,8 @@ const Z_PIN = 2147483646;
 const Z_HIGHLIGHT = 2147483645;
 const SHADOW_SM = "0 2px 8px rgba(0,0,0,0.2)";
 const SHADOW_LG = "0 4px 16px rgba(0,0,0,0.4)";
-const FONT_STACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+const FONT_STACK =
+  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 export const POSITION_STYLES: Record<WidgetPosition, React.CSSProperties> = {
   "bottom-right": { bottom: 20, right: 20 },
@@ -15,23 +16,6 @@ export const POSITION_STYLES: Record<WidgetPosition, React.CSSProperties> = {
   "middle-right": { top: "50%", right: 20, transform: "translateY(-50%)" },
   "middle-left": { top: "50%", left: 20, transform: "translateY(-50%)" },
 };
-
-export const triggerButtonStyle = (): React.CSSProperties => ({
-  width: 40,
-  height: 40,
-  borderRadius: "50%",
-  backgroundColor: "var(--ff-accent)",
-  color: "#fff",
-  border: "none",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  boxShadow: SHADOW_SM,
-  position: "relative",
-  transition: "transform 0.15s ease, background-color 0.15s ease",
-  flexShrink: 0,
-});
 
 export const toolbarStyle = (
   state: "collapsed" | "expanded" = "collapsed",

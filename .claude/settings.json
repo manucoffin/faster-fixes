@@ -31,15 +31,6 @@
     ],
     "ask": [],
     "deny": [
-      "Read(**/.env)",
-      "Read(**/.env.*)",
-      "Read(.env)",
-      "Read(.env.*)",
-      "Edit(**/.env)",
-      "Edit(**/.env.*)",
-      "Edit(.env)",
-      "Edit(.env.*)",
-      "Bash(cat *.env*)",
       "Bash(rm:*)",
       "Bash(rm -rf:*)",
       "Bash(rmdir:*)",
@@ -52,6 +43,25 @@
       "Bash(pnpm migrate:prod)",
       "Bash(pnpm migrate:createonly)",
       "Bash(pnpm migrate:reset)",
+
+      "Bash(cat *.env*)",
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.*.local)",
+      "Read(**/.env.development)",
+      "Read(**/.env.production)",
+      "Read(**/.env.staging)",
+      "Read(**/.env.preview)",
+      "Read(**/.env.test)",
+
+      "Edit(**/.env)",
+      "Edit(**/.env.local)",
+      "Edit(**/.env.*.local)",
+      "Edit(**/.env.development)",
+      "Edit(**/.env.production)",
+      "Edit(**/.env.staging)",
+      "Edit(**/.env.preview)",
+      "Edit(**/.env.test)",
 
       "EnterPlanMode",
       "ExitPlanMode",
@@ -69,26 +79,13 @@
     ]
   },
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
-        "matcher": "Edit|Write|Bash",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "code-review-graph update --skip-flows",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "code-review-graph status",
-            "timeout": 10
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous-git.sh"
           }
         ]
       }

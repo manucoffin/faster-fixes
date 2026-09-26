@@ -9,13 +9,16 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import * as React from "react";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
+import { getColumnSelectionState } from "./column-selection-state";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
+
+type KanbanColumn = { id: string; title: string };
 
 type KanbanMobileProps = {
-  columns: readonly { id: string; title: string }[];
+  columns: readonly [KanbanColumn, ...KanbanColumn[]];
   grouped: Record<string, FeedbackItem[]>;
   selectedIds: Set<string>;
   toolbar: React.ReactNode;
@@ -33,9 +36,7 @@ export function KanbanMobile({
   onToggleSelectAll,
   onSelectFeedback,
 }: KanbanMobileProps) {
-  const [activeColumn, setActiveColumn] = React.useState<string>(
-    columns[0]!.id,
-  );
+  const [activeColumn, setActiveColumn] = React.useState<string>(columns[0].id);
 
   return (
     <Tabs
@@ -57,9 +58,6 @@ export function KanbanMobile({
       {columns.map((col) => {
         const items = grouped[col.id] ?? [];
         const itemIds = items.map((i) => i.id);
-        const allSelected =
-          itemIds.length > 0 && itemIds.every((id) => selectedIds.has(id));
-        const someSelected = itemIds.some((id) => selectedIds.has(id));
 
         return (
           <TabsContent
@@ -69,12 +67,10 @@ export function KanbanMobile({
           >
             <div className="flex items-center gap-2">
               <Checkbox
-                checked={
-                  allSelected ? true : someSelected ? "indeterminate" : false
-                }
+                checked={getColumnSelectionState(itemIds, selectedIds)}
                 onCheckedChange={() => onToggleSelectAll(col.id, itemIds)}
               />
-              <span className="text-muted-foreground text-xs">Select all</span>
+              <span className="text-xs text-muted-foreground">Select all</span>
             </div>
 
             {toolbar}
@@ -82,7 +78,7 @@ export function KanbanMobile({
             <DndContext>
               <div className="flex flex-col gap-2">
                 {items.length === 0 ? (
-                  <div className="text-muted-foreground py-8 text-center text-sm">
+                  <div className="py-8 text-center text-sm text-muted-foreground">
                     No items
                   </div>
                 ) : (

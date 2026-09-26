@@ -1,9 +1,9 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { GleapBreadcrumb } from "./_features/gleap-breadcrumb";
@@ -15,7 +15,7 @@ import { GleapHero } from "./_features/gleap-hero";
 import { GleapPricingSection } from "./_features/gleap-pricing-section";
 
 const pageUrl = `${APP_URL}/vs/gleap`;
-const title = `Gleap Alternative — Open-Source & Dev-First | ${SITE_NAME}`;
+const title = `Gleap Alternative: Open-Source & Dev-First | ${SITE_NAME}`;
 const description =
   "FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $20/mo pricing.";
 const datePublished = "2026-05-03T00:00:00.000Z";

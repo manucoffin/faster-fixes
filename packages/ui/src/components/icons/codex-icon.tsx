@@ -1,6 +1,6 @@
 type Props = React.ComponentPropsWithoutRef<"svg">;
 
-export const CodexIcon = ({ className, ...props }: Props) => {
+export function CodexIcon({ className, ...props }: Props) {
   return (
     <svg
       className={className}
@@ -33,4 +33,4 @@ export const CodexIcon = ({ className, ...props }: Props) => {
       </defs>
     </svg>
   );
-};
+}

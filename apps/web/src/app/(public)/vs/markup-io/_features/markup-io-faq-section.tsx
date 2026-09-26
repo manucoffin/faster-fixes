@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -15,12 +15,12 @@ export const markupIoFaqs: FaqItem[] = [
   {
     question: "Why did Markup.io raise its prices?",
     answer:
-      "In January 2025 Markup.io raised Pro from $29 to $79 per month — a 172% increase — and removed the free plan entirely. Customers reported price changes of up to 280% on existing accounts and deletion notices for non-payment.",
+      "In January 2025 Markup.io raised Pro from $29 to $79 per month, a 172% increase, and removed the free plan entirely. Customers reported price changes of up to 280% on existing accounts and deletion notices for non-payment.",
   },
   {
     question: "Does FasterFixes work without a Chrome extension?",
     answer:
-      "Yes. FasterFixes runs as an in-page widget on every device the page supports — desktop, tablet, mobile. No browser extension required, including for auth-gated, localhost, and staging URLs.",
+      "Yes. FasterFixes runs as an in-page widget on every device the page supports: desktop, tablet, mobile. No browser extension required, including for auth-gated, localhost, and staging URLs.",
   },
   {
     question: "Can I self-host a Markup.io alternative?",
@@ -36,7 +36,7 @@ export const markupIoFaqs: FaqItem[] = [
   {
     question: "How does FasterFixes compare to Markup.io for web agencies?",
     answer:
-      "Markup.io is positioned for design review across file types. FasterFixes is built for agencies shipping React or Next.js apps where feedback needs to reach a developer or AI agent — component tree capture, structured sync to GitHub, Linear, and Jira, in-page widget on every device.",
+      "Markup.io is positioned for design review across file types. FasterFixes is built for agencies shipping React or Next.js apps where feedback needs to reach a developer or AI agent: component tree capture, structured sync to GitHub, Linear, and Jira, in-page widget on every device.",
   },
 ];
 
@@ -58,7 +58,7 @@ export function MarkupIoFaqSection() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {faq.answer}
                   </p>
                 </AccordionContent>

@@ -142,6 +142,12 @@
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "552b0f48b9fe054aa93c5d432fefbd7bd9645e3f2d20b4e22432453a81800b21"
     },
+    "setup-pre-commit": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/misc/setup-pre-commit/SKILL.md",
+      "computedHash": "7fc7b680161a5cb834b165e36efc2378ff63a1f80df0a9efd18448d366bea98a"
+    },
     "skill-creator": {
       "source": "anthropics/skills",
       "sourceType": "github",

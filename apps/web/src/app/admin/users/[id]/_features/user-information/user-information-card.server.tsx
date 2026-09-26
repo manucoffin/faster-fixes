@@ -1,20 +1,16 @@
-import { getUserDisplayName } from "@/app/_features/user/_utils/get-user-display-name";
-import {
-  Card,
-  CardHeader,
-  CardTitle
-} from "@workspace/ui/components/card";
+import { getUserDisplayName } from "@/app/_domains/user/_helpers/get-user-display-name";
+import { Card, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { EmailInformation } from "./email/email-information.client";
-import { getUserInformation } from "./get-user-information.server.query";
+import { getUserInformation } from "@/app/admin/users/_services/get-user-information";
 
-interface UserInformationCardProps {
+type UserInformationCardProps = {
   userId: string;
-}
+};
 
 export async function UserInformationCard({
   userId,
 }: UserInformationCardProps) {
-  const user = await getUserInformation(userId);
+  const user = await getUserInformation({ userId });
 
   if (!user) {
     return null;
@@ -25,7 +21,7 @@ export async function UserInformationCard({
   return (
     <Card className="">
       <CardHeader>
-        <p className="text-muted-foreground text-sm">Informations</p>
+        <p className="text-sm text-muted-foreground">Informations</p>
         <CardTitle>{username}</CardTitle>
         <EmailInformation userId={userId} />
       </CardHeader>

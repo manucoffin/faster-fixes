@@ -36,8 +36,8 @@ export function PricingCard({
     <Card
       className={`relative w-full ${
         isHighlighted
-          ? "border-primary border-2 shadow-xl"
-          : "border-muted border-2"
+          ? "border-2 border-primary shadow-xl"
+          : "border-2 border-muted"
       }`}
     >
       {badge && (
@@ -52,34 +52,32 @@ export function PricingCard({
           <div className="mb-2">
             <h3 className="text-3xl font-bold capitalize">{title}</h3>
           </div>
-          <p className="text-foreground text-start text-sm">{description}</p>
+          <p className="text-start text-sm text-foreground">{description}</p>
         </div>
 
         <div className="mb-2 flex items-baseline gap-1">
-          <span className="text-foreground text-5xl font-bold">
-            ${price}
-          </span>
-          <span className="text-muted-foreground text-sm">/month</span>
+          <span className="text-5xl font-bold text-foreground">${price}</span>
+          <span className="text-sm text-muted-foreground">/month</span>
         </div>
 
         {freeTrialDays && (
-          <div className="text-muted-foreground mb-6 flex items-center gap-2">
+          <div className="mb-6 flex items-center gap-2 text-muted-foreground">
             <Gift className="size-4" /> {freeTrialDays}-day free trial, no
             commitment
           </div>
         )}
 
-        <div className="mb-6 mt-4 w-full">{children}</div>
+        <div className="mt-4 mb-6 w-full">{children}</div>
 
         <div className="flex h-full flex-col justify-between gap-4">
           <div className="flex flex-col gap-3 text-left">
             {features.map((feature) => (
               <div key={feature.id} className="flex items-start gap-3">
-                <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
+                <Check className="mt-0.5 size-4 shrink-0 text-success" />
                 <span
                   className={`text-sm ${
                     feature.highlighted
-                      ? "text-foreground font-semibold"
+                      ? "font-semibold text-foreground"
                       : "text-muted-foreground"
                   }`}
                 >

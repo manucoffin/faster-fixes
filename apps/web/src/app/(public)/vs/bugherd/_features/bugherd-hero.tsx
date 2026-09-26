@@ -11,16 +11,16 @@ export function BugherdHero() {
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             BugHerd alternative
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
             The open-source BugHerd alternative built for developer teams
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
-            FasterFixes is the open-source, self-hostable alternative to BugHerd
-            — flat-rate at $20 a month for up to five members, or free if you
-            self-host. Where BugHerd routes feedback to a Kanban board,
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+            FasterFixes is the open-source, self-hostable alternative to
+            BugHerd: flat-rate at $20 a month for up to five members, or free if
+            you self-host. Where BugHerd routes feedback to a Kanban board,
             FasterFixes routes it to GitHub, Linear, or Jira with a full repro
             bundle, and exposes every report to Claude Code and Cursor over MCP.
           </p>

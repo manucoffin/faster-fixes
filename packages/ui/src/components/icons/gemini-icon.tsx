@@ -1,6 +1,6 @@
 type Props = React.ComponentPropsWithoutRef<"svg">;
 
-export const GeminiIcon = ({ className, ...props }: Props) => {
+export function GeminiIcon({ className, ...props }: Props) {
   return (
     <svg
       className={className}
@@ -62,4 +62,4 @@ export const GeminiIcon = ({ className, ...props }: Props) => {
       </defs>
     </svg>
   );
-};
+}

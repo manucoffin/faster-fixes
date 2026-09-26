@@ -1,10 +1,10 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { UsersnapAlternativesSection } from "./_features/usersnap-alternatives-section";
 import { UsersnapBreadcrumb } from "./_features/usersnap-breadcrumb";
@@ -28,9 +28,9 @@ import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-sectio
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const pageUrl = `${APP_URL}/vs/usersnap`;
-const title = `Usersnap Alternative — Open-Source & Self-Hosted | ${SITE_NAME}`;
+const title = `Usersnap Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
 const description =
-  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context — no per-seat pricing, no vendor lock-in. Compare features and pricing.";
+  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context, no per-seat pricing, no vendor lock-in. Compare features and pricing.";
 const datePublished = "2026-04-27T00:00:00.000Z";
 const dateModified = "2026-04-28T00:00:00.000Z";
 

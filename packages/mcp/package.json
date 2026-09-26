@@ -56,7 +56,9 @@
     "build": "tsdown",
     "dev": "tsx src/index.ts",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
@@ -69,6 +71,8 @@
     "eslint": "^9.39.1",
     "tsdown": "^0.21.4",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   }
 }

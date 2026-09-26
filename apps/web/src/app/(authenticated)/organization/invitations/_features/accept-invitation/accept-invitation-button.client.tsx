@@ -27,14 +27,12 @@ export function AcceptInvitationButton({
 
         await organization.setActive({ organizationId });
         await refetchOrganizations();
-        queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.getReceived.queryFilter(),
+        await queryClient.invalidateQueries(
+          trpc.authenticated.organization.invitation.listReceived.queryFilter(),
         );
       },
       onError: (error) => {
-        toast.error(
-          error.message || "Failed to accept invitation.",
-        );
+        toast.error(error.message || "Failed to accept invitation.");
       },
     }),
   );

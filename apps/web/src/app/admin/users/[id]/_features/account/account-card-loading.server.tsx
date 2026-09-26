@@ -11,23 +11,23 @@ export async function AccountCardLoading() {
   return (
     <Card>
       <CardHeader>
-        <p className="text-muted-foreground text-sm">Account</p>
+        <p className="text-sm text-muted-foreground">Account</p>
         <CardTitle>Account information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-muted-foreground text-sm">Created at</p>
+            <p className="text-sm text-muted-foreground">Created at</p>
             <Skeleton className="h-5 w-32" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">Last updated</p>
+            <p className="text-sm text-muted-foreground">Last updated</p>
             <Skeleton className="h-5 w-32" />
           </div>
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-muted-foreground mb-2 text-sm">Status</p>
+          <p className="mb-2 text-sm text-muted-foreground">Status</p>
           <Skeleton className="h-5 w-32" />
         </div>
       </CardContent>

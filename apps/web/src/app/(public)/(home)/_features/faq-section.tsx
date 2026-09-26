@@ -1,4 +1,4 @@
-import { PLAN_PRICES } from "@/server/auth/config/subscription-plans";
+import { PLAN_PRICES } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -18,12 +18,12 @@ export const faqs: {
   {
     question: "How does the widget work?",
     answer:
-      "Install the React component in your app. Your clients leave feedback in two clicks — the widget captures all the technical context automatically. You review feedback in the dashboard, or your coding agent retrieves it via MCP and fixes it directly.",
+      "Install the React component in your app. Your clients leave feedback in two clicks. The widget captures all the technical context automatically. You review feedback in the dashboard, or your coding agent retrieves it via MCP and fixes it directly.",
   },
   {
     question: "Do my clients need an account?",
     answer:
-      "No. You generate a shareable link for each client from your dashboard. Anyone with that link can leave feedback — they are authenticated transparently, no signup or login required. It keeps things secure while staying completely frictionless for your clients.",
+      "No. You generate a shareable link for each client from your dashboard. Anyone with that link can leave feedback. They are authenticated transparently, no signup or login required. It keeps things secure while staying completely frictionless for your clients.",
   },
   {
     question: "What technical context does it capture?",
@@ -33,17 +33,17 @@ export const faqs: {
   {
     question: "What is the MCP server?",
     answer:
-      "MCP (Model Context Protocol) is a standard that lets AI coding agents call external tools. The FasterFixes MCP server exposes your project's feedback to any compatible agent — Claude Code, Cursor, Windsurf, and others. The agent can fetch new feedback and mark items as resolved, all from your terminal.",
+      "MCP (Model Context Protocol) is a standard that lets AI coding agents call external tools. The FasterFixes MCP server exposes your project's feedback to any compatible agent: Claude Code, Cursor, Windsurf, and others. The agent can fetch new feedback and mark items as resolved, all from your terminal.",
   },
   {
     question: "How does the GitHub integration work?",
     answer:
-      "Connect your GitHub account in the organization settings, then link a repository to your project. New feedback automatically creates a GitHub issue with the full structured report — screenshot, component path, selector, and environment details. Status syncs bidirectionally: closing an issue on GitHub resolves the feedback in FasterFixes, and vice versa. Available on Pro and Agency plans.",
+      "Connect your GitHub account in the organization settings, then link a repository to your project. New feedback automatically creates a GitHub issue with the full structured report: screenshot, component path, selector, and environment details. Status syncs bidirectionally: closing an issue on GitHub resolves the feedback in FasterFixes, and vice versa. Available on Pro and Agency plans.",
   },
   {
     question: "Is this just another annotation tool?",
     answer:
-      "Annotation tools make it easier for clients to report bugs — a human still has to read, interpret, and relay that to an AI. FasterFixes removes that step. Feedback is captured as structured technical data and delivered via MCP to an AI coding agent that reads and acts on it directly. The loop is: client reports, agent fixes.",
+      "Annotation tools make it easier for clients to report bugs. A human still has to read, interpret, and relay that to an AI. FasterFixes removes that step. Feedback is captured as structured technical data and delivered via MCP to an AI coding agent that reads and acts on it directly. The loop is: client reports, agent fixes.",
   },
   {
     question: "How much does it cost?",
@@ -75,9 +75,11 @@ export function FaqSection() {
           <Accordion type="single" collapsible>
             {faqs.map((faq) => (
               <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">{faq.question}</AccordionTrigger>
+                <AccordionTrigger className="text-lg md:text-xl">
+                  {faq.question}
+                </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {faq.answer}
                   </p>
                   {faq.footer}

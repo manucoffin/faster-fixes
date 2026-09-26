@@ -46,3 +46,15 @@ Two separate constraints made the obvious solutions unattractive:
 - Future refactors of the widget's internal state model are free to break `FeedbackProviderCore`'s prop shape — it's marked unstable. Breaks are caught immediately because the marketing demo lives in the same monorepo and will fail typecheck.
 - The marketing demo is decoupled from the production backend entirely: no API keys, no rate-limiting concerns, no anti-spam surface, no DB cleanup jobs.
 - "Demo mode" is **not** a concept inside the widget package. The widget is unaware it's running a demo. This keeps the package's mental model clean.
+
+## Amendment 2026-09-26: the seam moves to `@fasterfixes/widget/internal`
+
+[ADR-0016](./0016-one-vanilla-widget-framework-embeds-are-wrappers.md) rewrites the Widget UI in vanilla DOM inside `@fasterfixes/widget` and makes `@fasterfixes/react` a wrapper around it. `FeedbackProviderCore` and the `@fasterfixes/react/internal` subpath are removed at the `@fasterfixes/react` 1.0.0 release.
+
+What this ADR decided survives unchanged in substance:
+
+- The `FeedbackClient` interface in `@fasterfixes/core` remains the single seam for running the Widget against another backend.
+- Client injection stays off the public API. It is exposed as `@fasterfixes/widget/internal`, `createWidget({ client, reviewerToken, config, ...options })`, marked `@unstable` with no semver guarantee, the same arrangement this ADR chose for React.
+- The marketing demo composes that internal entry with `LocalStorageFeedbackClient`, the `"demo"` token and a synthetic `WidgetConfig`. "Demo mode" is still not a concept inside any widget package.
+
+The rejected alternative 1 (public `storage` / `requireReviewerToken` props) stays rejected: `init()` of the vanilla widget takes no `client` option.

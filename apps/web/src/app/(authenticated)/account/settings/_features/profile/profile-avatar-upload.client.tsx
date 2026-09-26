@@ -1,9 +1,9 @@
 "use client";
 
-import { UploadButton } from "@/app/_features/core/upload/upload-button";
+import { UploadButton } from "@/app/_components/upload-button.client";
 import { updateUser, useSession } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { useMutation } from "@tanstack/react-query";
 import {
   Avatar,
@@ -20,8 +20,9 @@ export function ProfileAvatarUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
-  const deleteOldAvatar =
-    useMutation(trpc.authenticated.account.profile.updateAvatar.mutationOptions());
+  const deleteOldAvatar = useMutation(
+    trpc.authenticated.account.profile.updateAvatar.mutationOptions(),
+  );
 
   const userName = session?.user.name ?? "User";
   const userEmail = session?.user.email ?? userName;
@@ -36,13 +37,9 @@ export function ProfileAvatarUpload() {
     };
   }, []);
 
-  const displayUrl =
-    previewUrl ??
-    (userImage
-      ? userImage.startsWith("http")
-        ? userImage
-        : resolveS3Url(userImage)
-      : null);
+  // `resolveS3Url` returns an absolute URL untouched, so a stored key and a
+  // provider avatar URL both go through it.
+  const displayUrl = previewUrl ?? (userImage ? resolveS3Url(userImage) : null);
 
   return (
     <div className="flex items-center gap-4">

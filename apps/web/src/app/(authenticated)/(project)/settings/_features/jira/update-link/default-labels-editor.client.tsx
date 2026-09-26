@@ -35,8 +35,8 @@ export function DefaultLabelsEditor({
 
   const updateMutation = useMutation(
     trpc.authenticated.projects.jira.updateLink.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.jira.getLink.queryKey({
             projectId,
           }),
@@ -58,11 +58,11 @@ export function DefaultLabelsEditor({
         onChange={(event) => setValue(event.target.value)}
         placeholder="faster-fixes, triage"
       />
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         Comma-separated. Labels cannot contain spaces.
       </p>
       {invalidLabels.length > 0 && (
-        <p className="text-destructive text-xs">
+        <p className="text-xs text-destructive">
           Remove spaces from: {invalidLabels.join(", ")}
         </p>
       )}

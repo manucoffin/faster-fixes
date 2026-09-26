@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": ["docs/**"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreIssues": {
+    "apps/web/src/**/_services/**/*.ts": ["types"]
+  },
+  "workspaces": {
+    ".": {
+      "ignoreDependencies": ["prettier-plugin-tailwindcss"]
+    },
+    "apps/web": {
+      "entry": ["src/app/**/page.mdx", "mdx-components.tsx"],
+      "ignoreFiles": ["src/app/_domains/*/index.ts"],
+      "ignoreBinaries": ["portless", "stripe"],
+      "ignoreDependencies": ["@tailwindcss/postcss"]
+    },
+    "packages/database": {
+      "ignoreDependencies": ["@prisma/client"]
+    },
+    "packages/eslint-config": {
+      "ignoreDependencies": ["estree"]
+    },
+    "packages/typescript-config": {
+      "ignoreUnresolved": ["next"]
+    },
+    "packages/ui": {
+      "ignoreDependencies": ["postcss-load-config"]
+    }
+  }
+}

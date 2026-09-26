@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { ExternalLink } from "lucide-react";
-import type { GetProjectJiraLinkOutput } from "./get-project-jira-link.trpc.query";
+import type { GetProjectJiraLinkOutput } from "../../_services/get-project-jira-link";
 import { UnlinkJiraProjectButton } from "./unlink-project/unlink-jira-project-button.client";
 import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.client";
 import { DefaultLabelsEditor } from "./update-link/default-labels-editor.client";
@@ -54,7 +54,7 @@ export function LinkedJiraProjectView({
           {link.jiraProjectKey} · {link.jiraProjectName}
           <ExternalLink className="ml-1 inline size-3" />
         </a>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Issue type: {link.issueTypeName}
         </p>
       </div>

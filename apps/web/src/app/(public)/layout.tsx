@@ -1,7 +1,7 @@
-import { LayoutParams } from "@/types/next";
-import { Footer } from "../_features/core/footer/footer";
-import { Header } from "../_features/core/header/header.server";
-import { LaunchBanner } from "../_features/core/launch-banner/launch-banner.client";
+import type { LayoutParams } from "@/types/next";
+import { Footer } from "./_components/footer";
+import { Header } from "./_components/header.server";
+import { LaunchBanner } from "./_components/launch-banner.client";
 
 export default function PublicLayout({ children }: LayoutParams) {
   return (
@@ -12,5 +12,5 @@ export default function PublicLayout({ children }: LayoutParams) {
 
       <Footer />
     </div>
-  )
+  );
 }

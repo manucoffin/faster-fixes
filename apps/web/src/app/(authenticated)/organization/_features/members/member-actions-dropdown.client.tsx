@@ -12,7 +12,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { MoreHorizontal, Shield, UserMinus } from "lucide-react";
 import { toast } from "sonner";
-import type { UpdateMemberRoleInputs } from "./update-role/update-member-role.schema";
+import type { UpdateMemberRoleInput } from "../../_services/update-member-role.schema";
 
 type MemberActionsDropdownProps = {
   memberId: string;
@@ -54,7 +54,7 @@ export function MemberActionsDropdown({
 
   const isPending = updateRole.isPending || removeMember.isPending;
 
-  const handleUpdateRole = (newRole: UpdateMemberRoleInputs["role"]) => {
+  const handleUpdateRole = (newRole: UpdateMemberRoleInput["role"]) => {
     updateRole.mutate({ memberId, role: newRole });
   };
 

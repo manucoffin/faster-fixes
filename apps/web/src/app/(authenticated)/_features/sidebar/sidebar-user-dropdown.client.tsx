@@ -2,7 +2,7 @@
 
 import { useSession } from "@/lib/auth";
 import { useSignOut } from "@/lib/auth/use-sign-out";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,
@@ -57,16 +57,14 @@ export function SidebarUserDropdown() {
 
   const isAdmin = session?.user.role === "admin";
   const userName =
-    session?.user.firstName && session?.user.lastName
-      ? `${session?.user.firstName} ${session?.user.lastName}`
+    session?.user.firstName && session.user.lastName
+      ? `${session.user.firstName} ${session.user.lastName}`
       : "User";
 
   const userImage = session?.user.image;
-  const profilePicture = userImage
-    ? userImage.startsWith("http")
-      ? userImage
-      : resolveS3Url(userImage)
-    : null;
+  // `resolveS3Url` returns an absolute URL untouched, so a stored key and a
+  // provider avatar URL both go through it.
+  const profilePicture = userImage ? resolveS3Url(userImage) : null;
 
   if (isPending) {
     return <SidebarUserDropdownLoading />;
@@ -79,7 +77,7 @@ export function SidebarUserDropdown() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 {profilePicture ? (
@@ -135,20 +133,14 @@ export function SidebarUserDropdown() {
 
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link
-                  href="/account/settings"
-                  className="flex items-center"
-                >
+                <Link href="/account/settings" className="flex items-center">
                   <Settings2 className="mr-2 size-4" />
                   <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
 
               <DropdownMenuItem asChild>
-                <Link
-                  href="/account/billing"
-                  className="flex items-center"
-                >
+                <Link href="/account/billing" className="flex items-center">
                   <CreditCard className="mr-2 size-4" />
                   <span>Billing</span>
                 </Link>

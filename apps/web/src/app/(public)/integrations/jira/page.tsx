@@ -1,7 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { JiraBreadcrumb } from "./_features/jira-breadcrumb";
 import { JiraCapabilitiesSection } from "./_features/jira-capabilities-section";
@@ -15,7 +15,7 @@ const pageUrl = `${APP_URL}/integrations/jira`;
 // "2-way sync" without saying how it survives custom workflows (ChatSEO 2026-07-19).
 const title = "Client Feedback → Jira Issues, Synced by Status Category";
 const description =
-  "Turn client feedback into Jira issues with screenshot links, component paths, and diagnostics. Status sync tracks Jira's category, not name — works with any workflow.";
+  "Turn client feedback into Jira issues with screenshot links, component paths, and diagnostics. Status sync tracks Jira's category, not name. Works with any workflow.";
 const ogImageAlt =
   "Faster Fixes feedback panel showing a linked Jira issue with status category sync";
 const datePublished = "2026-07-19T00:00:00.000Z";

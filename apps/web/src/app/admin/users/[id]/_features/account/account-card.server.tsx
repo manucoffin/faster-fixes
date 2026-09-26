@@ -1,4 +1,4 @@
-import { prisma } from "@workspace/db";
+import { getUserAccount } from "@/app/admin/users/_services/get-user-account";
 import {
   Card,
   CardContent,
@@ -10,23 +10,12 @@ import { ImpersonateUserButton } from "./impersonate-user/impersonate-user-butto
 import { RequestPasswordResetButton } from "./request-password-reset/request-password-reset-button.client";
 import { RevokeUserSessionsButton } from "./revoke-user-sessions/revoke-user-sessions-button.client";
 
-interface AccountCardProps {
+type AccountCardProps = {
   userId: string;
-}
+};
 
 export async function AccountCard({ userId }: AccountCardProps) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      email: true,
-      accounts: true,
-    },
-  });
-
-  // Only show button if user has credential provider
-  const hasCredentialProvider = user?.accounts?.some(
-    (account) => account.providerId === "credential",
-  );
+  const { email, hasCredentialProvider } = await getUserAccount({ userId });
 
   return (
     <Card>
@@ -35,10 +24,7 @@ export async function AccountCard({ userId }: AccountCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-2">
-          <ImpersonateUserButton
-            userId={userId}
-            userEmail={user?.email || ""}
-          />
+          <ImpersonateUserButton userId={userId} userEmail={email ?? ""} />
           {hasCredentialProvider && (
             <RequestPasswordResetButton userId={userId} />
           )}

@@ -1,10 +1,10 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { SlackBreadcrumb } from "./_features/slack-breadcrumb";
 import { SlackCtaSection } from "./_features/slack-cta-section";
@@ -20,9 +20,9 @@ import { SlackUpdatesSection } from "./_features/slack-updates-section";
 const pageUrl = `${APP_URL}/integrations/slack`;
 const title = `Slack notifications for website feedback | ${SITE_NAME}`;
 const description =
-  "Get notified in Slack when a client submits or updates feedback on your staging site — with screenshot, page URL, and status. No noise.";
+  "Get notified in Slack when a client submits or updates feedback on your staging site, with screenshot, page URL, and status. No noise.";
 const ogImageAlt =
-  "FasterFixes Slack integration — client feedback posted to a Slack channel with screenshot and status badge";
+  "FasterFixes Slack integration: client feedback posted to a Slack channel with screenshot and status badge";
 const datePublished = "2026-05-31T00:00:00.000Z";
 const dateModified = "2026-05-31T00:00:00.000Z";
 

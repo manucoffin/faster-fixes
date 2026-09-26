@@ -1,7 +1,8 @@
-import type { FeedbackStatus, SelectorStrategies } from "@fasterfixes/core";
-import { STATUS_COLORS, resolveElement } from "@fasterfixes/core";
-import { useEffect, useRef, useState } from "react";
+import type { SelectorStrategies } from "@fasterfixes/core";
+import { resolveElement } from "@fasterfixes/core";
+import { useEffect, useState } from "react";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import {
   feedbackListItemStyle,
   feedbackListStyle,
@@ -25,25 +26,14 @@ export function FeedbackList() {
 
   // Delayed unmount: stay mounted during exit animation
   const [mounted, setMounted] = useState(showList);
-  const [exiting, setExiting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  if (showList && !mounted) setMounted(true);
+  const exiting = mounted && !showList;
 
   useEffect(() => {
-    if (showList) {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-      setExiting(false);
-      setMounted(true);
-    } else if (mounted) {
-      setExiting(true);
-      timerRef.current = setTimeout(() => {
-        setMounted(false);
-        setExiting(false);
-      }, EXIT_DURATION);
-    }
-    return () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-    };
-  }, [showList, mounted]);
+    if (!exiting) return;
+    const timer = setTimeout(() => setMounted(false), EXIT_DURATION);
+    return () => clearTimeout(timer);
+  }, [exiting]);
 
   if (!mounted) return null;
 
@@ -113,8 +103,7 @@ export function FeedbackList() {
         </div>
       ) : (
         visibleItems.map((item) => {
-          const statusColor =
-            STATUS_COLORS[item.status as FeedbackStatus] ?? STATUS_COLORS.new;
+          const statusColor = getStatusColor(item.status);
 
           return (
             <div
@@ -123,8 +112,9 @@ export function FeedbackList() {
               style={feedbackListItemStyle}
               onClick={() => {
                 if (item.pageUrl === window.location.href) {
-                  const strategies = (item.metadata as Record<string, unknown> | null)
-                    ?.selectors as SelectorStrategies | undefined;
+                  const strategies = (
+                    item.metadata as Record<string, unknown> | null
+                  )?.selectors as SelectorStrategies | undefined;
                   const el = resolveElement(item.selector, strategies);
                   el?.scrollIntoView({
                     behavior: "smooth",

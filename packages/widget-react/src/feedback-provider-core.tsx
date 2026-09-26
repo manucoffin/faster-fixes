@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import {
   createDiagnosticsRecorder,
@@ -85,7 +92,13 @@ export function FeedbackProviderCore({
     null,
   );
   const [feedbackLoaded, setFeedbackLoaded] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  // The portal mounts to document.body, which is unavailable during SSR: the
+  // server snapshot keeps it out of the server render and of hydration.
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
   const screenshotCaptureRef = useRef<Promise<Blob | null> | null>(null);
   const pendingFeedbackHandled = useRef(false);
   const portalCleanupRef = useRef<(() => void) | null>(null);
@@ -117,12 +130,6 @@ export function FeedbackProviderCore({
     [],
   );
 
-  // The portal mounts to document.body, which is unavailable during SSR.
-  // Defer all DOM-touching render until after hydration.
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Diagnostic Trail: instrument console + network for the lifetime of the
   // widget. Gated by captureDiagnostics so an opted-out site never patches
   // globals. Starts at mount — activity before hydration is not captured.
@@ -140,7 +147,8 @@ export function FeedbackProviderCore({
   // Initial feedback load
   useEffect(() => {
     let cancelled = false;
-    void (async () => {
+    // Not an IIFE: TypeScript would narrow `cancelled` to false inside it and miss the cleanup
+    const loadFeedback = async () => {
       try {
         const res = await client.getFeedback(reviewerToken);
         if (!cancelled) {
@@ -151,7 +159,8 @@ export function FeedbackProviderCore({
       } finally {
         if (!cancelled) setFeedbackLoaded(true);
       }
-    })();
+    };
+    void loadFeedback();
     return () => {
       cancelled = true;
     };
@@ -187,8 +196,9 @@ export function FeedbackProviderCore({
       !feedbackLoaded ||
       feedbackItems.length === 0 ||
       pendingFeedbackHandled.current
-    )
+    ) {
       return;
+    }
     try {
       const pendingId = sessionStorage.getItem("ff_pending_feedback");
       if (!pendingId) return;
@@ -293,8 +303,11 @@ export function FeedbackProviderCore({
     };
   }, []);
 
+  // why: a JS consumer can pass a position outside WidgetPosition
+  const positionStyles: Partial<Record<string, React.CSSProperties>> =
+    POSITION_STYLES;
   const posStyle =
-    POSITION_STYLES[effectivePosition] ?? POSITION_STYLES["bottom-right"];
+    positionStyles[effectivePosition] ?? POSITION_STYLES["bottom-right"];
 
   const show = () => setIsVisible(true);
   const hide = () => {
@@ -386,11 +399,7 @@ export function FeedbackProviderCore({
                 flexDirection: effectivePosition.includes("right")
                   ? "row-reverse"
                   : "row",
-                alignItems: effectivePosition.includes("bottom")
-                  ? "flex-end"
-                  : effectivePosition.includes("top")
-                    ? "flex-start"
-                    : "center",
+                alignItems: stackAlignment(effectivePosition),
                 gap: 8,
                 zIndex: Z_WIDGET,
                 pointerEvents: "auto",
@@ -407,4 +416,16 @@ export function FeedbackProviderCore({
         )}
     </FeedbackContext.Provider>
   );
+}
+
+// The widget stack hugs the screen edge it is anchored to.
+function stackAlignment(position: string) {
+  if (position.includes("bottom")) return "flex-end";
+  if (position.includes("top")) return "flex-start";
+  return "center";
+}
+
+// Nothing to subscribe to: only the server and client snapshots differ.
+function subscribeToNothing() {
+  return () => {};
 }

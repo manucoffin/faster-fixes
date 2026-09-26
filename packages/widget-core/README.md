@@ -57,22 +57,22 @@ const { feedback } = await client.getFeedback(reviewerToken, pageUrl);
 
 Thrown by all client methods on non-OK responses. Extends `Error`.
 
-| Property  | Type      | Description               |
-| --------- | --------- | ------------------------- |
-| `status`  | `number`  | HTTP status code          |
+| Property  | Type      | Description                |
+| --------- | --------- | -------------------------- |
+| `status`  | `number`  | HTTP status code           |
 | `message` | `string`  | Error message from the API |
-| `details` | `unknown` | Additional error details  |
+| `details` | `unknown` | Additional error details   |
 
 ### Utilities
 
-| Export                          | Description                                                                                           |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `generateSelector(element)`     | Generate a best-effort CSS selector for a DOM element                                                 |
-| `generateSelectors(element)`    | Generate multiple selector strategies and return the most stable as `best`                            |
-| `resolveElement(selector, strategies?)` | Find an element using the primary selector, falling back through strategies in priority order  |
-| `captureElementContext(element, selectors)` | Capture rich context about a DOM element (description, React component path, nearby text) |
-| `getBrowserInfo()`              | Detect browser name, version, OS, and viewport size                                                   |
-| `resolveReviewerToken()`        | Resolve reviewer token from URL param (`ff_token`) or localStorage                                    |
+| Export                                      | Description                                                                                   |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `generateSelector(element)`                 | Generate a best-effort CSS selector for a DOM element                                         |
+| `generateSelectors(element)`                | Generate multiple selector strategies and return the most stable as `best`                    |
+| `resolveElement(selector, strategies?)`     | Find an element using the primary selector, falling back through strategies in priority order |
+| `captureElementContext(element, selectors)` | Capture rich context about a DOM element (description, React component path, nearby text)     |
+| `getBrowserInfo()`                          | Detect browser name, version, OS, and viewport size                                           |
+| `resolveReviewerToken()`                    | Resolve reviewer token from URL param (`ff_token`) or localStorage                            |
 
 ### Types
 

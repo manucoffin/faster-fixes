@@ -45,7 +45,7 @@ export function registerCreateFeedbacks(
           source,
         });
         const summary = result.atLimit
-          ? `Created ${result.created} feedback(s). Plan limit reached — stop further imports until the plan is upgraded.`
+          ? `Created ${result.created} feedback(s). Plan limit reached: stop further imports until the plan is upgraded.`
           : `Created ${result.created} feedback(s) under reviewer "${result.reviewer.name}".`;
         return {
           content: [

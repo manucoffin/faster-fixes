@@ -26,5 +26,5 @@ export default async function BillingPage() {
     redirect(loginUrl);
   }
 
-  return <BillingPageContent organizationId={activeOrganization.id} />;
+  return <BillingPageContent />;
 }

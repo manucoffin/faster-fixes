@@ -16,18 +16,15 @@ export function AnnotationOverlay() {
 
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      // Ignore widget elements
-      const target = e.target as Element;
-      if (target.closest("[data-ff-widget]")) {
-        setHighlightRect(null);
-        return;
-      }
-      setHighlightRect(target.getBoundingClientRect());
-    },
-    [],
-  );
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    // Ignore widget elements
+    const target = e.target as Element;
+    if (target.closest("[data-ff-widget]")) {
+      setHighlightRect(null);
+      return;
+    }
+    setHighlightRect(target.getBoundingClientRect());
+  }, []);
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -46,13 +43,20 @@ export function AnnotationOverlay() {
 
       screenshotCaptureRef.current = capturePromise;
 
-      capturePromise.then((blob) => {
+      // captureViewportScreenshot resolves to null on failure, it never rejects
+      void capturePromise.then((blob) => {
         if (blob) setScreenshotBlob(blob);
       });
 
       setMode("selected");
     },
-    [setMode, setSelectedElement, setClickCoords, setScreenshotBlob, screenshotCaptureRef],
+    [
+      setMode,
+      setSelectedElement,
+      setClickCoords,
+      setScreenshotBlob,
+      screenshotCaptureRef,
+    ],
   );
 
   // Suppress pointer-down/mousedown so dialogs/drawers don't close

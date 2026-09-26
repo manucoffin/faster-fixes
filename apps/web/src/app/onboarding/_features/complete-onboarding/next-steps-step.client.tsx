@@ -10,18 +10,18 @@ type NextStepsStepProps = {
 export function NextStepsStep({ onFinish }: NextStepsStepProps) {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="bg-primary/10 flex size-16 items-center justify-center rounded-full">
-        <PartyPopper className="text-primary size-8" />
+      <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+        <PartyPopper className="size-8 text-primary" />
       </div>
 
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">You&apos;re all set</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Your project is ready. Here&apos;s what to do next.
         </p>
       </div>
 
-      <ul className="text-muted-foreground flex flex-col gap-2 text-left text-sm">
+      <ul className="flex flex-col gap-2 text-left text-sm text-muted-foreground">
         <li className="flex items-center gap-2">
           <Circle className="size-3.5 shrink-0" />
           Deploy your website with the widget installed

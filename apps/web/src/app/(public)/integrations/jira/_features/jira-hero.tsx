@@ -9,13 +9,13 @@ export function JiraHero() {
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="text-muted-foreground mb-4 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Jira integration
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
             Client feedback becomes Jira issues, status included
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Client feedback lands in Jira as a structured issue, with the
             context your engineers need to reproduce it. Status stays in sync
             both ways, whatever your workflow looks like.

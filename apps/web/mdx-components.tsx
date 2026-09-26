@@ -1,6 +1,6 @@
-import { FAQ } from "@/app/_features/mdx/faq";
-import { HowTo } from "@/app/_features/mdx/how-to";
-import { YoutubeEmbed } from "@/app/_features/mdx/youtube-embed";
+import { FaqList } from "@/app/_components/mdx/faq-list";
+import { HowTo } from "@/app/_components/mdx/how-to";
+import { YoutubeEmbed } from "@/app/_components/mdx/youtube-embed";
 import {
   Table,
   TableBody,
@@ -34,14 +34,17 @@ export function getContentMDXComponents(
     tr: (props) => <TableRow {...props} />,
     th: (props) => <TableHead {...props} />,
     td: (props) => <TableCell {...props} />,
-    FAQ,
+    FAQ: FaqList,
     HowTo,
     YoutubeEmbed,
     ...components,
   };
 }
 
-// Next.js MDX global provider — defaults to content (non-docs) components
+/**
+ * Next.js MDX global provider, defaults to content (non-docs) components.
+ * @alias
+ */
 export const useMDXComponents = getContentMDXComponents;
 
 declare global {

@@ -5,10 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { toast } from "sonner";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
 type JiraIssueBadgeProps = {
-  issueLink: GetFeedbackOutput[number]["jiraIssueLink"];
+  issueLink: ListFeedbackOutput[number]["jiraIssueLink"];
   feedbackId: string;
   hasJiraLink: boolean;
   projectId: string;
@@ -17,9 +17,9 @@ type JiraIssueBadgeProps = {
 // Jira exposes a coarse status category rather than a per-project status name,
 // so the dot maps on the category and works across arbitrary workflows.
 const STATUS_CATEGORY_COLOR: Record<string, string> = {
-  new: "bg-slate-500",
+  new: "bg-muted-foreground",
   indeterminate: "bg-blue-500",
-  done: "bg-emerald-500",
+  done: "bg-success",
 };
 
 export function JiraIssueBadge({
@@ -33,8 +33,8 @@ export function JiraIssueBadge({
 
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createJiraIssue.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.list.queryKey({
             projectId,
           }),
@@ -47,15 +47,19 @@ export function JiraIssueBadge({
 
   if (issueLink) {
     const dotColor =
-      STATUS_CATEGORY_COLOR[issueLink.issueStatusCategory] ?? "bg-slate-400";
+      STATUS_CATEGORY_COLOR[issueLink.issueStatusCategory] ??
+      "bg-muted-foreground/60";
     return (
       <a
         href={issueLink.issueUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span className={`size-2 rounded-full ${dotColor}`} aria-hidden="true" />
+        <span
+          className={`size-2 rounded-full ${dotColor}`}
+          aria-hidden="true"
+        />
         <span>{issueLink.issueKey}</span>
       </a>
     );

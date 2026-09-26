@@ -8,7 +8,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function MrrCard() {
   const trpc = useTRPC();
-  const query = useQuery(trpc.admin.dashboard.mrr.get.queryOptions());
+  const query = useQuery(trpc.admin.dashboard.getMrr.queryOptions());
 
   return matchQueryStatus(query, {
     Loading: <MrrCardLoading />,
@@ -24,14 +24,14 @@ export function MrrCard() {
       const formattedNetRevenue = formatEur(data?.netRevenue ?? 0);
       const formattedMrr = formatEur(data?.mrr ?? 0);
       const formattedArr = formatEur(data?.arr ?? 0);
-      const formattedLtv = data?.ltv == null ? "—" : formatEur(data.ltv);
+      const formattedLtv = data?.ltv == null ? "N/A" : formatEur(data.ltv);
 
       return (
         <Card>
           <CardContent>
             <div className="text-2xl font-bold">{formattedGrossRevenue}</div>
-            <p className="text-muted-foreground text-xs">Gross revenue</p>
-            <p className="text-muted-foreground mb-4 text-xs">
+            <p className="text-xs text-muted-foreground">Gross revenue</p>
+            <p className="mb-4 text-xs text-muted-foreground">
               {formattedNetRevenue} net
             </p>
 
@@ -39,7 +39,7 @@ export function MrrCard() {
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-xs">MRR</span>
+                  <span className="text-xs text-muted-foreground">MRR</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">{formattedMrr}</span>
@@ -48,7 +48,7 @@ export function MrrCard() {
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-xs">ARR</span>
+                    <span className="text-xs text-muted-foreground">ARR</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold">
@@ -57,8 +57,8 @@ export function MrrCard() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs">LTV</span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">LTV</span>
+                  <span className="text-xs text-muted-foreground">
                     {formattedLtv}
                   </span>
                 </div>
@@ -76,21 +76,21 @@ function MrrCardLoading() {
     <Card>
       <CardContent>
         <Skeleton className="h-8 w-24" />
-        <p className="text-muted-foreground text-xs">Gross revenue</p>
-        <Skeleton className="mb-4 mt-1 h-4 w-20" />
+        <p className="text-xs text-muted-foreground">Gross revenue</p>
+        <Skeleton className="mt-1 mb-4 h-4 w-20" />
 
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">MRR</span>
+            <span className="text-xs text-muted-foreground">MRR</span>
             <Skeleton className="h-5 w-16" />
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">ARR</span>
+              <span className="text-xs text-muted-foreground">ARR</span>
               <Skeleton className="h-5 w-16" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">LTV</span>
+              <span className="text-xs text-muted-foreground">LTV</span>
               <Skeleton className="h-4 w-12" />
             </div>
           </div>
@@ -104,9 +104,7 @@ function MrrCardError() {
   return (
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
-        <p className="text-destructive text-sm">
-          Failed to load statistics
-        </p>
+        <p className="text-sm text-destructive">Failed to load statistics</p>
       </CardContent>
     </Card>
   );

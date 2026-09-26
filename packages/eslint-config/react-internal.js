@@ -1,21 +1,17 @@
-import js from "@eslint/js"
-import eslintConfigPrettier from "eslint-config-prettier"
-import pluginReact from "eslint-plugin-react"
-import pluginReactHooks from "eslint-plugin-react-hooks"
-import globals from "globals"
-import tseslint from "typescript-eslint"
+import pluginReact from "eslint-plugin-react";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
 
-import { config as baseConfig } from "./base.js"
+import { config as baseConfig } from "./base.js";
+import { componentShapeConfig } from "./component-shape.js";
+import { withBinarySeverity } from "./severity.js";
 
 /**
  * A custom ESLint configuration for libraries that use React.
  *
- * @type {import("eslint").Linter.Config} */
-export const config = [
+ * @type {import("eslint").Linter.Config[]} */
+export const config = withBinarySeverity([
   ...baseConfig,
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
     languageOptions: {
@@ -32,10 +28,14 @@ export const config = [
     },
     settings: { react: { version: "detect" } },
     rules: {
-      ...pluginReactHooks.configs.recommended.rules,
+      // v7 preset: the React Compiler rules (`set-state-in-effect`, `refs`,
+      // `purity`, `immutability`, `static-components`, ...) report the
+      // patterns the compiler cannot optimise and that usually hide a bug.
+      ...pluginReactHooks.configs["recommended-latest"].rules,
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
     },
   },
-]
+  ...componentShapeConfig,
+]);

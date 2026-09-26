@@ -1,12 +1,8 @@
 import { APP_URL } from "@/app/_constants/app";
 import { AUTHOR } from "@/app/_constants/author";
-import {
-  PUBLISHER_LOGO,
-  SITE_LANGUAGE,
-  SITE_NAME,
-} from "@/app/_constants/seo";
-import { MdxLink } from "@/app/_features/mdx/mdx-link";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
+import { PUBLISHER_LOGO, SITE_LANGUAGE, SITE_NAME } from "@/app/_constants/seo";
+import { MdxLink } from "@/app/_components/mdx/mdx-link";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { blogSource } from "@/lib/blog/source";
 import { getContentMDXComponents } from "mdx-components";
 import type { Metadata } from "next";
@@ -76,11 +72,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+type BlogPostPageProps = { params: Promise<Params> };
+
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const page = blogSource.getPage([slug]);
   if (!page) notFound();
@@ -146,7 +140,7 @@ export default async function BlogPostPage({
           </h1>
           <time
             dateTime={page.data.date}
-            className="text-muted-foreground text-lg"
+            className="text-lg text-muted-foreground"
           >
             {dateFormatter.format(new Date(page.data.date))}
           </time>
@@ -165,7 +159,7 @@ export default async function BlogPostPage({
 
         <TableOfContents headings={page.data.toc} />
 
-        <div className="prose prose-xl dark:prose-invert max-w-none font-serif">
+        <div className="prose-xl dark:prose-invert prose max-w-none font-serif">
           <MDX components={getContentMDXComponents({ a: MdxLink })} />
         </div>
 

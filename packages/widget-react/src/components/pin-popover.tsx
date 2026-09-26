@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useFloating,
   autoUpdate,
@@ -6,9 +6,8 @@ import {
   flip,
   shift,
 } from "@floating-ui/react";
-import { STATUS_COLORS } from "@fasterfixes/core";
-import type { FeedbackStatus } from "@fasterfixes/core";
 import { useFeedbackContext } from "../context.js";
+import { getStatusColor } from "../get-status-color.js";
 import {
   popoverStyle,
   textareaStyle,
@@ -38,19 +37,31 @@ export function PinPopover() {
   const [error, setError] = useState<string | null>(null);
   const [renderedFeedback, setRenderedFeedback] =
     useState<typeof activeFeedback>(activeFeedback);
-  const [exiting, setExiting] = useState(false);
-  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const frozenStyleRef = useRef<React.CSSProperties | null>(null);
+  // Non-null while fading out; holds the position measured when the popover closed
+  const [exit, setExit] = useState<{
+    frozenStyle: React.CSSProperties | null;
+  } | null>(null);
+  const exiting = exit !== null;
 
   // Reset local state when switching between feedback items
-  useEffect(() => {
+  const [previousFeedbackId, setPreviousFeedbackId] = useState(
+    activeFeedback?.id,
+  );
+  if (activeFeedback?.id !== previousFeedbackId) {
+    setPreviousFeedbackId(activeFeedback?.id);
     setIsEditing(false);
     setEditComment("");
     setIsSaving(false);
     setIsDeleting(false);
     setShowDeleteConfirm(false);
     setError(null);
-  }, [activeFeedback?.id]);
+  }
+
+  // Opening (or switching) cancels a fade-out in progress
+  if (activeFeedback && (activeFeedback !== renderedFeedback || exiting)) {
+    setRenderedFeedback(activeFeedback);
+    setExit(null);
+  }
 
   // Anchor popover to the pin element (always visible, regardless of target element state)
   const currentFeedback = activeFeedback ?? renderedFeedback;
@@ -58,7 +69,11 @@ export function PinPopover() {
     ? document.querySelector(`[data-ff-pin-id="${activeFeedback.id}"]`)
     : null;
 
-  const { refs, floatingStyles } = useFloating({
+  const {
+    refs: { setFloating },
+    elements,
+    floatingStyles,
+  } = useFloating({
     open: !!activeFeedback || exiting,
     elements: {
       reference: pinEl,
@@ -70,38 +85,29 @@ export function PinPopover() {
   });
 
   useEffect(() => {
-    if (activeFeedback) {
-      if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
-      frozenStyleRef.current = null;
-      setRenderedFeedback(activeFeedback);
-      setExiting(false);
-      return;
-    }
+    if (activeFeedback || !renderedFeedback) return;
 
-    if (!renderedFeedback) return;
+    // Freeze the last position: the fade-out animation overrides Floating UI's transform
+    const floatingEl = elements.floating;
+    const rect = floatingEl?.getBoundingClientRect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- measures the popover's rect, which only exists in the DOM after the commit that closed it
+    setExit({
+      frozenStyle: rect
+        ? {
+            position: "fixed",
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+          }
+        : null,
+    });
 
-    const floatingEl = refs.floating.current;
-    if (floatingEl) {
-      const rect = floatingEl.getBoundingClientRect();
-      frozenStyleRef.current = {
-        position: "fixed",
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-      };
-    }
-
-    setExiting(true);
-    fadeTimerRef.current = setTimeout(() => {
+    const timer = setTimeout(() => {
       setRenderedFeedback(null);
-      setExiting(false);
-      frozenStyleRef.current = null;
+      setExit(null);
     }, FADEOUT_DURATION);
-
-    return () => {
-      if (fadeTimerRef.current !== null) clearTimeout(fadeTimerRef.current);
-    };
-  }, [activeFeedback, renderedFeedback, refs.floating]);
+    return () => clearTimeout(timer);
+  }, [activeFeedback, renderedFeedback, elements.floating]);
 
   // Close on outside click
   const handleOutsideClick = useCallback(
@@ -126,23 +132,22 @@ export function PinPopover() {
 
   if (!currentFeedback) return null;
 
-  const statusColor =
-    STATUS_COLORS[currentFeedback.status as FeedbackStatus] ?? STATUS_COLORS.new;
+  const statusColor = getStatusColor(currentFeedback.status);
 
-  function handleStartEdit() {
-    setEditComment(currentFeedback!.comment);
+  const handleStartEdit = () => {
+    setEditComment(currentFeedback.comment);
     setIsEditing(true);
     setError(null);
-  }
+  };
 
-  async function handleSave() {
+  const handleSave = async () => {
     if (!editComment.trim()) return;
     setIsSaving(true);
     setError(null);
 
     try {
       await client.updateFeedback(
-        currentFeedback!.id,
+        currentFeedback.id,
         { comment: editComment.trim() },
         reviewerToken,
       );
@@ -154,21 +159,21 @@ export function PinPopover() {
     } finally {
       setIsSaving(false);
     }
-  }
+  };
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
 
     try {
-      await client.deleteFeedback(currentFeedback!.id, reviewerToken);
+      await client.deleteFeedback(currentFeedback.id, reviewerToken);
       setActiveFeedback(null);
       await refreshFeedback();
     } catch (err) {
       setError(err instanceof Error ? err.message : labels.errorMessage);
       setIsDeleting(false);
     }
-  }
+  };
 
   function handleClose() {
     setIsEditing(false);
@@ -177,15 +182,15 @@ export function PinPopover() {
     setActiveFeedback(null);
   }
 
+  const mode = popoverMode(isEditing, showDeleteConfirm);
+
   return (
     <div
-      ref={refs.setFloating}
+      ref={setFloating}
       className={`ff-popover ${classNames.popover ?? ""}`}
       style={{
         ...popoverStyle,
-        ...(exiting && frozenStyleRef.current
-          ? frozenStyleRef.current
-          : floatingStyles),
+        ...(exit?.frozenStyle ?? floatingStyles),
         ...(exiting
           ? {
               animation: `ff-popover-fadeout ${FADEOUT_DURATION}ms ease-in forwards`,
@@ -238,7 +243,7 @@ export function PinPopover() {
         </p>
       )}
 
-      {isEditing ? (
+      {mode === "edit" && (
         <>
           <textarea
             className={`ff-textarea ${classNames.textarea ?? ""}`}
@@ -277,7 +282,8 @@ export function PinPopover() {
             </button>
           </div>
         </>
-      ) : showDeleteConfirm ? (
+      )}
+      {mode === "confirm-delete" && (
         <div>
           <p style={{ margin: "0 0 10px", fontSize: 13 }}>
             {labels.deleteConfirm}
@@ -306,7 +312,8 @@ export function PinPopover() {
             </button>
           </div>
         </div>
-      ) : (
+      )}
+      {mode === "view" && (
         <>
           <p style={{ margin: "0 0 10px", whiteSpace: "pre-wrap" }}>
             {currentFeedback.comment}
@@ -331,4 +338,11 @@ export function PinPopover() {
       )}
     </div>
   );
+}
+
+// Editing wins over the delete confirmation, which wins over the read view.
+function popoverMode(isEditing: boolean, showDeleteConfirm: boolean) {
+  if (isEditing) return "edit";
+  if (showDeleteConfirm) return "confirm-delete";
+  return "view";
 }

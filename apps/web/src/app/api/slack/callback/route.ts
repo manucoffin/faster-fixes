@@ -1,12 +1,13 @@
 import { auth } from "@/server/auth";
-import { encryptSlackToken } from "@/server/slack/crypto";
-import { SLACK_OAUTH_STATE_COOKIE } from "@/server/slack/oauth-state-cookie";
-import { exchangeOAuthCode } from "@/server/slack/slack-client";
-import { prisma } from "@workspace/db";
+import { findInstallingMember } from "@/app/_domains/integration/_services/find-installing-member";
+import { SLACK_OAUTH_STATE_COOKIE } from "@/app/_domains/integration/_helpers/slack/oauth-state-cookie";
+import { exchangeOAuthCode } from "@/app/_domains/integration/_services/slack/slack-client";
+import { upsertSlackInstallation } from "@/app/_domains/integration/_services/slack/upsert-slack-installation";
+import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;
+  const baseUrl = getAuthBaseUrl();
   const integrationsUrl = `${baseUrl}/integrations`;
   const { searchParams } = req.nextUrl;
 
@@ -39,20 +40,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${integrationsUrl}?slack=error`);
   }
 
-  const membership = await prisma.member.findFirst({
-    where: {
-      organizationId: activeOrganization.id,
-      userId: session.user.id,
-      role: { in: ["owner", "admin"] },
-    },
+  const installingMember = await findInstallingMember({
+    organizationId: activeOrganization.id,
+    userId: session.user.id,
   });
-  if (!membership) {
+  if (!installingMember) {
     return NextResponse.redirect(`${integrationsUrl}?slack=error`);
   }
 
-  let installation;
+  let grant;
   try {
-    installation = await exchangeOAuthCode({
+    grant = await exchangeOAuthCode({
       code,
       redirectUri: `${baseUrl}/api/slack/callback`,
     });
@@ -60,27 +58,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${integrationsUrl}?slack=error`);
   }
 
-  const encryptedToken = encryptSlackToken(installation.botToken);
-
-  await prisma.slackInstallation.upsert({
-    where: { organizationId: activeOrganization.id },
-    update: {
-      slackTeamId: installation.teamId,
-      slackTeamName: installation.teamName,
-      botToken: encryptedToken,
-      botUserId: installation.botUserId,
-      scope: installation.scope,
-      installedById: membership.id,
-    },
-    create: {
-      organizationId: activeOrganization.id,
-      slackTeamId: installation.teamId,
-      slackTeamName: installation.teamName,
-      botToken: encryptedToken,
-      botUserId: installation.botUserId,
-      scope: installation.scope,
-      installedById: membership.id,
-    },
+  await upsertSlackInstallation({
+    organizationId: activeOrganization.id,
+    installedById: installingMember.id,
+    grant,
   });
 
   const response = NextResponse.redirect(`${integrationsUrl}?slack=connected`);

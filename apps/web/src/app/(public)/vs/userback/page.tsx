@@ -1,10 +1,10 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { UserbackAlternativesSection } from "./_features/userback-alternatives-section";
 import { UserbackBreadcrumb } from "./_features/userback-breadcrumb";
@@ -29,9 +29,9 @@ import { UserbackWhySwitchSection } from "./_features/userback-why-switch-sectio
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const pageUrl = `${APP_URL}/vs/userback`;
-const title = `Userback Alternative — Open-Source & Self-Hosted | ${SITE_NAME}`;
+const title = `Userback Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
 const description =
-  "Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents — without per-seat pricing or vendor lock-in.";
+  "Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents, without per-seat pricing or vendor lock-in.";
 const datePublished = "2026-04-29T00:00:00.000Z";
 const dateModified = "2026-04-29T00:00:00.000Z";
 

@@ -95,7 +95,7 @@ export type ApiErrorResponse = {
  * alternative implementations can target localStorage, in-memory state,
  * or a mock for tests.
  */
-export interface FeedbackClient {
+export type FeedbackClient = {
   getConfig(): Promise<WidgetConfig>;
   getFeedback(
     reviewerToken: string,
@@ -117,4 +117,4 @@ export interface FeedbackClient {
     screenshot: Blob,
     reviewerToken: string,
   ): Promise<void>;
-}
+};

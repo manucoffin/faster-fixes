@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +15,7 @@ export const ruttlFaqs: FaqItem[] = [
   {
     question: "Does Ruttl require a Chrome extension?",
     answer:
-      "Yes for sites behind Basic Authentication. The extension requirement removes mobile feedback from the workflow on those projects — clients cannot annotate from a phone.",
+      "Yes for sites behind Basic Authentication. The extension requirement removes mobile feedback from the workflow on those projects: clients cannot annotate from a phone.",
   },
   {
     question:
@@ -63,7 +63,7 @@ export function RuttlFaqSection() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {faq.answer}
                   </p>
                 </AccordionContent>

@@ -1,10 +1,10 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
-import { BreadcrumbSchema } from "@/app/_features/seo/breadcrumb-schema";
-import { FaqSchema } from "@/app/_features/seo/faq-schema";
-import { HowToSchema } from "@/app/_features/seo/how-to-schema";
-import { SoftwareApplicationSchema } from "@/app/_features/seo/software-application-schema";
-import { WebPageSchema } from "@/app/_features/seo/web-page-schema";
+import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { HowToSchema } from "@/app/_components/seo/how-to-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import type { Metadata } from "next";
 import { McpBreadcrumb } from "./_features/mcp-breadcrumb";
 import { McpCtaSection } from "./_features/mcp-cta-section";
@@ -25,9 +25,9 @@ const pageUrl = `${APP_URL}/integrations/mcp`;
 // server is; this one names the tool call and the payload the agent receives.
 const title = `MCP server: fix client feedback in Claude Code - ${SITE_NAME}`;
 const description =
-  "Your agent calls list_feedbacks and gets the screenshot, DOM selector, React tree, console logs and network requests — then fixes it from the terminal.";
+  "Your agent calls list_feedbacks and gets the screenshot, DOM selector, React tree, console logs and network requests, then fixes it from the terminal.";
 const ogImageAlt =
-  "FasterFixes MCP server — an AI coding agent fetching client feedback with a full repro bundle";
+  "FasterFixes MCP server: an AI coding agent fetching client feedback with a full repro bundle";
 const datePublished = "2026-06-03T00:00:00.000Z";
 const dateModified = "2026-06-03T00:00:00.000Z";
 

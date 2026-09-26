@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/app/_features/seo/faq-schema";
+import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
   AccordionContent,
@@ -25,7 +25,7 @@ export const gleapFaqs: FaqItem[] = [
   {
     question: "How does FasterFixes integrate with Claude Code and Cursor?",
     answer:
-      "Via a built-in MCP server. Query your feedback queue directly from your terminal or IDE — no browser needed.",
+      "Via a built-in MCP server. Query your feedback queue directly from your terminal or IDE, no browser needed.",
   },
   {
     question: "Does FasterFixes support customer support or live chat?",
@@ -35,7 +35,7 @@ export const gleapFaqs: FaqItem[] = [
   {
     question: "Why did Gleap pivot to customer support?",
     answer:
-      "Gleap expanded to compete in the larger customer support market — adding Kai AI, ticketing, and multichannel messaging to position alongside Intercom and Zendesk.",
+      "Gleap expanded to compete in the larger customer support market, adding Kai AI, ticketing, and multichannel messaging to position alongside Intercom and Zendesk.",
   },
 ];
 
@@ -57,7 +57,7 @@ export function GleapFaqSection() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-muted-foreground text-lg md:text-xl">
+                  <p className="text-lg text-muted-foreground md:text-xl">
                     {faq.answer}
                   </p>
                 </AccordionContent>

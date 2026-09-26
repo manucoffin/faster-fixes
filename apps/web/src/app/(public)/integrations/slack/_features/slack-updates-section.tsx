@@ -8,7 +8,7 @@ import {
 const capabilities = [
   {
     title: "The same message updates in place",
-    body: "When a feedback item moves from new to in progress to resolved, Faster Fixes edits the original Slack message rather than posting a new one. The channel stays one message per report — no cascade of status-change notifications to scroll past.",
+    body: "When a feedback item moves from new to in progress to resolved, Faster Fixes edits the original Slack message rather than posting a new one. The channel stays one message per report, no cascade of status-change notifications to scroll past.",
   },
   {
     title: "An agent-resolved badge",
@@ -22,16 +22,16 @@ const capabilities = [
 
 export function SlackUpdatesSection() {
   return (
-    <section className="bg-muted/30 w-full border-y py-16 md:py-24">
+    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Notifications that stay clean
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             A live message, not a stream of alerts
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Most tools post a fresh Slack message for every event. Faster Fixes
             keeps a single message per piece of feedback and updates it as the
             status changes.

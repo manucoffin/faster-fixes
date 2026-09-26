@@ -1,8 +1,8 @@
 "use client";
 
-import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/use-feedback-mutations";
-import { useOrgMembers } from "@/app/(authenticated)/(project)/inbox/_features/use-org-members";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { useFeedbackMutations } from "@/app/(authenticated)/(project)/inbox/_features/feedback-mutations/use-feedback-mutations";
+import { useOrgMembers } from "./use-org-members";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import {
   Avatar,
   AvatarFallback,
@@ -23,17 +23,14 @@ type AssigneeSelectProps = {
   value: string | null;
 };
 
-export function AssigneeSelect({
-  feedbackId,
-  value,
-}: AssigneeSelectProps) {
+export function AssigneeSelect({ feedbackId, value }: AssigneeSelectProps) {
   const { updateAssignee } = useFeedbackMutations();
   const { members, currentMemberId } = useOrgMembers();
 
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-muted-foreground text-xs font-medium uppercase">
+        <h4 className="text-xs font-medium text-muted-foreground uppercase">
           Assignee
         </h4>
         {currentMemberId && value !== currentMemberId && (
@@ -64,13 +61,11 @@ export function AssigneeSelect({
               <div className="flex items-center gap-2">
                 <Avatar className="size-5">
                   <AvatarImage
-                    src={
-                      member.image ? resolveS3Url(member.image) : undefined
-                    }
+                    src={member.image ? resolveS3Url(member.image) : undefined}
                     className="object-cover"
                   />
                   <AvatarFallback className="text-[10px]">
-                    {member.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    {member.name?.charAt(0).toUpperCase() ?? "?"}
                   </AvatarFallback>
                 </Avatar>
                 {member.name ?? "Unknown"}

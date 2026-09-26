@@ -15,7 +15,7 @@ import {
 } from "@workspace/ui/components/alert-dialog";
 import { Button } from "@workspace/ui/components/button";
 import { toast } from "sonner";
-import type { GetSlackInstallationOutput } from "./get-slack-installation.trpc.query";
+import type { GetSlackInstallationOutput } from "../../_services/get-slack-installation";
 
 type SlackConnectedProps = {
   installation: NonNullable<GetSlackInstallationOutput>;
@@ -27,8 +27,8 @@ export function SlackConnected({ installation }: SlackConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.slack.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.slack.getInstallation.queryKey(),
         });
@@ -44,7 +44,7 @@ export function SlackConnected({ installation }: SlackConnectedProps) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
         <span className="font-medium">{installation.teamName}</span>
-        <span className="text-muted-foreground text-sm">
+        <span className="text-sm text-muted-foreground">
           Connected
           {installation.installedByName
             ? ` by ${installation.installedByName}`

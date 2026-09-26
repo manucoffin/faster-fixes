@@ -1,6 +1,5 @@
-import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
-import { PageParams } from "@/types/next";
-import { prisma } from "@workspace/db/index";
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
+import type { PageParams } from "@/types/next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AccountCardLoading } from "./_features/account/account-card-loading.server";
@@ -9,23 +8,18 @@ import { SubscriptionCardLoading } from "./_features/subscription/subscription-c
 import { SubscriptionCard } from "./_features/subscription/subscription-card.client";
 import { UserInformationCardLoading } from "./_features/user-information/user-information-card-loading.server";
 import { UserInformationCard } from "./_features/user-information/user-information-card.server";
+import { findUserName } from "../_services/find-user-name";
 
-export default async function AdminUserDetailsPage(props: PageParams) {
-  const params = await props.params;
-  const { id } = params;
+export default async function AdminUserDetailsPage({ params }: PageParams) {
+  const { id } = await params;
 
   if (!id) {
     return notFound();
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: {
-      name: true,
-    },
-  });
+  const userName = await findUserName({ userId: id });
 
-  const pageTitle = user ? `${user.name} details` : "User";
+  const pageTitle = userName ? `${userName} details` : "User";
 
   return (
     <DashboardPageContent
@@ -33,7 +27,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
       breadcrumbs={[
         { label: "Dashboard", link: "/admin" },
         { label: "Users", link: "/admin/users" },
-        { label: pageTitle, },
+        { label: pageTitle },
       ]}
     >
       <div className="grid gap-4 lg:grid-cols-3">
@@ -51,9 +45,7 @@ export default async function AdminUserDetailsPage(props: PageParams) {
           </Suspense>
         </div>
 
-        <div className="col-span-1 lg:col-span-2">
-
-        </div>
+        <div className="col-span-1 lg:col-span-2"></div>
       </div>
     </DashboardPageContent>
   );

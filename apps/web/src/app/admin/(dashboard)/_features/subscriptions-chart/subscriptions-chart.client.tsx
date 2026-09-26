@@ -1,7 +1,7 @@
 "use client";
 
-import { PeriodSelector } from "@/app/_features/core/dashboard/period-selector/period-selector.client";
-import { periodSelectorParsers } from "@/app/_features/core/dashboard/period-selector/search-params";
+import { PeriodSelector } from "@/app/_components/dashboard/period-selector.client";
+import { periodSelectorParsers } from "@/app/_components/dashboard/search-params";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -15,18 +15,27 @@ import { ChartContainer, ChartTooltip } from "@workspace/ui/components/chart";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useQueryStates } from "nuqs";
 import { Area, Bar, ComposedChart, Line, XAxis, YAxis } from "recharts";
-import type { GetMonthlyStatsOutput } from "./get-monthly-stats.trpc.query";
+import type { GetMonthlyStatsOutput } from "../../_services/get-monthly-stats";
 
 type MonthData = GetMonthlyStatsOutput[number];
+
+/** The tooltip label of a series; revenue is the remaining series. */
+function getSeriesLabel(name: string | number | undefined): string {
+  if (name === "users") return "Users:";
+  if (name === "subscriptions") return "Subscriptions:";
+  return "Revenue:";
+}
 
 export function SubscriptionsChart() {
   const trpc = useTRPC();
   const [period] = useQueryStates(periodSelectorParsers);
 
-  const getMonthlyStatsQuery = useQuery(trpc.admin.dashboard.stats.get.queryOptions({
-    from: period.from ? new Date(period.from) : undefined,
-    to: period.to ? new Date(period.to) : undefined,
-  }));
+  const getMonthlyStatsQuery = useQuery(
+    trpc.admin.dashboard.getMonthlyStats.queryOptions({
+      from: period.from ? new Date(period.from) : undefined,
+      to: period.to ? new Date(period.to) : undefined,
+    }),
+  );
 
   return matchQueryStatus(getMonthlyStatsQuery, {
     Loading: <SubscriptionsChartLoading />,
@@ -137,11 +146,12 @@ export function SubscriptionsChart() {
 
               <ChartTooltip
                 content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
+                  const firstEntry = payload?.[0];
+                  if (!active || !firstEntry) return null;
 
-                  const data = payload[0]!.payload as MonthData;
+                  const data = firstEntry.payload as MonthData;
                   return (
-                    <div className="bg-background rounded-lg border p-3 shadow-md">
+                    <div className="rounded-lg border bg-background p-3 shadow-md">
                       <div className="font-medium">{data.fullLabel}</div>
                       <div className="space-y-1 text-sm">
                         {payload.map((entry, index) => (
@@ -151,11 +161,7 @@ export function SubscriptionsChart() {
                               style={{ backgroundColor: entry.color }}
                             />
                             <span className="text-muted-foreground">
-                              {entry.name === "users"
-                                ? "Users:"
-                                : entry.name === "subscriptions"
-                                  ? "Subscriptions:"
-                                  : "Revenue:"}
+                              {getSeriesLabel(entry.name)}
                             </span>
                             <span className="font-medium">
                               {entry.name === "revenue"
@@ -200,9 +206,7 @@ function SubscriptionsChartError() {
         <CardTitle>Subscriptions and users by month</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
-        <p className="text-destructive text-sm">
-          Failed to load statistics
-        </p>
+        <p className="text-sm text-destructive">Failed to load statistics</p>
       </CardContent>
     </Card>
   );

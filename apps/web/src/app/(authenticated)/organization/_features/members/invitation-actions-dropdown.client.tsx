@@ -26,7 +26,7 @@ export function InvitationActionsDropdown({
     trpc.authenticated.organization.invitation.delete.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.authenticated.organization.invitation.get.queryFilter(),
+          trpc.authenticated.organization.invitation.list.queryFilter(),
         );
         toast.success("Invitation canceled");
       },

@@ -133,90 +133,100 @@ function ensureAnimationStyles() {
   document.head.appendChild(style);
 }
 
-const MessageIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
+function MessageIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
 
-const ListIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="8" y1="6" x2="21" y2="6" />
-    <line x1="8" y1="12" x2="21" y2="12" />
-    <line x1="8" y1="18" x2="21" y2="18" />
-    <line x1="3" y1="6" x2="3.01" y2="6" />
-    <line x1="3" y1="12" x2="3.01" y2="12" />
-    <line x1="3" y1="18" x2="3.01" y2="18" />
-  </svg>
-);
+function ListIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" />
+      <line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
 
-const EyeIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
+function EyeIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
 
-const EyeOffIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-  </svg>
-);
+function EyeOffIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+    </svg>
+  );
+}
 
-const CloseIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
+function CloseIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
 
 type ToolbarControlProps = {
   label: string;
@@ -243,9 +253,10 @@ function ToolbarControl({
         type="button"
         style={{
           ...toolbarButtonStyle,
-          backgroundColor: tone === "active"
-            ? "rgba(255,255,255,0.3)"
-            : "rgba(255,255,255,0.15)",
+          backgroundColor:
+            tone === "active"
+              ? "rgba(255,255,255,0.3)"
+              : "rgba(255,255,255,0.15)",
         }}
         onClick={(e) => {
           e.stopPropagation();

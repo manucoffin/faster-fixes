@@ -1,9 +1,6 @@
-import type { LimitableResource } from "@/server/auth/config/subscription-plans";
-import type { PrismaClient } from "@workspace/db/generated/prisma/client";
-import {
-  getMinimumRequiredPlanForResource,
-  type PlanDenial,
-} from "./denial";
+import type { LimitableResource } from "@/app/_domains/subscription";
+import type { PrismaClient } from "@workspace/db/types";
+import { getMinimumRequiredPlanForResource, type PlanDenial } from "./denial";
 import { resolveOrganizationPlan } from "./resolve-organization-plan";
 
 export type ResourceCheckResult =
@@ -34,13 +31,16 @@ export async function checkResourceLimit(
   prisma: PrismaClient,
 ): Promise<ResourceCheckResult> {
   const plan = await resolveOrganizationPlan(organizationId, prisma);
-  const limit = plan.limits[resource] as number;
+  const limit = plan.limits[resource];
 
   if (limit === Infinity) {
     return { allowed: true };
   }
 
-  const current = await RESOURCE_COUNT_QUERIES[resource](organizationId, prisma);
+  const current = await RESOURCE_COUNT_QUERIES[resource](
+    organizationId,
+    prisma,
+  );
 
   if (current < limit) {
     return { allowed: true };
@@ -55,7 +55,10 @@ export async function checkResourceLimit(
         current,
         limit,
         planName: plan.planName,
-        minimumRequiredPlan: getMinimumRequiredPlanForResource(resource, current),
+        minimumRequiredPlan: getMinimumRequiredPlanForResource(
+          resource,
+          current,
+        ),
       },
     },
   };

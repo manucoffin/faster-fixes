@@ -8,7 +8,7 @@ import {
 const capabilities = [
   {
     title: "Status sync that survives custom workflows",
-    body: "Status changes flow both ways. Sync keys on Jira's status category — To Do, In Progress, Done — rather than the status name, so renamed statuses and custom workflows keep working.",
+    body: "Status changes flow both ways. Sync keys on Jira's status category: To Do, In Progress, Done. It does not key on the status name, so renamed statuses and custom workflows keep working.",
   },
   {
     title: "Issues created with the data engineers need",
@@ -25,13 +25,13 @@ export function JiraCapabilitiesSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Built for Jira admins
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Status sync built for custom Jira workflows
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             Most feedback tools sync a status name, and break the first time an
             admin renames one. Faster Fixes syncs the category instead.
           </p>

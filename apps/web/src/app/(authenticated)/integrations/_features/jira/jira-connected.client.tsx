@@ -16,7 +16,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import type { GetJiraInstallationOutput } from "./get-jira-installation.trpc.query";
+import type { GetJiraInstallationOutput } from "../../_services/get-jira-installation";
 
 type JiraConnectedProps = {
   installation: NonNullable<GetJiraInstallationOutput>;
@@ -28,8 +28,8 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.jira.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.jira.getInstallation.queryKey(),
         });
@@ -47,7 +47,7 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
         <span className="font-medium">{installation.siteName}</span>
-        <span className="text-muted-foreground text-sm">
+        <span className="text-sm text-muted-foreground">
           Connected
           {installation.installedByName
             ? ` by ${installation.installedByName}`
@@ -66,7 +66,7 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
           <span className="text-sm font-medium text-destructive">
             Reconnection required
           </span>
-          <span className="text-muted-foreground text-sm">
+          <span className="text-sm text-muted-foreground">
             The Jira authorization is no longer valid, likely because the
             authorizing user lost access. Reconnect to resume syncing.
           </span>
@@ -78,7 +78,11 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
 
       <div className="flex gap-2">
         <Button variant="outline" size="sm" asChild>
-          <a href={installation.siteUrl} target="_blank" rel="noopener noreferrer">
+          <a
+            href={installation.siteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Open in Jira
             <ExternalLink className="ml-1 size-3" />
           </a>
@@ -94,8 +98,8 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
             <AlertDialogHeader>
               <AlertDialogTitle>Disconnect Jira?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove the connection and unlink all projects from this
-                Jira site. Existing Jira issues will not be deleted.
+                This will remove the connection and unlink all projects from
+                this Jira site. Existing Jira issues will not be deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

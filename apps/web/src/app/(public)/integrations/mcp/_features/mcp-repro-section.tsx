@@ -25,7 +25,7 @@ const reproFields = [
   },
   {
     label: "Network requests",
-    body: "Network activity from just before submission — the failing call is usually right there.",
+    body: "Network activity from just before submission: the failing call is usually right there.",
   },
   {
     label: "Status",
@@ -38,15 +38,15 @@ export function McpReproSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             What the agent receives
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             A repro bundle, not a text comment
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             When the agent calls <code>list_feedbacks</code>, each item arrives
-            as structured context it can act on directly — so it doesn&apos;t
+            as structured context it can act on directly, so it doesn&apos;t
             have to ask the client to reproduce anything.
           </p>
         </div>
@@ -55,17 +55,17 @@ export function McpReproSection() {
           {reproFields.map((field) => (
             <div
               key={field.label}
-              className="bg-muted/30 rounded-xl border p-6"
+              className="rounded-xl border bg-muted/30 p-6"
             >
               <dt className="font-semibold">{field.label}</dt>
-              <dd className="text-muted-foreground mt-2 leading-relaxed">
+              <dd className="mt-2 leading-relaxed text-muted-foreground">
                 {field.body}
               </dd>
             </div>
           ))}
         </dl>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-muted-foreground">
           The agent can filter by <code>status</code> and <code>page_url</code>{" "}
           to scope its work to a single page or a sprint.
         </p>

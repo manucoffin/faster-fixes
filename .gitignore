@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+# pnpm places its content-addressable store here when no global store is configured.
+.pnpm-store
 
 # Local env files
 .env
@@ -50,5 +52,4 @@ _internal/
 
 # Skill eval workspaces
 packages/skills/*-workspace/
-# Added by code-review-graph
-.code-review-graph/
+

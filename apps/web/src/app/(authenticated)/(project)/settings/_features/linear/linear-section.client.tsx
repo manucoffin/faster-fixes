@@ -1,11 +1,16 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
+import { usePlanGate } from "@/app/_domains/subscription";
 import { useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
+import { getErrorMessage } from "@/utils/error/get-error-message";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, AlertDescription } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { TeamPicker } from "./link-team/team-picker.client";
@@ -22,7 +27,7 @@ export function LinearSection({ projectId }: LinearSectionProps) {
   if (!canAccess("linearIntegration")) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Linear integration is available on paid plans.
         </p>
         <Button className="w-fit" asChild>
@@ -32,9 +37,7 @@ export function LinearSection({ projectId }: LinearSectionProps) {
     );
   }
 
-  return (
-    <LinearSectionInner orgId={activeOrg?.id} projectId={projectId} />
-  );
+  return <LinearSectionInner orgId={activeOrg?.id} projectId={projectId} />;
 }
 
 type LinearSectionInnerProps = {
@@ -63,7 +66,7 @@ function LinearSectionInner({ orgId, projectId }: LinearSectionInnerProps) {
     ),
     Empty: (
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Connect Linear in organization settings to link a team.
         </p>
         <Button variant="link" className="w-fit px-0" asChild>
@@ -115,7 +118,18 @@ function LinkOrPickTeam({ projectId, workspaceUrlKey }: LinkOrPickTeamProps) {
           workspaceUrlKey={workspaceUrlKey}
         />
       ) : (
-        <TeamPicker projectId={projectId} teams={teamsQuery.data ?? []} />
+        matchQueryStatus(teamsQuery, {
+          Loading: <Skeleton className="h-32 w-full" />,
+          Errored: (error) => (
+            <Alert variant="destructive">
+              <AlertTitle>Failed to load your Linear teams</AlertTitle>
+              <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+            </Alert>
+          ),
+          Success: ({ data: teams }) => (
+            <TeamPicker projectId={projectId} teams={teams ?? []} />
+          ),
+        })
       ),
   });
 }

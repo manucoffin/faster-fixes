@@ -21,7 +21,7 @@ export default async function LoginPage() {
     redirect("/inbox");
   }
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="space-y-6">
           <div className="space-y-2 text-center">
@@ -38,7 +38,7 @@ export default async function LoginPage() {
             </span>
             <Link
               href={signupUrl}
-              className="text-primary font-medium hover:underline"
+              className="font-medium text-primary hover:underline"
             >
               Sign up
             </Link>

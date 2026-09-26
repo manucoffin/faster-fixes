@@ -1,9 +1,9 @@
 "use client";
 
-import { UploadButton } from "@/app/_features/core/upload/upload-button";
+import { UploadButton } from "@/app/_components/upload-button.client";
 import { organization, useActiveOrganization } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { getInitials } from "@/utils/text/get-initials";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -25,9 +25,7 @@ export function OrganizationLogoUpload() {
   );
 
   const orgName = activeOrg?.name ?? "organization";
-  const orgLogo = (activeOrg as Record<string, unknown>)?.logo as
-    | string
-    | undefined;
+  const orgLogo = activeOrg?.logo;
 
   // Clean up blob URL on unmount
   useEffect(() => {

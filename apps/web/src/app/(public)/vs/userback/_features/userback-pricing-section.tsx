@@ -42,20 +42,20 @@ export function UserbackPricingSection() {
     <section className="w-full py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Pricing
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Userback pricing vs FasterFixes: what you actually pay
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
-            FasterFixes is open source. The lowest plan in any honest
-            comparison is &quot;free, forever, on your own server.&quot; If you
-            would rather not run it yourself, the hosted plans are flat-rate —
-            not tiered by team size. Userback is per-seat across every tier:
-            Team $9, Business $19, Business Plus $29 (monthly billing). The
-            Business plan is the closest equivalent to FasterFixes for
-            structured bug reporting; a 5-person team pays $95/month, $1,140/year.
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            FasterFixes is open source. The lowest plan in any honest comparison
+            is &quot;free, forever, on your own server.&quot; If you would
+            rather not run it yourself, the hosted plans are flat-rate, not
+            tiered by team size. Userback is per-seat across every tier: Team
+            $9, Business $19, Business Plus $29 (monthly billing). The Business
+            plan is the closest equivalent to FasterFixes for structured bug
+            reporting; a 5-person team pays $95/month, $1,140/year.
           </p>
         </div>
 
@@ -67,19 +67,19 @@ export function UserbackPricingSection() {
                 card.highlight ? "border-foreground bg-muted/30" : ""
               }`}
             >
-              <p className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+              <p className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                 {card.vendor}
               </p>
               <p className="mt-2 text-sm">{card.plan}</p>
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="text-4xl font-bold">{card.price}</span>
                 {card.suffix && (
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-sm text-muted-foreground">
                     {card.suffix}
                   </span>
                 )}
               </div>
-              <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 {card.note}
               </p>
             </div>
@@ -101,7 +101,7 @@ export function UserbackPricingSection() {
           </Button>
         </div>
 
-        <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-center text-sm">
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Userback pricing is based on publicly available information and may
           change. Check their site for current rates.
         </p>

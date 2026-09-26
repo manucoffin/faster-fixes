@@ -22,16 +22,14 @@ import { PasswordInput } from "@workspace/ui/components/password-input";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  ChangePasswordInputs,
-  ChangePasswordSchema,
-} from "./change-password.schema";
+import type { UpdatePasswordInput } from "@/app/(authenticated)/account/settings/_services/update-password.schema";
+import { UpdatePasswordSchema } from "@/app/(authenticated)/account/settings/_services/update-password.schema";
 
 export function PasswordForm() {
   const trpc = useTRPC();
 
-  const form = useForm<ChangePasswordInputs>({
-    resolver: zodResolver(ChangePasswordSchema),
+  const form = useForm<UpdatePasswordInput>({
+    resolver: zodResolver(UpdatePasswordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -39,8 +37,8 @@ export function PasswordForm() {
     },
   });
 
-  const changePasswordMutation =
-    useMutation(trpc.authenticated.account.password.change.mutationOptions({
+  const changePasswordMutation = useMutation(
+    trpc.authenticated.account.password.update.mutationOptions({
       onSuccess: () => {
         toast.success("Password changed successfully");
         form.reset();
@@ -49,9 +47,10 @@ export function PasswordForm() {
         const message = error.message || "An error occurred.";
         form.setError("root", { message });
       },
-    }));
+    }),
+  );
 
-  const onSubmit = async (data: ChangePasswordInputs) => {
+  const onSubmit = async (data: UpdatePasswordInput) => {
     changePasswordMutation.mutate(data);
   };
 
@@ -103,8 +102,8 @@ export function PasswordForm() {
                 />
               </FormControl>
               <FormDescription>
-                Minimum 8 characters, with at least one uppercase, one lowercase,
-                and one number
+                Minimum 8 characters, with at least one uppercase, one
+                lowercase, and one number
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -134,9 +133,7 @@ export function PasswordForm() {
           disabled={changePasswordMutation.isPending}
           className="self-end"
         >
-          {changePasswordMutation.isPending
-            ? "Changing..."
-            : "Change password"}
+          {changePasswordMutation.isPending ? "Changing..." : "Change password"}
         </Button>
       </form>
     </Form>

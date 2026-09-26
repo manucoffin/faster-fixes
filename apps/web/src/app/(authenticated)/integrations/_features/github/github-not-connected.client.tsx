@@ -6,7 +6,7 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 export function GitHubNotConnected() {
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         No GitHub account connected. Install the Faster Fixes GitHub App to
         enable automatic issue creation from feedback.
       </p>

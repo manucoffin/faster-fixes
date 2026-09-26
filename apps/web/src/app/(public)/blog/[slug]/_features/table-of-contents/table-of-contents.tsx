@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 
-export function TableOfContents({ headings }: { headings: Toc }) {
+type TableOfContentsProps = { headings: Toc };
+
+export function TableOfContents({ headings }: TableOfContentsProps) {
   if (headings.length === 0) return null;
 
   return (
@@ -28,7 +30,7 @@ export function TableOfContents({ headings }: { headings: Toc }) {
               >
                 <a
                   href={entry.url}
-                  className="text-muted-foreground dark:hover:text-primary-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground dark:hover:text-primary-foreground"
                 >
                   <AnimatedText>{entry.title}</AnimatedText>
                 </a>

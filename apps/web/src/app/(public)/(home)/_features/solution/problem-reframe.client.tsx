@@ -20,7 +20,7 @@ export function ProblemReframe() {
         {...fadeUp}
         transition={{ duration: 0.6, delay: 0.3 }}
       >
-        <span className="bg-primary/30 rounded px-2 py-0.5">
+        <span className="rounded bg-primary/30 px-2 py-0.5">
           FasterFixes makes the translation automatic.
         </span>
       </motion.p>

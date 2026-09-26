@@ -1,20 +1,17 @@
 "use client";
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import {
-  SUBSCRIPTION_PLANS,
-  SubscriptionStatus,
-} from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "@/app/_domains/subscription";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useQuery } from "@tanstack/react-query";
 import { Empty, EmptyHeader, EmptyTitle } from "@workspace/ui/components/empty";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-interface BillingDetailsCardProps {
+type BillingDetailsCardProps = {
   planName: string;
   stripeSubscriptionId?: string;
   subscriptionStatus?: string;
-}
+};
 
 export function BillingDetailsCard({
   planName,
@@ -30,28 +27,10 @@ export function BillingDetailsCard({
   );
 
   const getStripeSubscriptionQuery = useQuery(
-    trpc.subscription.getStripeSubscription.queryOptions(
-      {
-        stripeSubscriptionId: stripeSubscriptionId!,
-      },
-      {
-        enabled: !!stripeSubscriptionId,
-      },
-    ),
+    trpc.subscription.getStripeSubscription.queryOptions(undefined, {
+      enabled: !!stripeSubscriptionId,
+    }),
   );
-
-  // Determine billing period based on current price ID
-  const determineBillingPeriod = () => {
-    if (!getStripeSubscriptionQuery.data?.currentPriceId) return "monthly";
-
-    const currentPriceId = getStripeSubscriptionQuery.data.currentPriceId;
-    const plan = SUBSCRIPTION_PLANS.find((p) => p.name === planName);
-
-    if (plan?.annualDiscountPriceId === currentPriceId) {
-      return "annual";
-    }
-    return "monthly";
-  };
 
   return matchQueryStatus(getStripePricesQuery, {
     Loading: (
@@ -67,8 +46,8 @@ export function BillingDetailsCard({
       </div>
     ),
     Errored: (
-      <div className="border-destructive/50 bg-destructive/10 rounded-md border p-4">
-        <p className="text-destructive text-sm font-medium">
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-sm font-medium text-destructive">
           Error loading billing information
         </p>
       </div>
@@ -83,7 +62,13 @@ export function BillingDetailsCard({
     dataKey: planName,
     Success: ({ data }) => {
       const priceData = data[planName];
-      const billingPeriod = determineBillingPeriod();
+      // The annual price identifier is server configuration, so the billing
+      // period is told from the prices this read returns.
+      const currentPriceId = getStripeSubscriptionQuery.data?.currentPriceId;
+      const billingPeriod =
+        currentPriceId && priceData?.annual?.id === currentPriceId
+          ? "annual"
+          : "monthly";
       const price =
         billingPeriod === "annual" ? priceData?.annual : priceData?.monthly;
 
@@ -110,28 +95,28 @@ export function BillingDetailsCard({
 
           <div className="flex flex-col gap-3 p-4">
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">
+              <span className="text-sm text-muted-foreground">
                 {billingLabel}
               </span>
               <span className="text-sm font-medium">
-                {priceHT} {price.currency?.toUpperCase()}
+                {priceHT} {price.currency.toUpperCase()}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">VAT (20%)</span>
+              <span className="text-sm text-muted-foreground">VAT (20%)</span>
               <span className="text-sm font-medium">
-                {(priceValue * 0.2).toFixed(2)} {price.currency?.toUpperCase()}
+                {(priceValue * 0.2).toFixed(2)} {price.currency.toUpperCase()}
               </span>
             </div>
 
             {subscriptionStatus === SubscriptionStatus.Trialing && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sm text-muted-foreground">
                   Free trial
                 </span>
                 <span className="text-sm font-medium">
-                  -{priceTTC} {price.currency?.toUpperCase()}
+                  -{priceTTC} {price.currency.toUpperCase()}
                 </span>
               </div>
             )}
@@ -141,9 +126,9 @@ export function BillingDetailsCard({
             <span className="font-medium">Total incl. tax</span>
             <span className="font-semibold">
               {subscriptionStatus === SubscriptionStatus.Trialing ? (
-                <span className="">0 {price.currency?.toUpperCase()}</span>
+                <span className="">0 {price.currency.toUpperCase()}</span>
               ) : (
-                `${priceTTC} ${price.currency?.toUpperCase()}`
+                `${priceTTC} ${price.currency.toUpperCase()}`
               )}
             </span>
           </div>

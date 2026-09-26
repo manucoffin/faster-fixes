@@ -57,7 +57,7 @@ export type AddContactToSegmentOptions = {
   segmentId: string;
 };
 
-export interface Mailer {
+export type Mailer = {
   emails: {
     send(options: MailOptions): Promise<EmailResponse>;
   };
@@ -69,4 +69,4 @@ export interface Mailer {
     delete(id: string): Promise<Contact>;
     addToSegment(options: AddContactToSegmentOptions): Promise<void>;
   };
-}
+};

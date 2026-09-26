@@ -1,13 +1,15 @@
 "use client";
 
-import { getRoleLabel } from "@/app/_features/organization/_utils/organization-roles";
+import { getRoleLabel } from "@/app/_domains/organization/_helpers/organization-roles";
 import {
   useActiveMemberRole,
   useActiveOrganization,
   useSession,
 } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc/trpc-client";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
+import { getErrorMessage } from "@/utils/error/get-error-message";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
@@ -16,6 +18,7 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Table,
   TableBody,
@@ -50,26 +53,29 @@ export function OrganizationMembersTab() {
 
   const currentRole = memberRoleData?.role;
 
-  const members = (activeOrg as Record<string, unknown>)?.members as
-    | Array<{
-        id: string;
-        userId: string;
-        role: string;
-        user: { id: string; name: string; email: string; image?: string };
-      }>
-    | undefined;
+  const members = activeOrg?.members;
 
   const canManage = currentRole === "owner" || currentRole === "admin";
   const isOwner = currentRole === "owner";
 
   const invitationsQuery = useQuery(
-    trpc.authenticated.organization.invitation.get.queryOptions(
+    trpc.authenticated.organization.invitation.list.queryOptions(
       { organizationId: activeOrg?.id ?? "" },
       { enabled: !!activeOrg?.id && canManage },
     ),
   );
 
-  const invitations = invitationsQuery.data ?? [];
+  // A failed invitation read owns its own row, so the empty state must not
+  // claim the organization has no member at the same time. A count rather than
+  // an empty-array fallback: the rows themselves come from `matchQueryStatus`
+  // below, which keeps the error state distinct from "nothing to show".
+  const invitationCount = invitationsQuery.data?.length ?? 0;
+
+  const hasNoRows =
+    (!members || members.length === 0) &&
+    invitationCount === 0 &&
+    // eslint-disable-next-line local/no-query-status-branch -- derives a boolean for the empty row, the rows themselves go through matchQueryStatus
+    !invitationsQuery.isError;
 
   const leaveOrganization = useMutation(
     trpc.authenticated.organization.leave.mutationOptions({
@@ -122,10 +128,7 @@ export function OrganizationMembersTab() {
                         />
                       )}
                       <AvatarFallback>
-                        <Facehash
-                          name={member.user.email ?? memberName}
-                          size={32}
-                        />
+                        <Facehash name={member.user.email} size={32} />
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{memberName}</span>
@@ -168,44 +171,70 @@ export function OrganizationMembersTab() {
             );
           })}
 
-          {invitations.map((invitation) => (
-            <TableRow key={invitation.id}>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      <Mail className="size-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-muted-foreground font-medium">
-                    {invitation.email}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {invitation.email}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={getRoleBadgeVariant(invitation.role ?? "member")}
-                >
-                  {getRoleLabel(invitation.role ?? "member")}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary">Pending</Badge>
-              </TableCell>
-              <TableCell>
-                <InvitationActionsDropdown invitationId={invitation.id} />
-              </TableCell>
-            </TableRow>
-          ))}
+          {matchQueryStatus(invitationsQuery, {
+            Loading: (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Skeleton className="h-8 w-full" />
+                </TableCell>
+              </TableRow>
+            ),
+            Errored: (error) => (
+              <TableRow>
+                <TableCell colSpan={5} className="text-sm text-destructive">
+                  Failed to load the pending invitations.{" "}
+                  {getErrorMessage(error)}
+                </TableCell>
+              </TableRow>
+            ),
+            // No pending invitation, or a member who cannot manage them: the
+            // member rows above are the whole table.
+            Empty: <></>,
+            Success: ({ data }) => (
+              <>
+                {data.map((invitation) => (
+                  <TableRow key={invitation.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            <Mail className="size-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-muted-foreground">
+                          {invitation.email}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {invitation.email}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getRoleBadgeVariant(
+                          invitation.role ?? "member",
+                        )}
+                      >
+                        {getRoleLabel(invitation.role ?? "member")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">Pending</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <InvitationActionsDropdown invitationId={invitation.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            ),
+          })}
 
-          {(!members || members.length === 0) && invitations.length === 0 && (
+          {hasNoRows && (
             <TableRow>
               <TableCell
                 colSpan={5}
-                className="text-muted-foreground py-8 text-center"
+                className="py-8 text-center text-muted-foreground"
               >
                 No members
               </TableCell>

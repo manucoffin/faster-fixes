@@ -1,0 +1,7 @@
+set -e
+
+# Without set -e the hook exit code would be `pnpm test` alone, so a lint-staged
+# failure would not block the commit.
+pnpm exec lint-staged
+pnpm typecheck
+pnpm test

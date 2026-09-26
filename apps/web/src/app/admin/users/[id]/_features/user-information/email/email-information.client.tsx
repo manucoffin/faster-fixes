@@ -18,15 +18,17 @@ import {
 import { BadgeAlert, BadgeCheck, MoreVertical } from "lucide-react";
 import { EmailVerifiedToggle } from "./email-verified-toggle.client";
 
-interface EmailInformationProps {
+type EmailInformationProps = {
   userId: string;
-}
+};
 
 export function EmailInformation({ userId }: EmailInformationProps) {
   const trpc = useTRPC();
-  const emailQuery = useQuery(trpc.admin.users.email.get.queryOptions({
-    userId,
-  }));
+  const emailQuery = useQuery(
+    trpc.admin.users.email.get.queryOptions({
+      userId,
+    }),
+  );
 
   return matchQueryStatus(emailQuery, {
     Loading: (
@@ -37,16 +39,11 @@ export function EmailInformation({ userId }: EmailInformationProps) {
       </div>
     ),
     Errored: (
-      <div className="text-sm text-red-600">
-        Failed to retrieve email
-      </div>
+      <div className="text-sm text-destructive">Failed to retrieve email</div>
     ),
     Empty: <div />,
     Success: (query) => {
       const emailData = query.data;
-      if (!emailData) {
-        return <div />;
-      }
       return (
         <div className="flex items-center gap-2">
           <div>
@@ -56,7 +53,7 @@ export function EmailInformation({ userId }: EmailInformationProps) {
                   {emailData.emailVerified ? (
                     <BadgeCheck className="size-4 text-blue-400" />
                   ) : (
-                    <BadgeAlert className="size-4 text-red-600" />
+                    <BadgeAlert className="size-4 text-destructive" />
                   )}
                 </TooltipTrigger>
                 <TooltipContent>

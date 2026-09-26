@@ -1,10 +1,13 @@
-import { ORGANIZATION_ROLES } from "@/app/_features/organization/_utils/organization-roles";
+import { ORGANIZATION_ROLES } from "@/app/_domains/organization";
 import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import { OrganizationInvitation } from "@/lib/mailer/templates/organization-invitation";
 import { getAppUrl } from "@/utils/url/get-app-url";
 import { render } from "@react-email/components";
 import { organization } from "better-auth/plugins";
+
+// Widened so an invitation role outside the known set reads as `undefined`.
+const ROLE_LABELS: Partial<Record<string, string>> = ORGANIZATION_ROLES;
 
 export const organizationPlugin = organization({
   schema: {
@@ -24,9 +27,7 @@ export const organizationPlugin = organization({
       const normalizedEmail = email.toLowerCase().trim();
       const from = SENDER_EMAIL;
       const inviterName = inviter.user.name || inviter.user.email;
-      const role =
-        ORGANIZATION_ROLES[data.role as keyof typeof ORGANIZATION_ROLES] ??
-        data.role;
+      const role = ROLE_LABELS[data.role] ?? data.role;
       const invitationLink = `${getAppUrl()}/organization/invitations`;
 
       const body = await render(

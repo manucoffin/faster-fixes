@@ -1,6 +1,8 @@
 "use client";
 
-import { SendVerificationEmailButton } from "@/app/_features/auth/send-verification-email-button/send-verification-email-button.client";
+import { SendVerificationEmailButton } from "@/app/_domains/auth/send-verification-email-button/send-verification-email-button.client";
+import type { RegisterUserInput } from "@/app/_domains/auth/_services/register-user.schema";
+import { RegisterUserSchema } from "@/app/_domains/auth/_services/register-user.schema";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,14 +26,13 @@ import { PasswordStrengthIndicator } from "@workspace/ui/components/password-str
 import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { SignupInputs, SignupSchema } from "./signup.schema";
 
 export function SignupForm() {
   const trpc = useTRPC();
   const [success, setSuccess] = useState(false);
 
-  const form = useForm<SignupInputs>({
-    resolver: zodResolver(SignupSchema),
+  const form = useForm<RegisterUserInput>({
+    resolver: zodResolver(RegisterUserSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -39,18 +40,20 @@ export function SignupForm() {
     },
   });
 
-  const signupMutation = useMutation(trpc.auth.signup.mutationOptions({
-    onError: (error) => {
-      const message =
-        error.message || "Account creation failed. Please try again.";
-      form.setError("root", { message });
-    },
-    onSuccess: (() => {
-      setSuccess(true);
-    })
-  }));
+  const signupMutation = useMutation(
+    trpc.auth.registerUser.mutationOptions({
+      onError: (error) => {
+        const message =
+          error.message || "Account creation failed. Please try again.";
+        form.setError("root", { message });
+      },
+      onSuccess: () => {
+        setSuccess(true);
+      },
+    }),
+  );
 
-  const onSubmit = async (data: SignupInputs) => {
+  const onSubmit = async (data: RegisterUserInput) => {
     signupMutation.mutate(data);
   };
 

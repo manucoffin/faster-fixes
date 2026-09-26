@@ -9,7 +9,7 @@ export const migrationSteps = [
   },
   {
     label: "Replace the Userback widget",
-    body: "Remove the Userback script from your codebase. Install the FasterFixes React widget (npm install @fasterfixes/react) and drop the component into your layout, or use the HTML embed for non-React pages. Generate a shareable link for each client — no client account required.",
+    body: "Remove the Userback script from your codebase. Install the FasterFixes React widget (npm install @fasterfixes/react) and drop the component into your layout, or use the HTML embed for non-React pages. Generate a shareable link for each client, no client account required.",
   },
   {
     label: "Invite your team and connect your issue tracker",
@@ -19,18 +19,18 @@ export const migrationSteps = [
 
 export function UserbackMigrationSection() {
   return (
-    <section className="bg-muted/30 w-full border-y py-16 md:py-24">
+    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Migration
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Switching from Userback
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="mt-4 text-lg text-muted-foreground">
             No one-click import. Export your data, replace the widget, and wire
-            up the integrations — the whole process takes under an hour.
+            up the integrations. The whole process takes under an hour.
           </p>
         </div>
 
@@ -38,14 +38,14 @@ export function UserbackMigrationSection() {
           {migrationSteps.map((step, i) => (
             <li
               key={step.label}
-              className="bg-background flex gap-4 rounded-xl border p-6"
+              className="flex gap-4 rounded-xl border bg-background p-6"
             >
-              <span className="text-muted-foreground font-mono text-sm">
+              <span className="font-mono text-sm text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
                 <h3 className="font-semibold">{step.label}</h3>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
+                <p className="mt-2 leading-relaxed text-muted-foreground">
                   {step.body}
                 </p>
               </div>

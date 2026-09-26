@@ -2,7 +2,7 @@ import {
   PLAN_LIMITS,
   type PlanLimits,
   SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
+} from "@/app/_domains/subscription";
 import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { prisma } from "@workspace/db";
 import { customSession } from "better-auth/plugins";
@@ -52,7 +52,7 @@ export const customSessionPlugin = customSession(async ({ user, session }) => {
       ...user,
       firstName: userData?.profile?.firstName,
       lastName: userData?.profile?.lastName,
-      role: userData?.role || "user",
+      role: userData?.role ?? "user",
       onboardingCompleted: userData?.onboardingCompleted,
     },
     session: {

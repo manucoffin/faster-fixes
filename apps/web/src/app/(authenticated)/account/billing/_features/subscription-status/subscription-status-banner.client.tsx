@@ -2,15 +2,16 @@
 
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
-import { SubscriptionStatus } from "@/server/auth/config/subscription-plans";
+import { SubscriptionStatus } from "@/app/_domains/subscription";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { ManageSubscriptionButton } from "../manage-subscription/manage-subscription-button.client";
 
 export const SubscriptionStatusBanner = () => {
   const trpc = useTRPC();
 
-  const getSubscriptionStatusQuery =
-    useQuery(trpc.authenticated.account.billing.subscription.status.queryOptions());
+  const getSubscriptionStatusQuery = useQuery(
+    trpc.authenticated.account.billing.subscription.getStatus.queryOptions(),
+  );
 
   const formatDate = (date: string | Date) => {
     const d = typeof date === "string" ? new Date(date) : date;
@@ -30,7 +31,7 @@ export const SubscriptionStatusBanner = () => {
       }
 
       if (subscription.cancelAtPeriodEnd) {
-        const canceledAt = new Date(subscription.periodEnd || "");
+        const canceledAt = new Date(subscription.periodEnd ?? "");
         const formattedDate = formatDate(canceledAt);
 
         return (
@@ -39,9 +40,8 @@ export const SubscriptionStatusBanner = () => {
               <div>
                 <p className="font-semibold">Subscription canceled</p>
                 <p className="text-sm opacity-90">
-                  Your subscription will end on{" "}
-                  <strong>{formattedDate}</strong>. You will lose access to
-                  premium features after this date.
+                  Your subscription will end on <strong>{formattedDate}</strong>
+                  . You will lose access to premium features after this date.
                 </p>
               </div>
 
@@ -58,7 +58,7 @@ export const SubscriptionStatusBanner = () => {
       }
 
       if (subscription.status === SubscriptionStatus.Trialing) {
-        const trialEnd = new Date(subscription.trialEnd || "");
+        const trialEnd = new Date(subscription.trialEnd ?? "");
         const formattedDate = formatDate(trialEnd);
 
         return (
@@ -67,9 +67,8 @@ export const SubscriptionStatusBanner = () => {
               <div>
                 <p className="font-semibold">Free trial</p>
                 <p className="text-sm opacity-90">
-                  Your free trial ends on{" "}
-                  <strong>{formattedDate}</strong>. Your subscription will
-                  automatically renew on this date.
+                  Your free trial ends on <strong>{formattedDate}</strong>. Your
+                  subscription will automatically renew on this date.
                 </p>
               </div>
 

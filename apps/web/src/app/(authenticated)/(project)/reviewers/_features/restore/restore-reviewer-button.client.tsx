@@ -20,8 +20,8 @@ export function RestoreReviewerButton({
 
   const restoreReviewer = useMutation(
     trpc.authenticated.projects.reviewer.restore.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
           trpc.authenticated.projects.reviewer.list.queryOptions({ projectId }),
         );
         toast.success("Reviewer restored");

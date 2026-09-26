@@ -96,10 +96,7 @@ export function createDiagnosticsRecorder(
 
   // --- patch bookkeeping (kept so stop() can restore the originals) ---
   let started = false;
-  const consoleTarget = console as unknown as Record<
-    ConsoleLevel,
-    ConsoleMethod
-  >;
+  const consoleTarget: Record<ConsoleLevel, ConsoleMethod> = console;
   const originalConsole = new Map<ConsoleLevel, ConsoleMethod>();
   let originalFetch: typeof window.fetch | null = null;
   let originalXhrOpen: typeof XMLHttpRequest.prototype.open | null = null;
@@ -140,8 +137,7 @@ export function createDiagnosticsRecorder(
         const [input, init] = args;
         const startedAt = Date.now();
         const method = (
-          init?.method ??
-          (input instanceof Request ? input.method : "GET")
+          init?.method ?? (input instanceof Request ? input.method : "GET")
         ).toUpperCase();
         const url = input instanceof Request ? input.url : String(input);
         const promise = fetchOriginal.apply(window, args);
@@ -239,7 +235,9 @@ function serializeArg(value: unknown): string {
   if (value === undefined) return "undefined";
   if (value instanceof Error) return `${value.name}: ${value.message}`;
   if (typeof value === "function") return "[Function]";
-  if (typeof value !== "object") return String(value);
+  if (typeof value !== "object") {
+    return String(value as number | boolean | bigint | symbol);
+  }
 
   try {
     const seen = new WeakSet<object>();
@@ -255,7 +253,8 @@ function serializeArg(value: unknown): string {
       }
       return val;
     });
-    return json ?? String(value);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the TypeScript lib types JSON.stringify as string, but it returns undefined when a toJSON() yields undefined
+    return json ?? "[Unserializable]";
   } catch {
     return "[Unserializable]";
   }

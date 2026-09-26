@@ -64,14 +64,14 @@ export function IntegrationsSection() {
     <section className="w-full border-t py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Integrations
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
             Connects to the tools your team already uses
           </h2>
-          <p className="text-muted-foreground mt-4 text-lg">
-            Feedback flows into your project management workflow — no manual
+          <p className="mt-4 text-lg text-muted-foreground">
+            Feedback flows into your project management workflow, no manual
             triage, no copy-pasting.
           </p>
         </div>
@@ -80,7 +80,7 @@ export function IntegrationsSection() {
           {integrations.map((item) => (
             <li key={item.label}>
               <Link href={item.href} className="group block h-full">
-                <Card className="hover:border-foreground bg-muted/30 h-full transition-colors">
+                <Card className="h-full bg-muted/30 transition-colors hover:border-foreground">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       {item.icon}
@@ -90,7 +90,7 @@ export function IntegrationsSection() {
                       {item.description}
                     </CardDescription>
                     <CardAction>
-                      <ArrowRightIcon className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
+                      <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
                     </CardAction>
                   </CardHeader>
                 </Card>

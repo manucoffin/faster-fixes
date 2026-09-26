@@ -8,13 +8,13 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { resolveS3Url } from "@/server/storage/resolve-s3-url";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { GripVertical } from "lucide-react";
-import type { GetFeedbackOutput } from "../get-feedback.trpc.query";
+import type { ListFeedbackOutput } from "../../_services/list-feedback";
 
-type FeedbackItem = GetFeedbackOutput[number];
+type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanCardProps = {
   feedback: FeedbackItem;
@@ -58,7 +58,7 @@ function KanbanCardView({
   return (
     <div
       className={cn(
-        "group bg-card border-border flex cursor-pointer gap-2 rounded-lg border p-3 transition-shadow hover:shadow-sm",
+        "group flex cursor-pointer gap-2 rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-sm",
         isOverlay && "cursor-grabbing shadow-lg",
         // Source stays in flow but invisible; DragOverlay shows the moving copy.
         isDragging && "invisible",
@@ -83,7 +83,7 @@ function KanbanCardView({
       <div className="min-w-0 flex-1">
         <p className="line-clamp-3 text-sm leading-snug">{feedback.comment}</p>
 
-        <p className="text-muted-foreground mt-1.5 truncate text-xs">
+        <p className="mt-1.5 truncate text-xs text-muted-foreground">
           {formatPageUrl(feedback.pageUrl)}
         </p>
 
@@ -99,22 +99,22 @@ function KanbanCardView({
                 className="object-cover"
               />
               <AvatarFallback className="text-[10px]">
-                {feedback.assignee.name?.charAt(0)?.toUpperCase() ?? "?"}
+                {feedback.assignee.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="bg-muted size-5 rounded-full" />
+            <div className="size-5 rounded-full bg-muted" />
           )}
 
-          <span className="text-muted-foreground truncate text-xs">
+          <span className="truncate text-xs text-muted-foreground">
             {feedback.reviewer.name}
           </span>
 
           {feedback.issueLink && (
-            <GithubIcon className="text-muted-foreground size-3.5 shrink-0" />
+            <GithubIcon className="size-3.5 shrink-0 text-muted-foreground" />
           )}
 
-          <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground">
             {formatDistanceToNow(new Date(feedback.createdAt), {
               addSuffix: true,
             })}
@@ -141,7 +141,7 @@ export function KanbanCard({
 
   const handle = (
     <div
-      className="text-muted-foreground hidden shrink-0 cursor-grab items-center opacity-0 transition-opacity group-hover:opacity-100 lg:flex"
+      className="hidden shrink-0 cursor-grab items-center text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 lg:flex"
       {...listeners}
       {...attributes}
     >

@@ -1,0 +1,152 @@
+# Frontend: React components, client components, styling, query status
+
+Everything for building UI in `apps/web`. For where files go, see [architecture.md](architecture.md). For surfacing errors, see [errors.md](errors.md).
+
+## Component creation
+
+Export pattern:
+
+- Always use `export function` syntax. Enforced by `react/function-component-definition`, which allows an arrow only for an unnamed component (an inline render prop).
+- Never use default exports, anywhere under `src/`. The Next.js special files (`page`, `layout`, `error`, `not-found`, `sitemap`, `manifest`, …) are the one exception: the framework requires a default export from them. Enforced by `local/no-default-export`, which also reports `export { X as default }` and reads the special file names from one anchored list in `packages/eslint-config/next.js`.
+- Use named exports consistently.
+
+Props pattern: a named `<Component>Props` type, destructured in the parameter list. Enforced by `local/require-named-props-type`, which reports an inline type literal in the signature (alone or in an intersection) and an undestructured `props` parameter.
+
+```tsx
+type MyComponentProps = {
+  prop1: string;
+  prop2: number;
+};
+
+export function MyComponent({ prop1, prop2 }: MyComponentProps) {
+  return <div>{prop1}</div>;
+}
+```
+
+## Client components
+
+- Start the file with the `'use client'` directive, and name the file `*.client.tsx` (see [architecture.md](architecture.md)). The two halves are one convention and `local/require-use-client-suffix` holds both: a `'use client'` module without the suffix, and a `*.client.tsx` file without the directive. `use-*` hooks, `*.context.tsx` and the Next.js special files are exempt.
+- Use `useState` and React hooks as normal.
+- Handle browser APIs with hydration safety (**prose only**, no rule): guard browser-only code with `typeof window === "undefined"`.
+- Prevent hydration mismatches with proper client checks (**prose only**, no rule).
+- A client file must **not** import from a `_services/` path (except `*.schema.ts` and type-only imports); use a tRPC hook or a server component instead. Enforced by `local/no-client-import-of-services`.
+- A client file must **not** import a runtime value from `@/server/**` either. Enforced by `local/no-client-import-of-server-folder`. See [backend.md](backend.md).
+
+## TailwindCSS
+
+Opacity (**prose only**, no rule):
+
+- Use `bg-white/50` over `bg-white bg-opacity-50`.
+
+Theme variables:
+
+- Use semantic theme tokens over hardcoded colors.
+- Prefer `text-muted-foreground` over `text-gray-500`.
+- Follow design-system color tokens. The theme defines `muted`, `muted-foreground`, `destructive`, `success`, `primary`, `secondary`, `border` and `foreground` in `packages/ui/src/styles/globals.css`. There is no `warning` and no `info` token; adding one is a two-step change, the CSS variable **and** a line in the lint rule's hue table, and until both land the yellow, amber and blue sites stay raw and unreported.
+- **`local/no-raw-tailwind-colors` is driven by a hue-to-token table**, `HUE_TOKENS` in `packages/eslint-config/local-rules/no-raw-tailwind-colors.js`: `red` maps to `destructive`, `green` and `emerald` to `success`, the neutral hues to `muted` / `border` / `foreground`. **A hue absent from the table is never reported**, so the rule can never demand a token that does not exist. A neutral hue's message names all three candidates, because the right one depends on what the class is for. The table is the rule's own, so the shared config passes only `allowPatterns` and `ignorePathPatterns`.
+- **The rule reads every string literal and template chunk in the file**, not only a `className` attribute or a `cn()` argument. A ternary branch, a constant map of status classes and a `cva` variant value are all checked, so moving a class string out of the attribute is not a way round the rule.
+- **A `dark:` variant disappears when a class becomes a token; it is not ported.** A semantic token carries its own light and dark values, so `text-green-600 dark:text-green-400` collapses to `text-success`, never `text-success dark:text-success-400`. If the dark rendering is then wrong, that is a theme question (fix `--success` in `globals.css`), not a class question.
+- **The four home-page illustration files are permanently exempt** through anchored `ignorePathPatterns` entries: `hero/hero-flow-animation.client.tsx`, `how-it-works/flow-animations.tsx`, `before-after-section.tsx` and `problem/problem-chat-animation.client.tsx`. They are drawn mock screens whose fixed colours are the point. Do not "fix" them and do not remove the exemptions.
+
+## TanStack Query status handling
+
+**Enforced by `local/no-query-status-branch`** for the first bullet below: in a `.tsx` file, reading `isLoading`, `isPending`, `isError`, `isSuccess` or `status` on a query result (a `use*Query(...)` call, a variable assigned from one, or a variable named `query` / `*Query`) is reported. Mutations pass. The rest of this section is **prose only**, except the `query.data ?? []` ban below: whether a `Loading` renders a `<Skeleton>` shaped like its content and which folder's `Errored` convention wins are judgements about rendered output that a linter reading one file cannot make.
+
+**Accepted blind spot:** consumers of `useActiveProject()` read `isPending` from a state the provider publishes, not from a query result, so the rule does not see them. Render those through `projectsQuery` and `matchQueryStatus` anyway.
+
+- Use the `matchQueryStatus` utility for query states; do not write imperative `isLoading`/`isError` branches.
+- Handle all four states: `Loading`, `Errored`, `Empty`, `Success`.
+- Keep components declarative: no multiple return statements for status, no repeated layout wrappers, no cluttered conditional rendering.
+
+Each state has a required component, so the four branches look the same everywhere:
+
+- **`Loading` must render `<Skeleton>`** from `@workspace/ui/components/skeleton`, shaped like the content it replaces. Never a spinner, plain text, or `null`.
+- **`Errored` and `Empty` must render `<Empty>`** and its sub-components (`<EmptyHeader>`, `<EmptyMedia>`, `<EmptyTitle>`, `<EmptyDescription>`, `<EmptyContent>`) from `@workspace/ui/components/empty`. Never a raw string, a bare `<div>`, or `null`.
+- `Errored` renders the message inside the `<Empty>` (see [errors.md](errors.md)), never a stack or a digest. **Read it through `getErrorMessage`** (`@/utils/error/get-error-message`): the `Errored` branch is handed an `unknown`, and the helper returns an `Error`'s non-blank message or falls back to `Something went wrong. Please try again.`, deliberately the same sentence the `errorFormatter` sends. Rendering the message at all is only safe because of that server-side masking.
+- **Exception, folder consistency wins:** in the settings folders (project settings, account settings, organization general), the `Errored` branch renders `<Alert variant="destructive">` rather than `<Empty>`, because every neighbouring card already does. 19 of the 48 `Errored` branches look like this. A card whose failures look like two different products is worse than a rule file describing the rest of the app. Match the folder you are in.
+
+### What an `Errored` branch must never do
+
+- **Never pass `query.data ?? []` into a child list, select or picker.** A failed read then renders "No teams available": an empty state standing in for an error. Nest `matchQueryStatus` around the picker instead. This one is enforced, by `local/no-restricted-patterns`, which matches a receiver named `query` or `*Query`, so name the query result that way.
+- **Never fall back to a default that enables a destructive or duplicating action.** `isDefault ?? false` left `Delete organization` enabled and pointed at a default Organization; a `Not subscribed` fallback invited an admin to create a second Subscription. This is a safety rule, not a cosmetic one.
+- **Exemption:** a value read only to enable a control may skip the `Errored` branch when failure yields the safe outcome, especially when the same query's failure is already on screen elsewhere on the page. The delete-confirmation name is the live case: empty on failure, so the input can never match and `Delete` stays disabled.
+- **Exemption:** a table that owns its search field and its pagination keeps its own `isError` branch, because converting it to `matchQueryStatus` would remove the search field on a failure. Only its copy goes through `getErrorMessage`.
+- **A provider that must always render its children publishes a query-state object instead of rendering an error.** `ActiveProjectProvider` exposes a four-field `ProjectsQueryState` shaped for `matchQueryStatus`, and its `isLoading` follows the query's `isPending`, not react-query's `isLoading`, so a read disabled until the active Organization is known counts as loading rather than empty.
+
+```tsx
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { getErrorMessage } from "@/utils/error/get-error-message";
+import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@workspace/ui/components/empty";
+
+export function PostsList() {
+  const postsQuery = usePostsListQuery();
+
+  return (
+    <PostsListLayout>
+      {matchQueryStatus(postsQuery, {
+        Loading: (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ),
+        Errored: (error) => (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>Failed to load posts</EmptyTitle>
+              <EmptyDescription>{getErrorMessage(error)}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ),
+        Empty: (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No posts</EmptyTitle>
+              <EmptyDescription>
+                You have not published a post yet.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ),
+        Success: ({ data }) => (
+          <ul>
+            {data.map((post) => (
+              <li key={post.id}>{post.title}</li>
+            ))}
+          </ul>
+        ),
+      })}
+    </PostsListLayout>
+  );
+}
+```
+
+## Forms (create/edit)
+
+**Prose only** for this section, except the effect and `watch` rules, which name their rule.
+
+- Build on the project `Form` component with `react-hook-form` + `zodResolver`. No hand-rolled form state.
+- Read a field with `useWatch({ control, name })`, not `form.watch()`: `react-hooks/incompatible-library` reports `watch`.
+- **Never drive form state with `useEffect`.** `react-hook-form` owns it: use `defaultValues`, `values`, `reset()`, or `useFormContext()`. An effect that syncs props into the form is a bug waiting to happen. `reset` and `setValue` inside `useEffect` are reported by `local/no-form-mutation-in-effect`; a default that waits for async data and never replaces a user's choice is a disable comment with that reason (`jira-project-picker.client.tsx`).
+- When a form is used for both create and edit: split into a dialog wrapper (fetches data, `matchQueryStatus`) and a pure form component (receives loaded data as props).
+- Form validation uses a Zod schema from `_services/` (see [schemas.md](schemas.md)); validation failures surface as per-field errors, not a toast (see [errors.md](errors.md)).
+- The container hook (`use-*.ts`) owns form state + mutation + optimistic update + toast + invalidation.
+- An action button that owns its own mutation lives in its own file and reads form state via `useFormContext()` (see [code-shape.md](code-shape.md)).
+
+## User-facing copy
+
+- English only. Professional, clear, and concise: match the tone of serious developer tools
+  (Vercel, Linear, Stripe). **Prose only**, no rule.
+- No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated
+  wording. **Prose only**, no rule: an exclamation mark is legitimate inside a quoted string, a
+  regular expression or a shell snippet, so a character ban would report more noise than copy.
+- Never use the em dash character; use a comma, colon, or period. Enforced by
+  `local/no-em-dash-in-copy` over string literals, JSX text and template chunks in
+  `apps/web/src/**`, and by `apps/web/src/mdx-no-em-dash.test.ts` over the `.mdx` content ESLint
+  cannot parse.

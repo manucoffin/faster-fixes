@@ -12,14 +12,34 @@ type VsSlug =
   | "usersnap";
 
 const allComparisons: { slug: VsSlug; label: string; href: Route }[] = [
-  { slug: "bugherd", label: "BugHerd alternative", href: "/vs/bugherd" as Route },
-  { slug: "marker-io", label: "Marker.io alternative", href: "/vs/marker-io" as Route },
-  { slug: "usersnap", label: "Usersnap alternative", href: "/vs/usersnap" as Route },
-  { slug: "userback", label: "Userback alternative", href: "/vs/userback" as Route },
+  {
+    slug: "bugherd",
+    label: "BugHerd alternative",
+    href: "/vs/bugherd" as Route,
+  },
+  {
+    slug: "marker-io",
+    label: "Marker.io alternative",
+    href: "/vs/marker-io" as Route,
+  },
+  {
+    slug: "usersnap",
+    label: "Usersnap alternative",
+    href: "/vs/usersnap" as Route,
+  },
+  {
+    slug: "userback",
+    label: "Userback alternative",
+    href: "/vs/userback" as Route,
+  },
   { slug: "atarim", label: "Atarim alternative", href: "/vs/atarim" as Route },
   { slug: "gleap", label: "Gleap alternative", href: "/vs/gleap" as Route },
   { slug: "ruttl", label: "Ruttl alternative", href: "/vs/ruttl" as Route },
-  { slug: "markup-io", label: "Markup.io alternative", href: "/vs/markup-io" as Route },
+  {
+    slug: "markup-io",
+    label: "Markup.io alternative",
+    href: "/vs/markup-io" as Route,
+  },
 ];
 
 type VsCrossLinksProps = {
@@ -33,7 +53,7 @@ export function VsCrossLinks({ currentSlug }: VsCrossLinksProps) {
     <section className="w-full py-12 md:py-16">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
             Compare other tools
           </p>
           <h2 className="text-2xl font-bold md:text-3xl">

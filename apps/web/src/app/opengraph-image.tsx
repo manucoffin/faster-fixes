@@ -2,7 +2,7 @@ import { SITE_NAME, SITE_TAGLINE } from "@/app/_constants/seo";
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`;
+export const alt = `${SITE_NAME}: ${SITE_TAGLINE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

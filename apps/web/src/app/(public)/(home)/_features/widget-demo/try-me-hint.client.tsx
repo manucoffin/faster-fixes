@@ -60,7 +60,7 @@ export function TryMeHint() {
         aria-hidden="true"
         className="pointer-events-none fixed right-[80px] bottom-[22px] z-[2147483646] animate-[ff-try-me-fade-in_320ms_ease-out_both]"
       >
-        <div className="bg-primary relative overflow-hidden rounded-full p-[2px] shadow-lg">
+        <div className="relative overflow-hidden rounded-full bg-primary p-[2px] shadow-lg">
           <div
             className="absolute inset-[-50%] animate-[ff-try-me-spin_3s_linear_infinite]"
             style={{
@@ -68,7 +68,7 @@ export function TryMeHint() {
                 "conic-gradient(from 0deg, transparent 0deg, transparent 60deg, color-mix(in oklch, var(--primary) 30%, white) 90deg, transparent 120deg, transparent 360deg)",
             }}
           />
-          <div className="bg-background text-foreground relative flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap">
+          <div className="relative flex items-center gap-1 rounded-full bg-background px-3 py-1.5 text-sm font-medium whitespace-nowrap text-foreground">
             Try me
             <ChevronRightIcon className="size-3.5" />
           </div>

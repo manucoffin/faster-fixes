@@ -14,29 +14,32 @@ import { MessageSquareIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { SendFeedbackInputs, SendFeedbackSchema } from "./send-feedback.schema";
+import type { SendFeedbackInput } from "@/app/(authenticated)/_services/send-feedback.schema";
+import { SendFeedbackSchema } from "@/app/(authenticated)/_services/send-feedback.schema";
 
 export function FeedbackButton() {
   const trpc = useTRPC();
   const [open, setOpen] = useState(false);
 
-  const form = useForm<SendFeedbackInputs>({
+  const form = useForm<SendFeedbackInput>({
     resolver: zodResolver(SendFeedbackSchema),
     defaultValues: { message: "" },
   });
 
-  const sendFeedbackMutation = useMutation(trpc.authenticated.feedback.send.mutationOptions({
-    onSuccess: () => {
-      toast.success("Thank you for your feedback!");
-      form.reset();
-      setOpen(false);
-    },
-    onError: (error) => {
-      toast.error(error.message || "An error occurred.");
-    },
-  }));
+  const sendFeedbackMutation = useMutation(
+    trpc.authenticated.sendFeedback.mutationOptions({
+      onSuccess: () => {
+        toast.success("Thank you for your feedback!");
+        form.reset();
+        setOpen(false);
+      },
+      onError: (error) => {
+        toast.error(error.message || "An error occurred.");
+      },
+    }),
+  );
 
-  const onSubmit = (data: SendFeedbackInputs) => {
+  const onSubmit = (data: SendFeedbackInput) => {
     sendFeedbackMutation.mutate(data);
   };
 
@@ -60,7 +63,7 @@ export function FeedbackButton() {
             {...form.register("message")}
           />
           {form.formState.errors.message && (
-            <p className="text-destructive text-xs">
+            <p className="text-xs text-destructive">
               {form.formState.errors.message.message}
             </p>
           )}

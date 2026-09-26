@@ -4,11 +4,7 @@ import {
   FasterFixesClient,
   resolveReviewerToken,
 } from "@fasterfixes/core";
-import type {
-  Labels,
-  WidgetConfig,
-  WidgetPosition,
-} from "@fasterfixes/core";
+import type { Labels, WidgetConfig, WidgetPosition } from "@fasterfixes/core";
 import type { ClassNames } from "./context.js";
 import { FeedbackProviderCore } from "./feedback-provider-core.js";
 
@@ -33,6 +29,7 @@ type FeedbackProviderProps = {
 
 export function FeedbackProvider({
   projectId,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- the provider still honours the deprecated prop it declares, for existing installs
   apiKey,
   apiOrigin,
   color,
@@ -44,7 +41,6 @@ export function FeedbackProvider({
 }: FeedbackProviderProps) {
   const [reviewerToken, setReviewerToken] = useState<string | null>(null);
   const [config, setConfig] = useState<WidgetConfig | null>(null);
-  const [initialized, setInitialized] = useState(false);
 
   // Prefer projectId; fall back to the deprecated apiKey. The server resolves
   // either a `proj_` Project ID or a legacy `ff_` key from the same header.
@@ -57,26 +53,23 @@ export function FeedbackProvider({
 
   useEffect(() => {
     const token = resolveReviewerToken();
-    if (!token) {
-      setInitialized(true);
-      return;
-    }
-    setReviewerToken(token);
+    if (!token) return;
 
-    async function init() {
+    const init = async () => {
       try {
         const cfg = await client.getConfig();
+        // The token only matters once a config exists, so both land in one render
+        setReviewerToken(token);
         setConfig(cfg);
       } catch {
         // Config fetch failed — widget won't render
       }
-      setInitialized(true);
-    }
+    };
 
     void init();
   }, [client]);
 
-  if (!initialized || !reviewerToken || !config || !config.enabled) {
+  if (!reviewerToken || !config || !config.enabled) {
     return <>{children}</>;
   }
 
