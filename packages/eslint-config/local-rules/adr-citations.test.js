@@ -17,6 +17,12 @@ const ADR_CITATION_RE = /ADR-(\d{4})/g;
 // citation that merely points at an existing file is not enough. This table is
 // the assertion: a rule may cite these numbers and no others.
 const EXPECTED_CITATIONS = {
+  // The shared error screen and its fixed copy are a frontend convention of the
+  // coding standards; the leak it closes is argued in the message, not an ADR.
+  "error-boundary-renders-error-screen.js": [],
+  // A repo-wide naming convention of the coding standards: no ADR decides the
+  // casing of a path, and its exceptions come from Next.js routing syntax.
+  "kebab-case-path.js": [],
   "no-client-domain-error-instanceof.js": ["0012"],
   "no-client-import-of-server-folder.js": ["0012"],
   "no-client-import-of-services.js": ["0011"],
@@ -39,6 +45,10 @@ const EXPECTED_CITATIONS = {
   // decision, so there is nothing for it to cite.
   "no-em-dash-in-copy.js": [],
   "no-feature-nesting.js": ["0010"],
+  // Two react-hook-form conventions of the frontend standards, grounded in how
+  // the library subscribes and resets rather than in an architecture decision.
+  "no-form-mutation-in-effect.js": [],
+  "no-form-state-prop.js": [],
   // A design-system convention: the hue-to-token table is the theme in
   // `packages/ui/src/styles/globals.css`, not an ADR.
   "no-raw-tailwind-colors.js": [],

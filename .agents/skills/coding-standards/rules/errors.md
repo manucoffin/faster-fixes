@@ -45,7 +45,7 @@ Of the four, only the `Errored` branch of a query carries a rule, and only for o
 
 ## Boundary conventions
 
-**Prose only**, no rule, for this whole section and for "Logging" below. The boundary files are the Next.js special files, exempt from the suffix and default export rules by definition, and what they render is a judgement about output.
+**Prose only** for this section and for "Logging" below, except the first two points for `error.tsx` and `global-error.tsx`, held by `local/error-boundary-renders-error-screen`. The boundary files are the Next.js special files, exempt from the suffix and default export rules by definition, and what the others render is a judgement about output.
 
 - Every boundary file renders the shared `ErrorScreen` (`@/app/_components/error-screen`) with copy from `@/app/_constants/error-screens` and its actions as children (a retry button, a link out). Do not hand-roll the layout and do not inline the copy: six files use it today (`app/{error,global-error,not-found,forbidden,unauthorized}.tsx` and `app/(authenticated)/error.tsx`, which keeps the sidebar and the header on a dashboard render error).
 - A boundary must never render `error.message`: Server Component errors carry a masked digest, and an unexpected message may leak internals. Log the raw error in `useEffect`; show fixed copy to the user. `digest` is not declared in the boundary props type at all (`{ error: Error; retry: () => void }`), so it is unrenderable by construction rather than by discipline.
@@ -70,7 +70,7 @@ The `errorFormatter` replaces the **message** of an `INTERNAL_SERVER_ERROR` and 
 
 ## Anti-patterns
 
-- Never show a raw `error.message`, stack, or `digest` to the user. **Prose only**, no rule.
+- Never show a raw `error.message`, stack, or `digest` to the user. In `error.tsx` and `global-error.tsx`, enforced by `local/error-boundary-renders-error-screen`; everywhere else **prose only**.
 - Never `instanceof DomainError` in client code (`local/no-client-domain-error-instanceof`), or import server error modules into a `.client.tsx` / `"use client"` module (`local/no-client-import-of-server-folder`). The import rule is a boundary rule and cannot be switched off by a disable comment; the `instanceof` rule can, with a written reason.
 - Never throw a bare `Error` or a `TRPCError` from a service: `local/services-no-bare-error` reports the first, and the `TRPCError` row of `local/no-cross-layer-import` confines `@trpc/server` to a router and `src/server/trpc/`.
 - Never toast a validation error that belongs inline on a form field. **Prose only**, no rule.

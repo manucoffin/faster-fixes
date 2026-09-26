@@ -5,7 +5,8 @@ Shared eslint configuration for the workspace.
 ## Local convention rules
 
 `local-rules/` holds the project convention rules, exported as the `local/`
-plugin from `local-rules/index.js` and wired per file glob in `next.js`.
+plugin from `local-rules/index.js` and wired per file glob: in `base.js` for the
+generic rules every workspace is held to, in `next.js` for the web app.
 
 Every rule is `error`, with no environment gate and no per-scope allowlist
 (ADR-0015): `pnpm lint` is the single lint mode, so lint-staged, CI and an agent
@@ -14,45 +15,69 @@ regression.
 
 ## The rule set
 
-Twenty-one rules, every one `error`. The glob is the one it is wired on in `next.js`; "options"
-names the constant in `next.js` it reads.
+Twenty-five rules, every one `error`. The glob is the one it is wired on in `next.js`, or in
+`base.js` where the row says so; "options" names the constant it reads.
 
-| Rule                                 | Glob                     | Holds                                                                                             | Options                    |
-| ------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------- |
-| `no-client-domain-error-instanceof`  | `**/*.{ts,tsx}`          | `instanceof DomainError` in a client module is always false; branch on `error.data.code`          |                            |
-| `no-client-import-of-server-folder`  | `**/*.{ts,tsx}`          | a client module imports no runtime value from `@/server/**`                                       | `allowImportPatterns`      |
-| `no-client-import-of-services`       | `**/*.{ts,tsx}`          | a client module imports no `_services/` path, bar `*.schema.ts` and type-only imports             |                            |
-| `require-server-action-suffix`       | `**/*.{ts,tsx}`          | a `'use server'` directive, at module or function level, belongs only in `*.server.action.ts`     |                            |
-| `no-cross-domain-deep-import`        | `**/src/app/_domains/**` | another domain is reached through its barrel, by alias, in every import form                      |                            |
-| `no-cross-layer-import`              | `**/src/**/*.{ts,tsx}`   | the layer import table: nine rows, described below                                                | `layerImportRows`          |
-| `no-default-export`                  | `**/src/**/*.{ts,tsx}`   | no `export default` and no `export { X as default }`, Next.js special files excepted              | `noDefaultExportOptions`   |
-| `require-use-client-suffix`          | `**/src/**/*.{ts,tsx}`   | a `'use client'` module is named `*.client.ts(x)` and a `*.client.ts(x)` carries the directive    | `useClientSuffixOptions`   |
-| `require-service-output-type`        | `**/src/**/*.{ts,tsx}`   | a read service exports `<Service>Output`; no consumer infers it from the router                   |                            |
-| `require-inngest-function-placement` | `**/src/**/*.{ts,tsx}`   | `createFunction` sits in an `*.inngest.ts(x)` file, and that file in a `_services/` folder        |                            |
-| `no-restricted-patterns`             | `**/src/**/*.{ts,tsx}`   | no `enum`, no `as unknown as`, no `query.data ?? []`                                              | `restrictedPatternOptions` |
-| `no-em-dash-in-copy`                 | `**/src/**/*.{ts,tsx}`   | no em dash in a string literal, JSX text or a template chunk                                      |                            |
-| `no-feature-nesting`                 | `**/_features/**`        | one grouping level under a features folder, and no features folder inside one                     |                            |
-| `services-verb-prefix`               | `**/_services/**`        | the basename carries a verb from the vocabulary, and the export is named after the file           | `serviceVerbOptions`       |
-| `services-read-never-writes`         | `**/_services/**`        | a read-verb file calls no Prisma write method on a database client                                | `serviceVerbOptions`       |
-| `services-no-trpc-import`            | `**/_services/**`        | a service imports no tRPC                                                                         |                            |
-| `services-no-bare-error`             | `**/_services/**`        | a service throws a `DomainError` subclass, not `new Error(...)`                                   |                            |
-| `require-schema-conventions`         | `**/*.schema.ts`         | `*Schema` names, `Input` as `z.infer` and `Values` as `z.input`, no `z.nativeEnum`, no `.merge()` | `schemaConventionOptions`  |
-| `schema-must-be-pure-zod`            | `**/*.schema.ts`         | a schema imports only what the allowlist names                                                    | `schemaPurityOptions`      |
-| `no-relative-test-mock`              | `**/*.test.{ts,tsx}`     | a `vi.mock` names a boundary, never a relative specifier                                          |                            |
-| `no-raw-tailwind-colors`             | every linted file        | a hue with a semantic token is written as that token                                              | `rawTailwindColorOptions`  |
+| Rule                                  | Glob                     | Holds                                                                                             | Options                    |
+| ------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------- |
+| `no-client-domain-error-instanceof`   | `**/*.{ts,tsx}`          | `instanceof DomainError` in a client module is always false; branch on `error.data.code`          |                            |
+| `no-client-import-of-server-folder`   | `**/*.{ts,tsx}`          | a client module imports no runtime value from `@/server/**`                                       | `allowImportPatterns`      |
+| `no-client-import-of-services`        | `**/*.{ts,tsx}`          | a client module imports no `_services/` path, bar `*.schema.ts` and type-only imports             |                            |
+| `require-server-action-suffix`        | `**/*.{ts,tsx}`          | a `'use server'` directive, at module or function level, belongs only in `*.server.action.ts`     |                            |
+| `no-cross-domain-deep-import`         | `**/src/app/_domains/**` | another domain is reached through its barrel, by alias, in every import form                      |                            |
+| `no-cross-layer-import`               | `**/src/**/*.{ts,tsx}`   | the layer import table: nine rows, described below                                                | `layerImportRows`          |
+| `no-default-export`                   | `**/src/**/*.{ts,tsx}`   | no `export default` and no `export { X as default }`, Next.js special files excepted              | `noDefaultExportOptions`   |
+| `require-use-client-suffix`           | `**/src/**/*.{ts,tsx}`   | a `'use client'` module is named `*.client.ts(x)` and a `*.client.ts(x)` carries the directive    | `useClientSuffixOptions`   |
+| `require-service-output-type`         | `**/src/**/*.{ts,tsx}`   | a read service exports `<Service>Output`; no consumer infers it from the router                   |                            |
+| `require-inngest-function-placement`  | `**/src/**/*.{ts,tsx}`   | `createFunction` sits in an `*.inngest.ts(x)` file, and that file in a `_services/` folder        |                            |
+| `no-restricted-patterns`              | `**/src/**/*.{ts,tsx}`   | (`base.js`) no `enum`, no `as unknown as`, no `query.data ?? []`                                  | `restrictedPatternOptions` |
+| `no-em-dash-in-copy`                  | `**/src/**/*.{ts,tsx}`   | (`base.js`) no em dash in a string literal, JSX text or a template chunk                          |                            |
+| `kebab-case-path`                     | every linted file        | (`base.js`) every folder and file name is kebab-case; `_` buckets and route segments excepted     |                            |
+| `no-form-state-prop`                  | `**/src/**/*.{ts,tsx}`   | a react-hook-form `formState` is never handed to a child as a whole                               |                            |
+| `no-form-mutation-in-effect`          | `**/src/**/*.{ts,tsx}`   | no form `reset` or `setValue` inside an effect: `useForm({ values })` or the event handler        |                            |
+| `error-boundary-renders-error-screen` | `**/src/app/**/*.tsx`    | `error.tsx` and `global-error.tsx` render `ErrorScreen` and read no `message`, `stack`, `digest`  |                            |
+| `no-feature-nesting`                  | `**/_features/**`        | one grouping level under a features folder, and no features folder inside one                     |                            |
+| `services-verb-prefix`                | `**/_services/**`        | the basename carries a verb from the vocabulary, and the export is named after the file           | `serviceVerbOptions`       |
+| `services-read-never-writes`          | `**/_services/**`        | a read-verb file calls no Prisma write method on a database client                                | `serviceVerbOptions`       |
+| `services-no-trpc-import`             | `**/_services/**`        | a service imports no tRPC                                                                         |                            |
+| `services-no-bare-error`              | `**/_services/**`        | a service throws a `DomainError` subclass, not `new Error(...)`                                   |                            |
+| `require-schema-conventions`          | `**/*.schema.ts`         | `*Schema` names, `Input` as `z.infer` and `Values` as `z.input`, no `z.nativeEnum`, no `.merge()` | `schemaConventionOptions`  |
+| `schema-must-be-pure-zod`             | `**/*.schema.ts`         | a schema imports only what the allowlist names                                                    | `schemaPurityOptions`      |
+| `no-relative-test-mock`               | `**/*.test.{ts,tsx}`     | a `vi.mock` names a boundary, never a relative specifier                                          |                            |
+| `no-raw-tailwind-colors`              | every linted file        | a hue with a semantic token is written as that token                                              | `rawTailwindColorOptions`  |
 
-Five rules of installed plugins carry the style conventions on `**/src/**/*.{ts,tsx}`:
-`@typescript-eslint/consistent-type-definitions` (`type` over `interface`),
-`@typescript-eslint/consistent-type-imports` (an import used only as a type is `import type`),
-`react/function-component-definition` (a named component is an `export function`),
-`no-nested-ternary` and `no-else-return`. The core `no-restricted-imports` is the
+`base.js` holds the generic rules of every workspace, the web app and the
+packages alike. On every file: `@typescript-eslint/no-unused-vars` with the `_`
+convention (a `_` binding is imposed by the caller and ignored on purpose),
+`eqeqeq` (`== null` allowed), `object-shorthand` and ASCII identifiers
+(`id-match`). On `**/src/**/*.{ts,tsx}`: `consistent-type-definitions` (`type`
+over `interface`), `consistent-type-imports`, `no-inferrable-types`,
+`no-nested-ternary`, `no-else-return` (no `else if` either) and `max-depth: 3`.
+
+The same glob runs the type-aware rules through the TypeScript project service:
+`await-thenable`, `no-misused-promises` (JSX attributes excepted),
+`no-unsafe-call`, `no-unsafe-enum-comparison`, `no-unnecessary-type-assertion`,
+`restrict-template-expressions`, `no-base-to-string`, `no-deprecated`,
+`only-throw-error` and `switch-exhaustiveness-check`. They read the generated
+types, so a fresh clone builds the packages, the Prisma client and the Next.js
+route types before it lints. `next-config.test.js` lints made-up paths, so it
+switches them off with `disableTypeChecked`.
+
+`component-shape.js` holds `react/function-component-definition` (a named
+component is an `export function`) for the web app and the React packages.
+
+Severity is binary: `severity.js` promotes every `warn` a plugin preset ships
+(react-hooks, Next.js, turbo) to `error`, and `binary-severity.test.js` holds
+every exported config to it.
+
+The core `no-restricted-imports` is the
 `src/server/**` deep-import lock and nothing else.
 
 Two conventions of the tree are held by a test in `apps/web` rather than by lint, because each is a
 property of the whole tree: `src/app/_domains/domain-cycles.test.ts` (no domain import cycle) and
 `src/mdx-no-em-dash.test.ts` (no em dash in the MDX content).
 
-The coding standards skill at `.claude/skills/coding-standards/` is the reader's half of this
+The coding standards skill at `.agents/skills/coding-standards/` is the reader's half of this
 table: every checkable convention there names its rule, and every other one is marked prose only.
 
 ## How the rules behave
@@ -202,11 +227,6 @@ from internal ones, because an internal string has no use for the character
 either. MDX is the other half of the convention and ESLint cannot parse it:
 `apps/web/src/mdx-no-em-dash.test.ts` reads those files directly and fails on
 the same character.
-
-`local-rules/_deprecated_no-client-import-of-server-errors.js` and
-`local-rules/_deprecated_require-trpc-output-type.js` are the empty stubs of the
-rules `no-client-import-of-server-folder` and `require-service-output-type`
-replaced. Nothing imports them; they are the maintainer's to delete.
 
 `local-rules/imports.js` is the shared import view, not a rule: it visits the
 four import forms (static `import`, `export … from`, `export *`, dynamic

@@ -2,9 +2,15 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { ESLint } from "eslint";
+import tseslint from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
 import { nextJsConfig } from "./next.js";
+
+// The paths these tests lint are made up, so the TypeScript project service
+// cannot find them. The type-aware rules are switched off here: this suite is
+// about the convention rules and their globs, not about type information.
+const untypedConfig = [...nextJsConfig, tseslint.configs.disableTypeChecked];
 
 const SERVICE =
   "src/app/_domains/subscription/_services/get-active-subscription.ts";
@@ -39,6 +45,10 @@ const CONVENTION_RULES = {
   "local/no-relative-test-mock": SERVICE_TEST,
   "local/no-restricted-patterns": FEATURE,
   "local/no-em-dash-in-copy": FEATURE,
+  "local/kebab-case-path": FEATURE,
+  "local/no-form-state-prop": FEATURE,
+  "local/no-form-mutation-in-effect": FEATURE,
+  "local/error-boundary-renders-error-screen": "src/app/error.tsx",
 };
 
 /**
@@ -52,7 +62,7 @@ async function severityResolver(ruleName) {
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
     overrideConfigFile: true,
-    overrideConfig: nextJsConfig,
+    overrideConfig: untypedConfig,
   });
 
   return async (file) => {
@@ -77,7 +87,7 @@ async function messagesFor(file, code, ruleId) {
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
     overrideConfigFile: true,
-    overrideConfig: nextJsConfig,
+    overrideConfig: untypedConfig,
   });
   const [result] = await eslint.lintText(code, { filePath: file });
 
@@ -88,7 +98,7 @@ async function schemaPurityMessagesFor(file, code) {
   const eslint = new ESLint({
     cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
     overrideConfigFile: true,
-    overrideConfig: nextJsConfig,
+    overrideConfig: untypedConfig,
   });
   const [result] = await eslint.lintText(code, { filePath: file });
 
@@ -304,7 +314,7 @@ describe("require-service-output-type", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(code, { filePath: file });
 
@@ -381,7 +391,7 @@ describe("services-verb-prefix", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(`export function anything() {}\n`, {
       filePath: file,
@@ -507,7 +517,7 @@ describe("the server folder import lock", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(
       `import x from "${specifier}";\nexport default x;\n`,
@@ -617,7 +627,7 @@ describe("no-client-import-of-server-folder", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(
       `"use client";\nimport { x } from "${specifier}";\nexport const y = x;\n`,
@@ -665,7 +675,7 @@ describe("the layer import table", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(code, { filePath: file });
 
@@ -1167,7 +1177,7 @@ describe("no-raw-tailwind-colors", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(source, { filePath: file });
 
@@ -1271,7 +1281,7 @@ describe("no-relative-test-mock", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(
       `import { vi } from "vitest";\n// eslint-disable-next-line ${RULE} -- a reviewed one-off\nvi.mock("./sibling", () => ({}));\n`,
@@ -1592,7 +1602,7 @@ describe("the disable comment policy", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(code, { filePath: FILE });
 
@@ -1675,7 +1685,7 @@ describe("the disable comment policy", () => {
     const eslint = new ESLint({
       cwd: fileURLToPath(new URL("../../apps/web/", import.meta.url)),
       overrideConfigFile: true,
-      overrideConfig: nextJsConfig,
+      overrideConfig: untypedConfig,
     });
     const [result] = await eslint.lintText(
       `// eslint-disable-next-line local/no-cross-layer-import -- just this once\nimport { prisma } from "@workspace/db";\nexport const y = prisma;\n`,

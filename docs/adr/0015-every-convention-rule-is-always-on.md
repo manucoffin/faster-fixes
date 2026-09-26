@@ -1,6 +1,6 @@
 # Every convention rule is always on; the agent gate is removed
 
-- **Status**: Accepted, not yet implemented
+- **Status**: Accepted, implemented
 - **Date**: 2026-09-20
 
 Every rule of the `local/` ESLint plugin runs at `error` in plain `pnpm lint`. The

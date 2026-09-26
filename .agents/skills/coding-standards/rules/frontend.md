@@ -130,10 +130,10 @@ export function PostsList() {
 
 ## Forms (create/edit)
 
-**Prose only**, no rule, for this whole section.
+**Prose only** for this section, except the effect rule, which names its rule.
 
 - Build on the project `Form` component with `react-hook-form` + `zodResolver`. No hand-rolled form state.
-- **Never drive form state with `useEffect`.** `react-hook-form` owns it: use `defaultValues`, `values`, `reset()`, or `useFormContext()`. An effect that syncs props into the form is a bug waiting to happen.
+- **Never drive form state with `useEffect`.** `react-hook-form` owns it: use `defaultValues`, `values`, `reset()`, or `useFormContext()`. An effect that syncs props into the form is a bug waiting to happen. `reset` and `setValue` inside `useEffect` are reported by `local/no-form-mutation-in-effect`; a default that waits for async data and never replaces a user's choice is a disable comment with that reason (`jira-project-picker.client.tsx`).
 - When a form is used for both create and edit: split into a dialog wrapper (fetches data, `matchQueryStatus`) and a pure form component (receives loaded data as props).
 - Form validation uses a Zod schema from `_services/` (see [schemas.md](schemas.md)); validation failures surface as per-field errors, not a toast (see [errors.md](errors.md)).
 - The container hook (`use-*.ts`) owns form state + mutation + optimistic update + toast + invalidation.

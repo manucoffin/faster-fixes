@@ -119,7 +119,8 @@ Placement follows the **domain decision, not the dependency**. Thin domain-agnos
 
 Every rule below is `error` in plain `pnpm lint`, with no environment gate and no per-scope
 allowlist (ADR-0015), so the pre-commit hook and CI run exactly this set. Sources are in
-`packages/eslint-config/local-rules/`, wiring and options in `packages/eslint-config/next.js`.
+`packages/eslint-config/local-rules/`, wiring and options in `packages/eslint-config/base.js` (the
+generic rules every workspace runs) and `packages/eslint-config/next.js` (the web app).
 A convention of this file that is not listed here is marked **prose only** where it is stated.
 
 Inside `_services/`:
@@ -136,7 +137,7 @@ Across the app source:
 - `no-cross-layer-import`, the layer import table (`layerImportRows` in `next.js`). Nine rows: a domain barrel exports no service or router at runtime; a `trpc-router.ts` imports no Prisma; a helper imports neither the database, nor `next`, nor `react`; a service does not reach for `next/server`, `next/headers` or `next/navigation`; root `_components/`, `_providers/` and `_constants/` import no domain; `src/lib/` and `src/utils/` do not import the app tree; `@trpc/server` is confined to a router and `src/server/trpc/`; runtime database imports are confined to `_services/` and `src/server/`; the database package is reached through `@workspace/db`, `@workspace/db/types` and `@workspace/db/generated/prisma/enums`. `require-agent-auth.ts` is the one named service exemption.
 - `no-cross-domain-deep-import`: another domain is reached through its barrel, by alias, in every import form.
 - `no-restricted-imports` on `src/server/**`: the server folder does not reach into the app tree by deep path. Its exemptions are named file by file in `next.js`.
-- `no-default-export`, `no-restricted-patterns` (`enum`, `as unknown as`, `query.data ?? []`), `no-em-dash-in-copy` and the installed plugin rules (`@typescript-eslint/consistent-type-definitions`, `@typescript-eslint/consistent-type-imports`, `react/function-component-definition`, `no-nested-ternary`, `no-else-return`, and the built-in `no-throw-literal`) apply to services like every other module. See [typescript.md](typescript.md) and [code-shape.md](code-shape.md).
+- `no-default-export`, `no-restricted-patterns` (`enum`, `as unknown as`, `query.data ?? []`), `no-em-dash-in-copy`, `kebab-case-path` and the installed plugin rules of `base.js` (the type-aware set, `consistent-type-definitions`, `consistent-type-imports`, `no-nested-ternary`, `no-else-return`, `max-depth`, `only-throw-error`) apply to services like every other module. See [typescript.md](typescript.md), [code-shape.md](code-shape.md) and [naming.md](naming.md).
 
 At the client/server boundary:
 
@@ -151,6 +152,7 @@ On the folders and the schemas:
 - `no-feature-nesting`: one grouping level under a features folder, and no features folder inside one.
 - `schema-must-be-pure-zod` and `require-schema-conventions` on `**/*.schema.ts`. See [schemas.md](schemas.md).
 - `no-raw-tailwind-colors` on class strings, and `no-relative-test-mock` on `*.test.ts(x)`. See [frontend.md](frontend.md) and [testing.md](testing.md).
+- `no-form-state-prop` and `no-form-mutation-in-effect` on react-hook-form, and `error-boundary-renders-error-screen` on `error.tsx` / `global-error.tsx`. See [frontend.md](frontend.md), [code-shape.md](code-shape.md) and [errors.md](errors.md).
 
 The five boundary rules (`no-client-import-of-server-folder`, `no-client-import-of-services`,
 `no-cross-domain-deep-import`, `no-cross-layer-import`, `require-server-action-suffix`) and the

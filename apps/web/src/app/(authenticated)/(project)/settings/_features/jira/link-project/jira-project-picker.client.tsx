@@ -80,8 +80,10 @@ export function JiraProjectPicker({
     if (!issueTypes || issueTypeId) return;
     const bug = issueTypes.find((type) => type.name === "Bug");
     if (!bug) return;
+    /* eslint-disable local/no-form-mutation-in-effect -- a default that waits for the async list, and never replaces a type the user picked */
     form.setValue("issueTypeId", bug.id);
     form.setValue("issueTypeName", bug.name);
+    /* eslint-enable local/no-form-mutation-in-effect -- end of the default above */
   }, [issueTypes, issueTypeId, form]);
 
   const linkMutation = useMutation(

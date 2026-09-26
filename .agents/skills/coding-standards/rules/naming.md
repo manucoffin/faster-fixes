@@ -54,9 +54,9 @@ listUsers(opts?: ListOptions)
 
 ## File naming
 
-**Prose only** apart from the verb prefix, which `local/services-verb-prefix` holds inside `_services/`.
+**Prose only** apart from the verb prefix, which `local/services-verb-prefix` holds inside `_services/`, and the casing.
 
-- kebab-case file names.
+- kebab-case file and folder names, dot-separated parts (`foo.client.tsx`). Enforced by `local/kebab-case-path` on every linted file; `_` buckets and Next.js route segments (`[id]`, `(group)`, `@slot`) keep their spelling.
 - Match the CRUD verb in the file name: `get-user.ts` / `get-user-by-id.ts`, `list-users.ts`.
 - Outside `_services/`, prefix external operations with `fetch-`. Inside `_services/`, an external read uses a read verb (`get-github-stars.ts`).
 - In `apps/web` `_services/`, files are plain-named with the verb prefix and **no role suffix** (no `*.server.query.ts` / `*.trpc.*`).

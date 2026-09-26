@@ -7,12 +7,13 @@ How big a file may get and when to split it. Applies to any file you write or re
 Flag and fix these, they are almost always mechanical. Four of the six are enforced; the rest
 are review judgements.
 
-- Nested conditionals → early returns / guard clauses. **Prose only**, no rule.
+- Nested conditionals → early returns / guard clauses, or a helper function. Enforced past three
+  nested blocks by `max-depth`.
 - Deeply nested ternaries → extract to a named variable or an `if` block. Enforced by
   `no-nested-ternary`.
 - Boolean flag props/params → separate components, separate functions, or a named options object. **Prose only**, no rule.
 - The same expression repeated 3+ times → extract to a variable or a helper. **Prose only**, no rule.
-- `else` after a `return` or a `throw` → drop it. Enforced by `no-else-return`.
+- `else` or `else if` after a `return` or a `throw` → drop it. Enforced by `no-else-return`.
 - `as unknown as Type` casts → fix the underlying type instead. Enforced by
   `local/no-restricted-patterns`, which spares `*.test.ts(x)`: a service test builds a partial fake
   of the Prisma client and passes it through the dependency-injection seam. `// @ts-ignore` is
@@ -76,7 +77,8 @@ When action buttons need form state but sit in a header slot **outside** the `<f
 
 - Hoist the `<Form {...form}>` provider above the layout wrapper.
 - Wire the button to the form with the HTML attribute: `<button form="form-id" type="submit">`.
-- Each button calls `useFormContext()`. No prop drilling of `form.formState`.
+- Each button calls `useFormContext()`. The whole `formState` stays with the form: enforced by
+  `local/no-form-state-prop`. A single field (`isSubmitting={form.formState.isSubmitting}`) is fine.
 
 ## Flag vs auto-fix
 

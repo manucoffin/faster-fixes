@@ -1,14 +1,13 @@
 import pluginEslintComments from "@eslint-community/eslint-plugin-eslint-comments";
-import js from "@eslint/js";
 import pluginNext from "@next/eslint-plugin-next";
-import eslintConfigPrettier from "eslint-config-prettier";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
-import tseslint from "typescript-eslint";
 
 import { config as baseConfig } from "./base.js";
+import { componentShapeConfig } from "./component-shape.js";
 import { localRulesPlugin } from "./local-rules/index.js";
+import { withBinarySeverity } from "./severity.js";
 
 // Both options are the repo convention, not opt-in extras: a schema const is
 // PascalCase (`CreateInvoiceSchema`) and its input type is singular
@@ -157,16 +156,6 @@ const serviceVerbOptions = {
 // here is reviewed like the server folder deep-import exemptions below.
 const clientServerImportOptions = {
   allowImportPatterns: [],
-};
-
-// The one exception to the double-cast ban: a service test builds a partial
-// fake of the Prisma client and passes it through the dependency-injection
-// seam, whose parameter type is the real client. A partial object cannot reach
-// that type without the widening step, and giving the double a hand-written
-// type would mean writing out a surface the test does not use. The other two
-// patterns of the rule still apply to a test file.
-const restrictedPatternOptions = {
-  allowDoubleCastPathPatterns: ["\\.test\\.tsx?$"],
 };
 
 const rawTailwindColorOptions = {
@@ -390,17 +379,14 @@ const notDisableableRules = [
 /**
  * A custom ESLint configuration for libraries that use Next.js.
  *
- * @type {import("eslint").Linter.Config}
+ * @type {import("eslint").Linter.Config[]}
  * */
-export const nextJsConfig = [
+export const nextJsConfig = withBinarySeverity([
   // Next.js and Fumadocs write these; they are build output, not source.
   {
     ignores: [".next/**", ".source/**", "next-env.d.ts"],
   },
   ...baseConfig,
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
   {
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
@@ -435,28 +421,13 @@ export const nextJsConfig = [
   // Every rule below is `error` with no environment gate and no per-scope
   // allowlist (ADR-0015): one lint mode, so lint-staged, CI and an agent
   // enforce the same set. A rule reporting anything here is a regression.
+  // A rule may be switched off in a file, in writing (`base.js`), unless it
+  // guards a boundary.
   {
-    rules: {
-      // Only Error instances carry a stack, so only they may be thrown.
-      "no-throw-literal": "error",
-    },
-  },
-  // The exception surface of the whole rule set: a rule may be switched off in
-  // a file, in writing, unless it guards a boundary. A stale exception is a
-  // report of its own, so an exception that outlives its reason is deleted
-  // rather than inherited.
-  {
-    linterOptions: {
-      // `error` rather than the flat-config default of `warn`: an unused
-      // directive fails lint on its own terms, not only because the web app
-      // happens to lint with `--max-warnings 0`.
-      reportUnusedDisableDirectives: "error",
-    },
     plugins: {
       "eslint-comments": pluginEslintComments,
     },
     rules: {
-      "eslint-comments/require-description": "error",
       "eslint-comments/no-restricted-disable": [
         "error",
         ...notDisableableRules,
@@ -532,66 +503,25 @@ export const nextJsConfig = [
       "local/require-inngest-function-placement": "error",
     },
   },
+  ...componentShapeConfig,
+  // MDX is the other half of the em dash convention of `base.js`, and ESLint
+  // cannot parse it: `apps/web/src/mdx-no-em-dash.test.ts` reads those files
+  // directly.
   {
-    // The five style drifts an agent reproduces most, each held by a rule the
-    // repo already installs rather than by a rule of ours: the plugins say it
-    // better, and a rule we do not maintain is a rule that cannot rot.
-    //
-    // The glob is the web app source, the same one the repo-wide conventions
-    // above use, so a config or script file at the app root is not held to a
-    // component convention.
+    // react-hook-form, used by the web app only: the form state stays with the
+    // form, and a form is not rewritten from an effect.
     files: ["**/src/**/*.{ts,tsx}"],
     rules: {
-      // `type` over `interface`: one way to name an object shape, and the one
-      // that composes with unions and intersections.
-      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-      // An import used only as a type says so. Without it, a module that
-      // imports server code for `typeof` alone reads as a runtime dependency,
-      // and the client boundary rules cannot tell it from a real one.
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { fixStyle: "separate-type-imports" },
-      ],
-      // A named component is an `export function`, which hoists and shows its
-      // name in a stack. An unnamed one is still an arrow, because that is the
-      // only thing an inline render prop can be.
-      "react/function-component-definition": [
-        "error",
-        {
-          namedComponents: "function-declaration",
-          unnamedComponents: "arrow-function",
-        },
-      ],
-      // A ternary inside a ternary is a branch a reader has to unpick; an early
-      // return or a lookup says the same thing in reading order.
-      "no-nested-ternary": "error",
-      // An `else` after a `return` is a block that could be the rest of the
-      // function.
-      "no-else-return": "error",
+      "local/no-form-state-prop": "error",
+      "local/no-form-mutation-in-effect": "error",
     },
   },
   {
-    // The three shapes with no plugin rule to lean on, in one rule of ours: a
-    // TypeScript `enum`, an `as unknown as` double cast and an empty-array
-    // fallback on a query result. Same glob as the style rules above, for the
-    // same reason: they are conventions of the app source, not of a config
-    // file at the app root.
-    files: ["**/src/**/*.{ts,tsx}"],
+    // The rule checks the basename itself, so the glob is the app tree and
+    // only `error.tsx` and `global-error.tsx` are read.
+    files: ["**/src/app/**/*.tsx"],
     rules: {
-      "local/no-restricted-patterns": ["error", restrictedPatternOptions],
-    },
-  },
-  {
-    // The one non-negotiable of the house style that a linter can hold: no em
-    // dash in user-facing text. Same glob as the style rules above, because a
-    // config file at the app root ships no copy, and only the three node kinds
-    // that can carry copy are read, so a comment keeps its dashes.
-    //
-    // MDX is the other half of the convention and ESLint cannot parse it:
-    // `apps/web/src/mdx-no-em-dash.test.ts` reads those files directly.
-    files: ["**/src/**/*.{ts,tsx}"],
-    rules: {
-      "local/no-em-dash-in-copy": "error",
+      "local/error-boundary-renders-error-screen": "error",
     },
   },
   {
@@ -630,4 +560,4 @@ export const nextJsConfig = [
       ],
     },
   },
-];
+]);

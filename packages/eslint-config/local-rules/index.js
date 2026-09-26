@@ -1,3 +1,5 @@
+import { errorBoundaryRendersErrorScreenRule } from "./error-boundary-renders-error-screen.js";
+import { kebabCasePathRule } from "./kebab-case-path.js";
 import { noClientDomainErrorInstanceofRule } from "./no-client-domain-error-instanceof.js";
 import { noClientImportOfServerFolderRule } from "./no-client-import-of-server-folder.js";
 import { noClientImportOfServicesRule } from "./no-client-import-of-services.js";
@@ -6,6 +8,8 @@ import { noCrossLayerImportRule } from "./no-cross-layer-import.js";
 import { noDefaultExportRule } from "./no-default-export.js";
 import { noEmDashInCopyRule } from "./no-em-dash-in-copy.js";
 import { noFeatureNestingRule } from "./no-feature-nesting.js";
+import { noFormMutationInEffectRule } from "./no-form-mutation-in-effect.js";
+import { noFormStatePropRule } from "./no-form-state-prop.js";
 import { noRawTailwindColorsRule } from "./no-raw-tailwind-colors.js";
 import { noRelativeTestMockRule } from "./no-relative-test-mock.js";
 import { noRestrictedPatternsRule } from "./no-restricted-patterns.js";
@@ -22,6 +26,8 @@ import { servicesVerbPrefixRule } from "./services-verb-prefix.js";
 
 export const localRulesPlugin = {
   rules: {
+    "error-boundary-renders-error-screen": errorBoundaryRendersErrorScreenRule,
+    "kebab-case-path": kebabCasePathRule,
     "no-client-domain-error-instanceof": noClientDomainErrorInstanceofRule,
     "no-client-import-of-server-folder": noClientImportOfServerFolderRule,
     "no-client-import-of-services": noClientImportOfServicesRule,
@@ -30,6 +36,8 @@ export const localRulesPlugin = {
     "no-default-export": noDefaultExportRule,
     "no-em-dash-in-copy": noEmDashInCopyRule,
     "no-feature-nesting": noFeatureNestingRule,
+    "no-form-mutation-in-effect": noFormMutationInEffectRule,
+    "no-form-state-prop": noFormStatePropRule,
     "no-raw-tailwind-colors": noRawTailwindColorsRule,
     "no-relative-test-mock": noRelativeTestMockRule,
     "no-restricted-patterns": noRestrictedPatternsRule,

@@ -4,11 +4,7 @@ import {
   FasterFixesClient,
   resolveReviewerToken,
 } from "@fasterfixes/core";
-import type {
-  Labels,
-  WidgetConfig,
-  WidgetPosition,
-} from "@fasterfixes/core";
+import type { Labels, WidgetConfig, WidgetPosition } from "@fasterfixes/core";
 import type { ClassNames } from "./context.js";
 import { FeedbackProviderCore } from "./feedback-provider-core.js";
 
@@ -33,6 +29,7 @@ type FeedbackProviderProps = {
 
 export function FeedbackProvider({
   projectId,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- the provider still honours the deprecated prop it declares, for existing installs
   apiKey,
   apiOrigin,
   color,
