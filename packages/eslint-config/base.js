@@ -114,8 +114,7 @@ export const config = withBinarySeverity([
   {
     // The type-aware rules: what neither `tsc` nor a syntactic rule can see,
     // and what generated code gets wrong most. Each one reports nothing today,
-    // so a report is a regression. The rest of the `no-unsafe-*` family is not
-    // here yet: it still has violations to clear first.
+    // so a report is a regression.
     files: ["**/src/**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: {
@@ -136,7 +135,14 @@ export const config = withBinarySeverity([
         "error",
         { checksVoidReturn: { attributes: false } },
       ],
+      // An `any` spreads silently: once assigned, passed, read or returned, the
+      // compiler stops checking everything downstream of it. Data from outside
+      // (`JSON.parse`, `postMessage`, a fetch body) is parsed with Zod instead.
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
       "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
       "@typescript-eslint/no-unsafe-enum-comparison": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
       // `${object}` prints `[object Object]`.
@@ -152,6 +158,15 @@ export const config = withBinarySeverity([
         "error",
         { considerDefaultExhaustiveForUnions: true },
       ],
+    },
+  },
+  {
+    // A test asserts on loosely typed values on purpose (`expect.any(...)`,
+    // `mock.calls[0]`), and the assertion is the check. The rest of the
+    // `no-unsafe-*` family still applies.
+    files: ["**/*.test.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
     },
   },
   // The exception surface: a rule may be switched off in a file, in writing.

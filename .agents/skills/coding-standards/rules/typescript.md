@@ -41,8 +41,11 @@ catches what `tsc` accepts:
 - `no-floating-promises`: every promise is awaited, returned or marked `void`. Return or await an
   invalidation in `onSuccess`/`onSettled` so the mutation stays pending until fresh data lands;
   `void` is for a deliberate fire-and-forget, such as a `nuqs` setter.
-- `no-unsafe-call` and `no-unsafe-enum-comparison`: an `any` called as a function, an enum compared
-  to an untyped literal.
+- The `no-unsafe-*` family: an `any` assigned, passed as an argument, read from, returned or called,
+  and an enum compared to an untyped literal. Data from outside the type system (`JSON.parse`,
+  `postMessage`, a fetch body, a webhook payload) is parsed with Zod rather than cast with `as T`.
+  Inngest events are typed once, in `src/server/inngest/events.ts`, so `event.data` is never `any`.
+  `no-unsafe-assignment` is off in `*.test.ts(x)`, where a loosely typed assertion value is the point.
 - `restrict-template-expressions` and `no-base-to-string`: a value that would print
   `[object Object]`. Narrow `unknown` to a string first (`typeof x === "string"`).
 - `no-deprecated`: an API marked `@deprecated`. Use the replacement its message names
