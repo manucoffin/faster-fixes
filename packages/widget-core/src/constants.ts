@@ -28,7 +28,34 @@ export const DEFAULT_API_ORIGIN = "https://www.faster-fixes.com";
 export const DEFAULT_WIDGET_COLOR = "#02527E";
 export const DEFAULT_WIDGET_POSITION: WidgetPosition = "bottom-right";
 
-export const DEFAULT_LABELS = {
+export type Labels = {
+  submitButton: string;
+  cancelButton: string;
+  textareaPlaceholder: string;
+  // Unused by the Widget, kept so existing `labels` objects still type-check.
+  successMessage: string;
+  closeButton: string;
+  retryButton: string;
+  errorMessage: string;
+  deleteConfirm: string;
+  deleteButton: string;
+  editButton: string;
+  saveButton: string;
+  showResolved: string;
+  hideResolved: string;
+  feedbackListTitle: string;
+  emptyList: string;
+  startFeedback: string;
+  exitFeedbackMode: string;
+  showFeedbackList: string;
+  hideFeedbackList: string;
+  showMarkers: string;
+  hideMarkers: string;
+  // Receives the excerpt of the Feedback comment the pin stands for.
+  pinAriaLabel: (commentExcerpt: string) => string;
+};
+
+export const DEFAULT_LABELS: Labels = {
   submitButton: "Submit",
   cancelButton: "Cancel",
   textareaPlaceholder: "Describe the issue...",
@@ -44,9 +71,14 @@ export const DEFAULT_LABELS = {
   hideResolved: "Hide resolved",
   feedbackListTitle: "Feedback",
   emptyList: "No feedback on this page",
-} as const;
-
-export type Labels = typeof DEFAULT_LABELS;
+  startFeedback: "Start feedback",
+  exitFeedbackMode: "Exit feedback mode",
+  showFeedbackList: "Show feedback list",
+  hideFeedbackList: "Hide feedback list",
+  showMarkers: "Show markers",
+  hideMarkers: "Hide markers",
+  pinAriaLabel: (commentExcerpt) => `Feedback: ${commentExcerpt}`,
+};
 
 export const STORAGE_KEY_TOKEN = "ff_reviewer_token";
 export const URL_PARAM_TOKEN = "ff_token";
