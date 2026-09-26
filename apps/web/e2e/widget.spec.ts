@@ -486,7 +486,10 @@ for (const fixture of WIDGET_FIXTURES) {
         name: "Feedback: The heading is misaligned",
       });
       await pin.click();
-      await expect(page.getByText("The heading is misaligned")).toBeVisible();
+      // The script embed keeps the closed list's rows in the DOM, hidden.
+      await expect(
+        page.getByText("The heading is misaligned").filter({ visible: true }),
+      ).toBeVisible();
       await expect(page.getByText("E2E Reviewer")).toBeVisible();
 
       await page.mouse.click(5, 300);

@@ -239,6 +239,7 @@ declare global {
         readonly feedbackItems: readonly { id: string }[];
         togglePins: () => void;
         readonly showPins: boolean;
+        destroy: () => void;
       };
     };
   }

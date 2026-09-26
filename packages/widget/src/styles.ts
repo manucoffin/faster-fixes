@@ -547,3 +547,12 @@ export const WIDGET_CSS = `
     }
   }
 `;
+
+/**
+ * The `color` option as a `:host` rule rather than an inline style, so a page
+ * stylesheet that sets `--ff-accent` on the host still wins over it.
+ */
+export function accentRule(color: string) {
+  // The value lands in a stylesheet: a `;` or a brace would escape the declaration.
+  return /[;{}]/.test(color) ? "" : `:host { --ff-accent: ${color}; }`;
+}

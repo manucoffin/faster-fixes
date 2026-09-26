@@ -25,7 +25,7 @@ import { createPinLayer, resolveTarget } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
-import { WIDGET_CSS } from "./styles.js";
+import { accentRule, WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
 
 type MountInput = {
@@ -81,12 +81,13 @@ export function mountWidget({
 }: MountInput): Widget {
   const host = document.createElement("div");
   host.setAttribute("data-ff-widget", "");
-  host.style.setProperty("--ff-accent", options.color);
 
   const shadow = host.attachShadow({ mode: "open" });
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(WIDGET_CSS);
-  shadow.adoptedStyleSheets = [sheet];
+  const accent = new CSSStyleSheet();
+  accent.replaceSync(accentRule(options.color));
+  shadow.adoptedStyleSheets = [sheet, accent];
   const unguardHost = guardHost(host, shadow);
 
   // Starts at mount, stops on destroy: an opted-out site never patches globals.
