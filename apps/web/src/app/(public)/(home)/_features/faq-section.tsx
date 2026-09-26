@@ -18,7 +18,7 @@ export const faqs: {
   {
     question: "How does the widget work?",
     answer:
-      "Install the React component in your app. Your clients leave feedback in two clicks. The widget captures all the technical context automatically. You review feedback in the dashboard, or your coding agent retrieves it via MCP and fixes it directly.",
+      "Add one script tag to your site, or use the React embed in a React app. Your clients leave feedback in two clicks. The widget captures all the technical context automatically. You review feedback in the dashboard, or your coding agent retrieves it via MCP and fixes it directly.",
   },
   {
     question: "Do my clients need an account?",
@@ -57,7 +57,7 @@ export const faqs: {
   {
     question: "Which frameworks are supported?",
     answer:
-      "The widget is currently available as a React component (@fasterfixes/react) and works with Next.js and any React-based framework. Support for other frameworks is on the roadmap.",
+      "The widget works on any website: WordPress, Webflow, static HTML, and apps built with React, Next.js, Vue, Angular, Svelte or any other framework. Add it with one script tag, or install @fasterfixes/react to embed it in a React app. Both embeds share the same widget and capture the same context.",
   },
 ];
 

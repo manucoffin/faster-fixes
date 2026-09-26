@@ -44,8 +44,8 @@ export function SoftwareApplicationSchema() {
       "@id": `${appUrl}#organization`,
     },
     featureList: [
-      "Visual feedback widget for websites",
-      "Automatic context capture (screenshot, URL, DOM selector, React component tree, console logs, network requests)",
+      "Visual feedback widget for any website, as a script tag or a React embed",
+      "Automatic context capture (screenshot, URL, DOM selector, React component tree on React sites, console logs, network requests)",
       "Structured markdown bug reports for AI coding agents",
       "MCP server integration for Claude Code, Cursor, Windsurf",
       "GitHub issue sync",

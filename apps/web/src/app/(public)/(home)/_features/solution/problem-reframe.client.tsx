@@ -39,7 +39,7 @@ export function ProblemReframe() {
         {...fadeUp}
         transition={{ duration: 0.6, delay: 0.65 }}
       >
-        Works with React and any coding agent.
+        Works on any website and with any coding agent.
       </motion.p>
     </div>
   );

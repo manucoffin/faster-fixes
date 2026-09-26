@@ -25,9 +25,10 @@ export function LicenseSection() {
           <div className="rounded-xl border p-6">
             <p className="font-mono text-sm font-semibold">MIT</p>
             <p className="mt-3 leading-relaxed text-muted-foreground">
-              <code>@fasterfixes/core</code> and <code>@fasterfixes/react</code>
-              . The widget packages your clients embed. Drop them into any
-              project without AGPL obligations.
+              <code>@fasterfixes/widget</code>, <code>@fasterfixes/core</code>{" "}
+              and <code>@fasterfixes/react</code>. The widget packages your
+              clients embed. Drop them into any project without AGPL
+              obligations.
             </p>
           </div>
         </div>

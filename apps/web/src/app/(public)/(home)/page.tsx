@@ -33,6 +33,8 @@ export const metadata: Metadata = {
     "visual feedback tool",
     "client feedback tool",
     "open source feedback widget",
+    "feedback widget for any website",
+    "WordPress feedback widget",
     "feedback widget for Next.js",
     "feedback widget React",
     "MCP server bug tracking",
