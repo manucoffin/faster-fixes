@@ -2,7 +2,6 @@ const userbackWins = [
   "You need annotated video feedback or session replay.",
   "You run NPS, CSAT, or in-app microsurveys.",
   "You want a public feature request portal with voting.",
-  "Your stack is not React-based and you need framework-agnostic capture.",
   "You need SOC 2 Type II compliance or SSO available today.",
   "You want a mature integration roster (ClickUp 2-way sync, Zapier).",
 ];

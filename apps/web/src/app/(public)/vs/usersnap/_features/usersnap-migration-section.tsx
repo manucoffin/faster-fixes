@@ -9,7 +9,7 @@ export const migrationSteps = [
   },
   {
     label: "Replace the Usersnap widget",
-    body: "Remove the Usersnap script from your codebase. Install the FasterFixes React widget (npm install @fasterfixes/react) and drop the component into your layout, or use the HTML embed for non-React pages. Generate a shareable link for each client, no client account required.",
+    body: "Remove the Usersnap script from your codebase. Paste the FasterFixes script tag in its place, or in a React app run npm install @fasterfixes/react and wrap your app in FeedbackProvider. Generate a shareable link for each client, no client account required.",
   },
   {
     label: "Invite your team and connect your issue tracker",

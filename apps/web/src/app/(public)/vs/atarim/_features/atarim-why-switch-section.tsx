@@ -9,7 +9,7 @@ const limitations = [
   },
   {
     title: "Built for agency client review, not dev workflows",
-    body: "Atarim is framework-agnostic by design: it works via a JS snippet, a Chrome extension, or a WordPress plugin. There is no React or Next.js SDK, no component tree capture, and no DOM selector attached to feedback items. When a client clicks on a broken element, the report contains a screenshot and a URL, not the React component path, not the CSS selector, not the browser/viewport metadata a developer needs to locate the issue in code.",
+    body: "Atarim works via a JS snippet, a Chrome extension, or a WordPress plugin. There is no React or Next.js SDK, no component tree capture, and no DOM selector attached to feedback items. When a client clicks on a broken element, the report contains a screenshot and a URL, not the React component path, not the CSS selector, not the browser/viewport metadata a developer needs to locate the issue in code.",
   },
   {
     title: "AI stays inside the dashboard, no IDE or terminal access",

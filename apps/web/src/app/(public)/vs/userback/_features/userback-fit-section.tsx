@@ -5,7 +5,7 @@ const fitPoints = [
   "You want feedback piped directly into Claude Code, Cursor, or Codex via MCP.",
   "You need to self-host for data sovereignty or compliance.",
   "You don't need video recording, session replay, or NPS surveys.",
-  "You're already on Next.js or React and want a native widget integration.",
+  "You want one widget for every client site: a script tag on any stack, or a React package for React apps.",
 ];
 
 export function UserbackFitSection() {

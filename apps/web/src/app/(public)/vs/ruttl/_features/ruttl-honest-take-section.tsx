@@ -1,6 +1,5 @@
 const points = [
   "You are a solo creator on Ruttl's free Basic plan and never expect to grow past 5 pages.",
-  "Your team does not work in React or Next.js, and the framework-native widget is not a fit.",
   "Your stakeholders already live inside Ruttl's review workflow and you have no appetite for migration.",
 ];
 

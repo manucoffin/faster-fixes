@@ -9,7 +9,7 @@ export const migrationSteps = [
   },
   {
     label: "Replace the Userback widget",
-    body: "Remove the Userback script from your codebase. Install the FasterFixes React widget (npm install @fasterfixes/react) and drop the component into your layout, or use the HTML embed for non-React pages. Generate a shareable link for each client, no client account required.",
+    body: "Remove the Userback script from your codebase. Add the FasterFixes script tag to your site, or in a React app install @fasterfixes/react and wrap the app in FeedbackProvider. Generate a shareable link for each client, no client account required.",
   },
   {
     label: "Invite your team and connect your issue tracker",

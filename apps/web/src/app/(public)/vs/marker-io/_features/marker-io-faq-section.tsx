@@ -86,33 +86,37 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Marker.io has no equivalent.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Marker.io has no equivalent.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
-        context (URL, DOM selector, React component path, browser, viewport),
-        apply a fix, and mark the item resolved, all from the terminal.
-        Marker.io has no equivalent. See{" "}
+        context (URL, DOM selector, React component path when available,
+        browser, viewport), apply a fix, and mark the item resolved, all from
+        the terminal. Marker.io has no equivalent. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>
     ),
   },
   {
-    question: "How do I install the widget in a Next.js or React app?",
+    question: "How do I install the widget on my site?",
     answer:
-      "Run npm install @fasterfixes/react, mount the FeedbackWidget component in your layout, and pass the project key. The widget hooks into your React tree and captures the component path on every report. Works with the Next.js App Router and any React-based framework.",
+      'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context. On React sites, every report also carries the component path.',
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Run npm install @fasterfixes/react, mount the FeedbackWidget component
-        in your layout, and pass the project key. The widget hooks into your
-        React tree and captures the component path on every report. Works with
-        the Next.js App Router and any React-based framework. See the{" "}
-        <DocLink href={"/docs/widget/react" as Route}>
-          React widget docs
-        </DocLink>{" "}
-        and the{" "}
+        On any site, paste one script tag with your Project ID, or run npm
+        install @fasterfixes/widget and call init({"{ projectId }"}). In a React
+        or Next.js app, you can instead run npm install @fasterfixes/react and
+        wrap your app in {"<FeedbackProvider>"}. Both embeds share the same
+        widget, options, and captured context. On React sites, every report also
+        carries the component path. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        , the{" "}
+        <DocLink href={"/docs/widget/react" as Route}>React embed docs</DocLink>
+        , and the{" "}
         <DocLink href={"/docs/getting-started/quickstart" as Route}>
           quickstart
         </DocLink>
@@ -123,18 +127,20 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes work on non-React stacks?",
     answer:
-      "Not today. The widget is a framework-native React component, first-class on React and Next.js, with adapters for other frameworks on the roadmap. If you need a feedback widget on a non-JavaScript stack today, Marker.io's JS snippet, browser extension, or WordPress plugin is a better fit.",
+      "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. The widget does need to be installed on the site. If reviewers must leave feedback on sites you cannot edit, Marker.io's browser extension is a better fit.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Not today. The widget is a framework-native React component, first-class
-        on React and Next.js, with adapters for other frameworks on the roadmap.
-        If you need a feedback widget on a non-JavaScript stack today,
-        Marker.io&apos;s JS snippet, browser extension, or WordPress plugin is a
-        better fit. See the{" "}
-        <DocLink href={"/docs/widget/other-frameworks" as Route}>
-          other frameworks page
-        </DocLink>{" "}
-        for the latest status.
+        Yes. The script embed installs the widget with one script tag on any
+        website: WordPress, Webflow, static HTML, or an app built with Vue,
+        Angular, Svelte, or no framework at all. It needs no framework runtime
+        and renders in a Shadow DOM, so page styles do not affect it. The widget
+        does need to be installed on the site. If reviewers must leave feedback
+        on sites you cannot edit, Marker.io&apos;s browser extension is a better
+        fit. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        .
       </p>
     ),
   },
@@ -156,7 +162,7 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "How do I move my Marker.io data over?",
     answer:
-      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the React widget in your project, and reconnect your GitHub, Linear, and Jira integrations. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
+      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the widget on your site, and reconnect your GitHub, Linear, and Jira integrations. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
   },
   {
     question:

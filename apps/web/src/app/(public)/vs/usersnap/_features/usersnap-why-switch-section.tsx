@@ -9,7 +9,7 @@ const limitations = [
   },
   {
     title: "Not built for developers",
-    body: "Usersnap is designed for PMs and CX teams. It captures screenshots, but it does not know which React component was clicked, which DOM selector is involved, or what the viewport was. FasterFixes captures component tree, DOM selector, URL, browser, and viewport automatically on every feedback item, no manual annotation required.",
+    body: "Usersnap is designed for PMs and CX teams. It captures screenshots, but it does not know which React component was clicked, which DOM selector is involved, or what the viewport was. FasterFixes captures DOM selector, URL, browser, and viewport automatically on every feedback item, plus the component tree on React sites, no manual annotation required.",
   },
   {
     title: "No MCP or AI agent support",

@@ -3,8 +3,8 @@ import Link from "next/link";
 
 const points = [
   {
-    title: "Framework-native React widget",
-    body: "Run npm install @fasterfixes/react and drop the component into your layout. The widget hooks into your React tree and captures the component path on every report, no script tag, no browser extension. React and Next.js today; more frameworks coming.",
+    title: "One widget, any stack",
+    body: "Paste one script tag on any site, or run npm install @fasterfixes/react and wrap your React app in FeedbackProvider. Both embeds capture the same context, and on React sites every report also carries the component path. No browser extension for reviewers to install.",
     href: "/docs/widget/react" as Route,
     linkLabel: "Widget setup guide",
   },

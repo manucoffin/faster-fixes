@@ -23,9 +23,9 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [{ type: "yes" }, { type: "no" }],
   },
   {
-    label: "React / Next.js SDK",
+    label: "Web install",
     cells: [
-      { type: "yes", note: "Component tree capture" },
+      "Script tag or React package · component tree on React sites",
       "JavaScript SDK (no component tree)",
     ],
   },

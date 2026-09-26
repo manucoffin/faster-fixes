@@ -5,7 +5,7 @@ const fitPoints = [
   "You want feedback piped directly into Claude Code, Cursor, or Codex via MCP.",
   "You need to self-host for data sovereignty or compliance.",
   "Your clients are non-technical and need a zero-account annotation widget.",
-  "You're already on Next.js or React and want a native widget integration.",
+  "You ship sites on mixed stacks and want one widget for all of them, with a native package for React apps.",
 ];
 
 export function UsersnapFitSection() {

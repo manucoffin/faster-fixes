@@ -5,7 +5,7 @@ export const migrationSteps = [
   },
   {
     label: "Set up FasterFixes in under five minutes",
-    body: "Start on the hosted free plan or follow the self-hosting guide to deploy on your own infrastructure. Run npm install @fasterfixes/react, drop the component into your layout, and generate a shareable link for each client. No account required for clients.",
+    body: "Start on the hosted free plan or follow the self-hosting guide to deploy on your own infrastructure. Paste the script tag on your site, or wrap your React app in FeedbackProvider from @fasterfixes/react, then generate a shareable link for each client. No account required for clients.",
   },
   {
     label: "Import active feedback via the MCP",

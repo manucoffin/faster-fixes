@@ -29,8 +29,8 @@ export function MarkerIoHonestTakeSection() {
             <li>
               <strong className="text-foreground">Browser extension</strong>:
               Chrome, Firefox, and Safari extensions let reviewers leave
-              feedback on any site. FasterFixes requires a React or Next.js
-              widget install today.
+              feedback on any site without touching its code. FasterFixes needs
+              its script tag or React package installed on the site.
             </li>
             <li>
               <strong className="text-foreground">
@@ -97,8 +97,8 @@ export function MarkerIoHonestTakeSection() {
               <strong className="text-foreground">
                 React component tree capture
               </strong>
-              : every report ships with the DOM selector and the React component
-              path. The agent knows which file owns the bug.
+              : on React sites, every report ships with the DOM selector and the
+              React component path. The agent knows which file owns the bug.
             </li>
             <li>
               <strong className="text-foreground">Flat pricing</strong>:

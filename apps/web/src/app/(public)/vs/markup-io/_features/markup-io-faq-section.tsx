@@ -36,7 +36,7 @@ export const markupIoFaqs: FaqItem[] = [
   {
     question: "How does FasterFixes compare to Markup.io for web agencies?",
     answer:
-      "Markup.io is positioned for design review across file types. FasterFixes is built for agencies shipping React or Next.js apps where feedback needs to reach a developer or AI agent: component tree capture, structured sync to GitHub, Linear, and Jira, in-page widget on every device.",
+      "Markup.io is positioned for design review across file types. FasterFixes is built for agencies shipping websites and web apps on any stack where feedback needs to reach a developer or AI agent: DOM selector and React component tree capture, structured sync to GitHub, Linear, and Jira, in-page widget on every device.",
   },
 ];
 

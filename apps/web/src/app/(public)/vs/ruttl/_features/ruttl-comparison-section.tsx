@@ -45,9 +45,9 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [{ type: "yes" }, { type: "yes" }],
   },
   {
-    label: "Framework-native widget",
+    label: "React package",
     cells: [
-      { type: "yes", note: "React / Next.js SDK" },
+      { type: "yes", note: "Plus a script tag for any site" },
       { type: "no", note: "Generic JS snippet" },
     ],
   },

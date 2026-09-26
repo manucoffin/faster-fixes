@@ -3,14 +3,14 @@ import Link from "next/link";
 
 const points = [
   {
-    title: "Framework-native, by design",
-    body: "Run npm install @fasterfixes/react, drop the component into your layout, and you are done. We chose a framework-native widget over a generic JS tag: the trade-off is full control over the integration. React and Next.js today; more frameworks coming.",
-    href: "/docs/widget/react" as Route,
-    linkLabel: "React widget docs",
+    title: "One widget, any stack",
+    body: "Paste one script tag on any site, from WordPress and Webflow to Vue, Angular, or Svelte apps, or run npm install @fasterfixes/react and wrap your React app in FeedbackProvider. Same widget, same options, same captured context either way.",
+    href: "/docs/widget/script-embed" as Route,
+    linkLabel: "Script embed docs",
   },
   {
     title: "Captures the React component tree",
-    body: "Every feedback item ships with the DOM selector and the React component path. Your agent knows which file owns the bug, not just where it appears on screen.",
+    body: "Every feedback item ships with the DOM selector and, when the site runs React, the React component path. Your agent knows which file owns the bug, not just where it appears on screen.",
     href: "/docs/concepts/how-it-works" as Route,
     linkLabel: "How it works",
   },

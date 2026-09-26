@@ -47,7 +47,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Stack support",
     cells: [
-      "React / Next.js native · basic HTML embed",
+      "Any stack · script tag or React package",
       "Any stack · JS snippet, browser extension",
     ],
   },
@@ -57,7 +57,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "React component tree capture",
-    cells: [{ type: "yes" }, { type: "no" }],
+    cells: [{ type: "yes", note: "On React sites" }, { type: "no" }],
   },
   {
     label: "Auto context (URL, DOM, browser, viewport)",

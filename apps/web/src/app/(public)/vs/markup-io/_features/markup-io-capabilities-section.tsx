@@ -5,7 +5,7 @@ const cards = [
   },
   {
     title: "CSS selector + React component path",
-    body: "FasterFixes captures the React component name, props, and DOM selector at the click point. Developers receive a report that maps to the codebase, not a pixel coordinate. Markup.io stops at coordinates and a screenshot.",
+    body: "FasterFixes captures the DOM selector at the click point, plus the React component name and props on React sites. Developers receive a report that maps to the codebase, not a pixel coordinate. Markup.io stops at coordinates and a screenshot.",
   },
   {
     title: "Browser, OS, viewport context",

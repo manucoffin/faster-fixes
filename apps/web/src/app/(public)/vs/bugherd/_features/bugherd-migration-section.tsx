@@ -5,7 +5,7 @@ export const migrationSteps = [
   },
   {
     label: "Set up FasterFixes in under two minutes",
-    body: "Run npm install @fasterfixes/react, drop the component into your layout, and generate a shareable link for each client. No account required for clients. Connect @fasterfixes/mcp to your coding agent if you use Claude Code, Cursor, or Codex.",
+    body: "Paste the script tag on your site, or wrap your React app in FeedbackProvider from @fasterfixes/react, then generate a shareable link for each client. No account required for clients. Connect @fasterfixes/mcp to your coding agent if you use Claude Code, Cursor, or Codex.",
   },
   {
     label: "Import active feedback via the MCP",

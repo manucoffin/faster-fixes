@@ -87,56 +87,60 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path, browser, viewport), apply a fix, and mark the item resolved, all from the terminal, without leaving the editor.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal, without leaving the editor.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
-        context for each item (URL, DOM selector, React component path, browser,
-        viewport), apply a fix, and mark the item resolved, all from the
-        terminal, without leaving the editor. See{" "}
+        context for each item (URL, DOM selector, React component path when
+        available, browser, viewport), apply a fix, and mark the item resolved,
+        all from the terminal, without leaving the editor. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>
     ),
   },
   {
-    question: "How do I install the widget in a Next.js or React app?",
+    question: "How do I install the widget on my site?",
     answer:
-      "Run npm install @fasterfixes/react, mount the FeedbackWidget component in your layout, and pass the project key. Works with the Next.js App Router and any React-based framework. More framework adapters are on the way.",
+      'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context.',
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Run npm install @fasterfixes/react, mount the FeedbackWidget component
-        in your layout, and pass the project key. Works with the Next.js App
-        Router and any React-based framework. See the{" "}
-        <DocLink href={"/docs/widget/react" as Route}>
-          React widget docs
-        </DocLink>{" "}
-        and{" "}
+        On any site, paste one script tag with your Project ID, or run npm
+        install @fasterfixes/widget and call init({"{ projectId }"}). In a React
+        or Next.js app, you can instead run npm install @fasterfixes/react and
+        wrap your app in {"<FeedbackProvider>"}. Both embeds share the same
+        widget, options, and captured context. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        , the{" "}
+        <DocLink href={"/docs/widget/react" as Route}>React embed docs</DocLink>
+        , and the{" "}
         <DocLink href={"/docs/getting-started/quickstart" as Route}>
           quickstart
         </DocLink>
-        . More framework adapters are on the way.
+        .
       </p>
     ),
   },
   {
     question: "Does FasterFixes work on non-React websites?",
     answer:
-      "Not today. The widget is a framework-native React component, first-class on React and Next.js, and adapters for other frameworks are on the roadmap. We chose framework-native over a generic JS tag because it gives the widget access to the React component tree and lets us render inside your app rather than in a sandboxed overlay. If you need a feedback widget on a non-JavaScript stack today, BugHerd's JS tag or Chrome extension is a better fit.",
+      "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. Every report carries the screenshot, DOM selector, URL, browser, viewport, and console and network logs. The React component path is added when the site runs React.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Not today. The widget is a framework-native React component, first-class
-        on React and Next.js, and adapters for other frameworks are on the
-        roadmap. We chose framework-native over a generic JS tag because it
-        gives the widget access to the React component tree and lets us render
-        inside your app rather than in a sandboxed overlay. If you need a
-        feedback widget on a non-JavaScript stack today, BugHerd&apos;s JS tag
-        or Chrome extension is a better fit. See the{" "}
-        <DocLink href={"/docs/widget/other-frameworks" as Route}>
-          other frameworks page
-        </DocLink>{" "}
-        for the latest status.
+        Yes. The script embed installs the widget with one script tag on any
+        website: WordPress, Webflow, static HTML, or an app built with Vue,
+        Angular, Svelte, or no framework at all. It needs no framework runtime
+        and renders in a Shadow DOM, so page styles do not affect it. Every
+        report carries the screenshot, DOM selector, URL, browser, viewport, and
+        console and network logs. The React component path is added when the
+        site runs React. See the{" "}
+        <DocLink href={"/docs/widget/script-embed" as Route}>
+          script embed docs
+        </DocLink>
+        .
       </p>
     ),
   },
