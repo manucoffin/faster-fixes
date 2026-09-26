@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/widget",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "The FasterFixes feedback widget for any website, with no framework required. Reviewers annotate elements and submit visual feedback.",
   "type": "module",
   "license": "MIT",
