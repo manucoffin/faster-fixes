@@ -114,9 +114,8 @@ export const config = withBinarySeverity([
   {
     // The type-aware rules: what neither `tsc` nor a syntactic rule can see,
     // and what generated code gets wrong most. Each one reports nothing today,
-    // so a report is a regression. `no-floating-promises` and the rest of the
-    // `no-unsafe-*` family are not here yet: they still have violations to
-    // clear first.
+    // so a report is a regression. The rest of the `no-unsafe-*` family is not
+    // here yet: it still has violations to clear first.
     files: ["**/src/**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: {
@@ -125,6 +124,12 @@ export const config = withBinarySeverity([
     },
     rules: {
       "@typescript-eslint/await-thenable": "error",
+      // A promise nobody awaits loses its rejection and its ordering. `await`
+      // or `return` it; `void` says the fire-and-forget is on purpose.
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        { ignoreVoid: true },
+      ],
       // JSX attributes are left out: `onClick={async () => …}` is the React
       // idiom, and the handler's rejection is the mutation's to report.
       "@typescript-eslint/no-misused-promises": [

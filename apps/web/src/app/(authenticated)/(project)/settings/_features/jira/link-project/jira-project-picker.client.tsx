@@ -88,8 +88,8 @@ export function JiraProjectPicker({
 
   const linkMutation = useMutation(
     trpc.authenticated.projects.jira.linkProject.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.jira.getLink.queryKey({
             projectId,
           }),

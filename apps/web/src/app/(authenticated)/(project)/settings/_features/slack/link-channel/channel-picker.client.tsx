@@ -32,8 +32,8 @@ export function ChannelPicker({
 
   const setChannelMutation = useMutation(
     trpc.authenticated.projects.slack.linkChannel.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.slack.getLink.queryKey({
             projectId,
           }),

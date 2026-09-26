@@ -34,8 +34,8 @@ export function GitHubConnected({ installation }: GitHubConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.github.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.github.getInstallation.queryKey(),
         });

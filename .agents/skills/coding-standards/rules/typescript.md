@@ -38,6 +38,9 @@ catches what `tsc` accepts:
 
 - `await-thenable` and `no-misused-promises`: an `await` on a non-promise, or an async function
   passed where a sync callback is expected. JSX attributes are exempt (`onClick={async () => …}`).
+- `no-floating-promises`: every promise is awaited, returned or marked `void`. Return or await an
+  invalidation in `onSuccess`/`onSettled` so the mutation stays pending until fresh data lands;
+  `void` is for a deliberate fire-and-forget, such as a `nuqs` setter.
 - `no-unsafe-call` and `no-unsafe-enum-comparison`: an `any` called as a function, an enum compared
   to an untyped literal.
 - `restrict-template-expressions` and `no-base-to-string`: a value that would print

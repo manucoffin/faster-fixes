@@ -39,11 +39,11 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
 
   const deleteProject = useMutation(
     trpc.authenticated.projects.delete.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         if (activeProject?.id === projectId) {
           clearActiveProject();
         }
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.list.queryKey(),
         });
         router.push("/inbox");

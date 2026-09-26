@@ -29,8 +29,8 @@ export function UnlinkJiraProjectButton({
 
   const unlinkMutation = useMutation(
     trpc.authenticated.projects.jira.unlinkProject.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.jira.getLink.queryKey({
             projectId,
           }),

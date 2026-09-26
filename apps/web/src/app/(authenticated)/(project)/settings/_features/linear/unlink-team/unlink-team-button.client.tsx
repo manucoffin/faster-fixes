@@ -27,8 +27,8 @@ export function UnlinkTeamButton({ projectId }: UnlinkTeamButtonProps) {
 
   const unlinkMutation = useMutation(
     trpc.authenticated.projects.linear.unlinkTeam.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.linear.getLink.queryKey({
             projectId,
           }),

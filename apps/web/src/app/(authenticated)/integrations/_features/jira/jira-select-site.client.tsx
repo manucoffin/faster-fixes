@@ -26,8 +26,8 @@ export function JiraSelectSite() {
 
   const selectMutation = useMutation(
     trpc.authenticated.integrations.jira.selectSite.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.jira.getInstallation.queryKey(),
         });
@@ -41,7 +41,7 @@ export function JiraSelectSite() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         Your Atlassian account can access several Jira sites. Choose the one to
         connect to this organization.
       </p>
@@ -49,12 +49,12 @@ export function JiraSelectSite() {
       {matchQueryStatus(sitesQuery, {
         Loading: <Skeleton className="h-16 w-full" />,
         Errored: (
-          <p className="text-destructive text-sm">
+          <p className="text-sm text-destructive">
             Failed to load your Jira sites. Try refreshing the page.
           </p>
         ),
         Empty: (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             No accessible Jira sites found.
           </p>
         ),
@@ -72,7 +72,7 @@ export function JiraSelectSite() {
                     className="flex flex-col items-start gap-0.5"
                   >
                     <span className="font-medium">{site.name}</span>
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                       {site.url}
                     </span>
                   </Label>

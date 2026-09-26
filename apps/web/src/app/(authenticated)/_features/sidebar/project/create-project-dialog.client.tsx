@@ -27,6 +27,7 @@ import { Check, Copy, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { CreateProjectInput } from "@/app/(authenticated)/_services/create-project.schema";
 import { CreateProjectSchema } from "@/app/(authenticated)/_services/create-project.schema";
 
@@ -76,9 +77,14 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
     createProject.mutate(data);
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!createdProjectId) return;
-    navigator.clipboard.writeText(createdProjectId);
+    try {
+      await navigator.clipboard.writeText(createdProjectId);
+    } catch {
+      toast.error("Could not copy to the clipboard.");
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

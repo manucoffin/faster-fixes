@@ -34,9 +34,8 @@ export function useFeedbackMutations() {
         }
         toast.error("Failed to update status.");
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
+      onSettled: () =>
+        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
     }),
   );
 
@@ -61,17 +60,15 @@ export function useFeedbackMutations() {
         }
         toast.error("Failed to update status.");
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
+      onSettled: () =>
+        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
     }),
   );
 
   const updateAssignee = useMutation(
     trpc.authenticated.projects.feedback.updateAssignee.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey });
-      },
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
       onError: () => {
         toast.error("Failed to update assignee.");
       },

@@ -43,7 +43,9 @@ export function CreateUserDialog() {
         toast.success("User created successfully");
         setOpen(false);
         form.reset();
-        queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
+        return queryClient.invalidateQueries(
+          trpc.admin.users.list.queryFilter(),
+        );
       },
       onError: (error) => {
         toast.error(error.message || "Failed to create user");

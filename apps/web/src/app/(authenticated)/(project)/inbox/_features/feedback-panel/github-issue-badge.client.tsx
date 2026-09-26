@@ -28,8 +28,8 @@ export function GitHubIssueBadge({
 
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createGitHubIssue.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.list.queryKey({
             projectId,
           }),

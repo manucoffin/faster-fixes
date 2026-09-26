@@ -88,13 +88,15 @@ function UpdateProjectFields({ projectId, project }: UpdateProjectFieldsProps) {
 
   const updateProject = useMutation(
     trpc.authenticated.projects.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries(
-          trpc.authenticated.projects.get.queryOptions({ projectId }),
-        );
-        queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.list.queryKey(),
-        });
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.authenticated.projects.get.queryOptions({ projectId }),
+          ),
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.list.queryKey(),
+          }),
+        ]);
         toast.success("Project updated");
       },
       onError: (error) => {

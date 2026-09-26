@@ -20,8 +20,8 @@ export function AutoCreateIssuesSwitch({
 
   const updateMutation = useMutation(
     trpc.authenticated.projects.github.updateLink.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.github.getLink.queryKey({
             projectId,
           }),

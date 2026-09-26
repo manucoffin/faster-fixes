@@ -20,8 +20,8 @@ export function SlackEnabledSwitch({
 
   const updateMutation = useMutation(
     trpc.authenticated.projects.slack.updateLink.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.slack.getLink.queryKey({
             projectId,
           }),

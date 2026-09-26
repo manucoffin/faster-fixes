@@ -28,8 +28,8 @@ export function JiraConnected({ installation }: JiraConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.jira.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.jira.getInstallation.queryKey(),
         });

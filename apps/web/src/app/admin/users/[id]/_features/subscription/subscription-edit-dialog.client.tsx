@@ -69,7 +69,7 @@ export function SubscriptionEditDialog({
       onSuccess: () => {
         toast.success("Subscription updated successfully");
         setOpen(false);
-        queryClient.invalidateQueries(
+        return queryClient.invalidateQueries(
           trpc.admin.users.subscription.get.queryFilter(),
         );
       },

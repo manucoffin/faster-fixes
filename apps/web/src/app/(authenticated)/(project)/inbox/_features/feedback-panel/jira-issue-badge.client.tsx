@@ -33,8 +33,8 @@ export function JiraIssueBadge({
 
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createJiraIssue.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.list.queryKey({
             projectId,
           }),

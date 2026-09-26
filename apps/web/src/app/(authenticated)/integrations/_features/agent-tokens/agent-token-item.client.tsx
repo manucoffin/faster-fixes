@@ -55,18 +55,17 @@ export function AgentTokenItem({ token }: AgentTokenItemProps) {
   const queryClient = useQueryClient();
   const { data: activeOrg } = useActiveOrganization();
 
-  const invalidateTokens = () => {
+  const invalidateTokens = () =>
     queryClient.invalidateQueries({
       queryKey: trpc.authenticated.integrations.agentToken.list.queryKey({
         organizationId: activeOrg?.id ?? "",
       }),
     });
-  };
 
   const revokeToken = useMutation(
     trpc.authenticated.integrations.agentToken.revoke.mutationOptions({
-      onSuccess: () => {
-        invalidateTokens();
+      onSuccess: async () => {
+        await invalidateTokens();
         toast.success("Token revoked");
       },
       onError: (error) => toast.error(error.message),
@@ -75,8 +74,8 @@ export function AgentTokenItem({ token }: AgentTokenItemProps) {
 
   const deleteToken = useMutation(
     trpc.authenticated.integrations.agentToken.delete.mutationOptions({
-      onSuccess: () => {
-        invalidateTokens();
+      onSuccess: async () => {
+        await invalidateTokens();
         toast.success("Token deleted");
       },
       onError: (error) => toast.error(error.message),

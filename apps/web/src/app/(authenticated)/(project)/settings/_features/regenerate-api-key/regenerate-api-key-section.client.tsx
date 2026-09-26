@@ -45,9 +45,14 @@ export function RegenerateApiKeySection({
     }),
   );
 
-  const handleCopyKey = () => {
+  const handleCopyKey = async () => {
     if (!newApiKey) return;
-    navigator.clipboard.writeText(newApiKey);
+    try {
+      await navigator.clipboard.writeText(newApiKey);
+    } catch {
+      toast.error("Could not copy to the clipboard.");
+      return;
+    }
     setKeyCopied(true);
     setTimeout(() => setKeyCopied(false), 2000);
   };

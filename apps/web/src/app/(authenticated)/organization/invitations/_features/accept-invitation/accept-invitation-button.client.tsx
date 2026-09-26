@@ -27,7 +27,7 @@ export function AcceptInvitationButton({
 
         await organization.setActive({ organizationId });
         await refetchOrganizations();
-        queryClient.invalidateQueries(
+        await queryClient.invalidateQueries(
           trpc.authenticated.organization.invitation.listReceived.queryFilter(),
         );
       },

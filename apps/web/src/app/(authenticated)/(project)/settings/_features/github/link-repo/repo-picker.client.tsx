@@ -26,8 +26,8 @@ export function RepoPicker({ projectId, repos }: RepoPickerProps) {
 
   const linkMutation = useMutation(
     trpc.authenticated.projects.github.linkRepo.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.github.getLink.queryKey({
             projectId,
           }),

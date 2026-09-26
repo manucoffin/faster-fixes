@@ -28,8 +28,8 @@ export function LinearConnected({ installation }: LinearConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.linear.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.linear.getInstallation.queryKey(),
         });

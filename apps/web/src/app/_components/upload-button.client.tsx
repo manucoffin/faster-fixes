@@ -74,7 +74,8 @@ export function UploadButton({
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file && !control.isPending) {
-            control.upload(file, { metadata });
+            // upload() never rejects: failures are reported through onError
+            void control.upload(file, { metadata });
           }
           e.target.value = "";
         }}

@@ -47,8 +47,8 @@ export function CreateReviewerDialog({
 
   const createReviewer = useMutation(
     trpc.authenticated.projects.reviewer.create.mutationOptions({
-      onSuccess: (result) => {
-        queryClient.invalidateQueries(
+      onSuccess: async (result) => {
+        await queryClient.invalidateQueries(
           trpc.authenticated.projects.reviewer.list.queryOptions({ projectId }),
         );
         onCreated(result.shareUrl);

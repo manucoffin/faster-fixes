@@ -90,7 +90,7 @@ export function PeriodSelector({ onDateRangeChange }: PeriodSelectorProps) {
 
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     if (newDateRange?.from && newDateRange?.to) {
-      setPeriod({
+      void setPeriod({
         from: newDateRange.from.toISOString().split("T")[0],
         to: newDateRange.to.toISOString().split("T")[0],
       });

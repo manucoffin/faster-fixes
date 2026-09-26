@@ -9,7 +9,8 @@ export function useSignOut() {
   const router = useRouter();
 
   return useCallback(() => {
-    signOut({
+    // signOut reports failures in its result instead of rejecting, and callers bind this to onClick
+    void signOut({
       fetchOptions: {
         onSuccess: () => {
           getQueryClient().clear();

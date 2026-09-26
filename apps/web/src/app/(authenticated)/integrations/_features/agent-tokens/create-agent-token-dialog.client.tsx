@@ -64,9 +64,14 @@ export function CreateAgentTokenDialog() {
     });
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!rawToken) return;
-    navigator.clipboard.writeText(rawToken);
+    try {
+      await navigator.clipboard.writeText(rawToken);
+    } catch {
+      toast.error("Could not copy the token. Copy it manually.");
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -75,7 +80,7 @@ export function CreateAgentTokenDialog() {
     if (!next) {
       // Invalidate on close so the list refreshes only after the user has copied the token
       if (rawToken) {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: trpc.authenticated.integrations.agentToken.list.queryKey({
             organizationId: activeOrg?.id ?? "",
           }),

@@ -27,8 +27,8 @@ export function SlackConnected({ installation }: SlackConnectedProps) {
 
   const disconnectMutation = useMutation(
     trpc.authenticated.integrations.slack.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey:
             trpc.authenticated.integrations.slack.getInstallation.queryKey(),
         });

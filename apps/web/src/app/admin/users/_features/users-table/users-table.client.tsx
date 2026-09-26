@@ -130,7 +130,7 @@ export function UsersTable() {
     if (searchInput !== search) {
       isUserSearch.current = true; // Indicate that the search is triggered by user
       const handler = setTimeout(() => {
-        setSearch(searchInput);
+        void setSearch(searchInput);
       }, 500); // 500ms debounce
 
       return () => {
@@ -142,7 +142,7 @@ export function UsersTable() {
   // Reset to first page when the debounced search changes, but only if it was a user search
   useEffect(() => {
     if (isUserSearch.current) {
-      setCurrentPage(1);
+      void setCurrentPage(1);
       isUserSearch.current = false;
     }
   }, [search, setCurrentPage]);
@@ -184,14 +184,14 @@ export function UsersTable() {
     newSorting: Array<{ id: string; desc: boolean }>,
   ) => {
     if (newSorting.length === 0) {
-      setSortBy("");
-      setSortOrder("");
+      void setSortBy("");
+      void setSortOrder("");
     } else {
       const sort = newSorting[0];
-      setSortBy(sort?.id || null);
-      setSortOrder(sort?.desc ? "desc" : "asc");
+      void setSortBy(sort?.id || null);
+      void setSortOrder(sort?.desc ? "desc" : "asc");
       // Reset to first page when sorting changes
-      setCurrentPage(1);
+      void setCurrentPage(1);
     }
   };
 

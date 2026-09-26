@@ -77,8 +77,8 @@ export function TeamPicker({ projectId, teams }: TeamPickerProps) {
 
   const linkMutation = useMutation(
     trpc.authenticated.projects.linear.linkTeam.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.linear.getLink.queryKey({
             projectId,
           }),

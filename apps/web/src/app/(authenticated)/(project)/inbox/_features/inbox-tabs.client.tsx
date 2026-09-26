@@ -157,7 +157,7 @@ export function InboxTabs() {
         feedback={selectedFeedback}
         open={!!selectedFeedbackId}
         onOpenChange={(open) => {
-          if (!open) setSelectedFeedbackId(null);
+          if (!open) void setSelectedFeedbackId(null);
         }}
         projectId={projectId}
         hasGitHubLink={!!gitHubLinkQuery.data}

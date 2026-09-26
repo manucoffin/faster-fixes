@@ -55,7 +55,8 @@ over `interface`), `consistent-type-imports`, `no-inferrable-types`,
 `no-nested-ternary`, `no-else-return` (no `else if` either) and `max-depth: 3`.
 
 The same glob runs the type-aware rules through the TypeScript project service:
-`await-thenable`, `no-misused-promises` (JSX attributes excepted),
+`await-thenable`, `no-floating-promises` (`void` marks a deliberate
+fire-and-forget), `no-misused-promises` (JSX attributes excepted),
 `no-unsafe-call`, `no-unsafe-enum-comparison`, `no-unnecessary-type-assertion`,
 `restrict-template-expressions`, `no-base-to-string`, `no-deprecated`,
 `only-throw-error` and `switch-exhaustiveness-check`. They read the generated

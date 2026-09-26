@@ -62,8 +62,8 @@ export function ArchiveTab() {
 
   const deleteMutation = useMutation(
     trpc.authenticated.projects.feedback.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({
             projectId,
           }),

@@ -66,7 +66,7 @@ export function SubscriptionCreateDialog({
       onSuccess: () => {
         toast.success("Subscription created successfully");
         setOpen(false);
-        queryClient.invalidateQueries(
+        return queryClient.invalidateQueries(
           trpc.admin.users.subscription.get.queryFilter(),
         );
       },

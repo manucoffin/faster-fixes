@@ -28,11 +28,13 @@ export function DeleteUserButton({ userId }: DeleteUserButtonProps) {
 
   const deleteUserMutation = useMutation(
     trpc.admin.users.delete.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Success", {
           description: "User deleted successfully",
         });
-        queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.admin.users.list.queryFilter(),
+        );
         router.push("/admin/users");
       },
       onError: (error) => {

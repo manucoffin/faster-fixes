@@ -56,7 +56,7 @@ export function EmailVerifiedToggle({
         }
       },
       onSettled: () => {
-        queryClient.invalidateQueries(
+        return queryClient.invalidateQueries(
           trpc.admin.users.email.get.queryFilter({ userId }),
         );
       },
