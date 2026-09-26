@@ -8,12 +8,13 @@ import type {
 
 import { createAnnotationMode } from "./annotation.js";
 import { createCommentPopover } from "./comment-popover.js";
+import { createFeedbackList } from "./feedback-list.js";
 import { buildFeedbackPayload } from "./feedback-payload.js";
 import type { Widget } from "./instance.js";
 import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
 import { createPinPopover } from "./pin-popover.js";
-import { createPinLayer } from "./pins.js";
+import { createPinLayer, resolveTarget } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
@@ -24,6 +25,8 @@ type MountInput = {
   options: ResolvedDisplayOptions;
   client: FeedbackClient;
   reviewerToken: string;
+  /** Whether the Project's config asks for the product link in the list. */
+  branding: boolean;
 };
 
 // `selected` covers the comment popover in every state: typing, submitting, error.
@@ -61,6 +64,7 @@ export function mountWidget({
   options,
   client,
   reviewerToken,
+  branding,
 }: MountInput): Widget {
   const host = document.createElement("div");
   host.setAttribute("data-ff-widget", "");
@@ -90,6 +94,7 @@ export function mountWidget({
     // Annotating and commenting take over the page; a pin popover would sit in the way.
     if (next !== "idle") closePinPopover();
     toolbar.setActive(next !== "idle");
+    if (next === "idle") setListOpen(false);
     if (next === "annotating") annotation.start();
     else annotation.stop();
     if (next !== "selected") {
@@ -120,8 +125,7 @@ export function mountWidget({
       }
       // Leaves the comment popover but stays in feedback mode, like the React Embed.
       if (mode === "selected") setMode("annotating");
-      pinPopover.open(item, pin);
-      pinLayer.setActive(item.id);
+      openPinPopover(item, pin);
     },
   );
   let feedbackItems: FeedbackItem[] = [];
@@ -134,6 +138,7 @@ export function mountWidget({
     );
     pinLayer.render(pinned);
     pinPopover.sync(pinned);
+    list.render(next);
   }
 
   const pinPopover = createPinPopover(document, shadow, options.labels, {
@@ -155,6 +160,11 @@ export function mountWidget({
     },
     onClose: () => pinLayer.setActive(null),
   });
+
+  function openPinPopover(item: FeedbackItem, pin: HTMLElement) {
+    pinPopover.open(item, pin);
+    pinLayer.setActive(item);
+  }
 
   function closePinPopover() {
     pinPopover.close();
@@ -221,16 +231,47 @@ export function mountWidget({
     },
   });
 
+  const list = createFeedbackList(
+    document,
+    { labels: options.labels, position: options.position, branding },
+    {
+      onSelect(item) {
+        // Cross-page rows are handled with in-app navigation, not here yet.
+        if (item.pageUrl !== window.location.href) return;
+        if (mode === "selected") setMode("annotating");
+        resolveTarget(item)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        const pin = showPins ? pinLayer.pinOf(item.id) : null;
+        if (pin) {
+          openPinPopover(item, pin);
+          return;
+        }
+        // Resolved and closed items have no pin: only their element is outlined.
+        pinPopover.close();
+        pinLayer.setActive(item);
+      },
+    },
+  );
+
+  function setListOpen(open: boolean) {
+    list.setOpen(open);
+    toolbar.setListShown(open);
+  }
+
   const toolbar = createToolbar(document, options, {
     onStart: () => setMode("annotating"),
     onExit: () => setMode("idle"),
     onTogglePins: togglePins,
+    onToggleList: () => setListOpen(!list.isOpen),
   });
+  toolbar.setListShown(false);
 
   const stack = document.createElement("div");
   stack.className = "stack";
   applyStackLayout(stack, options.position);
-  stack.appendChild(toolbar.element);
+  stack.append(toolbar.element, list.element);
   shadow.append(overlay, stack);
 
   let visible = true;
@@ -258,6 +299,7 @@ export function mountWidget({
       visible = false;
       setMode("idle");
       closePinPopover();
+      list.close();
       host.remove();
     },
     get isVisible() {
@@ -282,6 +324,7 @@ export function mountWidget({
       destroyed = true;
       setMode("idle");
       closePinPopover();
+      list.close();
       recorder?.stop();
       recorder = null;
       pinLayer.destroy();

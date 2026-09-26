@@ -148,6 +148,68 @@ test.describe("script embed", () => {
     await page.getByRole("button", { name: "Fermer" }).click();
     await expect(page.getByRole("button", { name: "Modifier" })).toBeHidden();
   });
+
+  test("takes every Feedback list string from labels", async ({ page }) => {
+    await stubWidgetApi(page, { config: { enabled: true, branding: true } });
+    await page.goto(`${FIXTURE_PATH}?manual`);
+    await page.evaluate(
+      ([projectId, apiOrigin]) => {
+        window.FasterFixes?.init({
+          projectId,
+          apiOrigin,
+          labels: {
+            showFeedbackList: "Afficher la liste",
+            hideFeedbackList: "Masquer la liste",
+            feedbackListTitle: "Retours",
+            showResolved: "Afficher les résolus",
+            hideResolved: "Masquer les résolus",
+            emptyList: "Aucun retour",
+            brandingLink: "Propulsé par FasterFixes",
+          },
+        });
+      },
+      [WIDGET_PROJECT_ID, WIDGET_API_ORIGIN] as const,
+    );
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.getByRole("button", { name: "Afficher la liste" }).click();
+
+    await expect(page.getByRole("region", { name: "Retours" })).toBeVisible();
+    await expect(page.getByText("Aucun retour")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Propulsé par FasterFixes" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Afficher les résolus" }).click();
+    await expect(
+      page.getByRole("button", { name: "Masquer les résolus" }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Masquer la liste" }).click();
+    await expect(page.getByRole("region", { name: "Retours" })).toBeHidden();
+  });
+
+  test("exposes list parts and keyboard-operable rows", async ({ page }) => {
+    await page.goto(FIXTURE_PATH);
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.locator("h1").click();
+    await page.getByPlaceholder("Describe the issue...").fill("Keyboard row");
+    await page.getByRole("button", { name: "Submit" }).click();
+    await expect(
+      page.getByRole("button", { name: "Feedback: Keyboard row" }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.getByRole("button", { name: "Show feedback list" }).click();
+
+    await expect(page.locator('[part="list"]')).toBeVisible();
+    const row = page.locator('[part="list-item"]');
+    await expect(row).toHaveCount(1);
+
+    await row.focus();
+    await expect(row).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  });
 });
 
 declare global {

@@ -16,8 +16,10 @@ export type PinLayer = {
   /** One pin per item; a pin already on screen for an id is kept and updated. */
   render: (items: FeedbackItem[]) => void;
   setShown: (shown: boolean) => void;
-  /** Scales up the active pin and keeps its element outlined. */
-  setActive: (id: string | null) => void;
+  /** The pin on screen for an item, or null when the item has none. */
+  pinOf: (id: string) => HTMLElement | null;
+  /** Keeps the active item's element outlined and scales up its pin, if it has one. */
+  setActive: (item: FeedbackItem | null) => void;
   destroy: () => void;
 };
 
@@ -27,7 +29,7 @@ export function statusColor(status: string) {
   return colors[status] ?? STATUS_COLORS.new;
 }
 
-function resolveTarget(item: FeedbackItem) {
+export function resolveTarget(item: FeedbackItem) {
   const strategies = item.metadata?.selectors as SelectorStrategies | undefined;
   if (!item.selector && !strategies) return null;
   return resolveElement(item.selector, strategies);
@@ -65,7 +67,7 @@ export function createPinLayer(
   container.appendChild(layer);
 
   let pins: { item: FeedbackItem; element: HTMLButtonElement }[] = [];
-  let activeId: string | null = null;
+  let active: FeedbackItem | null = null;
   let retryTimers: ReturnType<typeof setTimeout>[] = [];
   let frame: number | null = null;
 
@@ -109,8 +111,7 @@ export function createPinLayer(
 
   // Hovering outlines the hovered pin's element, leaving restores the active one's.
   function highlightActive() {
-    const active = pins.find(({ item }) => item.id === activeId);
-    showHighlight(highlight, active ? resolveTarget(active.item) : null);
+    showHighlight(highlight, active ? resolveTarget(active) : null);
   }
 
   function createPin() {
@@ -138,7 +139,7 @@ export function createPinLayer(
       "aria-label",
       labels.pinAriaLabel(item.comment.slice(0, EXCERPT_LENGTH)),
     );
-    pin.classList.toggle("pin-active", item.id === activeId);
+    pin.classList.toggle("pin-active", item.id === active?.id);
     return pin;
   }
 
@@ -152,7 +153,7 @@ export function createPinLayer(
   window.addEventListener(
     "scroll",
     () => {
-      if (activeId !== null) highlightActive();
+      if (active) highlightActive();
     },
     { passive: true, signal: listening.signal },
   );
@@ -177,14 +178,17 @@ export function createPinLayer(
       frame = window.requestAnimationFrame(update);
       retryTimers = RETRY_DELAYS.map((delay) => setTimeout(update, delay));
     },
+    pinOf(id) {
+      return pins.find(({ item }) => item.id === id)?.element ?? null;
+    },
     setShown(shown) {
       layer.hidden = !shown;
       if (!shown) showHighlight(highlight, null);
     },
-    setActive(id) {
-      activeId = id;
-      for (const { item, element } of pins) {
-        element.classList.toggle("pin-active", item.id === id);
+    setActive(item) {
+      active = item;
+      for (const pin of pins) {
+        pin.element.classList.toggle("pin-active", pin.item.id === item?.id);
       }
       highlightActive();
     },

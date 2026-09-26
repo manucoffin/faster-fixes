@@ -52,6 +52,8 @@ export type Labels = {
   hideFeedbackList: string;
   showMarkers: string;
   hideMarkers: string;
+  // Text of the link to the product site shown when the Project has branding.
+  brandingLink: string;
   // Receives the excerpt of the Feedback comment the pin stands for.
   pinAriaLabel: (commentExcerpt: string) => string;
 };
@@ -78,6 +80,7 @@ export const DEFAULT_LABELS: Labels = {
   hideFeedbackList: "Hide feedback list",
   showMarkers: "Show markers",
   hideMarkers: "Hide markers",
+  brandingLink: "Powered by FasterFixes",
   pinAriaLabel: (commentExcerpt) => `Feedback: ${commentExcerpt}`,
 };
 

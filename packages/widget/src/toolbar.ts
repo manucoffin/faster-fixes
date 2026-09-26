@@ -8,6 +8,7 @@ type ToolbarActions = {
   onStart: () => void;
   onExit: () => void;
   onTogglePins: () => void;
+  onToggleList: () => void;
 };
 
 export type Toolbar = {
@@ -16,6 +17,8 @@ export type Toolbar = {
   setActive: (active: boolean) => void;
   /** Reflects whether pins are shown in the markers control. */
   setPinsShown: (shown: boolean) => void;
+  /** Reflects whether the Feedback list is open in the list control. */
+  setListShown: (shown: boolean) => void;
 };
 
 function tooltipSide(position: WidgetPosition) {
@@ -61,7 +64,7 @@ function createControl(
 export function createToolbar(
   document: Document,
   { labels, position }: ResolvedDisplayOptions,
-  { onStart, onExit, onTogglePins }: ToolbarActions,
+  { onStart, onExit, onTogglePins, onToggleList }: ToolbarActions,
 ): Toolbar {
   const side = tooltipSide(position);
   const toolbar = document.createElement("div");
@@ -93,10 +96,17 @@ export function createToolbar(
     side,
     onTogglePins,
   );
+  const list = createControl(
+    document,
+    labels.showFeedbackList,
+    "list",
+    side,
+    onToggleList,
+  );
   controls.append(
     ...(position.includes("top")
-      ? [exit.control, markers.control]
-      : [markers.control, exit.control]),
+      ? [exit.control, list.control, markers.control]
+      : [list.control, markers.control, exit.control]),
   );
 
   toolbar.append(trigger, controls);
@@ -120,6 +130,14 @@ export function createToolbar(
         shown ? "eye" : "eyeOff",
       );
       markers.control.classList.toggle("control-pressed", !shown);
+    },
+    setListShown(shown) {
+      list.setContent(
+        shown ? labels.hideFeedbackList : labels.showFeedbackList,
+        "list",
+      );
+      list.control.setAttribute("aria-expanded", String(shown));
+      list.control.classList.toggle("control-pressed", shown);
     },
   };
 }

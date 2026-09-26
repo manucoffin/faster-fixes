@@ -30,5 +30,10 @@ export function createWidget(input: CreateWidgetOptions): Widget {
   ) {
     return createInertWidget();
   }
-  return mountWidget({ options: result.options, client, reviewerToken });
+  return mountWidget({
+    options: result.options,
+    client,
+    reviewerToken,
+    branding: config.branding,
+  });
 }

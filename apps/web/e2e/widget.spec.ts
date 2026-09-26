@@ -282,6 +282,111 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(pin).toBeVisible();
     });
 
+    test("lists the submitted Feedback and reveals resolved items on request", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(new URL(fixture.path, baseURL).href, {
+            id: "fb_resolved",
+            status: "resolved",
+            comment: "Already fixed",
+          }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.locator("h1").click();
+      await page
+        .getByPlaceholder("Describe the issue...")
+        .fill("The heading overlaps the logo");
+      await page.getByRole("button", { name: "Submit" }).click();
+      await expect(
+        page.getByRole("button", {
+          name: "Feedback: The heading overlaps the logo",
+        }),
+      ).toBeVisible();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Show feedback list" }).click();
+      await expect(
+        page.getByRole("button", { name: "Hide feedback list" }),
+      ).toBeVisible();
+
+      await expect(
+        page.getByText("The heading overlaps the logo", { exact: true }),
+      ).toBeVisible();
+      const resolved = page.getByText("Already fixed", { exact: true });
+      await expect(resolved).toBeHidden();
+
+      await page.getByRole("button", { name: "Show resolved" }).click();
+      await expect(resolved).toBeVisible();
+      await page.getByRole("button", { name: "Hide resolved" }).click();
+      await expect(resolved).toBeHidden();
+
+      await page.getByRole("button", { name: "Hide feedback list" }).click();
+      await expect(
+        page.getByText("The heading overlaps the logo", { exact: true }),
+      ).toBeHidden();
+    });
+
+    test("activates a list row of the current page", async ({
+      page,
+      baseURL,
+    }) => {
+      await stubWidgetApi(page, {
+        feedback: [stubbedItem(new URL(fixture.path, baseURL).href)],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Show feedback list" }).click();
+      await page
+        .getByText("The heading is misaligned", { exact: true })
+        .click();
+
+      await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+      await expect(page.locator("h1")).toBeInViewport();
+    });
+
+    test("links to the product site only when the config asks for branding", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page, { config: { enabled: true, branding: true } });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Show feedback list" }).click();
+
+      const link = page.getByRole("link", { name: "Powered by FasterFixes" });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute(
+        "href",
+        "https://faster-fixes.com?ref=widget",
+      );
+    });
+
+    test("shows no branding link without branding in the config", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.getByRole("button", { name: "Show feedback list" }).click();
+
+      await expect(page.getByText("No feedback on this page")).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Powered by FasterFixes" }),
+      ).toHaveCount(0);
+    });
+
     test("views, edits and deletes Feedback from its pin", async ({
       page,
       baseURL,

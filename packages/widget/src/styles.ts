@@ -324,6 +324,140 @@ export const WIDGET_CSS = `
     font-size: 13px;
   }
 
+  .list {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    max-height: 320px;
+    overflow: hidden;
+    border-radius: var(--ff-radius);
+    background-color: var(--ff-background);
+    color: var(--ff-foreground);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    font: 13px/1.4 var(--ff-font-family);
+    animation: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .list[data-from="right"] {
+    animation-name: ff-list-slide-left;
+  }
+
+  .list[data-from="left"] {
+    animation-name: ff-list-slide-right;
+  }
+
+  .list.closing {
+    animation: 150ms ease-in forwards;
+  }
+
+  .list.closing[data-from="right"] {
+    animation-name: ff-list-exit-left;
+  }
+
+  .list.closing[data-from="left"] {
+    animation-name: ff-list-exit-right;
+  }
+
+  .list-header {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid #3f3f46;
+  }
+
+  .list-title {
+    font-weight: 600;
+  }
+
+  .list-toggle {
+    all: initial;
+    padding: 2px 8px;
+    border-radius: calc(var(--ff-radius) - 2px);
+    color: inherit;
+    font: 11px/1.4 var(--ff-font-family);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .list-toggle:focus-visible,
+  .list-footer a:focus-visible {
+    outline: 2px solid var(--ff-accent);
+    outline-offset: 2px;
+  }
+
+  .list-rows {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .list-item {
+    all: initial;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border-bottom: 1px solid #3f3f46;
+    box-sizing: border-box;
+    color: var(--ff-foreground);
+    font: 13px/1.4 var(--ff-font-family);
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+  }
+
+  .list-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .list-item:focus-visible {
+    outline: 2px solid var(--ff-accent);
+    outline-offset: -2px;
+  }
+
+  .list-item-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .list-item-comment,
+  .list-item-page {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item-page {
+    color: #71717a;
+    font-size: 11px;
+  }
+
+  .list-empty {
+    margin: 0;
+    padding: 20px 14px;
+    color: #71717a;
+    text-align: center;
+  }
+
+  .list-footer {
+    flex: none;
+    padding: 6px 14px;
+    border-top: 1px solid #3f3f46;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .list-footer a {
+    color: #71717a;
+    text-decoration: none;
+  }
+
   .tooltip {
     position: absolute;
     top: 50%;
@@ -369,6 +503,26 @@ export const WIDGET_CSS = `
     to { transform: scale(1); opacity: 1; }
   }
 
+  @keyframes ff-list-slide-left {
+    from { transform: translateX(12px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes ff-list-slide-right {
+    from { transform: translateX(-12px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes ff-list-exit-left {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(12px); opacity: 0; }
+  }
+
+  @keyframes ff-list-exit-right {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(-12px); opacity: 0; }
+  }
+
   @keyframes ff-popover-fadeout {
     from { transform: translateY(0); opacity: 1; }
     to { transform: translateY(8px); opacity: 0; }
@@ -377,12 +531,19 @@ export const WIDGET_CSS = `
   @media (prefers-reduced-motion: reduce) {
     .button,
     .controls,
+    .list-item,
     .overlay,
     .pin,
     .popover.fading,
     .tooltip {
       animation: none;
       transition-duration: 1ms;
+    }
+
+    /* The list's exit animation is timed, so it is shortened rather than removed. */
+    .list,
+    .list.closing {
+      animation-duration: 1ms;
     }
   }
 `;
