@@ -69,7 +69,7 @@ const ISSUE_LIST_COMMAND = (() => {
 const ISSUE_SCOPE =
   ISSUES.length === 0
     ? "Work on any open issue labelled `ready-for-agent`."
-    : `This round is scoped to these issues only: ${ISSUES.map((n) => `#${n}`).join(", ")}. Ignore every other open issue, even if it looks more urgent. If all of them are done, output ${COMPLETION_SIGNAL}.`;
+    : `This round is scoped to these issues only: ${ISSUES.map((n) => `#${n}`).join(", ")}. Ignore every other open issue, even if it looks more urgent. If all of them are done, output the completion signal.`;
 
 // ---------------------------------------------------------------------------
 // Run

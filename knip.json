@@ -7,7 +7,9 @@
   },
   "workspaces": {
     ".": {
-      "ignoreDependencies": ["prettier-plugin-tailwindcss"]
+      "entry": [".sandcastle/main.mts"],
+      "ignoreBinaries": ["caffeinate"],
+      "ignoreDependencies": ["prettier-plugin-tailwindcss", "tsx"]
     },
     "apps/web": {
       "entry": ["src/app/**/page.mdx", "mdx-components.tsx"],
