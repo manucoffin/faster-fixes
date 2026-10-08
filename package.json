@@ -22,7 +22,7 @@
     "version-packages": "changeset version && pnpm install --lockfile-only && prettier --write \"**/CHANGELOG.md\" pnpm-lock.yaml",
     "release": "pnpm build:packages && changeset publish",
     "prepare": "husky",
-    "sandcastle": "npx tsx .sandcastle/main.mts"
+    "sandcastle": "caffeinate -di npx tsx .sandcastle/main.mts"
   },
   "devDependencies": {
     "@ai-hero/sandcastle": "^0.12.0",

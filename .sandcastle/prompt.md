@@ -4,7 +4,14 @@ Here are a set of GitHub issues:
 
 !`{{ISSUE_LIST_COMMAND}}`
 
-If all tasks are complete, output <promise>NO MORE TASKS</promise>.
+# COMPLETION SIGNAL
+
+The loop stops the moment the exact string `<promise>NO MORE TASKS</promise>`
+appears anywhere in your visible output, even quoted inside a sentence.
+
+Output it only when the list above is empty or every issue in it is blocked, and
+then make it your whole reply. Otherwise never write it, not even to say it does
+not apply: just pick a task and work on it without mentioning the signal.
 
 # TASK SELECTION
 
