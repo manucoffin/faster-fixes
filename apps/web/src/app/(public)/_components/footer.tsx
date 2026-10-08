@@ -61,16 +61,16 @@ export function Footer() {
 
             <div className="mt-4 flex justify-center sm:justify-start md:mt-8">
               <a
-                href="https://twelve.tools"
+                href="https://startupbase.io/products/fasterfixes?utm_source=startupbase&utm_medium=badge&utm_campaign=featured-badge-dark"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- external badge served by Twelve Tools */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- external badge served by StartupBase */}
                 <img
-                  src="https://twelve.tools/badge0-dark.svg"
-                  alt="Featured on Twelve Tools"
-                  width={200}
-                  height={54}
+                  src="https://statics.startupbase.io/site/badges/featured-on-sb-dark.svg"
+                  alt="Featured on StartupBase"
+                  width={206}
+                  height={55}
                 />
               </a>
             </div>
