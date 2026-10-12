@@ -13,6 +13,7 @@
       "env": [
         "DOMAIN_NAME",
         "DATABASE_URL",
+        "DATABASE_PROVIDER",
 
         "BETTER_AUTH_SECRET",
         "BETTER_AUTH_URL",

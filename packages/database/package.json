@@ -6,6 +6,7 @@
     "build": "prisma generate",
     "db:gen": "prisma generate",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test adapter.test.ts",
     "db:seed": "dotenv -e .env.local -- npx prisma db seed",
     "db:pull": "dotenv -e .env.local -- npx prisma db pull",
     "migrate:dev": "npx prisma migrate dev",

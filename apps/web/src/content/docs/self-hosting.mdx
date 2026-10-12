@@ -80,6 +80,8 @@ If you prefer AWS S3 over Cloudflare R2, use `AWS_ACCESS_KEY_ID`, `AWS_BUCKET_NA
 
 Any Postgres 14+ works. Create a database and put the connection string in `DATABASE_URL`.
 
+The adapter is selected from the `DATABASE_URL` hostname in every environment: hosts ending in `.neon.tech` use Neon's serverless adapter; other hosts use standard TCP PostgreSQL. `NODE_ENV` does not select the adapter. Set `DATABASE_PROVIDER=postgres` or `DATABASE_PROVIDER=neon` to override detection, including when using a custom hostname or proxy.
+
 ### Cloudflare R2
 
 Create a bucket and an API token scoped to that bucket. Copy the account ID, access key, and secret into the R2 variables above. Make the bucket public (or front it with a Worker) so screenshots are readable by reviewers.
