@@ -61,7 +61,7 @@ export type Mailer = {
   emails: {
     send(options: MailOptions): Promise<EmailResponse>;
   };
-  contacts: {
+  contacts?: {
     list(): Promise<Contact[]>;
     create(options: CreateContactOptions): Promise<Contact>;
     get(id: string): Promise<Contact>;

@@ -15,7 +15,7 @@ You will need:
 - A **PostgreSQL database**: Neon, Supabase, Railway, or self-managed.
 - An **Inngest** account for background jobs (screenshot processing, GitHub sync, etc.). The free tier is enough to get started.
 - An **S3-compatible object store** for screenshots: Cloudflare R2 is the recommended default; AWS S3 works identically.
-- A **Resend** or **Plunk** account for transactional email: required to send sign-up confirmations and password resets.
+- An **SMTP server**, **Resend**, or **Plunk** for transactional email: required to send sign-up confirmations and password resets.
 - (Optional) A **GitHub App** if you want the GitHub integration.
 
 Stripe is not needed for self-hosted installs. The billing code only runs on the hosted cloud version.
@@ -59,9 +59,11 @@ INNGEST_EVENT_KEY="..."
 INNGEST_SIGNING_KEY="..."
 
 # Transactional email: required for sign-up confirmations and password resets.
-# Use either Resend or Plunk.
+# Resend remains the default. Set "plunk" or "smtp" to select another provider.
+MAILER_PROVIDER="resend"
 RESEND_API_KEY="re_..."
 # PLUNK_SECRET_KEY="sk_..."
+# For your own SMTP server, use the SMTP configuration below instead.
 
 # Widget API (points clients' widgets at your instance)
 NEXT_PUBLIC_FF_API_ORIGIN="https://your-domain.com"
@@ -89,6 +91,27 @@ Create a bucket and an API token scoped to that bucket. Copy the account ID, acc
 ### Inngest
 
 Create an app at [inngest.com](https://www.inngest.com). Copy the event key and signing key. After your first deployment, connect Inngest to your instance at `https://your-domain.com/api/inngest`.
+
+### SMTP
+
+Set `MAILER_PROVIDER=smtp` to use your own mail server instead of Resend or Plunk:
+
+```bash
+MAILER_PROVIDER=smtp
+SMTP_HOST=mail.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=your-smtp-username
+SMTP_PASSWORD="your-smtp-password"
+EMAIL_FROM="FasterFixes <support@example.com>"
+```
+
+Port 587 uses STARTTLS. For implicit TLS on port 465, set `SMTP_PORT=465` and `SMTP_SECURE=true`. Set both `SMTP_USER` and `SMTP_PASSWORD`, or leave both unset for an unauthenticated relay. Only disable `SMTP_REQUIRE_TLS` for a trusted local server that does not support TLS.
+
+Use a sender address authorized by your mail server. `EMAIL_FROM` overrides both transactional sender addresses. Alternatively, `MAIL_FROM_DOMAIN` sets the domain for `contact@` and `noreply@` addresses without changing the application domain.
+
+SMTP does not need Resend or Plunk API keys. It sends rendered transactional emails, but has no contact-management API, so marketing contact/segment synchronization is skipped. Keep credentials in your private environment file, not in Git.
 
 ## 4. Run migrations
 

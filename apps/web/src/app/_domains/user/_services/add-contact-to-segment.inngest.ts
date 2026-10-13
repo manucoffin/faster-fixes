@@ -20,6 +20,8 @@ export const addContactToSegment = inngest.createFunction(
     // Self-hosted instances have no marketing segment configured.
     const segmentId = process.env.RESEND_SEGMENT_ID;
     if (!segmentId) return { skipped: "no_segment_configured" };
+    const contacts = mailer.contacts;
+    if (!contacts) return { skipped: "provider_has_no_contacts" };
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -31,7 +33,7 @@ export const addContactToSegment = inngest.createFunction(
     const email = user.email.toLowerCase().trim();
 
     try {
-      await mailer.contacts.create({ email, subscribed: true });
+      await contacts.create({ email, subscribed: true });
     } catch (error) {
       // The contact may already exist (earlier newsletter signup, or a
       // re-registration after account deletion). The segment add below is the
@@ -42,7 +44,7 @@ export const addContactToSegment = inngest.createFunction(
       );
     }
 
-    await mailer.contacts.addToSegment({ email, segmentId });
+    await contacts.addToSegment({ email, segmentId });
 
     return { userId };
   },
