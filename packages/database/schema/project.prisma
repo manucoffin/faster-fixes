@@ -56,6 +56,8 @@ model Reviewer {
   @@map("reviewer")
 }
 
+/// A trigger (`feedback_clear_rank_on_status_change`, see ADR-0017) deletes the
+/// Feedback's `FeedbackRank` row whenever `status` changes, whatever the writer.
 model Feedback {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -97,9 +99,22 @@ model Feedback {
   linearIssueLink FeedbackLinearIssueLink?
   jiraIssueLink   FeedbackJiraIssueLink?
   slackMessage    FeedbackSlackMessage?
+  rank            FeedbackRank?
 
   @@index([projectId])
   @@index([reviewerId])
   @@index([assigneeId])
   @@map("feedback")
+}
+
+/// A Feedback's place within its Status column (ADR-0017). Kept out of the
+/// `feedback` row so a Rank write never bumps `Feedback.updatedAt`.
+model FeedbackRank {
+  feedbackId String   @id
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  // Fractional-index key, compared lexicographically.
+  key String
+
+  @@map("feedback_rank")
 }

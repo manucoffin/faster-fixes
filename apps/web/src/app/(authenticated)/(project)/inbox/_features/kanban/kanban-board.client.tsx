@@ -14,6 +14,10 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import * as React from "react";
+import {
+  type BoardSort,
+  sortColumnFeedback,
+} from "../../_helpers/board-column-order";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { BoardSummaryStrip } from "./board-summary-strip";
@@ -26,7 +30,7 @@ type FeedbackItem = ListFeedbackOutput[number];
 type KanbanBoardProps = {
   feedback: FeedbackItem[];
   pageUrlFilter: string | null;
-  sort: string;
+  sort: BoardSort;
   onSelectFeedback: (id: string) => void;
 };
 
@@ -35,25 +39,6 @@ const COLUMNS = [
   { id: "in_progress", title: "In Progress" },
   { id: "resolved", title: "Resolved" },
 ] as const;
-
-function sortFeedback(items: FeedbackItem[], sort: string): FeedbackItem[] {
-  return [...items].sort((a, b) => {
-    switch (sort) {
-      case "oldest":
-        return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      case "updated":
-        return (
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-      default: // newest
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-    }
-  });
-}
 
 export function KanbanBoard({
   feedback,
@@ -94,9 +79,8 @@ export function KanbanBoard({
     for (const item of filtered) {
       map[item.status]?.push(item);
     }
-    // Sort each column
     for (const [key, items] of Object.entries(map)) {
-      map[key] = sortFeedback(items, sort);
+      map[key] = sortColumnFeedback(items, sort);
     }
     return map;
   }, [filtered, sort]);

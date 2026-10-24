@@ -4,6 +4,13 @@ import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+// Mirrors the database trigger (ADR-0017): a Status change clears the Rank, so
+// the card lands on top of its new column before the list refetches.
+function withStatus(feedback: ListFeedbackOutput[number], status: string) {
+  if (feedback.status === status) return feedback;
+  return { ...feedback, status, rank: null };
+}
+
 export function useFeedbackMutations() {
   const { activeProject } = useActiveProject();
   if (!activeProject) {
@@ -35,7 +42,7 @@ export function useFeedbackMutations() {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: ListFeedbackOutput | undefined) =>
-            old?.map((f) => (f.id === feedbackId ? { ...f, status } : f)),
+            old?.map((f) => (f.id === feedbackId ? withStatus(f, status) : f)),
         );
 
         return { previous };
@@ -60,7 +67,7 @@ export function useFeedbackMutations() {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: ListFeedbackOutput | undefined) =>
-            old?.map((f) => (idSet.has(f.id) ? { ...f, status } : f)),
+            old?.map((f) => (idSet.has(f.id) ? withStatus(f, status) : f)),
         );
 
         return { previous };
