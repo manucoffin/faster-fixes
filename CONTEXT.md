@@ -94,6 +94,10 @@ _Avoid_: Priority (reserved for Tracker-side priority levels), Position, Order.
 A Feedback the team has decided not to act on (won't fix, duplicate, out of scope). Stored in the database as `status = "closed"` for legacy reasons; the literal will be renamed in a future migration. UI label is **Archived** everywhere (status dropdown, kanban action, archive view).
 _Avoid_: Closed, Dismissed, Rejected.
 
+**Restore**:
+Taking an **Archived** Feedback back into the inbox for triage. A restored Feedback is always `new`, whatever its Status was before it was archived: Restore means "look at this again", not "undo the archiving". It is a Status change like any other, so Trackers converge to it (the mirrored Issue reopens) and the Rank is cleared. Only an Archived Feedback can be restored; a Feedback another actor has already moved out of Archived is left untouched.
+_Avoid_: Unarchive, Reopen (reserved for the Tracker-side action on an Issue), Undo.
+
 ### Integrations
 
 **Integration**:
