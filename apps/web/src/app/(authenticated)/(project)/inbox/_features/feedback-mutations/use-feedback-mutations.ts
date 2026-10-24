@@ -104,7 +104,8 @@ export function useFeedbackMutations() {
             feedbackQueryKey,
             previous.map((f) => {
               const key = keys.get(f.id);
-              return key === undefined ? f : { ...f, rank: key };
+              const moved = f.id === feedbackId ? { ...f, status } : f;
+              return key === undefined ? moved : { ...moved, rank: key };
             }),
           );
         }
@@ -117,8 +118,8 @@ export function useFeedbackMutations() {
         }
         toast.error("Failed to move feedback.");
       },
-      onSettled: () =>
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
+      // A move to another column is a Status change, so the New count may move.
+      onSettled: invalidateAfterStatusChange,
     }),
   );
 

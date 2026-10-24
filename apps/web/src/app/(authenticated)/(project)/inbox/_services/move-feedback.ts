@@ -1,14 +1,12 @@
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from "@/server/errors/domain-errors";
+import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import { planRankPlacement } from "../_helpers/feedback-rank-placement";
 import type { MoveFeedbackInput } from "./move-feedback.schema";
+import { updateFeedbackStatus } from "./update-feedback-status";
 
-// Reordering is not an edit of the Feedback (ADR-0017): only `feedback_rank`
-// rows are written, so `updatedAt` stays put and no Tracker or Slack sync runs.
+// Reordering is not an edit of the Feedback (ADR-0017): within a column only
+// `feedback_rank` rows are written, so `updatedAt` stays put and no Tracker or
+// Slack sync runs. A move to another column is a Status change first.
 export async function moveFeedback(
   {
     projectId,
@@ -50,10 +48,11 @@ export async function moveFeedback(
     return { moved: false };
   }
 
+  // The Status service emits its event even on an unchanged Status (ADR-0007),
+  // so a same-column move must never reach it. It runs before the Rank write
+  // because the trigger clears the Rank on a Status change.
   if (feedback.status !== status) {
-    throw new BadRequestError(
-      "Feedback can only be reordered within its Status.",
-    );
+    await updateFeedbackStatus({ feedbackId, status, userId }, db);
   }
 
   // The server reads the column itself: the board's copy can be stale, so the

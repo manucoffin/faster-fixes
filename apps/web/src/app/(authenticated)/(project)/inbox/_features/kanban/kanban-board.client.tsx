@@ -43,6 +43,25 @@ const COLUMNS = [
   { id: "resolved", title: "Resolved" },
 ] as const;
 
+// A drop on the column itself rather than on a card lands at the bottom. Within
+// a column the sortable already reports the slot. The target column of a
+// cross-column drop opens no gap, so the card goes above or below the hovered
+// card depending on which half it was dropped on.
+function resolveDropIndex(
+  { active, over }: DragEndEvent,
+  overIndex: number,
+  columnLength: number,
+  isSameColumn: boolean,
+) {
+  if (overIndex === -1 || !over) return columnLength;
+  if (isSameColumn) return overIndex;
+  const dragged = active.rect.current.translated;
+  if (!dragged) return overIndex;
+  const isBelow =
+    dragged.top + dragged.height / 2 > over.rect.top + over.rect.height / 2;
+  return isBelow ? overIndex + 1 : overIndex;
+}
+
 export function KanbanBoard({
   feedback,
   pageUrlFilter,
@@ -104,31 +123,38 @@ export function KanbanBoard({
     const item = feedback.find((f) => f.id === feedbackId);
     if (!item || !over || !newStatus) return;
 
-    if (item.status !== newStatus) {
-      updateStatus(feedbackId, newStatus);
+    const isSameColumn = item.status === newStatus;
+
+    // A date sort orders the column itself, so a drop there only ever changes
+    // the Status and a same-column drop does nothing.
+    if (sort !== "manual") {
+      if (!isSameColumn) updateStatus(feedbackId, newStatus);
       return;
     }
-
-    // A date sort would put the card straight back, so only Manual reorders.
-    if (sort !== "manual" || over.id === feedbackId) return;
+    if (over.id === feedbackId) return;
 
     // Under the page filter these are the visible cards, so the card lands
     // between its visible neighbours.
     const columnIds = (grouped[newStatus] ?? []).map((f) => f.id);
     const overIndex = columnIds.indexOf(over.id as string);
-    // A drop on the column itself rather than on a card lands at the bottom.
-    const dropIndex = overIndex === -1 ? columnIds.length : overIndex;
-    const target = resolveDropNeighbours(columnIds, feedbackId, dropIndex);
-    const current = resolveDropNeighbours(
+    const target = resolveDropNeighbours(
       columnIds,
       feedbackId,
-      columnIds.indexOf(feedbackId),
+      resolveDropIndex(event, overIndex, columnIds.length, isSameColumn),
     );
-    if (
-      target.beforeId === current.beforeId &&
-      target.afterId === current.afterId
-    ) {
-      return;
+
+    if (isSameColumn) {
+      const current = resolveDropNeighbours(
+        columnIds,
+        feedbackId,
+        columnIds.indexOf(feedbackId),
+      );
+      if (
+        target.beforeId === current.beforeId &&
+        target.afterId === current.afterId
+      ) {
+        return;
+      }
     }
 
     moveFeedback(feedbackId, newStatus, target.beforeId, target.afterId);
