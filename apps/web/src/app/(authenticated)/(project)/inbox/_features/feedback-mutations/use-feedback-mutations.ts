@@ -18,12 +18,17 @@ export function useFeedbackMutations() {
   });
   const newCountQueryKey =
     trpc.authenticated.projects.feedback.countNew.queryKey({ projectId });
+  // Partial input, so every page, search and sort of the archive table matches.
+  const archivedQueryKey =
+    trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId });
 
-  // The sidebar badge counts New Feedback, so every status change refreshes it.
+  // The sidebar badge counts New Feedback, and a status change can move
+  // Feedback into the Archive, so every status change refreshes both.
   const invalidateAfterStatusChange = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
       queryClient.invalidateQueries({ queryKey: newCountQueryKey }),
+      queryClient.invalidateQueries({ queryKey: archivedQueryKey }),
     ]);
 
   const updateStatus = useMutation(
