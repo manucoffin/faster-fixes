@@ -16,6 +16,7 @@ type KanbanColumnBodyProps = {
   id: string;
   items: FeedbackItem[];
   selectedIds: Set<string>;
+  isSortable: boolean;
   onToggleSelect: (id: string) => void;
   onSelectFeedback: (id: string) => void;
 };
@@ -24,6 +25,7 @@ export function KanbanColumnBody({
   id,
   items,
   selectedIds,
+  isSortable,
   onToggleSelect,
   onSelectFeedback,
 }: KanbanColumnBodyProps) {
@@ -58,6 +60,7 @@ export function KanbanColumnBody({
               feedback={feedback}
               isSelected={selectedIds.has(feedback.id)}
               isDraggable
+              isSortable={isSortable}
               onToggleSelect={onToggleSelect}
               onSelect={onSelectFeedback}
             />

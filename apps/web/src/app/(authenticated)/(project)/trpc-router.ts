@@ -82,6 +82,8 @@ import { listDistinctPageUrls } from "./inbox/_services/list-distinct-page-urls"
 import { ListDistinctPageUrlsSchema } from "./inbox/_services/list-distinct-page-urls.schema";
 import { listFeedback } from "./inbox/_services/list-feedback";
 import { ListFeedbackSchema } from "./inbox/_services/list-feedback.schema";
+import { moveFeedback } from "./inbox/_services/move-feedback";
+import { MoveFeedbackSchema } from "./inbox/_services/move-feedback.schema";
 import { updateFeedbackAssignee } from "./inbox/_services/update-feedback-assignee";
 import { UpdateFeedbackAssigneeSchema } from "./inbox/_services/update-feedback-assignee.schema";
 import { updateFeedbackStatus } from "./inbox/_services/update-feedback-status";
@@ -237,6 +239,18 @@ export const projectsRouter = router({
         updateFeedbackAssignee({
           feedbackId: input.feedbackId,
           assigneeId: input.assigneeId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    move: protectedProcedure
+      .input(MoveFeedbackSchema)
+      .mutation(({ input, ctx }) =>
+        moveFeedback({
+          projectId: input.projectId,
+          feedbackId: input.feedbackId,
+          status: input.status,
+          beforeId: input.beforeId,
+          afterId: input.afterId,
           userId: ctx.session.user.id,
         }),
       ),

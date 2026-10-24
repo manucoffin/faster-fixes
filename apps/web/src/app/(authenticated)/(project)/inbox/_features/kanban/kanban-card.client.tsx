@@ -15,6 +15,9 @@ type KanbanCardProps = {
   feedback: FeedbackItem;
   isSelected: boolean;
   isDraggable: boolean;
+  // Lets the other cards make room while dragging, which only the Manual sort
+  // persists.
+  isSortable: boolean;
   onToggleSelect: (id: string) => void;
   onSelect: (id: string) => void;
 };
@@ -127,19 +130,33 @@ export function KanbanCard({
   feedback,
   isSelected,
   isDraggable,
+  isSortable,
   onToggleSelect,
   onSelect,
 }: KanbanCardProps) {
-  // No transform is applied yet, so the other cards stay in place while
-  // dragging: a same-column drop has no effect until Rank reordering lands.
-  const { attributes, listeners, setNodeRef, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging,
+    transform,
+    transition,
+  } = useSortable({
     id: feedback.id,
     data: { status: feedback.status },
     disabled: !isDraggable,
   });
 
+  const style =
+    isSortable && transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          transition,
+        }
+      : undefined;
+
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes}>
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <KanbanCardView
         feedback={feedback}
         isSelected={isSelected}

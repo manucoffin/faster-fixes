@@ -17,6 +17,7 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import * as React from "react";
 import {
   type BoardSort,
+  resolveDropNeighbours,
   sortColumnFeedback,
 } from "../../_helpers/board-column-order";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
@@ -48,7 +49,8 @@ export function KanbanBoard({
   sort,
   onSelectFeedback,
 }: KanbanBoardProps) {
-  const { updateStatus, bulkUpdateStatus } = useFeedbackMutations();
+  const { updateStatus, bulkUpdateStatus, moveFeedback } =
+    useFeedbackMutations();
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
@@ -100,9 +102,36 @@ export function KanbanBoard({
     const newStatus = readDropStatus(over);
 
     const item = feedback.find((f) => f.id === feedbackId);
-    if (!item || !newStatus || item.status === newStatus) return;
+    if (!item || !over || !newStatus) return;
 
-    updateStatus(feedbackId, newStatus);
+    if (item.status !== newStatus) {
+      updateStatus(feedbackId, newStatus);
+      return;
+    }
+
+    // A date sort would put the card straight back, so only Manual reorders.
+    if (sort !== "manual" || over.id === feedbackId) return;
+
+    // Under the page filter these are the visible cards, so the card lands
+    // between its visible neighbours.
+    const columnIds = (grouped[newStatus] ?? []).map((f) => f.id);
+    const overIndex = columnIds.indexOf(over.id as string);
+    // A drop on the column itself rather than on a card lands at the bottom.
+    const dropIndex = overIndex === -1 ? columnIds.length : overIndex;
+    const target = resolveDropNeighbours(columnIds, feedbackId, dropIndex);
+    const current = resolveDropNeighbours(
+      columnIds,
+      feedbackId,
+      columnIds.indexOf(feedbackId),
+    );
+    if (
+      target.beforeId === current.beforeId &&
+      target.afterId === current.afterId
+    ) {
+      return;
+    }
+
+    moveFeedback(feedbackId, newStatus, target.beforeId, target.afterId);
   }
 
   function handleDragCancel() {
@@ -192,6 +221,7 @@ export function KanbanBoard({
               id={col.id}
               items={grouped[col.id] ?? []}
               selectedIds={selectedIds}
+              isSortable={sort === "manual"}
               onToggleSelect={handleToggleSelect}
               onSelectFeedback={onSelectFeedback}
             />

@@ -1,4 +1,5 @@
 import type { ListFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_services/list-feedback";
+import { planRankPlacement } from "@/app/(authenticated)/(project)/inbox/_helpers/feedback-rank-placement";
 import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -82,6 +83,45 @@ export function useFeedbackMutations() {
     }),
   );
 
+  const move = useMutation(
+    trpc.authenticated.projects.feedback.move.mutationOptions({
+      onMutate: async ({ feedbackId, status, beforeId, afterId }) => {
+        await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
+        const previous =
+          queryClient.getQueryData<ListFeedbackOutput>(feedbackQueryKey);
+
+        // The server recomputes the keys from fresh data. These only place the
+        // card until the list refetches.
+        if (previous) {
+          const writes = planRankPlacement({
+            column: previous.filter((f) => f.status === status),
+            movedId: feedbackId,
+            beforeId,
+            afterId,
+          });
+          const keys = new Map(writes.map((w) => [w.feedbackId, w.key]));
+          queryClient.setQueryData(
+            feedbackQueryKey,
+            previous.map((f) => {
+              const key = keys.get(f.id);
+              return key === undefined ? f : { ...f, rank: key };
+            }),
+          );
+        }
+
+        return { previous };
+      },
+      onError: (_err, _vars, context) => {
+        if (context?.previous) {
+          queryClient.setQueryData(feedbackQueryKey, context.previous);
+        }
+        toast.error("Failed to move feedback.");
+      },
+      onSettled: () =>
+        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
+    }),
+  );
+
   const updateAssignee = useMutation(
     trpc.authenticated.projects.feedback.updateAssignee.mutationOptions({
       onSuccess: () =>
@@ -103,6 +143,19 @@ export function useFeedbackMutations() {
         projectId,
         feedbackIds,
         status: status as "new" | "in_progress" | "resolved" | "closed",
+      }),
+    moveFeedback: (
+      feedbackId: string,
+      status: string,
+      beforeId: string | null,
+      afterId: string | null,
+    ) =>
+      move.mutate({
+        projectId,
+        feedbackId,
+        status: status as "new" | "in_progress" | "resolved",
+        beforeId,
+        afterId,
       }),
     updateAssignee: (feedbackId: string, assigneeId: string | null) =>
       updateAssignee.mutate({ feedbackId, assigneeId }),

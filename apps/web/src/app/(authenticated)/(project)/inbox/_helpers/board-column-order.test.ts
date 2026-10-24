@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { sortColumnFeedback } from "./board-column-order";
+import {
+  resolveDropNeighbours,
+  sortColumnFeedback,
+} from "./board-column-order";
 
 function feedback(
   id: string,
@@ -120,5 +123,41 @@ describe("sortColumnFeedback in the date sorts", () => {
       "oldest",
       "newest",
     ]);
+  });
+});
+
+describe("resolveDropNeighbours", () => {
+  const column = ["a", "b", "moved", "c"];
+
+  it("resolves a drop at the top", () => {
+    expect(resolveDropNeighbours(column, "moved", 0)).toEqual({
+      beforeId: null,
+      afterId: "a",
+    });
+  });
+
+  it("resolves a drop in the middle", () => {
+    expect(resolveDropNeighbours(column, "moved", 1)).toEqual({
+      beforeId: "a",
+      afterId: "b",
+    });
+  });
+
+  it("resolves a drop at the bottom, clamping an index past the end", () => {
+    expect(resolveDropNeighbours(column, "moved", 3)).toEqual({
+      beforeId: "c",
+      afterId: null,
+    });
+    expect(resolveDropNeighbours(column, "moved", 9)).toEqual({
+      beforeId: "c",
+      afterId: null,
+    });
+  });
+
+  it("resolves a drop in an empty column", () => {
+    expect(resolveDropNeighbours([], "moved", 0)).toEqual({
+      beforeId: null,
+      afterId: null,
+    });
   });
 });

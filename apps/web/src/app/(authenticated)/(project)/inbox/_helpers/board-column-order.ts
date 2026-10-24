@@ -44,3 +44,18 @@ export function sortColumnFeedback<T extends ColumnFeedback>(
     }
   });
 }
+
+// `dropIndex` is the slot in the column once the moved card is taken out of it,
+// which is how dnd-kit sortable reports a drop.
+export function resolveDropNeighbours(
+  columnIds: string[],
+  movedId: string,
+  dropIndex: number,
+) {
+  const others = columnIds.filter((id) => id !== movedId);
+  const index = Math.min(Math.max(dropIndex, 0), others.length);
+  return {
+    beforeId: others[index - 1] ?? null,
+    afterId: others[index] ?? null,
+  };
+}

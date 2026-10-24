@@ -52,6 +52,7 @@ const DEFAULT_WRITE_VERBS = [
   "impersonate",
   "leave",
   "link",
+  "move",
   "notify",
   "refresh",
   "regenerate",
