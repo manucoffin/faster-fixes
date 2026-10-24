@@ -13,9 +13,16 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import * as React from "react";
+import {
+  type BoardSort,
+  resolveDropNeighbours,
+  sortColumnFeedback,
+} from "../../_helpers/board-column-order";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
+import { readDropStatus } from "../../_helpers/board-drop-target";
 import { BoardSummaryStrip } from "./board-summary-strip";
 import { KanbanCardOverlay } from "./kanban-card.client";
 import { KanbanColumnBody } from "./kanban-column.client";
@@ -26,7 +33,7 @@ type FeedbackItem = ListFeedbackOutput[number];
 type KanbanBoardProps = {
   feedback: FeedbackItem[];
   pageUrlFilter: string | null;
-  sort: string;
+  sort: BoardSort;
   onSelectFeedback: (id: string) => void;
 };
 
@@ -36,23 +43,23 @@ const COLUMNS = [
   { id: "resolved", title: "Resolved" },
 ] as const;
 
-function sortFeedback(items: FeedbackItem[], sort: string): FeedbackItem[] {
-  return [...items].sort((a, b) => {
-    switch (sort) {
-      case "oldest":
-        return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      case "updated":
-        return (
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-      default: // newest
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-    }
-  });
+// A drop on the column itself rather than on a card lands at the bottom. Within
+// a column the sortable already reports the slot. The target column of a
+// cross-column drop opens no gap, so the card goes above or below the hovered
+// card depending on which half it was dropped on.
+function resolveDropIndex(
+  { active, over }: DragEndEvent,
+  overIndex: number,
+  columnLength: number,
+  isSameColumn: boolean,
+) {
+  if (overIndex === -1 || !over) return columnLength;
+  if (isSameColumn) return overIndex;
+  const dragged = active.rect.current.translated;
+  if (!dragged) return overIndex;
+  const isBelow =
+    dragged.top + dragged.height / 2 > over.rect.top + over.rect.height / 2;
+  return isBelow ? overIndex + 1 : overIndex;
 }
 
 export function KanbanBoard({
@@ -61,7 +68,8 @@ export function KanbanBoard({
   sort,
   onSelectFeedback,
 }: KanbanBoardProps) {
-  const { updateStatus, bulkUpdateStatus } = useFeedbackMutations();
+  const { updateStatus, bulkUpdateStatus, moveFeedback } =
+    useFeedbackMutations();
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
@@ -73,7 +81,9 @@ export function KanbanBoard({
     useSensor(TouchSensor, {
       activationConstraint: { delay: 250, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   // Filter out closed items and apply page URL filter
@@ -94,9 +104,8 @@ export function KanbanBoard({
     for (const item of filtered) {
       map[item.status]?.push(item);
     }
-    // Sort each column
     for (const [key, items] of Object.entries(map)) {
-      map[key] = sortFeedback(items, sort);
+      map[key] = sortColumnFeedback(items, sort);
     }
     return map;
   }, [filtered, sort]);
@@ -108,15 +117,47 @@ export function KanbanBoard({
   function handleDragEnd(event: DragEndEvent) {
     setActiveId(null);
     const { active, over } = event;
-    if (!over) return;
-
     const feedbackId = active.id as string;
-    const newStatus = over.id as string;
+    const newStatus = readDropStatus(over);
 
     const item = feedback.find((f) => f.id === feedbackId);
-    if (!item || item.status === newStatus) return;
+    if (!item || !over || !newStatus) return;
 
-    updateStatus(feedbackId, newStatus);
+    const isSameColumn = item.status === newStatus;
+
+    // A date sort orders the column itself, so a drop there only ever changes
+    // the Status and a same-column drop does nothing.
+    if (sort !== "manual") {
+      if (!isSameColumn) updateStatus(feedbackId, newStatus);
+      return;
+    }
+    if (over.id === feedbackId) return;
+
+    // Under the page filter these are the visible cards, so the card lands
+    // between its visible neighbours.
+    const columnIds = (grouped[newStatus] ?? []).map((f) => f.id);
+    const overIndex = columnIds.indexOf(over.id as string);
+    const target = resolveDropNeighbours(
+      columnIds,
+      feedbackId,
+      resolveDropIndex(event, overIndex, columnIds.length, isSameColumn),
+    );
+
+    if (isSameColumn) {
+      const current = resolveDropNeighbours(
+        columnIds,
+        feedbackId,
+        columnIds.indexOf(feedbackId),
+      );
+      if (
+        target.beforeId === current.beforeId &&
+        target.afterId === current.afterId
+      ) {
+        return;
+      }
+    }
+
+    moveFeedback(feedbackId, newStatus, target.beforeId, target.afterId);
   }
 
   function handleDragCancel() {
@@ -206,6 +247,7 @@ export function KanbanBoard({
               id={col.id}
               items={grouped[col.id] ?? []}
               selectedIds={selectedIds}
+              isSortable={sort === "manual"}
               onToggleSelect={handleToggleSelect}
               onSelectFeedback={onSelectFeedback}
             />

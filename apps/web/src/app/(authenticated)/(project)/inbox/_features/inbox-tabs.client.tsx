@@ -19,8 +19,12 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { AlertCircle, Archive, Inbox, SquareKanban } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
 import * as React from "react";
+import {
+  BOARD_SORTS,
+  DEFAULT_BOARD_SORT,
+} from "../_helpers/board-column-order";
 import { ArchiveTab } from "./archive/archive-tab.client";
 import { FeedbackDetailPanel } from "./feedback-panel/feedback-detail-panel.client";
 import { FeedbackFilters } from "./filters/feedback-filters.client";
@@ -41,7 +45,7 @@ export function InboxTabs() {
   const [pageUrlFilter, setPageUrlFilter] = useQueryState("pageUrl");
   const [sort, setSort] = useQueryState(
     "sort",
-    parseAsString.withDefault("newest"),
+    parseAsStringLiteral(BOARD_SORTS).withDefault(DEFAULT_BOARD_SORT),
   );
   const [selectedFeedbackId, setSelectedFeedbackId] =
     useQueryState("feedbackId");

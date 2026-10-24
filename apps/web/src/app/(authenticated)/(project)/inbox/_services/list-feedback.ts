@@ -60,6 +60,7 @@ export async function listFeedback(
           issueStatusCategory: true,
         },
       },
+      rank: { select: { key: true } },
     },
   });
 
@@ -94,6 +95,7 @@ export async function listFeedback(
       issueLink: f.issueLink,
       linearIssueLink: f.linearIssueLink,
       jiraIssueLink: f.jiraIssueLink,
+      rank: f.rank?.key ?? null,
     })),
   );
 }
