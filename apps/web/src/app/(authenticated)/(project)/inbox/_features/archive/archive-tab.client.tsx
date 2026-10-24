@@ -17,12 +17,13 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import * as React from "react";
-import { getPageAfterDeletion } from "../../_helpers/archive-deletion";
+import { getPageAfterRemoval } from "../../_helpers/archive-deletion";
 import type { ListArchivedFeedbackOutput } from "../../_services/list-archived-feedback";
 import { ColumnSelectCheckbox } from "../kanban/column-select-checkbox.client";
 import { ArchiveSelectionToolbar } from "./archive-selection-toolbar.client";
-import { DeleteFeedbackDialog } from "./delete-feedback-dialog.client";
+import { ArchivedFeedbackActionsDropdown } from "./archived-feedback-actions-dropdown.client";
 import { useDeleteArchivedFeedback } from "./use-delete-archived-feedback";
+import { useRestoreArchivedFeedback } from "./use-restore-archived-feedback";
 import {
   Empty,
   EmptyDescription,
@@ -103,22 +104,30 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
 
   const totalCount = archiveQuery.data?.totalCount;
 
-  const { deleteOne, deleteMany, isPending } = useDeleteArchivedFeedback({
+  // Deleted or restored, the rows leave the archive the same way.
+  const handleRemoved = (removed: number) => {
+    setSelectedIds(new Set());
+    if (totalCount !== undefined) {
+      setPage((current) =>
+        getPageAfterRemoval({
+          page: current,
+          pageSize: PAGE_SIZE,
+          totalCount,
+          removed,
+        }),
+      );
+    }
+  };
+
+  const deletion = useDeleteArchivedFeedback({
     projectId,
-    onDeleted: (deleted) => {
-      setSelectedIds(new Set());
-      if (totalCount !== undefined) {
-        setPage((current) =>
-          getPageAfterDeletion({
-            page: current,
-            pageSize: PAGE_SIZE,
-            totalCount,
-            deleted,
-          }),
-        );
-      }
-    },
+    onDeleted: handleRemoved,
   });
+  const restoration = useRestoreArchivedFeedback({
+    projectId,
+    onRestored: handleRemoved,
+  });
+  const isPending = deletion.isPending || restoration.isPending;
 
   const columns: ColumnDef<ArchivedItem>[] = [
     {
@@ -222,9 +231,9 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
       id: "actions",
       header: "",
       cell: ({ row }) => (
-        <DeleteFeedbackDialog
-          count={1}
-          onConfirm={() => deleteOne(row.original.id)}
+        <ArchivedFeedbackActionsDropdown
+          onRestore={() => restoration.restoreOne(row.original.id)}
+          onDelete={() => deletion.deleteOne(row.original.id)}
           disabled={isPending}
         />
       ),
@@ -281,7 +290,8 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
             <ArchiveSelectionToolbar
               selectedCount={selectedIds.size}
               pageItemCount={data.items.length}
-              onDelete={() => deleteMany(Array.from(selectedIds))}
+              onRestore={() => restoration.restoreMany(Array.from(selectedIds))}
+              onDelete={() => deletion.deleteMany(Array.from(selectedIds))}
               onClearSelection={clearSelection}
               disabled={isPending}
             />

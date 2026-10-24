@@ -1,4 +1,4 @@
-import { getBulkDeleteNotice } from "@/app/(authenticated)/(project)/inbox/_helpers/archive-deletion";
+import { getArchiveBulkNotice } from "@/app/(authenticated)/(project)/inbox/_helpers/archive-bulk-notice";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -40,7 +40,11 @@ export function useDeleteArchivedFeedback({
       onSuccess: async (result) => {
         onDeleted(result.deleted);
         await invalidateArchive();
-        const notice = getBulkDeleteNotice(result);
+        const notice = getArchiveBulkNotice({
+          action: "deleted",
+          count: result.deleted,
+          requested: result.requested,
+        });
         toast[notice.tone](notice.message);
       },
       onError: (error) => {

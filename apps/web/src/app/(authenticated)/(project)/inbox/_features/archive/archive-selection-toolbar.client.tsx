@@ -1,12 +1,13 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { X } from "lucide-react";
+import { ArchiveRestore, X } from "lucide-react";
 import { DeleteFeedbackDialog } from "./delete-feedback-dialog.client";
 
 type ArchiveSelectionToolbarProps = {
   selectedCount: number;
   pageItemCount: number;
+  onRestore: () => void;
   onDelete: () => void;
   onClearSelection: () => void;
   disabled: boolean;
@@ -15,6 +16,7 @@ type ArchiveSelectionToolbarProps = {
 export function ArchiveSelectionToolbar({
   selectedCount,
   pageItemCount,
+  onRestore,
   onDelete,
   onClearSelection,
   disabled,
@@ -24,6 +26,16 @@ export function ArchiveSelectionToolbar({
       <span className="text-sm font-medium tabular-nums">
         {selectedCount} of {pageItemCount} selected
       </span>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onRestore}
+        disabled={disabled}
+      >
+        <ArchiveRestore className="mr-1 size-3" />
+        Restore {selectedCount > 1 ? `(${selectedCount})` : ""}
+      </Button>
 
       <DeleteFeedbackDialog
         count={selectedCount}
