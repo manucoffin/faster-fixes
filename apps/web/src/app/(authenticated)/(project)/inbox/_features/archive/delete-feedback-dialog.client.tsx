@@ -18,29 +18,39 @@ type DeleteFeedbackDialogProps = {
   count: number;
   onConfirm: () => void;
   disabled?: boolean;
+  // Controlled when opened from a menu item, which unmounts with its menu and
+  // so cannot host the trigger itself.
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function DeleteFeedbackDialog({
   count,
   onConfirm,
   disabled,
+  open,
+  onOpenChange,
 }: DeleteFeedbackDialogProps) {
+  const isControlled = open !== undefined;
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" disabled={disabled}>
-          <Trash2 className="mr-1 size-3" />
-          Delete {count > 1 ? `(${count})` : ""}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {!isControlled && (
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm" disabled={disabled}>
+            <Trash2 className="mr-1 size-3" />
+            Delete {count > 1 ? `(${count})` : ""}
+          </Button>
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Permanently delete feedback</AlertDialogTitle>
           <AlertDialogDescription>
             This will permanently delete {count}{" "}
             {count === 1 ? "feedback item" : "feedback items"} and{" "}
-            {count === 1 ? "its" : "their"} associated screenshots. This action
-            cannot be undone.
+            {count === 1 ? "its" : "their"} associated screenshots. Linked
+            tracker issues are not affected. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -15,6 +15,9 @@ type KanbanCardProps = {
   feedback: FeedbackItem;
   isSelected: boolean;
   isDraggable: boolean;
+  // Lets the other cards make room while dragging, which only the Manual sort
+  // persists.
+  isSortable: boolean;
   onToggleSelect: (id: string) => void;
   onSelect: (id: string) => void;
 };
@@ -127,17 +130,33 @@ export function KanbanCard({
   feedback,
   isSelected,
   isDraggable,
+  isSortable,
   onToggleSelect,
   onSelect,
 }: KanbanCardProps) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging,
+    transform,
+    transition,
+  } = useSortable({
     id: feedback.id,
-    data: { feedback },
+    data: { status: feedback.status },
     disabled: !isDraggable,
   });
 
+  const style =
+    isSortable && transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          transition,
+        }
+      : undefined;
+
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes}>
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <KanbanCardView
         feedback={feedback}
         isSelected={isSelected}

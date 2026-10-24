@@ -9,6 +9,7 @@ type ColumnSelectCheckboxProps = {
   itemIds: string[];
   selectedIds: Set<string>;
   onToggle: () => void;
+  disabled?: boolean;
   className?: string;
 };
 
@@ -17,6 +18,7 @@ export function ColumnSelectCheckbox({
   itemIds,
   selectedIds,
   onToggle,
+  disabled = false,
   className,
 }: ColumnSelectCheckboxProps) {
   return (
@@ -27,7 +29,7 @@ export function ColumnSelectCheckbox({
         className,
       )}
       checked={getColumnSelectionState(itemIds, selectedIds)}
-      disabled={itemIds.length === 0}
+      disabled={disabled || itemIds.length === 0}
       onCheckedChange={onToggle}
       aria-label={`Select all ${columnTitle}`}
     />

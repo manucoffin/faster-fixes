@@ -20,13 +20,14 @@ import {
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import * as React from "react";
+import type { BoardSort } from "../../_helpers/board-column-order";
 
 type FeedbackFiltersProps = {
   projectId: string;
   selectedPageUrl: string | null;
   onPageUrlChange: (url: string | null) => void;
-  sort: string;
-  onSortChange: (sort: string) => void;
+  sort: BoardSort;
+  onSortChange: (sort: BoardSort) => void;
 };
 
 function formatPageUrl(url: string) {
@@ -99,6 +100,7 @@ export function FeedbackFilters({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="manual">Manual</SelectItem>
           <SelectItem value="newest">Newest first</SelectItem>
           <SelectItem value="oldest">Oldest first</SelectItem>
           <SelectItem value="updated">Recently updated</SelectItem>

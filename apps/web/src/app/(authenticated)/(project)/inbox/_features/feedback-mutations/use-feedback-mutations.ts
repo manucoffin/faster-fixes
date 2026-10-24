@@ -1,8 +1,16 @@
 import type { ListFeedbackOutput } from "@/app/(authenticated)/(project)/inbox/_services/list-feedback";
+import { planRankPlacement } from "@/app/(authenticated)/(project)/inbox/_helpers/feedback-rank-placement";
 import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+// Mirrors the database trigger (ADR-0017): a Status change clears the Rank, so
+// the card lands on top of its new column before the list refetches.
+function withStatus(feedback: ListFeedbackOutput[number], status: string) {
+  if (feedback.status === status) return feedback;
+  return { ...feedback, status, rank: null };
+}
 
 export function useFeedbackMutations() {
   const { activeProject } = useActiveProject();
@@ -18,12 +26,17 @@ export function useFeedbackMutations() {
   });
   const newCountQueryKey =
     trpc.authenticated.projects.feedback.countNew.queryKey({ projectId });
+  // Partial input, so every page, search and sort of the archive table matches.
+  const archivedQueryKey =
+    trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId });
 
-  // The sidebar badge counts New Feedback, so every status change refreshes it.
+  // The sidebar badge counts New Feedback, and a status change can move
+  // Feedback into the Archive, so every status change refreshes both.
   const invalidateAfterStatusChange = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
       queryClient.invalidateQueries({ queryKey: newCountQueryKey }),
+      queryClient.invalidateQueries({ queryKey: archivedQueryKey }),
     ]);
 
   const updateStatus = useMutation(
@@ -35,7 +48,7 @@ export function useFeedbackMutations() {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: ListFeedbackOutput | undefined) =>
-            old?.map((f) => (f.id === feedbackId ? { ...f, status } : f)),
+            old?.map((f) => (f.id === feedbackId ? withStatus(f, status) : f)),
         );
 
         return { previous };
@@ -60,7 +73,7 @@ export function useFeedbackMutations() {
         queryClient.setQueryData(
           feedbackQueryKey,
           (old: ListFeedbackOutput | undefined) =>
-            old?.map((f) => (idSet.has(f.id) ? { ...f, status } : f)),
+            old?.map((f) => (idSet.has(f.id) ? withStatus(f, status) : f)),
         );
 
         return { previous };
@@ -71,6 +84,46 @@ export function useFeedbackMutations() {
         }
         toast.error("Failed to update status.");
       },
+      onSettled: invalidateAfterStatusChange,
+    }),
+  );
+
+  const move = useMutation(
+    trpc.authenticated.projects.feedback.move.mutationOptions({
+      onMutate: async ({ feedbackId, status, beforeId, afterId }) => {
+        await queryClient.cancelQueries({ queryKey: feedbackQueryKey });
+        const previous =
+          queryClient.getQueryData<ListFeedbackOutput>(feedbackQueryKey);
+
+        // The server recomputes the keys from fresh data. These only place the
+        // card until the list refetches.
+        if (previous) {
+          const writes = planRankPlacement({
+            column: previous.filter((f) => f.status === status),
+            movedId: feedbackId,
+            beforeId,
+            afterId,
+          });
+          const keys = new Map(writes.map((w) => [w.feedbackId, w.key]));
+          queryClient.setQueryData(
+            feedbackQueryKey,
+            previous.map((f) => {
+              const key = keys.get(f.id);
+              const moved = f.id === feedbackId ? { ...f, status } : f;
+              return key === undefined ? moved : { ...moved, rank: key };
+            }),
+          );
+        }
+
+        return { previous };
+      },
+      onError: (_err, _vars, context) => {
+        if (context?.previous) {
+          queryClient.setQueryData(feedbackQueryKey, context.previous);
+        }
+        toast.error("Failed to move feedback.");
+      },
+      // A move to another column is a Status change, so the New count may move.
       onSettled: invalidateAfterStatusChange,
     }),
   );
@@ -93,8 +146,22 @@ export function useFeedbackMutations() {
       }),
     bulkUpdateStatus: (feedbackIds: string[], status: string) =>
       bulkUpdateStatus.mutate({
+        projectId,
         feedbackIds,
         status: status as "new" | "in_progress" | "resolved" | "closed",
+      }),
+    moveFeedback: (
+      feedbackId: string,
+      status: string,
+      beforeId: string | null,
+      afterId: string | null,
+    ) =>
+      move.mutate({
+        projectId,
+        feedbackId,
+        status: status as "new" | "in_progress" | "resolved",
+        beforeId,
+        afterId,
       }),
     updateAssignee: (feedbackId: string, assigneeId: string | null) =>
       updateAssignee.mutate({ feedbackId, assigneeId }),

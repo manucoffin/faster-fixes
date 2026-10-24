@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { cn } from "@workspace/ui/lib/utils";
 import { AlertCircle, Search } from "lucide-react";
 import { DataTableExportButton } from "./data-table-export-button.client";
 
@@ -53,6 +54,8 @@ type DataTableProps<TData, TValue> = {
     data: Array<Record<string, unknown>>;
   };
   onSortingChange?: (sorting: Array<{ id: string; desc: boolean }>) => void;
+  /** Replaces the column headers after the first one while set, GitHub style. */
+  selectionActions?: React.ReactNode;
 };
 
 type DataTableBodyProps<TData> = {
@@ -140,6 +143,7 @@ export function DataTable<TData, TValue>({
   filterComponents,
   exportConfig,
   onSortingChange,
+  selectionActions,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -213,9 +217,24 @@ export function DataTable<TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+              <TableRow
+                key={headerGroup.id}
+                className={cn(selectionActions && "relative")}
+              >
+                {headerGroup.headers.map((header, index) => (
+                  <TableHead
+                    key={header.id}
+                    // Hidden rather than removed so the columns keep their width
+                    // and the rows below do not shift.
+                    className={cn(selectionActions && index > 0 && "invisible")}
+                  >
+                    {selectionActions && index === 1 && (
+                      // No left offset: the box starts where this cell's
+                      // content would, and stretches to the end of the row.
+                      <div className="visible absolute inset-y-0 right-0 flex animate-in items-center gap-2 pr-2 duration-150 fade-in">
+                        {selectionActions}
+                      </div>
+                    )}
                     {header.isPlaceholder
                       ? null
                       : flexRender(
