@@ -1,6 +1,10 @@
 import type { CaptureViewportScreenshotOptions } from "./screenshot.js";
 
-export const FULL_CAPTURE_TIMEOUT = 3000;
+// The full capture starts on selection and needs at least MEDIA_WAIT_TIMEOUT
+// (screenshot.ts) plus rendering the page — measured 9–47 s on CPUs without GPU
+// (Chromium/Firefox/WebKit). It runs in the background after submit, so give it
+// room before starting the fallback.
+export const FULL_CAPTURE_TIMEOUT = 60000;
 
 type CaptureScreenshot = (
   options?: CaptureViewportScreenshotOptions,
