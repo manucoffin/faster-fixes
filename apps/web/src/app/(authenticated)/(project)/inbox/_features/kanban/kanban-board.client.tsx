@@ -13,6 +13,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import * as React from "react";
 import {
   type BoardSort,
@@ -20,6 +21,7 @@ import {
 } from "../../_helpers/board-column-order";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
+import { readDropStatus } from "../../_helpers/board-drop-target";
 import { BoardSummaryStrip } from "./board-summary-strip";
 import { KanbanCardOverlay } from "./kanban-card.client";
 import { KanbanColumnBody } from "./kanban-column.client";
@@ -58,7 +60,9 @@ export function KanbanBoard({
     useSensor(TouchSensor, {
       activationConstraint: { delay: 250, tolerance: 5 },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   // Filter out closed items and apply page URL filter
@@ -92,13 +96,11 @@ export function KanbanBoard({
   function handleDragEnd(event: DragEndEvent) {
     setActiveId(null);
     const { active, over } = event;
-    if (!over) return;
-
     const feedbackId = active.id as string;
-    const newStatus = over.id as string;
+    const newStatus = readDropStatus(over);
 
     const item = feedback.find((f) => f.id === feedbackId);
-    if (!item || item.status === newStatus) return;
+    if (!item || !newStatus || item.status === newStatus) return;
 
     updateStatus(feedbackId, newStatus);
   }

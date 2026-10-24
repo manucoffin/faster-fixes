@@ -1,6 +1,6 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -130,9 +130,11 @@ export function KanbanCard({
   onToggleSelect,
   onSelect,
 }: KanbanCardProps) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  // No transform is applied yet, so the other cards stay in place while
+  // dragging: a same-column drop has no effect until Rank reordering lands.
+  const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: feedback.id,
-    data: { feedback },
+    data: { status: feedback.status },
     disabled: !isDraggable,
   });
 

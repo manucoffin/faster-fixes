@@ -1,8 +1,13 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { cn } from "@workspace/ui/lib/utils";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
+import { readDropStatus } from "../../_helpers/board-drop-target";
 import { KanbanCard } from "./kanban-card.client";
 
 type FeedbackItem = ListFeedbackOutput[number];
@@ -22,7 +27,10 @@ export function KanbanColumnBody({
   onToggleSelect,
   onSelectFeedback,
 }: KanbanColumnBodyProps) {
-  const { setNodeRef, isOver } = useDroppable({ id });
+  const { setNodeRef, over } = useDroppable({ id, data: { status: id } });
+  // Hovering one of the column's cards still targets the column.
+  const isOver = readDropStatus(over) === id;
+  const itemIds = items.map((feedback) => feedback.id);
 
   return (
     <div
@@ -34,22 +42,28 @@ export function KanbanColumnBody({
           : "border-transparent bg-muted/50",
       )}
     >
-      {items.length === 0 ? (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          No items
-        </div>
-      ) : (
-        items.map((feedback) => (
-          <KanbanCard
-            key={feedback.id}
-            feedback={feedback}
-            isSelected={selectedIds.has(feedback.id)}
-            isDraggable
-            onToggleSelect={onToggleSelect}
-            onSelect={onSelectFeedback}
-          />
-        ))
-      )}
+      <SortableContext
+        id={id}
+        items={itemIds}
+        strategy={verticalListSortingStrategy}
+      >
+        {items.length === 0 ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            No items
+          </div>
+        ) : (
+          items.map((feedback) => (
+            <KanbanCard
+              key={feedback.id}
+              feedback={feedback}
+              isSelected={selectedIds.has(feedback.id)}
+              isDraggable
+              onToggleSelect={onToggleSelect}
+              onSelect={onSelectFeedback}
+            />
+          ))
+        )}
+      </SortableContext>
     </div>
   );
 }
