@@ -86,6 +86,10 @@ The state of a Feedback. Canonical values: `new`, `in_progress`, `resolved`, `ar
 **Status actor**:
 Who or what drove a Status change: a **User**, a Tracker sync, or the **Agent** (an Agent-token caller). Travels on the status-change event so a **Notification channel** can distinguish an agent-resolved Feedback from a human-resolved one.
 
+**Rank**:
+A Feedback's place within its Status column of the inbox board, set by a User to say what the team handles first. Shared by every Member of the Project. A Feedback without a Rank sits above ranked ones, newest first, and a Status change clears it.
+_Avoid_: Priority (reserved for Tracker-side priority levels), Position, Order.
+
 **Archived**:
 A Feedback the team has decided not to act on (won't fix, duplicate, out of scope). Stored in the database as `status = "closed"` for legacy reasons; the literal will be renamed in a future migration. UI label is **Archived** everywhere (status dropdown, kanban action, archive view).
 _Avoid_: Closed, Dismissed, Rejected.
@@ -144,6 +148,7 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
+- A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
 - An **Integration** is either a **Tracker** or a **Notification channel**
