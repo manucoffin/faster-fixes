@@ -93,6 +93,7 @@ export function useFeedbackMutations() {
       }),
     bulkUpdateStatus: (feedbackIds: string[], status: string) =>
       bulkUpdateStatus.mutate({
+        projectId,
         feedbackIds,
         status: status as "new" | "in_progress" | "resolved" | "closed",
       }),

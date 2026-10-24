@@ -246,6 +246,7 @@ export const projectsRouter = router({
       .input(UpdateFeedbacksStatusSchema)
       .mutation(({ input, ctx }) =>
         updateFeedbacksStatus({
+          projectId: input.projectId,
           feedbackIds: input.feedbackIds,
           status: input.status,
           userId: ctx.session.user.id,
@@ -263,6 +264,7 @@ export const projectsRouter = router({
       .input(DeleteFeedbacksSchema)
       .mutation(({ input, ctx }) =>
         deleteFeedbacks({
+          projectId: input.projectId,
           feedbackIds: input.feedbackIds,
           userId: ctx.session.user.id,
         }),
