@@ -5,20 +5,24 @@ import { DataTableColumnHeader } from "@/app/_components/data-table-column-heade
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
+import { getPageAfterDeletion } from "../../_helpers/archive-deletion";
 import type { ListArchivedFeedbackOutput } from "../../_services/list-archived-feedback";
+import { ColumnSelectCheckbox } from "../kanban/column-select-checkbox.client";
+import { ArchiveSelectionToolbar } from "./archive-selection-toolbar.client";
 import { DeleteFeedbackDialog } from "./delete-feedback-dialog.client";
+import { useDeleteArchivedFeedback } from "./use-delete-archived-feedback";
 import {
   Empty,
   EmptyDescription,
@@ -30,18 +34,54 @@ import { Archive } from "lucide-react";
 
 type ArchivedItem = ListArchivedFeedbackOutput["items"][number];
 
+const PAGE_SIZE = 20;
+
 type ArchiveTabProps = {
   projectId: string;
 };
 
 export function ArchiveTab({ projectId }: ArchiveTabProps) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");
   const [sorting, setSorting] = React.useState<
     Array<{ id: string; desc: boolean }>
   >([]);
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+
+  // Selection covers the visible page only, so any change of view drops it
+  // rather than letting a delete reach rows that are no longer on screen.
+  const clearSelection = () =>
+    setSelectedIds((prev) => (prev.size === 0 ? prev : new Set()));
+
+  const changePage = (nextPage: number) => {
+    setPage(nextPage);
+    clearSelection();
+  };
+  const changeSearch = (nextSearch: string) => {
+    setSearch(nextSearch);
+    clearSelection();
+  };
+  const changeSorting = (nextSorting: Array<{ id: string; desc: boolean }>) => {
+    setSorting(nextSorting);
+    clearSelection();
+  };
+
+  const toggleSelected = (feedbackId: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(feedbackId)) {
+        next.delete(feedbackId);
+      } else {
+        next.add(feedbackId);
+      }
+      return next;
+    });
+
+  const togglePageSelected = (pageIds: string[]) =>
+    setSelectedIds((prev) =>
+      pageIds.every((id) => prev.has(id)) ? new Set() : new Set(pageIds),
+    );
 
   const sortBy =
     sorting[0]?.id === "createdAt"
@@ -54,124 +94,142 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
     trpc.authenticated.projects.feedback.listArchived.queryOptions({
       projectId,
       page,
-      pageSize: 20,
+      pageSize: PAGE_SIZE,
       search: search || undefined,
       sortBy,
       sortOrder,
     }),
   );
 
-  const deleteMutation = useMutation(
-    trpc.authenticated.projects.feedback.delete.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({
-            projectId,
-          }),
-        });
-        toast.success("Feedback deleted permanently.");
-      },
-      onError: () => {
-        toast.error("Failed to delete feedback.");
-      },
-    }),
-  );
+  const totalCount = archiveQuery.data?.totalCount;
 
-  const columns: ColumnDef<ArchivedItem>[] = React.useMemo(
-    () => [
-      {
-        accessorKey: "comment",
-        header: "Comment",
-        cell: ({ row }) => (
-          <p className="max-w-[300px] truncate text-sm">
-            {row.original.comment}
-          </p>
-        ),
-      },
-      {
-        accessorKey: "pageUrl",
-        header: "Page URL",
-        cell: ({ row }) => {
-          try {
-            const url = new URL(row.original.pageUrl);
-            return (
-              <span className="text-xs text-muted-foreground">
-                {url.hostname + url.pathname.replace(/\/$/, "")}
-              </span>
-            );
-          } catch {
-            return (
-              <span className="text-xs text-muted-foreground">
-                {row.original.pageUrl}
-              </span>
-            );
+  const { deleteOne, deleteMany, isPending } = useDeleteArchivedFeedback({
+    projectId,
+    onDeleted: (deleted) => {
+      setSelectedIds(new Set());
+      if (totalCount !== undefined) {
+        setPage((current) =>
+          getPageAfterDeletion({
+            page: current,
+            pageSize: PAGE_SIZE,
+            totalCount,
+            deleted,
+          }),
+        );
+      }
+    },
+  });
+
+  const columns: ColumnDef<ArchivedItem>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <ColumnSelectCheckbox
+          columnTitle="feedback on this page"
+          itemIds={table.getRowModel().rows.map((row) => row.original.id)}
+          selectedIds={selectedIds}
+          onToggle={() =>
+            togglePageSelected(
+              table.getRowModel().rows.map((row) => row.original.id),
+            )
           }
-        },
-      },
-      {
-        accessorKey: "reviewer",
-        header: "Reviewer",
-        cell: ({ row }) => (
-          <span className="text-sm">{row.original.reviewer.name}</span>
-        ),
-      },
-      {
-        accessorKey: "assignee",
-        header: "Assignee",
-        cell: ({ row }) => {
-          const assignee = row.original.assignee;
-          if (!assignee) {
-            return (
-              <span className="text-xs text-muted-foreground">Unassigned</span>
-            );
-          }
+          disabled={isPending}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedIds.has(row.original.id)}
+          onCheckedChange={() => toggleSelected(row.original.id)}
+          disabled={isPending}
+          aria-label="Select feedback"
+        />
+      ),
+    },
+    {
+      accessorKey: "comment",
+      header: "Comment",
+      cell: ({ row }) => (
+        <p className="max-w-[300px] truncate text-sm">{row.original.comment}</p>
+      ),
+    },
+    {
+      accessorKey: "pageUrl",
+      header: "Page URL",
+      cell: ({ row }) => {
+        try {
+          const url = new URL(row.original.pageUrl);
           return (
-            <div className="flex items-center gap-1.5">
-              <Avatar className="size-5">
-                <AvatarImage
-                  src={
-                    assignee.image ? resolveS3Url(assignee.image) : undefined
-                  }
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-[10px]">
-                  {assignee.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm">{assignee.name}</span>
-            </div>
+            <span className="text-xs text-muted-foreground">
+              {url.hostname + url.pathname.replace(/\/$/, "")}
+            </span>
           );
-        },
+        } catch {
+          return (
+            <span className="text-xs text-muted-foreground">
+              {row.original.pageUrl}
+            </span>
+          );
+        }
       },
-      {
-        accessorKey: "updatedAt",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Closed Date" />
-        ),
-        cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(row.original.updatedAt), {
-              addSuffix: true,
-            })}
-          </span>
-        ),
+    },
+    {
+      accessorKey: "reviewer",
+      header: "Reviewer",
+      cell: ({ row }) => (
+        <span className="text-sm">{row.original.reviewer.name}</span>
+      ),
+    },
+    {
+      accessorKey: "assignee",
+      header: "Assignee",
+      cell: ({ row }) => {
+        const assignee = row.original.assignee;
+        if (!assignee) {
+          return (
+            <span className="text-xs text-muted-foreground">Unassigned</span>
+          );
+        }
+        return (
+          <div className="flex items-center gap-1.5">
+            <Avatar className="size-5">
+              <AvatarImage
+                src={assignee.image ? resolveS3Url(assignee.image) : undefined}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-[10px]">
+                {assignee.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm">{assignee.name}</span>
+          </div>
+        );
       },
-      {
-        id: "actions",
-        header: "",
-        cell: ({ row }) => (
-          <DeleteFeedbackDialog
-            count={1}
-            onConfirm={() =>
-              deleteMutation.mutate({ feedbackId: row.original.id })
-            }
-            disabled={deleteMutation.isPending}
-          />
-        ),
-      },
-    ],
-    [deleteMutation],
-  );
+    },
+    {
+      accessorKey: "updatedAt",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Archived" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground">
+          {formatDistanceToNow(new Date(row.original.updatedAt), {
+            addSuffix: true,
+          })}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <DeleteFeedbackDialog
+          count={1}
+          onConfirm={() => deleteOne(row.original.id)}
+          disabled={isPending}
+        />
+      ),
+    },
+  ];
 
   return matchQueryStatus(archiveQuery, {
     Loading: (
@@ -207,18 +265,26 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
       </Empty>
     ),
     Success: ({ data }) => (
-      <DataTable
-        columns={columns}
-        data={data.items}
-        pageCount={data.pageCount || 1}
-        currentPage={page}
-        setCurrentPage={setPage}
-        search={search}
-        setSearch={setSearch}
-        searchInputPlaceholder="Search by comment..."
-        isLoading={archiveQuery.isFetching}
-        onSortingChange={setSorting}
-      />
+      <>
+        <ArchiveSelectionToolbar
+          selectedCount={selectedIds.size}
+          onDelete={() => deleteMany(Array.from(selectedIds))}
+          onClearSelection={clearSelection}
+          disabled={isPending}
+        />
+        <DataTable
+          columns={columns}
+          data={data.items}
+          pageCount={data.pageCount || 1}
+          currentPage={page}
+          setCurrentPage={changePage}
+          search={search}
+          setSearch={changeSearch}
+          searchInputPlaceholder="Search by comment..."
+          isLoading={archiveQuery.isFetching}
+          onSortingChange={changeSorting}
+        />
+      </>
     ),
   });
 }

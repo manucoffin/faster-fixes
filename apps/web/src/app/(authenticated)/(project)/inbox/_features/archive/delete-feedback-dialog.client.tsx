@@ -39,8 +39,8 @@ export function DeleteFeedbackDialog({
           <AlertDialogDescription>
             This will permanently delete {count}{" "}
             {count === 1 ? "feedback item" : "feedback items"} and{" "}
-            {count === 1 ? "its" : "their"} associated screenshots. This action
-            cannot be undone.
+            {count === 1 ? "its" : "their"} associated screenshots. Linked
+            tracker issues are not affected. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
