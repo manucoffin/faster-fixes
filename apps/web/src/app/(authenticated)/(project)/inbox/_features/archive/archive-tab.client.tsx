@@ -265,26 +265,29 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
       </Empty>
     ),
     Success: ({ data }) => (
-      <>
-        <ArchiveSelectionToolbar
-          selectedCount={selectedIds.size}
-          onDelete={() => deleteMany(Array.from(selectedIds))}
-          onClearSelection={clearSelection}
-          disabled={isPending}
-        />
-        <DataTable
-          columns={columns}
-          data={data.items}
-          pageCount={data.pageCount || 1}
-          currentPage={page}
-          setCurrentPage={changePage}
-          search={search}
-          setSearch={changeSearch}
-          searchInputPlaceholder="Search by comment..."
-          isLoading={archiveQuery.isFetching}
-          onSortingChange={changeSorting}
-        />
-      </>
+      <DataTable
+        columns={columns}
+        data={data.items}
+        pageCount={data.pageCount || 1}
+        currentPage={page}
+        setCurrentPage={changePage}
+        search={search}
+        setSearch={changeSearch}
+        searchInputPlaceholder="Search by comment..."
+        isLoading={archiveQuery.isFetching}
+        onSortingChange={changeSorting}
+        selectionActions={
+          selectedIds.size > 0 && (
+            <ArchiveSelectionToolbar
+              selectedCount={selectedIds.size}
+              pageItemCount={data.items.length}
+              onDelete={() => deleteMany(Array.from(selectedIds))}
+              onClearSelection={clearSelection}
+              disabled={isPending}
+            />
+          )
+        }
+      />
     ),
   });
 }

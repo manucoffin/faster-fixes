@@ -1,12 +1,12 @@
 "use client";
 
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { X } from "lucide-react";
 import { DeleteFeedbackDialog } from "./delete-feedback-dialog.client";
 
 type ArchiveSelectionToolbarProps = {
   selectedCount: number;
+  pageItemCount: number;
   onDelete: () => void;
   onClearSelection: () => void;
   disabled: boolean;
@@ -14,17 +14,16 @@ type ArchiveSelectionToolbarProps = {
 
 export function ArchiveSelectionToolbar({
   selectedCount,
+  pageItemCount,
   onDelete,
   onClearSelection,
   disabled,
 }: ArchiveSelectionToolbarProps) {
-  if (selectedCount === 0) return null;
-
   return (
-    <div className="mb-4 flex animate-in flex-wrap items-center gap-2 rounded-lg border bg-muted/50 p-2 duration-200 fade-in">
-      <Badge variant="secondary">
-        <span className="tabular-nums">{selectedCount}</span> selected
-      </Badge>
+    <div role="toolbar" className="flex flex-1 items-center gap-3">
+      <span className="text-sm font-medium tabular-nums">
+        {selectedCount} of {pageItemCount} selected
+      </span>
 
       <DeleteFeedbackDialog
         count={selectedCount}
