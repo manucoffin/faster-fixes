@@ -171,7 +171,7 @@ export function formatDiagnosticTrailLines(
  * Render Custom metadata as `key: value` bullet lines in declared order.
  * Returns `[]` when there are no pairs, like `formatDiagnosticTrailLines`.
  */
-function formatCustomMetadataLines(
+export function formatCustomMetadataLines(
   customMetadata: CustomMetadata | null | undefined,
 ): string[] {
   if (!customMetadata) return [];

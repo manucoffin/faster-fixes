@@ -4,7 +4,7 @@
 // two cannot share a renderer. Keep the section order in sync when either side changes.
 
 import { formatIssueTitle } from "../github/format-issue-body";
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 
 type AdfMark =
   | { type: "strong" }
@@ -43,6 +43,7 @@ export type FeedbackForJiraIssue = {
   reviewerName: string;
   metadata: Record<string, unknown> | null;
   diagnosticTrail: DiagnosticTrail | null;
+  customMetadata?: CustomMetadata | null;
   dashboardUrl: string;
 };
 
@@ -119,6 +120,9 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
   const environment = buildEnvironmentExpand(feedback);
   if (environment) content.push(environment);
 
+  const customMetadata = buildCustomMetadataExpand(feedback.customMetadata);
+  if (customMetadata) content.push(customMetadata);
+
   const diagnostics = buildDiagnosticsExpand(feedback.diagnosticTrail);
   if (diagnostics) content.push(diagnostics);
 
@@ -180,6 +184,26 @@ function buildEnvironmentExpand(
   body.push(paragraph([text(`Submitted by ${feedback.reviewerName}`)]));
 
   return { type: "expand", attrs: { title: "Environment" }, content: body };
+}
+
+function buildCustomMetadataExpand(
+  customMetadata: CustomMetadata | null | undefined,
+): AdfNode | null {
+  const entries = Object.entries(customMetadata ?? {});
+  if (entries.length === 0) return null;
+
+  return {
+    type: "expand",
+    attrs: { title: "Custom metadata" },
+    content: [
+      {
+        type: "bulletList",
+        content: entries.map(([key, value]) =>
+          bullet([text(`${key}: ${collapseWhitespace(String(value))}`)]),
+        ),
+      },
+    ],
+  };
 }
 
 function buildDiagnosticsExpand(trail: DiagnosticTrail | null): AdfNode | null {
