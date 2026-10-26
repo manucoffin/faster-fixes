@@ -44,6 +44,7 @@ describe("provideFasterFixes", () => {
       position: "top-left",
       labels: { submitButton: "Send" },
       captureDiagnostics: false,
+      customMetadata: () => ({ userId: "user_42" }),
     } as const;
 
     bootstrap([options]);

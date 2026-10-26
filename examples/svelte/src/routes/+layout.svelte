@@ -12,9 +12,21 @@
     );
   }
 
+  // Read at each submission, so a theme switched after init is the one reported.
+  // The end-to-end suite flips the `dark` class to prove the value is fresh.
+  function readCustomMetadata() {
+    return {
+      app: "svelte",
+      colorScheme: document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light",
+    };
+  }
+
   initFasterFixes({
     projectId,
     apiOrigin: env.NEXT_PUBLIC_FF_API_ORIGIN || undefined,
+    customMetadata: readCustomMetadata,
   });
 </script>
 
