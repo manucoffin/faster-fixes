@@ -117,3 +117,10 @@ export const DIAGNOSTICS_REDACT_PARAMS = [
   "email",
   "jwt",
 ] as const;
+
+/** Custom metadata keeps at most 50 keys; later keys are dropped in declared order. */
+export const CUSTOM_METADATA_MAX_KEYS = 50;
+/** Custom metadata keys longer than 40 characters are truncated. */
+export const CUSTOM_METADATA_MAX_KEY_LENGTH = 40;
+/** Custom metadata string values longer than 500 characters are truncated. */
+export const CUSTOM_METADATA_MAX_VALUE_LENGTH = 500;
