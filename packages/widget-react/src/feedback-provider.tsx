@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { init } from "@fasterfixes/widget";
-import type { Labels, WidgetPosition } from "@fasterfixes/widget";
+import type {
+  CustomMetadata,
+  Labels,
+  WidgetPosition,
+} from "@fasterfixes/widget";
 import { isDevelopment } from "./environment.js";
 import { WidgetSlotContext, createWidgetSlot } from "./widget-slot.js";
 
@@ -41,6 +45,15 @@ type FeedbackProviderProps = {
   // Capture a Diagnostic Trail (console + network) with each feedback. Code-managed,
   // not a dashboard setting; set false to opt a site out of capture entirely.
   captureDiagnostics?: boolean;
+  /**
+   * Key/value pairs sent with every Feedback, shown to your team and in
+   * mirrored Issues, never to Reviewers. Pass an object, or a synchronous
+   * function called at each submission so values such as a signed-in user ID
+   * stay current; an inline function is fine, it never re-initialises the
+   * Widget. Values are strings, numbers, booleans or `null`. At most 50 keys
+   * are kept, keys are truncated to 40 characters and values to 500.
+   */
+  customMetadata?: CustomMetadata | (() => CustomMetadata);
   children: React.ReactNode;
 };
 
@@ -70,6 +83,26 @@ function useShallowStable<T extends object>(value: T | undefined) {
   return stable;
 }
 
+// An inline function is a new reference on every render. The Widget gets one
+// stable delegate that calls the latest function, so it reads fresh values at
+// submit time without re-initialising; an object is compared like `labels`.
+function useStableCustomMetadata(
+  value: CustomMetadata | (() => CustomMetadata) | undefined,
+) {
+  const latest = useRef(value);
+  useEffect(() => {
+    latest.current = value;
+  });
+  const [delegate] = useState(() => () => {
+    const current = latest.current;
+    return typeof current === "function" ? current() : (current ?? {});
+  });
+  const stableObject = useShallowStable(
+    typeof value === "function" ? undefined : value,
+  );
+  return typeof value === "function" ? delegate : stableObject;
+}
+
 function useWarnOnce(shouldWarn: boolean, message: string) {
   // A ref, not module state, so Strict Mode's second effect run stays silent.
   const warned = useRef(false);
@@ -91,10 +124,12 @@ export function FeedbackProvider({
   classNames,
   labels,
   captureDiagnostics = true,
+  customMetadata,
   children,
 }: FeedbackProviderProps) {
   const [slot] = useState(createWidgetSlot);
   const stableLabels = useShallowStable(labels);
+  const stableCustomMetadata = useStableCustomMetadata(customMetadata);
 
   // Prefer projectId; fall back to the deprecated apiKey. The server resolves
   // either a `proj_` Project ID or a legacy `ff_` key from the same header.
@@ -112,6 +147,7 @@ export function FeedbackProvider({
       position,
       labels: stableLabels,
       captureDiagnostics,
+      customMetadata: stableCustomMetadata,
     });
     slot.set(widget);
     return () => {
@@ -127,6 +163,7 @@ export function FeedbackProvider({
     position,
     stableLabels,
     captureDiagnostics,
+    stableCustomMetadata,
   ]);
 
   return (
