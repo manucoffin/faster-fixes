@@ -157,6 +157,32 @@ for (const fixture of WIDGET_FIXTURES) {
       ).toBe("H1");
     });
 
+    test("sends Custom metadata read at submission, not at init", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const start = page.getByRole("button", { name: "Start feedback" });
+      await expect(start).toBeVisible();
+      // Stands in for a sign-in: the host state changes once the Widget is running.
+      await page.evaluate(() => {
+        document.documentElement.classList.add("dark");
+      });
+
+      await start.click();
+      await page.locator("h1").click();
+      await page.getByPlaceholder("Describe the issue...").fill("Wrong theme");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      await expect.poll(() => api.createdFeedback().length).toBe(1);
+      expect(api.createdFeedback()[0]?.customMetadata).toEqual({
+        app: fixture.customMetadataApp,
+        colorScheme: "dark",
+      });
+    });
+
     test("attaches a screenshot to the created Feedback", async ({ page }) => {
       const api = await stubWidgetApi(page);
       await seedReviewerToken(page);

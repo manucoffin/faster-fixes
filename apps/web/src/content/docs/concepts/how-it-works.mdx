@@ -15,6 +15,7 @@ The widget runs in the reviewer's browser. When they click an element:
 - Browser metadata is collected (name, version, OS, viewport)
 - Click coordinates are recorded
 - Recent console logs and network requests are captured (the Diagnostic Trail)
+- Custom metadata declared by your site, such as a user ID or a release version, is attached. See [Custom metadata](/docs/widget/custom-metadata).
 
 All data is sent to the Faster Fixes API as a multipart form upload.
 
@@ -36,7 +37,7 @@ Feedback can be consumed two ways:
 ```
 Reviewer clicks element on website
         ↓
-Widget captures context (screenshot, selector, component tree, browser info, console & network logs)
+Widget captures context (screenshot, selector, component tree, browser info, console & network logs, Custom metadata)
         ↓
 Feedback submitted to Faster Fixes API
         ↓

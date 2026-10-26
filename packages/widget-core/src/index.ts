@@ -18,6 +18,8 @@ export type {
   ConsoleEntry,
   NetworkEntry,
   DiagnosticTrail,
+  CustomMetadata,
+  CustomMetadataValue,
 } from "./types.js";
 
 export {
@@ -33,6 +35,9 @@ export {
   DIAGNOSTICS_MAX_ENTRIES,
   DIAGNOSTICS_MAX_MESSAGE_BYTES,
   DIAGNOSTICS_REDACT_PARAMS,
+  CUSTOM_METADATA_MAX_KEYS,
+  CUSTOM_METADATA_MAX_KEY_LENGTH,
+  CUSTOM_METADATA_MAX_VALUE_LENGTH,
 } from "./constants.js";
 export type { Labels } from "./constants.js";
 
@@ -41,7 +46,13 @@ export type {
   DiagnosticsRecorder,
   DiagnosticsRecorderOptions,
 } from "./diagnostics/recorder.js";
-export { redactUrl } from "./diagnostics/redact.js";
+export { redactUrl, isSensitiveParam } from "./diagnostics/redact.js";
+
+export { normalizeCustomMetadata } from "./custom-metadata.js";
+export type {
+  CustomMetadataWarning,
+  NormalizedCustomMetadata,
+} from "./custom-metadata.js";
 
 export { resolveReviewerToken } from "./utils/token.js";
 export {

@@ -4,7 +4,7 @@ import {
   DEFAULT_WIDGET_POSITION,
   WIDGET_POSITIONS,
 } from "@fasterfixes/core";
-import type { Labels, WidgetPosition } from "@fasterfixes/core";
+import type { CustomMetadata, Labels, WidgetPosition } from "@fasterfixes/core";
 
 import { isDevelopment } from "./environment.js";
 import { resolveLabels } from "./labels.js";
@@ -18,10 +18,21 @@ export type WidgetOptions = {
   labels?: Partial<Labels>;
   /** Records the Diagnostic Trail from mount. Defaults to `true`. */
   captureDiagnostics?: boolean;
+  /**
+   * Key/value pairs sent with every Feedback, shown to your team and in
+   * mirrored Issues, never to Reviewers. Pass an object, or a synchronous
+   * function called at each submission so values such as a signed-in user ID
+   * stay current. Values are strings, numbers, booleans or `null`. At most 50
+   * keys are kept, keys are truncated to 40 characters and values to 500.
+   */
+  customMetadata?: CustomMetadata | (() => CustomMetadata);
 };
 
-export type ResolvedWidgetOptions = Required<Omit<WidgetOptions, "labels">> & {
+export type ResolvedWidgetOptions = Required<
+  Omit<WidgetOptions, "labels" | "customMetadata">
+> & {
   labels: Labels;
+  customMetadata: WidgetOptions["customMetadata"];
 };
 
 export type OptionsValidationResult =
@@ -53,7 +64,7 @@ function checkProjectId(input: Record<string, unknown>) {
 }
 
 function checkDisplayOptions(input: Record<string, unknown>) {
-  const { position, labels } = input;
+  const { position, labels, customMetadata } = input;
   if (position !== undefined && !isPosition(position)) {
     return {
       option: "position",
@@ -67,6 +78,18 @@ function checkDisplayOptions(input: Record<string, unknown>) {
     return {
       option: "labels",
       message: "`labels` must be an object.",
+    } as const;
+  }
+  if (
+    customMetadata !== undefined &&
+    typeof customMetadata !== "function" &&
+    (typeof customMetadata !== "object" ||
+      customMetadata === null ||
+      Array.isArray(customMetadata))
+  ) {
+    return {
+      option: "customMetadata",
+      message: "`customMetadata` must be an object or a function.",
     } as const;
   }
   return undefined;
@@ -93,6 +116,7 @@ function resolveDisplayOptions(
     position: options.position ?? DEFAULT_WIDGET_POSITION,
     labels: resolveLabels(options.labels),
     captureDiagnostics: options.captureDiagnostics ?? true,
+    customMetadata: options.customMetadata,
   };
 }
 

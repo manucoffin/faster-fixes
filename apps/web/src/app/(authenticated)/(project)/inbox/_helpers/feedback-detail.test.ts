@@ -3,6 +3,7 @@ import {
   formatElementForCopy,
   formatEnvironment,
   formatPagePath,
+  getCustomMetadataRows,
   getElementContext,
 } from "./feedback-detail";
 
@@ -106,5 +107,29 @@ describe("formatEnvironment", () => {
       browser: null,
       details: null,
     });
+  });
+});
+
+describe("getCustomMetadataRows", () => {
+  it("keeps the declared order and formats each primitive", () => {
+    expect(
+      getCustomMetadataRows({
+        userId: "user_42",
+        seats: 3,
+        beta: true,
+        trial: false,
+        plan: null,
+      }),
+    ).toEqual([
+      { key: "userId", value: "user_42" },
+      { key: "seats", value: "3" },
+      { key: "beta", value: "true" },
+      { key: "trial", value: "false" },
+      { key: "plan", value: "null" },
+    ]);
+  });
+
+  it("yields no rows for a null column", () => {
+    expect(getCustomMetadataRows(null)).toEqual([]);
   });
 });

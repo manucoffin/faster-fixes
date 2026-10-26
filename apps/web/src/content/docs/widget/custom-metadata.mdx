@@ -1,0 +1,161 @@
+---
+title: Custom metadata
+description: Attach your own key/value pairs, such as a user ID or a release version, to every Feedback.
+---
+
+## Setup
+
+Pass an object for values that never change while the page is open. Pass a function for values that can change, such as the signed-in user: the widget calls it each time a Feedback is submitted.
+
+<Tabs groupId="embed" items={["React", "Vue", "Angular", "Svelte", "Script embed"]} persist>
+<Tab value="React">
+
+```tsx
+// Object
+<FeedbackProvider
+  projectId="proj_your_project_id"
+  customMetadata={{ release: "2026.10.1" }}
+>
+  {children}
+</FeedbackProvider>
+
+// Function
+const { user } = useSession();
+
+<FeedbackProvider
+  projectId="proj_your_project_id"
+  customMetadata={() => ({ userId: user?.id ?? null })}
+>
+  {children}
+</FeedbackProvider>
+```
+
+Inline objects and functions are safe: they do not remount the widget on each render, and the widget always calls the latest function.
+
+</Tab>
+<Tab value="Vue">
+
+```ts
+// Object
+createFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: { release: "2026.10.1" },
+});
+
+// Function
+const auth = useAuthStore(pinia);
+
+createFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: auth.user?.id ?? null }),
+});
+```
+
+</Tab>
+<Tab value="Angular">
+
+```ts
+// Object
+provideFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: { release: "2026.10.1" },
+});
+
+// Function: it runs outside any injection context, so read from a plain
+// value your app updates, not from inject().
+const session = { userId: null as string | null };
+
+provideFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: session.userId }),
+});
+
+// After sign-in, for example in your auth service:
+session.userId = user.id;
+```
+
+</Tab>
+<Tab value="Svelte">
+
+```ts
+// Object
+initFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: { release: "2026.10.1" },
+});
+
+// Function
+import { page } from "$app/state";
+
+initFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: page.data.user?.id ?? null }),
+});
+```
+
+</Tab>
+<Tab value="Script embed">
+
+The `data-*` attributes cannot set `customMetadata`. Remove `data-project-id` from the tag and call `init` yourself:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"></script>
+<script>
+  window.FasterFixes.init({
+    projectId: "proj_your_project_id",
+    // Object: customMetadata: { release: "2026.10.1" },
+    customMetadata: () => ({ userId: window.currentUser?.id ?? null }),
+  });
+</script>
+```
+
+Move any other attributes into the same object: `data-color` becomes `color`, `data-position` becomes `position`. See [Manual initialization](/docs/widget/install/script-embed#manual-initialization).
+
+</Tab>
+</Tabs>
+
+Outside React, options are read once at startup. Use the function form for anything that changes after that. You never need to initialize the widget again.
+
+The function must be synchronous. If it throws, the Feedback is still submitted, without Custom metadata.
+
+Several values go in the same object or function, one key each:
+
+```ts
+customMetadata: () => ({
+  userId: session.userId,
+  tenant: currentTenant.slug,
+  newCheckout: flags.isEnabled("new-checkout"),
+})
+```
+
+## Values and limits
+
+| Rule         | Value                                       |
+| ------------ | ------------------------------------------- |
+| Keys         | Strings, at most 50                         |
+| Values       | `string`, `number`, `boolean` or `null`     |
+| Key length   | 40 characters, longer keys are truncated    |
+| Value length | 500 characters, longer values are truncated |
+
+Keys beyond the 50th are dropped, and so are nested objects, arrays and `undefined` values. The Feedback is always submitted. The API enforces the same rules, so a request from the [headless client](/docs/widget/headless-client) behaves the same way.
+
+Keys appear in the order you declare them.
+
+## Privacy
+
+Values are stored and shown as you send them. Nothing is redacted.
+
+- Do not send secrets: tokens, passwords, API keys.
+- Prefer an internal user ID over an email address. Values appear in mirrored Issues, which may be visible to more people than the inbox.
+
+Custom metadata is independent of `captureDiagnostics`: turning off the Diagnostic Trail does not turn it off.
+
+## Development warnings
+
+When your bundler builds in development mode (`NODE_ENV` is not `production`), the widget logs a `[faster-fixes]` warning in the browser console when:
+
+- a key or value was dropped or truncated,
+- the function threw,
+- a key is named like a secret or personal data, such as `token`, `apiKey`, `access_token`, `password`, `session` or `email`. The match is on the whole key, so `userEmail` does not warn. The value is still sent.
+
+The script embed is not bundled by your app and never logs these warnings.

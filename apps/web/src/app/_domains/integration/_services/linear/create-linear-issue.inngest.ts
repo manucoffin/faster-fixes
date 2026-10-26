@@ -2,7 +2,7 @@ import {
   formatIssueBody,
   formatIssueTitle,
 } from "../../_helpers/github/format-issue-body";
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { decryptToken } from "./token-crypto";
 import { getLinearClient } from "./linear-client";
 import { getFeedbackStateId } from "./get-feedback-state-id";
@@ -108,6 +108,7 @@ export const createLinearIssue = inngest.createFunction(
       reviewerName: feedback.reviewer.name,
       metadata: feedback.metadata as Record<string, unknown> | null,
       diagnosticTrail: feedback.diagnosticTrail as DiagnosticTrail | null,
+      customMetadata: feedback.customMetadata as CustomMetadata | null,
       projectId: feedback.projectId,
       dashboardUrl,
     });

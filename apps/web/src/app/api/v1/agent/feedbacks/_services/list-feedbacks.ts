@@ -1,7 +1,7 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { resolveProjectId } from "../../_helpers/resolve-project-id";
 
@@ -57,6 +57,7 @@ export async function listFeedbacks(
         : null,
       metadata: f.metadata as Record<string, unknown> | null,
       diagnosticTrail: f.diagnosticTrail as DiagnosticTrail | null,
+      customMetadata: f.customMetadata as CustomMetadata | null,
       reviewerName: f.reviewer.name,
       createdAt: f.createdAt,
     })),

@@ -10,7 +10,8 @@ function normalizeParam(name: string): string {
 
 const REDACT_SET = new Set(DIAGNOSTICS_REDACT_PARAMS.map(normalizeParam));
 
-function isSensitiveParam(name: string): boolean {
+/** Whether a name matches the Diagnostic Trail's sensitive-parameter denylist. */
+export function isSensitiveParam(name: string): boolean {
   return REDACT_SET.has(normalizeParam(name));
 }
 

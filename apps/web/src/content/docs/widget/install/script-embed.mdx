@@ -59,20 +59,21 @@ The CDN tag reads its options from `data-*` attributes:
 ></script>
 ```
 
-To set `labels`, use [manual initialization](#manual-initialization).
+To set `labels` or `customMetadata`, use [manual initialization](#manual-initialization).
 
 ### Option object
 
 `init` accepts one option object:
 
-| Option               | Type              | Default                        | Description                                                                                |
-| -------------------- | ----------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
-| `projectId`          | `string`          | Required                       | Your Project ID, `proj_...`                                                                |
-| `apiOrigin`          | `string`          | `https://www.faster-fixes.com` | API base URL                                                                               |
-| `color`              | `string`          | `#02527E`                      | Accent color. Any CSS color value.                                                         |
-| `position`           | `WidgetPosition`  | `bottom-right`                 | Floating button placement                                                                  |
-| `labels`             | `Partial<Labels>` | English defaults               | Replaces any visible or announced string. See [Labels](/docs/widget/customization#labels). |
-| `captureDiagnostics` | `boolean`         | `true`                         | Records the console and network history leading to a report                                |
+| Option               | Type                                       | Default                        | Description                                                                                                       |
+| -------------------- | ------------------------------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | `string`                                   | Required                       | Your Project ID, `proj_...`                                                                                       |
+| `apiOrigin`          | `string`                                   | `https://www.faster-fixes.com` | API base URL                                                                                                      |
+| `color`              | `string`                                   | `#02527E`                      | Accent color. Any CSS color value.                                                                                |
+| `position`           | `WidgetPosition`                           | `bottom-right`                 | Floating button placement                                                                                         |
+| `labels`             | `Partial<Labels>`                          | English defaults               | Replaces any visible or announced string. See [Labels](/docs/widget/customization#labels).                        |
+| `captureDiagnostics` | `boolean`                                  | `true`                         | Records the console and network history leading to a report                                                       |
+| `customMetadata`     | `CustomMetadata \| (() => CustomMetadata)` | None                           | Key/value pairs sent with every Feedback, such as a user ID. See [Custom metadata](/docs/widget/custom-metadata). |
 
 ### Manual initialization
 

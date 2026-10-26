@@ -12,7 +12,7 @@ export function registerListFeedbacks(
     {
       title: "List Feedbacks",
       description:
-        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, and the console logs and network requests captured before submission. Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
+        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, the console logs and network requests captured before submission, and the Custom metadata the site attached (such as a user ID, release or tenant). Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
       inputSchema: {
         status: FeedbackStatusEnum.optional().describe(
           "Filter by feedback status",

@@ -12,12 +12,24 @@ if (projectId === "") {
   );
 }
 
+// Read at each submission, so a theme switched after init is the one reported.
+// The end-to-end suite flips the `dark` class to prove the value is fresh.
+function readCustomMetadata() {
+  return {
+    app: "angular",
+    colorScheme: document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light",
+  };
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideFasterFixes({
       projectId,
       apiOrigin: apiOrigin === "" ? undefined : apiOrigin,
+      customMetadata: readCustomMetadata,
     }),
   ],
 };

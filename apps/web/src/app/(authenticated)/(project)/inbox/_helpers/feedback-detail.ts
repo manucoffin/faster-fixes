@@ -1,3 +1,5 @@
+import type { CustomMetadata } from "@fasterfixes/core";
+
 type ElementSource = {
   selector: string | null;
   metadata: Record<string, unknown> | null;
@@ -70,4 +72,12 @@ export function formatEnvironment(f: EnvironmentSource) {
   const details = [f.os, viewport].filter(Boolean).join(" · ");
 
   return { browser, details: details || null };
+}
+
+export function getCustomMetadataRows(customMetadata: CustomMetadata | null) {
+  return Object.entries(customMetadata ?? {}).map(([key, value]) => ({
+    key,
+    // String() already renders null as "null" and booleans as "true"/"false".
+    value: String(value),
+  }));
 }

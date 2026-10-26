@@ -196,6 +196,24 @@ describe("PUT /api/v1/feedback/:id", () => {
     });
   });
 
+  it("ignores Custom metadata sent alongside the comment", async () => {
+    const response = await PUT(
+      editRequest(
+        JSON.stringify({
+          comment: NEW_COMMENT,
+          customMetadata: { userId: "user_42" },
+        }),
+      ),
+      routeParams,
+    );
+
+    expect(response.status).toBe(200);
+    expect(widgetApiPrisma.feedback.update).toHaveBeenCalledWith({
+      where: { id: FEEDBACK_ID },
+      data: { comment: NEW_COMMENT },
+    });
+  });
+
   // Any active Reviewer of the Project may edit any of its Feedback: the
   // handler scopes the lookup to the Project, not to the submitter.
   it("edits a feedback submitted by another reviewer of the project", async () => {

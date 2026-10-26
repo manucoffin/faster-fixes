@@ -282,6 +282,7 @@ export function mountWidget({
           element: selection.element,
           click: selection.click,
           diagnosticTrail: recorder?.snapshot(),
+          customMetadata: options.customMetadata,
         }),
         reviewerToken,
       );
