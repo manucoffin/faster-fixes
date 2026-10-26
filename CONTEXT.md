@@ -26,6 +26,24 @@ _Avoid_: Plugin, SDK, Snippet (the install code of an Embed, not the Widget itse
 A way of installing the **Widget** on a site: the **script embed** (a script tag, no build step) or a **framework embed** (a package for one rendering runtime: React, Vue, Angular, Svelte). A framework embed exists per runtime, never per meta-framework: a Nuxt site installs the Vue embed, an Analog site installs the Angular embed, a SvelteKit site installs the Svelte embed, a Next.js or Remix site installs the React embed. Every Embed exposes the same customization and behaviour; an Embed changes how the Widget is installed, never what it does.
 _Avoid_: Integration (reserved for external systems), Adapter, Wrapper (implementation vocabulary).
 
+### Capture
+
+**Selection**:
+The page element a Reviewer clicked in annotation mode, together with the click point inside it. What a new Feedback is about.
+_Avoid_: Target, Highlighted element, Annotation (the mode, not its result).
+
+**Pin**:
+The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot.
+_Avoid_: Marker, Dot, Annotation.
+
+**Screenshot**:
+The capture of the Reviewer's viewport taken at the moment of Selection and attached to the Feedback. Best-effort: a Feedback may have none, and a late capture may be of lower fidelity.
+_Avoid_: Capture (the act of taking it), Image, Attachment.
+
+**Selection frame**:
+The outline of the Selection and its click point drawn over the Screenshot in the inbox. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
+_Avoid_: Highlight, Overlay, Annotation.
+
 ### Identity & access
 
 **Project public ID**:
@@ -152,6 +170,8 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
+- A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
+- A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
