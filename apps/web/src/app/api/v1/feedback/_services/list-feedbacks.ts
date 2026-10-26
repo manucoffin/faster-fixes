@@ -23,8 +23,9 @@ export async function listFeedbacks({
       ...(pageUrl ? { pageUrl } : {}),
     },
     orderBy: { createdAt: "desc" },
-    // Keep the heavy Diagnostic Trail out of the widget's hot read path.
-    omit: { diagnosticTrail: true },
+    // Keep the heavy Diagnostic Trail out of the widget's hot read path, and
+    // Custom metadata away from Reviewers (ADR-0018).
+    omit: { diagnosticTrail: true, customMetadata: true },
     include: {
       reviewer: { select: { id: true, name: true } },
       screenshot: { select: { key: true, provider: true, bucket: true } },

@@ -36,20 +36,33 @@ Content-Type: multipart/form-data
 
 ### `data` JSON fields
 
-| Field             | Type     | Required | Description                                                                      |
-| ----------------- | -------- | -------- | -------------------------------------------------------------------------------- |
-| `comment`         | `string` | Yes      | Feedback comment                                                                 |
-| `pageUrl`         | `string` | Yes      | Page URL where feedback was left                                                 |
-| `selector`        | `string` | No       | DOM selector of the annotated element                                            |
-| `clickX`          | `number` | No       | Click X coordinate                                                               |
-| `clickY`          | `number` | No       | Click Y coordinate                                                               |
-| `browserName`     | `string` | No       | Browser name                                                                     |
-| `browserVersion`  | `string` | No       | Browser version                                                                  |
-| `os`              | `string` | No       | Operating system                                                                 |
-| `viewportWidth`   | `number` | No       | Viewport width                                                                   |
-| `viewportHeight`  | `number` | No       | Viewport height                                                                  |
-| `metadata`        | `object` | No       | Custom metadata                                                                  |
-| `diagnosticTrail` | `object` | No       | Captured console logs and network requests: `{ console: [...], network: [...] }` |
+| Field             | Type     | Required | Description                                                                                                 |
+| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `comment`         | `string` | Yes      | Feedback comment                                                                                            |
+| `pageUrl`         | `string` | Yes      | Page URL where feedback was left                                                                            |
+| `selector`        | `string` | No       | DOM selector of the annotated element                                                                       |
+| `clickX`          | `number` | No       | Click X coordinate                                                                                          |
+| `clickY`          | `number` | No       | Click Y coordinate                                                                                          |
+| `browserName`     | `string` | No       | Browser name                                                                                                |
+| `browserVersion`  | `string` | No       | Browser version                                                                                             |
+| `os`              | `string` | No       | Operating system                                                                                            |
+| `viewportWidth`   | `number` | No       | Viewport width                                                                                              |
+| `viewportHeight`  | `number` | No       | Viewport height                                                                                             |
+| `metadata`        | `object` | No       | Element context and pin placement, set by the Widget. Returned to every Reviewer of the project             |
+| `diagnosticTrail` | `object` | No       | Captured console logs and network requests: `{ console: [...], network: [...] }`                            |
+| `customMetadata`  | `object` | No       | Key/value pairs declared by your site. Never returned to Reviewers. See [Custom metadata](#custom-metadata) |
+
+### Custom metadata
+
+`customMetadata` is a flat object of string keys to `string`, `number`, `boolean` or `null` values. It is stored with the Feedback and shown to your team in the dashboard, the agent API and mirrored Issues. It is never included in a response from this API.
+
+| Limit        | Value          |
+| ------------ | -------------- |
+| Keys         | 50             |
+| Key length   | 40 characters  |
+| Value length | 500 characters |
+
+The server normalises the object on ingest and never rejects a Feedback because of it: keys beyond the 50th are dropped, longer keys and string values are truncated, and nested objects, arrays and other non-primitive values are dropped. When no pair remains, nothing is stored. A `customMetadata` that is not an object returns `422`.
 
 ### Response
 

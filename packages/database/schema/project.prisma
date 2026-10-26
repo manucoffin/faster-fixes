@@ -89,6 +89,11 @@ model Feedback {
   // the widget read path (kept out of the hot getFeedback query).
   diagnosticTrail Json?
 
+  // Custom metadata: key/value pairs the host site declared, normalised on
+  // ingest (ADR-0018). Never selected on the widget read path: a Reviewer must
+  // not see another Reviewer's pairs.
+  customMetadata Json?
+
   screenshotId String?
   screenshot   Asset?  @relation("FeedbackScreenshot", fields: [screenshotId], references: [id], onDelete: SetNull)
 
