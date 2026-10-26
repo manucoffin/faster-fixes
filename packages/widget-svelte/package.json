@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/svelte",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Svelte integration for the FasterFixes feedback widget. Reviewers annotate elements and submit visual feedback on your Svelte or SvelteKit app.",
   "type": "module",
   "license": "MIT",

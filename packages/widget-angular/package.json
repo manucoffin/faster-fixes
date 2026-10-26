@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/angular",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Angular provider for the FasterFixes feedback widget. Reviewers annotate elements and submit visual feedback on your Angular or Analog app.",
   "type": "module",
   "license": "MIT",
