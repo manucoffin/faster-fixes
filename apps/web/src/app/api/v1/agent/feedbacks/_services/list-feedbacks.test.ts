@@ -32,6 +32,7 @@ const feedbackRow = {
   screenshot: { key: "shot.png", provider: "s3", bucket: "assets" },
   metadata: { source: "bugherd" },
   diagnosticTrail: null,
+  customMetadata: { userId: "user_42", beta: true },
   reviewer: { name: "Dana" },
   createdAt: new Date("2026-01-02T03:04:05.000Z"),
 };
@@ -95,6 +96,7 @@ describe("listFeedbacks", () => {
         screenshotUrl: SIGNED_ASSET_URL,
         metadata: { source: "bugherd" },
         diagnosticTrail: null,
+        customMetadata: { userId: "user_42", beta: true },
         reviewerName: "Dana",
         createdAt: new Date("2026-01-02T03:04:05.000Z"),
       },

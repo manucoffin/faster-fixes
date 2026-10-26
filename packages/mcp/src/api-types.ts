@@ -6,6 +6,21 @@ export type ListFeedbacksParams = {
   format?: "json" | "markdown";
 };
 
+type DiagnosticTrailJson = {
+  console: Array<{
+    level: "log" | "info" | "warn" | "error" | "debug";
+    message: string;
+    timestamp: number;
+  }>;
+  network: Array<{
+    method: string;
+    url: string;
+    status: number;
+    duration: number;
+    timestamp: number;
+  }>;
+};
+
 export type FeedbackJson = {
   id: string;
   status: string;
@@ -20,6 +35,11 @@ export type FeedbackJson = {
   browserVersion: string | null;
   os: string | null;
   screenshotUrl: string | null;
+  /** Element context and pin placement, set by the Widget. */
+  metadata: Record<string, unknown> | null;
+  diagnosticTrail: DiagnosticTrailJson | null;
+  /** Key/value pairs declared by the host site at submission. */
+  customMetadata: Record<string, string | number | boolean | null> | null;
   reviewerName: string;
   createdAt: string;
 };

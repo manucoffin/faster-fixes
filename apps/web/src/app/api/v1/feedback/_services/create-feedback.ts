@@ -1,6 +1,7 @@
 import { inngest } from "@/server/inngest";
 import { buildEvent, feedbackCreatedEvent } from "@/server/inngest/events";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
+import { normalizeCustomMetadata } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import type { CreateFeedbackInput } from "./create-feedback.schema";
 
@@ -24,6 +25,10 @@ export async function createFeedback({
   screenshotId,
   data,
 }: CreateFeedbackServiceInput) {
+  const customMetadata = data.customMetadata
+    ? normalizeCustomMetadata(data.customMetadata).customMetadata
+    : {};
+
   const feedback = await prisma.feedback.create({
     data: {
       projectId,
@@ -40,6 +45,9 @@ export async function createFeedback({
       viewportHeight: data.viewportHeight,
       metadata: data.metadata,
       diagnosticTrail: data.diagnosticTrail,
+      // Left unset (stored as null) when no pair survives normalisation.
+      customMetadata:
+        Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
       screenshotId,
     },
     include: {

@@ -57,6 +57,12 @@ export type DiagnosticTrail = {
   network: NetworkEntry[];
 };
 
+export type CustomMetadataValue = string | number | boolean | null;
+
+// Flat key/value pairs the host site declares; see normalizeCustomMetadata for
+// the limits the Widget and the server both apply.
+export type CustomMetadata = Record<string, CustomMetadataValue>;
+
 export type CreateFeedbackData = {
   comment: string;
   pageUrl: string;
@@ -70,6 +76,7 @@ export type CreateFeedbackData = {
   viewportHeight?: number;
   metadata?: Record<string, unknown>;
   diagnosticTrail?: DiagnosticTrail;
+  customMetadata?: CustomMetadata;
 };
 
 export type UpdateFeedbackData = {

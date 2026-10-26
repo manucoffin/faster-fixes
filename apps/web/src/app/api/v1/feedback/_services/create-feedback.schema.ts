@@ -33,6 +33,9 @@ export const CreateFeedbackSchema = z.object({
   viewportHeight: z.number().int().optional(),
   metadata: z.record(z.string(), z.any()).optional(),
   diagnosticTrail: DiagnosticTrailSchema.optional(),
+  // Only the shape is checked: limits are applied by normalisation on ingest so
+  // an over-limit payload from an outdated client is never rejected.
+  customMetadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateFeedbackInput = z.infer<typeof CreateFeedbackSchema>;

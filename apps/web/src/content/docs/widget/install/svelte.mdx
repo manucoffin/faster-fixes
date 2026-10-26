@@ -48,14 +48,15 @@ Read `isVisible`, `feedbackItems` and `showPins` from the returned object, as in
 
 ## Options
 
-| Option               | Type              | Required | Description                                                                                                 |
-| -------------------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `projectId`          | `string`          | Yes      | Your Faster Fixes Project ID                                                                                |
-| `apiOrigin`          | `string`          | No       | API base URL. Defaults to `https://www.faster-fixes.com`                                                    |
-| `color`              | `string`          | No       | Accent color. Any CSS color value. Defaults to `#02527E`                                                    |
-| `position`           | `WidgetPosition`  | No       | Floating button placement. Defaults to `bottom-right`. See [Position](/docs/widget/customization#position). |
-| `labels`             | `Partial<Labels>` | No       | Replaces any visible or announced string. See [Labels](/docs/widget/customization#labels).                  |
-| `captureDiagnostics` | `boolean`         | No       | Records the console and network history leading to a report. Defaults to `true`                             |
+| Option               | Type                                       | Required | Description                                                                                                       |
+| -------------------- | ------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | `string`                                   | Yes      | Your Faster Fixes Project ID                                                                                      |
+| `apiOrigin`          | `string`                                   | No       | API base URL. Defaults to `https://www.faster-fixes.com`                                                          |
+| `color`              | `string`                                   | No       | Accent color. Any CSS color value. Defaults to `#02527E`                                                          |
+| `position`           | `WidgetPosition`                           | No       | Floating button placement. Defaults to `bottom-right`. See [Position](/docs/widget/customization#position).       |
+| `labels`             | `Partial<Labels>`                          | No       | Replaces any visible or announced string. See [Labels](/docs/widget/customization#labels).                        |
+| `captureDiagnostics` | `boolean`                                  | No       | Records the console and network history leading to a report. Defaults to `true`                                   |
+| `customMetadata`     | `CustomMetadata \| (() => CustomMetadata)` | No       | Key/value pairs sent with every Feedback, such as a user ID. See [Custom metadata](/docs/widget/custom-metadata). |
 
 Options are read once, when the root component initializes. `WidgetOptions`, `Labels` and `WidgetPosition` are exported from `@fasterfixes/svelte`.
 

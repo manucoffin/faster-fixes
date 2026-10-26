@@ -1,5 +1,8 @@
-import { formatDiagnosticTrailLines } from "@/app/_domains/feedback";
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import {
+  formatCustomMetadataLines,
+  formatDiagnosticTrailLines,
+} from "@/app/_domains/feedback";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 
 type FeedbackForIssue = {
   id: string;
@@ -17,6 +20,7 @@ type FeedbackForIssue = {
   reviewerName: string;
   metadata: Record<string, unknown> | null;
   diagnosticTrail?: DiagnosticTrail | null;
+  customMetadata?: CustomMetadata | null;
   projectId: string;
   dashboardUrl: string;
 };
@@ -96,6 +100,19 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
       lines.push(envParts.join(" \u00b7 "));
     }
     lines.push(`Submitted by ${feedback.reviewerName}`);
+    lines.push("");
+    lines.push("</details>");
+  }
+
+  const customMetadataLines = formatCustomMetadataLines(
+    feedback.customMetadata,
+  );
+  if (customMetadataLines.length > 0) {
+    lines.push("");
+    lines.push("<details>");
+    lines.push("<summary>Custom metadata</summary>");
+    lines.push("");
+    lines.push(...customMetadataLines);
     lines.push("");
     lines.push("</details>");
   }

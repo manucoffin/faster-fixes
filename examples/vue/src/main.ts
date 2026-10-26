@@ -12,12 +12,24 @@ if (typeof projectId !== "string" || projectId === "") {
   );
 }
 
+// Read at each submission, so a theme switched after init is the one reported.
+// The end-to-end suite flips the `dark` class to prove the value is fresh.
+function readCustomMetadata() {
+  return {
+    app: "vue",
+    colorScheme: document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light",
+  };
+}
+
 createApp(App)
   .use(router)
   .use(
     createFasterFixes({
       projectId,
       apiOrigin: typeof apiOrigin === "string" ? apiOrigin : undefined,
+      customMetadata: readCustomMetadata,
     }),
   )
   .mount("#app");

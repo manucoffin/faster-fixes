@@ -56,12 +56,23 @@ GET /feedbacks?project=proj_xxx
       "metadata": {},
       "diagnosticTrail": {
         "console": [
-          { "level": "error", "message": "Uncaught TypeError: x is undefined", "timestamp": 1736937000000 }
+          {
+            "level": "error",
+            "message": "Uncaught TypeError: x is undefined",
+            "timestamp": 1736937000000
+          }
         ],
         "network": [
-          { "method": "GET", "url": "https://api.myapp.com/user", "status": 500, "duration": 142, "timestamp": 1736937000000 }
+          {
+            "method": "GET",
+            "url": "https://api.myapp.com/user",
+            "status": 500,
+            "duration": 142,
+            "timestamp": 1736937000000
+          }
         ]
       },
+      "customMetadata": { "userId": "user_42", "release": "2.4.1" },
       "reviewerName": "Sarah",
       "createdAt": "2025-01-15T10:30:00Z"
     }
@@ -69,6 +80,8 @@ GET /feedbacks?project=proj_xxx
   "count": 1
 }
 ```
+
+`customMetadata` holds the key/value pairs your site attached with the widget's `customMetadata` option, or `null` when it attached none.
 
 ### Markdown response
 

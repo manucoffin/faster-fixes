@@ -286,6 +286,108 @@ describe("POST /api/v1/feedback", () => {
     );
   });
 
+  it("stores Custom metadata and leaves it out of the answer", async () => {
+    widgetApiPrisma.feedback.create.mockResolvedValue({
+      ...createdFeedbackRow,
+      customMetadata: { userId: "user_42", plan: "pro" },
+    });
+
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: {
+            ...validFeedbackPayload,
+            customMetadata: { userId: "user_42", plan: "pro" },
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.not.toHaveProperty("customMetadata");
+    expect(widgetApiPrisma.feedback.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          customMetadata: { userId: "user_42", plan: "pro" },
+        }),
+      }),
+    );
+  });
+
+  // An outdated widget or a hand-written client cannot be forced to respect the
+  // limits, so its Feedback is stored normalised rather than lost.
+  it("stores over-limit Custom metadata normalised", async () => {
+    const keys = Array.from({ length: 55 }, (_, i) => [`key${i}`, i]);
+
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: {
+            ...validFeedbackPayload,
+            customMetadata: {
+              note: "x".repeat(600),
+              nested: { a: 1 },
+              ...Object.fromEntries(keys),
+            },
+          },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(widgetApiPrisma.feedback.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          customMetadata: {
+            note: "x".repeat(500),
+            ...Object.fromEntries(keys.slice(0, 49)),
+          },
+        }),
+      }),
+    );
+  });
+
+  it("stores no Custom metadata when no pair survives", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, customMetadata: { nested: [1] } },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(widgetApiPrisma.feedback.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ customMetadata: undefined }),
+      }),
+    );
+  });
+
+  it.each([
+    ["a string", "user_42"],
+    ["a number", 42],
+    ["an array", [["userId", "user_42"]]],
+  ])("rejects Custom metadata that is %s", async (_, customMetadata) => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, customMetadata },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({
+      error: "Validation failed",
+      details: {
+        formErrors: [],
+        fieldErrors: { customMetadata: [expect.any(String)] },
+      },
+    });
+    expect(widgetApiPrisma.feedback.create).not.toHaveBeenCalled();
+  });
+
   it("announces the created feedback to the integrations", async () => {
     const response = await POST(submitRequest(feedbackFormData()));
 
@@ -444,6 +546,22 @@ describe("GET /api/v1/feedback", () => {
       provider: "r2",
       bucket: STORAGE_BUCKET,
     });
+  });
+
+  it("never returns Custom metadata to a Reviewer", async () => {
+    widgetApiPrisma.feedback.findMany.mockResolvedValue([
+      { ...listedFeedbackRow, customMetadata: { userId: "user_42" } },
+    ]);
+
+    const response = await GET(widgetRequest(ROUTE_URL));
+
+    const body = (await response.json()) as { feedback: object[] };
+    expect(body.feedback[0]).not.toHaveProperty("customMetadata");
+    expect(widgetApiPrisma.feedback.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        omit: expect.objectContaining({ customMetadata: true }),
+      }),
+    );
   });
 
   it("narrows the list to one page when a url is given", async () => {

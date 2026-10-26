@@ -180,6 +180,84 @@ describe("FeedbackProvider", () => {
     expect(widgets[1]?.calls.destroy).toHaveLength(0);
   });
 
+  it("keeps the instance when customMetadata is a new function on each render", () => {
+    const { rerender } = render(
+      <FeedbackProvider projectId="proj_1" customMetadata={() => ({ a: 1 })}>
+        child
+      </FeedbackProvider>,
+    );
+    rerender(
+      <FeedbackProvider projectId="proj_1" customMetadata={() => ({ a: 2 })}>
+        new child
+      </FeedbackProvider>,
+    );
+
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(widgets[0]?.calls.destroy).toHaveLength(0);
+  });
+
+  it("hands the Widget a customMetadata function returning the latest render's value", () => {
+    const { rerender } = render(
+      <FeedbackProvider
+        projectId="proj_1"
+        customMetadata={() => ({ userId: null })}
+      >
+        child
+      </FeedbackProvider>,
+    );
+    rerender(
+      <FeedbackProvider
+        projectId="proj_1"
+        customMetadata={() => ({ userId: "user_42" })}
+      >
+        child
+      </FeedbackProvider>,
+    );
+
+    const resolve = initMock.mock.calls[0]?.[0].customMetadata;
+    expect(typeof resolve).toBe("function");
+    expect(typeof resolve === "function" && resolve()).toEqual({
+      userId: "user_42",
+    });
+  });
+
+  it("keeps the instance when customMetadata is an equal object", () => {
+    const { rerender } = render(
+      <FeedbackProvider projectId="proj_1" customMetadata={{ release: "1.0" }}>
+        child
+      </FeedbackProvider>,
+    );
+    rerender(
+      <FeedbackProvider projectId="proj_1" customMetadata={{ release: "1.0" }}>
+        new child
+      </FeedbackProvider>,
+    );
+
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(initMock).toHaveBeenCalledWith(
+      expect.objectContaining({ customMetadata: { release: "1.0" } }),
+    );
+  });
+
+  it("re-initialises when a customMetadata object changes", () => {
+    const { rerender } = render(
+      <FeedbackProvider projectId="proj_1" customMetadata={{ release: "1.0" }}>
+        child
+      </FeedbackProvider>,
+    );
+    rerender(
+      <FeedbackProvider projectId="proj_1" customMetadata={{ release: "1.1" }}>
+        child
+      </FeedbackProvider>,
+    );
+
+    expect(initMock).toHaveBeenCalledTimes(2);
+    expect(initMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ customMetadata: { release: "1.1" } }),
+    );
+    expect(widgets[0]?.calls.destroy).toHaveLength(1);
+  });
+
   it("keeps the instance when a re-render passes equal props", () => {
     const { rerender } = render(
       <FeedbackProvider projectId="proj_1" labels={{ submitButton: "Send" }}>

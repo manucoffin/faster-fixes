@@ -3,7 +3,7 @@
  * Used by both the dashboard export and the agent API.
  */
 
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 
 export type FeedbackForMarkdown = {
   id: string;
@@ -23,6 +23,8 @@ export type FeedbackForMarkdown = {
   // Optional: the dashboard's lean list query doesn't load it; the agent API and
   // issue creators do. Absent → the Diagnostics section is skipped.
   diagnosticTrail?: DiagnosticTrail | null;
+  // Optional for the same reason: absent or empty → the section is skipped.
+  customMetadata?: CustomMetadata | null;
 };
 
 export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
@@ -90,6 +92,14 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     lines.push(...envLines);
   }
 
+  const customMetadataLines = formatCustomMetadataLines(f.customMetadata);
+  if (customMetadataLines.length > 0) {
+    lines.push("");
+    lines.push("## Custom metadata");
+    lines.push("");
+    lines.push(...customMetadataLines);
+  }
+
   // Diagnostics — console + network captured before submission
   const diagnosticLines = formatDiagnosticTrailLines(f.diagnosticTrail);
   if (diagnosticLines.length > 0) {
@@ -155,6 +165,19 @@ export function formatDiagnosticTrailLines(
   }
 
   return lines;
+}
+
+/**
+ * Render Custom metadata as `key: value` bullet lines in declared order.
+ * Returns `[]` when there are no pairs, like `formatDiagnosticTrailLines`.
+ */
+export function formatCustomMetadataLines(
+  customMetadata: CustomMetadata | null | undefined,
+): string[] {
+  if (!customMetadata) return [];
+  return Object.entries(customMetadata).map(
+    ([key, value]) => `- ${key}: ${collapseWhitespace(String(value))}`,
+  );
 }
 
 // Console messages can be multi-line; flatten so each entry stays one bullet.

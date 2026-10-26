@@ -1,0 +1,276 @@
+---
+title: Custom metadata
+description: Attach your own key/value pairs, such as a user ID or a release version, to every Feedback.
+---
+
+Custom metadata is a flat set of key/value pairs your site declares in the widget configuration. The pairs travel with every Feedback submitted from your site, fixed at the moment of submission.
+
+Your team sees them in the inbox, in Copy markdown, in the agent API and MCP, and in mirrored GitHub, Linear and Jira Issues. Reviewers never see them.
+
+## Setup
+
+Pass `customMetadata` as an object for values known when the widget starts, or as a function for values that change while the page is open. The function is called each time a Reviewer submits Feedback, so it always returns the current state of your application.
+
+<Tabs groupId="embed" items={["React", "Vue", "Angular", "Svelte", "Script embed"]} persist>
+<Tab value="React">
+
+```tsx
+// Object form
+<FeedbackProvider
+  projectId="proj_your_project_id"
+  customMetadata={{ environment: "staging" }}
+>
+  {children}
+</FeedbackProvider>
+
+// Function form
+<FeedbackProvider
+  projectId="proj_your_project_id"
+  customMetadata={() => ({ userId: user?.id ?? null })}
+>
+  {children}
+</FeedbackProvider>
+```
+
+An inline function does not remount the widget on each render, and the widget always calls the latest one. An object with the same values as the previous render does not remount it either.
+
+</Tab>
+<Tab value="Vue">
+
+```ts
+// Object form
+app.use(
+  createFasterFixes({
+    projectId: "proj_your_project_id",
+    customMetadata: { environment: "staging" },
+  }),
+);
+
+// Function form
+app.use(
+  createFasterFixes({
+    projectId: "proj_your_project_id",
+    customMetadata: () => ({ userId: auth.user?.id ?? null }),
+  }),
+);
+```
+
+</Tab>
+<Tab value="Angular">
+
+```ts
+// Object form
+provideFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: { environment: "staging" },
+});
+
+// Function form
+provideFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: auth.user?.id ?? null }),
+});
+```
+
+</Tab>
+<Tab value="Svelte">
+
+```ts
+// Object form
+initFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: { environment: "staging" },
+});
+
+// Function form
+initFasterFixes({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: auth.user?.id ?? null }),
+});
+```
+
+</Tab>
+<Tab value="Script embed">
+
+```js
+// Object form
+window.FasterFixes.init({
+  projectId: "proj_your_project_id",
+  customMetadata: { environment: "staging" },
+});
+
+// Function form
+window.FasterFixes.init({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: window.currentUser?.id ?? null }),
+});
+```
+
+See [Script embed](#script-embed) to switch from the `data-project-id` tag.
+
+</Tab>
+</Tabs>
+
+Vue, Angular, Svelte and the script embed read their options once, when the widget starts. Use the function form for any value that changes after that, such as the signed-in user. There is no need to initialize the widget again.
+
+The function must be synchronous. If it throws, the Feedback is submitted without Custom metadata and a warning is logged in development.
+
+## Recipes
+
+### User ID after sign-in
+
+Read the user when the Feedback is submitted, not when the page loads. A Reviewer who signs in after opening the page is reported with their user ID.
+
+<Tabs groupId="embed" items={["React", "Vue", "Angular", "Svelte", "Script embed"]} persist>
+<Tab value="React">
+
+```tsx
+function Providers({ children }: { children: React.ReactNode }) {
+  const { user } = useSession();
+
+  return (
+    <FeedbackProvider
+      projectId="proj_your_project_id"
+      customMetadata={() => ({ userId: user?.id ?? null })}
+    >
+      {children}
+    </FeedbackProvider>
+  );
+}
+```
+
+</Tab>
+<Tab value="Vue">
+
+```ts
+const pinia = createPinia();
+const auth = useAuthStore(pinia);
+
+createApp(App)
+  .use(pinia)
+  .use(
+    createFasterFixes({
+      projectId: "proj_your_project_id",
+      customMetadata: () => ({ userId: auth.user?.id ?? null }),
+    }),
+  )
+  .mount("#app");
+```
+
+</Tab>
+<Tab value="Angular">
+
+```ts
+// The function runs outside any injection context: capture what it needs
+// in a value it can read later.
+const session = { userId: null as string | null };
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideFasterFixes({
+      projectId: "proj_your_project_id",
+      customMetadata: () => ({ userId: session.userId }),
+    }),
+  ],
+};
+
+// After sign-in, for example in your auth service:
+session.userId = user.id;
+```
+
+</Tab>
+<Tab value="Svelte">
+
+```svelte
+<script lang="ts">
+  import { initFasterFixes } from "@fasterfixes/svelte";
+  import { page } from "$app/state";
+
+  let { children } = $props();
+
+  initFasterFixes({
+    projectId: "proj_your_project_id",
+    customMetadata: () => ({ userId: page.data.user?.id ?? null }),
+  });
+</script>
+
+{@render children()}
+```
+
+</Tab>
+<Tab value="Script embed">
+
+```js
+window.FasterFixes.init({
+  projectId: "proj_your_project_id",
+  customMetadata: () => ({ userId: window.currentUser?.id ?? null }),
+});
+```
+
+</Tab>
+</Tabs>
+
+### Release version
+
+Read a build-time environment variable once. An object is enough: the value does not change while the page is open.
+
+```ts
+customMetadata: {
+  release: import.meta.env.VITE_RELEASE ?? "unknown",
+}
+```
+
+The variable prefix depends on your bundler: `VITE_` with Vite, SvelteKit and Nuxt (`import.meta.env`), `NEXT_PUBLIC_` with Next.js (`process.env`). In Angular, read it from your `environment.ts` file.
+
+### Tenant and feature flags
+
+Combine several values in one function. Each flag is its own key, so it reads as one line in the inbox and in Issues.
+
+```ts
+customMetadata: () => ({
+  tenant: currentTenant.slug,
+  plan: currentTenant.plan,
+  newCheckout: flags.isEnabled("new-checkout"),
+  betaEditor: flags.isEnabled("beta-editor"),
+})
+```
+
+## Values and limits
+
+Keys are strings. Values are strings, numbers, booleans or `null`. Keys are shown in the order you declare them.
+
+| Limit        | Value          |
+| ------------ | -------------- |
+| Keys         | 50             |
+| Key length   | 40 characters  |
+| Value length | 500 characters |
+
+The Feedback is always submitted. Keys beyond the 50th are dropped, long keys and values are truncated, and nested objects, arrays, functions and `undefined` values are dropped. In development, the browser console names each key that was dropped or truncated. The API applies the same rules to Feedback sent by an older widget or by the [headless client](/docs/widget/headless-client).
+
+## Privacy
+
+Values are sent and stored as you provide them. Nothing is redacted.
+
+- Do not send secrets, such as tokens, passwords or API keys.
+- Do not send personal data your team should not see in its trackers. Values appear in mirrored GitHub, Linear and Jira Issues, which may be visible to more people than the inbox.
+- Prefer an internal user ID over an email address.
+
+In development, the console warns about keys that look sensitive, such as `password`, `token`, `secret` or `email`. The value is still sent.
+
+Custom metadata is independent of `captureDiagnostics`. Turning off the Diagnostic Trail does not turn off Custom metadata.
+
+## Script embed
+
+The CDN tag has no `data-*` attribute for Custom metadata. To add it, remove `data-project-id` from the tag and call `window.FasterFixes.init` yourself:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"></script>
+<script>
+  window.FasterFixes.init({
+    projectId: "proj_your_project_id",
+    customMetadata: () => ({ userId: window.currentUser?.id ?? null }),
+  });
+</script>
+```
+
+Keep the other options you had set as attributes by passing them in the same object: `data-color` becomes `color`, `data-position` becomes `position`. See [Manual initialization](/docs/widget/install/script-embed#manual-initialization).

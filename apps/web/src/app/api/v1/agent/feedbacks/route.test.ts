@@ -58,6 +58,7 @@ const feedbackRow = {
   screenshot: { key: "shot.png", provider: "s3", bucket: "assets" },
   metadata: { source: "bugherd" },
   diagnosticTrail: null,
+  customMetadata: { userId: "user_42", beta: true },
   reviewer: { name: "Dana" },
   createdAt: new Date("2026-01-02T03:04:05.000Z"),
 };
@@ -190,6 +191,7 @@ describe("GET /api/v1/agent/feedbacks", () => {
           screenshotUrl: SIGNED_ASSET_URL,
           metadata: { source: "bugherd" },
           diagnosticTrail: null,
+          customMetadata: { userId: "user_42", beta: true },
           reviewerName: "Dana",
           createdAt: "2026-01-02T03:04:05.000Z",
         },
@@ -213,6 +215,29 @@ describe("GET /api/v1/agent/feedbacks", () => {
       "text/markdown; charset=utf-8",
     );
     await expect(response.text()).resolves.toContain("# Feedback feedback_1");
+  });
+
+  it("carries the Custom metadata section in the markdown format", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([feedbackRow]);
+
+    const response = await GET(agentRequest(`${LIST_URL}&format=markdown`));
+
+    const markdown = await response.text();
+    expect(markdown).toContain(
+      "## Custom metadata\n\n- userId: user_42\n- beta: true",
+    );
+  });
+
+  it("returns null Custom metadata for a Feedback that has none", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([
+      { ...feedbackRow, customMetadata: null },
+    ]);
+
+    const response = await GET(agentRequest(LIST_URL));
+
+    await expect(response.json()).resolves.toMatchObject({
+      feedbacks: [{ customMetadata: null }],
+    });
   });
 });
 

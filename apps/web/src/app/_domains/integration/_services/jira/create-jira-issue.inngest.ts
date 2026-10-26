@@ -8,7 +8,7 @@ import { createJiraIssue as createIssue } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
-import type { DiagnosticTrail } from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import {
@@ -94,6 +94,7 @@ export const createJiraIssue = inngest.createFunction(
       reviewerName: feedback.reviewer.name,
       metadata: feedback.metadata as Record<string, unknown> | null,
       diagnosticTrail: feedback.diagnosticTrail as DiagnosticTrail | null,
+      customMetadata: feedback.customMetadata as CustomMetadata | null,
       dashboardUrl: `${baseUrl}/inbox?feedbackId=${feedback.id}`,
     });
 

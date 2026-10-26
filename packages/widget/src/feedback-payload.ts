@@ -5,6 +5,8 @@ import {
 } from "@fasterfixes/core";
 import type { CreateFeedbackData, DiagnosticTrail } from "@fasterfixes/core";
 
+import { resolveCustomMetadata } from "./custom-metadata.js";
+import type { WidgetOptions } from "./options.js";
 import {
   computePinAnchor,
   createPinPlacementMetadata,
@@ -17,6 +19,7 @@ type FeedbackPayloadInput = {
   element: Element;
   click: PinPoint;
   diagnosticTrail: DiagnosticTrail | undefined;
+  customMetadata: WidgetOptions["customMetadata"];
 };
 
 /** The create request body for a comment on `element`, read at submit time. */
@@ -25,6 +28,7 @@ export function buildFeedbackPayload({
   element,
   click,
   diagnosticTrail,
+  customMetadata,
 }: FeedbackPayloadInput): CreateFeedbackData {
   const selectors = generateSelectors(element);
   const metadata: Record<string, unknown> = {
@@ -41,6 +45,8 @@ export function buildFeedbackPayload({
     );
   }
 
+  const resolvedCustomMetadata = resolveCustomMetadata(customMetadata);
+
   return {
     comment,
     pageUrl: window.location.href,
@@ -50,5 +56,6 @@ export function buildFeedbackPayload({
     metadata,
     diagnosticTrail,
     ...getBrowserInfo(),
+    ...(resolvedCustomMetadata && { customMetadata: resolvedCustomMetadata }),
   };
 }

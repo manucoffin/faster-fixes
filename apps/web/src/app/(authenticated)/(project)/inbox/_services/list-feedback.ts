@@ -1,5 +1,6 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
+import type { CustomMetadata } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import type { ListFeedbackInput } from "./list-feedback.schema";
 
@@ -92,6 +93,7 @@ export async function listFeedback(
         ? await getSignedAssetUrl(f.screenshot)
         : null,
       metadata: f.metadata as Record<string, unknown> | null,
+      customMetadata: f.customMetadata as CustomMetadata | null,
       issueLink: f.issueLink,
       linearIssueLink: f.linearIssueLink,
       jiraIssueLink: f.jiraIssueLink,
