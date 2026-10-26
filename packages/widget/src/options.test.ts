@@ -55,10 +55,33 @@ describe("validateOptions", () => {
     ["labels", { projectId: "proj_abc", labels: "Send" }],
     ["labels", { projectId: "proj_abc", labels: null }],
     ["labels", { projectId: "proj_abc", labels: ["Send"] }],
+    ["customMetadata", { projectId: "proj_abc", customMetadata: "user_42" }],
+    ["customMetadata", { projectId: "proj_abc", customMetadata: 42 }],
+    ["customMetadata", { projectId: "proj_abc", customMetadata: null }],
   ])("rejects an invalid %s", (option, input) => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     expect(validateOptions(input)).toMatchObject({ valid: false, option });
+  });
+
+  it.each([
+    ["an object", { release: "1.4.0" }],
+    ["a function", () => ({ userId: "user_42" })],
+  ])("accepts customMetadata as %s", (_, customMetadata) => {
+    const result = validateOptions({ projectId: "proj_abc", customMetadata });
+
+    expect(result.valid && result.options.customMetadata).toBe(customMetadata);
+  });
+
+  it("names customMetadata in the development error", () => {
+    const error = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    validateOptions({ projectId: "proj_abc", customMetadata: "user_42" });
+
+    expect(error).toHaveBeenCalledOnce();
+    expect(error.mock.calls[0]?.[0]).toContain("`customMetadata`");
   });
 
   it("rejects input that is not an object", () => {
