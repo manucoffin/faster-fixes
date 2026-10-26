@@ -1,6 +1,6 @@
 {
   "name": "@fasterfixes/vue",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vue plugin for the FasterFixes feedback widget. Reviewers annotate elements and submit visual feedback on your Vue or Nuxt app.",
   "type": "module",
   "license": "MIT",

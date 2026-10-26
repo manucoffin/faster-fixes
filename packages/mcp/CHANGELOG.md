@@ -1,5 +1,11 @@
 # @fasterfixes/mcp
 
+## 0.0.7
+
+### Patch Changes
+
+- [#279](https://github.com/manucoffin/faster-fixes/pull/279) [`4c9403d`](https://github.com/manucoffin/faster-fixes/commit/4c9403d70b214a37e1206c47eb8a045bd236a7d7) Thanks [@manucoffin](https://github.com/manucoffin)! - `list_feedbacks` tool: the description now states that each Feedback carries the Custom metadata the site attached, next to the captured console logs and network requests. The `FeedbackJson` type gains `customMetadata`, `metadata` and `diagnosticTrail` so it matches what the agent API returns. No behavioral change.
+
 ## 0.0.6
 
 ### Patch Changes
