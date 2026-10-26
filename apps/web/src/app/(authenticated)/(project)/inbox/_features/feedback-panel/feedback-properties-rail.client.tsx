@@ -10,6 +10,7 @@ import {
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { AssigneeSelect } from "./assignee-select.client";
 import { CopyFeedbackMarkdown } from "./copy-feedback-markdown.client";
+import { CustomMetadataSection } from "./custom-metadata-section.client";
 import { StatusSelect } from "./status-select.client";
 import { TrackersSection } from "./trackers-section.client";
 import { ViewDiagnosticsDialog } from "./view-diagnostics-dialog.client";
@@ -90,6 +91,8 @@ export function FeedbackPropertiesRail({
           </span>
         )}
       </Property>
+
+      <CustomMetadataSection customMetadata={feedback.customMetadata} />
 
       <div className="mt-auto flex flex-col gap-2">
         <ViewDiagnosticsDialog projectId={projectId} feedbackId={feedback.id} />
