@@ -165,11 +165,16 @@ One captured `fetch`/`XHR` call: method, URL, status, duration, timestamp. Metad
 **Ring Buffer**:
 The fixed-size in-memory store the Widget fills from page load; oldest entries drop when full. A Diagnostic Trail is a snapshot of this buffer at submission time.
 
+**Custom metadata**:
+Key/value pairs the customer's site declares in its Widget configuration and that travel with every Feedback submitted from it: a user ID in the customer's system, a release version, a tenant, a feature flag. Declared by the developer, never captured by the Widget; one flat set per Feedback, fixed at submission; shown to the team in the inbox, in mirrored Issues and on the agent surface, never to a Reviewer. Distinct from the **Diagnostic Trail** (what the Widget observed) and unaffected by turning capture off.
+_Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which the Widget reads back), Tags, Context, Attributes, User properties.
+
 ## Relationships
 
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
+- A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
 - A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
 - A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
@@ -198,4 +203,5 @@ The fixed-size in-memory store the Widget fills from page load; oldest entries d
 - **"Issue"** — refers exclusively to a tracker-side artifact (GitHub Issue, Linear Issue). Internal app records are **Feedback**, never "issues".
 - **"logs"** — used loosely for the captured browser data. Resolved: the canonical term is **Diagnostic Trail** (console + network), distinct from server-side logs.
 - **"Integration" vs "external system"**: the glossary said "external system" while the UI and the team said "integration". Resolved: **Integration** is the canonical umbrella term; **Tracker** and **Notification channel** are its two categories, and **Installation** and **Project link** apply to both.
+- **"metadata"** — the Widget's HTTP payload and `Feedback` record carry a `metadata` bag holding the element context and pin placement the Widget itself writes and reads back, and the API reference once labelled it "Custom metadata". Resolved: that bag has no domain name and is widget-internal; the developer-declared pairs are **Custom metadata**, a separate concept with its own field, and the bare word "metadata" is not used for them.
 - **"API key"** — the widget historically embedded an `apiKey` stored like a secret (SHA-256 hash, last-4 shown, "regenerate" flow). Resolved: the widget surface has **no secret**. It embeds the public **Project public ID**, secured by the **allowed origins** (domain + subdomains) + **Reviewer token**. Genuine secrets exist only on the agent surface (**Agent token**). The widget `apiKey` is being removed.
