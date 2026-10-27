@@ -1,3 +1,4 @@
+import type { SelectionGeometry } from "@fasterfixes/core";
 import { expect, test } from "@playwright/test";
 import { PNG } from "pngjs";
 
@@ -56,5 +57,48 @@ test.describe("screenshot capture", () => {
     );
     expect(image.width).toBeGreaterThan(0);
     expect(isUniformColour(image)).toBe(false);
+  });
+
+  test("sends the Selection geometry of the clicked element", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== "chromium", "The geometry is browser-agnostic");
+    const api = await stubWidgetApi(page);
+    await seedReviewerToken(page);
+    await page.goto(TALL_PAGE_PATH);
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    const target = page.locator("#below-fold-target");
+    // Scrolled, so viewport and document coordinates differ.
+    await target.scrollIntoViewIfNeeded();
+    await target.click();
+    const box = await target.evaluate((element) => {
+      const { left, top, width, height } = element.getBoundingClientRect();
+      return { left, top, width, height };
+    });
+    const viewport = await page.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }));
+    await page.getByPlaceholder("Describe the issue...").fill("Below the fold");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect.poll(() => api.createdFeedback().length).toBe(1);
+    const selection = api.createdFeedback()[0]?.metadata?.selection as
+      | SelectionGeometry
+      | undefined;
+    expect(selection).toBeDefined();
+    if (!selection) return;
+    expect(selection.viewport).toEqual(viewport);
+    expect(selection.element.left).toBeCloseTo(box.left, 1);
+    expect(selection.element.top).toBeCloseTo(box.top, 1);
+    expect(selection.element.width).toBeCloseTo(box.width, 1);
+    expect(selection.element.height).toBeCloseTo(box.height, 1);
+    const { click, element } = selection;
+    expect(click.x).toBeGreaterThanOrEqual(element.left);
+    expect(click.x).toBeLessThanOrEqual(element.left + element.width);
+    expect(click.y).toBeGreaterThanOrEqual(element.top);
+    expect(click.y).toBeLessThanOrEqual(element.top + element.height);
   });
 });

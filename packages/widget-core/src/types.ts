@@ -63,6 +63,17 @@ export type CustomMetadataValue = string | number | boolean | null;
 // the limits the Widget and the server both apply.
 export type CustomMetadata = Record<string, CustomMetadataValue>;
 
+/**
+ * Where the Selection sat in the Reviewer's viewport when they made it, in
+ * viewport CSS pixels. Stored under the `selection` key of the Feedback
+ * metadata so the inbox can draw the Selection frame over the Screenshot.
+ */
+export type SelectionGeometry = {
+  viewport: { width: number; height: number };
+  element: { left: number; top: number; width: number; height: number };
+  click: { x: number; y: number };
+};
+
 export type CreateFeedbackData = {
   comment: string;
   pageUrl: string;
