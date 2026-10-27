@@ -109,7 +109,10 @@ for (const fixture of WIDGET_FIXTURES) {
       ).toBeVisible();
     });
 
-    test("annotates an element and submits Feedback", async ({ page }) => {
+    test("annotates an element and submits Feedback", async ({
+      page,
+      browserName,
+    }) => {
       const api = await stubWidgetApi(page);
       await seedReviewerToken(page);
       await page.goto(fixture.path);
@@ -138,7 +141,7 @@ for (const fixture of WIDGET_FIXTURES) {
         clickX: expect.any(Number),
         clickY: expect.any(Number),
         selector: expect.any(String),
-        browserName: "Chrome",
+        browserName: browserName === "firefox" ? "Firefox" : "Chrome",
         viewportWidth: page.viewportSize()?.width,
         metadata: {
           elementDescription: expect.stringContaining("h1"),
@@ -213,6 +216,10 @@ for (const fixture of WIDGET_FIXTURES) {
       expect(body).toContain("Content-Type: image/png");
       // PNG signature
       expect(body).toContain("\x89PNG");
+      // The capture sandbox is gone once the image is uploaded.
+      await expect(
+        page.locator('iframe[data-ff-widget], iframe[id^="__SANDBOX__"]'),
+      ).toHaveCount(0);
     });
 
     test("leaves annotation mode on Escape without selecting", async ({

@@ -4,6 +4,7 @@
  * Its stylesheet is hostile on purpose, so style bleed into the Widget shows up.
  * Under `/inline-init` the page calls `window.FasterFixes.init` itself instead,
  * the way a customer passes options with no `data-*` attribute, like `customMetadata`.
+ * With `tall`, the page grows far below the fold, so a scenario can scroll before selecting.
  */
 
 export const SCRIPT_EMBED_PAGE_PATH = "/e2e/script-embed";
@@ -18,6 +19,7 @@ type ScriptEmbedPageInput = {
   autoInit: boolean;
   color: string | null;
   position: string | null;
+  tall: boolean;
 };
 
 // Keyed by the path below the fixture's base, so both bases serve the same pages.
@@ -37,6 +39,23 @@ const HOSTILE_CSS = `
   * { font-family: "Comic Sans MS", "Comic Sans", cursive !important; }
   button { all: unset !important; }
 `;
+
+// Distinct solid colours, so a blank or offset capture of a scrolled viewport stands out.
+const BELOW_FOLD_COLORS = [
+  "#dc2626",
+  "#16a34a",
+  "#2563eb",
+  "#ca8a04",
+  "#9333ea",
+];
+
+function buildBelowFold() {
+  const blocks = BELOW_FOLD_COLORS.map(
+    (color, index) =>
+      `<div style="height: 600px; padding: 24px; background: ${color}; color: #fff;">Block ${String(index + 1)}</div>`,
+  ).join("");
+  return `<section id="below-fold">${blocks}<h2 id="below-fold-target">Below the fold</h2></section>`;
+}
 
 // Swaps the page content on a pushState navigation, like a single-page app router.
 function buildRouterScript(basePath: string) {
@@ -128,6 +147,7 @@ export function buildScriptEmbedPage(input: ScriptEmbedPageInput) {
         <button type="button" id="primary-action">Get started</button>
       </section>
     </main>
+    ${input.tall ? buildBelowFold() : ""}
     <script>${buildRouterScript(basePath)}</script>
     ${buildScriptTag(input, input.autoInit && !inlineInit)}
     ${inlineInit ? `<script>${buildInlineInitScript(input)}</script>` : ""}

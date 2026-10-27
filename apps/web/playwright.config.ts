@@ -20,7 +20,16 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // Guards Firefox-only regressions such as screenshot capture. The framework
+    // embed specs check parity between Embeds, which Chromium alone covers.
+    {
+      name: "firefox",
+      testMatch: ["widget.spec.ts", "widget-screenshot.spec.ts"],
+      use: { ...devices["Desktop Firefox"] },
+    },
+  ],
   webServer: [
     {
       command: `next dev --turbopack --port ${PORT}`,
