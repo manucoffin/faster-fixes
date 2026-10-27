@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { settleScreenshot } from "./screenshot-fallback.js";
+import {
+  FULL_CAPTURE_TIMEOUT,
+  settleScreenshot,
+} from "./screenshot-fallback.js";
 
 const fullImage = new Blob(["full"]);
 const lightImage = new Blob(["light"]);
@@ -29,6 +32,23 @@ describe("settleScreenshot", () => {
 
     await expect(settled).resolves.toBe(lightImage);
     expect(capture).toHaveBeenCalledWith({ lightweight: true });
+  });
+
+  it("gives the full capture 15 seconds by default", async () => {
+    vi.useFakeTimers();
+    const capture = vi.fn(() => Promise.resolve(lightImage));
+    let finish: (blob: Blob) => void = () => {};
+    const slow = new Promise<Blob | null>((resolve) => {
+      finish = resolve;
+    });
+
+    const settled = settleScreenshot(slow, capture);
+    await vi.advanceTimersByTimeAsync(FULL_CAPTURE_TIMEOUT - 1);
+    finish(fullImage);
+
+    await expect(settled).resolves.toBe(fullImage);
+    expect(FULL_CAPTURE_TIMEOUT).toBe(15000);
+    expect(capture).not.toHaveBeenCalled();
   });
 
   it("falls back to a lightweight capture when the full one failed", async () => {

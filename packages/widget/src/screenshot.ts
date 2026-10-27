@@ -2,15 +2,28 @@ import { createContext, destroyContext, domToBlob } from "modern-screenshot";
 import type { Context } from "modern-screenshot";
 
 export type CaptureViewportScreenshotOptions = {
-  // Skip images and videos so the capture finishes fast when the full one timed out
+  // Fallback when the full capture timed out: no font embedding and short fetch
+  // timeouts, so slow images become same-size placeholders. Elements are never
+  // removed, since that would shift the layout away from the Selection geometry.
   lightweight?: boolean;
 };
 
-function isMediaElement(el: Element) {
+// The library waits for every image and video to load, bounded by `timeout`.
+// Lazy images below the fold and unplayed videos never load on their own, and
+// media that is not in by now is not on screen anyway.
+const MEDIA_WAIT_TIMEOUT = 3000;
+// The same `timeout` bounds each asset fetch while embedding. Aborted font fetches
+// blank the whole image, so fetches get more time once the media wait is over.
+const FETCH_TIMEOUT = 15000;
+// Safari refuses canvases above about 16.7 million pixels and returns nothing
+const MAX_CANVAS_PIXELS = 16_000_000;
+
+// A video without a decoded frame cannot be drawn and can hang the capture. Such
+// videos are positioned in practice, so leaving them out does not move the layout.
+function isUndecodedVideo(el: Element) {
   return (
-    el instanceof HTMLImageElement ||
-    el instanceof HTMLVideoElement ||
-    el instanceof HTMLPictureElement
+    el instanceof HTMLVideoElement &&
+    el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
   );
 }
 
@@ -60,7 +73,10 @@ export async function captureViewportScreenshot(
 ): Promise<Blob | null> {
   // Read synchronously so the capture matches the page at the moment of the call
   const { scrollX, scrollY, innerWidth, innerHeight } = window;
-  const scale = window.devicePixelRatio || 1;
+  const scale = Math.min(
+    window.devicePixelRatio || 1,
+    Math.sqrt(MAX_CANVAS_PIXELS / Math.max(1, innerWidth * innerHeight)),
+  );
 
   let sandbox: HTMLIFrameElement | undefined;
   let context: Context<HTMLElement> | undefined;
@@ -70,6 +86,10 @@ export async function captureViewportScreenshot(
       width: innerWidth,
       height: innerHeight,
       scale,
+      timeout: MEDIA_WAIT_TIMEOUT,
+      // Embedding every format of every @font-face made the image blank on
+      // font-heavy sites; one format per face is enough.
+      font: options.lightweight ? false : { preferredFormat: "woff2" },
       // restoreScrollPosition only handles scrolled children. Window scroll lives on
       // documentElement, not body, so the root clone must be shifted by hand or every
       // screenshot shows the top of the document.
@@ -80,10 +100,12 @@ export async function captureViewportScreenshot(
       filter: (node: Node) => {
         if (!(node instanceof Element)) return true;
         if (node.hasAttribute("data-ff-widget")) return false;
-        if (options.lightweight && isMediaElement(node)) return false;
+        if (isUndecodedVideo(node)) return false;
         return true;
       },
     });
+    // createContext has finished the media wait; the timeout now bounds fetches
+    if (!options.lightweight) context.timeout = FETCH_TIMEOUT;
     context.sandbox = sandbox;
     return await domToBlob(context);
   } catch (err) {

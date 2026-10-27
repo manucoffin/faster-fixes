@@ -1,6 +1,8 @@
 import type { CaptureViewportScreenshotOptions } from "./screenshot.js";
 
-export const FULL_CAPTURE_TIMEOUT = 3000;
+// The capture runs in the background after submit, so the Reviewer never waits,
+// but a longer window raises the chance they leave the page before the upload.
+export const FULL_CAPTURE_TIMEOUT = 15000;
 
 type CaptureScreenshot = (
   options?: CaptureViewportScreenshotOptions,
