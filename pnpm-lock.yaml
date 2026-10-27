@@ -227,6 +227,9 @@ importers:
       "@types/nodemailer":
         specifier: ^8.0.2
         version: 8.0.2
+      "@types/pngjs":
+        specifier: ^6.0.5
+        version: 6.0.5
       "@types/react":
         specifier: 19.3.0
         version: 19.3.0
@@ -242,6 +245,9 @@ importers:
       eslint:
         specifier: ^9.39.1
         version: 9.39.1(jiti@2.7.0)
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
       prettier:
         specifier: ^3.7.4
         version: 3.8.1
@@ -8627,6 +8633,12 @@ packages:
         integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==,
       }
 
+  "@types/pngjs@6.0.5":
+    resolution:
+      {
+        integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==,
+      }
+
   "@types/react-dom@19.3.0":
     resolution:
       {
@@ -14433,6 +14445,13 @@ packages:
       }
     engines: { node: ">=20" }
     hasBin: true
+
+  pngjs@7.0.0:
+    resolution:
+      {
+        integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==,
+      }
+    engines: { node: ">=14.19.0" }
 
   possible-typed-array-names@1.1.0:
     resolution:
@@ -22557,6 +22576,10 @@ snapshots:
       pg-protocol: 1.11.0
       pg-types: 2.2.0
 
+  "@types/pngjs@6.0.5":
+    dependencies:
+      "@types/node": 20.19.25
+
   "@types/react-dom@19.3.0(@types/react@19.3.0)":
     dependencies:
       "@types/react": 19.3.0
@@ -26691,6 +26714,8 @@ snapshots:
   playwright@1.63.0:
     dependencies:
       playwright-core: 1.63.0
+
+  pngjs@7.0.0: {}
 
   possible-typed-array-names@1.1.0: {}
 

@@ -26,7 +26,7 @@ export default defineConfig({
     // embed specs check parity between Embeds, which Chromium alone covers.
     {
       name: "firefox",
-      testMatch: "widget.spec.ts",
+      testMatch: ["widget.spec.ts", "widget-screenshot.spec.ts"],
       use: { ...devices["Desktop Firefox"] },
     },
   ],
