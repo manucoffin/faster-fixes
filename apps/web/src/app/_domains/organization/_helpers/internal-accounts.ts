@@ -4,8 +4,10 @@
 // where fragments, type-checked where the query spreads them.
 const PLATFORM_ADMIN_ROLE = "admin";
 
+export const internalMemberWhere = { user: { role: PLATFORM_ADMIN_ROLE } };
+
 export const nonInternalOrganizationWhere = {
-  members: { none: { user: { role: PLATFORM_ADMIN_ROLE } } },
+  members: { none: internalMemberWhere },
 };
 
 // `role` and `banned` are nullable, and SQL drops NULL rows from a bare `not`,

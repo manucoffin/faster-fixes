@@ -22,6 +22,8 @@ model User {
   members     Member[]
   invitations Invitation[]
 
+  testimonialRequest TestimonialRequest?
+
   // Asset relations
   uploadedAssets Asset[] @relation("AssetUploader")
 

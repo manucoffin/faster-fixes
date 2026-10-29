@@ -35,6 +35,11 @@ export const userEmailVerifiedEvent = eventType("user/email-verified", {
   schema: z.object({ userId: z.string() }),
 });
 
+export const testimonialRequestCreatedEvent = eventType(
+  "testimonial/request.created",
+  { schema: z.object({ requestId: z.string() }) },
+);
+
 export const githubWebhookIssuesEvent = eventType("github/webhook.issues", {
   schema: z.object({
     action: z.string(),

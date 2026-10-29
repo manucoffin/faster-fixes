@@ -1,0 +1,31 @@
+// A Testimonial request is the one-time invitation to give a Testimonial
+// (CONTEXT.md). Unique per User and per Organization; both links are nullable:
+// a row with no User marks an Organization with no eligible owner as handled,
+// and a deleted Organization leaves the row so it is never asked again.
+model TestimonialRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  token  String @unique
+  // `pending`, `submitted`, `declined` or `expired`, validated by the Zod enum
+  // of the testimonial domain.
+  status String @default("pending")
+
+  // The Feedback total quoted in the first email, frozen at scan time.
+  feedbackCount Int
+
+  firstEmailSentAt DateTime?
+  reminderSentAt   DateTime?
+  closedAt         DateTime?
+  // Thirty days after the first email, so unset until that email is sent.
+  expiresAt        DateTime?
+
+  userId         String?       @unique
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?       @unique
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("testimonial_request")
+}
