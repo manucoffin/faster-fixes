@@ -9,7 +9,7 @@ import { DashboardPanel } from "../../_components/dashboard-panel";
 import { FigureRow, FigureRowSkeleton } from "../../_components/figure-row";
 import { FigureUnavailable } from "../../_components/figure-unavailable";
 import { ShareBar, ShareBarSkeleton } from "../../_components/share-bar";
-import { getDeltaTone } from "../../_helpers/get-delta-tone";
+import { getDeltaTone } from "@/app/admin/_helpers/get-delta-tone";
 
 const SIGNUPS_LABEL = "Signups, last 30 days";
 
