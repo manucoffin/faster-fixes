@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.1
+
+### Patch Changes
+
+- [#287](https://github.com/manucoffin/faster-fixes/pull/287) [`928c17f`](https://github.com/manucoffin/faster-fixes/commit/928c17f414770f1a21bd0e08a656565256fc38f7) Thanks [@manucoffin](https://github.com/manucoffin)! - Attach a Screenshot shortly after submit on pages with lazy images, unplayed videos or many web fonts. The capture no longer waits 30 seconds for media below the fold: images and videos get 3 seconds to load, then each remote asset gets 15 seconds to embed. Videos without a decoded frame are left out of the image instead of hanging the capture, and only the woff2 source of each `@font-face` is embedded, which kept font-heavy pages from rendering blank. The full capture now gets 15 seconds before the fallback replaces it, up from 3. The fallback keeps every element on the page, skips font embedding and draws slow images as same-size placeholders, so its image shows the same layout as the page instead of one with images and videos removed. On very large Retina viewports the capture scale is lowered to keep the canvas under 16 million pixels, so Safari returns an image instead of nothing.
+
+- [#287](https://github.com/manucoffin/faster-fixes/pull/287) [`5d37e3a`](https://github.com/manucoffin/faster-fixes/commit/5d37e3a229ded2e5bee2bb11ba030f74103ca3f2) Thanks [@manucoffin](https://github.com/manucoffin)! - Attach a Screenshot to Feedback submitted from Firefox. On Firefox 156 and later every capture failed with `can't access property "appendChild", l.body is null`, because the capture library wrote into its sandbox iframe before the iframe's document had loaded. The Widget now creates that iframe itself, waits for it to load, excludes it from the image and removes it after every capture, whether the capture succeeded or failed, so no hidden iframe is left in your page.
+
+- [#287](https://github.com/manucoffin/faster-fixes/pull/287) [`4d6a401`](https://github.com/manucoffin/faster-fixes/commit/4d6a401c5ac6d9900bb2ad3d60210164d8972fa4) Thanks [@manucoffin](https://github.com/manucoffin)! - Record where the Selection sat on screen when the Reviewer made it. Each Feedback now carries a `selection` object in its metadata, measured in the same tick the Screenshot capture starts: the viewport size, the selected element's rectangle and the click point, all in viewport CSS pixels. The inbox uses it to draw the Selection frame over the Screenshot. `@fasterfixes/core` exports its shape as the `SelectionGeometry` type. No option, attribute or API contract changes.
+- Updated dependencies [[`4d6a401`](https://github.com/manucoffin/faster-fixes/commit/4d6a401c5ac6d9900bb2ad3d60210164d8972fa4)]:
+  - @fasterfixes/core@0.3.0
+
 ## 1.3.0
 
 ### Minor Changes

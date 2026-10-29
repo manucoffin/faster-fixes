@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- [#287](https://github.com/manucoffin/faster-fixes/pull/287) [`4d6a401`](https://github.com/manucoffin/faster-fixes/commit/4d6a401c5ac6d9900bb2ad3d60210164d8972fa4) Thanks [@manucoffin](https://github.com/manucoffin)! - Record where the Selection sat on screen when the Reviewer made it. Each Feedback now carries a `selection` object in its metadata, measured in the same tick the Screenshot capture starts: the viewport size, the selected element's rectangle and the click point, all in viewport CSS pixels. The inbox uses it to draw the Selection frame over the Screenshot. `@fasterfixes/core` exports its shape as the `SelectionGeometry` type. No option, attribute or API contract changes.
+
 ## 0.2.0
 
 ### Minor Changes
