@@ -107,6 +107,7 @@ const serviceVerbOptions = {
     "add",
     "complete",
     "create",
+    "decline",
     "delete",
     "disconnect",
     "expire",

@@ -1,6 +1,7 @@
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { publicProcedure, router } from "@/server/trpc/trpc";
 import { TRPCError } from "@trpc/server";
+import { declineTestimonialRequest } from "./_services/decline-testimonial-request";
 import { submitTestimonial } from "./_services/submit-testimonial";
 import { SubmitTestimonialSchema } from "./_services/submit-testimonial.schema";
 import { TestimonialTokenSchema } from "./_services/testimonial-token.schema";
@@ -23,4 +24,7 @@ export const testimonialRouter = router({
     .mutation(({ input: { token, ...testimonial } }) =>
       submitTestimonial({ token, now: new Date(), testimonial }),
     ),
+  decline: testimonialTokenProcedure.mutation(({ input: { token } }) =>
+    declineTestimonialRequest({ token, now: new Date() }),
+  ),
 });
