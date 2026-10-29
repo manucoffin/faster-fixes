@@ -2,7 +2,7 @@ import "server-only";
 
 import { BadRequestError } from "@/server/errors/domain-errors";
 import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { getStorageBucket } from "./config";
 import { createLocalStorageUrl } from "./local-url";
@@ -28,6 +28,19 @@ export class LocalStorage implements StorageBackend {
 
   read(bucket: string, key: string) {
     return readFile(getLocalObjectPath(this.root, bucket, key));
+  }
+
+  async copy(source: StorageObject, destination: StorageObject) {
+    const path = getLocalObjectPath(
+      this.root,
+      destination.bucket,
+      destination.key,
+    );
+    await mkdir(dirname(path), { recursive: true });
+    await copyFile(
+      getLocalObjectPath(this.root, source.bucket, source.key),
+      path,
+    );
   }
 
   delete(object: StorageObject) {

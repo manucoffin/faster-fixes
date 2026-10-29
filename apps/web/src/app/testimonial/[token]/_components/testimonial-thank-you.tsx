@@ -1,4 +1,10 @@
 import type { SubmitTestimonialOutput } from "@/app/_domains/testimonial/_services/submit-testimonial";
+import { resolveS3Url } from "@/utils/url/resolve-s3-url";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import { StarIcon } from "lucide-react";
 
 type TestimonialThankYouProps = {
@@ -40,11 +46,25 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
         <blockquote className="whitespace-pre-line">
           {testimonial.text}
         </blockquote>
-        <figcaption className="text-sm">
-          <span className="font-medium">{testimonial.authorName}</span>
-          {byline ? (
-            <span className="text-muted-foreground">, {byline}</span>
+        <figcaption className="flex items-center gap-3 text-sm">
+          {testimonial.photoKey ? (
+            <Avatar className="size-10">
+              <AvatarImage
+                src={resolveS3Url(testimonial.photoKey)}
+                alt=""
+                className="object-cover"
+              />
+              <AvatarFallback>
+                {testimonial.authorName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
           ) : null}
+          <span>
+            <span className="font-medium">{testimonial.authorName}</span>
+            {byline ? (
+              <span className="text-muted-foreground">, {byline}</span>
+            ) : null}
+          </span>
         </figcaption>
       </figure>
     </div>

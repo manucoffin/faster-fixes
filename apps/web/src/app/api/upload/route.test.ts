@@ -18,16 +18,25 @@ const USER_ID = "user_1";
 const MEMBER_ID = "member_1";
 const UPLOADED_AT = new Date("2026-01-15T10:00:00.000Z");
 
+const REQUEST_ID = "request_1";
+const TOKEN = "token_1";
+
 const uploadPrisma = {
   member: { findFirst: vi.fn() },
+  testimonialRequest: { findUnique: vi.fn() },
 };
 
 const getSessionDouble = vi.fn();
+const checkRateLimitDouble = vi.fn();
 
 vi.mock("@workspace/db", () => ({ prisma: uploadPrisma }));
 
 vi.mock("@/server/auth", () => ({
   auth: { api: { getSession: getSessionDouble } },
+}));
+
+vi.mock("@/server/rate-limit/check-rate-limit", () => ({
+  checkRateLimit: checkRateLimitDouble,
 }));
 
 // A signing double: the real client would need R2 credentials, and the signed
@@ -79,6 +88,14 @@ function userAvatarRequest() {
   });
 }
 
+function testimonialPhotoRequest(metadata: unknown = { token: TOKEN }) {
+  return uploadRequest({
+    route: "testimonial-photo",
+    files: [{ name: "me.jpeg", size: 1024, type: "image/jpeg" }],
+    metadata,
+  });
+}
+
 // Loose objects: the accepted-upload case asserts the whole file entry.
 const signedUploadSchema = z.object({
   files: z.array(
@@ -107,6 +124,13 @@ beforeEach(() => {
   vi.setSystemTime(UPLOADED_AT);
   getSessionDouble.mockResolvedValue({ user: { id: USER_ID } });
   uploadPrisma.member.findFirst.mockResolvedValue({ id: MEMBER_ID });
+  uploadPrisma.testimonialRequest.findUnique.mockResolvedValue({
+    id: REQUEST_ID,
+    status: "pending",
+    expiresAt: new Date("2026-02-01T10:00:00.000Z"),
+    userId: USER_ID,
+  });
+  checkRateLimitDouble.mockResolvedValue({ allowed: true });
 });
 
 afterAll(() => {
@@ -239,5 +263,103 @@ describe("POST /api/upload, user avatar", () => {
       `/${BUCKET}/user-avatars/${USER_ID}/${UPLOADED_AT.getTime()}.png`,
     );
     expect(uploadPrisma.member.findFirst).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/upload, testimonial photo", () => {
+  it("signs an upload for a pending token under the request prefix, without a session", async () => {
+    getSessionDouble.mockResolvedValue(null);
+
+    const response = await POST(testimonialPhotoRequest());
+
+    expect(response.status).toBe(200);
+    const body = await readSignedUpload(response);
+    expect(signedKey(body)).toBe(
+      `/${BUCKET}/testimonial-uploads/${REQUEST_ID}/${UPLOADED_AT.getTime()}.jpeg`,
+    );
+    expect(checkRateLimitDouble).toHaveBeenCalledWith(
+      TOKEN,
+      "testimonial-token",
+    );
+  });
+
+  it("refuses a token matching no request", async () => {
+    uploadPrisma.testimonialRequest.findUnique.mockResolvedValue(null);
+
+    const response = await POST(testimonialPhotoRequest());
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: { type: "rejected", message: "This link no longer works." },
+    });
+  });
+
+  it.each(["submitted", "declined", "expired"])(
+    "refuses a %s request",
+    async (status) => {
+      uploadPrisma.testimonialRequest.findUnique.mockResolvedValue({
+        id: REQUEST_ID,
+        status,
+        expiresAt: null,
+        userId: USER_ID,
+      });
+
+      const response = await POST(testimonialPhotoRequest());
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: { type: "rejected", message: "This link no longer works." },
+      });
+    },
+  );
+
+  it("refuses a pending request past its expiry date", async () => {
+    uploadPrisma.testimonialRequest.findUnique.mockResolvedValue({
+      id: REQUEST_ID,
+      status: "pending",
+      expiresAt: new Date("2026-01-01T10:00:00.000Z"),
+      userId: USER_ID,
+    });
+
+    const response = await POST(testimonialPhotoRequest());
+
+    expect(response.status).toBe(400);
+  });
+
+  it("refuses a token over its rate limit before resolving it", async () => {
+    checkRateLimitDouble.mockResolvedValue({ allowed: false });
+
+    const response = await POST(testimonialPhotoRequest());
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        type: "rejected",
+        message: "Too many uploads. Try again later.",
+      },
+    });
+    expect(uploadPrisma.testimonialRequest.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("refuses a request that carries no token", async () => {
+    const response = await POST(testimonialPhotoRequest({}));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: { type: "invalid_request", message: "Invalid metadata." },
+    });
+  });
+
+  it("refuses a file larger than the avatar limit", async () => {
+    const response = await POST(
+      uploadRequest({
+        route: "testimonial-photo",
+        files: [{ name: "me.png", size: 3 * 1024 * 1024, type: "image/png" }],
+        metadata: { token: TOKEN },
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(uploadPrisma.testimonialRequest.findUnique).not.toHaveBeenCalled();
   });
 });

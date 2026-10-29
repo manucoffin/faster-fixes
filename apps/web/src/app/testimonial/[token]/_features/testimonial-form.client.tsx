@@ -2,13 +2,7 @@
 
 import { StarRating } from "@/app/_components/star-rating.client";
 import type { SubmitTestimonialInput } from "@/app/_domains/testimonial/_services/submit-testimonial.schema";
-import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { ActionButton } from "@workspace/ui/components/action-button";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
   Form,
@@ -19,12 +13,13 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import type { UseFormReturn } from "react-hook-form";
+import { TestimonialPhotoField } from "./testimonial-photo-field.client";
 import type { TestimonialPrefill } from "./use-submit-testimonial";
 
 type TestimonialFormProps = {
+  token: string;
   form: UseFormReturn<SubmitTestimonialInput>;
   onSubmit: (event?: React.BaseSyntheticEvent) => Promise<void>;
   isPending: boolean;
@@ -32,6 +27,7 @@ type TestimonialFormProps = {
 };
 
 export function TestimonialForm({
+  token,
   form,
   onSubmit,
   isPending,
@@ -147,24 +143,23 @@ export function TestimonialForm({
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Photo</Label>
-          <div className="flex items-center gap-3">
-            <Avatar className="size-12">
-              {prefill.image ? (
-                <AvatarImage src={resolveS3Url(prefill.image)} alt="" />
-              ) : null}
-              <AvatarFallback>
-                {prefill.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <p className="text-sm text-muted-foreground">
-              {prefill.image
-                ? "Your account photo."
-                : "Your account has no photo."}
-            </p>
-          </div>
-        </div>
+        <FormField
+          control={form.control}
+          name="photo"
+          render={({ field }) => (
+            <FormItem>
+              <TestimonialPhotoField
+                token={token}
+                value={field.value}
+                onChange={field.onChange}
+                avatar={prefill.image}
+                name={prefill.name}
+                disabled={isPending}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

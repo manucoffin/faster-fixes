@@ -31,6 +31,7 @@ export function TestimonialSubmission({
         </p>
       </div>
       <TestimonialForm
+        token={token}
         form={form}
         onSubmit={onSubmit}
         isPending={isPending}

@@ -10,6 +10,35 @@ vi.mock("@/server/inngest", () => ({
   inngest: { send: (payload: unknown) => send(payload) },
 }));
 
+// An in-memory bucket: the test reads which objects exist afterwards.
+const bucket = new Map<string, string>();
+
+vi.mock("@/server/storage/objects", () => ({
+  copyStorageObject: async ({
+    sourceKey,
+    destinationKey,
+  }: {
+    sourceKey: string;
+    destinationKey: string;
+  }) => {
+    const object = bucket.get(sourceKey);
+    if (object === undefined) return Promise.reject(new Error("NoSuchKey"));
+    bucket.set(destinationKey, object);
+  },
+  putStorageObject: async ({
+    key,
+    contentType,
+  }: {
+    key: string;
+    contentType: string;
+  }) => {
+    bucket.set(key, contentType);
+  },
+  deleteStorageObject: async ({ key }: { key: string }) => {
+    bucket.delete(key);
+  },
+}));
+
 type FakeDb = NonNullable<Parameters<typeof submitTestimonial>[1]>;
 
 type RequestRow = {
@@ -20,6 +49,7 @@ type RequestRow = {
   closedAt: Date | null;
   userId: string | null;
   organizationId: string | null;
+  user: { image: string | null } | null;
 };
 
 type TestimonialRow = Record<string, unknown> & { id: string };
@@ -35,6 +65,7 @@ function requestRow(fields: Partial<RequestRow> = {}): RequestRow {
     closedAt: null,
     userId: "user_1",
     organizationId: "org_1",
+    user: { image: "user-avatars/user_1/100.png" },
     ...fields,
   };
 }
@@ -46,19 +77,24 @@ const testimonial = {
   title: "Founder",
   organization: "Acme Labs",
   website: "https://acme.dev",
+  photo: { source: "none" as const },
   consent: true,
 };
 
+const photoKey = `testimonial-photos/request_1/${now.getTime()}`;
+
 // Serves the row by token and applies writes in memory, so the test reads the
 // resulting state instead of the query. The transaction runs on the same fake.
-function fakeDb(row: RequestRow | null) {
+// `servedRow` lets the read return a stale copy, as when another submission
+// closes the request between the read and the write.
+function fakeDb(row: RequestRow | null, servedRow = row) {
   const testimonials: TestimonialRow[] = [];
 
   const db = {
     testimonials,
     testimonialRequest: {
       findUnique: vi.fn(async ({ where }: { where: { token: string } }) =>
-        row && row.token === where.token ? { ...row } : null,
+        servedRow && servedRow.token === where.token ? { ...servedRow } : null,
       ),
       updateMany: vi.fn(
         async ({
@@ -95,6 +131,9 @@ function fakeDb(row: RequestRow | null) {
 describe("submitTestimonial", () => {
   beforeEach(() => {
     send.mockClear();
+    bucket.clear();
+    bucket.set("user-avatars/user_1/100.png", "avatar");
+    vi.unstubAllGlobals();
   });
 
   it("stores a pending Testimonial with the submitted values as a snapshot", async () => {
@@ -218,5 +257,200 @@ describe("submitTestimonial", () => {
     ).resolves.toMatchObject({ authorName: "Ada" });
 
     expect(db.testimonials).toHaveLength(1);
+  });
+
+  describe("photo", () => {
+    it("stores no photo when the User removed it", async () => {
+      const db = fakeDb(requestRow());
+
+      await submitTestimonial({ token: "token_1", now, testimonial }, db);
+
+      expect(db.testimonials[0]).toMatchObject({ photoKey: null });
+      expect([...bucket.keys()]).toEqual(["user-avatars/user_1/100.png"]);
+    });
+
+    it("copies the kept avatar to a Testimonial-owned key", async () => {
+      const db = fakeDb(requestRow());
+
+      await submitTestimonial(
+        {
+          token: "token_1",
+          now,
+          testimonial: { ...testimonial, photo: { source: "avatar" } },
+        },
+        db,
+      );
+
+      expect(db.testimonials[0]).toMatchObject({
+        photoKey: `${photoKey}.png`,
+      });
+      expect(bucket.get(`${photoKey}.png`)).toBe("avatar");
+      // The avatar itself is left to the account.
+      expect(bucket.has("user-avatars/user_1/100.png")).toBe(true);
+    });
+
+    it("stores no photo when the User keeps an avatar they do not have", async () => {
+      const db = fakeDb(requestRow({ user: { image: null } }));
+
+      await submitTestimonial(
+        {
+          token: "token_1",
+          now,
+          testimonial: { ...testimonial, photo: { source: "avatar" } },
+        },
+        db,
+      );
+
+      expect(db.testimonials[0]).toMatchObject({ photoKey: null });
+    });
+
+    it("fetches a provider avatar and stores it under a Testimonial-owned key", async () => {
+      const fetchDouble = vi.fn(
+        async () =>
+          new Response(new Uint8Array([1, 2, 3]), {
+            headers: { "content-type": "image/jpeg" },
+          }),
+      );
+      vi.stubGlobal("fetch", fetchDouble);
+      const db = fakeDb(
+        requestRow({ user: { image: "https://avatars.example.com/u/1" } }),
+      );
+
+      await submitTestimonial(
+        {
+          token: "token_1",
+          now,
+          testimonial: { ...testimonial, photo: { source: "avatar" } },
+        },
+        db,
+      );
+
+      expect(fetchDouble).toHaveBeenCalledWith(
+        new URL("https://avatars.example.com/u/1"),
+        expect.objectContaining({ redirect: "error" }),
+      );
+      expect(db.testimonials[0]).toMatchObject({
+        photoKey: `${photoKey}.jpeg`,
+      });
+      expect(bucket.get(`${photoKey}.jpeg`)).toBe("image/jpeg");
+    });
+
+    it.each([
+      "http://avatars.example.com/u/1",
+      "https://169.254.169.254/latest",
+      "https://localhost/avatar.png",
+    ])("refuses to fetch the avatar URL %s", async (image) => {
+      const fetchDouble = vi.fn();
+      vi.stubGlobal("fetch", fetchDouble);
+      const db = fakeDb(requestRow({ user: { image } }));
+
+      await expect(
+        submitTestimonial(
+          {
+            token: "token_1",
+            now,
+            testimonial: { ...testimonial, photo: { source: "avatar" } },
+          },
+          db,
+        ),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+      expect(fetchDouble).not.toHaveBeenCalled();
+      expect(db.testimonials).toEqual([]);
+    });
+
+    it("refuses a provider avatar that is not an image", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            new Response("<html>", {
+              headers: { "content-type": "text/html" },
+            }),
+        ),
+      );
+      const db = fakeDb(
+        requestRow({ user: { image: "https://avatars.example.com/u/1" } }),
+      );
+
+      await expect(
+        submitTestimonial(
+          {
+            token: "token_1",
+            now,
+            testimonial: { ...testimonial, photo: { source: "avatar" } },
+          },
+          db,
+        ),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      expect(db.testimonials).toEqual([]);
+    });
+
+    it("copies an uploaded photo and deletes the staged upload", async () => {
+      const uploadKey = "testimonial-uploads/request_1/200.webp";
+      bucket.set(uploadKey, "upload");
+      const db = fakeDb(requestRow());
+
+      await submitTestimonial(
+        {
+          token: "token_1",
+          now,
+          testimonial: {
+            ...testimonial,
+            photo: { source: "upload", key: uploadKey },
+          },
+        },
+        db,
+      );
+
+      expect(db.testimonials[0]).toMatchObject({
+        photoKey: `${photoKey}.webp`,
+      });
+      expect(bucket.get(`${photoKey}.webp`)).toBe("upload");
+      expect(bucket.has(uploadKey)).toBe(false);
+    });
+
+    it.each([
+      "user-avatars/user_2/100.png",
+      "testimonial-uploads/request_2/200.png",
+      "testimonial-uploads/request_1/../../user-avatars/user_2/100.png",
+    ])(
+      "refuses to copy %s, which was not uploaded for this request",
+      async (key) => {
+        bucket.set(key, "foreign");
+        const db = fakeDb(requestRow());
+
+        await expect(
+          submitTestimonial(
+            {
+              token: "token_1",
+              now,
+              testimonial: { ...testimonial, photo: { source: "upload", key } },
+            },
+            db,
+          ),
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+        expect(db.testimonials).toEqual([]);
+        expect(bucket.size).toBe(2);
+      },
+    );
+
+    it("deletes the copied photo when the submission loses a race", async () => {
+      const db = fakeDb(requestRow({ status: "submitted" }), requestRow());
+
+      await expect(
+        submitTestimonial(
+          {
+            token: "token_1",
+            now,
+            testimonial: { ...testimonial, photo: { source: "avatar" } },
+          },
+          db,
+        ),
+      ).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
+      expect([...bucket.keys()]).toEqual(["user-avatars/user_1/100.png"]);
+    });
   });
 });

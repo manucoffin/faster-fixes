@@ -32,6 +32,7 @@ export function useSubmitTestimonial({
       title: "",
       organization: prefill.organization,
       website: prefill.website,
+      photo: prefill.image ? { source: "avatar" } : { source: "none" },
       consent: false,
     },
   });

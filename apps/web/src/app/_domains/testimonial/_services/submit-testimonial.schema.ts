@@ -32,6 +32,13 @@ export const SubmitTestimonialSchema = z.object({
         z.url({ protocol: /^https?$/ }).safeParse(value).success,
       "Enter a valid URL, starting with https://.",
     ),
+  // `avatar` keeps the account photo, read on the server rather than trusted
+  // from the form; `upload` names the object staged by the token upload route.
+  photo: z.discriminatedUnion("source", [
+    z.object({ source: z.literal("avatar") }),
+    z.object({ source: z.literal("upload"), key: z.string().min(1).max(300) }),
+    z.object({ source: z.literal("none") }),
+  ]),
   consent: z
     .boolean()
     .refine((value) => value, "Agree to publication to submit."),
