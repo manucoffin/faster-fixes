@@ -116,6 +116,7 @@ const serviceVerbOptions = {
     "link",
     "move",
     "notify",
+    "open",
     "refresh",
     "regenerate",
     "register",
