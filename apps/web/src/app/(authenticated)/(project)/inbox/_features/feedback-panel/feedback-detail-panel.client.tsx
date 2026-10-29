@@ -9,6 +9,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { ImageOff } from "lucide-react";
 import { getElementContext } from "../../_helpers/feedback-detail";
+import { getSelectionFrame } from "../../_helpers/selection-frame";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { getBoardStatusAppearance } from "../kanban/board-status-appearance";
 import { ElementContextCard } from "./element-context-card.client";
@@ -62,7 +63,10 @@ export function FeedbackDetailPanel({
             </p>
 
             {feedback.screenshotUrl ? (
-              <ScreenshotDialog src={feedback.screenshotUrl} />
+              <ScreenshotDialog
+                src={feedback.screenshotUrl}
+                frame={getSelectionFrame(feedback.metadata)}
+              />
             ) : (
               <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-xs text-muted-foreground">
                 <ImageOff className="size-4 opacity-50" />

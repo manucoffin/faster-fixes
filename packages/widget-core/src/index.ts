@@ -20,6 +20,7 @@ export type {
   DiagnosticTrail,
   CustomMetadata,
   CustomMetadataValue,
+  SelectionGeometry,
 } from "./types.js";
 
 export {

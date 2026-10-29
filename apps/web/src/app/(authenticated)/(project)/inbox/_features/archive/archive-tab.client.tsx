@@ -165,20 +165,21 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
       accessorKey: "pageUrl",
       header: "Page URL",
       cell: ({ row }) => {
+        let displayUrl = row.original.pageUrl;
         try {
           const url = new URL(row.original.pageUrl);
-          return (
-            <span className="text-xs text-muted-foreground">
-              {url.hostname + url.pathname.replace(/\/$/, "")}
-            </span>
-          );
+          displayUrl = url.hostname + url.pathname.replace(/\/$/, "");
         } catch {
-          return (
-            <span className="text-xs text-muted-foreground">
-              {row.original.pageUrl}
-            </span>
-          );
+          // Not a parseable URL: show it as stored
         }
+        return (
+          <p
+            className="max-w-[300px] truncate text-xs text-muted-foreground"
+            title={row.original.pageUrl}
+          >
+            {displayUrl}
+          </p>
+        );
       },
     },
     {

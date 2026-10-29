@@ -3,6 +3,7 @@ import type {
   DiagnosticsRecorder,
   FeedbackClient,
   FeedbackItem,
+  SelectionGeometry,
   WidgetPosition,
 } from "@fasterfixes/core";
 
@@ -25,6 +26,7 @@ import { createPinLayer, resolveTarget } from "./pins.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
+import { measureSelectionGeometry } from "./selection-geometry.js";
 import { createWidgetState } from "./state.js";
 import { accentRule, WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
@@ -102,6 +104,7 @@ export function mountWidget({
   let selection: {
     element: Element;
     click: PinPoint;
+    geometry: SelectionGeometry;
     screenshot: Promise<Blob | null>;
   } | null = null;
 
@@ -266,7 +269,12 @@ export function mountWidget({
     onSelect(element, click) {
       setMode("selected");
       // Started before the popover opens; the host is excluded from the capture either way.
-      selection = { element, click, screenshot: captureViewportScreenshot() };
+      selection = {
+        element,
+        click,
+        geometry: measureSelectionGeometry(element, click),
+        screenshot: captureViewportScreenshot(),
+      };
       popover.open(element);
     },
     onCancel: () => setMode("idle"),
@@ -281,6 +289,7 @@ export function mountWidget({
           comment,
           element: selection.element,
           click: selection.click,
+          selection: selection.geometry,
           diagnosticTrail: recorder?.snapshot(),
           customMetadata: options.customMetadata,
         }),

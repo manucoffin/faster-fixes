@@ -126,7 +126,7 @@ jobs:
 
       - run: pnpm --filter @workspace/db db:gen
 
-      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm --filter web exec playwright install --with-deps chromium firefox
 
       # Starts `next dev` itself with placeholder env values; the widget API is stubbed in
       # the browser, so no database or secret is needed.

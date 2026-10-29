@@ -3,7 +3,11 @@ import {
   generateSelectors,
   getBrowserInfo,
 } from "@fasterfixes/core";
-import type { CreateFeedbackData, DiagnosticTrail } from "@fasterfixes/core";
+import type {
+  CreateFeedbackData,
+  DiagnosticTrail,
+  SelectionGeometry,
+} from "@fasterfixes/core";
 
 import { resolveCustomMetadata } from "./custom-metadata.js";
 import type { WidgetOptions } from "./options.js";
@@ -18,6 +22,8 @@ type FeedbackPayloadInput = {
   comment: string;
   element: Element;
   click: PinPoint;
+  /** Measured at Selection, unlike the rest of the payload. */
+  selection: SelectionGeometry;
   diagnosticTrail: DiagnosticTrail | undefined;
   customMetadata: WidgetOptions["customMetadata"];
 };
@@ -27,12 +33,14 @@ export function buildFeedbackPayload({
   comment,
   element,
   click,
+  selection,
   diagnosticTrail,
   customMetadata,
 }: FeedbackPayloadInput): CreateFeedbackData {
   const selectors = generateSelectors(element);
   const metadata: Record<string, unknown> = {
     ...captureElementContext(element, selectors.strategies),
+    selection,
   };
 
   const pinAnchor = computePinAnchor(element.getBoundingClientRect(), click);
