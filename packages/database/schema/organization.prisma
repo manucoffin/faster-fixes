@@ -24,6 +24,7 @@ model Organization {
   slackInstallation   SlackInstallation?
 
   testimonialRequest TestimonialRequest?
+  testimonials       Testimonial[]
 
   @@unique([slug])
   @@map("organization")

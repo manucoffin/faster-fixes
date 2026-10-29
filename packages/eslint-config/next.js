@@ -130,6 +130,7 @@ const serviceVerbOptions = {
     "send",
     "sign",
     "stop",
+    "submit",
     "sync",
     "toggle",
     "unlink",

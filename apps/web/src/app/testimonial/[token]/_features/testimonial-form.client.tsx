@@ -1,17 +1,14 @@
 "use client";
 
 import { StarRating } from "@/app/_components/star-rating.client";
-import type { OpenTestimonialRequestOutput } from "@/app/_domains/testimonial/_services/open-testimonial-request";
 import type { SubmitTestimonialInput } from "@/app/_domains/testimonial/_services/submit-testimonial.schema";
-import { SubmitTestimonialSchema } from "@/app/_domains/testimonial/_services/submit-testimonial.schema";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { ActionButton } from "@workspace/ui/components/action-button";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar";
-import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import {
   Form,
@@ -24,33 +21,26 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { useForm } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
+import type { TestimonialPrefill } from "./use-submit-testimonial";
 
 type TestimonialFormProps = {
-  prefill: Extract<OpenTestimonialRequestOutput, { state: "open" }>["prefill"];
+  form: UseFormReturn<SubmitTestimonialInput>;
+  onSubmit: (event?: React.BaseSyntheticEvent) => Promise<void>;
+  isPending: boolean;
+  prefill: TestimonialPrefill;
 };
 
-export function TestimonialForm({ prefill }: TestimonialFormProps) {
-  const form = useForm<SubmitTestimonialInput>({
-    resolver: zodResolver(SubmitTestimonialSchema),
-    defaultValues: {
-      rating: 0,
-      text: "",
-      name: prefill.name,
-      title: "",
-      organization: prefill.organization,
-      website: prefill.website,
-      consent: false,
-    },
-  });
-
-  // Validation only: the submit procedure is wired by the next slice.
-  const onSubmit = () => undefined;
-
+export function TestimonialForm({
+  form,
+  onSubmit,
+  isPending,
+  prefill,
+}: TestimonialFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={(event) => void onSubmit(event)}
         className="flex flex-col gap-6"
         noValidate
       >
@@ -200,9 +190,9 @@ export function TestimonialForm({ prefill }: TestimonialFormProps) {
           )}
         />
 
-        <Button type="submit" className="self-start">
-          Submit testimonial
-        </Button>
+        <ActionButton pending={isPending} className="self-start">
+          {isPending ? "Submitting..." : "Submit testimonial"}
+        </ActionButton>
       </form>
     </Form>
   );

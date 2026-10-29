@@ -23,6 +23,7 @@ model User {
   invitations Invitation[]
 
   testimonialRequest TestimonialRequest?
+  testimonials       Testimonial[]
 
   // Asset relations
   uploadedAssets Asset[] @relation("AssetUploader")
