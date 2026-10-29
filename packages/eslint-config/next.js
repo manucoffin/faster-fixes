@@ -109,6 +109,7 @@ const serviceVerbOptions = {
     "create",
     "delete",
     "disconnect",
+    "expire",
     "handle",
     "impersonate",
     "leave",
@@ -320,6 +321,9 @@ const serverDeepImportExemptions = [
   // Composition: the Better Auth database hooks call the Organization slug
   // service on sign-up.
   "**/src/server/auth/config/database-hooks.ts",
+  // Composition: the Better Auth Organization hooks close the Organization's
+  // pending Testimonial request before it is deleted.
+  "**/src/server/auth/plugins/organization.tsx",
   // Fixture, not production coupling: the mapping test names a real
   // second-level domain error so the assertion holds for a shipped subclass.
   "**/src/server/trpc/domain-error-mapping.test.ts",

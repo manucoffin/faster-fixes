@@ -9,6 +9,7 @@ import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
 import { refreshJiraWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-webhooks.inngest";
 import { scanTestimonialRequests } from "@/app/_domains/testimonial/_services/scan-testimonial-requests.inngest";
+import { sendTestimonialRequestSequence } from "@/app/_domains/testimonial/_services/send-testimonial-request-sequence.inngest";
 import { sendWelcomeEmail } from "@/app/_domains/user/_services/send-welcome-email.inngest";
 import { syncFeedbackStatusToGitHub } from "@/app/_domains/integration/_services/github/sync-feedback-status-to-github.inngest";
 import { syncFeedbackStatusToJira } from "@/app/_domains/integration/_services/jira/sync-feedback-status-to-jira.inngest";
@@ -41,6 +42,7 @@ export const { GET, POST, PUT } = serve({
     sendWelcomeEmail,
     addContactToSegment,
     scanTestimonialRequests,
+    sendTestimonialRequestSequence,
     notifySlackFeedbackCreated,
     updateSlackFeedbackMessage,
   ],

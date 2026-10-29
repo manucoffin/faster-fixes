@@ -7,10 +7,12 @@ import {
 
 import { selectTestimonialRecipients } from "../_helpers/select-testimonial-recipients";
 import { createTestimonialRequests } from "./create-testimonial-requests";
+import { expireTestimonialRequests } from "./expire-testimonial-requests";
 import { listTestimonialCandidates } from "./list-testimonial-candidates";
 
 /**
- * The only producer of Testimonial requests with a User. Weekday mornings so
+ * The only producer of Testimonial requests with a User, and the one that
+ * expires `pending` requests past their expiry date. Weekday mornings so
  * the email lands when people read mail; the selection caps each run, so the
  * backlog of already-eligible Organizations spreads over the following days.
  */
@@ -24,6 +26,10 @@ export const scanTestimonialRequests = inngest.createFunction(
     // Self-hosted instances have no named sender and must never ask on the
     // operator's behalf.
     if (!HAS_COMMERCIAL_SENDER) return { skipped: "no_commercial_sender" };
+
+    const expiry = await step.run("expire-requests", () =>
+      expireTestimonialRequests(new Date()),
+    );
 
     // One step reads the clock and selects, so a retry of a later step
     // replays the same decision instead of re-reading a moved clock.
@@ -68,6 +74,7 @@ export const scanTestimonialRequests = inngest.createFunction(
     return {
       created: requests.length,
       handled: selection.handled.length,
+      expired: expiry.expired,
     };
   },
 );
