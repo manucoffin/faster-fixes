@@ -1,9 +1,9 @@
 import { prisma } from "@workspace/db";
 import {
+  getEngagedOrganizationWhere,
   nonInternalOrganizationWhere,
   nonInternalSignupWhere,
-} from "../_helpers/internal-accounts";
-import { getEngagedOrganizationWhere } from "../_helpers/engaged-organization-where";
+} from "@/app/_domains/organization";
 
 const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
