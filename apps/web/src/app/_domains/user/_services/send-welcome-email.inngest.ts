@@ -1,5 +1,5 @@
 import { mailer } from "@/lib/mailer/client";
-import { SENDER_EMAIL } from "@/lib/mailer/constants";
+import { COMMERCIAL_SENDER_EMAIL } from "@/lib/mailer/constants";
 import {
   WelcomeEmail,
   type WelcomeEmailProps,
@@ -37,9 +37,9 @@ export const sendWelcomeEmail = inngest.createFunction(
     );
 
     await mailer.emails.send({
-      from: SENDER_EMAIL,
+      from: COMMERCIAL_SENDER_EMAIL,
       to: user.email.toLowerCase().trim(),
-      subject: "Welcome to Faster Fixes",
+      subject: "quick question",
       body,
     });
 

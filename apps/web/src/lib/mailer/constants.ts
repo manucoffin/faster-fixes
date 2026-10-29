@@ -8,3 +8,9 @@ export const NO_REPLY_EMAIL =
   sender === "" ? `noreply@${mailDomain}` : (sender ?? `noreply@${mailDomain}`);
 export const SENDER_EMAIL =
   sender === "" ? `contact@${mailDomain}` : (sender ?? `contact@${mailDomain}`);
+
+// Commercial mail goes out under a person's name so replies reach a read inbox.
+// Instances without one (self-hosted) fall back to the transactional sender.
+const commercialSender = process.env.COMMERCIAL_EMAIL_FROM?.trim();
+export const COMMERCIAL_SENDER_EMAIL =
+  commercialSender === "" ? SENDER_EMAIL : (commercialSender ?? SENDER_EMAIL);
