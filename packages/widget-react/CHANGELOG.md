@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`928c17f`](https://github.com/manucoffin/faster-fixes/commit/928c17f414770f1a21bd0e08a656565256fc38f7), [`5d37e3a`](https://github.com/manucoffin/faster-fixes/commit/5d37e3a229ded2e5bee2bb11ba030f74103ca3f2), [`4d6a401`](https://github.com/manucoffin/faster-fixes/commit/4d6a401c5ac6d9900bb2ad3d60210164d8972fa4)]:
+  - @fasterfixes/widget@1.3.1
+
 ## 1.0.2
 
 ### Patch Changes
