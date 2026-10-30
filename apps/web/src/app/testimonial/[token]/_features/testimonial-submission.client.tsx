@@ -15,28 +15,20 @@ export function TestimonialSubmission({
   token,
   prefill,
 }: TestimonialSubmissionProps) {
-  const { form, onSubmit, isPending, submitted, expired } =
-    useSubmitTestimonial({ token, prefill });
+  const { submitted, expired, ...formProps } = useSubmitTestimonial({
+    token,
+    prefill,
+  });
 
   if (expired) return <TestimonialLinkExpired />;
   if (submitted) return <TestimonialThankYou testimonial={submitted} />;
 
   return (
-    <div className="space-y-8 pt-10">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Share your experience</h1>
-        <p className="text-muted-foreground">
-          A rating and a few sentences. Your details are filled in from your
-          account and can be changed before you submit.
-        </p>
-      </div>
-      <TestimonialForm
-        token={token}
-        form={form}
-        onSubmit={onSubmit}
-        isPending={isPending}
-        prefill={prefill}
-      />
+    <div>
+      {/* Each step asks its own question, so the page title is for screen
+          readers only. */}
+      <h1 className="sr-only">Share your experience</h1>
+      <TestimonialForm token={token} prefill={prefill} {...formProps} />
     </div>
   );
 }

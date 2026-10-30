@@ -62,7 +62,7 @@ export function StarRating({
               className={cn(
                 "size-6 transition-colors",
                 star <= shown
-                  ? "fill-primary text-primary"
+                  ? "fill-yellow-400 text-yellow-400"
                   : "text-muted-foreground",
               )}
             />

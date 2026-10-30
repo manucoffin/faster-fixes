@@ -105,7 +105,7 @@ function TestimonialRow({ testimonial }: TestimonialRowProps) {
                 aria-hidden
                 className={
                   index < testimonial.rating
-                    ? "size-4 fill-primary text-primary"
+                    ? "size-4 fill-yellow-400 text-yellow-400"
                     : "size-4 text-muted-foreground"
                 }
               />

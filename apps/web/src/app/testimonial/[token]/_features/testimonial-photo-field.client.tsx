@@ -55,19 +55,20 @@ export function TestimonialPhotoField({
 
   return (
     <div className="space-y-2">
-      <Label>Photo (optional)</Label>
+      <Label className="text-base">Photo (optional)</Label>
       <div className="flex flex-wrap items-center gap-3">
-        <Avatar className="size-12">
+        <Avatar className="size-16">
           {previewUrl ? (
             <AvatarImage src={previewUrl} alt="" className="object-cover" />
           ) : null}
           <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-base text-muted-foreground">{description}</p>
       </div>
       <div className="flex flex-wrap items-start gap-2">
         <UploadButton
           route="testimonial-photo"
+          className="[&_button]:h-10 [&_button]:px-4 [&_button]:text-base [&_p]:text-sm"
           accept="image/png,image/jpeg,image/webp"
           label={previewUrl ? "Replace photo" : "Upload photo"}
           description="PNG, JPEG or WebP. 2 MB max."
@@ -85,7 +86,7 @@ export function TestimonialPhotoField({
           <Button
             type="button"
             variant="ghost"
-            size="sm"
+            className="h-10 text-base"
             disabled={disabled}
             onClick={() => onChange({ source: "none" })}
           >
@@ -96,7 +97,7 @@ export function TestimonialPhotoField({
           <Button
             type="button"
             variant="ghost"
-            size="sm"
+            className="h-10 text-base"
             disabled={disabled}
             onClick={() => onChange({ source: "avatar" })}
           >

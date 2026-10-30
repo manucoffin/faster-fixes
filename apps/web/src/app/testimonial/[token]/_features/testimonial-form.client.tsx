@@ -3,7 +3,7 @@
 import { StarRating } from "@/app/_components/star-rating.client";
 import type { SubmitTestimonialInput } from "@/app/_domains/testimonial/_services/submit-testimonial.schema";
 import { ActionButton } from "@workspace/ui/components/action-button";
-import { Checkbox } from "@workspace/ui/components/checkbox";
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
@@ -12,11 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
+import { Progress } from "@workspace/ui/components/progress";
 import { Textarea } from "@workspace/ui/components/textarea";
 import type { UseFormReturn } from "react-hook-form";
-import { TestimonialPhotoField } from "./testimonial-photo-field.client";
+import { TestimonialCreditFields } from "./testimonial-credit-fields.client";
 import type { TestimonialPrefill } from "./use-submit-testimonial";
+
+// The form is alone on the page and often opened on a phone from an email,
+// so everything is sized up for reading and tapping.
+const STEP_QUESTION_CLASS_NAME = "text-2xl leading-snug font-semibold";
+const NAVIGATION_BUTTON_CLASS_NAME = "h-12 min-w-36 px-8 text-base";
 
 type TestimonialFormProps = {
   token: string;
@@ -24,6 +29,11 @@ type TestimonialFormProps = {
   onSubmit: (event?: React.BaseSyntheticEvent) => Promise<void>;
   isPending: boolean;
   prefill: TestimonialPrefill;
+  step: number;
+  stepCount: number;
+  isLastStep: boolean;
+  goToNextStep: () => Promise<void>;
+  goToPreviousStep: () => void;
 };
 
 export function TestimonialForm({
@@ -32,162 +42,123 @@ export function TestimonialForm({
   onSubmit,
   isPending,
   prefill,
+  step,
+  stepCount,
+  isLastStep,
+  goToNextStep,
+  goToPreviousStep,
 }: TestimonialFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={(event) => void onSubmit(event)}
-        className="flex flex-col gap-6"
+        onSubmit={(event) => {
+          if (isLastStep) return void onSubmit(event);
+          // Enter in an earlier step advances instead of submitting.
+          event.preventDefault();
+          void goToNextStep();
+        }}
+        className="flex flex-col gap-10"
         noValidate
       >
-        <FormField
-          control={form.control}
-          name="rating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rating</FormLabel>
-              <FormControl>
-                <StarRating
-                  value={field.value}
-                  onChange={field.onChange}
-                  name={field.name}
-                  aria-label="Rating"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-2">
+          <Progress value={((step + 1) / stepCount) * 100} />
+          <p className="text-center text-sm text-muted-foreground">
+            Step {step + 1} of {stepCount}
+          </p>
+        </div>
 
-        <FormField
-          control={form.control}
-          name="text"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                What would you tell someone who is hesitating to try Faster
-                Fixes?
-              </FormLabel>
-              <FormControl>
-                <Textarea rows={5} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid gap-6 sm:grid-cols-2">
+        {/* Every step stays mounted so values and the uploaded photo preview
+            survive going back and forth. */}
+        <div hidden={step !== 0}>
           <FormField
             control={form.control}
-            name="name"
+            name="rating"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
+              <FormItem className="justify-items-center gap-6 text-center">
+                <FormLabel className={STEP_QUESTION_CLASS_NAME}>
+                  How would you rate Faster Fixes?
+                </FormLabel>
                 <FormControl>
-                  <Input autoComplete="name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title (optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Founder"
-                    autoComplete="organization-title"
-                    {...field}
+                  <StarRating
+                    value={field.value}
+                    onChange={field.onChange}
+                    name={field.name}
+                    aria-label="Rating"
+                    className="gap-2 [&_svg]:size-12"
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Organization</FormLabel>
-                <FormControl>
-                  <Input autoComplete="organization" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website (optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="url"
-                    placeholder="https://example.com"
-                    autoComplete="url"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
+                <FormMessage className="text-base" />
               </FormItem>
             )}
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="photo"
-          render={({ field }) => (
-            <FormItem>
-              <TestimonialPhotoField
-                token={token}
-                value={field.value}
-                onChange={field.onChange}
-                avatar={prefill.image}
-                name={prefill.name}
-                disabled={isPending}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="consent"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-start gap-2">
+        <div hidden={step !== 1}>
+          <FormField
+            control={form.control}
+            name="text"
+            render={({ field }) => (
+              <FormItem className="gap-6">
+                <FormLabel
+                  className={`${STEP_QUESTION_CLASS_NAME} justify-center text-center`}
+                >
+                  What would you tell someone who is hesitating to try Faster
+                  Fixes?
+                </FormLabel>
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked === true)
-                    }
+                  <Textarea
+                    rows={6}
+                    placeholder="For example: the problem it solved for your team, how your clients report issues now, or the time it saves on each round of feedback."
+                    className="min-h-48 p-4 text-lg md:text-lg"
+                    {...field}
                   />
                 </FormControl>
-                <FormLabel className="leading-snug font-normal">
-                  Publish my name, photo and this testimonial on the Faster
-                  Fixes website.
-                </FormLabel>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage className="text-base" />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <ActionButton pending={isPending} className="self-start">
-          {isPending ? "Submitting..." : "Submit testimonial"}
-        </ActionButton>
+        <div hidden={step !== 2} className="space-y-8">
+          <h2 className={`${STEP_QUESTION_CLASS_NAME} text-center`}>
+            How should we credit you?
+          </h2>
+          <TestimonialCreditFields
+            token={token}
+            prefill={prefill}
+            isPending={isPending}
+          />
+        </div>
+
+        <div className="flex justify-center gap-3">
+          {step > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              className={NAVIGATION_BUTTON_CLASS_NAME}
+              onClick={goToPreviousStep}
+              disabled={isPending}
+            >
+              Back
+            </Button>
+          )}
+          {isLastStep ? (
+            <ActionButton
+              pending={isPending}
+              className={NAVIGATION_BUTTON_CLASS_NAME}
+            >
+              {isPending ? "Submitting..." : "Submit testimonial"}
+            </ActionButton>
+          ) : (
+            <Button
+              type="button"
+              className={NAVIGATION_BUTTON_CLASS_NAME}
+              onClick={() => void goToNextStep()}
+            >
+              Continue
+            </Button>
+          )}
+        </div>
       </form>
     </Form>
   );

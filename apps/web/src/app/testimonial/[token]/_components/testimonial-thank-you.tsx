@@ -6,6 +6,7 @@ import {
   AvatarImage,
 } from "@workspace/ui/components/avatar";
 import { StarIcon } from "lucide-react";
+import { TestimonialMessage } from "@/app/testimonial/_components/testimonial-message";
 
 type TestimonialThankYouProps = {
   testimonial: SubmitTestimonialOutput;
@@ -17,14 +18,10 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
     .join(", ");
 
   return (
-    <div className="space-y-8 pt-10">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Thank you</h1>
-        <p className="text-muted-foreground">
-          Your testimonial will appear on the site after review. To change
-          anything, reply to the email you received.
-        </p>
-      </div>
+    <TestimonialMessage
+      title="Thank you"
+      description="Your testimonial will appear on the site after review. To change anything, reply to the email you received."
+    >
       <figure className="space-y-4 rounded-lg border p-6">
         <div
           className="flex gap-0.5"
@@ -37,7 +34,7 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
               aria-hidden
               className={
                 index < testimonial.rating
-                  ? "size-4 fill-primary text-primary"
+                  ? "size-4 fill-yellow-400 text-yellow-400"
                   : "size-4 text-muted-foreground"
               }
             />
@@ -67,6 +64,6 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
           </span>
         </figcaption>
       </figure>
-    </div>
+    </TestimonialMessage>
   );
 }
