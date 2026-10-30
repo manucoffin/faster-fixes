@@ -9,7 +9,7 @@ import {
   HeadlineFigure,
   HeadlineFigureFrame,
   HeadlineFigureSkeleton,
-} from "../../_components/headline-figure";
+} from "@/app/admin/_components/headline-figure";
 
 const LABEL = "Paying organizations";
 
@@ -37,9 +37,11 @@ export function PayingOrganizationsCard() {
         <HeadlineFigure
           label={LABEL}
           value={String(total)}
-          delta={delta}
-          deltaLabel={`${delta > 0 ? "+" : ""}${delta}`}
-          comparison="vs 30 days ago"
+          delta={{
+            value: delta,
+            label: `${delta > 0 ? "+" : ""}${delta}`,
+            comparison: "vs 30 days ago",
+          }}
           hint={`${pro} Pro, ${agency} Agency`}
         />
       );

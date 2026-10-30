@@ -1,5 +1,5 @@
 import { prisma } from "@workspace/db";
-import { nonInternalSignupWhere } from "../_helpers/internal-accounts";
+import { nonInternalSignupWhere } from "@/app/_domains/organization";
 import { listParisMonths } from "../_helpers/paris-months";
 import { getMonthlyBillingSeries } from "./get-monthly-billing-series";
 

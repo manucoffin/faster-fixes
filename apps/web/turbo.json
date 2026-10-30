@@ -31,6 +31,7 @@
         "MAILER_PROVIDER",
         "EMAIL_FROM",
         "MAIL_FROM_DOMAIN",
+        "COMMERCIAL_EMAIL_FROM",
         "SMTP_HOST",
         "SMTP_PORT",
         "SMTP_SECURE",

@@ -536,6 +536,7 @@ describe("the server folder import lock", () => {
     expect(entry.ignores).toEqual([
       "**/src/server/trpc/routers/_app.ts",
       "**/src/server/auth/config/database-hooks.ts",
+      "**/src/server/auth/plugins/organization.tsx",
       "**/src/server/trpc/domain-error-mapping.test.ts",
     ]);
     expect(entry.rules["no-restricted-imports"][0]).toBe("error");
@@ -597,10 +598,11 @@ describe("the server folder import lock", () => {
     ).toHaveLength(1);
   });
 
-  it("lets the three exempted files reach the app tree by deep path", async () => {
+  it("lets the four exempted files reach the app tree by deep path", async () => {
     for (const file of [
       "src/server/trpc/routers/_app.ts",
       "src/server/auth/config/database-hooks.ts",
+      "src/server/auth/plugins/organization.tsx",
       "src/server/trpc/domain-error-mapping.test.ts",
     ]) {
       expect([file, await restrictedImportsFor(file, DEEP)]).toEqual([

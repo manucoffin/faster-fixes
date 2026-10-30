@@ -9,7 +9,7 @@ import {
   HeadlineFigure,
   HeadlineFigureFrame,
   HeadlineFigureSkeleton,
-} from "../../_components/headline-figure";
+} from "@/app/admin/_components/headline-figure";
 
 const LABEL = "MRR, excluding VAT";
 
@@ -45,9 +45,11 @@ export function MrrCard() {
         <HeadlineFigure
           label={LABEL}
           value={formatUsd(data.mrr)}
-          delta={delta}
-          deltaLabel={formatSignedUsd(delta)}
-          comparison="vs 30 days ago"
+          delta={{
+            value: delta,
+            label: formatSignedUsd(delta),
+            comparison: "vs 30 days ago",
+          }}
           hint={`${formatUsd(data.arr)} ARR`}
         >
           {data.unpricedItemCount > 0 && (

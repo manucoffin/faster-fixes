@@ -2,6 +2,7 @@ import "server-only";
 
 import { aws, cloudflare, custom } from "@better-upload/server/clients";
 import {
+  copyObject,
   deleteObject,
   deleteObjects,
   presignGetObject,
@@ -46,6 +47,10 @@ export class S3Storage implements StorageBackend {
 
   put(object: Parameters<StorageBackend["put"]>[0]) {
     return putObject(this.uploadClient, object);
+  }
+
+  copy(source: StorageObject, destination: StorageObject) {
+    return copyObject(this.uploadClient, { source, destination });
   }
 
   delete(object: StorageObject) {

@@ -7,7 +7,7 @@ import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { FigureUnavailable } from "../_components/figure-unavailable";
-import { getDeltaTone } from "../_helpers/get-delta-tone";
+import { getDeltaTone } from "@/app/admin/_helpers/get-delta-tone";
 
 export function FeedbackSummary() {
   const trpc = useTRPC();

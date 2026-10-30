@@ -20,6 +20,20 @@ export async function putStorageObject({
   });
 }
 
+export async function copyStorageObject({
+  sourceKey,
+  destinationKey,
+}: {
+  sourceKey: string;
+  destinationKey: string;
+}) {
+  const bucket = getStorageBucket();
+  return createStorage().copy(
+    { bucket, key: sourceKey },
+    { bucket, key: destinationKey },
+  );
+}
+
 export async function deleteStorageObject({ key }: { key: string }) {
   return createStorage().delete({ bucket: getStorageBucket(), key });
 }

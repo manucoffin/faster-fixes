@@ -1,10 +1,26 @@
 import { NotFoundError } from "@/server/errors/domain-errors";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const deleteStorageObjects = vi.fn<(keys: string[]) => Promise<unknown>>();
+
+vi.mock("@/server/storage/objects", () => ({
+  deleteStorageObjects: (keys: string[]) => deleteStorageObjects(keys),
+}));
 
 const { deleteUser } = await import("./delete-user");
 
-function fakeDb(user: { id: string } | null) {
+function fakeDb(
+  user: { id: string } | null,
+  testimonials: { photoKey: string | null }[] = [],
+) {
   return {
+    testimonial: {
+      findMany: vi.fn(async ({ where }: { where: { userId: string } }) =>
+        where.userId === user?.id
+          ? testimonials.filter(({ photoKey }) => photoKey)
+          : [],
+      ),
+    },
     user: {
       findUnique: vi.fn().mockResolvedValue(user),
       delete: vi
@@ -15,6 +31,10 @@ function fakeDb(user: { id: string } | null) {
 }
 
 describe("deleteUser", () => {
+  beforeEach(() => {
+    deleteStorageObjects.mockReset().mockResolvedValue({ errors: [] });
+  });
+
   it("reports an unknown User as a not found domain error", async () => {
     await expect(
       deleteUser({ userId: "absent" }, fakeDb(null)),
@@ -28,5 +48,41 @@ describe("deleteUser", () => {
       success: true,
       user: { id: "user_1", email: "gone@example.com" },
     });
+  });
+
+  it("deletes the Testimonial photo object of the User", async () => {
+    await deleteUser(
+      { userId: "user_1" },
+      fakeDb({ id: "user_1" }, [
+        { photoKey: "testimonial-photos/request_1/100.png" },
+      ]),
+    );
+
+    expect(deleteStorageObjects).toHaveBeenCalledWith([
+      "testimonial-photos/request_1/100.png",
+    ]);
+  });
+
+  it("touches no storage when the User has no Testimonial photo", async () => {
+    await deleteUser(
+      { userId: "user_1" },
+      fakeDb({ id: "user_1" }, [{ photoKey: null }]),
+    );
+
+    expect(deleteStorageObjects).not.toHaveBeenCalled();
+  });
+
+  it("still deletes the User when the photo cannot be removed", async () => {
+    deleteStorageObjects.mockRejectedValue(new Error("Storage unavailable"));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(
+      deleteUser(
+        { userId: "user_1" },
+        fakeDb({ id: "user_1" }, [
+          { photoKey: "testimonial-photos/request_1/100.png" },
+        ]),
+      ),
+    ).resolves.toMatchObject({ success: true });
   });
 });

@@ -1,0 +1,72 @@
+// A Testimonial request is the one-time invitation to give a Testimonial
+// (CONTEXT.md). Unique per User and per Organization; both links are nullable:
+// a row with no User marks an Organization with no eligible owner as handled,
+// and a deleted Organization leaves the row so it is never asked again.
+model TestimonialRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  token  String @unique
+  // `pending`, `submitted`, `declined` or `expired`, validated by the Zod enum
+  // of the testimonial domain.
+  status String @default("pending")
+
+  // The Feedback total quoted in the first email, frozen at scan time.
+  feedbackCount Int
+
+  firstEmailSentAt DateTime?
+  reminderSentAt   DateTime?
+  closedAt         DateTime?
+  // Thirty days after the first email, so unset until that email is sent.
+  expiresAt        DateTime?
+
+  userId         String?       @unique
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?       @unique
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  testimonial Testimonial?
+
+  @@index([status])
+  @@map("testimonial_request")
+}
+
+// A Testimonial is a quote a User gave in answer to their Testimonial request
+// (CONTEXT.md). Author name, title, organization, website and photo are a
+// snapshot taken at submission, never read back from the live account. It
+// dies with its User and survives its Organization.
+model Testimonial {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  // Moves with every `status` change, so the admin can tell when it was
+  // published or rejected.
+  statusChangedAt DateTime @default(now())
+
+  rating Int
+  text   String
+
+  authorName       String
+  authorTitle      String?
+  organizationName String
+  websiteUrl       String?
+  photoKey         String?
+
+  // `pending`, `published` or `rejected`, validated by the Zod enum of the
+  // testimonial domain.
+  status    String   @default("pending")
+  consentAt DateTime
+
+  testimonialRequestId String             @unique
+  testimonialRequest   TestimonialRequest @relation(fields: [testimonialRequestId], references: [id], onDelete: Cascade)
+  userId               String
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId       String?
+  organization         Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("testimonial")
+}

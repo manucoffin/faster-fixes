@@ -6,6 +6,7 @@ export type StorageBackend = {
   put(
     object: StorageObject & { body: Buffer<ArrayBuffer>; contentType: string },
   ): Promise<void>;
+  copy(source: StorageObject, destination: StorageObject): Promise<void>;
   delete(object: StorageObject): Promise<void>;
   deleteMany(
     bucket: string,

@@ -35,6 +35,18 @@ export const userEmailVerifiedEvent = eventType("user/email-verified", {
   schema: z.object({ userId: z.string() }),
 });
 
+export const testimonialRequestCreatedEvent = eventType(
+  "testimonial/request.created",
+  { schema: z.object({ requestId: z.string() }) },
+);
+
+// Emitted when a pending Testimonial request leaves `pending` before its
+// sequence ends, so the reminder is cancelled.
+export const testimonialRequestClosedEvent = eventType(
+  "testimonial/request.closed",
+  { schema: z.object({ requestId: z.string() }) },
+);
+
 export const githubWebhookIssuesEvent = eventType("github/webhook.issues", {
   schema: z.object({
     action: z.string(),

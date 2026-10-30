@@ -96,6 +96,16 @@ _Avoid_: Customer, Subscriber, Paying user (billing belongs to the Organization,
 An Organization that received at least one Feedback in the last 30 days, meaning its Widget is installed and used by Reviewers. The unit for usage and adoption metrics.
 _Avoid_: Active organization (reserved for the Organization selected in a User's session), Active user.
 
+### Testimonials
+
+**Testimonial**:
+A quote a **User** gives about Faster Fixes on behalf of the **Organization** they belong to at that moment: a star rating, a text, and the identity it is signed with (name, title, organization, website, photo). The identity is a snapshot taken at submission, never a live reference to the User or Organization, so a published quote stays as the person validated it. Never published without review.
+_Avoid_: Review (a Reviewer is the widget's end-user), Feedback (reserved for the widget's reports), Quote.
+
+**Testimonial request**:
+The one-time invitation sent to a User to give a **Testimonial**, as a short email sequence. At most one per User, ever, and at most one per Organization. Ends when the User submits a Testimonial, declines, or the sequence runs out.
+_Avoid_: Campaign, Drip, Survey.
+
 ### Feedback lifecycle
 
 **Status**:
@@ -174,6 +184,8 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
+- A **Testimonial** is given by one **User** on behalf of one **Organization**; it is the outcome of at most one **Testimonial request**
+- A **Testimonial** is deleted with its **User**; it outlives its **Organization**, whose name it carries as a snapshot
 - A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
 - A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
 - A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot

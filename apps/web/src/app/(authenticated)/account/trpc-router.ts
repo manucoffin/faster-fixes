@@ -17,8 +17,9 @@ import { UpdateProfileSchema } from "./settings/_services/update-profile.schema"
 export const accountRouter = router({
   delete: protectedProcedure
     .input(DeleteAccountSchema)
-    .mutation(async ({ input }) =>
+    .mutation(async ({ ctx, input }) =>
       deleteAccount({
+        userId: ctx.session.user.id,
         password: input.password,
         headers: await headers(),
       }),

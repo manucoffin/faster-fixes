@@ -23,6 +23,9 @@ model Organization {
   jiraInstallation    JiraInstallation?
   slackInstallation   SlackInstallation?
 
+  testimonialRequest TestimonialRequest?
+  testimonials       Testimonial[]
+
   @@unique([slug])
   @@map("organization")
 }

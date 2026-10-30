@@ -1,6 +1,6 @@
 import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
 import { isCloud } from "@/utils/environment/env";
-import { HeadlineStrip } from "./_components/headline-strip";
+import { HeadlineStrip } from "@/app/admin/_components/headline-strip";
 import { ActivationFunnelCard } from "./_features/activation-funnel-card/activation-funnel-card.client";
 import { AdoptionCard } from "./_features/adoption-card/adoption-card.client";
 import { CollectedRevenueCard } from "./_features/collected-revenue-card/collected-revenue-card.client";

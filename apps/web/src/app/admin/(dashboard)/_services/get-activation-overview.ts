@@ -2,8 +2,10 @@ import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { getStripeApi } from "@/server/stripe";
 import { prisma } from "@workspace/db";
 import type Stripe from "stripe";
-import { getEngagedOrganizationWhere } from "../_helpers/engaged-organization-where";
-import { nonInternalOrganizationWhere } from "../_helpers/internal-accounts";
+import {
+  getEngagedOrganizationWhere,
+  nonInternalOrganizationWhere,
+} from "@/app/_domains/organization";
 import { getBillingMetrics } from "./get-billing-metrics";
 
 const DAY_MS = 24 * 60 * 60 * 1000;

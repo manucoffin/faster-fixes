@@ -9,7 +9,7 @@ import {
   HeadlineFigure,
   HeadlineFigureFrame,
   HeadlineFigureSkeleton,
-} from "../../_components/headline-figure";
+} from "@/app/admin/_components/headline-figure";
 
 const LABEL = "Collected in the last 30 days";
 
@@ -46,9 +46,11 @@ export function CollectedRevenueCard() {
         <HeadlineFigure
           label={LABEL}
           value={formatEur(data.current)}
-          delta={delta}
-          deltaLabel={formatSignedEur(delta)}
-          comparison="vs previous 30 days"
+          delta={{
+            value: delta,
+            label: formatSignedEur(delta),
+            comparison: "vs previous 30 days",
+          }}
           hint="Net of refunds and fees, excluding VAT"
         >
           {data.nonEurTransactionCount > 0 && (

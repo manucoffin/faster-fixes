@@ -20,6 +20,13 @@ const RATE_LIMITS = {
   "agent:read": { max: 1000, windowMs: 3_600_000 } satisfies RateLimitConfig,
   "agent:write": { max: 120, windowMs: 3_600_000 } satisfies RateLimitConfig,
   trpc: { max: 300, windowMs: 60_000 } satisfies RateLimitConfig,
+  // Public Testimonial request procedures, keyed by the request token. A User
+  // needs a handful of calls; the ceiling only stops a leaked token being
+  // hammered.
+  "testimonial-token": {
+    max: 30,
+    windowMs: 3_600_000,
+  } satisfies RateLimitConfig,
 } as const;
 
 type RateLimitAction = keyof typeof RATE_LIMITS;

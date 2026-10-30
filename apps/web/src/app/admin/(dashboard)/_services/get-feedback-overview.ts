@@ -3,7 +3,7 @@ import {
   type FeedbackStatus,
 } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
-import { nonInternalOrganizationWhere } from "../_helpers/internal-accounts";
+import { nonInternalOrganizationWhere } from "@/app/_domains/organization";
 
 const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 

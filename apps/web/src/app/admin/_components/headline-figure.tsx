@@ -5,9 +5,8 @@ import { getDeltaTone } from "../_helpers/get-delta-tone";
 type HeadlineFigureProps = {
   label: string;
   value: string;
-  delta: number;
-  deltaLabel: string;
-  comparison: string;
+  // Omitted for a plain count with no comparison period.
+  delta?: { value: number; label: string; comparison: string };
   hint: string;
   children?: React.ReactNode;
 };
@@ -16,8 +15,6 @@ export function HeadlineFigure({
   label,
   value,
   delta,
-  deltaLabel,
-  comparison,
   hint,
   children,
 }: HeadlineFigureProps) {
@@ -25,12 +22,14 @@ export function HeadlineFigure({
     <HeadlineFigureFrame label={label}>
       <div className="flex items-baseline gap-2">
         <span className="text-3xl font-semibold tracking-tight">{value}</span>
-        <span
-          className={cn("text-xs font-medium", getDeltaTone(delta))}
-          title={comparison}
-        >
-          {deltaLabel}
-        </span>
+        {delta && (
+          <span
+            className={cn("text-xs font-medium", getDeltaTone(delta.value))}
+            title={delta.comparison}
+          >
+            {delta.label}
+          </span>
+        )}
       </div>
       <p className="text-xs text-muted-foreground">{hint}</p>
       {children}

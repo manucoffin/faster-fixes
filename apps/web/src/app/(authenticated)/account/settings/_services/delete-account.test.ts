@@ -7,13 +7,30 @@ vi.mock("@/server/auth", () => ({
   auth: { api: { deleteUser } },
 }));
 
+const findTestimonials = vi.fn();
+const deleteStorageObjects = vi.fn();
+
+vi.mock("@workspace/db", () => ({
+  prisma: { testimonial: { findMany: findTestimonials } },
+}));
+
+vi.mock("@/server/storage/objects", () => ({
+  deleteStorageObjects,
+}));
+
 const { deleteAccount } = await import("./delete-account");
 
-const input = { password: "s3cret", headers: new Headers() };
+const input = {
+  userId: "user_1",
+  password: "s3cret",
+  headers: new Headers(),
+};
 
 describe("deleteAccount", () => {
   beforeEach(() => {
     deleteUser.mockReset();
+    findTestimonials.mockReset().mockResolvedValue([]);
+    deleteStorageObjects.mockReset().mockResolvedValue({ errors: [] });
   });
 
   it("reports a rejected password as a bad request, not a missing session", async () => {
@@ -60,5 +77,28 @@ describe("deleteAccount", () => {
       body: { password: "s3cret" },
       headers: input.headers,
     });
+  });
+
+  it("deletes the Testimonial photo object once the account is gone", async () => {
+    deleteUser.mockResolvedValue({ success: true });
+    findTestimonials.mockResolvedValue([
+      { photoKey: "testimonial-photos/request_1/100.png" },
+    ]);
+
+    await deleteAccount(input);
+
+    expect(deleteStorageObjects).toHaveBeenCalledWith([
+      "testimonial-photos/request_1/100.png",
+    ]);
+  });
+
+  it("keeps the Testimonial photo when the account is not deleted", async () => {
+    deleteUser.mockRejectedValue(new Error("Invalid password"));
+    findTestimonials.mockResolvedValue([
+      { photoKey: "testimonial-photos/request_1/100.png" },
+    ]);
+
+    await expect(deleteAccount(input)).rejects.toBeInstanceOf(BadRequestError);
+    expect(deleteStorageObjects).not.toHaveBeenCalled();
   });
 });

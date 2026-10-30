@@ -1,4 +1,5 @@
 import { ORGANIZATION_ROLES } from "@/app/_domains/organization";
+import { expireOrganizationTestimonialRequest } from "@/app/_domains/testimonial/_services/expire-organization-testimonial-request";
 import { mailer } from "@/lib/mailer/client";
 import { SENDER_EMAIL } from "@/lib/mailer/constants";
 import { OrganizationInvitation } from "@/lib/mailer/templates/organization-invitation";
@@ -19,6 +20,15 @@ export const organizationPlugin = organization({
           defaultValue: false,
         },
       },
+    },
+  },
+  organizationHooks: {
+    // Before, not after: the deletion nulls the request's Organization link.
+    beforeDeleteOrganization: async ({ organization: org }) => {
+      await expireOrganizationTestimonialRequest({
+        organizationId: org.id,
+        now: new Date(),
+      });
     },
   },
   sendInvitationEmail: async (data) => {

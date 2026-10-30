@@ -3,7 +3,6 @@ import {
   Container,
   Head,
   Html,
-  Section,
   Tailwind,
   Text,
 } from "@react-email/components";
@@ -14,47 +13,37 @@ export type WelcomeEmailProps = {
   userName?: string;
 };
 
+// Deliberately unstyled and without a Preview: the inbox shows the opening
+// lines, as it would for a note typed by hand.
 export function WelcomeEmail({ userName }: WelcomeEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Tailwind config={emailTailwindConfig}>
         <Head />
-        <Body className="bg-secondary py-[40px] font-sans">
-          <Container className="mx-auto max-w-[600px] bg-card px-[40px] py-[40px]">
-            <Section>
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                {userName ? `Hi ${userName},` : "Hi,"}
-              </Text>
+        <Body className="bg-background font-sans">
+          <Container className="mx-0 max-w-[560px] px-[8px] py-[8px]">
+            <Text className="mt-0 mb-[16px] text-[15px] leading-[22px] text-foreground">
+              {userName ? `Hi ${userName},` : "Hi,"}
+            </Text>
 
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                Welcome to Faster Fixes! 🙂
-              </Text>
+            <Text className="mt-0 mb-[16px] text-[15px] leading-[22px] text-foreground">
+              Thanks for signing up. I&apos;m Manuel, I build Faster Fixes on my
+              own.
+            </Text>
 
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                I&apos;m Manuel, the founder of the app. Thanks for signing up.
-                As a solo founder, it really means a lot! 🙏
-              </Text>
+            <Text className="mt-0 mb-[16px] text-[15px] leading-[22px] text-foreground">
+              One quick question: are you collecting feedback for client
+              websites (agency or freelance), or for your own product?
+            </Text>
 
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                I&apos;m curious: what problem does Faster Fixes solve for you?
-              </Text>
+            <Text className="mt-0 mb-[16px] text-[15px] leading-[22px] text-foreground">
+              A one-word reply is enough. If anything blocks you while
+              installing the widget, reply here and I&apos;ll help directly.
+            </Text>
 
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                You can simply reply to this email. I read every response
-                myself, and it&apos;ll help me make Faster Fixes more useful.
-              </Text>
-
-              <Text className="mt-0 mb-[4px] text-[16px] leading-[24px] text-foreground">
-                Best,
-              </Text>
-              <Text className="mt-0 mb-[16px] text-[16px] leading-[24px] text-foreground">
-                Manuel
-              </Text>
-
-              <Text className="mt-0 mb-0 text-[14px] leading-[20px] text-muted-foreground">
-                P.S. Let me know if you have any issue setting up the tool.
-              </Text>
-            </Section>
+            <Text className="mt-0 mb-0 text-[15px] leading-[22px] text-foreground">
+              Manuel
+            </Text>
           </Container>
         </Body>
       </Tailwind>
