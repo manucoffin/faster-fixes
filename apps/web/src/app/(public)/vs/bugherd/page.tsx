@@ -1,5 +1,4 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
@@ -25,9 +24,9 @@ import { BugherdWhySwitchSection } from "./_features/bugherd-why-switch-section"
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const pageUrl = `${APP_URL}/vs/bugherd`;
-const title = `BugHerd alternative · Open-source feedback widget · ${SITE_NAME}`;
+const title = "BugHerd Alternative: Open-Source, Self-Hosted, No Seat Fees";
 const description =
-  "FasterFixes is the open-source, self-hostable BugHerd alternative for developer teams. Free when self-hosted, flat-rate when hosted, and shipped with an MCP server for Claude Code, Cursor, and Codex.";
+  "BugHerd costs $50/mo for 5 members. FasterFixes is an open-source feedback widget, free to self-host, with MCP for Claude Code and Cursor.";
 const datePublished = "2026-04-25T00:00:00.000Z";
 const dateModified = "2026-04-25T00:00:00.000Z";
 
