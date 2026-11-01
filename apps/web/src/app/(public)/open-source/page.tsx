@@ -1,11 +1,19 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
+import { FaqSchema } from "@/app/_components/seo/faq-schema";
+import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import type { Metadata } from "next";
 import { ComparisonSection } from "./_features/comparison-section";
 import { LicenseSection } from "./_features/license-section";
 import { OpenSourceCtaSection } from "./_features/open-source-cta-section";
+import {
+  OpenSourceFaqSection,
+  openSourceFaqs,
+} from "./_features/open-source-faq-section";
 import { OpenSourceHero } from "./_features/open-source-hero";
+import { SelfHostedInstanceSection } from "./_features/self-hosted-instance-section";
 import { SelfHostingSection } from "./_features/self-hosting-section";
+import { TeamSizePricingSection } from "./_features/team-size-pricing-section";
 import { WhyOpenSourceSection } from "./_features/why-open-source-section";
 
 const title = `Open-source feedback widget · Self-hosted · ${SITE_NAME}`;
@@ -50,7 +58,13 @@ export default function Page() {
       <SelfHostingSection />
       <ComparisonSection />
       <LicenseSection />
+      <TeamSizePricingSection />
+      <SelfHostedInstanceSection />
+      <OpenSourceFaqSection />
       <OpenSourceCtaSection />
+
+      <SoftwareApplicationSchema />
+      <FaqSchema faqs={openSourceFaqs} />
     </div>
   );
 }
