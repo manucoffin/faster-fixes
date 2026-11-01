@@ -40,8 +40,15 @@ export function UsersnapDeveloperFirstSection() {
             Built around the editor, not the dashboard
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            FasterFixes is shaped for teams whose primary workspace is the
-            codebase, not a survey platform.
+            FasterFixes is an{" "}
+            <Link
+              href="/open-source"
+              className="text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              open-source feedback widget
+            </Link>{" "}
+            shaped for teams whose primary workspace is the codebase, not a
+            survey platform.
           </p>
         </div>
 
