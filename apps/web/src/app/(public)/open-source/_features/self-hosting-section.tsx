@@ -18,7 +18,7 @@ const steps = [
   },
   {
     label: "Run migrations",
-    body: "pnpm --filter @workspace/db migrate:dev applies the schema. Production deploys run prisma migrate deploy as part of your build.",
+    body: "Run pnpm --filter @workspace/db migrate:prod against your production database on every deploy. It applies all pending Prisma migrations.",
   },
 ];
 

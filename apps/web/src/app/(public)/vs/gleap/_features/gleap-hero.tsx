@@ -19,11 +19,18 @@ export function GleapHero() {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Gleap has pivoted to AI customer support: chatbot, ticketing, shared
-            inbox. FasterFixes is built for the opposite workflow: structured
-            bug reports carrying screenshot, DOM selector, React component tree,
-            console logs, and network requests, routed to GitHub, Linear, or
-            Jira and readable by Claude Code or Cursor over MCP. Open-source
-            under AGPL-3.0, self-hostable, and flat-rate.
+            inbox. FasterFixes is an{" "}
+            <Link
+              href="/open-source"
+              className="text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              open-source feedback widget
+            </Link>{" "}
+            built for the opposite workflow: structured bug reports carrying
+            screenshot, DOM selector, React component tree, console logs, and
+            network requests, routed to GitHub, Linear, or Jira and readable by
+            Claude Code or Cursor over MCP. Open-source under AGPL-3.0,
+            self-hostable, and flat-rate.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

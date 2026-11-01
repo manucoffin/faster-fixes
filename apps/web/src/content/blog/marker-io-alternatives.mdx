@@ -23,23 +23,24 @@ This post breaks down 8 marker.io alternatives, what they actually cost, and whe
 
 ## Quick comparison table
 
-| Tool | Pricing | Free plan | Self-hosted | Best for |
-|---|---|---|---|---|
-| **Faster Fixes** | $0 / $20 per 5 users / $99 | ✅ Yes | ✅ Yes (AGPL-3.0) | Dev teams wanting full context + MCP server for Claude Code/Cursor |
-| BugHerd | From $50/mo for 5 members + $8/seat | ❌ Trial only | ❌ No | Marketing/QA teams |
-| Userback | $0 / $7 / $15 / $23 per seat | ✅ Yes | ❌ No | Small teams |
-| Atarim | $0 / $25 / $35 per seat | ✅ Yes | ❌ No | Agencies/client work |
-| Gleap | $39 / $149 flat / $999 | ❌ No | ❌ No | In-app product feedback + support |
-| Ruttl | Free / $18 / $90 per user | ✅ Yes | ❌ No | Design review workflows |
-| Markup.io | $79 flat (free plan discontinued Jan 2025) | ❌ No | ❌ No | Quick annotation on static assets |
-| Usersnap | Free up to 20 items, then custom | ⚠️ Limited | ❌ No | Enterprise QA |
-| Marker.io | $59/mo Starter ($39 annual) / $199 Team ($149 annual) / $129 Agency ($99 annual) | ❌ Trial only (15 days) | ❌ No | Agencies needing visual bug reports with dev tool integrations |
+| Tool             | Pricing                                                                          | Free plan               | Self-hosted       | Best for                                                           |
+| ---------------- | -------------------------------------------------------------------------------- | ----------------------- | ----------------- | ------------------------------------------------------------------ |
+| **Faster Fixes** | $0 / $20 per 5 users / $99                                                       | ✅ Yes                  | ✅ Yes (AGPL-3.0) | Dev teams wanting full context + MCP server for Claude Code/Cursor |
+| BugHerd          | From $50/mo for 5 members + $8/seat                                              | ❌ Trial only           | ❌ No             | Marketing/QA teams                                                 |
+| Userback         | $0 / $7 / $15 / $23 per seat                                                     | ✅ Yes                  | ❌ No             | Small teams                                                        |
+| Atarim           | $0 / $25 / $35 per seat                                                          | ✅ Yes                  | ❌ No             | Agencies/client work                                               |
+| Gleap            | $39 / $149 flat / $999                                                           | ❌ No                   | ❌ No             | In-app product feedback + support                                  |
+| Ruttl            | Free / $18 / $90 per user                                                        | ✅ Yes                  | ❌ No             | Design review workflows                                            |
+| Markup.io        | $79 flat (free plan discontinued Jan 2025)                                       | ❌ No                   | ❌ No             | Quick annotation on static assets                                  |
+| Usersnap         | Free up to 20 items, then custom                                                 | ⚠️ Limited              | ❌ No             | Enterprise QA                                                      |
+| Marker.io        | $59/mo Starter ($39 annual) / $199 Team ($149 annual) / $129 Agency ($99 annual) | ❌ Trial only (15 days) | ❌ No             | Agencies needing visual bug reports with dev tool integrations     |
 
 ## 1. Faster Fixes
 
 **TL;DR:** Open-source, self-hostable visual feedback and bug-reporting tool built for developers - free tier included, plus an MCP server so Claude Code or Cursor can act on bug reports directly.
 
 **Pricing:**
+
 - Free plan - unlimited core usage for small teams
 - $20/mo per 5 users - for growing teams
 - $99/mo - for larger orgs, all features unlocked
@@ -48,6 +49,7 @@ This post breaks down 8 marker.io alternatives, what they actually cost, and whe
 **Best for:** Dev teams and agencies who want full technical context on every bug report (console logs, network requests, session replay, environment metadata) without paying a per-seat tax, and who might want an AI coding agent to pick up issues automatically.
 
 **Strengths:**
+
 - Actually has a free plan - not a trial, a real free tier
 - Open-source (AGPL-3.0), so you can audit the code and self-host on your own servers
 - MCP server integration lets Claude Code, Cursor, and other AI coding agents read and act on bug reports
@@ -55,6 +57,7 @@ This post breaks down 8 marker.io alternatives, what they actually cost, and whe
 - Pricing scales in flat per-5-user blocks instead of Marker.io's per-seat model
 
 **Weaknesses:**
+
 - Newer product, smaller integration marketplace than a 10-year-old incumbent like Marker.io
 - Self-hosting requires you to manage your own infra, though it's still fairly straightforward - the [self-hosting guide](/docs/self-hosting) walks you through it
 
@@ -65,6 +68,7 @@ See the full breakdown on [pricing](/pricing) and what self-hosting actually inv
 **TL;DR:** A well-known visual feedback tool for marketing sites and client projects, but pricing climbs fast once you add teammates.
 
 **Pricing:**
+
 - From $50/mo for 5 members
 - Additional seats at $8/seat
 - No free plan - trial only
@@ -72,22 +76,25 @@ See the full breakdown on [pricing](/pricing) and what self-hosting actually inv
 **Best for:** Marketing and QA teams that need simple point-and-click feedback on websites without deep dev-tool integration.
 
 **Strengths:**
+
 - Simple, familiar Trello-like Kanban board for managing feedback
 - Easy client onboarding - no account needed to leave feedback
 - Solid browser extension for capturing issues on any site
 
 **Weaknesses:**
+
 - Per-seat pricing adds up quickly for teams past 5 people
 - No free plan, so you're committing before you've fully tested it at scale
 - Less technical context captured per bug than dev-first tools
 
-Full side-by-side numbers are in our [BugHerd comparison](/vs/bugherd).
+Full side-by-side numbers are on our [BugHerd alternative](/vs/bugherd) page.
 
 ## 3. Userback
 
 **TL;DR:** A budget-friendly feedback tool with an actual free tier, but the per-seat pricing on paid plans stacks up for bigger teams.
 
 **Pricing:**
+
 - $0 free plan
 - $7/seat
 - $15/seat
@@ -96,11 +103,13 @@ Full side-by-side numbers are in our [BugHerd comparison](/vs/bugherd).
 **Best for:** Small teams that want a lightweight feedback widget without much setup overhead.
 
 **Strengths:**
+
 - Genuine free plan to start with, no credit card required
 - In-app survey and NPS features baked in alongside bug reporting
 - Reasonable entry price for very small teams
 
 **Weaknesses:**
+
 - Per-seat pricing scales linearly - no flat-rate option for larger teams
 - No self-hosting, so you're locked into their infrastructure and data retention policies
 - Fewer developer-facing integrations than dev-first alternatives
@@ -112,6 +121,7 @@ See how it stacks up in our [Userback comparison](/vs/userback).
 **TL;DR:** Built specifically for agencies managing client sites and WordPress projects, with visual commenting directly on the live page.
 
 **Pricing:**
+
 - $0 free plan
 - $25/seat
 - $35/seat
@@ -119,11 +129,13 @@ See how it stacks up in our [Userback comparison](/vs/userback).
 **Best for:** Agencies and freelancers running client feedback loops on WordPress or other CMS-driven sites.
 
 **Strengths:**
+
 - Client-facing visual commenting works well for non-technical stakeholders
 - Free plan available to test the workflow before committing
 - Strong WordPress-specific tooling and project management features
 
 **Weaknesses:**
+
 - Per-seat pricing gets expensive once you're running feedback across multiple client sites with a full team
 - No self-hosting option
 - Less suited to teams working outside CMS/agency workflows
@@ -135,6 +147,7 @@ Details in our [Atarim comparison](/vs/atarim).
 **TL;DR:** An in-app feedback and support widget that leans more toward product teams than pure bug-reporting for dev teams.
 
 **Pricing:**
+
 - $39/mo
 - $149/mo flat
 - $999/mo
@@ -142,22 +155,25 @@ Details in our [Atarim comparison](/vs/atarim).
 **Best for:** SaaS product teams that want in-app feedback widgets combined with customer support features, not just visual bug reports.
 
 **Strengths:**
+
 - Flat-rate mid-tier plan ($149) avoids per-seat surprises for growing teams
 - Combines feedback, bug reporting, and a support inbox in one tool
 - Good in-app messaging and survey capabilities
 
 **Weaknesses:**
+
 - No free plan
 - Overkill if all you need is visual bug reporting on a website
 - No self-hosting option
 
-More detail in our [Gleap comparison](/vs/gleap).
+More detail on our [Gleap alternative](/vs/gleap) page.
 
 ## 6. Ruttl
 
 **TL;DR:** A design-review-focused tool that lets you annotate live websites and mockups side by side, with an actual free tier.
 
 **Pricing:**
+
 - Free
 - $18/user
 - $90/user
@@ -165,11 +181,13 @@ More detail in our [Gleap comparison](/vs/gleap).
 **Best for:** Design teams reviewing website mockups and live builds against a design file, rather than pure bug tracking.
 
 **Strengths:**
+
 - Free plan covers basic annotation needs
 - Side-by-side design comparison feature is genuinely useful for design QA
 - Reasonable entry price for small design teams
 
 **Weaknesses:**
+
 - Per-user pricing on higher tiers gets costly for larger dev/QA teams
 - Less focused on technical bug context (console logs, network requests) than dev-first tools
 - No self-hosting
@@ -181,16 +199,19 @@ Full comparison at [Ruttl vs Faster Fixes](/vs/ruttl).
 **TL;DR:** A simple annotation tool for images, PDFs, and websites - but it dropped its free plan in January 2025, so it's flat-fee only now.
 
 **Pricing:**
+
 - $79/mo flat (free plan discontinued January 2025)
 
 **Best for:** Quick annotation on static assets like images, PDFs, or design mockups rather than ongoing bug tracking.
 
 **Strengths:**
+
 - Flat pricing means no per-seat math
 - Fast, no-friction annotation on static files
 - Good for one-off review cycles rather than continuous QA
 
 **Weaknesses:**
+
 - No free plan anymore - a real downgrade from its earlier positioning
 - Not built for capturing technical bug context (console errors, network logs)
 - No self-hosting option
@@ -203,27 +224,31 @@ See how it compares in our [Markup.io comparison](/vs/markup-io).
 **TL;DR:** A solid enterprise QA tool with a limited free tier that caps out fast - after 20 items, you're into custom pricing territory.
 
 **Pricing:**
+
 - Free up to 20 items, then hidden/custom pricing
 
 **Best for:** Enterprise QA teams that need structured bug tracking and don't mind a sales conversation for pricing.
 
 **Strengths:**
+
 - Established product with mature integrations (Jira, Slack, Trello, and more)
 - Good session recording and visual feedback capture
 - Enterprise-friendly security and admin controls
 
 **Weaknesses:**
+
 - Free tier caps at just 20 items - not enough for real ongoing use
 - Pricing beyond the free tier isn't public, so you can't easily compare costs upfront
 - No self-hosting
 
-Full breakdown in our [Usersnap comparison](/vs/usersnap).
+Full breakdown on our [Usersnap alternative](/vs/usersnap) page.
 
 ## 9. Marker.io
 
 **TL;DR:** The tool most people are looking to replace when they search "marker.io alternatives" - solid dev-tool integrations, but no free plan and a pricing structure that punishes growing teams.
 
 **Pricing:**
+
 - $59/mo Starter (or $39/mo billed annually) - 3 seats, 1 project, 5,000 pageviews/month
 - $199/mo Team (or $149/mo billed annually) - 15 seats, 3 projects, 25,000 pageviews/month
 - $129/mo Agency (or $99/mo billed annually) - 15 seats, 50 projects, application required
@@ -233,12 +258,14 @@ Full breakdown in our [Usersnap comparison](/vs/usersnap).
 **Best for:** Agencies and dev teams already committed to Jira, Trello, Linear, or GitHub workflows who need visual bug reports with session replay and don't mind the per-seat and pageview caps.
 
 **Strengths:**
+
 - Deep integrations with Jira, Linear, GitHub, GitLab, Azure DevOps, Trello, Asana, and more
 - Session replay and detailed environment metadata on every issue
 - Established product with a large customer base (L'Oréal, Vimeo, Expedia are cited case studies)
 - Clean widget and browser extension setup
 
 **Weaknesses:**
+
 - No free plan at all - just a 15-day trial capped at 25 issues
 - Starter plan's 5,000 pageview/month cap is easy to blow through - the widget counts every visitor session, not just people who submit feedback
 - 1-project limit on Starter forces an upgrade almost immediately for teams managing more than one site
@@ -261,14 +288,41 @@ If you're evaluating whether to stick with Marker.io or switch, our full [Marker
 
 ## FAQ
 
-<FAQ items={[
-  { question: "Is there a free marker.io alternative?", answer: "Yes. <strong>Faster Fixes</strong> offers a genuine free plan (not a trial), and Userback, Atarim, and Ruttl all have free tiers too. Marker.io itself has no free plan - only a 15-day trial capped at 25 issues." },
-  { question: "Is there an open-source marker.io alternative?", answer: "<strong>Faster Fixes</strong> is the main open-source option here, licensed under AGPL-3.0. You can self-host it on your own infrastructure, which matters if you need full control over where bug report data and screenshots live." },
-  { question: "How does Marker.io compare to BugHerd?", answer: "Both lack a real free plan and charge per seat. Marker.io starts at $59/mo ($39 annual) for 3 seats and 1 project; BugHerd starts at $50/mo for 5 members plus $8 per extra seat. Marker.io captures more technical context (console logs, network requests, session replay); BugHerd leans more toward simple visual commenting for marketing sites. See our full <a href='/vs/bugherd'>BugHerd comparison</a> for the detailed breakdown." },
-  { question: "What's a cheaper alternative to Marker.io?", answer: "<strong>Faster Fixes</strong> is the cheapest option with a real free plan and a $20/mo-per-5-users tier, well below Marker.io's $59/mo Starter plan for just 3 seats. Userback and Ruttl are also cheaper on a per-seat basis if you don't need self-hosting." },
-  { question: "Is there a marker.io alternative with Jira or Linear integration?", answer: "Yes - several tools here integrate with Jira and Linear, including Marker.io itself, Usersnap, and Faster Fixes. If Jira/Linear-native workflow is your top priority and cost isn't the deciding factor, Marker.io's Team plan includes Jira sync; Faster Fixes covers the same integrations without the per-seat cost." },
-  { question: "Why doesn't Marker.io have a free plan anymore?", answer: "Marker.io moved to a trial-only model (15 days, capped at 25 reported issues) rather than offering an ongoing free tier. This is a common shift among visual feedback tools as they mature - Markup.io did the same thing in January 2025. If a free tier matters to your team long-term, tools like Faster Fixes, Userback, Atarim, or Ruttl keep one available indefinitely." }
-]} />
+<FAQ
+  items={[
+    {
+      question: "Is there a free marker.io alternative?",
+      answer:
+        "Yes. <strong>Faster Fixes</strong> offers a genuine free plan (not a trial), and Userback, Atarim, and Ruttl all have free tiers too. Marker.io itself has no free plan - only a 15-day trial capped at 25 issues.",
+    },
+    {
+      question: "Is there an open-source marker.io alternative?",
+      answer:
+        "<strong>Faster Fixes</strong> is the main open-source option here, licensed under AGPL-3.0. You can self-host it on your own infrastructure, which matters if you need full control over where bug report data and screenshots live.",
+    },
+    {
+      question: "How does Marker.io compare to BugHerd?",
+      answer:
+        "Both lack a real free plan and charge per seat. Marker.io starts at $59/mo ($39 annual) for 3 seats and 1 project; BugHerd starts at $50/mo for 5 members plus $8 per extra seat. Marker.io captures more technical context (console logs, network requests, session replay); BugHerd leans more toward simple visual commenting for marketing sites. See our full <a href='/vs/bugherd'>BugHerd comparison</a> for the detailed breakdown.",
+    },
+    {
+      question: "What's a cheaper alternative to Marker.io?",
+      answer:
+        "<strong>Faster Fixes</strong> is the cheapest option with a real free plan and a $20/mo-per-5-users tier, well below Marker.io's $59/mo Starter plan for just 3 seats. Userback and Ruttl are also cheaper on a per-seat basis if you don't need self-hosting.",
+    },
+    {
+      question:
+        "Is there a marker.io alternative with Jira or Linear integration?",
+      answer:
+        "Yes - several tools here integrate with Jira and Linear, including Marker.io itself, Usersnap, and Faster Fixes. If Jira/Linear-native workflow is your top priority and cost isn't the deciding factor, Marker.io's Team plan includes Jira sync; Faster Fixes covers the same integrations without the per-seat cost.",
+    },
+    {
+      question: "Why doesn't Marker.io have a free plan anymore?",
+      answer:
+        "Marker.io moved to a trial-only model (15 days, capped at 25 reported issues) rather than offering an ongoing free tier. This is a common shift among visual feedback tools as they mature - Markup.io did the same thing in January 2025. If a free tier matters to your team long-term, tools like Faster Fixes, Userback, Atarim, or Ruttl keep one available indefinitely.",
+    },
+  ]}
+/>
 
 ## Try Faster Fixes
 
