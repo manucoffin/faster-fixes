@@ -33,7 +33,7 @@ export async function createFeedbackScreenshot({
     key,
     filename: `screenshot.${ext}`,
     mimeType: contentType,
-    size: body.length,
+    size: BigInt(body.length),
   });
 
   return asset.id;

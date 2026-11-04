@@ -27,6 +27,7 @@ model User {
 
   // Asset relations
   uploadedAssets Asset[] @relation("AssetUploader")
+  uploadedVideos Video[] @relation("VideoUploader")
 
   @@unique([email])
   @@map("user")

@@ -286,7 +286,7 @@ describe("PUT /api/v1/feedback/:id/screenshot", () => {
       expect.objectContaining({
         filename: "screenshot.png",
         mimeType: "image/png",
-        size: 8,
+        size: 8n,
       }),
     );
     expect(widgetApiPrisma.feedback.update).toHaveBeenCalledWith(

@@ -1,0 +1,51 @@
+// A Video is a file a User uploaded into a Project for clients to review
+// (CONTEXT.md, ADR-0020). The row is reserved in `uploading` before the
+// transfer starts and flipped to `ready` by the commit, once storage reports
+// the real size.
+model Video {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  title    String
+  filename String
+  // `video/mp4` or `video/quicktime`.
+  mimeType String
+  // `uploading` or `ready`, validated by the Zod enum of the video domain.
+  state    String @default("uploading")
+  // Declared size at reservation, replaced by the size storage reports at
+  // commit. BigInt: a 4 GB file does not fit a 32-bit integer.
+  size     BigInt
+
+  // Media metadata parsed by the browser at upload; null until then.
+  durationMs   Int?
+  width        Int?
+  height       Int?
+  // Sample entry fourcc, `avc1` or `avc3`.
+  videoCodec   String?
+  hasFastStart Boolean?
+
+  fileAssetId   String?
+  fileAsset     Asset?  @relation("VideoFile", fields: [fileAssetId], references: [id], onDelete: SetNull)
+  posterAssetId String?
+  posterAsset   Asset?  @relation("VideoPoster", fields: [posterAssetId], references: [id], onDelete: SetNull)
+
+  // The Share link secret is never stored in clear: the SHA-256 hex for
+  // lookup, and the secret under the token cipher of ADR-0003 for display.
+  shareTokenHash      String @unique
+  shareTokenEncrypted String
+
+  annotationsOpen Boolean @default(true)
+
+  uploadedById String?
+  uploadedBy   User?   @relation("VideoUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  feedback  Feedback[]
+  reviewers Reviewer[]
+
+  @@index([projectId])
+  @@map("video")
+}

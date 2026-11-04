@@ -7,7 +7,7 @@ type CreateAssetInput = {
   filename: string;
   mimeType: string;
   /** File size in bytes */
-  size: number;
+  size: bigint;
   width?: number;
   height?: number;
   alt?: string;
