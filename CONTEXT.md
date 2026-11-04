@@ -11,7 +11,7 @@ A bug report or comment a **Reviewer** submits, through the **Widget** on a cust
 _Avoid_: Issue (reserved for tracker-side artifacts), Ticket, Bug report, Annotation (the act of giving Feedback on a Video, never the Feedback itself).
 
 **Reviewer**:
-A person who submits Feedback without a Faster Fixes account: the end-user of the customer's site, through the Widget, or the holder of a Video's **Share link**. Known by a name; on a Video the name is given by the person or generated for them, and the same name is the same Reviewer.
+A person who submits Feedback without a Faster Fixes account: the end-user of the customer's site, through the Widget, or the holder of a Video's **Share link**. Known by a name; on a Video the name is given by the person or generated for them, unique per Video and held by the browser that first claimed it: the same name is the same Reviewer.
 _Avoid_: Reporter, Submitter, User, Guest.
 
 **Project**:
@@ -47,7 +47,7 @@ _Avoid_: Highlight, Overlay, Annotation.
 ### Video review
 
 **Video**:
-A video file a User uploads into their Organization so Reviewers can give Feedback on it. Owned by the Organization, not by a Project: a Video is not a website.
+A video file a User uploads into their Organization so Reviewers can give Feedback on it. Owned by the Organization, not by a Project: a Video is not a website. Its annotations are open or closed by a User; closed keeps the Video and its Feedback viewable through the Share link but accepts no new or changed Feedback.
 _Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video project.
 
 **Share link**:
