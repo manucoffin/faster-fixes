@@ -60,10 +60,9 @@ ruleTester.run("types-folder-type-only", typesFolderTypeOnlyRule, {
       code: `export type Row = { id: string };\n`,
     },
     {
-      name: "a retired file holding only a comment",
-      filename:
-        "/repo/apps/web/src/app/_domains/feedback/_types/_deprecated_thing.ts",
-      code: `// Retired: moved to ../_helpers/thing.ts\n`,
+      name: "a file holding only a comment",
+      filename: "/repo/apps/web/src/app/_domains/feedback/_types/thing.ts",
+      code: `// Shapes live in ../_helpers/thing.ts\n`,
     },
     {
       name: "runtime code outside a types folder",

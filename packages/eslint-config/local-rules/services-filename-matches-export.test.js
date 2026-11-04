@@ -102,9 +102,9 @@ ruleTester.run(
         code: `export { getPlan } from "./get-plan";\n`,
       },
       {
-        name: "a retired underscore-prefixed stub is exempt",
-        filename: `${SERVICES}/_deprecated_get-plan.ts`,
-        code: `// Retired: moved to get-billing-plan.ts\n`,
+        name: "an underscore-prefixed private helper is exempt",
+        filename: `${SERVICES}/_format-plan.ts`,
+        code: `export function toLabel() {}\n`,
       },
       {
         name: "a noun-named module with an exempt suffix",

@@ -22,9 +22,6 @@
 
 const SCHEMA_FILE_RE = /\.schema\.ts$/;
 const UPPER_SNAKE_CASE_RE = /^[A-Z][A-Z0-9_]*$/;
-// A retired schema is an empty `_deprecated_*` stub by repo convention, so it
-// has no exports left to name.
-const DEPRECATED_FILE_RE = /(^|[/\\])_deprecated_/;
 
 // `z.infer` for the parsed type, `z.input` for the pre-parse form values type.
 const SUFFIX_INFERENCE = { Input: "infer", Values: "input" };
@@ -98,7 +95,7 @@ export const requireSchemaConventionsRule = {
   },
   create(context) {
     const filename = context.filename;
-    if (!SCHEMA_FILE_RE.test(filename) || DEPRECATED_FILE_RE.test(filename)) {
+    if (!SCHEMA_FILE_RE.test(filename)) {
       return {};
     }
 

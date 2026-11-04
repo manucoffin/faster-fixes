@@ -14,9 +14,8 @@
 
 ## Non-negotiables
 
-- You are FORBIDDEN from deleting any files yourself.
-- If a file must be retired by you: keep an empty `_deprecated_*.ts(x)` replacement with a short comment.
-- The user MAY delete files. If a file is already deleted (shows as `deleted` in git status), do NOT restore it — include the deletion as-is in the commit.
+- Delete files your change makes obsolete.
+- If a file is already deleted (shows as `deleted` in git status), the user removed it on purpose: include the deletion as-is in the commit.
 - If env vars change, update `.env.example` only.
 - Never run a bare `pnpm install` to "refresh" anything. `pnpm-lock.yaml` is committed with Prettier's quoting (lint-staged reformats it), and pnpm rewrites it with its own, producing a ~20,000-line diff unrelated to your change. Install only when you are deliberately adding or removing a dependency, and check the lockfile diff before committing.
 - Never run production database migrations (`pnpm --filter @workspace/db migrate:prod`).

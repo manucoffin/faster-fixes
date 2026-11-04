@@ -96,11 +96,6 @@ ruleTester.run("app-file-placement", appFilePlacementRule, {
       code: CODE,
     },
     {
-      name: "a retired _deprecated_ folder",
-      filename: `${APP}/_domains/project/_deprecated_utils/format.ts`,
-      code: CODE,
-    },
-    {
       name: "a Next.js special file at a route segment",
       filename: `${APP}/(public)/blog/[slug]/page.tsx`,
       code: CODE,
