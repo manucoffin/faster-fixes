@@ -80,7 +80,7 @@ The sign-in subsystem: credentials, sessions, email verification, password reset
 _Avoid_: Login, Identity.
 
 **Organization**:
-The tenant. Owns Projects, Installations, Agent tokens and the Subscription. Every User acts within one active Organization.
+The tenant. Owns Projects, Videos, Installations, Agent tokens and the Subscription. Every User acts within one active Organization.
 _Avoid_: Team, Workspace, Company.
 
 **Member**:
@@ -96,7 +96,7 @@ A pending offer for an email address to become a Member of an Organization, with
 An Organization's billing relationship, mirrored from Stripe. At most one active per Organization. Belongs to the Organization, never to a User.
 
 **Plan**:
-The tier a Subscription grants (`free`, `pro`, `agency`), defining limits (projects, members) and feature access. An Organization without an active Subscription is on the free Plan; a self-hosted instance always resolves to the top Plan.
+The tier a Subscription grants (`free`, `pro`, `agency`), defining limits (projects, members, Videos) and feature access. An Organization without an active Subscription is on the free Plan; a self-hosted instance always resolves to the top Plan. Video limits (one Video on the free Plan, a storage budget and a maximum file size on every Plan) apply only on the cloud instance: a self-hosted instance has none. An Organization above a limit keeps what it has and cannot add more.
 
 **Paying organization**:
 An Organization whose Subscription is `active` or `past_due` in Stripe. Trialing, unpaid, paused and incomplete Subscriptions do not count. The unit for MRR, conversion and churn.
