@@ -9,7 +9,14 @@
  * redirect to a short-lived signed URL, everything else stays unreachable.
  */
 
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -162,6 +169,17 @@ describe("GET /api/storage with the local provider", () => {
     expect(response.status).toBe(404);
   });
 
+  it("serves an image whole, ignoring a Range header", async () => {
+    const response = await GET(
+      storageRequest(AVATAR_KEY, { headers: { Range: "bytes=0-2" } }),
+      routeContext(AVATAR_KEY),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("accept-ranges")).toBeNull();
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(PNG_BYTES);
+  });
+
   it("refuses a PUT without a token", async () => {
     const response = await PUT(
       storageRequest(AVATAR_KEY, { method: "PUT", body: PNG_BYTES }),
@@ -171,6 +189,179 @@ describe("GET /api/storage with the local provider", () => {
     expect(response.status).toBe(403);
   });
 });
+
+describe("video on the local provider", () => {
+  const VIDEO_KEY = "videos/project_1/video_1/source.mp4";
+  // Distinct byte values so a misplaced slice cannot match by accident.
+  const VIDEO_BYTES = Buffer.from(Array.from({ length: 200 }, (_, i) => i));
+
+  beforeAll(() => writeObject(VIDEO_KEY, VIDEO_BYTES));
+
+  function getVideo(headers?: HeadersInit) {
+    const signedUrl = createLocalStorageUrl(
+      { bucket: BUCKET, key: VIDEO_KEY, method: "GET" },
+      60,
+    );
+    return GET(
+      storageRequest(VIDEO_KEY, { headers }, tokenOf(signedUrl)),
+      routeContext(VIDEO_KEY),
+    );
+  }
+
+  function putVideo(
+    key: string,
+    size: number,
+    body: ReadableStream<Uint8Array>,
+  ) {
+    const signedUrl = createLocalStorageUrl(
+      { bucket: BUCKET, key, method: "PUT", contentType: "video/mp4", size },
+      60,
+    );
+    return PUT(
+      storageRequest(
+        key,
+        {
+          method: "PUT",
+          body,
+          headers: {
+            "Content-Type": "video/mp4",
+            "Content-Length": String(size),
+          },
+          duplex: "half",
+        } as RequestInit,
+        tokenOf(signedUrl),
+      ),
+      routeContext(key),
+    );
+  }
+
+  // Produces `size` bytes lazily, chunk by chunk, so the body never exists as
+  // one buffer on the test side either.
+  function patternStream(size: number, chunkSize = 1024 * 1024) {
+    let sent = 0;
+    return new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (sent >= size) {
+          controller.close();
+          return;
+        }
+        const length = Math.min(chunkSize, size - sent);
+        const chunk = new Uint8Array(length);
+        for (let i = 0; i < length; i++) chunk[i] = (sent + i) % 251;
+        sent += length;
+        controller.enqueue(chunk);
+      },
+    });
+  }
+
+  it("answers a Range request with 206 and the exact slice", async () => {
+    const response = await getVideo({ Range: "bytes=10-19" });
+
+    expect(response.status).toBe(206);
+    expect(response.headers.get("content-type")).toBe("video/mp4");
+    expect(response.headers.get("accept-ranges")).toBe("bytes");
+    expect(response.headers.get("content-range")).toBe("bytes 10-19/200");
+    expect(response.headers.get("content-length")).toBe("10");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(
+      VIDEO_BYTES.subarray(10, 20),
+    );
+  });
+
+  it("answers an open-ended range up to the last byte", async () => {
+    const response = await getVideo({ Range: "bytes=150-" });
+
+    expect(response.status).toBe(206);
+    expect(response.headers.get("content-range")).toBe("bytes 150-199/200");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(
+      VIDEO_BYTES.subarray(150),
+    );
+  });
+
+  it("answers a suffix range with the last bytes", async () => {
+    const response = await getVideo({ Range: "bytes=-5" });
+
+    expect(response.status).toBe(206);
+    expect(response.headers.get("content-range")).toBe("bytes 195-199/200");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(
+      VIDEO_BYTES.subarray(195),
+    );
+  });
+
+  it("answers 416 for a range past the end", async () => {
+    const response = await getVideo({ Range: "bytes=200-" });
+
+    expect(response.status).toBe(416);
+    expect(response.headers.get("content-range")).toBe("bytes */200");
+  });
+
+  it("answers 200 with Accept-Ranges without a Range header", async () => {
+    const response = await getVideo();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("accept-ranges")).toBe("bytes");
+    expect(response.headers.get("content-length")).toBe("200");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(VIDEO_BYTES);
+  });
+
+  it("serves a QuickTime file as video/quicktime", async () => {
+    const key = "videos/project_1/video_2/source.mov";
+    await writeObject(key, VIDEO_BYTES);
+    const signedUrl = createLocalStorageUrl(
+      { bucket: BUCKET, key, method: "GET" },
+      60,
+    );
+
+    const response = await GET(
+      storageRequest(
+        key,
+        { headers: { Range: "bytes=0-0" } },
+        tokenOf(signedUrl),
+      ),
+      routeContext(key),
+    );
+
+    expect(response.status).toBe(206);
+    expect(response.headers.get("content-type")).toBe("video/quicktime");
+  });
+
+  it("refuses a video without a token", async () => {
+    const response = await GET(
+      storageRequest(VIDEO_KEY, { headers: { Range: "bytes=0-1" } }),
+      routeContext(VIDEO_KEY),
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it("streams a large PUT to disk byte for byte", async () => {
+    const key = "videos/project_1/video_3/source.mp4";
+    const size = 64 * 1024 * 1024 + 7;
+
+    const response = await putVideo(key, size, patternStream(size));
+
+    expect(response.status).toBe(204);
+    const stored = await readFile(join(storageRoot, BUCKET, key));
+    expect(stored.length).toBe(size);
+    expect(stored.equals(Buffer.from(await readAll(patternStream(size))))).toBe(
+      true,
+    );
+  });
+
+  it("refuses a PUT body shorter than declared and stores nothing", async () => {
+    const key = "videos/project_1/video_4/source.mp4";
+
+    const response = await putVideo(key, 2048, patternStream(1024));
+
+    expect(response.status).toBe(400);
+    await expect(
+      readdir(join(storageRoot, BUCKET, "videos/project_1/video_4")),
+    ).resolves.toEqual([]);
+  });
+});
+
+async function readAll(stream: ReadableStream<Uint8Array>) {
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
 
 describe("GET /api/storage with an S3 provider", () => {
   function useS3() {

@@ -130,6 +130,10 @@ Apply it with `aws s3api put-bucket-lifecycle-configuration --bucket your-bucket
 
 For local disk, set only `STORAGE_PROVIDER=local`; no storage credentials are needed. Files default to `./storage` in the application directory and the bucket to `uploads`, so images are served from `/api/storage/uploads`. Override these with `STORAGE_LOCAL_PATH` or `STORAGE_BUCKET_NAME` if needed. Use a persistent, application-managed directory shared by all app replicas, and back it up alongside PostgreSQL. Local URLs use the existing `BETTER_AUTH_SECRET` and app URL configuration.
 
+#### Videos on local disk
+
+With local disk, a video is uploaded in a single request that your instance streams to disk, so the largest video you can upload is bounded by your reverse proxy's request body limit. nginx defaults `client_max_body_size` to `1m`; raise it to at least the largest file you expect, for example `client_max_body_size 4g;` in the server block for your instance. Playback needs no extra configuration: `/api/storage` answers HTTP Range requests for videos, so the player can seek.
+
 Screenshots stay private with every provider: they are only ever reached through signed URLs, and `/api/storage` serves nothing but logo and avatar keys without a token. To switch storage backends, copy existing files to the new bucket or directory with their keys unchanged, then update the storage configuration and rebuild. Asset rows do not need updating: reads and deletes always use the current provider and bucket. Previously issued signed URLs must be regenerated.
 
 ### Inngest

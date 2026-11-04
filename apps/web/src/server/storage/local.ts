@@ -2,15 +2,21 @@ import "server-only";
 
 import { BadRequestError } from "@/server/errors/domain-errors";
 import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
+import { randomUUID } from "node:crypto";
+import { createReadStream, createWriteStream } from "node:fs";
 import {
   copyFile,
   mkdir,
   readFile,
+  rename,
   rm,
   stat,
   writeFile,
 } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { Readable, Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import type { ReadableStream as WebReadableStream } from "node:stream/web";
 import { getStorageBucket } from "./config";
 import { createLocalStorageUrl } from "./local-url";
 import type { StorageBackend, StorageObject } from "./types";
@@ -43,8 +49,55 @@ export class LocalStorage implements StorageBackend {
     await writeFile(path, object.body);
   }
 
+  // Streams the body to a temporary file renamed into place once it holds
+  // exactly `size` bytes, so a short or oversized body never lands at the key.
+  async write(
+    object: StorageObject & { size: number },
+    body: WebReadableStream<Uint8Array> | null,
+  ) {
+    const path = getLocalObjectPath(this.root, object.bucket, object.key);
+    await mkdir(dirname(path), { recursive: true });
+    const partPath = `${path}.${randomUUID()}.part`;
+    let written = 0;
+    const countBytes = new Transform({
+      transform(chunk: Buffer, _encoding, callback) {
+        written += chunk.length;
+        if (written > object.size) {
+          callback(new BadRequestError("Upload is larger than declared."));
+          return;
+        }
+        callback(null, chunk);
+      },
+    });
+    try {
+      await pipeline(
+        body ? Readable.fromWeb(body) : Readable.from([]),
+        countBytes,
+        createWriteStream(partPath),
+      );
+      if (written !== object.size) {
+        throw new BadRequestError("Upload is smaller than declared.");
+      }
+      await rename(partPath, path);
+    } catch (error) {
+      await rm(partPath, { force: true });
+      throw error;
+    }
+  }
+
   read(bucket: string, key: string) {
     return readFile(getLocalObjectPath(this.root, bucket, key));
+  }
+
+  // `end` is inclusive, as in an HTTP byte range.
+  readRange(
+    bucket: string,
+    key: string,
+    range: { start: number; end: number },
+  ) {
+    return Readable.toWeb(
+      createReadStream(getLocalObjectPath(this.root, bucket, key), range),
+    );
   }
 
   async copy(source: StorageObject, destination: StorageObject) {

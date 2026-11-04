@@ -3,6 +3,7 @@ import { getStorageBucket, getStorageProvider } from "@/server/storage/config";
 import { LocalStorage } from "@/server/storage/local";
 import { verifyLocalStorageAccess } from "@/server/storage/local-url";
 import { getStorageObjectUrl } from "@/server/storage/objects";
+import type { ReadableStream as WebReadableStream } from "node:stream/web";
 
 type Context = { params: Promise<{ path: string[] }> };
 const contentTypes: Record<string, string> = {
@@ -10,7 +11,73 @@ const contentTypes: Record<string, string> = {
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
   webp: "image/webp",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
 };
+const servedHeaders = {
+  "Cache-Control": "private, no-store",
+  "X-Content-Type-Options": "nosniff",
+  "Content-Security-Policy": "default-src 'none'",
+  "Access-Control-Allow-Origin": "*",
+};
+
+// A syntactically invalid or multi-part Range is ignored and the whole object
+// served, as RFC 9110 allows; only a well-formed range past the end is refused.
+function parseByteRange(header: string | null, size: number) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header?.trim() ?? "");
+  if (!match || (!match[1] && !match[2])) return null;
+  const [, first = "", last = ""] = match;
+  if (!first) {
+    const suffix = Number(last);
+    if (suffix === 0 || size === 0) return "unsatisfiable";
+    return { start: Math.max(size - suffix, 0), end: size - 1 };
+  }
+  const start = Number(first);
+  if (last && Number(last) < start) return null;
+  if (start >= size) return "unsatisfiable";
+  return {
+    start,
+    end: last ? Math.min(Number(last), size - 1) : size - 1,
+  };
+}
+
+async function serveVideo(
+  req: Request,
+  storage: LocalStorage,
+  object: { bucket: string; key: string; contentType: string },
+) {
+  const info = await storage.head(object);
+  if (!info) return new Response(null, { status: 404 });
+  const headers = {
+    ...servedHeaders,
+    "Content-Type": object.contentType,
+    "Accept-Ranges": "bytes",
+  };
+  const range = parseByteRange(req.headers.get("range"), info.size);
+  if (range === "unsatisfiable") {
+    return new Response(null, {
+      status: 416,
+      headers: { ...headers, "Content-Range": `bytes */${info.size}` },
+    });
+  }
+  const { start, end } = range ?? { start: 0, end: info.size - 1 };
+  return new Response(
+    info.size === 0
+      ? null
+      : (storage.readRange(object.bucket, object.key, {
+          start,
+          end,
+        }) as ReadableStream<Uint8Array>),
+    {
+      status: range ? 206 : 200,
+      headers: {
+        ...headers,
+        "Content-Length": String(end - start + 1),
+        ...(range && { "Content-Range": `bytes ${start}-${end}/${info.size}` }),
+      },
+    },
+  );
+}
 
 // A key changes on every new upload, so a cached redirect never shows a stale
 // image; the signed URL outlives the cache so a cached redirect still resolves.
@@ -63,22 +130,19 @@ async function storageRequest(req: Request, { params }: Context) {
       ) {
         return new Response(null, { status: 400 });
       }
-      const body = Buffer.from(await req.arrayBuffer());
-      if (body.length !== access.size) {
-        return new Response(null, { status: 400 });
-      }
-      await storage.put({ bucket, key, contentType: access.contentType, body });
+      // Streamed so a video of several hundred megabytes is never held in memory.
+      await storage.write(
+        { bucket, key, size: access.size },
+        req.body as WebReadableStream<Uint8Array> | null,
+      );
       return new Response(null, { status: 204 });
     }
     if (!contentType) return new Response(null, { status: 404 });
+    if (contentType.startsWith("video/")) {
+      return await serveVideo(req, storage, { bucket, key, contentType });
+    }
     return new Response(await storage.read(bucket, key), {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "private, no-store",
-        "X-Content-Type-Options": "nosniff",
-        "Content-Security-Policy": "default-src 'none'",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { ...servedHeaders, "Content-Type": contentType },
     });
   } catch (error) {
     if (error instanceof BadRequestError) {
