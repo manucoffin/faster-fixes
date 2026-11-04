@@ -54,6 +54,10 @@ _Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video p
 The unguessable URL that grants whoever holds it access to review a Video. One per Video at a time; issuing a new one revokes the previous.
 _Avoid_: Review link, Public link, Invite, Reviewer token (the per-Reviewer secret of the Widget surface).
 
+**Poster**:
+The still frame of a **Video** shown in the Videos list and in the player before playback. Taken from the file once, at upload; a Video may have none.
+_Avoid_: Thumbnail, Cover, Preview.
+
 ### Identity & access
 
 **Project public ID**:
@@ -200,6 +204,7 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
 - A **Feedback** belongs to one **Project** and is about either a page of its website or one of its **Videos**, never both; its **Selection** takes the shape of that subject
 - A **Project** holds many **Videos**; a **Video** belongs to exactly one **Project** and is deleted with it
+- A **Video** has zero or one **Poster**
 - A **Video** has exactly one **Share link** at a time; a **Reviewer** who gives Feedback on a Video does so through that link
 - A **Reviewer** belongs to exactly one **Project**; a Reviewer who came through a **Share link** is also bound to that **Video**, where their name is unique
 - A **Tracker** mirrors and a **Notification channel** announces every Feedback of a **Project** through its **Project links**, page and video alike
