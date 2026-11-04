@@ -98,9 +98,11 @@ function KanbanCardView({
       <div className="min-w-0 flex-1">
         <p className="line-clamp-3 text-sm leading-snug">{feedback.comment}</p>
 
-        <p className="mt-1 truncate text-xs text-muted-foreground">
-          {formatPagePath(feedback.pageUrl)}
-        </p>
+        {feedback.pageUrl && (
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            {formatPagePath(feedback.pageUrl)}
+          </p>
+        )}
 
         {(isWaiting || hasTracker) && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">

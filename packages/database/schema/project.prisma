@@ -82,7 +82,7 @@ model Feedback {
 
   status  String @default("new")
   comment String
-  pageUrl String
+  pageUrl String?
 
   clickX   Float?
   clickY   Float?

@@ -58,18 +58,20 @@ export function FeedbackPropertiesRail({
 
       <div className="h-px bg-border" />
 
-      <Property label="Page">
-        <a
-          href={feedback.pageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex max-w-full items-center gap-1 text-sm text-primary hover:underline"
-          title={feedback.pageUrl}
-        >
-          <span className="truncate">{formatPagePath(feedback.pageUrl)}</span>
-          <ExternalLink className="size-3 shrink-0" />
-        </a>
-      </Property>
+      {feedback.pageUrl && (
+        <Property label="Page">
+          <a
+            href={feedback.pageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex max-w-full items-center gap-1 text-sm text-primary hover:underline"
+            title={feedback.pageUrl}
+          >
+            <span className="truncate">{formatPagePath(feedback.pageUrl)}</span>
+            <ExternalLink className="size-3 shrink-0" />
+          </a>
+        </Property>
+      )}
 
       <Property label="Reported by">
         <span className="text-sm">{feedback.reviewer.name}</span>

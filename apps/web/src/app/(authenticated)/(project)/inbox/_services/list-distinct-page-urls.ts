@@ -23,13 +23,13 @@ export async function listDistinctPageUrls(
   }
 
   const results = await db.feedback.findMany({
-    where: { projectId },
+    where: { projectId, pageUrl: { not: null } },
     select: { pageUrl: true },
     distinct: ["pageUrl"],
     orderBy: { pageUrl: "asc" },
   });
 
-  return results.map((r) => r.pageUrl);
+  return results.flatMap((r) => (r.pageUrl ? [r.pageUrl] : []));
 }
 
 export type ListDistinctPageUrlsOutput = Awaited<

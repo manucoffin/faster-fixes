@@ -7,7 +7,7 @@ import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 type FeedbackForIssue = {
   id: string;
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   selector: string | null;
   clickX: number | null;
   clickY: number | null;
@@ -48,8 +48,10 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
   lines.push("");
 
   // Page URL
-  const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
-  lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
+  if (feedback.pageUrl) {
+    const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
+    lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
+  }
 
   // Component path + selector
   const locationParts: string[] = [];

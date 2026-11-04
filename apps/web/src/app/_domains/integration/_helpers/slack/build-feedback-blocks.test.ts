@@ -32,4 +32,45 @@ describe("buildFeedbackBlocks", () => {
       expect(announcement).not.toContain(fragment);
     }
   });
+
+  it("leaves the page link out when the Feedback has no page URL", () => {
+    const { blocks } = buildFeedbackBlocks({
+      feedback: {
+        reviewerName: "Ada",
+        comment: "The cut at 0:42 is too abrupt",
+        pageUrl: null,
+        browserName: "Chrome",
+        os: "macOS",
+      },
+      status: "new",
+      actor: "human",
+      dashboardUrl: "https://app.example.com/inbox?feedback=fb_1",
+      screenshotUrl: null,
+    });
+
+    expect(blocks.filter((block) => block.type === "context")).toEqual([
+      {
+        type: "context",
+        elements: [{ type: "mrkdwn", text: "Chrome · macOS" }],
+      },
+    ]);
+  });
+
+  it("leaves the context block out when there is nothing to put in it", () => {
+    const { blocks } = buildFeedbackBlocks({
+      feedback: {
+        reviewerName: "Ada",
+        comment: "The cut at 0:42 is too abrupt",
+        pageUrl: null,
+        browserName: null,
+        os: null,
+      },
+      status: "new",
+      actor: "human",
+      dashboardUrl: "https://app.example.com/inbox?feedback=fb_1",
+      screenshotUrl: null,
+    });
+
+    expect(blocks.some((block) => block.type === "context")).toBe(false);
+  });
 });

@@ -227,6 +227,24 @@ describe("POST /api/v1/feedback", () => {
     expect(widgetApiPrisma.feedback.create).not.toHaveBeenCalled();
   });
 
+  it("rejects a page Feedback submitted without a page URL", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({ data: { comment: validFeedbackPayload.comment } }),
+      ),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({
+      error: "Validation failed",
+      details: {
+        formErrors: [],
+        fieldErrors: { pageUrl: [expect.any(String)] },
+      },
+    });
+    expect(widgetApiPrisma.feedback.create).not.toHaveBeenCalled();
+  });
+
   it("rejects a screenshot whose type is not an allowed image", async () => {
     const response = await POST(
       submitRequest(

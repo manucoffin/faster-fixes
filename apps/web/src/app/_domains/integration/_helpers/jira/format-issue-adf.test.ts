@@ -79,4 +79,13 @@ describe("formatIssueAdf", () => {
       ]);
     },
   );
+
+  it("drops the Page paragraph when the Feedback has no page URL", () => {
+    const withPage = formatIssueAdf(feedback);
+    const withoutPage = formatIssueAdf({ ...feedback, pageUrl: null });
+
+    expect(withoutPage.content).toHaveLength(withPage.content.length - 1);
+    expect(JSON.stringify(withoutPage)).not.toContain("Page: ");
+    expect(JSON.stringify(withoutPage)).not.toContain("null");
+  });
 });

@@ -9,7 +9,7 @@ export type FeedbackForMarkdown = {
   id: string;
   status: string;
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   selector: string | null;
   clickX: number | null;
   clickY: number | null;
@@ -41,7 +41,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
 
   // Where to look — most actionable info first
   const locationLines: string[] = [];
-  locationLines.push(`**Page URL:** ${f.pageUrl}`);
+  if (f.pageUrl) locationLines.push(`**Page URL:** ${f.pageUrl}`);
   if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
     locationLines.push(`**Component tree:** \`${md.reactComponentPath}\``);
   }
@@ -53,10 +53,12 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     locationLines.push(`**Element:** ${md.elementDescription}`);
   }
 
-  lines.push("");
-  lines.push("## Where to look");
-  lines.push("");
-  lines.push(...locationLines);
+  if (locationLines.length > 0) {
+    lines.push("");
+    lines.push("## Where to look");
+    lines.push("");
+    lines.push(...locationLines);
+  }
 
   // What's wrong — the user's description as a blockquote
   lines.push("");

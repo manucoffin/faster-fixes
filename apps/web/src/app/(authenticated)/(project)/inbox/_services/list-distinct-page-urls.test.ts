@@ -7,6 +7,10 @@ type FakeDb = NonNullable<Parameters<typeof listDistinctPageUrls>[1]>;
 function fakeDb(
   project: { organizationId: string } | null,
   membership: { id: string } | null,
+  pageUrls: Array<string | null> = [
+    "https://example.com/a",
+    "https://example.com/b",
+  ],
 ) {
   return {
     project: { findUnique: vi.fn().mockResolvedValue(project) },
@@ -14,10 +18,7 @@ function fakeDb(
     feedback: {
       findMany: vi
         .fn()
-        .mockResolvedValue([
-          { pageUrl: "https://example.com/a" },
-          { pageUrl: "https://example.com/b" },
-        ]),
+        .mockResolvedValue(pageUrls.map((pageUrl) => ({ pageUrl }))),
     },
   } as unknown as FakeDb;
 }
@@ -47,5 +48,16 @@ describe("listDistinctPageUrls", () => {
     expect(db.member.findFirst).toHaveBeenCalledWith({
       where: { organizationId: "org_1", userId: "user_1" },
     });
+  });
+
+  it("leaves out the Feedback without a page URL", async () => {
+    const db = fakeDb({ organizationId: "org_1" }, { id: "member_1" }, [
+      null,
+      "https://example.com/a",
+    ]);
+
+    await expect(listDistinctPageUrls(input, db)).resolves.toEqual([
+      "https://example.com/a",
+    ]);
   });
 });

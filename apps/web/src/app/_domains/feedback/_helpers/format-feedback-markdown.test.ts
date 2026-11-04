@@ -101,4 +101,21 @@ describe("formatFeedbackAsMarkdown", () => {
       formatFeedbackAsMarkdown({ ...feedback, customMetadata: value }),
     ).toBe(todaysOutput);
   });
+
+  it("drops the page line when the Feedback has no page URL", () => {
+    expect(formatFeedbackAsMarkdown({ ...feedback, pageUrl: null })).toBe(
+      todaysOutput.replace("**Page URL:** https://example.com/settings\n", ""),
+    );
+  });
+
+  it("drops the Where to look section when nothing locates the Feedback", () => {
+    const markdown = formatFeedbackAsMarkdown({
+      ...feedback,
+      pageUrl: null,
+      selector: null,
+    });
+
+    expect(markdown).not.toContain("## Where to look");
+    expect(markdown).not.toContain("null");
+  });
 });

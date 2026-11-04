@@ -88,4 +88,13 @@ describe("formatIssueBody", () => {
   ])("renders today's body when Custom metadata is %s", (_, customMetadata) => {
     expect(formatIssueBody({ ...feedback, customMetadata })).toBe(todaysOutput);
   });
+
+  it("drops the page line when the Feedback has no page URL", () => {
+    expect(formatIssueBody({ ...feedback, pageUrl: null })).toBe(
+      todaysOutput.replace(
+        "**Page:** [example.com/settings](https://example.com/settings)\n",
+        "",
+      ),
+    );
+  });
 });

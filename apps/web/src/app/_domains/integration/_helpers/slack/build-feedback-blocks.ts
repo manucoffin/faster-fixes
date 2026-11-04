@@ -39,7 +39,7 @@ export function statusBadge(
 type BuildFeedbackBlocksFeedback = {
   reviewerName: string | null;
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   browserName: string | null;
   os: string | null;
 };
@@ -80,12 +80,14 @@ export function buildFeedbackBlocks({
     },
   ];
 
-  const contextElements: SlackBlock[] = [
-    {
+  const contextElements: SlackBlock[] = [];
+
+  if (feedback.pageUrl) {
+    contextElements.push({
       type: "mrkdwn",
       text: `<${feedback.pageUrl}|${feedback.pageUrl}>`,
-    },
-  ];
+    });
+  }
 
   const environment = [feedback.browserName, feedback.os]
     .filter((part): part is string => Boolean(part))
@@ -95,7 +97,10 @@ export function buildFeedbackBlocks({
     contextElements.push({ type: "mrkdwn", text: environment });
   }
 
-  blocks.push({ type: "context", elements: contextElements });
+  // Slack rejects a context block without elements.
+  if (contextElements.length > 0) {
+    blocks.push({ type: "context", elements: contextElements });
+  }
 
   if (screenshotUrl) {
     blocks.push({

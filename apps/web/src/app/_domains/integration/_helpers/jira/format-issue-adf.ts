@@ -30,7 +30,7 @@ export type AdfDocument = {
 
 export type FeedbackForJiraIssue = {
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   selector: string | null;
   clickX: number | null;
   clickY: number | null;
@@ -91,13 +91,15 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
       .map((line) => paragraph(line.length > 0 ? [text(line)] : [])),
   });
 
-  const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
-  content.push(
-    paragraph([
-      text("Page: ", [{ type: "strong" }]),
-      link(displayUrl, feedback.pageUrl),
-    ]),
-  );
+  if (feedback.pageUrl) {
+    const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
+    content.push(
+      paragraph([
+        text("Page: ", [{ type: "strong" }]),
+        link(displayUrl, feedback.pageUrl),
+      ]),
+    );
+  }
 
   const elementParts = collectElementParts(feedback);
   if (elementParts.length > 0) {
