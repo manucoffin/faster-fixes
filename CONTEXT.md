@@ -1,18 +1,18 @@
 # Faster Fixes
 
-A widget that lets a website's end-users report bugs and feedback in-page; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira), and announced to notification channels (Slack).
+A widget that lets a website's end-users report bugs and feedback in-page, and a review page that lets a customer's clients annotate an uploaded video; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira), and announced to notification channels (Slack).
 
 ## Language
 
 ### Reporting
 
 **Feedback**:
-A bug report or comment submitted via the widget on a customer's site. The atomic unit of the inbox.
-_Avoid_: Issue (reserved for tracker-side artifacts), Ticket, Bug report.
+A bug report or comment a **Reviewer** submits, through the **Widget** on a customer's site or on a **Video** through its **Share link**. The atomic unit of the inbox.
+_Avoid_: Issue (reserved for tracker-side artifacts), Ticket, Bug report, Annotation (the act of giving Feedback on a Video, never the Feedback itself).
 
 **Reviewer**:
-The end-user of the customer's site who submitted a Feedback through the widget.
-_Avoid_: Reporter, Submitter, User.
+A person who submits Feedback without a Faster Fixes account: the end-user of the customer's site, through the Widget, or the holder of a Video's **Share link**.
+_Avoid_: Reporter, Submitter, User, Guest.
 
 **Project**:
 A Faster Fixes container scoped to one website (one widget install). Holds Feedback, settings, and at most one **Project link** per **Integration**.
@@ -29,8 +29,8 @@ _Avoid_: Integration (reserved for external systems), Adapter, Wrapper (implemen
 ### Capture
 
 **Selection**:
-The page element a Reviewer clicked in annotation mode, together with the click point inside it. What a new Feedback is about.
-_Avoid_: Target, Highlighted element, Annotation (the mode, not its result).
+What a Feedback is about. On a page: the element a Reviewer clicked in annotation mode, together with the click point inside it. On a **Video**: the instant or time range the Reviewer marked, with an optional point or area on the frame.
+_Avoid_: Target, Highlighted element, Annotation (the mode, not its result), Timecode (the instant alone, not the Selection), Marker.
 
 **Pin**:
 The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot.
@@ -43,6 +43,16 @@ _Avoid_: Capture (the act of taking it), Image, Attachment.
 **Selection frame**:
 The outline of the Selection and its click point drawn over the Screenshot in the inbox. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
 _Avoid_: Highlight, Overlay, Annotation.
+
+### Video review
+
+**Video**:
+A video file a User uploads into their Organization so Reviewers can give Feedback on it. Owned by the Organization, not by a Project: a Video is not a website.
+_Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video project.
+
+**Share link**:
+The unguessable URL that grants whoever holds it access to review a Video. One per Video at a time; issuing a new one revokes the previous.
+_Avoid_: Review link, Public link, Invite, Reviewer token (the per-Reviewer secret of the Widget surface).
 
 ### Identity & access
 
@@ -188,6 +198,10 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Testimonial** is deleted with its **User**; it outlives its **Organization**, whose name it carries as a snapshot
 - A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
 - A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
+- A **Feedback** is about either a page of a **Project** or a **Video**, never both; its **Selection** takes the shape of that subject
+- An **Organization** owns many **Videos**; a **Video** belongs to no **Project**
+- A **Video** has exactly one **Share link** at a time; a **Reviewer** who gives Feedback on a Video does so through that link
+- A video Feedback's **Screenshot** is the frame captured at its **Selection**
 - A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
