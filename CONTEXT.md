@@ -11,7 +11,7 @@ A bug report or comment a **Reviewer** submits, through the **Widget** on a cust
 _Avoid_: Issue (reserved for tracker-side artifacts), Ticket, Bug report, Annotation (the act of giving Feedback on a Video, never the Feedback itself).
 
 **Reviewer**:
-A person who submits Feedback without a Faster Fixes account: the end-user of the customer's site, through the Widget, or the holder of a Video's **Share link**.
+A person who submits Feedback without a Faster Fixes account: the end-user of the customer's site, through the Widget, or the holder of a Video's **Share link**. Known by a name; on a Video the name is given by the person or generated for them, and the same name is the same Reviewer.
 _Avoid_: Reporter, Submitter, User, Guest.
 
 **Project**:
@@ -125,7 +125,7 @@ The state of a Feedback. Canonical values: `new`, `in_progress`, `resolved`, `ar
 Who or what drove a Status change: a **User**, a Tracker sync, or the **Agent** (an Agent-token caller). Travels on the status-change event so a **Notification channel** can distinguish an agent-resolved Feedback from a human-resolved one.
 
 **Rank**:
-A Feedback's place within its Status column of the inbox board, set by a User to say what the team handles first. Shared by every Member of the Project. A Feedback without a Rank sits above ranked ones, newest first, and a Status change clears it.
+A Feedback's place within its Status column of its subject's board, a Project's inbox or a Video, set by a User to say what the team handles first. Shared by every Member. A Feedback without a Rank sits above ranked ones, newest first, and a Status change clears it.
 _Avoid_: Priority (reserved for Tracker-side priority levels), Position, Order.
 
 **Archived**:
@@ -201,6 +201,8 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Feedback** is about either a page of a **Project** or a **Video**, never both; its **Selection** takes the shape of that subject
 - An **Organization** owns many **Videos**; a **Video** belongs to no **Project**
 - A **Video** has exactly one **Share link** at a time; a **Reviewer** who gives Feedback on a Video does so through that link
+- A **Reviewer** belongs to exactly one **Project** or one **Video**, never both
+- A **Tracker** mirrors and a **Notification channel** announces page Feedback only; a video Feedback is read in the dashboard, the export and the MCP
 - A video Feedback's **Screenshot** is the frame captured at its **Selection**
 - A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
