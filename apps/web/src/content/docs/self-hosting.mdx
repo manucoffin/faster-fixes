@@ -89,6 +89,45 @@ Existing R2 variables work unchanged, with no provider toggle required. Create a
 
 The bucket does not need to be public. Organization logos and user avatars are requested from `/api/storage/<bucket>/<key>` on your instance, which redirects to a short-lived signed URL for the object. Browsers must be able to reach the storage endpoint, which is already the case since uploads go to it directly. If you serve the bucket through a public URL or a CDN, set `NEXT_PUBLIC_STORAGE_BASE_URL` to that URL and logos and avatars are loaded from it instead. The bucket name is read at build time, so set the storage variables before building.
 
+#### Bucket CORS for video uploads
+
+Videos are uploaded from the browser straight to the bucket in 16 MiB parts, and the browser reads the `ETag` response header after each part to complete the upload. The bucket therefore needs a CORS rule that allows `GET`, `HEAD`, `PUT`, `POST` and `DELETE` from your app origin and exposes `ETag`. The same rule lets the review page capture video frames.
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://feedback.example.com"],
+    "AllowedMethods": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+- **Cloudflare R2**: paste the rule above into the bucket's CORS policy in the dashboard.
+- **AWS S3**: wrap the array in `{ "CORSRules": [...] }` and apply it with `aws s3api put-bucket-cors --bucket your-bucket --cors-configuration file://cors.json`.
+- **MinIO**: CORS is set server-wide. Allow your app origin with `mc admin config set <alias> api cors_allow_origin="https://feedback.example.com"`, then restart the server. MinIO exposes `ETag` to the browser by default.
+
+#### Abandoned video uploads
+
+A closed tab leaves an incomplete multipart upload behind. Faster Fixes removes the reserved Video after a day, but the parts already sent are cleaned up by the storage provider. R2 aborts incomplete multipart uploads after 7 days by default. S3 keeps them until a lifecycle rule aborts them, so add one:
+
+```json
+{
+  "Rules": [
+    {
+      "ID": "abort-incomplete-video-uploads",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "videos/" },
+      "AbortIncompleteMultipartUpload": { "DaysAfterInitiation": 7 }
+    }
+  ]
+}
+```
+
+Apply it with `aws s3api put-bucket-lifecycle-configuration --bucket your-bucket --lifecycle-configuration file://lifecycle.json`.
+
 For local disk, set only `STORAGE_PROVIDER=local`; no storage credentials are needed. Files default to `./storage` in the application directory and the bucket to `uploads`, so images are served from `/api/storage/uploads`. Override these with `STORAGE_LOCAL_PATH` or `STORAGE_BUCKET_NAME` if needed. Use a persistent, application-managed directory shared by all app replicas, and back it up alongside PostgreSQL. Local URLs use the existing `BETTER_AUTH_SECRET` and app URL configuration.
 
 Screenshots stay private with every provider: they are only ever reached through signed URLs, and `/api/storage` serves nothing but logo and avatar keys without a token. To switch storage backends, copy existing files to the new bucket or directory with their keys unchanged, then update the storage configuration and rebuild. Asset rows do not need updating: reads and deletes always use the current provider and bucket. Previously issued signed URLs must be regenerated.

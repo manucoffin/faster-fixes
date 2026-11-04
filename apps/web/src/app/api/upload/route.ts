@@ -1,9 +1,12 @@
-import { findOpenTestimonialRequest } from "@/app/_domains/testimonial/_services/find-open-testimonial-request";
 import { getTestimonialUploadPrefix } from "@/app/_domains/testimonial/_helpers/testimonial-photo-keys";
+import { findOpenTestimonialRequest } from "@/app/_domains/testimonial/_services/find-open-testimonial-request";
+import { createVideo } from "@/app/_domains/video/_services/create-video";
+import { findUploadingVideo } from "@/app/_domains/video/_services/find-uploading-video";
 import { auth } from "@/server/auth";
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 import { createStorage } from "@/server/storage";
-import { getStorageBucket } from "@/server/storage/config";
+import { DomainError } from "@/server/errors/domain-errors";
+import { getStorageBucket, getStorageProvider } from "@/server/storage/config";
 import { RejectUpload, route, type Router } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
 import { z } from "zod";
@@ -104,12 +107,120 @@ const routes: Router["routes"] = {
   }),
 };
 
+const VIDEO_EXTENSIONS: Record<string, string> = {
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+};
+
+// R2 requires every part but the last to be the same size, so never adaptive.
+const VIDEO_PART_SIZE = 16 * 1024 * 1024;
+
+// The largest per-file cap of any Plan; the Organization's own cap is checked
+// by the quota.
+const VIDEO_MAX_FILE_SIZE = 4_000_000_000;
+
+function getVideoFolder(video: { projectId: string; id: string }) {
+  return `videos/${video.projectId}/${video.id}`;
+}
+
+// The local provider's upload client signs single PUTs only.
+function videoRoute(multipart: boolean) {
+  return route({
+    fileTypes: Object.keys(VIDEO_EXTENSIONS),
+    maxFileSize: VIDEO_MAX_FILE_SIZE,
+    multipart,
+    partSize: VIDEO_PART_SIZE,
+    clientMetadataSchema: z.object({
+      projectId: z.string().min(1),
+      title: z.string().trim().min(1).max(200).optional(),
+      durationMs: z.number().int().nonnegative(),
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+      videoCodec: z.enum(["avc1", "avc3"]),
+      hasFastStart: z.boolean(),
+    }),
+    onBeforeUpload: async ({ req, file, clientMetadata }) => {
+      const session = await auth.api.getSession({
+        headers: req.headers,
+      });
+
+      if (!session) {
+        throw new RejectUpload("Unauthorized");
+      }
+
+      const { projectId, title, ...media } = clientMetadata;
+      const { denial, video } = await createVideo({
+        projectId,
+        userId: session.user.id,
+        file,
+        title,
+        media,
+      }).catch(rejectDomainError);
+
+      // The upload dialog parses the denial to show the same message it
+      // would have shown before the request.
+      if (denial) {
+        throw new RejectUpload(JSON.stringify(denial));
+      }
+
+      return {
+        objectInfo: {
+          key: `${getVideoFolder(video)}/source.${VIDEO_EXTENSIONS[file.type]}`,
+        },
+        metadata: { videoId: video.id },
+      };
+    },
+    onAfterSignedUrl: ({ metadata }) => ({ metadata }),
+  });
+}
+
+function rejectDomainError(error: unknown): never {
+  if (error instanceof DomainError) {
+    throw new RejectUpload(error.message);
+  }
+  throw error;
+}
+
+const videoPosterRoute = route({
+  fileTypes: ["image/jpeg"],
+  maxFileSize: 1_000_000,
+  clientMetadataSchema: z.object({
+    videoId: z.string().min(1),
+  }),
+  onBeforeUpload: async ({ req, clientMetadata }) => {
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (!session) {
+      throw new RejectUpload("Unauthorized");
+    }
+
+    const video = await findUploadingVideo({
+      videoId: clientMetadata.videoId,
+      userId: session.user.id,
+    });
+
+    if (!video) {
+      throw new RejectUpload("This video is not being uploaded.");
+    }
+
+    return {
+      objectInfo: { key: `${getVideoFolder(video)}/poster.jpg` },
+    };
+  },
+});
+
 // Built per request so a missing bucket name fails the upload, not the module import.
 export function POST(req: Request) {
   const router: Router = {
     client: createStorage().uploadClient,
     bucketName: getStorageBucket(),
-    routes,
+    routes: {
+      ...routes,
+      video: videoRoute(getStorageProvider() !== "local"),
+      "video-poster": videoPosterRoute,
+    },
   };
   return toRouteHandler(router).POST(req);
 }
