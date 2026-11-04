@@ -48,7 +48,7 @@ _Avoid_: Highlight, Overlay, Annotation.
 
 **Video**:
 A video file a User uploads into a Project so Reviewers can give Feedback on it. Belongs to the Project like the website does: the Project's Trackers and Notification channels apply to its Feedback, and the Project's board holds it. Its annotations are open or closed by a User; closed keeps the Video and its Feedback viewable through the Share link but accepts no new or changed Feedback. Deleted by a User, at once and for good: its Feedback and Reviewers go with it, its Share link stops working, and Issues already mirrored to a Tracker stay as they are.
-_Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video project.
+_Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video project, Version (a revised cut is a new Video).
 
 **Share link**:
 The unguessable URL that grants whoever holds it access to review a Video. One per Video at a time; issuing a new one revokes the previous.
