@@ -13,6 +13,8 @@
   "disableArtifact": true,
   "permissions": {
     "allow": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
       "Edit(src/**)",
       "Bash(git:*)",
       "Bash(pnpm:*)",
@@ -31,11 +33,7 @@
     ],
     "ask": [],
     "deny": [
-      "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rmdir:*)",
       "Bash(npm run:*)",
-      "Bash(pnpm build)",
       "Bash(pnpm build:*)",
       "Bash(pnpm db:seed)",
       "Bash(pnpm db:pull)",
@@ -86,6 +84,15 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous-git.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-rm.py"
           }
         ]
       }
