@@ -18,6 +18,9 @@ const RESOURCE_COUNT_QUERIES: Record<
     prisma.project.count({ where: { organizationId: orgId } }),
   feedbacks: (orgId, prisma) =>
     prisma.feedback.count({ where: { project: { organizationId: orgId } } }),
+  // Both states count: an `uploading` row already holds its place.
+  videos: (orgId, prisma) =>
+    prisma.video.count({ where: { project: { organizationId: orgId } } }),
   seats: (orgId, prisma) =>
     prisma.member.count({ where: { organizationId: orgId } }),
   organizations: () => {
