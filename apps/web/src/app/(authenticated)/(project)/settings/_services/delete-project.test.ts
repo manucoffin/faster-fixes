@@ -9,14 +9,18 @@ const { deleteProject } = await import("./delete-project");
 
 type FakeDb = NonNullable<Parameters<typeof deleteProject>[1]>;
 
+type VideoAssets = { fileAssetId: string | null; posterAssetId: string | null };
+
 function fakeDb({
   project = { id: "project_1", organizationId: "org_1" },
   membership = { id: "member_1" },
   screenshots = [] as { screenshotId: string | null }[],
+  videos = [] as VideoAssets[],
 }: {
   project?: { id: string; organizationId: string } | null;
   membership?: { id: string } | null;
   screenshots?: { screenshotId: string | null }[];
+  videos?: VideoAssets[];
 } = {}) {
   return {
     project: {
@@ -25,6 +29,7 @@ function fakeDb({
     },
     member: { findFirst: vi.fn().mockResolvedValue(membership) },
     feedback: { findMany: vi.fn().mockResolvedValue(screenshots) },
+    video: { findMany: vi.fn().mockResolvedValue(videos) },
   } as unknown as FakeDb;
 }
 
@@ -66,5 +71,30 @@ describe("deleteProject", () => {
       where: { id: "project_1" },
     });
     expect(deleteAssets).toHaveBeenCalledWith(["asset_1", "asset_2"]);
+  });
+
+  it("frees the file and Poster of every Video with the screenshots in one call", async () => {
+    const db = fakeDb({
+      screenshots: [{ screenshotId: "asset_shot" }],
+      videos: [
+        { fileAssetId: "asset_file_1", posterAssetId: "asset_poster_1" },
+        { fileAssetId: "asset_file_2", posterAssetId: null },
+        { fileAssetId: null, posterAssetId: null },
+      ],
+    });
+
+    await deleteProject(input, db);
+
+    expect(db.video.findMany).toHaveBeenCalledWith({
+      where: { projectId: "project_1" },
+      select: { fileAssetId: true, posterAssetId: true },
+    });
+    expect(deleteAssets).toHaveBeenCalledTimes(1);
+    expect(deleteAssets).toHaveBeenCalledWith([
+      "asset_shot",
+      "asset_file_1",
+      "asset_poster_1",
+      "asset_file_2",
+    ]);
   });
 });

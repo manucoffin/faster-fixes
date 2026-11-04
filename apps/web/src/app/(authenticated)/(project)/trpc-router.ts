@@ -1,5 +1,7 @@
 import { completeVideoUpload } from "@/app/_domains/video/_services/complete-video-upload";
 import { CompleteVideoUploadSchema } from "@/app/_domains/video/_services/complete-video-upload.schema";
+import { deleteVideo } from "@/app/_domains/video/_services/delete-video";
+import { DeleteVideoSchema } from "@/app/_domains/video/_services/delete-video.schema";
 import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
@@ -192,6 +194,11 @@ export const projectsRouter = router({
           posterKey: input.posterKey,
           userId: ctx.session.user.id,
         }),
+      ),
+    delete: protectedProcedure
+      .input(DeleteVideoSchema)
+      .mutation(({ input, ctx }) =>
+        deleteVideo({ videoId: input.videoId, userId: ctx.session.user.id }),
       ),
   }),
   feedback: router({
