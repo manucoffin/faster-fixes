@@ -1,6 +1,6 @@
 # ADR-0019: One Feedback entity for two subjects, a Project page or a Video, told apart by a nullable pair under a CHECK constraint
 
-- **Status**: Accepted
+- **Status**: Superseded by ADR-0020
 - **Date**: 2026-11-04
 
 ## Context
