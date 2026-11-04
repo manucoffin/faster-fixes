@@ -15,7 +15,7 @@ A person who submits Feedback without a Faster Fixes account: the end-user of th
 _Avoid_: Reporter, Submitter, User, Guest.
 
 **Project**:
-A Faster Fixes container scoped to one website (one widget install). Holds Feedback, settings, and at most one **Project link** per **Integration**.
+A Faster Fixes container for one client's scope: at most one website (one widget install) and any number of **Videos**. Holds Feedback, settings, and at most one **Project link** per **Integration**.
 _Avoid_: Site, App, Workspace.
 
 **Widget**:
@@ -47,7 +47,7 @@ _Avoid_: Highlight, Overlay, Annotation.
 ### Video review
 
 **Video**:
-A video file a User uploads into their Organization so Reviewers can give Feedback on it. Owned by the Organization, not by a Project: a Video is not a website. Its annotations are open or closed by a User; closed keeps the Video and its Feedback viewable through the Share link but accepts no new or changed Feedback.
+A video file a User uploads into a Project so Reviewers can give Feedback on it. Belongs to the Project like the website does: the Project's Trackers and Notification channels apply to its Feedback, and the Project's board holds it. Its annotations are open or closed by a User; closed keeps the Video and its Feedback viewable through the Share link but accepts no new or changed Feedback.
 _Avoid_: Media, Clip, Asset (the stored file, not the reviewable thing), Video project.
 
 **Share link**:
@@ -80,7 +80,7 @@ The sign-in subsystem: credentials, sessions, email verification, password reset
 _Avoid_: Login, Identity.
 
 **Organization**:
-The tenant. Owns Projects, Videos, Installations, Agent tokens and the Subscription. Every User acts within one active Organization.
+The tenant. Owns Projects (and through them Videos), Installations, Agent tokens and the Subscription. Every User acts within one active Organization.
 _Avoid_: Team, Workspace, Company.
 
 **Member**:
@@ -125,7 +125,7 @@ The state of a Feedback. Canonical values: `new`, `in_progress`, `resolved`, `ar
 Who or what drove a Status change: a **User**, a Tracker sync, or the **Agent** (an Agent-token caller). Travels on the status-change event so a **Notification channel** can distinguish an agent-resolved Feedback from a human-resolved one.
 
 **Rank**:
-A Feedback's place within its Status column of its subject's board, a Project's inbox or a Video, set by a User to say what the team handles first. Shared by every Member. A Feedback without a Rank sits above ranked ones, newest first, and a Status change clears it.
+A Feedback's place within its Status column of its Project's board, set by a User to say what the team handles first. Shared by every Member. A Feedback without a Rank sits above ranked ones, newest first, and a Status change clears it.
 _Avoid_: Priority (reserved for Tracker-side priority levels), Position, Order.
 
 **Archived**:
@@ -198,11 +198,11 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Testimonial** is deleted with its **User**; it outlives its **Organization**, whose name it carries as a snapshot
 - A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
 - A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
-- A **Feedback** is about either a page of a **Project** or a **Video**, never both; its **Selection** takes the shape of that subject
-- An **Organization** owns many **Videos**; a **Video** belongs to no **Project**
+- A **Feedback** belongs to one **Project** and is about either a page of its website or one of its **Videos**, never both; its **Selection** takes the shape of that subject
+- A **Project** holds many **Videos**; a **Video** belongs to exactly one **Project** and is deleted with it
 - A **Video** has exactly one **Share link** at a time; a **Reviewer** who gives Feedback on a Video does so through that link
-- A **Reviewer** belongs to exactly one **Project** or one **Video**, never both
-- A **Tracker** mirrors and a **Notification channel** announces page Feedback only; a video Feedback is read in the dashboard, the export and the MCP
+- A **Reviewer** belongs to exactly one **Project**; a Reviewer who came through a **Share link** is also bound to that **Video**, where their name is unique
+- A **Tracker** mirrors and a **Notification channel** announces every Feedback of a **Project** through its **Project links**, page and video alike
 - A video Feedback's **Screenshot** is the frame captured at its **Selection**
 - A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
