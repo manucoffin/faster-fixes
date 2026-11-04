@@ -12,11 +12,13 @@ export type VideoQuotaResult =
   | { allowed: false; denial: VideoQuotaDenial };
 
 // May this Organization add a Video of `declaredSize` bytes. Rows in both
-// states count, so concurrent uploads cannot race past the budget.
+// states count, so concurrent uploads cannot race past the budget. The commit
+// excludes the Video it is checking, whose declared size the real one replaces.
 export async function checkVideoQuota(
   organizationId: string,
   declaredSize: number,
   prisma: PrismaClient,
+  { excludeVideoId }: { excludeVideoId?: string } = {},
 ): Promise<VideoQuotaResult> {
   // A self-hosted instance stores on its own disk: no video quota at all.
   if (!isCloud()) {
@@ -36,7 +38,10 @@ export async function checkVideoQuota(
     };
   }
 
-  const where = { project: { organizationId } };
+  const where = {
+    project: { organizationId },
+    ...(excludeVideoId ? { id: { not: excludeVideoId } } : {}),
+  };
 
   if (limits.videos !== Infinity) {
     const count = await prisma.video.count({ where });

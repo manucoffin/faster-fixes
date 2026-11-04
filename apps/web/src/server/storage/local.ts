@@ -2,11 +2,28 @@ import "server-only";
 
 import { BadRequestError } from "@/server/errors/domain-errors";
 import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
-import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { getStorageBucket } from "./config";
 import { createLocalStorageUrl } from "./local-url";
 import type { StorageBackend, StorageObject } from "./types";
+
+// Local disk keeps no content type, so it is read back from the key.
+const contentTypesByExtension: Record<string, string> = {
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  mov: "video/quicktime",
+  mp4: "video/mp4",
+  png: "image/png",
+  webp: "image/webp",
+};
 
 function getLocalObjectPath(root: string, bucket: string, key: string) {
   if (
@@ -47,6 +64,25 @@ export class LocalStorage implements StorageBackend {
     return rm(getLocalObjectPath(this.root, object.bucket, object.key), {
       force: true,
     });
+  }
+
+  async head(object: StorageObject) {
+    try {
+      const { size } = await stat(
+        getLocalObjectPath(this.root, object.bucket, object.key),
+      );
+      const extension = object.key.split(".").at(-1) ?? "";
+      return { size, contentType: contentTypesByExtension[extension] ?? "" };
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async deleteMany(bucket: string, keys: string[]) {

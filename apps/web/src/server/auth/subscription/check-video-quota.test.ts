@@ -6,7 +6,12 @@ type FakeDb = Parameters<typeof checkVideoQuota>[2];
 const MB = 1_000_000;
 const GB = 1_000_000_000;
 
-type VideoRow = { organizationId: string; size: bigint; state: string };
+type VideoRow = {
+  id?: string;
+  organizationId: string;
+  size: bigint;
+  state: string;
+};
 
 function fakeDb({
   plan,
@@ -15,9 +20,15 @@ function fakeDb({
   plan: "pro" | "agency" | null;
   videos?: VideoRow[];
 }) {
-  type Query = { where: { project: { organizationId: string } } };
+  type Query = {
+    where: { project: { organizationId: string }; id?: { not: string } };
+  };
   const inOrganization = (where: Query["where"]): VideoRow[] =>
-    videos.filter((v) => v.organizationId === where.project.organizationId);
+    videos.filter(
+      (v) =>
+        v.organizationId === where.project.organizationId &&
+        (!where.id || v.id !== where.id.not),
+    );
 
   return {
     subscription: {
@@ -151,6 +162,17 @@ describe("checkVideoQuota", () => {
           ],
         }),
       ),
+    ).resolves.toEqual({ allowed: true });
+  });
+
+  it("leaves the excluded Video out of the count and the budget", async () => {
+    const db = fakeDb({
+      plan: null,
+      videos: [{ ...video(400 * MB, "uploading"), id: "video_1" }],
+    });
+
+    await expect(
+      checkVideoQuota("org_1", 450 * MB, db, { excludeVideoId: "video_1" }),
     ).resolves.toEqual({ allowed: true });
   });
 

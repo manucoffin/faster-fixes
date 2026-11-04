@@ -2,12 +2,16 @@ import type { Router } from "@better-upload/server";
 
 export type StorageObject = { bucket: string; key: string };
 
+// What storage reports about a stored object, `null` when it is absent.
+export type StoredObjectInfo = { size: number; contentType: string } | null;
+
 export type StorageBackend = {
   put(
     object: StorageObject & { body: Buffer<ArrayBuffer>; contentType: string },
   ): Promise<void>;
   copy(source: StorageObject, destination: StorageObject): Promise<void>;
   delete(object: StorageObject): Promise<void>;
+  head(object: StorageObject): Promise<StoredObjectInfo>;
   deleteMany(
     bucket: string,
     keys: string[],

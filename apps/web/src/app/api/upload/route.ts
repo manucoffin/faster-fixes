@@ -1,5 +1,10 @@
 import { getTestimonialUploadPrefix } from "@/app/_domains/testimonial/_helpers/testimonial-photo-keys";
 import { findOpenTestimonialRequest } from "@/app/_domains/testimonial/_services/find-open-testimonial-request";
+import {
+  getVideoPosterKey,
+  getVideoSourceKey,
+  VIDEO_MIME_TYPES,
+} from "@/app/_domains/video/_helpers/video-object-keys";
 import { createVideo } from "@/app/_domains/video/_services/create-video";
 import { findUploadingVideo } from "@/app/_domains/video/_services/find-uploading-video";
 import { auth } from "@/server/auth";
@@ -107,11 +112,6 @@ const routes: Router["routes"] = {
   }),
 };
 
-const VIDEO_EXTENSIONS: Record<string, string> = {
-  "video/mp4": "mp4",
-  "video/quicktime": "mov",
-};
-
 // R2 requires every part but the last to be the same size, so never adaptive.
 const VIDEO_PART_SIZE = 16 * 1024 * 1024;
 
@@ -119,14 +119,10 @@ const VIDEO_PART_SIZE = 16 * 1024 * 1024;
 // by the quota.
 const VIDEO_MAX_FILE_SIZE = 4_000_000_000;
 
-function getVideoFolder(video: { projectId: string; id: string }) {
-  return `videos/${video.projectId}/${video.id}`;
-}
-
 // The local provider's upload client signs single PUTs only.
 function videoRoute(multipart: boolean) {
   return route({
-    fileTypes: Object.keys(VIDEO_EXTENSIONS),
+    fileTypes: VIDEO_MIME_TYPES,
     maxFileSize: VIDEO_MAX_FILE_SIZE,
     multipart,
     partSize: VIDEO_PART_SIZE,
@@ -165,7 +161,7 @@ function videoRoute(multipart: boolean) {
 
       return {
         objectInfo: {
-          key: `${getVideoFolder(video)}/source.${VIDEO_EXTENSIONS[file.type]}`,
+          key: getVideoSourceKey({ ...video, mimeType: file.type }),
         },
         metadata: { videoId: video.id },
       };
@@ -206,7 +202,7 @@ const videoPosterRoute = route({
     }
 
     return {
-      objectInfo: { key: `${getVideoFolder(video)}/poster.jpg` },
+      objectInfo: { key: getVideoPosterKey(video) },
     };
   },
 });

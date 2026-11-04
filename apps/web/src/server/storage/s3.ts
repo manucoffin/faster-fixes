@@ -57,6 +57,23 @@ export class S3Storage implements StorageBackend {
     return deleteObject(this.uploadClient, object);
   }
 
+  // Not `headObject` from the helpers: a HEAD response has no body, so its
+  // error parser cannot tell a missing object from any other failure.
+  async head({ bucket, key }: StorageObject) {
+    const response = await this.uploadClient.s3.fetch(
+      `${this.uploadClient.buildBucketUrl(bucket)}/${key}`,
+      { method: "HEAD", aws: { signQuery: true, allHeaders: true } },
+    );
+    if (response.status === 404) return null;
+    if (!response.ok) {
+      throw new Error(`HeadObject failed with status ${response.status}.`);
+    }
+    return {
+      size: Number(response.headers.get("content-length") ?? 0),
+      contentType: response.headers.get("content-type") ?? "",
+    };
+  }
+
   deleteMany(bucket: string, keys: string[]) {
     return deleteObjects(this.uploadClient, {
       bucket,

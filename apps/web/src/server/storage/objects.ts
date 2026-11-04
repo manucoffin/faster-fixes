@@ -38,6 +38,10 @@ export async function deleteStorageObject({ key }: { key: string }) {
   return createStorage().delete({ bucket: getStorageBucket(), key });
 }
 
+export async function headStorageObject({ key }: { key: string }) {
+  return createStorage().head({ bucket: getStorageBucket(), key });
+}
+
 export async function deleteStorageObjects(keys: string[]) {
   return createStorage().deleteMany(getStorageBucket(), keys);
 }
