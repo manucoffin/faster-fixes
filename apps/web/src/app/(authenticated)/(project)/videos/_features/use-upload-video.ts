@@ -5,10 +5,10 @@ import { getVideoTitleFromFileName } from "@/app/_domains/video/_helpers/get-vid
 import { parseVideoQuotaDenial } from "@/app/_domains/video/_helpers/parse-video-quota-denial";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import type { VideoQuotaDenial } from "@/server/auth/subscription/check-video-quota";
-import { useUploadFile } from "@better-upload/client";
+import { uploadFile, useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -16,6 +16,7 @@ import {
   UploadVideoSchema,
   type UploadVideoInput,
 } from "../_services/upload-video.schema";
+import { captureVideoPoster } from "./capture-video-poster";
 import { readVideoFileClassification } from "./read-video-file-classification";
 
 type PickedFile = {
@@ -48,6 +49,11 @@ export function useUploadVideo({
   // the render that starts the transfer.
   const [abortController, setAbortController] = useState(
     () => new AbortController(),
+  );
+  // Captured while the file is checked, uploaded once the Video row exists.
+  const posterRef = useRef<Promise<Blob | null>>(Promise.resolve(null));
+  const posterKeyRef = useRef<Promise<string | undefined>>(
+    Promise.resolve(undefined),
   );
 
   const form = useForm<UploadVideoInput>({
@@ -100,14 +106,20 @@ export function useUploadVideo({
     onUploadBegin: ({ metadata }) => {
       if (typeof metadata.videoId === "string") {
         setVideoId(metadata.videoId);
+        posterKeyRef.current = uploadPoster({
+          videoId: metadata.videoId,
+          poster: posterRef.current,
+          signal: abortController.signal,
+        });
       }
       // The row now exists in `uploading` state.
       void refreshVideos();
     },
     onUploadComplete: async ({ metadata }) => {
       if (typeof metadata.videoId === "string") {
+        const posterKey = await posterKeyRef.current;
         await completeUploadMutation
-          .mutateAsync({ videoId: metadata.videoId })
+          .mutateAsync({ videoId: metadata.videoId, posterKey })
           .catch(() => undefined);
       }
     },
@@ -137,6 +149,8 @@ export function useUploadVideo({
     setVideoId(null);
     setAbortController(new AbortController());
     setPicked({ file, classification: null });
+    posterRef.current = captureVideoPoster(file);
+    posterKeyRef.current = Promise.resolve(undefined);
     form.reset({ title: getVideoTitleFromFileName(file.name) });
 
     const classification = await readVideoFileClassification(file);
@@ -204,4 +218,31 @@ export function useUploadVideo({
     upload,
     cancel,
   };
+}
+
+// A failed Poster is not reported: the Video falls back to the generic icon.
+async function uploadPoster({
+  videoId,
+  poster,
+  signal,
+}: {
+  videoId: string;
+  poster: Promise<Blob | null>;
+  signal: AbortSignal;
+}) {
+  try {
+    const blob = await poster;
+    if (!blob) {
+      return undefined;
+    }
+    const { file } = await uploadFile({
+      route: "video-poster",
+      file: new File([blob], "poster.jpg", { type: "image/jpeg" }),
+      metadata: { videoId },
+      signal,
+    });
+    return file.objectInfo.key;
+  } catch {
+    return undefined;
+  }
 }
