@@ -139,6 +139,42 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
 // A video Feedback has no page, element, Custom metadata or Diagnostics: the
 // Video line says where to look and the captured frame is the Screenshot.
 function formatVideoIssueBody(feedback: FeedbackForIssue): string {
+  const lines = [
+    quoteComment(feedback.comment),
+    "",
+    `**Video:** ${describeVideoLocation(feedback).join(" \u00b7 ")}`,
+  ];
+
+  if (feedback.screenshotUrl) {
+    lines.push("", `![Screenshot](${feedback.screenshotUrl})`);
+  }
+
+  lines.push("", `**Reported by:** ${feedback.reviewerName}`);
+
+  const envParts = environmentParts(feedback);
+  if (envParts.length > 0) {
+    lines.push("", `**Environment:** ${envParts.join(" \u00b7 ")}`);
+  }
+
+  lines.push("", dashboardFooter(feedback.dashboardUrl));
+
+  return lines.join("\n");
+}
+
+// The Video line's parts (title, time, position on the frame), shared by every
+// Tracker's video variant so GitHub, Linear and Jira say the same thing.
+export function describeVideoLocation(
+  feedback: Pick<
+    FeedbackForIssue,
+    | "videoTitle"
+    | "startMs"
+    | "endMs"
+    | "frameX"
+    | "frameY"
+    | "frameWidth"
+    | "frameHeight"
+  >,
+): string[] {
   const videoParts: string[] = [];
   if (feedback.videoTitle) videoParts.push(feedback.videoTitle);
   if (feedback.startMs != null) {
@@ -156,26 +192,7 @@ function formatVideoIssueBody(feedback: FeedbackForIssue): string {
   );
   if (position) videoParts.push(position);
 
-  const lines = [
-    quoteComment(feedback.comment),
-    "",
-    `**Video:** ${videoParts.join(" \u00b7 ")}`,
-  ];
-
-  if (feedback.screenshotUrl) {
-    lines.push("", `![Screenshot](${feedback.screenshotUrl})`);
-  }
-
-  lines.push("", `**Reported by:** ${feedback.reviewerName}`);
-
-  const envParts = environmentParts(feedback);
-  if (envParts.length > 0) {
-    lines.push("", `**Environment:** ${envParts.join(" \u00b7 ")}`);
-  }
-
-  lines.push("", dashboardFooter(feedback.dashboardUrl));
-
-  return lines.join("\n");
+  return videoParts;
 }
 
 function quoteComment(comment: string) {

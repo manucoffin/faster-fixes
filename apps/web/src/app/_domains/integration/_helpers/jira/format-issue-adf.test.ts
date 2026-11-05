@@ -89,3 +89,157 @@ describe("formatIssueAdf", () => {
     expect(JSON.stringify(withoutPage)).not.toContain("null");
   });
 });
+
+describe("formatIssueAdf for a video Feedback", () => {
+  const videoFeedback: FeedbackForJiraIssue = {
+    ...feedback,
+    comment: "The logo jumps when the menu opens",
+    pageUrl: null,
+    selector: null,
+    viewportWidth: null,
+    viewportHeight: null,
+    screenshotUrl: "https://cdn.example.com/frame.jpg?X-Amz-Expires=3600",
+    reviewerName: "Curious Otter",
+    metadata: { reactComponentPath: "App > Header" },
+    customMetadata: { plan: "pro" },
+    dashboardUrl: "https://app.example.com/videos/vid_1?feedbackId=fb_1",
+    videoId: "vid_1",
+    videoTitle: "Homepage walkthrough v1",
+    startMs: 12340,
+    endMs: null,
+    frameX: 0.42,
+    frameY: 0.61,
+    frameWidth: null,
+    frameHeight: null,
+  };
+
+  const labelled = (label: string, value: string) => ({
+    type: "paragraph",
+    content: [
+      { type: "text", text: label, marks: [{ type: "strong" }] },
+      { type: "text", text: value },
+    ],
+  });
+
+  const videoDocument = (videoLine: string) => ({
+    version: 1,
+    type: "doc",
+    content: [
+      {
+        type: "blockquote",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              { type: "text", text: "The logo jumps when the menu opens" },
+            ],
+          },
+        ],
+      },
+      labelled("Video: ", videoLine),
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Screenshot: ", marks: [{ type: "strong" }] },
+          {
+            type: "text",
+            text: "view",
+            marks: [
+              {
+                type: "link",
+                attrs: {
+                  href: "https://cdn.example.com/frame.jpg?X-Amz-Expires=3600",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      labelled("Reported by: ", "Curious Otter"),
+      labelled("Environment: ", "Chrome 130 · macOS"),
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "Faster Fixes",
+            marks: [
+              { type: "link", attrs: { href: "https://faster-fixes.com" } },
+            ],
+          },
+          { type: "text", text: " · ", marks: [{ type: "em" }] },
+          {
+            type: "text",
+            text: "View in dashboard",
+            marks: [
+              {
+                type: "link",
+                attrs: {
+                  href: "https://app.example.com/videos/vid_1?feedbackId=fb_1",
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  it("renders the Video paragraph with the instant and the point, in order", () => {
+    expect(formatIssueAdf(videoFeedback)).toEqual(
+      videoDocument(
+        "Homepage walkthrough v1 · At 0:12.340 · Point at 42%, 61%",
+      ),
+    );
+  });
+
+  it("renders a range with an area", () => {
+    expect(
+      formatIssueAdf({
+        ...videoFeedback,
+        startMs: 41000,
+        endMs: 47500,
+        frameX: 0.1,
+        frameY: 0.2,
+        frameWidth: 0.45,
+        frameHeight: 0.5,
+      }),
+    ).toEqual(
+      videoDocument(
+        "Homepage walkthrough v1 · From 0:41.000 to 0:47.500 · Area from (10%, 20%) to (55%, 70%)",
+      ),
+    );
+  });
+
+  it("renders time only when the Reviewer marked no part of the frame", () => {
+    expect(
+      formatIssueAdf({ ...videoFeedback, frameX: null, frameY: null }),
+    ).toEqual(videoDocument("Homepage walkthrough v1 · At 0:12.340"));
+  });
+
+  it("drops the Screenshot and Environment when neither was captured", () => {
+    const json = JSON.stringify(
+      formatIssueAdf({
+        ...videoFeedback,
+        screenshotUrl: null,
+        browserName: null,
+        browserVersion: null,
+        os: null,
+      }),
+    );
+
+    expect(json).not.toContain("Screenshot");
+    expect(json).not.toContain("Environment");
+    expect(json).toContain("Reported by: ");
+  });
+
+  it("writes no expand, Element, Share link or inbox link", () => {
+    const doc = formatIssueAdf(videoFeedback);
+    const json = JSON.stringify(doc);
+
+    expect(expandTitles(doc)).toEqual([]);
+    expect(json).not.toContain("Element: ");
+    expect(json).not.toContain("/review/");
+    expect(json).not.toContain("/inbox");
+  });
+});

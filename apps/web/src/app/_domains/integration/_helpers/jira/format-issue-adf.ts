@@ -3,7 +3,10 @@
 // but ADF is a structured JSON tree — Jira's v3 API rejects Markdown — so the
 // two cannot share a renderer. Keep the section order in sync when either side changes.
 
-import { formatIssueTitle } from "../github/format-issue-body";
+import {
+  describeVideoLocation,
+  formatIssueTitle,
+} from "../github/format-issue-body";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 
 type AdfMark =
@@ -45,6 +48,15 @@ export type FeedbackForJiraIssue = {
   diagnosticTrail: DiagnosticTrail | null;
   customMetadata?: CustomMetadata | null;
   dashboardUrl: string;
+  // Optional: absent or null on a page Feedback (ADR-0020).
+  videoId?: string | null;
+  videoTitle?: string | null;
+  startMs?: number | null;
+  endMs?: number | null;
+  frameX?: number | null;
+  frameY?: number | null;
+  frameWidth?: number | null;
+  frameHeight?: number | null;
 };
 
 const SEPARATOR = " · ";
@@ -80,16 +92,9 @@ export function formatJiraSummary(comment: string): string {
 }
 
 export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
-  const content: AdfNode[] = [];
+  if (feedback.videoId) return formatVideoIssueAdf(feedback);
 
-  // The reviewer's words lead, quoted, so they read as a citation rather than as
-  // Faster Fixes speaking.
-  content.push({
-    type: "blockquote",
-    content: feedback.comment
-      .split("\n")
-      .map((line) => paragraph(line.length > 0 ? [text(line)] : [])),
-  });
+  const content: AdfNode[] = [quoteComment(feedback.comment)];
 
   if (feedback.pageUrl) {
     const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
@@ -108,15 +113,8 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
     );
   }
 
-  // ADF cannot hotlink an external image: `mediaSingle` only references files
-  // already uploaded to Jira's media store, so the screenshot ships as a link.
   if (feedback.screenshotUrl) {
-    content.push(
-      paragraph([
-        text("Screenshot: ", [{ type: "strong" }]),
-        link("view", feedback.screenshotUrl),
-      ]),
-    );
+    content.push(screenshotParagraph(feedback.screenshotUrl));
   }
 
   const environment = buildEnvironmentExpand(feedback);
@@ -128,15 +126,74 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
   const diagnostics = buildDiagnosticsExpand(feedback.diagnosticTrail);
   if (diagnostics) content.push(diagnostics);
 
+  content.push(dashboardFooter(feedback.dashboardUrl));
+
+  return { version: 1, type: "doc", content };
+}
+
+// Same section order as the Markdown video variant: no page, element, Custom
+// metadata or Diagnostics, and the captured frame is the Screenshot.
+function formatVideoIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
+  const content: AdfNode[] = [
+    quoteComment(feedback.comment),
+    paragraph([
+      text("Video: ", [{ type: "strong" }]),
+      text(describeVideoLocation(feedback).join(SEPARATOR)),
+    ]),
+  ];
+
+  if (feedback.screenshotUrl) {
+    content.push(screenshotParagraph(feedback.screenshotUrl));
+  }
+
   content.push(
     paragraph([
-      link("Faster Fixes", "https://faster-fixes.com"),
-      text(SEPARATOR, [{ type: "em" }]),
-      link("View in dashboard", feedback.dashboardUrl),
+      text("Reported by: ", [{ type: "strong" }]),
+      text(feedback.reviewerName),
     ]),
   );
 
+  const envParts = environmentParts(feedback);
+  if (envParts.length > 0) {
+    content.push(
+      paragraph([
+        text("Environment: ", [{ type: "strong" }]),
+        text(envParts.join(SEPARATOR)),
+      ]),
+    );
+  }
+
+  content.push(dashboardFooter(feedback.dashboardUrl));
+
   return { version: 1, type: "doc", content };
+}
+
+// The reviewer's words lead, quoted, so they read as a citation rather than as
+// Faster Fixes speaking.
+function quoteComment(comment: string): AdfNode {
+  return {
+    type: "blockquote",
+    content: comment
+      .split("\n")
+      .map((line) => paragraph(line.length > 0 ? [text(line)] : [])),
+  };
+}
+
+// ADF cannot hotlink an external image: `mediaSingle` only references files
+// already uploaded to Jira's media store, so the screenshot ships as a link.
+function screenshotParagraph(screenshotUrl: string): AdfNode {
+  return paragraph([
+    text("Screenshot: ", [{ type: "strong" }]),
+    link("view", screenshotUrl),
+  ]);
+}
+
+function dashboardFooter(dashboardUrl: string): AdfNode {
+  return paragraph([
+    link("Faster Fixes", "https://faster-fixes.com"),
+    text(SEPARATOR, [{ type: "em" }]),
+    link("View in dashboard", dashboardUrl),
+  ]);
 }
 
 function collectElementParts(feedback: FeedbackForJiraIssue): AdfNode[] {
@@ -163,9 +220,7 @@ function collectElementParts(feedback: FeedbackForJiraIssue): AdfNode[] {
   return nodes;
 }
 
-function buildEnvironmentExpand(
-  feedback: FeedbackForJiraIssue,
-): AdfNode | null {
+function environmentParts(feedback: FeedbackForJiraIssue): string[] {
   const parts: string[] = [];
 
   if (feedback.browserName) {
@@ -178,6 +233,13 @@ function buildEnvironmentExpand(
   if (feedback.viewportWidth && feedback.viewportHeight) {
     parts.push(`${feedback.viewportWidth} × ${feedback.viewportHeight}`);
   }
+  return parts;
+}
+
+function buildEnvironmentExpand(
+  feedback: FeedbackForJiraIssue,
+): AdfNode | null {
+  const parts = environmentParts(feedback);
 
   if (parts.length === 0 && !feedback.reviewerName) return null;
 

@@ -41,6 +41,7 @@ export const createJiraIssue = inngest.createFunction(
           },
         },
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
         jiraIssueLink: { select: { id: true } },
       },
@@ -94,6 +95,14 @@ export const createJiraIssue = inngest.createFunction(
       diagnosticTrail: feedback.diagnosticTrail as DiagnosticTrail | null,
       customMetadata: feedback.customMetadata as CustomMetadata | null,
       dashboardUrl: buildFeedbackDashboardUrl(feedback),
+      videoId: feedback.videoId,
+      videoTitle: feedback.video?.title,
+      startMs: feedback.startMs,
+      endMs: feedback.endMs,
+      frameX: feedback.frameX,
+      frameY: feedback.frameY,
+      frameWidth: feedback.frameWidth,
+      frameHeight: feedback.frameHeight,
     });
 
     let issue;
