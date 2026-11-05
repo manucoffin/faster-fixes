@@ -71,7 +71,7 @@ export function VideoSharePopover({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              This link cannot be displayed. Replace it to get a new one.
+              This link cannot be displayed. Rotate it to get a new one.
             </p>
           )}
           {isConfirmingReplace ? (
@@ -94,7 +94,7 @@ export function VideoSharePopover({
                   disabled={isReplacing}
                   onClick={() => void handleReplace()}
                 >
-                  {isReplacing ? "Replacing..." : "Replace link"}
+                  {isReplacing ? "Rotating..." : "Rotate link"}
                 </Button>
               </div>
             </div>
@@ -105,7 +105,7 @@ export function VideoSharePopover({
               className="-ml-2"
               onClick={() => setIsConfirmingReplace(true)}
             >
-              Replace link
+              Rotate link
             </Button>
           )}
         </div>

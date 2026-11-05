@@ -35,7 +35,7 @@ export function useVideoActions({
 
   const replaceShareLinkMutation = useMutation(
     trpc.authenticated.projects.video.replaceShareLink.mutationOptions({
-      onSuccess: () => toast.success("Link replaced"),
+      onSuccess: () => toast.success("Link rotated"),
       onError: (error) => toast.error(error.message),
       onSettled: () => refreshVideo(),
     }),

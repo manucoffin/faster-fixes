@@ -37,7 +37,7 @@ export function ReplaceVideoLinkDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Replace link?</AlertDialogTitle>
+          <AlertDialogTitle>Rotate link?</AlertDialogTitle>
           <AlertDialogDescription>
             Everyone holding the current link loses access.
           </AlertDialogDescription>
@@ -52,7 +52,7 @@ export function ReplaceVideoLinkDialog({
               void handleReplace();
             }}
           >
-            {isReplacing ? "Replacing..." : "Replace link"}
+            {isReplacing ? "Rotating..." : "Rotate link"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

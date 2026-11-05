@@ -54,7 +54,7 @@ export function VideoRowMenu({ video, projectId }: VideoRowMenuProps) {
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setOpenDialog("replaceLink")}>
                 <Link2 className="size-4" />
-                Replace link
+                Rotate link
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
