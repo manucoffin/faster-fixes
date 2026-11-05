@@ -75,7 +75,9 @@ export function VideosList({ projectId }: VideosListProps) {
             </EmptyContent>
           </Empty>
         ),
-        Success: ({ data: videos }) => <VideosTable videos={videos} />,
+        Success: ({ data: videos }) => (
+          <VideosTable videos={videos} projectId={projectId} />
+        ),
       })}
     </div>
   );

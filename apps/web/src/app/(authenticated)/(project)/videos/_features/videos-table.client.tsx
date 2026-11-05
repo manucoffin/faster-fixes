@@ -19,14 +19,16 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import type { ListVideosOutput } from "../_services/list-videos";
+import { VideoRowMenu } from "./video-row-menu/video-row-menu.client";
 
 type VideosTableProps = {
   videos: ListVideosOutput;
+  projectId: string;
 };
 
 type Video = ListVideosOutput[number];
 
-export function VideosTable({ videos }: VideosTableProps) {
+export function VideosTable({ videos, projectId }: VideosTableProps) {
   const router = useRouter();
   const [copied, setCopied] = React.useState<string | null>(null);
 
@@ -53,6 +55,7 @@ export function VideosTable({ videos }: VideosTableProps) {
           <TableHead>Annotations</TableHead>
           <TableHead>Uploaded</TableHead>
           <TableHead />
+          <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -127,6 +130,9 @@ export function VideosTable({ videos }: VideosTableProps) {
                     )}
                   </Button>
                 )}
+              </TableCell>
+              <TableCell>
+                <VideoRowMenu video={video} projectId={projectId} />
               </TableCell>
             </TableRow>
           );

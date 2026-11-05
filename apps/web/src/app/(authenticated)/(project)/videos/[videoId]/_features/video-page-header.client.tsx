@@ -1,13 +1,16 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { Download, ExternalLink, SquareKanban } from "lucide-react";
+import { Download, ExternalLink, SquareKanban, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { serializeBoardSource } from "@/app/(authenticated)/(project)/inbox/_helpers/board-source";
 import type { GetVideoOutput } from "../_services/get-video";
 import { useExportVideoFeedback } from "./use-export-video-feedback";
-import { useVideoActions } from "./use-video-actions";
+import { DeleteVideoDialog } from "@/app/_domains/video/video-actions/delete-video-dialog.client";
+import { useVideoActions } from "@/app/_domains/video/video-actions/use-video-actions";
 import { VideoSharePopover } from "./video-share-popover.client";
 import { VideoTitleEditor } from "./video-title-editor.client";
 
@@ -20,11 +23,15 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
     renameMutation,
     replaceShareLinkMutation,
     setAnnotationsOpenMutation,
+    deleteMutation,
   } = useVideoActions({ videoId: video.id, projectId: video.projectId });
   const exportFeedbackMutation = useExportVideoFeedback({
     videoId: video.id,
     title: video.title,
   });
+
+  const router = useRouter();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // The review page opens a `ready` Video only.
   const reviewUrl = video.state === "ready" ? video.shareUrl : null;
@@ -83,6 +90,26 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
             View on Task board
           </Link>
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Delete"
+          title="Delete"
+          className="size-8 text-destructive hover:text-destructive"
+          onClick={() => setIsDeleteOpen(true)}
+        >
+          <Trash2 />
+        </Button>
+        <DeleteVideoDialog
+          open={isDeleteOpen}
+          onOpenChange={setIsDeleteOpen}
+          feedbackCount={video.feedback.length}
+          isDeleting={deleteMutation.isPending}
+          onDelete={async () => {
+            await deleteMutation.mutateAsync({ videoId: video.id });
+            router.push("/videos");
+          }}
+        />
       </div>
     </header>
   );

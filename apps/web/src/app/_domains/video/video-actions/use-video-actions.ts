@@ -7,8 +7,9 @@ type UseVideoActionsOptions = {
   projectId: string;
 };
 
-// The Video page header's writes. Each one refreshes the page and the Videos
-// list, which shows the same title, link and annotations state.
+// The writes on one Video, shared by the Video page header and the Videos list
+// row menu. Each one refreshes the page and the list, which show the same
+// title, link and annotations state.
 export function useVideoActions({
   videoId,
   projectId,
@@ -47,9 +48,34 @@ export function useVideoActions({
     }),
   );
 
+  // The Video's own query is left alone: refetching it would flash "not
+  // found" on the page the User is leaving.
+  const deleteMutation = useMutation(
+    trpc.authenticated.projects.video.delete.mutationOptions({
+      onSuccess: () => toast.success("Video deleted"),
+      onError: (error) => toast.error(error.message),
+      onSettled: () =>
+        Promise.all([
+          queryClient.invalidateQueries(
+            trpc.authenticated.projects.video.list.queryFilter({ projectId }),
+          ),
+          queryClient.invalidateQueries(
+            trpc.authenticated.projects.video.getUsage.queryFilter({
+              projectId,
+            }),
+          ),
+          // Its Feedback leaves the Task board and its source filter.
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.feedback.pathKey(),
+          }),
+        ]),
+    }),
+  );
+
   return {
     renameMutation,
     replaceShareLinkMutation,
     setAnnotationsOpenMutation,
+    deleteMutation,
   };
 }

@@ -33,9 +33,25 @@ export async function listVideos(
     select: videoRowSelect,
   });
 
+  // The Delete dialog names every Feedback going with the Video, whatever its
+  // Status, which the row's open count does not cover.
+  const feedbackCounts = await db.feedback.groupBy({
+    by: ["videoId"],
+    where: { videoId: { in: videos.map(({ id }) => id) } },
+    _count: { _all: true },
+  });
+  const feedbackCountByVideoId = new Map(
+    feedbackCounts.map(({ videoId, _count }) => [videoId, _count._all]),
+  );
+
   const appUrl = getAppUrl();
 
-  return Promise.all(videos.map((video) => toVideoRow(video, appUrl)));
+  return Promise.all(
+    videos.map(async (video) => ({
+      ...(await toVideoRow(video, appUrl)),
+      feedbackCount: feedbackCountByVideoId.get(video.id) ?? 0,
+    })),
+  );
 }
 
 export type ListVideosOutput = Awaited<ReturnType<typeof listVideos>>;

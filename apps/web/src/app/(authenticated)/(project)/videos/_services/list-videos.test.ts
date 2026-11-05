@@ -35,6 +35,10 @@ type FindManyArgs = {
   };
 };
 
+type GroupByArgs = {
+  where: { videoId: { in: string[] } };
+};
+
 // Reads the Status filter the service asks the count for, so a case asserts
 // which Feedback ends up counted rather than the shape of the query.
 function fakeDb({
@@ -45,6 +49,19 @@ function fakeDb({
   const db = {
     project: { findUnique: vi.fn().mockResolvedValue(project) },
     member: { findFirst: vi.fn().mockResolvedValue(membership) },
+    feedback: {
+      groupBy: vi.fn(({ where }: GroupByArgs) =>
+        Promise.resolve(
+          videos
+            .filter((video) => where.videoId.in.includes(video.id))
+            .map((video) => ({
+              videoId: video.id,
+              _count: { _all: video.feedbackStatuses.length },
+            }))
+            .filter(({ _count }) => _count._all > 0),
+        ),
+      ),
+    },
     video: {
       findMany: vi.fn(({ where, select }: FindManyArgs) => {
         const openStatuses = select._count.select.feedback.where.status.in;
@@ -112,6 +129,7 @@ describe("listVideos", () => {
         size: 48_000_000,
         posterUrl: "https://storage.test/videos/video_1/poster.jpg?signed",
         openFeedbackCount: 0,
+        feedbackCount: 0,
         annotationsOpen: true,
         uploadedBy: "Ada",
         createdAt: new Date("2026-10-01T10:00:00Z"),
@@ -131,6 +149,26 @@ describe("listVideos", () => {
 
     const [row] = await listVideos(input, db);
     expect(row?.openFeedbackCount).toBe(3);
+  });
+
+  it("counts every Feedback of the Video, whatever its Status", async () => {
+    const db = fakeDb({
+      videos: [
+        videoRow({
+          id: "commented",
+          feedbackStatuses: ["new", "in_progress", "resolved", "closed"],
+        }),
+        videoRow({ id: "silent", feedbackStatuses: [] }),
+      ],
+    });
+
+    const rows = await listVideos(input, db);
+    expect(
+      rows.map(({ id, feedbackCount }) => ({ id, feedbackCount })),
+    ).toEqual([
+      { id: "commented", feedbackCount: 4 },
+      { id: "silent", feedbackCount: 0 },
+    ]);
   });
 
   it("carries an uploading Video with its state, no Poster and no uploader", async () => {
