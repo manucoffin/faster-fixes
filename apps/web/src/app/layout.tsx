@@ -6,13 +6,13 @@ import { Analytics } from "@vercel/analytics/next";
 import "@workspace/ui/globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import { StopImpersonateButton } from "./_domains/auth/stop-impersonate-button/stop-impersonate-button.client";
 import { AppFeedbackProvider } from "./_providers/app-feedback-provider.client";
 import { ConsentProvider } from "./_providers/consent-provider.client";
+import { ThemeProvider } from "./_providers/theme-provider.client";
 
 const fontSans = Space_Grotesk({
   subsets: ["latin"],
@@ -64,13 +64,7 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
+        <ThemeProvider>
           <ConsentProvider>
             <TRPCProvider>
               <NuqsAdapter>

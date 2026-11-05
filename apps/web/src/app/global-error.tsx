@@ -2,9 +2,9 @@
 
 import { ErrorScreen } from "@/app/_components/error-screen";
 import { ERROR_BOUNDARY_COPY } from "@/app/_constants/error-screens";
+import { ThemeProvider } from "@/app/_providers/theme-provider.client";
 import { Button } from "@workspace/ui/components/button";
 import "@workspace/ui/globals.css";
-import { ThemeProvider } from "next-themes";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { useEffect } from "react";
 
@@ -45,13 +45,7 @@ export default function GlobalErrorBoundary({
       >
         <title>{ERROR_BOUNDARY_COPY.title}</title>
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
+        <ThemeProvider>
           <main className="flex flex-1 flex-col">
             <ErrorScreen
               title={ERROR_BOUNDARY_COPY.title}
