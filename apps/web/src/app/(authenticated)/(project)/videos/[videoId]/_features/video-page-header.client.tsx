@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { ExternalLink, SquareKanban, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { ExternalLink, MoreVertical, SquareKanban, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -66,26 +73,38 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
             Open review page
           </Button>
         )}
-        <Button variant="outline" size="sm" asChild>
-          <Link
-            href={`/inbox?source=${encodeURIComponent(
-              serializeBoardSource({ kind: "video", videoId: video.id }),
-            )}`}
-          >
-            <SquareKanban />
-            View on Task board
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Delete"
-          title="Delete"
-          className="size-8 text-destructive hover:text-destructive"
-          onClick={() => setIsDeleteOpen(true)}
-        >
-          <Trash2 />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Video actions"
+              className="size-8"
+            >
+              <MoreVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link
+                href={`/inbox?source=${encodeURIComponent(
+                  serializeBoardSource({ kind: "video", videoId: video.id }),
+                )}`}
+              >
+                <SquareKanban className="size-4" />
+                View on Task board
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => setIsDeleteOpen(true)}
+            >
+              <Trash2 className="size-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DeleteVideoDialog
           open={isDeleteOpen}
           onOpenChange={setIsDeleteOpen}
