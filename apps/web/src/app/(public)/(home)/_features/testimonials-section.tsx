@@ -12,7 +12,13 @@ import {
 import { StarIcon } from "lucide-react";
 
 export async function TestimonialsSection() {
-  const testimonials = await listPublishedTestimonials();
+  // An optional section: a database outage hides it rather than taking down the homepage.
+  const testimonials = await listPublishedTestimonials().catch(
+    (error: unknown) => {
+      console.error("Failed to list published Testimonials", error);
+      return [];
+    },
+  );
 
   if (testimonials.length === 0) return null;
 
