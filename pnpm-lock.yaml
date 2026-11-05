@@ -9,6 +9,7 @@ overrides:
   react-dom: 19.3.0
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
+  "@radix-ui/react-slot": 1.2.4
 
 importers:
   .:
@@ -553,8 +554,8 @@ importers:
         specifier: ^1.3.6
         version: 1.3.6(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-slot":
-        specifier: ^1.2.3
-        version: 1.2.3(@types/react@19.3.0)(react@19.3.0)
+        specifier: 1.2.4
+        version: 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-switch":
         specifier: ^1.2.6
         version: 1.2.6(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -6880,30 +6881,6 @@ packages:
       "@types/react":
         optional: true
       "@types/react-dom":
-        optional: true
-
-  "@radix-ui/react-slot@1.2.0":
-    resolution:
-      {
-        integrity: sha512-ujc+V6r0HNDviYqIK3rW4ffgYiZ8g5DEHrGJVk4x7kTlLXRDILnKX9vAUYeIsLOoDpDJ0ujpqMkjH4w2ofuo6w==,
-      }
-    peerDependencies:
-      "@types/react": 19.3.0
-      react: 19.3.0
-    peerDependenciesMeta:
-      "@types/react":
-        optional: true
-
-  "@radix-ui/react-slot@1.2.3":
-    resolution:
-      {
-        integrity: sha512-aeNmHnBxbi2St0au6VBVC7JXFlhLlOnvIIlePNniyUNAClzmtAUEY8/pBiK3iHjufOlwA+c20/8jngo7xcrg8A==,
-      }
-    peerDependencies:
-      "@types/react": 19.3.0
-      react: 19.3.0
-    peerDependenciesMeta:
-      "@types/react":
         optional: true
 
   "@radix-ui/react-slot@1.2.4":
@@ -18095,7 +18072,7 @@ snapshots:
   "@c15t/react@1.8.3(@electric-sql/pglite@0.3.2)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.213.0(@opentelemetry/api@1.9.0))(@prisma/client@7.2.0(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.16.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(pg@8.17.1)(postgres@3.4.7)(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typeorm@0.3.28(babel-plugin-macros@3.1.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(pg@8.17.1)(ts-node@10.9.2(@types/node@20.19.25)(typescript@5.9.3)))(use-sync-external-store@1.6.0(react@19.3.0))(ws@8.19.0)":
     dependencies:
       "@radix-ui/react-accordion": 1.2.4(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.0(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-switch": 1.1.4(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       c15t: 1.8.3(@electric-sql/pglite@0.3.2)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.213.0(@opentelemetry/api@1.9.0))(@prisma/client@7.2.0(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.16.0)(@types/react@19.3.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(pg@8.17.1)(postgres@3.4.7)(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(react@19.3.0)(typeorm@0.3.28(babel-plugin-macros@3.1.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(pg@8.17.1)(ts-node@10.9.2(@types/node@20.19.25)(typescript@5.9.3)))(use-sync-external-store@1.6.0(react@19.3.0))(ws@8.19.0)
       clsx: 2.1.1
@@ -21057,7 +21034,7 @@ snapshots:
       "@radix-ui/react-context": 1.1.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-dialog": 1.1.15(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     optionalDependencies:
@@ -21148,7 +21125,7 @@ snapshots:
       "@radix-ui/react-compose-refs": 1.1.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-context": 1.1.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-primitive": 2.0.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.0(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     optionalDependencies:
@@ -21160,7 +21137,7 @@ snapshots:
       "@radix-ui/react-compose-refs": 1.1.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-context": 1.1.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     optionalDependencies:
@@ -21211,7 +21188,7 @@ snapshots:
       "@radix-ui/react-portal": 1.1.9(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-presence": 1.1.5(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-controllable-state": 1.2.2(@types/react@19.3.0)(react@19.3.0)
       aria-hidden: 1.2.6
       react: 19.3.0
@@ -21321,7 +21298,7 @@ snapshots:
       "@radix-ui/react-presence": 1.1.5(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-roving-focus": 1.1.11(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-callback-ref": 1.1.1(@types/react@19.3.0)(react@19.3.0)
       aria-hidden: 1.2.6
       react: 19.3.0
@@ -21384,7 +21361,7 @@ snapshots:
       "@radix-ui/react-portal": 1.1.9(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-presence": 1.1.5(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-controllable-state": 1.2.2(@types/react@19.3.0)(react@19.3.0)
       aria-hidden: 1.2.6
       react: 19.3.0
@@ -21444,7 +21421,7 @@ snapshots:
 
   "@radix-ui/react-primitive@2.0.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)":
     dependencies:
-      "@radix-ui/react-slot": 1.2.0(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     optionalDependencies:
@@ -21453,7 +21430,7 @@ snapshots:
 
   "@radix-ui/react-primitive@2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)":
     dependencies:
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     optionalDependencies:
@@ -21546,7 +21523,7 @@ snapshots:
       "@radix-ui/react-popper": 1.2.8(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-portal": 1.1.9(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-callback-ref": 1.1.1(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-controllable-state": 1.2.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-layout-effect": 1.1.1(@types/react@19.3.0)(react@19.3.0)
@@ -21587,20 +21564,6 @@ snapshots:
     optionalDependencies:
       "@types/react": 19.3.0
       "@types/react-dom": 19.3.0(@types/react@19.3.0)
-
-  "@radix-ui/react-slot@1.2.0(@types/react@19.3.0)(react@19.3.0)":
-    dependencies:
-      "@radix-ui/react-compose-refs": 1.1.2(@types/react@19.3.0)(react@19.3.0)
-      react: 19.3.0
-    optionalDependencies:
-      "@types/react": 19.3.0
-
-  "@radix-ui/react-slot@1.2.3(@types/react@19.3.0)(react@19.3.0)":
-    dependencies:
-      "@radix-ui/react-compose-refs": 1.1.2(@types/react@19.3.0)(react@19.3.0)
-      react: 19.3.0
-    optionalDependencies:
-      "@types/react": 19.3.0
 
   "@radix-ui/react-slot@1.2.4(@types/react@19.3.0)(react@19.3.0)":
     dependencies:
@@ -21692,7 +21655,7 @@ snapshots:
       "@radix-ui/react-portal": 1.1.9(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-presence": 1.1.5(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       "@radix-ui/react-primitive": 2.1.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      "@radix-ui/react-slot": 1.2.3(@types/react@19.3.0)(react@19.3.0)
+      "@radix-ui/react-slot": 1.2.4(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-use-controllable-state": 1.2.2(@types/react@19.3.0)(react@19.3.0)
       "@radix-ui/react-visually-hidden": 1.2.3(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react: 19.3.0
