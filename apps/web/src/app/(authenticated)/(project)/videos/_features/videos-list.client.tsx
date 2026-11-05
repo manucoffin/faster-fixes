@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { AlertCircle, SquarePlay } from "lucide-react";
 
+import { VideoUsageLine } from "./video-usage-line.client";
 import { VideosTable } from "./videos-table.client";
 
 type VideosListProps = {
@@ -22,7 +23,7 @@ type VideosListProps = {
 
 const SKELETON_ROWS = 3;
 
-// The header row is left for the Upload button and the usage line.
+// The header row is left for the Upload button.
 export function VideosList({ projectId }: VideosListProps) {
   const trpc = useTRPC();
 
@@ -32,6 +33,7 @@ export function VideosList({ projectId }: VideosListProps) {
 
   return (
     <div className="flex flex-col gap-8">
+      <VideoUsageLine projectId={projectId} />
       {matchQueryStatus(videosQuery, {
         Loading: (
           <div className="flex flex-col gap-2">

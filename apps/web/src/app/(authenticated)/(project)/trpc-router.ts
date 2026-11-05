@@ -98,6 +98,8 @@ import { updateFeedbacksStatus } from "./inbox/_services/update-feedbacks-status
 import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-status.schema";
 import { getVideo } from "./videos/[videoId]/_services/get-video";
 import { GetVideoSchema } from "./videos/[videoId]/_services/get-video.schema";
+import { getVideoUsage } from "./videos/_services/get-video-usage";
+import { GetVideoUsageSchema } from "./videos/_services/get-video-usage.schema";
 import { listVideos } from "./videos/_services/list-videos";
 import { ListVideosSchema } from "./videos/_services/list-videos.schema";
 
@@ -200,6 +202,14 @@ export const projectsRouter = router({
       .input(GetVideoSchema)
       .query(({ input, ctx }) =>
         getVideo({ videoId: input.videoId, userId: ctx.session.user.id }),
+      ),
+    getUsage: protectedProcedure
+      .input(GetVideoUsageSchema)
+      .query(({ input, ctx }) =>
+        getVideoUsage({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
       ),
     completeUpload: protectedProcedure
       .input(CompleteVideoUploadSchema)
