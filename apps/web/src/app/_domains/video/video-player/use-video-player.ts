@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { isPlayPauseShortcut } from "../_helpers/is-play-pause-shortcut";
 
 /**
  * Transport state for one `<video>`, read through rAF while playing so the
@@ -81,6 +82,23 @@ export function useVideoPlayer(
       video.removeEventListener("ended", handlePause);
       video.removeEventListener("seeked", handleSeeked);
     };
+  }, [videoRef]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const video = videoRef.current;
+      if (!video || !isPlayPauseShortcut(event)) return;
+      // Also keeps Space from scrolling the page, clicking a focused button or
+      // opening a focused menu trigger: Radix skips its handler once the
+      // default is prevented.
+      event.preventDefault();
+      if (video.paused) video.play().catch(() => undefined);
+      else video.pause();
+    };
+    // Capture runs before React's handlers, which sit on the root.
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () =>
+      document.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [videoRef]);
 
   function seek(ms: number) {

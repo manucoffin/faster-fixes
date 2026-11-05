@@ -62,6 +62,8 @@ export function VideoPlayer({
           variant="outline"
           onClick={player.togglePlay}
           aria-label={player.paused ? "Play" : "Pause"}
+          aria-keyshortcuts="Space"
+          title={player.paused ? "Play (Space)" : "Pause (Space)"}
         >
           {player.paused ? <PlayIcon /> : <PauseIcon />}
         </Button>
