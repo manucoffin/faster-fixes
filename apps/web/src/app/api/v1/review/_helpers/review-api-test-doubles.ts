@@ -163,11 +163,22 @@ function findManyIn(table: () => Row[]) {
   );
 }
 
+type CreateArgs = { data: Row; select?: Row };
+
+// Inserts the row with the next sequential id, as Postgres would generate one.
+function createIn(table: () => Row[], idPrefix: string) {
+  return vi.fn(async ({ data, select }: CreateArgs) => {
+    const row = { id: `${idPrefix}_${table().length + 1}`, ...data };
+    table().push(row);
+    return applySelect(row, select);
+  });
+}
+
 export const reviewApiPrisma = {
   video: { findFirst: findFirstIn(() => reviewApiTables.videos) },
   reviewer: {
     findFirst: findFirstIn(() => reviewApiTables.reviewers),
-    create: vi.fn(),
+    create: createIn(() => reviewApiTables.reviewers, "reviewer"),
   },
   feedback: {
     findFirst: findFirstIn(() => reviewApiTables.feedbacks),
