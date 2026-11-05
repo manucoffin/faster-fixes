@@ -12,7 +12,7 @@ export function registerListFeedbacks(
     {
       title: "List Feedbacks",
       description:
-        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, the console logs and network requests captured before submission, and the Custom metadata the site attached (such as a user ID, release or tenant). Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
+        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, the console logs and network requests captured before submission, and the Custom metadata the site attached (such as a user ID, release or tenant). Feedback left on a video carries the video id and a selection instead: the time in milliseconds and, when marked, a point or area in normalized 0..1 frame coordinates. Pass video_id (from list_videos) to list one video's feedback. Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
       inputSchema: {
         status: FeedbackStatusEnum.optional().describe(
           "Filter by feedback status",
@@ -22,6 +22,13 @@ export function registerListFeedbacks(
           .url()
           .optional()
           .describe("Filter by the page URL where feedback was submitted"),
+        video_id: z
+          .string()
+          .uuid()
+          .optional()
+          .describe(
+            "Filter by a video id from list_videos. Cannot be combined with page_url",
+          ),
         format: z
           .enum(["json", "markdown"])
           .optional()
@@ -29,9 +36,14 @@ export function registerListFeedbacks(
           .describe("Response format. Use markdown for readable output"),
       },
     },
-    async ({ status, page_url, format }) => {
+    async ({ status, page_url, video_id, format }) => {
       try {
-        const result = await client.listFeedbacks({ status, page_url, format });
+        const result = await client.listFeedbacks({
+          status,
+          page_url,
+          video: video_id,
+          format,
+        });
 
         if (typeof result === "string") {
           return { content: [{ type: "text" as const, text: result }] };
