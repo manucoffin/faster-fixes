@@ -10,6 +10,7 @@ import {
 } from "@/app/_domains/video/video-player/video-timeline.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
 import {
   Empty,
   EmptyDescription,
@@ -17,11 +18,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
-import { MessageSquare, Upload } from "lucide-react";
+import { Download, MessageSquare, Upload } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
 import type { GetVideoOutput } from "../_services/get-video";
+import { useExportVideoFeedback } from "./use-export-video-feedback";
 import { VideoFeedbackCard } from "./video-feedback-card.client";
 
 type VideoReviewProps = {
@@ -92,6 +94,11 @@ function VideoReviewWorkspace({
     video.feedback.find((item) => item.id === selectedFeedbackId),
   );
 
+  const exportFeedbackMutation = useExportVideoFeedback({
+    videoId: video.id,
+    title: video.title,
+  });
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const player = useVideoPlayer(
     videoRef,
@@ -154,12 +161,23 @@ function VideoReviewWorkspace({
       </section>
 
       <aside className="flex flex-col gap-3">
-        <h2 className="font-medium">
-          Feedback{" "}
-          <span className="text-muted-foreground">
-            ({video.feedback.length})
-          </span>
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-medium">
+            Feedback{" "}
+            <span className="text-muted-foreground">
+              ({video.feedback.length})
+            </span>
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exportFeedbackMutation.isPending}
+            onClick={() => exportFeedbackMutation.mutate()}
+          >
+            <Download />
+            Export
+          </Button>
+        </div>
         {video.feedback.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>

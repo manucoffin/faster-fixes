@@ -1,14 +1,13 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { Download, ExternalLink, SquareKanban, Trash2 } from "lucide-react";
+import { ExternalLink, SquareKanban, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { serializeBoardSource } from "@/app/(authenticated)/(project)/inbox/_helpers/board-source";
 import type { GetVideoOutput } from "../_services/get-video";
-import { useExportVideoFeedback } from "./use-export-video-feedback";
 import { DeleteVideoDialog } from "@/app/_domains/video/video-actions/delete-video-dialog.client";
 import { useVideoActions } from "@/app/_domains/video/video-actions/use-video-actions";
 import { VideoSharePopover } from "./video-share-popover.client";
@@ -25,10 +24,6 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
     setAnnotationsOpenMutation,
     deleteMutation,
   } = useVideoActions({ videoId: video.id, projectId: video.projectId });
-  const exportFeedbackMutation = useExportVideoFeedback({
-    videoId: video.id,
-    title: video.title,
-  });
 
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -71,15 +66,6 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
             Open review page
           </Button>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={exportFeedbackMutation.isPending}
-          onClick={() => exportFeedbackMutation.mutate()}
-        >
-          <Download />
-          Export feedback
-        </Button>
         <Button variant="outline" size="sm" asChild>
           <Link
             href={`/inbox?source=${encodeURIComponent(
