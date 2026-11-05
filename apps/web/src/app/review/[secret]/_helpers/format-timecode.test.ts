@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatTimecode } from "./format-timecode";
+import { formatFeedbackTime, formatTimecode } from "./format-timecode";
 
 describe("formatTimecode", () => {
   it("shows the start of the video as 0:00", () => {
@@ -42,5 +42,15 @@ describe("formatTimecode", () => {
 
   it("clamps a negative position to zero", () => {
     expect(formatTimecode(-500)).toBe("0:00");
+  });
+});
+
+describe("formatFeedbackTime", () => {
+  it("shows an instant as its timecode", () => {
+    expect(formatFeedbackTime(83_045, null)).toBe("1:23");
+  });
+
+  it("shows a range as both bounds to the millisecond", () => {
+    expect(formatFeedbackTime(12_300, 15_000)).toBe("0:12.300 to 0:15.000");
   });
 });

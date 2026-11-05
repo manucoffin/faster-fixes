@@ -11,10 +11,9 @@ import {
 } from "@workspace/ui/components/empty";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import type { ReactNode } from "react";
-import { AnnotationsClosedBanner } from "../../_components/annotations-closed-banner";
 import { ReviewLinkNotFound } from "../../_components/review-link-not-found";
 import { ReviewerChip } from "../../_components/reviewer-chip";
-import { ReviewPlayer } from "./review-player.client";
+import { ReviewWorkspace } from "./review-workspace.client";
 import { useReviewPageQuery } from "./use-review-page-query";
 
 // A failing player refetches the signed URL, but not more often than this, so
@@ -23,9 +22,10 @@ const PLAYBACK_RETRY_INTERVAL_MS = 30 * 1000;
 
 type VideoReviewProps = {
   secret: string;
+  initialFeedbackId: string | null;
 };
 
-export function VideoReview({ secret }: VideoReviewProps) {
+export function VideoReview({ secret, initialFeedbackId }: VideoReviewProps) {
   const reviewPageQuery = useReviewPageQuery(secret);
 
   function handlePlaybackError() {
@@ -55,15 +55,11 @@ export function VideoReview({ secret }: VideoReviewProps) {
     Empty: <ReviewLinkNotFound />,
     Success: ({ data }) => (
       <ReviewShell title={<h1 className="font-medium">{data.video.title}</h1>}>
-        <section className="space-y-3">
-          {data.video.annotationsOpen ? null : <AnnotationsClosedBanner />}
-          <ReviewPlayer
-            video={data.video}
-            onPlaybackError={handlePlaybackError}
-          />
-        </section>
-        {/* Reserved for the Feedback list. */}
-        <aside />
+        <ReviewWorkspace
+          data={data}
+          initialFeedbackId={initialFeedbackId}
+          onPlaybackError={handlePlaybackError}
+        />
       </ReviewShell>
     ),
   });

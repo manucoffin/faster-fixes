@@ -11,7 +11,13 @@ export type ReviewVideo = {
   posterUrl: string | null;
 };
 
-export type ReviewFeedbackItem = {
+/** Where on the frame a Feedback points, normalized 0..1 to the Video. */
+export type ReviewSelection = {
+  point: { x: number; y: number } | null;
+  area: { x: number; y: number; width: number; height: number } | null;
+};
+
+export type ReviewFeedbackItem = ReviewSelection & {
   id: string;
   status: FeedbackStatus;
   comment: string;
@@ -20,8 +26,6 @@ export type ReviewFeedbackItem = {
   createdAt: string;
   startMs: number;
   endMs: number | null;
-  point: { x: number; y: number } | null;
-  area: { x: number; y: number; width: number; height: number } | null;
 };
 
 /** The body of `GET /api/v1/review/{secret}`, as the review page reads it. */

@@ -10,11 +10,14 @@ export function useVideoPlayer(
   videoRef: RefObject<HTMLVideoElement | null>,
   src: string,
   initialDurationMs: number | null,
+  initialMs = 0,
 ) {
-  const [currentMs, setCurrentMs] = useState(0);
+  const [currentMs, setCurrentMs] = useState(initialMs);
   const [durationMs, setDurationMs] = useState(initialDurationMs ?? 0);
   const [paused, setPaused] = useState(true);
   const loadedSrcRef = useRef<string | null>(null);
+  // Applies to the first source only; a refresh resumes where it was.
+  const initialMsRef = useRef(initialMs);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -25,7 +28,13 @@ export function useVideoPlayer(
     const isRefresh = loadedSrcRef.current !== null;
     loadedSrcRef.current = src;
     video.src = src;
-    if (!isRefresh) return;
+    if (!isRefresh) {
+      // Before metadata loads this sets where playback starts.
+      if (initialMsRef.current > 0) {
+        video.currentTime = initialMsRef.current / 1000;
+      }
+      return;
+    }
 
     const resume = () => {
       video.currentTime = resumeAt;
@@ -82,6 +91,10 @@ export function useVideoPlayer(
     setCurrentMs(clamped);
   }
 
+  function pause() {
+    videoRef.current?.pause();
+  }
+
   function togglePlay() {
     const video = videoRef.current;
     if (!video) return;
@@ -89,5 +102,5 @@ export function useVideoPlayer(
     else video.pause();
   }
 
-  return { currentMs, durationMs, paused, seek, togglePlay };
+  return { currentMs, durationMs, paused, seek, pause, togglePlay };
 }

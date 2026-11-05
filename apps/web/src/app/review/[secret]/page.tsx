@@ -5,8 +5,14 @@ import { VideoReview } from "./_features/video-review/video-review.client";
 // the page and the API answer a replaced link the same way.
 export default async function ReviewPage({
   params,
+  searchParams,
 }: PageParams<{ secret: string }>) {
-  const { secret } = await params;
+  const [{ secret }, { feedback }] = await Promise.all([params, searchParams]);
 
-  return <VideoReview secret={secret} />;
+  return (
+    <VideoReview
+      secret={secret}
+      initialFeedbackId={typeof feedback === "string" ? feedback : null}
+    />
+  );
 }
