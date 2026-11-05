@@ -49,7 +49,8 @@ export function CommentControls({
         disabled={draft !== null}
         onClick={onMarkIn}
       >
-        Comment at {formatTimecode(currentMs)}
+        Comment at{" "}
+        <span className="tabular-nums">{formatTimecode(currentMs)}</span>
       </Button>
     </div>
   );
