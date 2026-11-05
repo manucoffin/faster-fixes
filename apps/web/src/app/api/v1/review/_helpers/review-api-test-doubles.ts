@@ -199,6 +199,32 @@ const createFeedback = vi.fn(async ({ data, select }: CreateArgs) => {
   return applySelect(row, select);
 });
 
+type WriteArgs = { where: Row; data?: Row; select?: Row };
+
+// Prisma's update and delete throw P2025 when no row matches; a plain Error
+// stands in, since the review routes check existence before they write.
+function findRowOrThrow(table: Row[], where: Row) {
+  const row = table.find((candidate) => matchesWhere(candidate, where));
+  if (!row) throw new Error("Record to update or delete does not exist.");
+  return row;
+}
+
+function updateIn(table: () => Row[]) {
+  return vi.fn(async ({ where, data, select }: WriteArgs) => {
+    const row = findRowOrThrow(table(), where);
+    Object.assign(row, data);
+    return applySelect(row, select);
+  });
+}
+
+function deleteIn(table: () => Row[]) {
+  return vi.fn(async ({ where, select }: WriteArgs) => {
+    const row = findRowOrThrow(table(), where);
+    table().splice(table().indexOf(row), 1);
+    return applySelect(row, select);
+  });
+}
+
 export const reviewApiPrisma = {
   video: { findFirst: findFirstIn(() => reviewApiTables.videos) },
   reviewer: {
@@ -210,13 +236,13 @@ export const reviewApiPrisma = {
     findMany: findManyIn(() => reviewApiTables.feedbacks),
     count: vi.fn(),
     create: createFeedback,
-    update: vi.fn(),
-    delete: vi.fn(),
+    update: updateIn(() => reviewApiTables.feedbacks),
+    delete: deleteIn(() => reviewApiTables.feedbacks),
   },
   asset: {
-    findUnique: vi.fn(),
+    findUnique: findFirstIn(() => reviewApiTables.assets),
     create: createIn(() => reviewApiTables.assets, "asset"),
-    delete: vi.fn(),
+    delete: deleteIn(() => reviewApiTables.assets),
   },
   subscription: { findFirst: vi.fn() },
   $queryRaw: vi.fn(),

@@ -1,6 +1,9 @@
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { toReviewFeedbackItem } from "../_helpers/to-review-feedback-item";
+import {
+  reviewFeedbackSelect,
+  toReviewFeedbackItem,
+} from "../_helpers/to-review-feedback-item";
 
 /**
  * Every Feedback of the Video, resolved and archived included (the page hides
@@ -10,25 +13,7 @@ export async function listVideoFeedbacks(videoId: string) {
   const feedbackList = await prisma.feedback.findMany({
     where: { videoId },
     orderBy: [{ startMs: "asc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      status: true,
-      comment: true,
-      pageUrl: true,
-      clickX: true,
-      clickY: true,
-      selector: true,
-      metadata: true,
-      createdAt: true,
-      startMs: true,
-      endMs: true,
-      frameX: true,
-      frameY: true,
-      frameWidth: true,
-      frameHeight: true,
-      reviewer: { select: { id: true, name: true } },
-      screenshot: { select: { key: true } },
-    },
+    select: reviewFeedbackSelect,
   });
 
   return Promise.all(

@@ -1,3 +1,24 @@
+/** The Feedback fields every review route reads back for the list projection. */
+export const reviewFeedbackSelect = {
+  id: true,
+  status: true,
+  comment: true,
+  pageUrl: true,
+  clickX: true,
+  clickY: true,
+  selector: true,
+  metadata: true,
+  createdAt: true,
+  startMs: true,
+  endMs: true,
+  frameX: true,
+  frameY: true,
+  frameWidth: true,
+  frameHeight: true,
+  reviewer: { select: { id: true, name: true } },
+  screenshot: { select: { key: true } },
+} as const;
+
 type ReviewFeedbackRow = {
   id: string;
   status: string;

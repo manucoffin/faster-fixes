@@ -3,7 +3,10 @@ import { inngest } from "@/server/inngest";
 import { buildEvent, feedbackCreatedEvent } from "@/server/inngest/events";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { toReviewFeedbackItem } from "../_helpers/to-review-feedback-item";
+import {
+  reviewFeedbackSelect,
+  toReviewFeedbackItem,
+} from "../_helpers/to-review-feedback-item";
 
 type CreateVideoFeedbackServiceInput = {
   projectId: string;
@@ -48,25 +51,7 @@ export async function createVideoFeedback({
       viewportHeight: data.viewportHeight,
       screenshotId,
     },
-    select: {
-      id: true,
-      status: true,
-      comment: true,
-      pageUrl: true,
-      clickX: true,
-      clickY: true,
-      selector: true,
-      metadata: true,
-      createdAt: true,
-      startMs: true,
-      endMs: true,
-      frameX: true,
-      frameY: true,
-      frameWidth: true,
-      frameHeight: true,
-      reviewer: { select: { id: true, name: true } },
-      screenshot: { select: { key: true } },
-    },
+    select: reviewFeedbackSelect,
   });
 
   // Fire-and-forget: a Tracker or a Notification channel that is slow or down

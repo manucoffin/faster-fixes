@@ -38,14 +38,16 @@ export const VideoSelectionSchema = z
     path: ["area"],
   });
 
+const comment = z
+  .string()
+  .trim()
+  .min(1, "Write a comment before posting.")
+  .max(5000, "A comment cannot exceed 5000 characters.");
+
 // `safeExtend` keeps the Selection's cross-field refinements, which a spread
 // of its shape would drop.
 export const CreateVideoFeedbackSchema = VideoSelectionSchema.safeExtend({
-  comment: z
-    .string()
-    .trim()
-    .min(1, "Write a comment before posting.")
-    .max(5000, "A comment cannot exceed 5000 characters."),
+  comment,
   browserName: z.string().max(100).optional(),
   browserVersion: z.string().max(100).optional(),
   os: z.string().max(100).optional(),
@@ -53,7 +55,13 @@ export const CreateVideoFeedbackSchema = VideoSelectionSchema.safeExtend({
   viewportHeight: z.number().int().min(0).optional(),
 });
 
+/** A Reviewer's edit of their own new Feedback: the comment only. */
+export const UpdateVideoFeedbackSchema = z.object({ comment });
+
 export type VideoSelectionInput = z.infer<typeof VideoSelectionSchema>;
 export type CreateVideoFeedbackInput = z.infer<
   typeof CreateVideoFeedbackSchema
+>;
+export type UpdateVideoFeedbackInput = z.infer<
+  typeof UpdateVideoFeedbackSchema
 >;
