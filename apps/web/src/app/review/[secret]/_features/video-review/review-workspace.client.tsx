@@ -158,6 +158,7 @@ export function ReviewWorkspace({
         />
       </section>
       <FeedbackList
+        secret={secret}
         video={data.video}
         feedback={visible}
         hiddenCount={hiddenCount}

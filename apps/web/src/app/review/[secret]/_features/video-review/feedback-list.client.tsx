@@ -16,6 +16,7 @@ import type {
 import { FeedbackCard } from "./feedback-card.client";
 
 type FeedbackListProps = {
+  secret: string;
   video: ReviewVideo;
   feedback: ReviewFeedbackItem[];
   hiddenCount: number;
@@ -29,6 +30,7 @@ type FeedbackListProps = {
 };
 
 export function FeedbackList({
+  secret,
   video,
   feedback,
   hiddenCount,
@@ -75,10 +77,16 @@ export function FeedbackList({
           {feedback.map((item) => (
             <FeedbackCard
               key={item.id}
+              secret={secret}
               feedback={item}
               video={video}
               isOwn={item.reviewer.id === ownReviewerId}
               isActive={item.id === activeFeedbackId}
+              canManage={
+                video.annotationsOpen &&
+                item.status === "new" &&
+                item.reviewer.id === ownReviewerId
+              }
               link={getFeedbackLink(item.id)}
               onSelect={() => onSelect(item)}
             />
