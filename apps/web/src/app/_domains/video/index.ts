@@ -1,2 +1,3 @@
-// Public surface of the video domain. Empty until another domain imports from it.
-export {};
+// Public surface of the video domain.
+export { readVideoSelection } from "./_helpers/read-video-selection";
+export type { VideoSelection } from "./_types/video-selection";

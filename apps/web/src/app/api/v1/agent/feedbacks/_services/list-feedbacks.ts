@@ -1,7 +1,7 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
+import { toAgentFeedbackItem } from "@/app/_domains/feedback/_helpers/agent-feedback-serializer";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { resolveProjectId } from "../../_helpers/resolve-project-id";
 
@@ -39,28 +39,12 @@ export async function listFeedbacks(
   });
 
   const items = await Promise.all(
-    feedbacks.map(async (f) => ({
-      id: f.id,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      selector: f.selector,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      viewportWidth: f.viewportWidth,
-      viewportHeight: f.viewportHeight,
-      browserName: f.browserName,
-      browserVersion: f.browserVersion,
-      os: f.os,
-      screenshotUrl: f.screenshot
-        ? await getSignedAssetUrl(f.screenshot)
-        : null,
-      metadata: f.metadata as Record<string, unknown> | null,
-      diagnosticTrail: f.diagnosticTrail as DiagnosticTrail | null,
-      customMetadata: f.customMetadata as CustomMetadata | null,
-      reviewerName: f.reviewer.name,
-      createdAt: f.createdAt,
-    })),
+    feedbacks.map(async (f) =>
+      toAgentFeedbackItem(
+        f,
+        f.screenshot ? await getSignedAssetUrl(f.screenshot) : null,
+      ),
+    ),
   );
 
   // `projectId` travels back so the boundary can name the resolved Project in

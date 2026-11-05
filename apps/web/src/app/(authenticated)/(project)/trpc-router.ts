@@ -104,6 +104,8 @@ import { updateFeedbacksStatus } from "./inbox/_services/update-feedbacks-status
 import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-status.schema";
 import { getVideo } from "./videos/[videoId]/_services/get-video";
 import { GetVideoSchema } from "./videos/[videoId]/_services/get-video.schema";
+import { getVideoFeedbackExport } from "./videos/[videoId]/_services/get-video-feedback-export";
+import { GetVideoFeedbackExportSchema } from "./videos/[videoId]/_services/get-video-feedback-export.schema";
 import { getVideoUsage } from "./videos/_services/get-video-usage";
 import { GetVideoUsageSchema } from "./videos/_services/get-video-usage.schema";
 import { listVideos } from "./videos/_services/list-videos";
@@ -256,6 +258,14 @@ export const projectsRouter = router({
       .input(DeleteVideoSchema)
       .mutation(({ input, ctx }) =>
         deleteVideo({ videoId: input.videoId, userId: ctx.session.user.id }),
+      ),
+    exportFeedback: protectedProcedure
+      .input(GetVideoFeedbackExportSchema)
+      .query(({ input, ctx }) =>
+        getVideoFeedbackExport({
+          videoId: input.videoId,
+          userId: ctx.session.user.id,
+        }),
       ),
   }),
   feedback: router({

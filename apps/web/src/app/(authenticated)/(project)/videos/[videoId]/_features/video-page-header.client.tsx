@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 
 import type { GetVideoOutput } from "../_services/get-video";
+import { useExportVideoFeedback } from "./use-export-video-feedback";
 import { useVideoActions } from "./use-video-actions";
 import { VideoSharePopover } from "./video-share-popover.client";
 import { VideoTitleEditor } from "./video-title-editor.client";
@@ -18,6 +19,10 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
     replaceShareLinkMutation,
     setAnnotationsOpenMutation,
   } = useVideoActions({ videoId: video.id, projectId: video.projectId });
+  const exportFeedbackMutation = useExportVideoFeedback({
+    videoId: video.id,
+    title: video.title,
+  });
 
   // The review page opens a `ready` Video only.
   const reviewUrl = video.state === "ready" ? video.shareUrl : null;
@@ -57,6 +62,15 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
             Open review page
           </Button>
         )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={exportFeedbackMutation.isPending}
+          onClick={() => exportFeedbackMutation.mutate()}
+        >
+          <Download />
+          Export feedback
+        </Button>
       </div>
     </header>
   );
