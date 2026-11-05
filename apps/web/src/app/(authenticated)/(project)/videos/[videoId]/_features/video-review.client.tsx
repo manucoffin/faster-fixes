@@ -8,6 +8,7 @@ import {
   VideoTimeline,
   type VideoTimelineMarker,
 } from "@/app/_domains/video/video-player/video-timeline.client";
+import { useDocumentTopVariable } from "@/app/_hooks/use-document-top-variable";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
@@ -101,6 +102,7 @@ function VideoReviewWorkspace({
   });
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const feedbackColumnRef = useDocumentTopVariable<HTMLElement>();
   const player = useVideoPlayer(
     videoRef,
     video.playbackUrl,
@@ -161,7 +163,13 @@ function VideoReviewWorkspace({
         />
       </section>
 
-      <aside className="flex flex-col gap-3">
+      {/* On desktop the column ends at the viewport bottom, less the page's
+          bottom padding, and only its list scrolls, so the page itself does
+          not. */}
+      <aside
+        ref={feedbackColumnRef}
+        className="flex flex-col gap-3 lg:max-h-[calc(100svh-var(--document-top,0px)-1rem)] lg:self-start"
+      >
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-medium">
             Feedback{" "}
@@ -192,7 +200,8 @@ function VideoReviewWorkspace({
             </EmptyHeader>
           </Empty>
         ) : (
-          <ol className="flex flex-col gap-2">
+          // The 1px padding keeps the active card's ring clear of the clip edge.
+          <ol className="flex flex-col gap-2 lg:-m-px lg:min-h-0 lg:overflow-y-auto lg:p-px">
             {video.feedback.map((feedback) => (
               <li key={feedback.id}>
                 <VideoFeedbackCard

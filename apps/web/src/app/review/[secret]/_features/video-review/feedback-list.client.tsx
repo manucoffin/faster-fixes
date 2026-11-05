@@ -9,6 +9,7 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
 import type { ReactNode } from "react";
+import { useDocumentTopVariable } from "@/app/_hooks/use-document-top-variable";
 import type {
   ReviewFeedbackItem,
   ReviewVideo,
@@ -42,8 +43,15 @@ export function FeedbackList({
   onSelect,
   composer,
 }: FeedbackListProps) {
+  const columnRef = useDocumentTopVariable<HTMLElement>();
+
   return (
-    <aside className="space-y-3">
+    // On desktop the column ends at the viewport bottom, less the page's
+    // bottom padding, and only the cards scroll, so the page itself does not.
+    <aside
+      ref={columnRef}
+      className="flex flex-col gap-3 lg:max-h-[calc(100svh-var(--document-top,0px)-1.5rem)] lg:self-start"
+    >
       {/* At the head of the list column: beside the player on desktop, right
           under it on a phone. */}
       {composer}
@@ -73,7 +81,8 @@ export function FeedbackList({
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="space-y-2">
+        // The 1px padding keeps the active card's ring clear of the clip edge.
+        <div className="space-y-2 lg:-m-px lg:min-h-0 lg:overflow-y-auto lg:p-px">
           {feedback.map((item) => (
             <FeedbackCard
               key={item.id}
