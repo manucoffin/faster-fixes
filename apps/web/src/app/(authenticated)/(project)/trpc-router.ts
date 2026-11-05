@@ -2,6 +2,12 @@ import { completeVideoUpload } from "@/app/_domains/video/_services/complete-vid
 import { CompleteVideoUploadSchema } from "@/app/_domains/video/_services/complete-video-upload.schema";
 import { deleteVideo } from "@/app/_domains/video/_services/delete-video";
 import { DeleteVideoSchema } from "@/app/_domains/video/_services/delete-video.schema";
+import { replaceVideoShareLink } from "@/app/_domains/video/_services/replace-video-share-link";
+import { ReplaceVideoShareLinkSchema } from "@/app/_domains/video/_services/replace-video-share-link.schema";
+import { updateVideoAnnotationsOpen } from "@/app/_domains/video/_services/update-video-annotations-open";
+import { UpdateVideoAnnotationsOpenSchema } from "@/app/_domains/video/_services/update-video-annotations-open.schema";
+import { updateVideoTitle } from "@/app/_domains/video/_services/update-video-title";
+import { UpdateVideoTitleSchema } from "@/app/_domains/video/_services/update-video-title.schema";
 import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
@@ -217,6 +223,32 @@ export const projectsRouter = router({
         completeVideoUpload({
           videoId: input.videoId,
           posterKey: input.posterKey,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    rename: protectedProcedure
+      .input(UpdateVideoTitleSchema)
+      .mutation(({ input, ctx }) =>
+        updateVideoTitle({
+          videoId: input.videoId,
+          title: input.title,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    replaceShareLink: protectedProcedure
+      .input(ReplaceVideoShareLinkSchema)
+      .mutation(({ input, ctx }) =>
+        replaceVideoShareLink({
+          videoId: input.videoId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    setAnnotationsOpen: protectedProcedure
+      .input(UpdateVideoAnnotationsOpenSchema)
+      .mutation(({ input, ctx }) =>
+        updateVideoAnnotationsOpen({
+          videoId: input.videoId,
+          open: input.open,
           userId: ctx.session.user.id,
         }),
       ),

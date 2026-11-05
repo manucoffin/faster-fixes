@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { AlertCircle, FolderOpen } from "lucide-react";
 
+import { VideoPageHeader } from "./video-page-header.client";
 import { VideoReview } from "./video-review.client";
 
 type VideoPageProps = {
@@ -97,10 +98,7 @@ export function VideoPage({ videoId }: VideoPageProps) {
         ),
         Success: ({ data: video }) => (
           <div className="flex flex-col gap-6">
-            {/* The header leaves room for the Video actions. */}
-            <header className="flex flex-wrap items-center justify-between gap-3">
-              <h1 className="truncate text-xl font-semibold">{video.title}</h1>
-            </header>
+            <VideoPageHeader video={video} />
             <VideoReview
               video={video}
               onPlaybackError={() => void videoQuery.refetch()}
