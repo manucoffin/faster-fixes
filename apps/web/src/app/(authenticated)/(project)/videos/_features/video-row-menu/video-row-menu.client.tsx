@@ -10,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { Link2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Copy, Link2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import type { ListVideosOutput } from "../../_services/list-videos";
 import { RenameVideoDialog } from "./rename-video-dialog.client";
@@ -31,6 +32,16 @@ export function VideoRowMenu({ video, projectId }: VideoRowMenuProps) {
 
   // An abandoned upload offers Delete only, so it does not linger.
   const isUploading = video.state === "uploading";
+  const { shareUrl } = video;
+
+  const handleCopyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied");
+    } catch {
+      toast.error("Could not copy the link to the clipboard");
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) setOpenDialog(null);
@@ -48,6 +59,14 @@ export function VideoRowMenu({ video, projectId }: VideoRowMenuProps) {
         <DropdownMenuContent align="end">
           {!isUploading && (
             <>
+              {shareUrl && (
+                <DropdownMenuItem
+                  onSelect={() => void handleCopyLink(shareUrl)}
+                >
+                  <Copy className="size-4" />
+                  Copy link
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onSelect={() => setOpenDialog("rename")}>
                 <Pencil className="size-4" />
                 Rename

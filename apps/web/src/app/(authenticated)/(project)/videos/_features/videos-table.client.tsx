@@ -3,7 +3,6 @@
 import { formatBytes } from "@/app/_domains/video/_helpers/format-bytes";
 import { formatTimecode } from "@/app/_domains/video/_helpers/format-timecode";
 import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
 import {
   Table,
   TableBody,
@@ -12,11 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Check, Copy, SquarePlay } from "lucide-react";
+import { SquarePlay } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import * as React from "react";
-import { toast } from "sonner";
 
 import type { ListVideosOutput } from "../_services/list-videos";
 import { VideoRowMenu } from "./video-row-menu/video-row-menu.client";
@@ -30,18 +27,6 @@ type Video = ListVideosOutput[number];
 
 export function VideosTable({ videos, projectId }: VideosTableProps) {
   const router = useRouter();
-  const [copied, setCopied] = React.useState<string | null>(null);
-
-  const handleCopy = async (shareUrl: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-    } catch {
-      toast.error("Could not copy the link to the clipboard");
-      return;
-    }
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   return (
     <Table>
@@ -54,7 +39,6 @@ export function VideosTable({ videos, projectId }: VideosTableProps) {
           <TableHead>Open feedback</TableHead>
           <TableHead>Annotations</TableHead>
           <TableHead>Uploaded</TableHead>
-          <TableHead />
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -104,32 +88,6 @@ export function VideosTable({ videos, projectId }: VideosTableProps) {
                     })}
                   </span>
                 </div>
-              </TableCell>
-              <TableCell>
-                {video.shareUrl && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (video.shareUrl) {
-                        void handleCopy(video.shareUrl, video.id);
-                      }
-                    }}
-                  >
-                    {copied === video.id ? (
-                      <>
-                        <Check className="size-3 text-success" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="size-3" />
-                        Copy link
-                      </>
-                    )}
-                  </Button>
-                )}
               </TableCell>
               <TableCell>
                 <VideoRowMenu video={video} projectId={projectId} />
