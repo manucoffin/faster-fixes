@@ -1,11 +1,14 @@
 "use client";
 
+import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
 import { format, formatDistanceToNow } from "date-fns";
 import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   formatEnvironment,
   formatPagePath,
+  type getFeedbackDetailSections,
 } from "../../_helpers/feedback-detail";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { AssigneeSelect } from "./assignee-select.client";
@@ -19,6 +22,7 @@ type FeedbackItem = ListFeedbackOutput[number];
 
 type FeedbackPropertiesRailProps = {
   feedback: FeedbackItem;
+  sections: ReturnType<typeof getFeedbackDetailSections>;
   projectId: string;
   hasGitHubLink: boolean;
   hasLinearLink: boolean;
@@ -27,6 +31,7 @@ type FeedbackPropertiesRailProps = {
 
 export function FeedbackPropertiesRail({
   feedback,
+  sections,
   projectId,
   hasGitHubLink,
   hasLinearLink,
@@ -58,7 +63,24 @@ export function FeedbackPropertiesRail({
 
       <div className="h-px bg-border" />
 
-      {feedback.pageUrl && (
+      {sections.video && feedback.videoId && (
+        <Property label="Video">
+          <Link
+            href={`/videos/${feedback.videoId}?feedbackId=${feedback.id}`}
+            className="max-w-full text-sm text-primary hover:underline"
+            title={feedback.videoTitle ?? undefined}
+          >
+            <span className="block truncate">{feedback.videoTitle}</span>
+          </Link>
+          {feedback.startMs !== null && (
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {formatFeedbackTime(feedback.startMs, feedback.endMs)}
+            </span>
+          )}
+        </Property>
+      )}
+
+      {sections.page && feedback.pageUrl && (
         <Property label="Page">
           <a
             href={feedback.pageUrl}
@@ -83,21 +105,30 @@ export function FeedbackPropertiesRail({
         </span>
       </Property>
 
-      <Property label="Environment">
-        <span className="text-sm">
-          {environment.browser ?? "Unknown browser"}
-        </span>
-        {environment.details && (
-          <span className="text-xs text-muted-foreground">
-            {environment.details}
+      {sections.environment && (
+        <Property label="Environment">
+          <span className="text-sm">
+            {environment.browser ?? "Unknown browser"}
           </span>
-        )}
-      </Property>
+          {environment.details && (
+            <span className="text-xs text-muted-foreground">
+              {environment.details}
+            </span>
+          )}
+        </Property>
+      )}
 
-      <CustomMetadataSection customMetadata={feedback.customMetadata} />
+      {sections.customMetadata && (
+        <CustomMetadataSection customMetadata={feedback.customMetadata} />
+      )}
 
       <div className="mt-auto flex flex-col gap-2">
-        <ViewDiagnosticsDialog projectId={projectId} feedbackId={feedback.id} />
+        {sections.diagnostics && (
+          <ViewDiagnosticsDialog
+            projectId={projectId}
+            feedbackId={feedback.id}
+          />
+        )}
         <CopyFeedbackMarkdown feedback={feedback} />
       </div>
     </aside>

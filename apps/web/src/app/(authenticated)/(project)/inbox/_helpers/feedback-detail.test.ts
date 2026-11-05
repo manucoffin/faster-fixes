@@ -5,6 +5,7 @@ import {
   formatPagePath,
   getCustomMetadataRows,
   getElementContext,
+  getFeedbackDetailSections,
 } from "./feedback-detail";
 
 const baseFeedback = {
@@ -131,5 +132,59 @@ describe("getCustomMetadataRows", () => {
 
   it("yields no rows for a null column", () => {
     expect(getCustomMetadataRows(null)).toEqual([]);
+  });
+});
+
+describe("getFeedbackDetailSections", () => {
+  it("shows every page section and no Video line for a page Feedback", () => {
+    expect(
+      getFeedbackDetailSections({
+        ...baseFeedback,
+        pageUrl: "https://example.com/pricing",
+        videoId: null,
+      }),
+    ).toEqual({
+      page: true,
+      video: false,
+      elementContext: true,
+      environment: true,
+      customMetadata: true,
+      diagnostics: true,
+    });
+  });
+
+  it("keeps Environment for a video Feedback that captured some of it", () => {
+    expect(
+      getFeedbackDetailSections({
+        ...baseFeedback,
+        browserName: "Firefox",
+        pageUrl: null,
+        videoId: "video_1",
+      }),
+    ).toEqual({
+      page: false,
+      video: true,
+      elementContext: false,
+      environment: true,
+      customMetadata: false,
+      diagnostics: false,
+    });
+  });
+
+  it("drops Environment for a video Feedback that captured none of it", () => {
+    expect(
+      getFeedbackDetailSections({
+        ...baseFeedback,
+        pageUrl: null,
+        videoId: "video_1",
+      }),
+    ).toEqual({
+      page: false,
+      video: true,
+      elementContext: false,
+      environment: false,
+      customMetadata: false,
+      diagnostics: false,
+    });
   });
 });

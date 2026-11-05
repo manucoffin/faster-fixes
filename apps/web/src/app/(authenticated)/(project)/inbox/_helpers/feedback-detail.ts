@@ -81,3 +81,33 @@ export function getCustomMetadataRows(customMetadata: CustomMetadata | null) {
     value: String(value),
   }));
 }
+
+type SectionsSource = EnvironmentSource & {
+  videoId: string | null;
+  pageUrl: string | null;
+};
+
+/**
+ * The sections the detail Sheet shows for a Feedback. A video Feedback has no
+ * element, no custom metadata and no diagnostics, and keeps Environment only
+ * when the review page captured some of it.
+ */
+export function getFeedbackDetailSections(f: SectionsSource) {
+  const isVideo = f.videoId !== null;
+  const hasEnvironment = [
+    f.browserName,
+    f.browserVersion,
+    f.os,
+    f.viewportWidth,
+    f.viewportHeight,
+  ].some((value) => value !== null);
+
+  return {
+    page: !isVideo && f.pageUrl !== null,
+    video: isVideo,
+    elementContext: !isVideo,
+    environment: !isVideo || hasEnvironment,
+    customMetadata: !isVideo,
+    diagnostics: !isVideo,
+  };
+}
