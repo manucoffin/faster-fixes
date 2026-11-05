@@ -96,6 +96,8 @@ import { updateFeedbackStatus } from "./inbox/_services/update-feedback-status";
 import { UpdateFeedbackStatusSchema } from "./inbox/_services/update-feedback-status.schema";
 import { updateFeedbacksStatus } from "./inbox/_services/update-feedbacks-status";
 import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-status.schema";
+import { listVideos } from "./videos/_services/list-videos";
+import { ListVideosSchema } from "./videos/_services/list-videos.schema";
 
 // Every denial of the migrated operations reads a loaded row (the Project, or
 // the Feedback and its Project), so all of them live in their service;
@@ -186,6 +188,12 @@ export const projectsRouter = router({
       ),
   }),
   video: router({
+    list: protectedProcedure.input(ListVideosSchema).query(({ input, ctx }) =>
+      listVideos({
+        projectId: input.projectId,
+        userId: ctx.session.user.id,
+      }),
+    ),
     completeUpload: protectedProcedure
       .input(CompleteVideoUploadSchema)
       .mutation(({ input, ctx }) =>
