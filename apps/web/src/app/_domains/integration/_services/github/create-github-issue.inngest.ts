@@ -40,6 +40,7 @@ export const createGitHubIssue = inngest.createFunction(
           },
         },
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
         issueLink: { select: { id: true } },
       },
@@ -95,6 +96,14 @@ export const createGitHubIssue = inngest.createFunction(
       customMetadata: feedback.customMetadata as CustomMetadata | null,
       projectId: feedback.projectId,
       dashboardUrl,
+      videoId: feedback.videoId,
+      videoTitle: feedback.video?.title,
+      startMs: feedback.startMs,
+      endMs: feedback.endMs,
+      frameX: feedback.frameX,
+      frameY: feedback.frameY,
+      frameWidth: feedback.frameWidth,
+      frameHeight: feedback.frameHeight,
     });
 
     const response = await octokit.request(
