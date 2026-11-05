@@ -118,8 +118,29 @@ describe("listFeedbacks", () => {
         customMetadata: { userId: "user_42", beta: true },
         reviewerName: "Dana",
         createdAt: new Date("2026-01-02T03:04:05.000Z"),
+        videoTitle: null,
       },
     ]);
+  });
+
+  it("carries the Video title with a video item", async () => {
+    const result = await listFeedbacks(
+      { project: "proj_public_1", organizationProjects: ORGANIZATION_PROJECTS },
+      fakeDb([
+        {
+          ...feedbackRow,
+          videoId: "video_1",
+          pageUrl: null,
+          startMs: 12340,
+          video: { title: "Homepage walkthrough v1" },
+        },
+      ]),
+    );
+
+    expect(result.items[0]).toMatchObject({
+      videoId: "video_1",
+      videoTitle: "Homepage walkthrough v1",
+    });
   });
 
   it("accepts the project's internal id as well as its public one", async () => {

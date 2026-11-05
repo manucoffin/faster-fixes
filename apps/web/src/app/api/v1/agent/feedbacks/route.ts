@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       ...(video ? { video } : {}),
-      feedbacks: items,
+      feedbacks: items.map(({ videoTitle, ...item }) => item),
       count: items.length,
     });
   } catch (error) {

@@ -64,17 +64,20 @@ export async function listFeedbacks(
     orderBy: { createdAt: "desc" },
     include: {
       reviewer: { select: { name: true } },
+      video: { select: { title: true } },
       screenshot: { select: { key: true, provider: true, bucket: true } },
     },
   });
 
   const items = await Promise.all(
-    feedbacks.map(async (f) =>
-      toAgentFeedbackItem(
+    feedbacks.map(async (f) => ({
+      ...toAgentFeedbackItem(
         f,
         f.screenshot ? await getSignedAssetUrl(f.screenshot) : null,
       ),
-    ),
+      // Not part of the JSON item: the Markdown rendering names the Video.
+      videoTitle: f.video?.title ?? null,
+    })),
   );
 
   // `projectId` travels back so the boundary can name the resolved Project in

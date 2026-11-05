@@ -3,7 +3,9 @@
  * Used by both the dashboard export and the agent API.
  */
 
+import { describeVideoSelection } from "@/app/_domains/video";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+import type { FeedbackSelection } from "./read-feedback-selection";
 
 export type FeedbackForMarkdown = {
   id: string;
@@ -25,6 +27,10 @@ export type FeedbackForMarkdown = {
   diagnosticTrail?: DiagnosticTrail | null;
   // Optional for the same reason: absent or empty → the section is skipped.
   customMetadata?: CustomMetadata | null;
+  // Optional: absent or null on a page Feedback (ADR-0020).
+  videoId?: string | null;
+  videoTitle?: string | null;
+  selection?: FeedbackSelection | null;
 };
 
 export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
@@ -40,7 +46,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
   );
 
   // Where to look — most actionable info first
-  const locationLines: string[] = [];
+  const locationLines: string[] = f.videoId ? videoLocationLines(f) : [];
   if (f.pageUrl) locationLines.push(`**Page URL:** ${f.pageUrl}`);
   if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
     locationLines.push(`**Component tree:** \`${md.reactComponentPath}\``);
@@ -123,6 +129,39 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
   }
 
   return lines.join("\n");
+}
+
+function videoLocationLines({ videoTitle, selection }: FeedbackForMarkdown) {
+  const lines: string[] = [];
+  if (videoTitle) lines.push(`**Video:** ${videoTitle}`);
+  if (!selection) return lines;
+
+  lines.push(`**When:** ${describeMarkdownTime(selection)}`);
+  const where = describeVideoSelection(selection);
+  if (where) lines.push(`**Where on the frame:** ${where}`);
+  return lines;
+}
+
+// Both the timecode and the raw milliseconds, so an agent can read either.
+function describeMarkdownTime({ startMs, endMs }: FeedbackSelection) {
+  if (endMs === null) {
+    return `At ${formatMarkdownTimecode(startMs)} (${startMs} ms)`;
+  }
+  return `From ${formatMarkdownTimecode(startMs)} to ${formatMarkdownTimecode(endMs)} (${startMs} to ${endMs} ms)`;
+}
+
+// `mm:ss.mmm`, with an `hh:` prefix past an hour.
+function formatMarkdownTimecode(ms: number) {
+  const totalMs = Math.max(0, Math.floor(ms));
+  const hours = Math.floor(totalMs / 3_600_000);
+  const minutes = Math.floor(totalMs / 60_000) % 60;
+  const seconds = Math.floor(totalMs / 1000) % 60;
+  const clock = `${pad(minutes, 2)}:${pad(seconds, 2)}.${pad(totalMs % 1000, 3)}`;
+  return hours > 0 ? `${pad(hours, 2)}:${clock}` : clock;
+}
+
+function pad(value: number, length: number) {
+  return String(value).padStart(length, "0");
 }
 
 export function formatFeedbackListAsMarkdown(

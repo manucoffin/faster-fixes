@@ -1,5 +1,5 @@
-import { readVideoSelection, type VideoSelection } from "@/app/_domains/video";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+import { readFeedbackSelection } from "./read-feedback-selection";
 
 /**
  * The JSON shape of a Feedback for an agent: one serializer for the agent API
@@ -33,12 +33,6 @@ type FeedbackRow = {
   createdAt: Date;
 };
 
-type AgentFeedbackSelection = VideoSelection & {
-  startMs: number;
-  /** Null for an instant. */
-  endMs: number | null;
-};
-
 type VideoRow = {
   id: string;
   title: string;
@@ -54,18 +48,13 @@ export function toAgentFeedbackItem(
 ) {
   const isVideoFeedback = f.videoId !== null;
 
-  const selection: AgentFeedbackSelection | null =
-    isVideoFeedback && f.startMs !== null
-      ? { startMs: f.startMs, endMs: f.endMs, ...readVideoSelection(f) }
-      : null;
-
   return {
     id: f.id,
     status: f.status,
     comment: f.comment,
     videoId: f.videoId,
     pageUrl: f.pageUrl,
-    selection,
+    selection: readFeedbackSelection(f),
     selector: f.selector,
     clickX: f.clickX,
     clickY: f.clickY,

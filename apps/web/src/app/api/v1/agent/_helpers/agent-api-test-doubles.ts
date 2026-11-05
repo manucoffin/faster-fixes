@@ -100,6 +100,7 @@ export const videoFeedbackRow = {
   diagnosticTrail: null,
   customMetadata: null,
   reviewer: { name: "Curious Otter" },
+  video: { title: videoRow.title },
   createdAt: new Date("2026-11-04T09:12:33.000Z"),
 };
 

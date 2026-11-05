@@ -368,6 +368,38 @@ describe("GET /api/v1/agent/feedbacks with the video filter", () => {
     expect(body.count).toBe(2);
   });
 
+  it("says the Video, the time and the position in the markdown format", async () => {
+    const response = await GET(agentRequest(`${VIDEO_URL}&format=markdown`));
+
+    expect(response.status).toBe(200);
+    const markdown = await response.text();
+    expect(markdown).toContain(
+      [
+        "## Where to look",
+        "",
+        "**Video:** Homepage walkthrough v1",
+        "**When:** At 00:12.340 (12340 ms)",
+        "**Where on the frame:** Point at 42%, 61%",
+        "",
+        "## What's wrong",
+      ].join("\n"),
+    );
+  });
+
+  it("names the Video of a video item in an unfiltered markdown listing", async () => {
+    const response = await GET(agentRequest(`${LIST_URL}&format=markdown`));
+
+    const markdown = await response.text();
+    expect(markdown).toContain("**Page URL:** https://client.test/checkout");
+    expect(markdown).toContain(
+      [
+        "**Video:** Homepage walkthrough v1",
+        "**When:** At 00:12.340 (12340 ms)",
+        "**Where on the frame:** Point at 42%, 61%",
+      ].join("\n"),
+    );
+  });
+
   it("refuses the video and page_url filters together, naming the conflict", async () => {
     const response = await GET(
       agentRequest(`${VIDEO_URL}&page_url=https://client.test/checkout`),
