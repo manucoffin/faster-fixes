@@ -1,8 +1,6 @@
 "use client";
 
-import { getBoardStatusAppearance } from "@/app/(authenticated)/(project)/inbox/_features/kanban/board-status-appearance";
-import { FeedbackStatusEnum } from "@/app/_domains/feedback";
-import { getFeedbackStatusLabel } from "@/app/_domains/feedback/_helpers/feedback-status-label";
+import { FeedbackStatusPill } from "@/app/_domains/feedback/_components/feedback-status-pill";
 import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
 import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
 import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";
@@ -33,9 +31,6 @@ export function VideoFeedbackCard({
     frame,
     THUMBNAIL_BOX,
   );
-  const appearance = getBoardStatusAppearance(feedback.status);
-  const StatusIcon = appearance.icon;
-  const status = FeedbackStatusEnum.safeParse(feedback.status);
 
   return (
     <button
@@ -67,17 +62,7 @@ export function VideoFeedbackCard({
           <span className="truncate text-muted-foreground">
             {feedback.reviewer.name}
           </span>
-          <span
-            className={cn(
-              "ml-auto inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium",
-              appearance.pillClassName,
-            )}
-          >
-            <StatusIcon className="size-3" />
-            {status.success
-              ? getFeedbackStatusLabel(status.data)
-              : feedback.status}
-          </span>
+          <FeedbackStatusPill status={feedback.status} className="ml-auto" />
         </div>
         <p className="line-clamp-3 text-sm leading-snug break-words whitespace-pre-wrap">
           {feedback.comment}

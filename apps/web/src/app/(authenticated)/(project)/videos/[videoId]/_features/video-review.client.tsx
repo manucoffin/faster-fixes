@@ -1,7 +1,7 @@
 "use client";
 
 import { FeedbackDetailPanel } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/feedback-detail-panel.client";
-import { getBoardStatusAppearance } from "@/app/(authenticated)/(project)/inbox/_features/kanban/board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { useVideoPlayer } from "@/app/_domains/video/video-player/use-video-player";
 import { VideoPlayer } from "@/app/_domains/video/video-player/video-player.client";
 import {
@@ -70,7 +70,8 @@ function toTimelineMarker(feedback: FeedbackItem): VideoTimelineMarker {
     id: feedback.id,
     startMs: feedback.startMs ?? 0,
     endMs: feedback.endMs,
-    colorClassName: getBoardStatusAppearance(feedback.status).swatchClassName,
+    colorClassName: getFeedbackStatusAppearance(feedback.status)
+      .swatchClassName,
   };
 }
 

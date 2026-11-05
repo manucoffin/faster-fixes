@@ -1,7 +1,7 @@
 import { Archive, CircleCheck, CircleDashed, CircleDot } from "lucide-react";
 
 // Colour is reserved for status, so the rest of the board stays neutral.
-const BOARD_STATUS_APPEARANCE = {
+const FEEDBACK_STATUS_APPEARANCE = {
   new: {
     icon: CircleDot,
     iconClassName: "text-blue-500",
@@ -22,7 +22,7 @@ const BOARD_STATUS_APPEARANCE = {
     swatchClassName: "bg-success",
     pillClassName: "border-success/30 bg-success/10 text-success",
   },
-  // Not a board column, but the detail panel can show an archived Feedback.
+  // Not a board column, but an archived Feedback can still be shown.
   closed: {
     icon: Archive,
     iconClassName: "text-muted-foreground",
@@ -31,8 +31,10 @@ const BOARD_STATUS_APPEARANCE = {
   },
 } as const;
 
-export function getBoardStatusAppearance(status: string) {
-  return status in BOARD_STATUS_APPEARANCE
-    ? BOARD_STATUS_APPEARANCE[status as keyof typeof BOARD_STATUS_APPEARANCE]
-    : BOARD_STATUS_APPEARANCE.new;
+export function getFeedbackStatusAppearance(status: string) {
+  return status in FEEDBACK_STATUS_APPEARANCE
+    ? FEEDBACK_STATUS_APPEARANCE[
+        status as keyof typeof FEEDBACK_STATUS_APPEARANCE
+      ]
+    : FEEDBACK_STATUS_APPEARANCE.new;
 }

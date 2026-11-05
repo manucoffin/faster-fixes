@@ -18,7 +18,7 @@ import {
 } from "../../_helpers/feedback-detail";
 import { getSelectionFrame } from "../../_helpers/selection-frame";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
-import { getBoardStatusAppearance } from "../kanban/board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { ElementContextCard } from "./element-context-card.client";
 import { FeedbackPropertiesRail } from "./feedback-properties-rail.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
@@ -85,7 +85,7 @@ export function FeedbackDetailPanel({
         <div
           className={cn(
             "h-1 w-full shrink-0",
-            getBoardStatusAppearance(feedback.status).swatchClassName,
+            getFeedbackStatusAppearance(feedback.status).swatchClassName,
           )}
         />
 
