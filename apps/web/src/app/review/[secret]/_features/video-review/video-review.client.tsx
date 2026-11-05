@@ -37,13 +37,16 @@ export function VideoReview({ secret, initialFeedbackId }: VideoReviewProps) {
 
   return matchQueryStatus(reviewPageQuery, {
     Loading: (
-      <ReviewShell title={<Skeleton className="h-5 w-48" />}>
+      <ReviewShell
+        title={<Skeleton className="h-5 w-48" />}
+        reviewerName={null}
+      >
         <Skeleton className="aspect-video w-full rounded-lg" />
         <Skeleton className="h-64 w-full rounded-lg" />
       </ReviewShell>
     ),
     Errored: (error) => (
-      <ReviewShell title={null}>
+      <ReviewShell title={null} reviewerName={null}>
         <Empty className="lg:col-span-2">
           <EmptyHeader>
             <EmptyTitle>Failed to load the video</EmptyTitle>
@@ -54,8 +57,12 @@ export function VideoReview({ secret, initialFeedbackId }: VideoReviewProps) {
     ),
     Empty: <ReviewLinkNotFound />,
     Success: ({ data }) => (
-      <ReviewShell title={<h1 className="font-medium">{data.video.title}</h1>}>
+      <ReviewShell
+        title={<h1 className="font-medium">{data.video.title}</h1>}
+        reviewerName={data.reviewer?.name ?? null}
+      >
         <ReviewWorkspace
+          secret={secret}
           data={data}
           initialFeedbackId={initialFeedbackId}
           onPlaybackError={handlePlaybackError}
@@ -67,12 +74,13 @@ export function VideoReview({ secret, initialFeedbackId }: VideoReviewProps) {
 
 type ReviewShellProps = {
   title: ReactNode;
+  reviewerName: string | null;
   children: ReactNode;
 };
 
 // The "Theater" layout: the player is the stage, the list column beside it on
 // desktop and under it on a phone.
-function ReviewShell({ title, children }: ReviewShellProps) {
+function ReviewShell({ title, reviewerName, children }: ReviewShellProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b">
@@ -82,7 +90,7 @@ function ReviewShell({ title, children }: ReviewShellProps) {
             <span className="text-muted-foreground">/</span>
             <div className="min-w-0 truncate">{title}</div>
           </div>
-          <ReviewerChip />
+          <ReviewerChip name={reviewerName} />
         </div>
       </header>
       <main className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_360px]">

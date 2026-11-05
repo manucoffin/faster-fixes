@@ -50,9 +50,13 @@ async function fetchReviewPageAsReviewer(
   return reviewerSecret ? fetchReviewPage(secret, reviewerSecret) : data;
 }
 
+export function getReviewPageQueryKey(secret: string) {
+  return ["review-page", secret];
+}
+
 export function useReviewPageQuery(secret: string) {
   const queryClient = useQueryClient();
-  const queryKey = ["review-page", secret];
+  const queryKey = getReviewPageQueryKey(secret);
 
   return useQuery({
     queryKey,

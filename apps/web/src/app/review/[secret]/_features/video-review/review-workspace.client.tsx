@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { AnnotationsClosedBanner } from "../../_components/annotations-closed-banner";
 import {
+  anchorCommentDraft,
+  clearCommentDraftOut,
+  markCommentDraftOut,
+  type CommentDraft,
+} from "../../_helpers/comment-draft";
+import {
   isHiddenByDefault,
   listVisibleFeedback,
 } from "../../_helpers/list-visible-feedback";
@@ -10,12 +16,17 @@ import type {
   ReviewFeedbackItem,
   ReviewPageData,
 } from "../../_types/review-page-data";
+import { CommentControls } from "./comment-controls.client";
+import { FeedbackComposer } from "./feedback-composer.client";
 import { FeedbackList } from "./feedback-list.client";
+import { NamePromptDialog } from "./name-prompt-dialog.client";
 import { ReviewPlayer } from "./review-player.client";
 import { ReviewTimeline } from "./review-timeline.client";
+import { usePostFeedback } from "./use-post-feedback";
 import { useVideoPlayer } from "./use-video-player";
 
 type ReviewWorkspaceProps = {
+  secret: string;
   data: ReviewPageData;
   initialFeedbackId: string | null;
   onPlaybackError: () => void;
@@ -37,6 +48,7 @@ function getFeedbackLink(feedbackId: string) {
 // The player and the list stay in step: a marker or a card seeks the Video
 // and highlights the same Feedback.
 export function ReviewWorkspace({
+  secret,
   data,
   initialFeedbackId,
   onPlaybackError,
@@ -64,6 +76,19 @@ export function ReviewWorkspace({
     if (initialFeedback) scrollCardIntoView(initialFeedback.id);
   }, [initialFeedback]);
 
+  const [draft, setDraft] = useState<CommentDraft | null>(null);
+  const postFeedback = usePostFeedback({
+    secret,
+    data,
+    videoRef,
+    onPosted: (feedback) => {
+      setDraft(null);
+      setActiveFeedbackId(feedback.id);
+      requestAnimationFrame(() => scrollCardIntoView(feedback.id));
+    },
+  });
+  const canComment = data.video.annotationsOpen;
+
   const { visible, hiddenCount } = listVisibleFeedback(
     data.feedback,
     showResolved,
@@ -83,6 +108,18 @@ export function ReviewWorkspace({
     scrollCardIntoView(feedback.id);
   }
 
+  function markIn() {
+    player.pause();
+    setDraft((current) => anchorCommentDraft(current, player.currentMs));
+  }
+
+  function markOut() {
+    player.pause();
+    setDraft(
+      (current) => current && markCommentDraftOut(current, player.currentMs),
+    );
+  }
+
   return (
     <>
       <section className="space-y-3">
@@ -92,6 +129,21 @@ export function ReviewWorkspace({
           videoRef={videoRef}
           player={player}
           onPlaybackError={onPlaybackError}
+          controls={
+            canComment ? (
+              <CommentControls
+                draft={draft}
+                currentMs={player.currentMs}
+                onMarkIn={markIn}
+                onMarkOut={markOut}
+                onClearOut={() =>
+                  setDraft(
+                    (current) => current && clearCommentDraftOut(current),
+                  )
+                }
+              />
+            ) : null
+          }
           timeline={
             <ReviewTimeline
               durationMs={player.durationMs}
@@ -115,6 +167,26 @@ export function ReviewWorkspace({
         activeFeedbackId={activeFeedbackId}
         getFeedbackLink={getFeedbackLink}
         onSelect={selectFeedback}
+        composer={
+          canComment && draft ? (
+            <FeedbackComposer
+              draft={draft}
+              isPosting={postFeedback.isPosting}
+              onCommentChange={(comment) =>
+                setDraft((current) => current && { ...current, comment })
+              }
+              onDiscard={() => setDraft(null)}
+              onPost={() => postFeedback.post(draft)}
+            />
+          ) : null
+        }
+      />
+      <NamePromptDialog
+        open={postFeedback.namePromptOpen}
+        secret={secret}
+        videoId={data.video.id}
+        onClaimed={postFeedback.handleClaimed}
+        onCancel={postFeedback.cancelNamePrompt}
       />
     </>
   );

@@ -8,6 +8,7 @@ import {
 } from "@workspace/ui/components/empty";
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
+import type { ReactNode } from "react";
 import type {
   ReviewFeedbackItem,
   ReviewVideo,
@@ -24,6 +25,7 @@ type FeedbackListProps = {
   activeFeedbackId: string | null;
   getFeedbackLink: (feedbackId: string) => string;
   onSelect: (feedback: ReviewFeedbackItem) => void;
+  composer: ReactNode;
 };
 
 export function FeedbackList({
@@ -36,9 +38,13 @@ export function FeedbackList({
   activeFeedbackId,
   getFeedbackLink,
   onSelect,
+  composer,
 }: FeedbackListProps) {
   return (
     <aside className="space-y-3">
+      {/* At the head of the list column: beside the player on desktop, right
+          under it on a phone. */}
+      {composer}
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-medium">
           Comments{" "}

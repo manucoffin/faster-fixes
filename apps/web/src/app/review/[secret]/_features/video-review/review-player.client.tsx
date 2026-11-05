@@ -12,6 +12,7 @@ type ReviewPlayerProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
   player: ReturnType<typeof useVideoPlayer>;
   timeline: ReactNode;
+  controls: ReactNode;
   onPlaybackError: () => void;
 };
 
@@ -20,6 +21,7 @@ export function ReviewPlayer({
   videoRef,
   player,
   timeline,
+  controls,
   onPlaybackError,
 }: ReviewPlayerProps) {
   return (
@@ -46,7 +48,7 @@ export function ReviewPlayer({
 
       {timeline}
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
           size="icon"
@@ -63,6 +65,7 @@ export function ReviewPlayer({
             / {formatTimecode(player.durationMs)}
           </span>
         </span>
+        <div className="ml-auto">{controls}</div>
       </div>
     </div>
   );
