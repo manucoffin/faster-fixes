@@ -254,4 +254,29 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
     expect(agentApiPrisma.feedback.update).toHaveBeenCalledTimes(1);
     expect(inngestSendDouble).not.toHaveBeenCalled();
   });
+
+  it("updates the Status of a video Feedback as for a page Feedback", async () => {
+    agentApiPrisma.feedback.findFirst.mockResolvedValue({
+      id: FEEDBACK_ID,
+      status: "new",
+      videoId: "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+      pageUrl: null,
+    });
+
+    const response = await POST(
+      statusRequest({ status: "resolved" }),
+      routeContext(),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      id: FEEDBACK_ID,
+      status: "resolved",
+      updatedAt: "2026-01-02T03:04:05.000Z",
+    });
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/status-changed",
+      data: { feedbackId: FEEDBACK_ID, newStatus: "resolved", actor: "agent" },
+    });
+  });
 });

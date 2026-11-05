@@ -18,6 +18,9 @@ import {
   resetAgentApiDoubles,
   REVIEWER_ID,
   SIGNED_ASSET_URL,
+  VIDEO_ID,
+  videoFeedbackRow,
+  videoRow,
 } from "../_helpers/agent-api-test-doubles";
 
 vi.mock("@workspace/db", async () => {
@@ -247,6 +250,158 @@ describe("GET /api/v1/agent/feedbacks", () => {
     await expect(response.json()).resolves.toMatchObject({
       feedbacks: [{ customMetadata: null }],
     });
+  });
+});
+
+describe("GET /api/v1/agent/feedbacks with the video filter", () => {
+  const VIDEO_URL = `${LIST_URL}&video=${VIDEO_ID}`;
+
+  /** The Video reads as absent unless it belongs to the queried Project. */
+  function seedVideo(row: typeof videoRow = videoRow) {
+    agentApiPrisma.video.findFirst.mockImplementation(
+      async ({ where }: { where: { id: string; projectId: string } }) =>
+        where.id === row.id && where.projectId === row.projectId ? row : null,
+    );
+  }
+
+  /** Narrows the stored rows the way the `where` clause does. */
+  function seedFeedbacks(
+    rows: Array<Record<string, unknown> & { videoId: string | null }>,
+  ) {
+    agentApiPrisma.feedback.findMany.mockImplementation(
+      async ({ where }: { where: { videoId?: string } }) =>
+        rows.filter(
+          (row) => where.videoId === undefined || row.videoId === where.videoId,
+        ),
+    );
+  }
+
+  beforeEach(() => {
+    seedVideo();
+    seedFeedbacks([feedbackRow, videoFeedbackRow]);
+  });
+
+  it("lists only that Video's Feedback, opened by the video block", async () => {
+    const response = await GET(agentRequest(VIDEO_URL));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      video: {
+        id: VIDEO_ID,
+        title: "Homepage walkthrough v1",
+        filename: "homepage-walkthrough.mp4",
+        durationMs: 94200,
+        width: 1920,
+        height: 1080,
+      },
+      feedbacks: [
+        {
+          id: "feedback_video_1",
+          status: "new",
+          comment: "The logo jumps when the menu opens",
+          videoId: VIDEO_ID,
+          pageUrl: null,
+          selection: {
+            startMs: 12340,
+            endMs: null,
+            point: { x: 0.42, y: 0.61 },
+            area: null,
+          },
+          selector: null,
+          clickX: null,
+          clickY: null,
+          viewportWidth: null,
+          viewportHeight: null,
+          browserName: "Chrome",
+          browserVersion: "142",
+          os: "macOS",
+          screenshotUrl: SIGNED_ASSET_URL,
+          metadata: null,
+          diagnosticTrail: null,
+          customMetadata: null,
+          reviewerName: "Curious Otter",
+          createdAt: "2026-11-04T09:12:33.000Z",
+        },
+      ],
+      count: 1,
+    });
+  });
+
+  it("types a range with an area in the selection", async () => {
+    seedFeedbacks([
+      {
+        ...videoFeedbackRow,
+        startMs: 41000,
+        endMs: 47500,
+        frameX: 0.1,
+        frameY: 0.2,
+        frameWidth: 0.45,
+        frameHeight: 0.5,
+      },
+    ]);
+
+    const response = await GET(agentRequest(VIDEO_URL));
+
+    await expect(response.json()).resolves.toMatchObject({
+      feedbacks: [
+        {
+          selection: {
+            startMs: 41000,
+            endMs: 47500,
+            point: null,
+            area: { x: 0.1, y: 0.2, width: 0.45, height: 0.5 },
+          },
+        },
+      ],
+    });
+  });
+
+  it("carries videoId on each item of an unfiltered listing and no video block", async () => {
+    const response = await GET(agentRequest(LIST_URL));
+
+    const body = (await response.json()) as {
+      feedbacks: Array<{ videoId: string | null }>;
+      count: number;
+    };
+    expect(body).not.toHaveProperty("video");
+    expect(body.feedbacks.map((f) => f.videoId)).toEqual([null, VIDEO_ID]);
+    expect(body.count).toBe(2);
+  });
+
+  it("refuses the video and page_url filters together, naming the conflict", async () => {
+    const response = await GET(
+      agentRequest(`${VIDEO_URL}&page_url=https://client.test/checkout`),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "The video and page_url filters cannot be combined",
+      code: "VALIDATION_ERROR",
+    });
+    expect(agentApiPrisma.feedback.findMany).not.toHaveBeenCalled();
+  });
+
+  it("rejects a video that is not a Video id", async () => {
+    const response = await GET(agentRequest(`${LIST_URL}&video=not-an-id`));
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toEqual({
+      error: "Validation failed",
+      code: "VALIDATION_ERROR",
+    });
+  });
+
+  it("reports a Video of another Project as not found", async () => {
+    seedVideo({ ...videoRow, projectId: "someone-elses-project" });
+
+    const response = await GET(agentRequest(VIDEO_URL));
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      error: "Video not found",
+      code: "NOT_FOUND",
+    });
+    expect(agentApiPrisma.feedback.findMany).not.toHaveBeenCalled();
   });
 });
 

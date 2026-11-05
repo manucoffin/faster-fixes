@@ -4,6 +4,7 @@ import { z } from "zod";
 export const ListFeedbacksQuerySchema = z.object({
   status: FeedbackStatusEnum.optional(),
   page_url: z.url().optional(),
+  video: z.uuid().optional(),
   project: z.string().min(1),
   format: z.enum(["json", "markdown"]).default("json"),
 });

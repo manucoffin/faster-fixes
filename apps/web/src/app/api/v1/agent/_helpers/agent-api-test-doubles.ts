@@ -17,6 +17,7 @@ export const PROJECT_ID = "project_1";
 export const PROJECT_PUBLIC_ID = "proj_public_1";
 export const REVIEWER_ID = "reviewer_1";
 export const SIGNED_ASSET_URL = "https://assets.example.test/signed";
+export const VIDEO_ID = "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23";
 
 export const ALL_AGENT_SCOPES = [
   "feedbacks:read",
@@ -54,8 +55,52 @@ export const agentApiPrisma = {
     update: vi.fn(),
   },
   reviewer: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
+  video: { findFirst: vi.fn(), findMany: vi.fn() },
   $queryRaw: vi.fn(),
   $transaction: vi.fn(),
+};
+
+/** A `ready` Video of the token's Project, as the `video` table stores it. */
+export const videoRow = {
+  id: VIDEO_ID,
+  projectId: PROJECT_ID,
+  title: "Homepage walkthrough v1",
+  filename: "homepage-walkthrough.mp4",
+  state: "ready",
+  durationMs: 94200,
+  width: 1920,
+  height: 1080,
+  annotationsOpen: true,
+  createdAt: new Date("2026-11-04T09:00:00.000Z"),
+};
+
+/** A Feedback on `videoRow`: an instant with a point, page fields empty. */
+export const videoFeedbackRow = {
+  id: "feedback_video_1",
+  status: "new",
+  comment: "The logo jumps when the menu opens",
+  videoId: VIDEO_ID,
+  pageUrl: null,
+  startMs: 12340,
+  endMs: null,
+  frameX: 0.42,
+  frameY: 0.61,
+  frameWidth: null,
+  frameHeight: null,
+  selector: null,
+  clickX: null,
+  clickY: null,
+  viewportWidth: null,
+  viewportHeight: null,
+  browserName: "Chrome",
+  browserVersion: "142",
+  os: "macOS",
+  screenshot: { key: "frame.jpg", provider: "s3", bucket: "assets" },
+  metadata: null,
+  diagnosticTrail: null,
+  customMetadata: null,
+  reviewer: { name: "Curious Otter" },
+  createdAt: new Date("2026-11-04T09:12:33.000Z"),
 };
 
 export const getSignedAssetUrlDouble = vi.fn();
