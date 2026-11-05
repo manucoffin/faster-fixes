@@ -1,5 +1,9 @@
 "use client";
 
+import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
+import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
+import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";
+import { readVideoSelection } from "@/app/_domains/video/_helpers/read-video-selection";
 import {
   Sheet,
   SheetContent,
@@ -8,15 +12,42 @@ import {
 } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
 import { ImageOff } from "lucide-react";
-import { getElementContext } from "../../_helpers/feedback-detail";
+import {
+  getElementContext,
+  getFeedbackDetailSections,
+} from "../../_helpers/feedback-detail";
 import { getSelectionFrame } from "../../_helpers/selection-frame";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
-import { getBoardStatusAppearance } from "../kanban/board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { ElementContextCard } from "./element-context-card.client";
 import { FeedbackPropertiesRail } from "./feedback-properties-rail.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
+import { SelectionFrameOverlay } from "./selection-frame-overlay";
 
 type FeedbackItem = ListFeedbackOutput[number];
+
+// The captured frame is shown at its own aspect ratio, so the image box is the
+// frame and the normalized Selection maps onto it as is.
+const UNIT_BOX = { width: 1, height: 1 };
+
+// Null when the Feedback marks nothing, so the switch is not offered.
+function renderScreenshotOverlay(feedback: FeedbackItem) {
+  if (feedback.videoId === null) {
+    const frame = getSelectionFrame(feedback.metadata);
+    return frame ? <SelectionFrameOverlay frame={frame} /> : null;
+  }
+
+  const geometry = mapSelectionToBox(
+    readVideoSelection(feedback),
+    UNIT_BOX,
+    UNIT_BOX,
+  );
+  return geometry ? (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <SelectionMarker geometry={geometry} />
+    </div>
+  ) : null;
+}
 
 type FeedbackDetailPanelProps = {
   feedback: FeedbackItem | null;
@@ -40,6 +71,8 @@ export function FeedbackDetailPanel({
   if (!feedback) return null;
 
   const element = getElementContext(feedback);
+  const sections = getFeedbackDetailSections(feedback);
+  const overlay = renderScreenshotOverlay(feedback);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -52,7 +85,7 @@ export function FeedbackDetailPanel({
         <div
           className={cn(
             "h-1 w-full shrink-0",
-            getBoardStatusAppearance(feedback.status).swatchClassName,
+            getFeedbackStatusAppearance(feedback.status).swatchClassName,
           )}
         />
 
@@ -65,7 +98,14 @@ export function FeedbackDetailPanel({
             {feedback.screenshotUrl ? (
               <ScreenshotDialog
                 src={feedback.screenshotUrl}
-                frame={getSelectionFrame(feedback.metadata)}
+                overlay={overlay}
+                badge={
+                  feedback.videoId !== null && feedback.startMs !== null ? (
+                    <span className="absolute top-2 left-2 rounded border bg-background/90 px-1.5 py-0.5 font-mono text-xs text-foreground tabular-nums">
+                      {formatFeedbackTime(feedback.startMs, feedback.endMs)}
+                    </span>
+                  ) : undefined
+                }
               />
             ) : (
               <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-xs text-muted-foreground">
@@ -74,11 +114,14 @@ export function FeedbackDetailPanel({
               </div>
             )}
 
-            {element.hasContext && <ElementContextCard element={element} />}
+            {sections.elementContext && element.hasContext && (
+              <ElementContextCard element={element} />
+            )}
           </div>
 
           <FeedbackPropertiesRail
             feedback={feedback}
+            sections={sections}
             projectId={projectId}
             hasGitHubLink={hasGitHubLink}
             hasLinearLink={hasLinearLink}

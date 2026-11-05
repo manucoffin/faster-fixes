@@ -20,7 +20,14 @@ const feedbackRow = {
   id: "feedback_1",
   status: "new",
   comment: "The submit button does nothing",
+  videoId: null,
   pageUrl: "https://client.test/checkout",
+  startMs: null,
+  endMs: null,
+  frameX: null,
+  frameY: null,
+  frameWidth: null,
+  frameHeight: null,
   selector: "#submit",
   clickX: 12,
   clickY: 34,
@@ -37,9 +44,19 @@ const feedbackRow = {
   createdAt: new Date("2026-01-02T03:04:05.000Z"),
 };
 
-function fakeDb(rows: unknown[] = [feedbackRow]) {
+const videoRow = {
+  id: "video_1",
+  title: "Homepage walkthrough v1",
+  filename: "homepage-walkthrough.mp4",
+  durationMs: 94200,
+  width: 1920,
+  height: 1080,
+};
+
+function fakeDb(rows: unknown[] = [feedbackRow], video: unknown = videoRow) {
   return {
     feedback: { findMany: vi.fn().mockResolvedValue(rows) },
+    video: { findFirst: vi.fn().mockResolvedValue(video) },
   } as unknown as FakeDb;
 }
 
@@ -84,7 +101,9 @@ describe("listFeedbacks", () => {
         id: "feedback_1",
         status: "new",
         comment: "The submit button does nothing",
+        videoId: null,
         pageUrl: "https://client.test/checkout",
+        selection: null,
         selector: "#submit",
         clickX: 12,
         clickY: 34,
@@ -99,8 +118,29 @@ describe("listFeedbacks", () => {
         customMetadata: { userId: "user_42", beta: true },
         reviewerName: "Dana",
         createdAt: new Date("2026-01-02T03:04:05.000Z"),
+        videoTitle: null,
       },
     ]);
+  });
+
+  it("carries the Video title with a video item", async () => {
+    const result = await listFeedbacks(
+      { project: "proj_public_1", organizationProjects: ORGANIZATION_PROJECTS },
+      fakeDb([
+        {
+          ...feedbackRow,
+          videoId: "video_1",
+          pageUrl: null,
+          startMs: 12340,
+          video: { title: "Homepage walkthrough v1" },
+        },
+      ]),
+    );
+
+    expect(result.items[0]).toMatchObject({
+      videoId: "video_1",
+      videoTitle: "Homepage walkthrough v1",
+    });
   });
 
   it("accepts the project's internal id as well as its public one", async () => {
@@ -109,7 +149,7 @@ describe("listFeedbacks", () => {
       fakeDb([]),
     );
 
-    expect(result).toEqual({ projectId: "project_1", items: [] });
+    expect(result).toEqual({ projectId: "project_1", video: null, items: [] });
   });
 
   it("narrows the read to the requested status and page url", async () => {
@@ -134,5 +174,58 @@ describe("listFeedbacks", () => {
         },
       }),
     );
+  });
+
+  it("opens a listing filtered on a Video with its block", async () => {
+    const db = fakeDb([]);
+
+    const result = await listFeedbacks(
+      {
+        project: "proj_public_1",
+        organizationProjects: ORGANIZATION_PROJECTS,
+        videoId: "video_1",
+      },
+      db,
+    );
+
+    expect(result.video).toEqual(videoRow);
+    expect(db.video.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "video_1", projectId: "project_1" },
+      }),
+    );
+    expect(db.feedback.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { projectId: "project_1", videoId: "video_1" },
+      }),
+    );
+  });
+
+  it("leaves the video block out of an unfiltered listing", async () => {
+    const db = fakeDb([]);
+
+    const result = await listFeedbacks(
+      { project: "proj_public_1", organizationProjects: ORGANIZATION_PROJECTS },
+      db,
+    );
+
+    expect(result.video).toBeNull();
+    expect(db.video.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("reports a Video outside the resolved Project as not found", async () => {
+    const db = fakeDb([], null);
+
+    await expect(
+      listFeedbacks(
+        {
+          project: "proj_public_1",
+          organizationProjects: ORGANIZATION_PROJECTS,
+          videoId: "video_1",
+        },
+        db,
+      ),
+    ).rejects.toThrow(new NotFoundError("Video not found"));
+    expect(db.feedback.findMany).not.toHaveBeenCalled();
   });
 });

@@ -71,11 +71,6 @@ ruleTester.run("kebab-case-path", kebabCasePathRule, {
       code: CODE,
     },
     {
-      name: "a deprecated stub, whatever its casing",
-      filename: inCwd("src/app/_deprecated_UserCard.tsx"),
-      code: CODE,
-    },
-    {
       name: "a dotfile",
       filename: inCwd(".storybook/main.ts"),
       code: CODE,

@@ -6,7 +6,7 @@ import {
   AvatarImage,
 } from "@workspace/ui/components/avatar";
 import { StarIcon } from "lucide-react";
-import { TestimonialMessage } from "@/app/testimonial/_components/testimonial-message";
+import { PublicMessage } from "@/app/_components/public-message";
 
 type TestimonialThankYouProps = {
   testimonial: SubmitTestimonialOutput;
@@ -18,7 +18,7 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
     .join(", ");
 
   return (
-    <TestimonialMessage
+    <PublicMessage
       title="Thank you"
       description="Your testimonial will appear on the site after review. To change anything, reply to the email you received."
     >
@@ -64,6 +64,6 @@ export function TestimonialThankYou({ testimonial }: TestimonialThankYouProps) {
           </span>
         </figcaption>
       </figure>
-    </TestimonialMessage>
+    </PublicMessage>
   );
 }

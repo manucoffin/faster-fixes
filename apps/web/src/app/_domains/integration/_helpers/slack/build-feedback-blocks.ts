@@ -1,4 +1,5 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
+import { describeVideoLocation } from "../github/format-issue-body";
 
 // Block Kit blocks are loosely typed; we model only the shapes we emit rather
 // than depending on the full Block Kit type surface.
@@ -39,9 +40,18 @@ export function statusBadge(
 type BuildFeedbackBlocksFeedback = {
   reviewerName: string | null;
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   browserName: string | null;
   os: string | null;
+  // Optional: absent or null on a page Feedback (ADR-0020).
+  videoId?: string | null;
+  videoTitle?: string | null;
+  startMs?: number | null;
+  endMs?: number | null;
+  frameX?: number | null;
+  frameY?: number | null;
+  frameWidth?: number | null;
+  frameHeight?: number | null;
 };
 
 type BuildFeedbackBlocksParams = {
@@ -80,12 +90,21 @@ export function buildFeedbackBlocks({
     },
   ];
 
-  const contextElements: SlackBlock[] = [
-    {
+  const contextElements: SlackBlock[] = [];
+
+  // A video Feedback names the Video, the time and the position on the frame
+  // where a page Feedback links its page.
+  if (feedback.videoId) {
+    contextElements.push({
+      type: "mrkdwn",
+      text: describeVideoLocation(feedback).join(" · "),
+    });
+  } else if (feedback.pageUrl) {
+    contextElements.push({
       type: "mrkdwn",
       text: `<${feedback.pageUrl}|${feedback.pageUrl}>`,
-    },
-  ];
+    });
+  }
 
   const environment = [feedback.browserName, feedback.os]
     .filter((part): part is string => Boolean(part))
@@ -95,13 +114,16 @@ export function buildFeedbackBlocks({
     contextElements.push({ type: "mrkdwn", text: environment });
   }
 
-  blocks.push({ type: "context", elements: contextElements });
+  // Slack rejects a context block without elements.
+  if (contextElements.length > 0) {
+    blocks.push({ type: "context", elements: contextElements });
+  }
 
   if (screenshotUrl) {
     blocks.push({
       type: "image",
       image_url: screenshotUrl,
-      alt_text: "Feedback screenshot",
+      alt_text: feedback.videoId ? "Video frame" : "Feedback screenshot",
     });
   }
 

@@ -25,6 +25,10 @@ import {
   BOARD_SORTS,
   DEFAULT_BOARD_SORT,
 } from "../_helpers/board-column-order";
+import {
+  parseBoardSource,
+  serializeBoardSource,
+} from "../_helpers/board-source";
 import { ArchiveTab } from "./archive/archive-tab.client";
 import { FeedbackDetailPanel } from "./feedback-panel/feedback-detail-panel.client";
 import { FeedbackFilters } from "./filters/feedback-filters.client";
@@ -42,7 +46,11 @@ export function InboxTabs() {
     "view",
     parseAsString.withDefault("board"),
   );
-  const [pageUrlFilter, setPageUrlFilter] = useQueryState("pageUrl");
+  const [sourceParam, setSourceParam] = useQueryState("source");
+  const source = React.useMemo(
+    () => parseBoardSource(sourceParam),
+    [sourceParam],
+  );
   const [sort, setSort] = useQueryState(
     "sort",
     parseAsStringLiteral(BOARD_SORTS).withDefault(DEFAULT_BOARD_SORT),
@@ -89,8 +97,10 @@ export function InboxTabs() {
           {view === "board" && (
             <FeedbackFilters
               projectId={projectId}
-              selectedPageUrl={pageUrlFilter}
-              onPageUrlChange={setPageUrlFilter}
+              source={source}
+              onSourceChange={(next) =>
+                void setSourceParam(serializeBoardSource(next))
+              }
               sort={sort}
               onSortChange={setSort}
             />
@@ -147,7 +157,7 @@ export function InboxTabs() {
             Success: ({ data: feedback }) => (
               <KanbanBoard
                 feedback={feedback}
-                pageUrlFilter={pageUrlFilter}
+                source={source}
                 sort={sort}
                 onSelectFeedback={(id) => setSelectedFeedbackId(id)}
               />

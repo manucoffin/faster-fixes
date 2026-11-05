@@ -2,12 +2,17 @@ import {
   formatCustomMetadataLines,
   formatDiagnosticTrailLines,
 } from "@/app/_domains/feedback";
+import {
+  describeVideoFeedbackTime,
+  describeVideoSelection,
+  readVideoSelection,
+} from "@/app/_domains/video";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 
 type FeedbackForIssue = {
   id: string;
   comment: string;
-  pageUrl: string;
+  pageUrl: string | null;
   selector: string | null;
   clickX: number | null;
   clickY: number | null;
@@ -23,6 +28,15 @@ type FeedbackForIssue = {
   customMetadata?: CustomMetadata | null;
   projectId: string;
   dashboardUrl: string;
+  // Optional: absent or null on a page Feedback (ADR-0020).
+  videoId?: string | null;
+  videoTitle?: string | null;
+  startMs?: number | null;
+  endMs?: number | null;
+  frameX?: number | null;
+  frameY?: number | null;
+  frameWidth?: number | null;
+  frameHeight?: number | null;
 };
 
 export function formatIssueTitle(comment: string): string {
@@ -37,19 +51,15 @@ export function formatIssueTitle(comment: string): string {
 }
 
 export function formatIssueBody(feedback: FeedbackForIssue): string {
-  const lines: string[] = [];
+  if (feedback.videoId) return formatVideoIssueBody(feedback);
 
-  // Comment first — most important
-  const quoted = feedback.comment
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n");
-  lines.push(quoted);
-  lines.push("");
+  const lines: string[] = [quoteComment(feedback.comment), ""];
 
   // Page URL
-  const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
-  lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
+  if (feedback.pageUrl) {
+    const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
+    lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
+  }
 
   // Component path + selector
   const locationParts: string[] = [];
@@ -77,19 +87,7 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
   }
 
   // Collapsible environment block
-  const envParts: string[] = [];
-  if (feedback.browserName) {
-    envParts.push(
-      feedback.browserName +
-        (feedback.browserVersion ? ` ${feedback.browserVersion}` : ""),
-    );
-  }
-  if (feedback.os) envParts.push(feedback.os);
-  if (feedback.viewportWidth && feedback.viewportHeight) {
-    envParts.push(
-      `${feedback.viewportWidth} \u00d7 ${feedback.viewportHeight}`,
-    );
-  }
+  const envParts = environmentParts(feedback);
 
   if (envParts.length > 0 || feedback.reviewerName) {
     lines.push("");
@@ -133,11 +131,92 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
     lines.push("</details>");
   }
 
-  // Footer
-  lines.push("");
-  lines.push(
-    `<sub><a href="https://faster-fixes.com">Faster Fixes</a> \u00b7 <a href="${feedback.dashboardUrl}">View in dashboard</a></sub>`,
-  );
+  lines.push("", dashboardFooter(feedback.dashboardUrl));
 
   return lines.join("\n");
+}
+
+// A video Feedback has no page, element, Custom metadata or Diagnostics: the
+// Video line says where to look and the captured frame is the Screenshot.
+function formatVideoIssueBody(feedback: FeedbackForIssue): string {
+  const lines = [
+    quoteComment(feedback.comment),
+    "",
+    `**Video:** ${describeVideoLocation(feedback).join(" \u00b7 ")}`,
+  ];
+
+  if (feedback.screenshotUrl) {
+    lines.push("", `![Screenshot](${feedback.screenshotUrl})`);
+  }
+
+  lines.push("", `**Reported by:** ${feedback.reviewerName}`);
+
+  const envParts = environmentParts(feedback);
+  if (envParts.length > 0) {
+    lines.push("", `**Environment:** ${envParts.join(" \u00b7 ")}`);
+  }
+
+  lines.push("", dashboardFooter(feedback.dashboardUrl));
+
+  return lines.join("\n");
+}
+
+// The Video line's parts (title, time, position on the frame), shared by every
+// Tracker's video variant so GitHub, Linear and Jira say the same thing.
+export function describeVideoLocation(
+  feedback: Pick<
+    FeedbackForIssue,
+    | "videoTitle"
+    | "startMs"
+    | "endMs"
+    | "frameX"
+    | "frameY"
+    | "frameWidth"
+    | "frameHeight"
+  >,
+): string[] {
+  const videoParts: string[] = [];
+  if (feedback.videoTitle) videoParts.push(feedback.videoTitle);
+  if (feedback.startMs != null) {
+    videoParts.push(
+      describeVideoFeedbackTime(feedback.startMs, feedback.endMs ?? null),
+    );
+  }
+  const position = describeVideoSelection(
+    readVideoSelection({
+      frameX: feedback.frameX ?? null,
+      frameY: feedback.frameY ?? null,
+      frameWidth: feedback.frameWidth ?? null,
+      frameHeight: feedback.frameHeight ?? null,
+    }),
+  );
+  if (position) videoParts.push(position);
+
+  return videoParts;
+}
+
+function quoteComment(comment: string) {
+  return comment
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n");
+}
+
+function environmentParts(feedback: FeedbackForIssue) {
+  const parts: string[] = [];
+  if (feedback.browserName) {
+    parts.push(
+      feedback.browserName +
+        (feedback.browserVersion ? ` ${feedback.browserVersion}` : ""),
+    );
+  }
+  if (feedback.os) parts.push(feedback.os);
+  if (feedback.viewportWidth && feedback.viewportHeight) {
+    parts.push(`${feedback.viewportWidth} \u00d7 ${feedback.viewportHeight}`);
+  }
+  return parts;
+}
+
+function dashboardFooter(dashboardUrl: string) {
+  return `<sub><a href="https://faster-fixes.com">Faster Fixes</a> \u00b7 <a href="${dashboardUrl}">View in dashboard</a></sub>`;
 }

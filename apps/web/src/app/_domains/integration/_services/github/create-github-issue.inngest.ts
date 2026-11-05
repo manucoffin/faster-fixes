@@ -5,7 +5,7 @@ import {
 import { getInstallationOctokit } from "./github-app";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import {
@@ -40,6 +40,7 @@ export const createGitHubIssue = inngest.createFunction(
           },
         },
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
         issueLink: { select: { id: true } },
       },
@@ -73,8 +74,7 @@ export const createGitHubIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
-    const baseUrl = getAuthBaseUrl();
-    const dashboardUrl = `${baseUrl}/inbox?feedbackId=${feedback.id}`;
+    const dashboardUrl = buildFeedbackDashboardUrl(feedback);
 
     const title = formatIssueTitle(feedback.comment);
     const body = formatIssueBody({
@@ -96,6 +96,14 @@ export const createGitHubIssue = inngest.createFunction(
       customMetadata: feedback.customMetadata as CustomMetadata | null,
       projectId: feedback.projectId,
       dashboardUrl,
+      videoId: feedback.videoId,
+      videoTitle: feedback.video?.title,
+      startMs: feedback.startMs,
+      endMs: feedback.endMs,
+      frameX: feedback.frameX,
+      frameY: feedback.frameY,
+      frameWidth: feedback.frameWidth,
+      frameHeight: feedback.frameHeight,
     });
 
     const response = await octokit.request(

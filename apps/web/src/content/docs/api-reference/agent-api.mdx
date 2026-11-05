@@ -1,6 +1,6 @@
 ---
 title: Agent API
-description: REST API for AI agents to list feedback and update status.
+description: REST API for AI agents to list feedback and videos and update status.
 ---
 
 The Agent API is designed for programmatic access by AI coding agents. It's the same API used by the [MCP server](/docs/mcp/setup).
@@ -27,12 +27,15 @@ GET /feedbacks?project=proj_xxx
 
 ### Query parameters
 
-| Parameter  | Type     | Required | Description                                        |
-| ---------- | -------- | -------- | -------------------------------------------------- |
-| `project`  | `string` | Yes      | Project ID (prefix: `proj_`)                       |
-| `status`   | `string` | No       | Filter: `new`, `in_progress`, `resolved`, `closed` |
-| `page_url` | `string` | No       | Filter by page URL                                 |
-| `format`   | `string` | No       | `json` (default) or `markdown`                     |
+| Parameter  | Type     | Required | Description                                          |
+| ---------- | -------- | -------- | ---------------------------------------------------- |
+| `project`  | `string` | Yes      | Project ID (prefix: `proj_`)                         |
+| `status`   | `string` | No       | Filter: `new`, `in_progress`, `resolved`, `closed`   |
+| `page_url` | `string` | No       | Filter by page URL                                   |
+| `video`    | `string` | No       | Filter by Video ID (see [List videos](#list-videos)) |
+| `format`   | `string` | No       | `json` (default) or `markdown`                       |
+
+`video` and `page_url` are mutually exclusive. Sending both returns `400` with the code `VALIDATION_ERROR`. A `video` that does not belong to the Project returns `404` with `Video not found`.
 
 ### JSON response
 
@@ -43,7 +46,9 @@ GET /feedbacks?project=proj_xxx
       "id": "uuid",
       "status": "new",
       "comment": "The spacing between these buttons is too large",
+      "videoId": null,
       "pageUrl": "https://myapp.com/settings",
+      "selection": null,
       "selector": "[data-testid=\"save-btn\"]",
       "clickX": 450,
       "clickY": 320,
@@ -83,9 +88,169 @@ GET /feedbacks?project=proj_xxx
 
 `customMetadata` holds the key/value pairs your site attached with the widget's `customMetadata` option, or `null` when it attached none.
 
+`screenshotUrl` is a signed URL that expires one hour after the response. Request the listing again to get a fresh one.
+
+### Video feedback
+
+Every item has the same keys, whether it was left on a page or on a Video. Without a filter, the listing mixes both, and `videoId` lets you group items by Video.
+
+| Field                                                             | Page item      | Video item                   |
+| ----------------------------------------------------------------- | -------------- | ---------------------------- |
+| `videoId`                                                         | `null`         | The Video ID                 |
+| `selection`                                                       | `null`         | The marked time and position |
+| `pageUrl`                                                         | The page URL   | `null`                       |
+| `selector`, `clickX`, `clickY`, `viewportWidth`, `viewportHeight` | When captured  | `null` unless captured       |
+| `metadata`, `diagnosticTrail`, `customMetadata`                   | When captured  | `null`                       |
+| `screenshotUrl`                                                   | The screenshot | The captured frame           |
+
+`selection` holds:
+
+| Field     | Type             | Description                                     |
+| --------- | ---------------- | ----------------------------------------------- |
+| `startMs` | `number`         | Start of the marked time, in milliseconds       |
+| `endMs`   | `number \| null` | End of a range, or `null` for an instant        |
+| `point`   | `object \| null` | `{ x, y }`, a point on the frame                |
+| `area`    | `object \| null` | `{ x, y, width, height }`, an area on the frame |
+
+At most one of `point` and `area` is set. Both are `null` when the Reviewer marked a time only. Coordinates are normalized from 0 to 1 of the frame: multiply by the Video's `width` and `height` to get pixels.
+
+When the listing is filtered by `video`, the response starts with a `video` block describing it. Without the filter, there is no block.
+
+```json
+{
+  "video": {
+    "id": "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+    "title": "Homepage walkthrough v1",
+    "filename": "homepage-walkthrough.mp4",
+    "durationMs": 94200,
+    "width": 1920,
+    "height": 1080
+  },
+  "feedbacks": [
+    {
+      "id": "0b6c1f52-3d8e-4a9b-8c7d-1e2f3a4b5c6d",
+      "status": "new",
+      "comment": "The logo jumps when the menu opens",
+      "videoId": "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+      "pageUrl": null,
+      "selection": {
+        "startMs": 12340,
+        "endMs": null,
+        "point": { "x": 0.42, "y": 0.61 },
+        "area": null
+      },
+      "selector": null,
+      "clickX": null,
+      "clickY": null,
+      "viewportWidth": null,
+      "viewportHeight": null,
+      "browserName": "Chrome",
+      "browserVersion": "142",
+      "os": "macOS",
+      "screenshotUrl": "https://…/frame.jpg?X-Amz-Expires=3600&…",
+      "metadata": null,
+      "diagnosticTrail": null,
+      "customMetadata": null,
+      "reviewerName": "Curious Otter",
+      "createdAt": "2026-11-04T09:12:33.000Z"
+    },
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c0d",
+      "status": "in_progress",
+      "comment": "Transition is too slow across this whole section",
+      "videoId": "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+      "pageUrl": null,
+      "selection": {
+        "startMs": 41000,
+        "endMs": 47500,
+        "point": null,
+        "area": { "x": 0.1, "y": 0.2, "width": 0.45, "height": 0.5 }
+      },
+      "selector": null,
+      "clickX": null,
+      "clickY": null,
+      "viewportWidth": null,
+      "viewportHeight": null,
+      "browserName": null,
+      "browserVersion": null,
+      "os": null,
+      "screenshotUrl": "https://…/frame.jpg?X-Amz-Expires=3600&…",
+      "metadata": null,
+      "diagnosticTrail": null,
+      "customMetadata": null,
+      "reviewerName": "Patient Heron",
+      "createdAt": "2026-11-04T09:20:05.000Z"
+    }
+  ],
+  "count": 2
+}
+```
+
+On a video item, `screenshotUrl` is the frame captured at the marked time. The **Export feedback** button on a Video page in the dashboard downloads the same document, and its `screenshotUrl` values also expire one hour after the download.
+
+Agents never receive the video file itself: no field carries a link to it.
+
 ### Markdown response
 
-When `format=markdown`, the response is a structured markdown document with sections for each feedback item, ready for AI agent consumption.
+When `format=markdown`, the response is a structured markdown document with sections for each feedback item, ready for AI agent consumption. It works with or without the `video` filter.
+
+For a video item, the "Where to look" section reads:
+
+```md
+## Where to look
+
+**Video:** Homepage walkthrough v1
+**When:** At 00:12.340 (12340 ms)
+**Where on the frame:** Point at 42%, 61%
+```
+
+A range reads `From 00:41.000 to 00:47.500 (41000 to 47500 ms)` and an area reads `Area from (10%, 20%) to (55%, 70%)`. The **Where on the frame** line is omitted when the Reviewer marked a time only.
+
+---
+
+## List videos
+
+```
+GET /videos?project=proj_xxx
+```
+
+Lists the Project's Videos that are ready for review, newest first. Videos still uploading are omitted. Use an `id` from this list as the `video` filter of [List feedbacks](#list-feedbacks).
+
+### Query parameters
+
+| Parameter | Type     | Required | Description                  |
+| --------- | -------- | -------- | ---------------------------- |
+| `project` | `string` | Yes      | Project ID (prefix: `proj_`) |
+
+### Response
+
+```json
+{
+  "videos": [
+    {
+      "id": "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+      "title": "Homepage walkthrough v1",
+      "filename": "homepage-walkthrough.mp4",
+      "durationMs": 94200,
+      "width": 1920,
+      "height": 1080,
+      "annotationsOpen": true,
+      "openFeedbackCount": 2,
+      "createdAt": "2026-11-04T08:55:10.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+| Field               | Description                                             |
+| ------------------- | ------------------------------------------------------- |
+| `durationMs`        | Duration in milliseconds                                |
+| `width`, `height`   | Frame size in pixels                                    |
+| `annotationsOpen`   | Whether Reviewers can still leave feedback on the Video |
+| `openFeedbackCount` | Feedback with the status `new` or `in_progress`         |
+
+The list is not paginated.
 
 ---
 
@@ -120,7 +285,7 @@ Content-Type: application/json
 }
 ```
 
-If a GitHub issue is linked, the status change is automatically synced.
+If a GitHub issue is linked, the status change is automatically synced. The call is the same for page and video feedback.
 
 ---
 
@@ -131,9 +296,12 @@ If a GitHub issue is linked, the status change is automatically synced.
 | List feedbacks | 200 requests/hour |
 | Update status  | 50 requests/hour  |
 
+List videos counts against the same read limit as List feedbacks.
+
 ## Required scopes
 
 | Endpoint                     | Scope                     |
 | ---------------------------- | ------------------------- |
 | `GET /feedbacks`             | `feedbacks:read`          |
+| `GET /videos`                | `feedbacks:read`          |
 | `POST /feedbacks/:id/status` | `feedbacks:update_status` |

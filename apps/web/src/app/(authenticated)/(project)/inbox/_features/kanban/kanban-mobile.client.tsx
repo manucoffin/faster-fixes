@@ -11,7 +11,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import * as React from "react";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { KanbanCard } from "./kanban-card.client";
-import { getBoardStatusAppearance } from "./board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { ColumnSelectCheckbox } from "./column-select-checkbox.client";
 
 type FeedbackItem = ListFeedbackOutput[number];
@@ -51,7 +51,7 @@ export function KanbanMobile({
             <span
               className={cn(
                 "mr-1.5 size-2 rounded-full",
-                getBoardStatusAppearance(col.id).swatchClassName,
+                getFeedbackStatusAppearance(col.id).swatchClassName,
               )}
             />
             {col.title}

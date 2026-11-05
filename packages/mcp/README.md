@@ -158,17 +158,51 @@ After configuring, ask your agent:
 
 Or set up a scheduled task to fetch and fix feedback automatically.
 
+### Example session: feedback on a video
+
+1. "Which videos have open feedback?" The agent calls `list_videos` and finds "Homepage walkthrough v1" with id `d4f0a2c1-…`.
+2. "List the feedback on that video." The agent calls `list_feedbacks` with `video_id: "d4f0a2c1-…"`. Each item names the time ("At 00:12.340") and the position on the frame ("Point at 42%, 61%").
+3. "Mark the logo comment as in progress." The agent calls `update_feedback_status` with the Feedback id and `status: "in_progress"`.
+
 ## Tools
 
 ### `list_feedbacks`
 
-List feedback items for your project. Returns page URL, CSS selector, click coordinates, component tree, browser info, and screenshot.
+List feedback items for your project. Returns page URL, CSS selector, click coordinates, component tree, browser info, and screenshot. Feedback left on a video carries a `videoId` and a `selection` instead of the page fields: `startMs`, `endMs` (null for an instant), and a `point` or `area` in normalized 0..1 frame coordinates (both null when the reviewer marked time only).
 
-| Parameter  | Type   | Required | Description                                        |
-| ---------- | ------ | -------- | -------------------------------------------------- |
-| `status`   | string | No       | Filter: `new`, `in_progress`, `resolved`, `closed` |
-| `page_url` | string | No       | Filter by the page where feedback was left         |
-| `format`   | string | No       | `markdown` (default) or `json`                     |
+| Parameter  | Type   | Required | Description                                                                  |
+| ---------- | ------ | -------- | ---------------------------------------------------------------------------- |
+| `status`   | string | No       | Filter: `new`, `in_progress`, `resolved`, `closed`                           |
+| `page_url` | string | No       | Filter by the page where feedback was left                                   |
+| `video_id` | string | No       | Filter by a video id from `list_videos`. Cannot be combined with `page_url`. |
+| `format`   | string | No       | `markdown` (default) or `json`                                               |
+
+With `video_id` and `format: json`, the response opens with a `video` block (`id`, `title`, `filename`, `durationMs`, `width`, `height`) so normalized coordinates can be converted to pixels. Screenshot URLs expire after one hour.
+
+### `list_videos`
+
+List the project's videos that are ready for review, newest first. Takes no parameters: the project comes from `FASTER_FIXES_PROJECT`. Returns JSON:
+
+```json
+{
+  "videos": [
+    {
+      "id": "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
+      "title": "Homepage walkthrough v1",
+      "filename": "homepage-walkthrough.mp4",
+      "durationMs": 94200,
+      "width": 1920,
+      "height": 1080,
+      "annotationsOpen": true,
+      "openFeedbackCount": 2,
+      "createdAt": "2026-11-04T09:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+The video file itself is never returned.
 
 ### `update_feedback_status`
 

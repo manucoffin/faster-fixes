@@ -1,12 +1,13 @@
 "use client";
 
+import { VideoSourceLine } from "@/app/_domains/video/_components/video-source-line";
 import { useSortable } from "@dnd-kit/sortable";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { getWaitingDays, isWaitingTooLong } from "../../_helpers/board-summary";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
-import { getBoardStatusAppearance } from "./board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { AssigneeAvatar, TrackerChips, WaitingChip } from "./kanban-card-parts";
 
 type FeedbackItem = ListFeedbackOutput[number];
@@ -51,7 +52,7 @@ function KanbanCardView({
   onToggleSelect,
   onSelect,
 }: KanbanCardViewProps) {
-  const appearance = getBoardStatusAppearance(feedback.status);
+  const appearance = getFeedbackStatusAppearance(feedback.status);
   const StatusIcon = appearance.icon;
   const now = new Date();
   const isWaiting = isWaitingTooLong(feedback, now);
@@ -98,9 +99,20 @@ function KanbanCardView({
       <div className="min-w-0 flex-1">
         <p className="line-clamp-3 text-sm leading-snug">{feedback.comment}</p>
 
-        <p className="mt-1 truncate text-xs text-muted-foreground">
-          {formatPagePath(feedback.pageUrl)}
-        </p>
+        {feedback.videoTitle !== null ? (
+          <VideoSourceLine
+            className="mt-1"
+            title={feedback.videoTitle}
+            startMs={feedback.startMs}
+            endMs={feedback.endMs}
+          />
+        ) : (
+          feedback.pageUrl && (
+            <p className="mt-1 truncate text-xs text-muted-foreground">
+              {formatPagePath(feedback.pageUrl)}
+            </p>
+          )
+        )}
 
         {(isWaiting || hasTracker) && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">

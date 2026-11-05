@@ -2,6 +2,7 @@
 
 import { DataTable } from "@/app/_components/data-table.client";
 import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
+import { VideoSourceLine } from "@/app/_domains/video/_components/video-source-line";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -163,11 +164,23 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
     },
     {
       accessorKey: "pageUrl",
-      header: "Page URL",
+      header: "Source",
       cell: ({ row }) => {
-        let displayUrl = row.original.pageUrl;
+        const { pageUrl, videoTitle, startMs, endMs } = row.original;
+        if (videoTitle !== null) {
+          return (
+            <VideoSourceLine
+              className="max-w-[300px]"
+              title={videoTitle}
+              startMs={startMs}
+              endMs={endMs}
+            />
+          );
+        }
+        if (!pageUrl) return null;
+        let displayUrl = pageUrl;
         try {
-          const url = new URL(row.original.pageUrl);
+          const url = new URL(pageUrl);
           displayUrl = url.hostname + url.pathname.replace(/\/$/, "");
         } catch {
           // Not a parseable URL: show it as stored
@@ -175,7 +188,7 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
         return (
           <p
             className="max-w-[300px] truncate text-xs text-muted-foreground"
-            title={row.original.pageUrl}
+            title={pageUrl}
           >
             {displayUrl}
           </p>

@@ -37,11 +37,16 @@ export function LinearIssueBadge({
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createLinearIssue.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.feedback.list.queryKey({
-            projectId,
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.feedback.list.queryKey({
+              projectId,
+            }),
           }),
-        });
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.video.get.pathKey(),
+          }),
+        ]);
         toast.success("Linear issue creation queued.");
       },
       onError: (error) => toast.error(error.message),

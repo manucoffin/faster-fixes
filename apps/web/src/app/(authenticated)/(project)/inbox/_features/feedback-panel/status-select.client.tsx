@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { cn } from "@workspace/ui/lib/utils";
 import { ChevronDown } from "lucide-react";
-import { getBoardStatusAppearance } from "../kanban/board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "New" },
@@ -26,7 +26,7 @@ type StatusSelectProps = {
 
 export function StatusSelect({ feedbackId, value }: StatusSelectProps) {
   const { updateStatus } = useFeedbackMutations();
-  const appearance = getBoardStatusAppearance(value);
+  const appearance = getFeedbackStatusAppearance(value);
   const StatusIcon = appearance.icon;
   const label =
     STATUS_OPTIONS.find((opt) => opt.value === value)?.label ?? value;
@@ -52,7 +52,7 @@ export function StatusSelect({ feedbackId, value }: StatusSelectProps) {
           onValueChange={(status) => updateStatus(feedbackId, status)}
         >
           {STATUS_OPTIONS.map((opt) => {
-            const optAppearance = getBoardStatusAppearance(opt.value);
+            const optAppearance = getFeedbackStatusAppearance(opt.value);
             const OptIcon = optAppearance.icon;
             return (
               <DropdownMenuRadioItem key={opt.value} value={opt.value}>

@@ -1,0 +1,50 @@
+"use client";
+
+import { DashboardPageContent } from "@/app/_components/dashboard/dashboard-page-content";
+import { useActiveProject } from "@/app/_domains/project/active-project/active-project-provider.client";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@workspace/ui/components/empty";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { FolderOpen } from "lucide-react";
+
+import { VideosList } from "./videos-list.client";
+
+export function VideosPage() {
+  const { activeProject, isPending } = useActiveProject();
+
+  if (isPending) {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!activeProject) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FolderOpen />
+          </EmptyMedia>
+          <EmptyTitle>Select a project</EmptyTitle>
+          <EmptyDescription>
+            Choose a project from the sidebar to see its videos.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  return (
+    <DashboardPageContent breadcrumbs={[{ label: "Videos" }]}>
+      <VideosList projectId={activeProject.id} />
+    </DashboardPageContent>
+  );
+}

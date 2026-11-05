@@ -15,6 +15,7 @@ model Project {
   widgetConfig WidgetConfig?
   reviewers    Reviewer[]
   feedback     Feedback[]
+  videos       Video[]
   gitHubLink   ProjectGitHubLink?
   linearLink   ProjectLinearLink?
   jiraLink     ProjectJiraLink?
@@ -46,12 +47,18 @@ model Reviewer {
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  // Set for a Reviewer of a Video; null for a Widget Reviewer. Postgres treats
+  // nulls as distinct, so the unique pair binds video Reviewers only.
+  videoId String?
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
   name     String
   token    String  @unique
   isActive Boolean @default(true)
 
   feedback Feedback[]
 
+  @@unique([videoId, name])
   @@index([projectId])
   @@map("reviewer")
 }
@@ -68,13 +75,27 @@ model Feedback {
   reviewerId String
   reviewer   Reviewer @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
 
+  // A Feedback with a `videoId` is a video Feedback, any other a page Feedback
+  // (ADR-0020). `projectId` stays required and equals the Video's Project.
+  videoId String?
+  video   Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
   status  String @default("new")
   comment String
-  pageUrl String
+  pageUrl String?
 
   clickX   Float?
   clickY   Float?
   selector String?
+
+  // Video Selection: an instant (`endMs` null) or a range, and an optional
+  // point or area on the frame in normalized 0..1 coordinates.
+  startMs     Int?
+  endMs       Int?
+  frameX      Float?
+  frameY      Float?
+  frameWidth  Float?
+  frameHeight Float?
 
   browserName    String?
   browserVersion String?
@@ -109,6 +130,7 @@ model Feedback {
   @@index([projectId])
   @@index([reviewerId])
   @@index([assigneeId])
+  @@index([videoId])
   @@map("feedback")
 }
 

@@ -40,9 +40,6 @@ const FEATURES_BUCKET = "_features";
 const COMPONENTS_BUCKET = "_components";
 const SERVICES_BUCKET = "_services";
 
-// CLAUDE.md: a retired file or folder keeps a `_deprecated_<old-name>` stub.
-const DEPRECATED_PREFIX = "_deprecated_";
-
 const APP_SEGMENT = "/src/app/";
 const TRPC_ROUTER_RE = /^trpc-router\.tsx?$/;
 const SCHEMA_RE = /\.schema\.tsx?$/;
@@ -67,7 +64,6 @@ function formatBuckets(buckets) {
 function walk(dirs) {
   let state = "root";
   for (const dir of dirs) {
-    if (dir.startsWith(DEPRECATED_PREFIX)) return { state: "free" };
     const isBucket = dir.startsWith("_");
 
     switch (state) {

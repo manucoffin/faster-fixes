@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["docs/**", "**/_deprecated_*"],
+  "ignore": ["docs/**"],
   "ignoreExportsUsedInFile": true,
   "ignoreIssues": {
     "apps/web/src/**/_services/**/*.ts": ["types"]

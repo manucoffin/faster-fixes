@@ -1,3 +1,13 @@
+import { completeVideoUpload } from "@/app/_domains/video/_services/complete-video-upload";
+import { CompleteVideoUploadSchema } from "@/app/_domains/video/_services/complete-video-upload.schema";
+import { deleteVideo } from "@/app/_domains/video/_services/delete-video";
+import { DeleteVideoSchema } from "@/app/_domains/video/_services/delete-video.schema";
+import { replaceVideoShareLink } from "@/app/_domains/video/_services/replace-video-share-link";
+import { ReplaceVideoShareLinkSchema } from "@/app/_domains/video/_services/replace-video-share-link.schema";
+import { updateVideoAnnotationsOpen } from "@/app/_domains/video/_services/update-video-annotations-open";
+import { UpdateVideoAnnotationsOpenSchema } from "@/app/_domains/video/_services/update-video-annotations-open.schema";
+import { updateVideoTitle } from "@/app/_domains/video/_services/update-video-title";
+import { UpdateVideoTitleSchema } from "@/app/_domains/video/_services/update-video-title.schema";
 import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { protectedProcedure, router } from "@/server/trpc/trpc";
 import { headers } from "next/headers";
@@ -78,8 +88,8 @@ import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnosti
 import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
 import { listArchivedFeedback } from "./inbox/_services/list-archived-feedback";
 import { ListArchivedFeedbackSchema } from "./inbox/_services/list-archived-feedback.schema";
-import { listDistinctPageUrls } from "./inbox/_services/list-distinct-page-urls";
-import { ListDistinctPageUrlsSchema } from "./inbox/_services/list-distinct-page-urls.schema";
+import { listSources } from "./inbox/_services/list-sources";
+import { ListSourcesSchema } from "./inbox/_services/list-sources.schema";
 import { listFeedback } from "./inbox/_services/list-feedback";
 import { ListFeedbackSchema } from "./inbox/_services/list-feedback.schema";
 import { moveFeedback } from "./inbox/_services/move-feedback";
@@ -92,6 +102,14 @@ import { updateFeedbackStatus } from "./inbox/_services/update-feedback-status";
 import { UpdateFeedbackStatusSchema } from "./inbox/_services/update-feedback-status.schema";
 import { updateFeedbacksStatus } from "./inbox/_services/update-feedbacks-status";
 import { UpdateFeedbacksStatusSchema } from "./inbox/_services/update-feedbacks-status.schema";
+import { getVideo } from "./videos/[videoId]/_services/get-video";
+import { GetVideoSchema } from "./videos/[videoId]/_services/get-video.schema";
+import { getVideoFeedbackExport } from "./videos/[videoId]/_services/get-video-feedback-export";
+import { GetVideoFeedbackExportSchema } from "./videos/[videoId]/_services/get-video-feedback-export.schema";
+import { getVideoUsage } from "./videos/_services/get-video-usage";
+import { GetVideoUsageSchema } from "./videos/_services/get-video-usage.schema";
+import { listVideos } from "./videos/_services/list-videos";
+import { ListVideosSchema } from "./videos/_services/list-videos.schema";
 
 // Every denial of the migrated operations reads a loaded row (the Project, or
 // the Feedback and its Project), so all of them live in their service;
@@ -181,6 +199,75 @@ export const projectsRouter = router({
         }),
       ),
   }),
+  video: router({
+    list: protectedProcedure.input(ListVideosSchema).query(({ input, ctx }) =>
+      listVideos({
+        projectId: input.projectId,
+        userId: ctx.session.user.id,
+      }),
+    ),
+    get: protectedProcedure
+      .input(GetVideoSchema)
+      .query(({ input, ctx }) =>
+        getVideo({ videoId: input.videoId, userId: ctx.session.user.id }),
+      ),
+    getUsage: protectedProcedure
+      .input(GetVideoUsageSchema)
+      .query(({ input, ctx }) =>
+        getVideoUsage({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    completeUpload: protectedProcedure
+      .input(CompleteVideoUploadSchema)
+      .mutation(({ input, ctx }) =>
+        completeVideoUpload({
+          videoId: input.videoId,
+          posterKey: input.posterKey,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    rename: protectedProcedure
+      .input(UpdateVideoTitleSchema)
+      .mutation(({ input, ctx }) =>
+        updateVideoTitle({
+          videoId: input.videoId,
+          title: input.title,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    replaceShareLink: protectedProcedure
+      .input(ReplaceVideoShareLinkSchema)
+      .mutation(({ input, ctx }) =>
+        replaceVideoShareLink({
+          videoId: input.videoId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    setAnnotationsOpen: protectedProcedure
+      .input(UpdateVideoAnnotationsOpenSchema)
+      .mutation(({ input, ctx }) =>
+        updateVideoAnnotationsOpen({
+          videoId: input.videoId,
+          open: input.open,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    delete: protectedProcedure
+      .input(DeleteVideoSchema)
+      .mutation(({ input, ctx }) =>
+        deleteVideo({ videoId: input.videoId, userId: ctx.session.user.id }),
+      ),
+    exportFeedback: protectedProcedure
+      .input(GetVideoFeedbackExportSchema)
+      .query(({ input, ctx }) =>
+        getVideoFeedbackExport({
+          videoId: input.videoId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+  }),
   feedback: router({
     list: protectedProcedure.input(ListFeedbackSchema).query(({ input, ctx }) =>
       listFeedback({
@@ -209,10 +296,10 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    listDistinctPageUrls: protectedProcedure
-      .input(ListDistinctPageUrlsSchema)
+    listSources: protectedProcedure
+      .input(ListSourcesSchema)
       .query(({ input, ctx }) =>
-        listDistinctPageUrls({
+        listSources({
           projectId: input.projectId,
           userId: ctx.session.user.id,
         }),

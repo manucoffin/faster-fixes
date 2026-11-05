@@ -11,7 +11,7 @@ model Asset {
   // File metadata
   filename String // original filename as uploaded
   mimeType String // "image/jpeg", "application/pdf", etc.
-  size     Int // bytes
+  size     BigInt // bytes; a video file exceeds a 32-bit integer
 
   // Image-specific (null for non-images)
   width  Int?
@@ -27,6 +27,8 @@ model Asset {
   uploadedBy   User?   @relation("AssetUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   feedbackScreenshots Feedback[] @relation("FeedbackScreenshot")
+  videoFiles          Video[]    @relation("VideoFile")
+  videoPosters        Video[]    @relation("VideoPoster")
 
   @@map("assets")
 }

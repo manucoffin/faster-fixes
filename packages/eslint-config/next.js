@@ -105,6 +105,7 @@ const serviceVerbOptions = {
   writeVerbs: [
     "accept",
     "add",
+    "claim",
     "complete",
     "create",
     "decline",
@@ -125,6 +126,7 @@ const serviceVerbOptions = {
     "request",
     "require",
     "reset",
+    "replace",
     "restore",
     "revoke",
     "select",
@@ -221,23 +223,25 @@ const layerImportRows = [
   {
     name: "a helper is pure",
     sourcePathPattern: "(^|/)_helpers/",
-    // The five modules that build a response or a request rather than doing
+    // The seven modules that build a response or a request rather than doing
     // IO. `_helpers/` purity is about IO, and `NextResponse.json(…)` is a value
     // constructor, so each of these is a pure function that happens to name a
     // framework type. Named file by file so the exception cannot grow into a
     // pattern.
     //
-    // The three mappers are the scope-local error responses of the published
-    // APIs: the widget and agent contracts are bodies that installed clients
+    // The four mappers are the scope-local error responses of the published
+    // APIs: the widget, agent and review contracts are bodies that clients
     // already parse, so they are written once per scope rather than per route
-    // (ADR-0012). The two test-double modules build a `NextRequest` fixture and
-    // nothing under `src/` imports them at runtime.
+    // (ADR-0012). The three test-double modules build a `NextRequest` fixture
+    // and nothing under `src/` imports them at runtime.
     exemptPathPatterns: [
       "/src/app/api/v1/agent/_helpers/agent-error\\.ts$",
       "/src/app/api/v1/agent/_helpers/is-auth-failure\\.ts$",
       "/src/app/api/v1/agent/_helpers/agent-api-test-doubles\\.ts$",
       "/src/app/api/v1/feedback/_helpers/widget-error-response\\.ts$",
       "/src/app/api/v1/feedback/_helpers/widget-api-test-doubles\\.ts$",
+      "/src/app/api/v1/review/_helpers/review-error\\.ts$",
+      "/src/app/api/v1/review/_helpers/review-api-test-doubles\\.ts$",
     ],
     forbiddenPatterns: [
       "^@workspace/db(/|$)",

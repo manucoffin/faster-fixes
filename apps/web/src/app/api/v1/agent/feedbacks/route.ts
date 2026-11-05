@@ -28,9 +28,19 @@ export async function GET(req: NextRequest) {
   const agentToken = auth;
 
   const { searchParams } = req.nextUrl;
+
+  if (searchParams.has("video") && searchParams.has("page_url")) {
+    return agentError(
+      "The video and page_url filters cannot be combined",
+      "VALIDATION_ERROR",
+      400,
+    );
+  }
+
   const parsed = ListFeedbacksQuerySchema.safeParse({
     status: searchParams.get("status") ?? undefined,
     page_url: searchParams.get("page_url") ?? undefined,
+    video: searchParams.get("video") ?? undefined,
     project: searchParams.get("project") ?? undefined,
     format: searchParams.get("format") ?? undefined,
   });
@@ -39,14 +49,15 @@ export async function GET(req: NextRequest) {
     return agentError("Validation failed", "VALIDATION_ERROR", 422);
   }
 
-  const { status, page_url, project, format } = parsed.data;
+  const { status, page_url, video: videoId, project, format } = parsed.data;
 
   try {
-    const { projectId, items } = await listFeedbacks({
+    const { projectId, video, items } = await listFeedbacks({
       project,
       organizationProjects: agentToken.organization.projects,
       status,
       pageUrl: page_url,
+      videoId,
     });
 
     console.info(
@@ -60,7 +71,11 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ feedbacks: items, count: items.length });
+    return NextResponse.json({
+      ...(video ? { video } : {}),
+      feedbacks: items.map(({ videoTitle, ...item }) => item),
+      count: items.length,
+    });
   } catch (error) {
     const response = domainErrorResponse(error);
     if (!response) throw error;

@@ -1,7 +1,10 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
+import {
+  toAgentFeedbackItem,
+  toAgentVideoBlock,
+} from "@/app/_domains/feedback/_helpers/agent-feedback-serializer";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { resolveProjectId } from "../../_helpers/resolve-project-id";
 
@@ -12,10 +15,18 @@ type ListFeedbacksInput = {
   organizationProjects: Array<{ id: string; publicId: string }>;
   status?: FeedbackStatus;
   pageUrl?: string;
+  /** A Video of the resolved Project; the boundary keeps it exclusive with `pageUrl`. */
+  videoId?: string;
 };
 
 export async function listFeedbacks(
-  { project, organizationProjects, status, pageUrl }: ListFeedbacksInput,
+  {
+    project,
+    organizationProjects,
+    status,
+    pageUrl,
+    videoId,
+  }: ListFeedbacksInput,
   db: typeof prisma = prisma,
 ) {
   const projectId = resolveProjectId(project, organizationProjects);
@@ -25,47 +36,58 @@ export async function listFeedbacks(
     throw new NotFoundError("Project not found");
   }
 
+  const video = videoId
+    ? await db.video.findFirst({
+        where: { id: videoId, projectId },
+        select: {
+          id: true,
+          title: true,
+          filename: true,
+          durationMs: true,
+          width: true,
+          height: true,
+        },
+      })
+    : null;
+
+  if (videoId && !video) {
+    throw new NotFoundError("Video not found");
+  }
+
   const feedbacks = await db.feedback.findMany({
     where: {
       projectId,
       ...(status ? { status } : {}),
       ...(pageUrl ? { pageUrl } : {}),
+      ...(videoId ? { videoId } : {}),
     },
     orderBy: { createdAt: "desc" },
     include: {
       reviewer: { select: { name: true } },
+      video: { select: { title: true } },
       screenshot: { select: { key: true, provider: true, bucket: true } },
     },
   });
 
   const items = await Promise.all(
     feedbacks.map(async (f) => ({
-      id: f.id,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      selector: f.selector,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      viewportWidth: f.viewportWidth,
-      viewportHeight: f.viewportHeight,
-      browserName: f.browserName,
-      browserVersion: f.browserVersion,
-      os: f.os,
-      screenshotUrl: f.screenshot
-        ? await getSignedAssetUrl(f.screenshot)
-        : null,
-      metadata: f.metadata as Record<string, unknown> | null,
-      diagnosticTrail: f.diagnosticTrail as DiagnosticTrail | null,
-      customMetadata: f.customMetadata as CustomMetadata | null,
-      reviewerName: f.reviewer.name,
-      createdAt: f.createdAt,
+      ...toAgentFeedbackItem(
+        f,
+        f.screenshot ? await getSignedAssetUrl(f.screenshot) : null,
+      ),
+      // Not part of the JSON item: the Markdown rendering names the Video.
+      videoTitle: f.video?.title ?? null,
     })),
   );
 
   // `projectId` travels back so the boundary can name the resolved Project in
   // its access log without resolving the identifier a second time.
-  return { projectId, items };
+  return {
+    projectId,
+    // Only a listing filtered on a Video opens with its block.
+    video: video ? toAgentVideoBlock(video) : null,
+    items,
+  };
 }
 
 export type ListFeedbacksOutput = Awaited<ReturnType<typeof listFeedbacks>>;

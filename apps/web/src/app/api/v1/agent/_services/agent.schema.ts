@@ -4,6 +4,7 @@ import { z } from "zod";
 export const ListFeedbacksQuerySchema = z.object({
   status: FeedbackStatusEnum.optional(),
   page_url: z.url().optional(),
+  video: z.uuid().optional(),
   project: z.string().min(1),
   format: z.enum(["json", "markdown"]).default("json"),
 });
@@ -12,6 +13,12 @@ export type ListFeedbacksQueryInput = z.infer<typeof ListFeedbacksQuerySchema>;
 
 // `format` carries a default, so a caller may omit it.
 export type ListFeedbacksQueryValues = z.input<typeof ListFeedbacksQuerySchema>;
+
+export const ListVideosQuerySchema = z.object({
+  project: z.string().min(1),
+});
+
+export type ListVideosQueryInput = z.infer<typeof ListVideosQuerySchema>;
 
 export const UpdateFeedbackStatusSchema = z.object({
   status: FeedbackStatusEnum,

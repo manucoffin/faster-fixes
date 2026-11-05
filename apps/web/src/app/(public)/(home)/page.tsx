@@ -19,6 +19,7 @@ import { HowItWorksSection } from "./_features/how-it-works/how-it-works-section
 import { IntegrationsSection } from "./_features/integrations-section";
 import { ProblemSection } from "./_features/problem/problem-section";
 import { SolutionSection } from "./_features/solution/solution-section";
+import { TestimonialsSection } from "./_features/testimonials-section";
 import { DemoWidget } from "./_features/widget-demo/demo-widget.client";
 import { WorksWithSection } from "./_features/works-with-section";
 
@@ -69,6 +70,7 @@ export default function Page() {
         <ProblemSection />
         <SolutionSection />
         <BeforeAfterSection />
+        <TestimonialsSection />
         <FaqSection />
         <FinalCtaSection />
         <IntegrationsSection />

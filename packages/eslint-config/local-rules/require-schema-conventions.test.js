@@ -104,12 +104,6 @@ export const InvoiceSchema = z.object({ status: z.enum(InvoiceStatus) });
 export type InvoiceInput = z.infer<typeof InvoiceSchema>;
 `,
     },
-    {
-      name: "a retired _deprecated_ schema stub with no exports",
-      filename:
-        "/repo/apps/web/src/app/_services/_deprecated_invoice.schema.ts",
-      code: `// Retired, kept as an empty stub.\n`,
-    },
   ],
   invalid: [
     {

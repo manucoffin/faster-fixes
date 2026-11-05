@@ -14,7 +14,7 @@ import { findReviewerByToken } from "@/app/_domains/project/_services/find-revie
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { widgetErrorResponse } from "../../_helpers/widget-error-response";
-import { createFeedbackScreenshot } from "../../_services/create-feedback-screenshot";
+import { createFeedbackScreenshot } from "@/app/_domains/feedback/_services/create-feedback-screenshot";
 import { getFeedbackAwaitingScreenshot } from "../../_services/get-feedback-awaiting-screenshot";
 import { updateFeedbackScreenshot } from "../../_services/update-feedback-screenshot";
 

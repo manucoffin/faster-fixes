@@ -1,5 +1,5 @@
 import { buildFeedbackBlocks } from "../../_helpers/slack/build-feedback-blocks";
-import { buildFeedbackDashboardUrl } from "../../_helpers/slack/build-feedback-dashboard-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { decryptSlackToken } from "./token-crypto";
 import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
@@ -22,6 +22,7 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
       where: { id: feedbackId },
       include: {
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true, provider: true } },
         slackMessage: { select: { id: true } },
         project: {
@@ -54,11 +55,19 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
         pageUrl: feedback.pageUrl,
         browserName: feedback.browserName,
         os: feedback.os,
+        videoId: feedback.videoId,
+        videoTitle: feedback.video?.title,
+        startMs: feedback.startMs,
+        endMs: feedback.endMs,
+        frameX: feedback.frameX,
+        frameY: feedback.frameY,
+        frameWidth: feedback.frameWidth,
+        frameHeight: feedback.frameHeight,
       },
       status: "new",
       // A freshly submitted feedback has no automated action yet.
       actor: "human",
-      dashboardUrl: buildFeedbackDashboardUrl(feedback.id),
+      dashboardUrl: buildFeedbackDashboardUrl(feedback),
       screenshotUrl,
     });
 

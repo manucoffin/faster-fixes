@@ -4,7 +4,7 @@ import {
   getBoardSummary,
   WAITING_THRESHOLD_DAYS,
 } from "../../_helpers/board-summary";
-import { getBoardStatusAppearance } from "./board-status-appearance";
+import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { ColumnSelectCheckbox } from "./column-select-checkbox.client";
 
 type BoardSummaryStripProps = {
@@ -31,7 +31,7 @@ export function BoardSummaryStrip({
     <div className="rounded-lg border bg-card">
       <div className="grid grid-cols-3 divide-x">
         {columns.map((col) => {
-          const appearance = getBoardStatusAppearance(col.id);
+          const appearance = getFeedbackStatusAppearance(col.id);
           const StatusIcon = appearance.icon;
           const itemIds = feedback
             .filter((f) => f.status === col.id)
@@ -88,7 +88,7 @@ export function BoardSummaryStrip({
               key={col.id}
               className={cn(
                 "h-full",
-                getBoardStatusAppearance(col.id).swatchClassName,
+                getFeedbackStatusAppearance(col.id).swatchClassName,
               )}
               style={{ width: `${(count / summary.total) * 100}%` }}
             />

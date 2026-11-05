@@ -12,8 +12,7 @@
 //     routing syntax the framework reads (`[id]`, `[...slug]`, `(group)`,
 //     `@slot`), and whose inner name is often a camelCase param;
 //   - an intercepting prefix (`(.)`, `(..)`, `(...)`), after which the rest of
-//     the segment is checked like any other;
-//   - a `_deprecated_` stub, which only waits for a maintainer to delete it.
+//     the segment is checked like any other.
 //
 // Only the part of the path under the working directory is checked: the
 // folders above it belong to whoever cloned the repo.
@@ -22,7 +21,6 @@ import path from "node:path";
 
 import { filenameOf, normalizePath } from "./imports.js";
 
-const DEPRECATED_PREFIX = "_deprecated_";
 const IGNORED_SEGMENT = "node_modules";
 const KEBAB_PART_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const ROUTE_SEGMENT_RE = /^(\[{1,2}[^\]]+\]{1,2}|\([^.)][^)]*\)|@.+)$/;
@@ -38,7 +36,6 @@ function isKebabName(name) {
 }
 
 function isAcceptedSegment(segment) {
-  if (segment.startsWith(DEPRECATED_PREFIX)) return true;
   if (ROUTE_SEGMENT_RE.test(segment)) return true;
 
   const intercepted = segment.replace(INTERCEPTING_PREFIX_RE, "");
@@ -85,7 +82,7 @@ export const kebabCasePathRule = {
     schema: [],
     messages: {
       notKebabCase:
-        'Rename "{{ segment }}" to "{{ suggestion }}". Folder and file names are lowercase kebab-case, with dots between the parts (`create-user.schema.ts`). A leading `_`, a Next.js route segment and a `_deprecated_` stub are the only exceptions.',
+        'Rename "{{ segment }}" to "{{ suggestion }}". Folder and file names are lowercase kebab-case, with dots between the parts (`create-user.schema.ts`). A leading `_` and a Next.js route segment are the only exceptions.',
     },
   },
   create(context) {

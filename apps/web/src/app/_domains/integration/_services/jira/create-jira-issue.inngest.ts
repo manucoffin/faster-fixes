@@ -7,7 +7,7 @@ import {
 import { createJiraIssue as createIssue } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -41,6 +41,7 @@ export const createJiraIssue = inngest.createFunction(
           },
         },
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
         jiraIssueLink: { select: { id: true } },
       },
@@ -77,8 +78,6 @@ export const createJiraIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
-    const baseUrl = getAuthBaseUrl();
-
     const description = formatIssueAdf({
       comment: feedback.comment,
       pageUrl: feedback.pageUrl,
@@ -95,7 +94,15 @@ export const createJiraIssue = inngest.createFunction(
       metadata: feedback.metadata as Record<string, unknown> | null,
       diagnosticTrail: feedback.diagnosticTrail as DiagnosticTrail | null,
       customMetadata: feedback.customMetadata as CustomMetadata | null,
-      dashboardUrl: `${baseUrl}/inbox?feedbackId=${feedback.id}`,
+      dashboardUrl: buildFeedbackDashboardUrl(feedback),
+      videoId: feedback.videoId,
+      videoTitle: feedback.video?.title,
+      startMs: feedback.startMs,
+      endMs: feedback.endMs,
+      frameX: feedback.frameX,
+      frameY: feedback.frameY,
+      frameWidth: feedback.frameWidth,
+      frameHeight: feedback.frameHeight,
     });
 
     let issue;

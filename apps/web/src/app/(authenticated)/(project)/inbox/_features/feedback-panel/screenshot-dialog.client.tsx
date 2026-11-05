@@ -10,18 +10,24 @@ import {
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
 import { cn } from "@workspace/ui/lib/utils";
-import { useId, useState } from "react";
-import type { SelectionFrame } from "../../_helpers/selection-frame";
-import { SelectionFrameOverlay } from "./selection-frame-overlay";
+import { type ReactNode, useId, useState } from "react";
 
 type ScreenshotDialogProps = {
   src: string;
-  frame: SelectionFrame | null;
+  /** What the Reviewer marked, drawn over the image; the switch hides it. */
+  overlay: ReactNode;
+  /** Pinned to a corner of the image whatever the switch says. */
+  badge?: ReactNode;
 };
 
-export function ScreenshotDialog({ src, frame }: ScreenshotDialogProps) {
+export function ScreenshotDialog({
+  src,
+  overlay,
+  badge,
+}: ScreenshotDialogProps) {
   const [isFrameShown, setIsFrameShown] = useState(true);
-  const visibleFrame = isFrameShown ? frame : null;
+  const hasOverlay = overlay !== null && overlay !== undefined;
+  const visibleOverlay = hasOverlay && isFrameShown ? overlay : null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -34,7 +40,8 @@ export function ScreenshotDialog({ src, frame }: ScreenshotDialogProps) {
               alt="Feedback screenshot"
               className="w-full rounded-md border"
             />
-            {visibleFrame && <SelectionFrameOverlay frame={visibleFrame} />}
+            {visibleOverlay}
+            {badge}
           </button>
         </DialogTrigger>
         <DialogContent className="flex h-[calc(100vh-2rem)] flex-col gap-0 overflow-auto rounded-none border-none p-0 sm:max-w-[calc(100%-2rem)]">
@@ -42,7 +49,7 @@ export function ScreenshotDialog({ src, frame }: ScreenshotDialogProps) {
           <DialogDescription className="sr-only">
             Full-size feedback screenshot
           </DialogDescription>
-          {frame && (
+          {hasOverlay && (
             <SelectionFrameSwitch
               checked={isFrameShown}
               onCheckedChange={setIsFrameShown}
@@ -58,12 +65,13 @@ export function ScreenshotDialog({ src, frame }: ScreenshotDialogProps) {
                 alt="Feedback screenshot"
                 className="block max-h-[calc(100vh-2rem-3rem)] max-w-full object-contain"
               />
-              {visibleFrame && <SelectionFrameOverlay frame={visibleFrame} />}
+              {visibleOverlay}
+              {badge}
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {frame && (
+      {hasOverlay && (
         <SelectionFrameSwitch
           checked={isFrameShown}
           onCheckedChange={setIsFrameShown}

@@ -7,8 +7,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createFeedback } from "./_services/create-feedback";
 import { CreateFeedbackSchema } from "./_services/create-feedback.schema";
-import { createFeedbackScreenshot } from "./_services/create-feedback-screenshot";
-import { getFeedbackCapacity } from "./_services/get-feedback-capacity";
+import { createFeedbackScreenshot } from "@/app/_domains/feedback/_services/create-feedback-screenshot";
+import { getFeedbackCapacity } from "@/app/_domains/feedback/_services/get-feedback-capacity";
 import { listFeedbacks } from "./_services/list-feedbacks";
 
 const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"];

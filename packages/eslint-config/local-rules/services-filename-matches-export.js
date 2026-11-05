@@ -19,7 +19,7 @@
 //
 // The same files are exempt as in `services-verb-prefix`, and for the same
 // reasons: the barrel, a schema, an Inngest job, a test, an `_`-prefixed
-// private helper or retired stub, and a noun-named module recognised by a
+// private helper, and a noun-named module recognised by a
 // suffix from the `exemptSuffixes` option (an SDK client, an error class, a
 // cipher). The config passes `serviceVerbOptions.exemptSuffixes`, so the two
 // rules read one list.

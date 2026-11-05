@@ -27,19 +27,28 @@ export async function deleteProject(
     throw new ForbiddenError("Access denied.");
   }
 
-  // The Feedback cascade only nulls each screenshot reference, so the Assets
-  // are collected first and freed once the Project is gone.
+  // The cascades only null each Asset reference, so the screenshots and the
+  // Videos' file and Poster Assets are collected first and freed once the
+  // Project is gone.
   const screenshots = await db.feedback.findMany({
     where: { projectId, screenshotId: { not: null } },
     select: { screenshotId: true },
+  });
+  const videos = await db.video.findMany({
+    where: { projectId },
+    select: { fileAssetId: true, posterAssetId: true },
   });
 
   await db.project.delete({ where: { id: projectId } });
 
   await deleteAssets(
-    screenshots.flatMap(({ screenshotId }) =>
-      screenshotId ? [screenshotId] : [],
-    ),
+    [
+      ...screenshots.map(({ screenshotId }) => screenshotId),
+      ...videos.flatMap(({ fileAssetId, posterAssetId }) => [
+        fileAssetId,
+        posterAssetId,
+      ]),
+    ].filter((id): id is string => id !== null),
   );
 
   return { id: projectId };

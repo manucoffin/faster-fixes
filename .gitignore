@@ -60,4 +60,4 @@ _internal/
 
 # Skill eval workspaces
 packages/skills/*-workspace/
-
+.claude/worktrees/

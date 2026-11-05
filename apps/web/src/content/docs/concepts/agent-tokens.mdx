@@ -20,8 +20,10 @@ Each token has fine-grained permissions:
 
 | Scope                     | Permission                                                  |
 | ------------------------- | ----------------------------------------------------------- |
-| `feedbacks:read`          | List and read feedback items                                |
+| `feedbacks:read`          | List and read feedback items, and list Videos               |
 | `feedbacks:update_status` | Update feedback status (new, in_progress, resolved, closed) |
+
+`feedbacks:read` covers `GET /feedbacks` and `GET /videos` of the [Agent API](/docs/api-reference/agent-api).
 
 ## Rate limits
 

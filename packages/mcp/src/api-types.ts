@@ -3,6 +3,8 @@ export type FeedbackStatus = "new" | "in_progress" | "resolved" | "closed";
 export type ListFeedbacksParams = {
   status?: string;
   page_url?: string;
+  /** A Video id; exclusive with `page_url`. */
+  video?: string;
   format?: "json" | "markdown";
 };
 
@@ -21,11 +23,26 @@ type DiagnosticTrailJson = {
   }>;
 };
 
+/** Coordinates are normalized 0..1 of the frame. */
+export type FeedbackSelectionJson = {
+  startMs: number;
+  /** Null for an instant. */
+  endMs: number | null;
+  /** At most one of `point` and `area` is set; both null for time only. */
+  point: { x: number; y: number } | null;
+  area: { x: number; y: number; width: number; height: number } | null;
+};
+
 export type FeedbackJson = {
   id: string;
   status: string;
   comment: string;
-  pageUrl: string;
+  /** Null on a page Feedback. */
+  videoId: string | null;
+  /** Null on a video Feedback. */
+  pageUrl: string | null;
+  /** Null on a page Feedback. */
+  selection: FeedbackSelectionJson | null;
   selector: string | null;
   clickX: number | null;
   clickY: number | null;
@@ -44,8 +61,30 @@ export type FeedbackJson = {
   createdAt: string;
 };
 
+export type VideoBlockJson = {
+  id: string;
+  title: string;
+  filename: string;
+  durationMs: number | null;
+  width: number | null;
+  height: number | null;
+};
+
 export type ListFeedbacksJsonResponse = {
+  /** Present only when the listing is filtered by `video`. */
+  video?: VideoBlockJson;
   feedbacks: FeedbackJson[];
+  count: number;
+};
+
+export type VideoJson = VideoBlockJson & {
+  annotationsOpen: boolean;
+  openFeedbackCount: number;
+  createdAt: string;
+};
+
+export type ListVideosResponse = {
+  videos: VideoJson[];
   count: number;
 };
 
