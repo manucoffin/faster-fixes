@@ -16,6 +16,7 @@ export function useVideoPlayer(
   const [currentMs, setCurrentMs] = useState(initialMs);
   const [durationMs, setDurationMs] = useState(initialDurationMs ?? 0);
   const [paused, setPaused] = useState(true);
+  const [playbackRate, setPlaybackRateState] = useState(1);
   const loadedSrcRef = useRef<string | null>(null);
   // Applies to the first source only; a refresh resumes where it was.
   const initialMsRef = useRef(initialMs);
@@ -113,6 +114,15 @@ export function useVideoPlayer(
     videoRef.current?.pause();
   }
 
+  function setPlaybackRate(rate: number) {
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = rate;
+    // A refreshed source resets the rate to this default, so the speed survives.
+    video.defaultPlaybackRate = rate;
+    setPlaybackRateState(rate);
+  }
+
   function togglePlay() {
     const video = videoRef.current;
     if (!video) return;
@@ -120,5 +130,14 @@ export function useVideoPlayer(
     else video.pause();
   }
 
-  return { currentMs, durationMs, paused, seek, pause, togglePlay };
+  return {
+    currentMs,
+    durationMs,
+    paused,
+    playbackRate,
+    seek,
+    pause,
+    togglePlay,
+    setPlaybackRate,
+  };
 }

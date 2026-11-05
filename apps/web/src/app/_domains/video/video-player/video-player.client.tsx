@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
 import { formatTimecode } from "../_helpers/format-timecode";
+import { PlaybackRateMenu } from "./playback-rate-menu.client";
 import type { useVideoPlayer } from "./use-video-player";
 
 type VideoPlayerProps = {
@@ -74,7 +75,13 @@ export function VideoPlayer({
             / {formatTimecode(player.durationMs)}
           </span>
         </span>
-        <div className="ml-auto">{controls}</div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {controls}
+          <PlaybackRateMenu
+            playbackRate={player.playbackRate}
+            onPlaybackRateChange={player.setPlaybackRate}
+          />
+        </div>
       </div>
     </div>
   );
