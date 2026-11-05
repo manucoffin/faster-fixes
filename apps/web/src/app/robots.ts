@@ -26,6 +26,7 @@ const PRIVATE_ROUTES = [
   "/onboarding",
   "/inbox",
   "/reviewers",
+  "/review/",
   "/login",
   "/signup",
   "/forgot-password",

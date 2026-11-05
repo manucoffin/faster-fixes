@@ -1,6 +1,6 @@
 "use client";
 
-import { TestimonialMessage } from "@/app/testimonial/_components/testimonial-message";
+import { PublicMessage } from "@/app/_components/public-message";
 import { ActionButton } from "@workspace/ui/components/action-button";
 import { TestimonialDeclined } from "../_components/testimonial-declined";
 import { TestimonialRequestHandled } from "../_components/testimonial-request-handled";
@@ -17,7 +17,7 @@ export function TestimonialDecline({ token }: TestimonialDeclineProps) {
   if (status === "handled") return <TestimonialRequestHandled />;
 
   return (
-    <TestimonialMessage
+    <PublicMessage
       title="Stop testimonial requests"
       description="Confirm and you will not be asked for a testimonial again. Other emails from Faster Fixes are not affected."
     >
@@ -31,6 +31,6 @@ export function TestimonialDecline({ token }: TestimonialDeclineProps) {
           Don&apos;t ask me again
         </ActionButton>
       </div>
-    </TestimonialMessage>
+    </PublicMessage>
   );
 }

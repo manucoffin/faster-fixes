@@ -1,18 +1,19 @@
 import type { ReactNode } from "react";
 
-type TestimonialMessageProps = {
+type PublicMessageProps = {
   title: string;
   description: ReactNode;
   children?: ReactNode;
 };
 
-// The shared shape of every page in the Testimonial flow besides the form:
-// a centered title and explanation, with an optional action or preview below.
-export function TestimonialMessage({
+// The shared shape of a bare public page reached by a private link (the
+// Testimonial flow, a Video's Share link): a centered title and explanation,
+// with an optional action or preview below.
+export function PublicMessage({
   title,
   description,
   children,
-}: TestimonialMessageProps) {
+}: PublicMessageProps) {
   return (
     <div className="space-y-8">
       <div className="space-y-3 text-center">

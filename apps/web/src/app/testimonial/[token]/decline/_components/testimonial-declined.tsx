@@ -1,8 +1,8 @@
-import { TestimonialMessage } from "@/app/testimonial/_components/testimonial-message";
+import { PublicMessage } from "@/app/_components/public-message";
 
 export function TestimonialDeclined() {
   return (
-    <TestimonialMessage
+    <PublicMessage
       title="You will not be asked again"
       description="No further testimonial requests will be sent to you."
     />
