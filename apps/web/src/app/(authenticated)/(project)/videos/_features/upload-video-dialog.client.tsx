@@ -217,7 +217,7 @@ function UploadVideoDialogContent({
             </Button>
             <ActionButton
               type="submit"
-              disabled={!canUpload || !form.formState.isValid}
+              disabled={!canUpload}
               pending={isTransferring}
             >
               {isTransferring ? "Uploading..." : "Upload"}

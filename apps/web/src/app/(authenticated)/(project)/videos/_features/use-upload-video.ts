@@ -9,7 +9,7 @@ import { uploadFile, useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
@@ -167,10 +167,16 @@ export function useUploadVideo({
     picked && usage ? checkVideoUploadQuota(usage, picked.file.size) : null;
   const denial = serverDenial ?? preflightDenial;
 
+  // Read from the value, not formState.isValid: reset() leaves isValid at
+  // the empty default title until the field is edited.
+  const title = useWatch({ control: form.control, name: "title" });
+  const hasValidTitle = UploadVideoSchema.safeParse({ title }).success;
+
   const accepted =
     picked?.classification?.kind === "accepted" ? picked.classification : null;
   const canUpload =
     accepted !== null &&
+    hasValidTitle &&
     denial === null &&
     !isTransferring &&
     !completeUploadMutation.isSuccess;
