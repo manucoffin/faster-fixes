@@ -1,14 +1,12 @@
 "use client";
 
-import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState } from "react";
 import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
-import { getFeedbackStatusLabel } from "@/app/_domains/feedback/_helpers/feedback-status-label";
+import { FeedbackStatusPill } from "@/app/_domains/feedback/_components/feedback-status-pill";
 import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
-import { isHiddenByDefault } from "../../_helpers/list-visible-feedback";
 import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";
 import type {
   ReviewFeedbackItem,
@@ -96,14 +94,7 @@ export function FeedbackCard({
             >
               {isOwn ? "You" : feedback.reviewer.name}
             </span>
-            <Badge
-              variant={
-                isHiddenByDefault(feedback.status) ? "outline" : "secondary"
-              }
-              className="ml-auto"
-            >
-              {getFeedbackStatusLabel(feedback.status)}
-            </Badge>
+            <FeedbackStatusPill status={feedback.status} className="ml-auto" />
           </div>
           {isEditing ? null : (
             <p className="text-sm leading-snug break-words whitespace-pre-wrap">
