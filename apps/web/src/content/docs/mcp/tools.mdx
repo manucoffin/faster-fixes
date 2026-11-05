@@ -1,9 +1,9 @@
 ---
 title: Tools
-description: "Reference for MCP tools: list_feedbacks and update_feedback_status."
+description: "Reference for MCP tools: list_feedbacks, list_videos and update_feedback_status."
 ---
 
-The MCP server exposes two tools.
+The MCP server exposes these tools.
 
 ## `list_feedbacks`
 
@@ -11,11 +11,12 @@ Lists feedback items for your project with optional filtering.
 
 ### Parameters
 
-| Parameter  | Type     | Required | Description                                                     |
-| ---------- | -------- | -------- | --------------------------------------------------------------- |
-| `status`   | `string` | No       | Filter by status: `new`, `in_progress`, `resolved`, or `closed` |
-| `page_url` | `string` | No       | Filter by page URL where feedback was submitted                 |
-| `format`   | `string` | No       | Output format: `markdown` (default) or `json`                   |
+| Parameter  | Type            | Required | Description                                                                 |
+| ---------- | --------------- | -------- | --------------------------------------------------------------------------- |
+| `status`   | `string`        | No       | Filter by status: `new`, `in_progress`, `resolved`, or `closed`             |
+| `page_url` | `string`        | No       | Filter by page URL where feedback was submitted                             |
+| `video_id` | `string` (UUID) | No       | Filter by a Video ID from `list_videos`. Cannot be combined with `page_url` |
+| `format`   | `string`        | No       | Output format: `markdown` (default) or `json`                               |
 
 ### Example usage (in an AI agent)
 
@@ -30,6 +31,14 @@ The agent calls `list_feedbacks` with `status: "new"` and receives structured fe
 - Screenshot URL
 - Console logs and network requests captured before submission
 - Custom metadata: the key/value pairs your site attached with the widget's `customMetadata` option, such as a user ID or release version
+
+Feedback left on a Video carries its `videoId` and a `selection` instead of the page fields: the marked time in milliseconds and, when the Reviewer marked one, a point or area in coordinates normalized from 0 to 1 of the frame. With `video_id`, the JSON output starts with a `video` block holding the Video's title, filename, duration and pixel size. The Markdown output names the Video, the time and the position on the frame. See the [Agent API](/docs/api-reference/agent-api#video-feedback) for the full item shape.
+
+## `list_videos`
+
+Lists the Videos of the configured project that are ready for review, newest first. It takes no parameters.
+
+Each Video carries its `id`, `title`, `filename`, `durationMs`, `width` and `height` in pixels, `annotationsOpen`, and `openFeedbackCount`. Pass an `id` to `list_feedbacks` as `video_id`. The video file itself is never returned.
 
 ## `update_feedback_status`
 
@@ -48,6 +57,16 @@ Updates the status of a feedback item.
 
 The agent calls `update_feedback_status` with the feedback ID and `status: "resolved"`.
 
+## Example session: video feedback
+
+> "Fix the feedback on the homepage walkthrough video"
+
+1. The agent calls `list_videos` and finds the Video titled "Homepage walkthrough v1".
+2. It calls `list_feedbacks` with `video_id` set to that Video's `id` and `status: "new"`. Each item says when in the Video and where on the frame the Reviewer pointed, with the captured frame as its screenshot.
+3. After making a change, it calls `update_feedback_status` with the feedback ID and `status: "resolved"`.
+
+Screenshot and frame URLs expire one hour after the call. List again to get fresh ones.
+
 ## Feedback statuses
 
 | Status        | Description                                 |
@@ -59,9 +78,10 @@ The agent calls `update_feedback_status` with the feedback ID and `status: "reso
 
 ## Rate limits
 
-| Action                   | Limit             |
-| ------------------------ | ----------------- |
-| `list_feedbacks`         | 200 requests/hour |
-| `update_feedback_status` | 50 requests/hour  |
+| Action                   | Limit                             |
+| ------------------------ | --------------------------------- |
+| `list_feedbacks`         | 200 requests/hour                 |
+| `list_videos`            | Shares the `list_feedbacks` limit |
+| `update_feedback_status` | 50 requests/hour                  |
 
 Rate limits are per agent token.
