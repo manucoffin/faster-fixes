@@ -29,6 +29,8 @@ export function useFeedbackMutations() {
   // Partial input, so every page, search and sort of the archive table matches.
   const archivedQueryKey =
     trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId });
+  // The Video page reads the same Feedback through its own query.
+  const videoQueryKey = trpc.authenticated.projects.video.get.pathKey();
 
   // The sidebar badge counts New Feedback, and a status change can move
   // Feedback into the Archive, so every status change refreshes both.
@@ -37,6 +39,7 @@ export function useFeedbackMutations() {
       queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
       queryClient.invalidateQueries({ queryKey: newCountQueryKey }),
       queryClient.invalidateQueries({ queryKey: archivedQueryKey }),
+      queryClient.invalidateQueries({ queryKey: videoQueryKey }),
     ]);
 
   const updateStatus = useMutation(
@@ -131,7 +134,10 @@ export function useFeedbackMutations() {
   const updateAssignee = useMutation(
     trpc.authenticated.projects.feedback.updateAssignee.mutationOptions({
       onSuccess: () =>
-        queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
+        Promise.all([
+          queryClient.invalidateQueries({ queryKey: feedbackQueryKey }),
+          queryClient.invalidateQueries({ queryKey: videoQueryKey }),
+        ]),
       onError: () => {
         toast.error("Failed to update assignee.");
       },

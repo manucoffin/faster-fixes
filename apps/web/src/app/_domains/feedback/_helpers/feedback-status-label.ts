@@ -1,4 +1,4 @@
-import type { FeedbackStatus } from "@/app/_domains/feedback";
+import type { FeedbackStatus } from "../_types/feedback-status";
 
 // The dashboard's labels: the stored "closed" reads as "Archived".
 const FEEDBACK_STATUS_LABELS: Record<FeedbackStatus, string> = {

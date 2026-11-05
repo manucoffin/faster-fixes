@@ -34,11 +34,16 @@ export function JiraIssueBadge({
   const createIssueMutation = useMutation(
     trpc.authenticated.projects.feedback.createJiraIssue.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.feedback.list.queryKey({
-            projectId,
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.feedback.list.queryKey({
+              projectId,
+            }),
           }),
-        });
+          queryClient.invalidateQueries({
+            queryKey: trpc.authenticated.projects.video.get.pathKey(),
+          }),
+        ]);
         toast.success("Jira issue creation queued.");
       },
       onError: (error) => toast.error(error.message),

@@ -6,7 +6,7 @@ import { CopyButton } from "@workspace/ui/components/copy-button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState } from "react";
 import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
-import { getFeedbackStatusLabel } from "../../_helpers/feedback-status-label";
+import { getFeedbackStatusLabel } from "@/app/_domains/feedback/_helpers/feedback-status-label";
 import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
 import { isHiddenByDefault } from "../../_helpers/list-visible-feedback";
 import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";

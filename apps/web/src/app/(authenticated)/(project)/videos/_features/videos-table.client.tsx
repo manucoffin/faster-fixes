@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { Check, Copy, SquarePlay } from "lucide-react";
-import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -58,9 +57,7 @@ export function VideosTable({ videos }: VideosTableProps) {
       </TableHeader>
       <TableBody>
         {videos.map((video) => {
-          // The Video page lands with its own route; until then the typed
-          // route table does not know the dynamic segment.
-          const href = `/videos/${video.id}` as Route;
+          const href = `/videos/${video.id}` as const;
           const isUploading = video.state === "uploading";
 
           return (

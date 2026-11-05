@@ -1,7 +1,9 @@
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import type { CustomMetadata } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
+import {
+  inboxFeedbackInclude,
+  toInboxFeedbackItem,
+} from "./_inbox-feedback-projection";
 import type { ListFeedbackInput } from "./list-feedback.schema";
 
 export async function listFeedback(
@@ -27,89 +29,10 @@ export async function listFeedback(
   const feedback = await db.feedback.findMany({
     where: { projectId },
     orderBy: { createdAt: "desc" },
-    include: {
-      reviewer: { select: { id: true, name: true } },
-      video: { select: { title: true } },
-      assignee: {
-        select: {
-          id: true,
-          user: { select: { id: true, name: true, image: true } },
-        },
-      },
-      screenshot: {
-        select: { id: true, key: true, provider: true, bucket: true },
-      },
-      issueLink: {
-        select: {
-          issueNumber: true,
-          issueUrl: true,
-          issueState: true,
-        },
-      },
-      linearIssueLink: {
-        select: {
-          issueId: true,
-          issueIdentifier: true,
-          issueUrl: true,
-          issueStateType: true,
-        },
-      },
-      jiraIssueLink: {
-        select: {
-          issueId: true,
-          issueKey: true,
-          issueUrl: true,
-          issueStatusCategory: true,
-        },
-      },
-      rank: { select: { key: true } },
-    },
+    include: inboxFeedbackInclude,
   });
 
-  return Promise.all(
-    feedback.map(async (f) => ({
-      id: f.id,
-      createdAt: f.createdAt,
-      updatedAt: f.updatedAt,
-      status: f.status,
-      comment: f.comment,
-      pageUrl: f.pageUrl,
-      // Null on a page Feedback (ADR-0020).
-      videoId: f.videoId,
-      videoTitle: f.video?.title ?? null,
-      startMs: f.startMs,
-      endMs: f.endMs,
-      frameX: f.frameX,
-      frameY: f.frameY,
-      frameWidth: f.frameWidth,
-      frameHeight: f.frameHeight,
-      clickX: f.clickX,
-      clickY: f.clickY,
-      selector: f.selector,
-      browserName: f.browserName,
-      browserVersion: f.browserVersion,
-      os: f.os,
-      viewportWidth: f.viewportWidth,
-      viewportHeight: f.viewportHeight,
-      reviewer: f.reviewer,
-      assignee: f.assignee
-        ? {
-            id: f.assignee.id,
-            name: f.assignee.user.name,
-            image: f.assignee.user.image,
-          }
-        : null,
-      screenshotUrl: f.screenshot
-        ? await getSignedAssetUrl(f.screenshot)
-        : null,
-      metadata: f.metadata as Record<string, unknown> | null,
-      customMetadata: f.customMetadata as CustomMetadata | null,
-      issueLink: f.issueLink,
-      linearIssueLink: f.linearIssueLink,
-      jiraIssueLink: f.jiraIssueLink,
-      rank: f.rank?.key ?? null,
-    })),
-  );
+  return Promise.all(feedback.map(toInboxFeedbackItem));
 }
 
 export type ListFeedbackOutput = Awaited<ReturnType<typeof listFeedback>>;

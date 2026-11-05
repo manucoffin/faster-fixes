@@ -1,3 +1,5 @@
+import { readVideoSelection } from "@/app/_domains/video/_helpers/read-video-selection";
+
 /** The Feedback fields every review route reads back for the list projection. */
 export const reviewFeedbackSelect = {
   id: true,
@@ -38,19 +40,11 @@ type ReviewFeedbackRow = {
   reviewer: { id: string; name: string };
 };
 
-/**
- * The Widget list projection extended with the video Selection. The flat
- * frame columns become a `point` when only x and y are set, an `area` when the
- * size is set too, and neither when the Feedback marks no part of the frame.
- */
+/** The Widget list projection extended with the video Selection. */
 export function toReviewFeedbackItem(
   row: ReviewFeedbackRow,
   screenshotUrl: string | null,
 ) {
-  const { frameX: x, frameY: y, frameWidth: width, frameHeight: height } = row;
-  const hasPosition = x !== null && y !== null;
-  const hasSize = width !== null && height !== null;
-
   return {
     id: row.id,
     status: row.status,
@@ -65,7 +59,6 @@ export function toReviewFeedbackItem(
     createdAt: row.createdAt,
     startMs: row.startMs,
     endMs: row.endMs,
-    point: hasPosition && !hasSize ? { x, y } : null,
-    area: hasPosition && hasSize ? { x, y, width, height } : null,
+    ...readVideoSelection(row),
   };
 }
