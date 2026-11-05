@@ -20,7 +20,7 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
  * agent pick freely from every open `ready-for-agent` issue.
  */
 const ISSUES: number[] = [
-  316, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347,
+  317, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357,
 ];
 
 /**
