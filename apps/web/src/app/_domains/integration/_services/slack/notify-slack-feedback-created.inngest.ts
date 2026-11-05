@@ -22,6 +22,7 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
       where: { id: feedbackId },
       include: {
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true, provider: true } },
         slackMessage: { select: { id: true } },
         project: {
@@ -54,6 +55,14 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
         pageUrl: feedback.pageUrl,
         browserName: feedback.browserName,
         os: feedback.os,
+        videoId: feedback.videoId,
+        videoTitle: feedback.video?.title,
+        startMs: feedback.startMs,
+        endMs: feedback.endMs,
+        frameX: feedback.frameX,
+        frameY: feedback.frameY,
+        frameWidth: feedback.frameWidth,
+        frameHeight: feedback.frameHeight,
       },
       status: "new",
       // A freshly submitted feedback has no automated action yet.

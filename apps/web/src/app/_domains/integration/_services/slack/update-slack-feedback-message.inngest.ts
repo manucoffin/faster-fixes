@@ -29,6 +29,7 @@ export const updateSlackFeedbackMessage = inngest.createFunction(
       where: { id: feedbackId },
       include: {
         reviewer: { select: { name: true } },
+        video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true, provider: true } },
         project: {
           include: {
@@ -55,6 +56,14 @@ export const updateSlackFeedbackMessage = inngest.createFunction(
         pageUrl: feedback.pageUrl,
         browserName: feedback.browserName,
         os: feedback.os,
+        videoId: feedback.videoId,
+        videoTitle: feedback.video?.title,
+        startMs: feedback.startMs,
+        endMs: feedback.endMs,
+        frameX: feedback.frameX,
+        frameY: feedback.frameY,
+        frameWidth: feedback.frameWidth,
+        frameHeight: feedback.frameHeight,
       },
       status: newStatus,
       // The badge only distinguishes automated resolutions from human ones;

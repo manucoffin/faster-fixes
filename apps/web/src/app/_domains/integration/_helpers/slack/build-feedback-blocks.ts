@@ -1,4 +1,5 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
+import { describeVideoLocation } from "../github/format-issue-body";
 
 // Block Kit blocks are loosely typed; we model only the shapes we emit rather
 // than depending on the full Block Kit type surface.
@@ -42,6 +43,15 @@ type BuildFeedbackBlocksFeedback = {
   pageUrl: string | null;
   browserName: string | null;
   os: string | null;
+  // Optional: absent or null on a page Feedback (ADR-0020).
+  videoId?: string | null;
+  videoTitle?: string | null;
+  startMs?: number | null;
+  endMs?: number | null;
+  frameX?: number | null;
+  frameY?: number | null;
+  frameWidth?: number | null;
+  frameHeight?: number | null;
 };
 
 type BuildFeedbackBlocksParams = {
@@ -82,7 +92,14 @@ export function buildFeedbackBlocks({
 
   const contextElements: SlackBlock[] = [];
 
-  if (feedback.pageUrl) {
+  // A video Feedback names the Video, the time and the position on the frame
+  // where a page Feedback links its page.
+  if (feedback.videoId) {
+    contextElements.push({
+      type: "mrkdwn",
+      text: describeVideoLocation(feedback).join(" · "),
+    });
+  } else if (feedback.pageUrl) {
     contextElements.push({
       type: "mrkdwn",
       text: `<${feedback.pageUrl}|${feedback.pageUrl}>`,
@@ -106,7 +123,7 @@ export function buildFeedbackBlocks({
     blocks.push({
       type: "image",
       image_url: screenshotUrl,
-      alt_text: "Feedback screenshot",
+      alt_text: feedback.videoId ? "Video frame" : "Feedback screenshot",
     });
   }
 
