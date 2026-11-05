@@ -14,11 +14,18 @@ export type VideoTimelineMarker = {
   raised?: boolean;
 };
 
+/** The section being marked: an open out point follows the playhead. */
+export type VideoTimelineDraftRange = {
+  startMs: number;
+  endMs: number | null;
+};
+
 type VideoTimelineProps = {
   durationMs: number;
   currentMs: number;
   markers: VideoTimelineMarker[];
   activeMarkerId: string | null;
+  draftRange?: VideoTimelineDraftRange | null;
   onSeek: (ms: number) => void;
   onMarkerClick: (markerId: string) => void;
 };
@@ -34,6 +41,7 @@ export function VideoTimeline({
   currentMs,
   markers,
   activeMarkerId,
+  draftRange = null,
   onSeek,
   onMarkerClick,
 }: VideoTimelineProps) {
@@ -99,10 +107,57 @@ export function VideoTimeline({
         );
       })}
 
+      {draftRange ? (
+        <DraftRange
+          startMs={draftRange.startMs}
+          endMs={draftRange.endMs}
+          currentMs={currentMs}
+          position={position}
+        />
+      ) : null}
+
       <div
         className="pointer-events-none absolute top-1/2 z-20 h-5 w-0.5 -translate-x-1/2 -translate-y-1/2 bg-foreground"
         style={{ left: position(currentMs) }}
       />
     </div>
+  );
+}
+
+type DraftRangeProps = VideoTimelineDraftRange & {
+  currentMs: number;
+  position: (ms: number) => string;
+};
+
+// Until the out point is set, the bar previews the section Mark out would
+// close at the playhead, so the Reviewer sees where it runs.
+function DraftRange({ startMs, endMs, currentMs, position }: DraftRangeProps) {
+  const previewEndMs = endMs ?? (currentMs > startMs ? currentMs : null);
+
+  return (
+    <>
+      {previewEndMs !== null ? (
+        <div
+          className={cn(
+            "pointer-events-none absolute top-1/2 z-10 h-2 -translate-y-1/2",
+            endMs === null ? "bg-primary/40" : "bg-primary",
+          )}
+          style={{
+            left: position(startMs),
+            width: `calc(${position(previewEndMs)} - ${position(startMs)})`,
+          }}
+        />
+      ) : null}
+      <div
+        className="pointer-events-none absolute top-1/2 z-10 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"
+        style={{ left: position(startMs) }}
+      />
+      {endMs !== null ? (
+        <div
+          className="pointer-events-none absolute top-1/2 z-10 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"
+          style={{ left: position(endMs) }}
+        />
+      ) : null}
+    </>
   );
 }

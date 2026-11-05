@@ -37,7 +37,10 @@ type FrameOverlayProps = {
   frame: Size;
   selection: VideoSelection | null;
   paused: boolean;
-  /** The composer, floated beside the marker; null keeps it elsewhere. */
+  /**
+   * The composer, floated beside the marker, or centered at the foot of the
+   * frame when nothing is marked on it; null keeps it elsewhere.
+   */
   popover: ReactNode;
   onMark: (selection: VideoSelection) => void;
   onPause: () => void;
@@ -134,6 +137,11 @@ export function FrameOverlay({
               : { visibility: "hidden" }
           }
         >
+          {popover}
+        </div>
+      ) : null}
+      {popover && !anchor ? (
+        <div className="absolute bottom-3 left-1/2 z-10 w-80 max-w-[calc(100%-1.5rem)] -translate-x-1/2">
           {popover}
         </div>
       ) : null}

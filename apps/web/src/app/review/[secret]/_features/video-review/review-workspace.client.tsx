@@ -162,12 +162,9 @@ export function ReviewWorkspace({
         onPost={() => postFeedback.post(draft)}
       />
     ) : null;
-  // A marked draft floats beside its marker; one at a time only, or any draft
-  // on a phone, where the frame is too small to type over, heads the list.
-  const floatsOnFrame =
-    !isMobile &&
-    draft !== null &&
-    (draft.point !== null || draft.area !== null);
+  // A draft floats over the frame, where the Reviewer is looking; on a phone,
+  // where the frame is too small to type over, it heads the list.
+  const floatsOnFrame = !isMobile && draft !== null;
 
   return (
     <>
@@ -216,6 +213,7 @@ export function ReviewWorkspace({
                 toTimelineMarker(item, item.reviewer.id === ownReviewerId),
               )}
               activeMarkerId={activeFeedbackId}
+              draftRange={canComment ? draft : null}
               onSeek={player.seek}
               onMarkerClick={handleMarkerClick}
             />
