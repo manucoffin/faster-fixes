@@ -18,6 +18,7 @@ const nextConfig = {
   },
 
   experimental: {
+    agentUpgrade: "latest",
     authInterrupts: true,
   },
 
