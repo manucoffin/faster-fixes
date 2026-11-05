@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
-import { SelectionMarker } from "../../_components/selection-marker";
-import { mapSelectionToBox } from "../../_helpers/map-selection-to-box";
+import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
+import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";
 import { placeComposerPopover } from "../../_helpers/place-composer-popover";
 import {
   readFrameGesture,
   toFramePosition,
 } from "../../_helpers/read-frame-gesture";
-import type { ReviewSelection } from "../../_types/review-page-data";
+import type { VideoSelection } from "@/app/_domains/video/_types/video-selection";
 
 type Size = { width: number; height: number };
 type Position = { x: number; y: number };
@@ -35,11 +35,11 @@ function useElementSize(element: HTMLElement | null) {
 
 type FrameOverlayProps = {
   frame: Size;
-  selection: ReviewSelection | null;
+  selection: VideoSelection | null;
   paused: boolean;
   /** The composer, floated beside the marker; null keeps it elsewhere. */
   popover: ReactNode;
-  onMark: (selection: ReviewSelection) => void;
+  onMark: (selection: VideoSelection) => void;
   onPause: () => void;
 };
 

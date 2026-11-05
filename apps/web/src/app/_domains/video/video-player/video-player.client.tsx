@@ -3,22 +3,25 @@
 import { Button } from "@workspace/ui/components/button";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
-import { formatTimecode } from "../../_helpers/format-timecode";
-import type { ReviewVideo } from "../../_types/review-page-data";
+import { formatTimecode } from "../_helpers/format-timecode";
 import type { useVideoPlayer } from "./use-video-player";
 
-type ReviewPlayerProps = {
-  video: ReviewVideo;
+type VideoPlayerProps = {
+  video: {
+    width: number | null;
+    height: number | null;
+    posterUrl: string | null;
+  };
   videoRef: RefObject<HTMLVideoElement | null>;
   player: ReturnType<typeof useVideoPlayer>;
   timeline: ReactNode;
-  controls: ReactNode;
+  controls?: ReactNode;
   /** Drawn over the frame; it takes the clicks the video would. */
-  overlay: ReactNode;
+  overlay?: ReactNode;
   onPlaybackError: () => void;
 };
 
-export function ReviewPlayer({
+export function VideoPlayer({
   video,
   videoRef,
   player,
@@ -26,7 +29,7 @@ export function ReviewPlayer({
   controls,
   overlay,
   onPlaybackError,
-}: ReviewPlayerProps) {
+}: VideoPlayerProps) {
   return (
     <div className="space-y-3">
       <div

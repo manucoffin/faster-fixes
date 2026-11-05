@@ -4,7 +4,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { XIcon } from "lucide-react";
 import type { CommentDraft } from "../../_helpers/comment-draft";
-import { formatFeedbackTime } from "../../_helpers/format-timecode";
+import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
 import { describeFrameMarker } from "../../_helpers/read-frame-gesture";
 
 type FeedbackComposerProps = {

@@ -1,4 +1,4 @@
-import type { SelectionGeometry } from "./map-selection-to-box";
+import type { SelectionGeometry } from "@/app/_domains/video/_helpers/map-selection-to-box";
 
 type Size = { width: number; height: number };
 

@@ -5,11 +5,11 @@ import { Button } from "@workspace/ui/components/button";
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useState } from "react";
-import { SelectionMarker } from "../../_components/selection-marker";
+import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
 import { getFeedbackStatusLabel } from "../../_helpers/feedback-status-label";
-import { formatFeedbackTime } from "../../_helpers/format-timecode";
+import { formatFeedbackTime } from "@/app/_domains/video/_helpers/format-timecode";
 import { isHiddenByDefault } from "../../_helpers/list-visible-feedback";
-import { mapSelectionToBox } from "../../_helpers/map-selection-to-box";
+import { mapSelectionToBox } from "@/app/_domains/video/_helpers/map-selection-to-box";
 import type {
   ReviewFeedbackItem,
   ReviewVideo,

@@ -1,4 +1,4 @@
-import type { ReviewSelection } from "../_types/review-page-data";
+import type { VideoSelection } from "../_types/video-selection";
 
 type Size = { width: number; height: number };
 
@@ -13,7 +13,7 @@ export type SelectionGeometry =
  * above and below it; a narrower one leaves bands at the sides.
  */
 export function mapSelectionToBox(
-  selection: ReviewSelection,
+  selection: VideoSelection,
   frame: Size,
   box: Size,
 ): SelectionGeometry | null {

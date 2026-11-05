@@ -1,7 +1,7 @@
-import type { ReviewSelection } from "../_types/review-page-data";
+import type { VideoSelection } from "@/app/_domains/video/_types/video-selection";
 
 /** A comment the Reviewer is composing: where it sits and what it says. */
-export type CommentDraft = ReviewSelection & {
+export type CommentDraft = VideoSelection & {
   startMs: number;
   endMs: number | null;
   comment: string;
@@ -40,7 +40,7 @@ export function anchorCommentDraft(
 export function markCommentDraftFrame(
   draft: CommentDraft | null,
   playheadMs: number,
-  selection: ReviewSelection,
+  selection: VideoSelection,
 ): CommentDraft {
   return {
     ...anchorCommentDraft(draft, playheadMs),

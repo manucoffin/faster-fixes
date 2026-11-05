@@ -5,7 +5,7 @@ import {
   canMarkCommentDraftOut,
   type CommentDraft,
 } from "../../_helpers/comment-draft";
-import { formatTimecode } from "../../_helpers/format-timecode";
+import { formatTimecode } from "@/app/_domains/video/_helpers/format-timecode";
 
 type CommentControlsProps = {
   draft: CommentDraft | null;

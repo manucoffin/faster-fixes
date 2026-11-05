@@ -1,4 +1,4 @@
-import type { ReviewSelection } from "../_types/review-page-data";
+import type { VideoSelection } from "@/app/_domains/video/_types/video-selection";
 
 type Size = { width: number; height: number };
 type Fraction = { x: number; y: number };
@@ -51,7 +51,7 @@ function toSpan(from: number, to: number) {
 export function readFrameGesture(start: Fraction, end: Fraction) {
   const travel = Math.hypot(end.x - start.x, end.y - start.y);
   if (travel < DRAG_THRESHOLD) {
-    return { point: start, area: null } satisfies ReviewSelection;
+    return { point: start, area: null } satisfies VideoSelection;
   }
 
   const horizontal = toSpan(start.x, end.x);
@@ -64,11 +64,11 @@ export function readFrameGesture(start: Fraction, end: Fraction) {
       width: horizontal.size,
       height: vertical.size,
     },
-  } satisfies ReviewSelection;
+  } satisfies VideoSelection;
 }
 
 /** The marker kind the composer shows beside the time, or null without one. */
-export function describeFrameMarker(selection: ReviewSelection) {
+export function describeFrameMarker(selection: VideoSelection) {
   if (selection.area) return "Area outlined";
   if (selection.point) return "Point placed";
   return null;

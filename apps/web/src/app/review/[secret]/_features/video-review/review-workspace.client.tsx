@@ -2,6 +2,12 @@
 
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { useEffect, useRef, useState } from "react";
+import { useVideoPlayer } from "@/app/_domains/video/video-player/use-video-player";
+import { VideoPlayer } from "@/app/_domains/video/video-player/video-player.client";
+import {
+  VideoTimeline,
+  type VideoTimelineMarker,
+} from "@/app/_domains/video/video-player/video-timeline.client";
 import { AnnotationsClosedBanner } from "../../_components/annotations-closed-banner";
 import {
   anchorCommentDraft,
@@ -17,17 +23,14 @@ import {
 import type {
   ReviewFeedbackItem,
   ReviewPageData,
-  ReviewSelection,
 } from "../../_types/review-page-data";
+import type { VideoSelection } from "@/app/_domains/video/_types/video-selection";
 import { CommentControls } from "./comment-controls.client";
 import { FeedbackComposer } from "./feedback-composer.client";
 import { FeedbackList } from "./feedback-list.client";
 import { FrameOverlay } from "./frame-overlay.client";
 import { NamePromptDialog } from "./name-prompt-dialog.client";
-import { ReviewPlayer } from "./review-player.client";
-import { ReviewTimeline } from "./review-timeline.client";
 import { usePostFeedback } from "./use-post-feedback";
-import { useVideoPlayer } from "./use-video-player";
 
 type ReviewWorkspaceProps = {
   secret: string;
@@ -35,6 +38,21 @@ type ReviewWorkspaceProps = {
   initialFeedbackId: string | null;
   onPlaybackError: () => void;
 };
+
+function toTimelineMarker(
+  feedback: ReviewFeedbackItem,
+  isOwn: boolean,
+): VideoTimelineMarker {
+  let colorClassName = isOwn ? "bg-foreground" : "bg-foreground/50";
+  if (isHiddenByDefault(feedback.status)) colorClassName = "bg-success";
+  return {
+    id: feedback.id,
+    startMs: feedback.startMs,
+    endMs: feedback.endMs,
+    colorClassName,
+    raised: isOwn,
+  };
+}
 
 function scrollCardIntoView(feedbackId: string) {
   document
@@ -125,7 +143,7 @@ export function ReviewWorkspace({
     );
   }
 
-  function markFrame(selection: ReviewSelection) {
+  function markFrame(selection: VideoSelection) {
     player.pause();
     setDraft((current) =>
       markCommentDraftFrame(current, player.currentMs, selection),
@@ -155,7 +173,7 @@ export function ReviewWorkspace({
     <>
       <section className="space-y-3">
         {data.video.annotationsOpen ? null : <AnnotationsClosedBanner />}
-        <ReviewPlayer
+        <VideoPlayer
           video={data.video}
           videoRef={videoRef}
           player={player}
@@ -191,12 +209,13 @@ export function ReviewWorkspace({
             ) : null
           }
           timeline={
-            <ReviewTimeline
+            <VideoTimeline
               durationMs={player.durationMs}
               currentMs={player.currentMs}
-              feedback={visible}
-              ownReviewerId={ownReviewerId}
-              activeFeedbackId={activeFeedbackId}
+              markers={visible.map((item) =>
+                toTimelineMarker(item, item.reviewer.id === ownReviewerId),
+              )}
+              activeMarkerId={activeFeedbackId}
               onSeek={player.seek}
               onMarkerClick={handleMarkerClick}
             />

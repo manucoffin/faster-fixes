@@ -1,4 +1,5 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
+import type { VideoSelection } from "@/app/_domains/video/_types/video-selection";
 
 export type ReviewVideo = {
   id: string;
@@ -11,13 +12,7 @@ export type ReviewVideo = {
   posterUrl: string | null;
 };
 
-/** Where on the frame a Feedback points, normalized 0..1 to the Video. */
-export type ReviewSelection = {
-  point: { x: number; y: number } | null;
-  area: { x: number; y: number; width: number; height: number } | null;
-};
-
-export type ReviewFeedbackItem = ReviewSelection & {
+export type ReviewFeedbackItem = VideoSelection & {
   id: string;
   status: FeedbackStatus;
   comment: string;

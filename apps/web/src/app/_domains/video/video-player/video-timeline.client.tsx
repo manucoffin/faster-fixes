@@ -2,45 +2,41 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { useState, type PointerEvent } from "react";
-import { formatFeedbackTime } from "../../_helpers/format-timecode";
-import { isHiddenByDefault } from "../../_helpers/list-visible-feedback";
-import type { ReviewFeedbackItem } from "../../_types/review-page-data";
+import { formatFeedbackTime } from "../_helpers/format-timecode";
 
-type ReviewTimelineProps = {
+/** One Feedback on the timeline, coloured by the caller. */
+export type VideoTimelineMarker = {
+  id: string;
+  startMs: number;
+  endMs: number | null;
+  colorClassName: string;
+  /** Drawn above the other markers. */
+  raised?: boolean;
+};
+
+type VideoTimelineProps = {
   durationMs: number;
   currentMs: number;
-  feedback: ReviewFeedbackItem[];
-  ownReviewerId: string | null;
-  activeFeedbackId: string | null;
+  markers: VideoTimelineMarker[];
+  activeMarkerId: string | null;
   onSeek: (ms: number) => void;
-  onMarkerClick: (feedbackId: string) => void;
+  onMarkerClick: (markerId: string) => void;
 };
 
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));
 }
 
-function markerColor(
-  feedback: ReviewFeedbackItem,
-  isOwn: boolean,
-  isActive: boolean,
-) {
-  if (isActive) return "bg-primary";
-  if (isHiddenByDefault(feedback.status)) return "bg-success";
-  return isOwn ? "bg-foreground" : "bg-foreground/50";
-}
-
-// Every visible Feedback as a dot (instant) or a bar (range) along the Video.
-// A press on the bar seeks, and dragging scrubs.
-export function ReviewTimeline({
+// Every marker as a dot (instant) or a bar (range) along the Video. A press on
+// the bar seeks, and dragging scrubs.
+export function VideoTimeline({
   durationMs,
   currentMs,
-  feedback,
-  ownReviewerId,
-  activeFeedbackId,
+  markers,
+  activeMarkerId,
   onSeek,
   onMarkerClick,
-}: ReviewTimelineProps) {
+}: VideoTimelineProps) {
   const [scrubbing, setScrubbing] = useState(false);
 
   function seekToPointer(event: PointerEvent<HTMLDivElement>) {
@@ -73,9 +69,8 @@ export function ReviewTimeline({
         />
       </div>
 
-      {feedback.map((item) => {
-        const isOwn = item.reviewer.id === ownReviewerId;
-        const isActive = item.id === activeFeedbackId;
+      {markers.map((item) => {
+        const isActive = item.id === activeMarkerId;
         return (
           <button
             key={item.id}
@@ -87,8 +82,8 @@ export function ReviewTimeline({
               item.endMs === null
                 ? "size-3.5 -translate-x-1/2 ring-2 ring-background hover:scale-125"
                 : "h-2 hover:h-2.5",
-              isOwn || isActive ? "z-10" : null,
-              markerColor(item, isOwn, isActive),
+              item.raised || isActive ? "z-10" : null,
+              isActive ? "bg-primary" : item.colorClassName,
             )}
             style={
               item.endMs === null
