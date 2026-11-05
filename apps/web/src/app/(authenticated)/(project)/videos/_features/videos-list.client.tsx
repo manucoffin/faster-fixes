@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Empty,
   EmptyDescription,
+  EmptyContent,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -14,6 +15,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { AlertCircle, SquarePlay } from "lucide-react";
 
+import { UploadVideoDialog } from "./upload-video-dialog.client";
 import { VideoUsageLine } from "./video-usage-line.client";
 import { VideosTable } from "./videos-table.client";
 
@@ -23,7 +25,6 @@ type VideosListProps = {
 
 const SKELETON_ROWS = 3;
 
-// The header row is left for the Upload button.
 export function VideosList({ projectId }: VideosListProps) {
   const trpc = useTRPC();
 
@@ -33,7 +34,12 @@ export function VideosList({ projectId }: VideosListProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <VideoUsageLine projectId={projectId} />
+      <div className="flex items-center justify-between gap-4">
+        <VideoUsageLine projectId={projectId} />
+        <div className="ml-auto">
+          <UploadVideoDialog projectId={projectId} />
+        </div>
+      </div>
       {matchQueryStatus(videosQuery, {
         Loading: (
           <div className="flex flex-col gap-2">
@@ -64,6 +70,9 @@ export function VideosList({ projectId }: VideosListProps) {
                 Upload a video to collect timed feedback from your clients.
               </EmptyDescription>
             </EmptyHeader>
+            <EmptyContent>
+              <UploadVideoDialog projectId={projectId} />
+            </EmptyContent>
           </Empty>
         ),
         Success: ({ data: videos }) => <VideosTable videos={videos} />,
