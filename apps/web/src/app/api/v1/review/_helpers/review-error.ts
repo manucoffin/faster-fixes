@@ -59,3 +59,22 @@ export function reviewRateLimitResponse(result: RateLimitResult): NextResponse {
     },
   );
 }
+
+/**
+ * The Plan's Feedback cap, refused with the Widget's body as it stands, so
+ * one cap answers the same on both surfaces.
+ */
+export function reviewFeedbackLimitReached(capacity: {
+  current: number;
+  limit: number;
+}): NextResponse {
+  return NextResponse.json(
+    {
+      error: "Feedback limit reached for this organization's plan.",
+      code: "RESOURCE_LIMIT_EXCEEDED",
+      current: capacity.current,
+      limit: capacity.limit,
+    },
+    { status: 403 },
+  );
+}

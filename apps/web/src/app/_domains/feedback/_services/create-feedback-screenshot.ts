@@ -4,16 +4,17 @@ import crypto from "crypto";
 
 type CreateFeedbackScreenshotInput = {
   projectId: string;
-  /** The image type the widget sent, already checked against the allowed set. */
+  /** The image type the client sent, already checked against the allowed set. */
   contentType: string;
   /** The image bytes, as `Buffer.from` hands them over: a `BodyInit` the S3 client accepts. */
   body: Buffer<ArrayBuffer>;
 };
 
 /**
- * Stores a widget screenshot in the bucket and records the Asset that points at
- * it, returning the Asset id the Feedback write hangs the screenshot on. The
- * caller decides what an upload failure means for the submit.
+ * Stores a Screenshot sent by the Widget or the review page in the bucket and
+ * records the Asset that points at it, returning the Asset id the Feedback
+ * write hangs the screenshot on. The caller decides what an upload failure
+ * means for the submit.
  */
 export async function createFeedbackScreenshot({
   projectId,

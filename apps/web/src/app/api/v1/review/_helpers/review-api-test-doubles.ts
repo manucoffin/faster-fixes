@@ -30,7 +30,6 @@ export const OTHER_REVIEWER_ID = "reviewer_2";
 export const OTHER_REVIEWER_NAME = "Patient Heron";
 export const OTHER_REVIEWER_SECRET = "other_reviewer_secret_characterization";
 export const FEEDBACK_ID = "feedback_1";
-export const SCREENSHOT_ASSET_ID = "asset_1";
 export const STORAGE_BUCKET = "review-assets";
 export const VIDEO_FILE_KEY = `videos/${PROJECT_ID}/${VIDEO_ID}/source.mp4`;
 export const VIDEO_POSTER_KEY = `videos/${PROJECT_ID}/${VIDEO_ID}/poster.jpg`;
@@ -126,7 +125,8 @@ export const reviewApiTables: {
   videos: Row[];
   reviewers: Row[];
   feedbacks: Row[];
-} = { videos: [], reviewers: [], feedbacks: [] };
+  assets: Row[];
+} = { videos: [], reviewers: [], feedbacks: [], assets: [] };
 
 // Scalar conditions only: a nested filter (`{ not: null }`, a relation) is not
 // interpreted and always matches, which is enough for the review routes.
@@ -174,6 +174,31 @@ function createIn(table: () => Row[], idPrefix: string) {
   });
 }
 
+// Fills the defaults Postgres would and resolves the `reviewer` and
+// `screenshot` relations from their tables, so a `select` reads them back.
+const createFeedback = vi.fn(async ({ data, select }: CreateArgs) => {
+  const reviewer = reviewApiTables.reviewers.find(
+    (row) => row.id === data.reviewerId,
+  );
+  const screenshot = reviewApiTables.assets.find(
+    (row) => row.id === data.screenshotId,
+  );
+  const row: Row = {
+    id: `feedback_${reviewApiTables.feedbacks.length + 1}`,
+    status: "new",
+    clickX: null,
+    clickY: null,
+    selector: null,
+    metadata: null,
+    createdAt: CREATED_AT,
+    ...data,
+    reviewer: reviewer ? { id: reviewer.id, name: reviewer.name } : null,
+    screenshot: screenshot ? { key: screenshot.key } : null,
+  };
+  reviewApiTables.feedbacks.push(row);
+  return applySelect(row, select);
+});
+
 export const reviewApiPrisma = {
   video: { findFirst: findFirstIn(() => reviewApiTables.videos) },
   reviewer: {
@@ -184,11 +209,15 @@ export const reviewApiPrisma = {
     findFirst: findFirstIn(() => reviewApiTables.feedbacks),
     findMany: findManyIn(() => reviewApiTables.feedbacks),
     count: vi.fn(),
-    create: vi.fn(),
+    create: createFeedback,
     update: vi.fn(),
     delete: vi.fn(),
   },
-  asset: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn() },
+  asset: {
+    findUnique: vi.fn(),
+    create: createIn(() => reviewApiTables.assets, "asset"),
+    delete: vi.fn(),
+  },
   subscription: { findFirst: vi.fn() },
   $queryRaw: vi.fn(),
   $transaction: vi.fn(),
@@ -219,10 +248,10 @@ export function resetReviewApiDoubles() {
   reviewApiTables.videos = [videoRow()];
   reviewApiTables.reviewers = [reviewerRow()];
   reviewApiTables.feedbacks = [];
+  reviewApiTables.assets = [];
 
   reviewApiPrisma.subscription.findFirst.mockResolvedValue(null);
   reviewApiPrisma.feedback.count.mockResolvedValue(0);
-  reviewApiPrisma.asset.create.mockResolvedValue({ id: SCREENSHOT_ASSET_ID });
   allowRateLimit();
 
   storageDouble.getSignedUrl.mockImplementation(
@@ -289,4 +318,19 @@ export function reviewRequest(url: string, init: ReviewRequestInit = {}) {
   }
 
   return new NextRequest(url, { method, headers, body });
+}
+
+/** The multipart body of a Feedback create: `data` as JSON, an optional file. */
+export function feedbackFormData(
+  data: unknown,
+  screenshot?: File | string,
+): FormData {
+  const formData = new FormData();
+  formData.set("data", typeof data === "string" ? data : JSON.stringify(data));
+  if (screenshot !== undefined) formData.set("screenshot", screenshot);
+  return formData;
+}
+
+export function screenshotFile(type = "image/jpeg", bytes = 8) {
+  return new File([new Uint8Array(bytes)], "frame.jpg", { type });
 }
