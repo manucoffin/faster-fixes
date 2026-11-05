@@ -1,11 +1,10 @@
+import { OPEN_FEEDBACK_STATUSES } from "@/app/_domains/feedback";
 import { decryptShareLinkSecret } from "@/app/_domains/video/_helpers/share-link-secret";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { Prisma } from "@workspace/db/types";
 
 // A Video as the Videos list shows it, shared with the Video page, which
 // extends the same row.
-
-const OPEN_STATUSES = ["new", "in_progress"];
 
 export const videoRowSelect = {
   id: true,
@@ -19,7 +18,7 @@ export const videoRowSelect = {
   posterAsset: { select: { key: true } },
   uploadedBy: { select: { name: true } },
   _count: {
-    select: { feedback: { where: { status: { in: OPEN_STATUSES } } } },
+    select: { feedback: { where: { status: { in: OPEN_FEEDBACK_STATUSES } } } },
   },
 } satisfies Prisma.VideoSelect;
 
