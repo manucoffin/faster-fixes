@@ -1,5 +1,6 @@
 "use client";
 
+import { VideoSourceLine } from "@/app/_domains/video/_components/video-source-line";
 import { useSortable } from "@dnd-kit/sortable";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { cn } from "@workspace/ui/lib/utils";
@@ -98,10 +99,19 @@ function KanbanCardView({
       <div className="min-w-0 flex-1">
         <p className="line-clamp-3 text-sm leading-snug">{feedback.comment}</p>
 
-        {feedback.pageUrl && (
-          <p className="mt-1 truncate text-xs text-muted-foreground">
-            {formatPagePath(feedback.pageUrl)}
-          </p>
+        {feedback.videoTitle !== null ? (
+          <VideoSourceLine
+            className="mt-1"
+            title={feedback.videoTitle}
+            startMs={feedback.startMs}
+            endMs={feedback.endMs}
+          />
+        ) : (
+          feedback.pageUrl && (
+            <p className="mt-1 truncate text-xs text-muted-foreground">
+              {formatPagePath(feedback.pageUrl)}
+            </p>
+          )
         )}
 
         {(isWaiting || hasTracker) && (

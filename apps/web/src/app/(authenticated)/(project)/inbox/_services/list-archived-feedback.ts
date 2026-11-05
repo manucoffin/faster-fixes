@@ -47,6 +47,7 @@ export async function listArchivedFeedback(
       take: pageSize,
       include: {
         reviewer: { select: { id: true, name: true } },
+        video: { select: { title: true } },
         assignee: {
           select: {
             id: true,
@@ -68,6 +69,15 @@ export async function listArchivedFeedback(
       updatedAt: f.updatedAt,
       comment: f.comment,
       pageUrl: f.pageUrl,
+      // Null on a page Feedback (ADR-0020).
+      videoId: f.videoId,
+      videoTitle: f.video?.title ?? null,
+      startMs: f.startMs,
+      endMs: f.endMs,
+      frameX: f.frameX,
+      frameY: f.frameY,
+      frameWidth: f.frameWidth,
+      frameHeight: f.frameHeight,
       reviewer: f.reviewer,
       assignee: f.assignee
         ? {

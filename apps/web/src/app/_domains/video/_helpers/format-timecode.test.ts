@@ -53,4 +53,10 @@ describe("formatFeedbackTime", () => {
   it("shows a range as both bounds to the millisecond", () => {
     expect(formatFeedbackTime(12_300, 15_000)).toBe("0:12.300 to 0:15.000");
   });
+
+  it("shows a range to the second when milliseconds are turned off", () => {
+    expect(formatFeedbackTime(12_300, 75_000, { milliseconds: false })).toBe(
+      "0:12 to 1:15",
+    );
+  });
 });

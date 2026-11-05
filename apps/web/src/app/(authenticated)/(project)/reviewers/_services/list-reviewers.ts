@@ -22,8 +22,9 @@ export async function listReviewers(
     throw new ForbiddenError("Access denied.");
   }
 
+  // Reviewers that came through a Share link belong to their Video, not here.
   const reviewers = await db.reviewer.findMany({
-    where: { projectId },
+    where: { projectId, videoId: null },
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { feedback: true } },

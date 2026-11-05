@@ -2,6 +2,7 @@
 
 import { DataTable } from "@/app/_components/data-table.client";
 import { DataTableColumnHeader } from "@/app/_components/data-table-column-header.client";
+import { VideoSourceLine } from "@/app/_domains/video/_components/video-source-line";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -163,9 +164,19 @@ export function ArchiveTab({ projectId }: ArchiveTabProps) {
     },
     {
       accessorKey: "pageUrl",
-      header: "Page URL",
+      header: "Source",
       cell: ({ row }) => {
-        const { pageUrl } = row.original;
+        const { pageUrl, videoTitle, startMs, endMs } = row.original;
+        if (videoTitle !== null) {
+          return (
+            <VideoSourceLine
+              className="max-w-[300px]"
+              title={videoTitle}
+              startMs={startMs}
+              endMs={endMs}
+            />
+          );
+        }
         if (!pageUrl) return null;
         let displayUrl = pageUrl;
         try {

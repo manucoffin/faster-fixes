@@ -29,6 +29,7 @@ export async function listFeedback(
     orderBy: { createdAt: "desc" },
     include: {
       reviewer: { select: { id: true, name: true } },
+      video: { select: { title: true } },
       assignee: {
         select: {
           id: true,
@@ -73,6 +74,15 @@ export async function listFeedback(
       status: f.status,
       comment: f.comment,
       pageUrl: f.pageUrl,
+      // Null on a page Feedback (ADR-0020).
+      videoId: f.videoId,
+      videoTitle: f.video?.title ?? null,
+      startMs: f.startMs,
+      endMs: f.endMs,
+      frameX: f.frameX,
+      frameY: f.frameY,
+      frameWidth: f.frameWidth,
+      frameHeight: f.frameHeight,
       clickX: f.clickX,
       clickY: f.clickY,
       selector: f.selector,

@@ -28,8 +28,15 @@ function pad(value: number, length: number) {
   return String(value).padStart(length, "0");
 }
 
-/** A Feedback's time: an instant, or a range as "a to b" to the millisecond. */
-export function formatFeedbackTime(startMs: number, endMs: number | null) {
+/**
+ * A Feedback's time: an instant, or a range as "a to b", to the millisecond
+ * unless `milliseconds` is false, as a compact source line needs.
+ */
+export function formatFeedbackTime(
+  startMs: number,
+  endMs: number | null,
+  { milliseconds = true }: FormatTimecodeOptions = {},
+) {
   if (endMs === null) return formatTimecode(startMs);
-  return `${formatTimecode(startMs, { milliseconds: true })} to ${formatTimecode(endMs, { milliseconds: true })}`;
+  return `${formatTimecode(startMs, { milliseconds })} to ${formatTimecode(endMs, { milliseconds })}`;
 }
