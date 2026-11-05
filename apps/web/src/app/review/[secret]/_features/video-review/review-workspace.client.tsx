@@ -1,10 +1,12 @@
 "use client";
 
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { useEffect, useRef, useState } from "react";
 import { AnnotationsClosedBanner } from "../../_components/annotations-closed-banner";
 import {
   anchorCommentDraft,
   clearCommentDraftOut,
+  markCommentDraftFrame,
   markCommentDraftOut,
   type CommentDraft,
 } from "../../_helpers/comment-draft";
@@ -15,10 +17,12 @@ import {
 import type {
   ReviewFeedbackItem,
   ReviewPageData,
+  ReviewSelection,
 } from "../../_types/review-page-data";
 import { CommentControls } from "./comment-controls.client";
 import { FeedbackComposer } from "./feedback-composer.client";
 import { FeedbackList } from "./feedback-list.client";
+import { FrameOverlay } from "./frame-overlay.client";
 import { NamePromptDialog } from "./name-prompt-dialog.client";
 import { ReviewPlayer } from "./review-player.client";
 import { ReviewTimeline } from "./review-timeline.client";
@@ -88,6 +92,7 @@ export function ReviewWorkspace({
     },
   });
   const canComment = data.video.annotationsOpen;
+  const isMobile = useIsMobile();
 
   const { visible, hiddenCount } = listVisibleFeedback(
     data.feedback,
@@ -120,6 +125,32 @@ export function ReviewWorkspace({
     );
   }
 
+  function markFrame(selection: ReviewSelection) {
+    player.pause();
+    setDraft((current) =>
+      markCommentDraftFrame(current, player.currentMs, selection),
+    );
+  }
+
+  const composer =
+    canComment && draft ? (
+      <FeedbackComposer
+        draft={draft}
+        isPosting={postFeedback.isPosting}
+        onCommentChange={(comment) =>
+          setDraft((current) => current && { ...current, comment })
+        }
+        onDiscard={() => setDraft(null)}
+        onPost={() => postFeedback.post(draft)}
+      />
+    ) : null;
+  // A marked draft floats beside its marker; one at a time only, or any draft
+  // on a phone, where the frame is too small to type over, heads the list.
+  const floatsOnFrame =
+    !isMobile &&
+    draft !== null &&
+    (draft.point !== null || draft.area !== null);
+
   return (
     <>
       <section className="space-y-3">
@@ -129,6 +160,21 @@ export function ReviewWorkspace({
           videoRef={videoRef}
           player={player}
           onPlaybackError={onPlaybackError}
+          overlay={
+            canComment ? (
+              <FrameOverlay
+                frame={{
+                  width: data.video.width ?? 16,
+                  height: data.video.height ?? 9,
+                }}
+                selection={draft}
+                paused={player.paused}
+                popover={floatsOnFrame ? composer : null}
+                onMark={markFrame}
+                onPause={player.pause}
+              />
+            ) : null
+          }
           controls={
             canComment ? (
               <CommentControls
@@ -156,6 +202,12 @@ export function ReviewWorkspace({
             />
           }
         />
+        {canComment && !draft ? (
+          <p className="text-sm text-muted-foreground">
+            Pause and click the frame to mark a point, or drag to outline an
+            area. Mark in and out to comment on a section.
+          </p>
+        ) : null}
       </section>
       <FeedbackList
         secret={secret}
@@ -168,19 +220,7 @@ export function ReviewWorkspace({
         activeFeedbackId={activeFeedbackId}
         getFeedbackLink={getFeedbackLink}
         onSelect={selectFeedback}
-        composer={
-          canComment && draft ? (
-            <FeedbackComposer
-              draft={draft}
-              isPosting={postFeedback.isPosting}
-              onCommentChange={(comment) =>
-                setDraft((current) => current && { ...current, comment })
-              }
-              onDiscard={() => setDraft(null)}
-              onPost={() => postFeedback.post(draft)}
-            />
-          ) : null
-        }
+        composer={floatsOnFrame ? null : composer}
       />
       <NamePromptDialog
         open={postFeedback.namePromptOpen}

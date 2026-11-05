@@ -32,6 +32,23 @@ export function anchorCommentDraft(
   return { ...draft, startMs, endMs };
 }
 
+/**
+ * Marks a point or an area on the frame at the playhead, opening a draft when
+ * none is open. An open draft keeps its text and moves its in point to the
+ * frame the marker was drawn on, so the Screenshot shows what was marked.
+ */
+export function markCommentDraftFrame(
+  draft: CommentDraft | null,
+  playheadMs: number,
+  selection: ReviewSelection,
+): CommentDraft {
+  return {
+    ...anchorCommentDraft(draft, playheadMs),
+    point: selection.point,
+    area: selection.area,
+  };
+}
+
 export function canMarkCommentDraftOut(
   draft: CommentDraft | null,
   playheadMs: number,

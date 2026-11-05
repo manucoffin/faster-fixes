@@ -13,6 +13,8 @@ type ReviewPlayerProps = {
   player: ReturnType<typeof useVideoPlayer>;
   timeline: ReactNode;
   controls: ReactNode;
+  /** Drawn over the frame; it takes the clicks the video would. */
+  overlay: ReactNode;
   onPlaybackError: () => void;
 };
 
@@ -22,12 +24,13 @@ export function ReviewPlayer({
   player,
   timeline,
   controls,
+  overlay,
   onPlaybackError,
 }: ReviewPlayerProps) {
   return (
     <div className="space-y-3">
       <div
-        className="overflow-hidden rounded-lg bg-black"
+        className="relative overflow-hidden rounded-lg bg-black"
         style={{
           aspectRatio: `${video.width ?? 16} / ${video.height ?? 9}`,
         }}
@@ -44,6 +47,7 @@ export function ReviewPlayer({
           onClick={player.togglePlay}
           className="size-full"
         />
+        {overlay}
       </div>
 
       {timeline}

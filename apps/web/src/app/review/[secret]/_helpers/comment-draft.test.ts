@@ -3,6 +3,7 @@ import {
   anchorCommentDraft,
   canMarkCommentDraftOut,
   clearCommentDraftOut,
+  markCommentDraftFrame,
   markCommentDraftOut,
   type CommentDraft,
 } from "./comment-draft";
@@ -79,5 +80,35 @@ describe("markCommentDraftOut", () => {
 describe("clearCommentDraftOut", () => {
   it("turns a range back into an instant", () => {
     expect(clearCommentDraftOut({ ...draft, endMs: 3000 })).toEqual(draft);
+  });
+});
+
+describe("markCommentDraftFrame", () => {
+  const point = { x: 0.2, y: 0.3 };
+  const area = { x: 0.1, y: 0.1, width: 0.4, height: 0.2 };
+
+  it("opens an empty draft at the playhead with the marker", () => {
+    expect(markCommentDraftFrame(null, 2500.7, { point, area: null })).toEqual({
+      startMs: 2500,
+      endMs: null,
+      point,
+      area: null,
+      comment: "",
+    });
+  });
+
+  it("replaces a point with an area and keeps the text", () => {
+    expect(
+      markCommentDraftFrame({ ...draft, point }, 1000, { point: null, area }),
+    ).toEqual({ ...draft, point: null, area });
+  });
+
+  it("moves the in point to the frame the marker was drawn on", () => {
+    expect(
+      markCommentDraftFrame({ ...draft, endMs: 4000 }, 3000, {
+        point,
+        area: null,
+      }),
+    ).toEqual({ ...draft, startMs: 3000, endMs: 4000, point });
   });
 });

@@ -5,6 +5,7 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { XIcon } from "lucide-react";
 import type { CommentDraft } from "../../_helpers/comment-draft";
 import { formatFeedbackTime } from "../../_helpers/format-timecode";
+import { describeFrameMarker } from "../../_helpers/read-frame-gesture";
 
 type FeedbackComposerProps = {
   draft: CommentDraft;
@@ -21,10 +22,12 @@ export function FeedbackComposer({
   onDiscard,
   onPost,
 }: FeedbackComposerProps) {
+  const markerKind = describeFrameMarker(draft);
+
   return (
     <form
       aria-label="New comment"
-      className="space-y-2 rounded-lg border bg-popover p-3 text-popover-foreground shadow-sm"
+      className="space-y-2 rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg"
       onSubmit={(event) => {
         event.preventDefault();
         onPost();
@@ -37,6 +40,9 @@ export function FeedbackComposer({
         <span className="font-mono font-medium tabular-nums">
           {formatFeedbackTime(draft.startMs, draft.endMs)}
         </span>
+        {markerKind ? (
+          <span className="text-muted-foreground">{markerKind}</span>
+        ) : null}
         <Button
           type="button"
           size="icon"
