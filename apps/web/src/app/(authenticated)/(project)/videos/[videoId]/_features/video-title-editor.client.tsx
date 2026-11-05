@@ -34,7 +34,7 @@ export function VideoTitleEditor({
 
   if (!isEditing) {
     return (
-      <h1 className="min-w-0">
+      <h1 className="min-w-0 flex-1">
         <button
           type="button"
           title="Rename"
