@@ -20,6 +20,10 @@ import {
   resolveDropNeighbours,
   sortColumnFeedback,
 } from "../../_helpers/board-column-order";
+import {
+  type BoardSource,
+  matchesBoardSource,
+} from "../../_helpers/board-source";
 import { BulkActionToolbar } from "../actions-toolbar/bulk-action-toolbar.client";
 import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { readDropStatus } from "../../_helpers/board-drop-target";
@@ -32,7 +36,7 @@ type FeedbackItem = ListFeedbackOutput[number];
 
 type KanbanBoardProps = {
   feedback: FeedbackItem[];
-  pageUrlFilter: string | null;
+  source: BoardSource;
   sort: BoardSort;
   onSelectFeedback: (id: string) => void;
 };
@@ -64,7 +68,7 @@ function resolveDropIndex(
 
 export function KanbanBoard({
   feedback,
-  pageUrlFilter,
+  source,
   sort,
   onSelectFeedback,
 }: KanbanBoardProps) {
@@ -86,14 +90,13 @@ export function KanbanBoard({
     }),
   );
 
-  // Filter out closed items and apply page URL filter
-  const filtered = React.useMemo(() => {
-    let items = feedback.filter((f) => f.status !== "closed");
-    if (pageUrlFilter) {
-      items = items.filter((f) => f.pageUrl === pageUrlFilter);
-    }
-    return items;
-  }, [feedback, pageUrlFilter]);
+  const filtered = React.useMemo(
+    () =>
+      feedback.filter(
+        (f) => f.status !== "closed" && matchesBoardSource(f, source),
+      ),
+    [feedback, source],
+  );
 
   const grouped = React.useMemo(() => {
     const map: Record<string, FeedbackItem[]> = {
@@ -133,7 +136,7 @@ export function KanbanBoard({
     }
     if (over.id === feedbackId) return;
 
-    // Under the page filter these are the visible cards, so the card lands
+    // Under the source filter these are the visible cards, so the card lands
     // between its visible neighbours.
     const columnIds = (grouped[newStatus] ?? []).map((f) => f.id);
     const overIndex = columnIds.indexOf(over.id as string);

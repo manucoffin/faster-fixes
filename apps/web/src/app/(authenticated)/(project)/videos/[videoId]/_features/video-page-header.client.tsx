@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, SquareKanban } from "lucide-react";
+import Link from "next/link";
 
+import { serializeBoardSource } from "@/app/(authenticated)/(project)/inbox/_helpers/board-source";
 import type { GetVideoOutput } from "../_services/get-video";
 import { useExportVideoFeedback } from "./use-export-video-feedback";
 import { useVideoActions } from "./use-video-actions";
@@ -70,6 +72,16 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
         >
           <Download />
           Export feedback
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link
+            href={`/inbox?source=${encodeURIComponent(
+              serializeBoardSource({ kind: "video", videoId: video.id }),
+            )}`}
+          >
+            <SquareKanban />
+            View on Task board
+          </Link>
         </Button>
       </div>
     </header>

@@ -117,7 +117,7 @@ describe("planRankPlacement", () => {
   it("lands between the visible neighbours when hidden cards sit between them", () => {
     const column = [...ranked, feedback("moved", "a3")];
 
-    // Under a page filter only a and c are visible.
+    // Under a source filter only a and c are visible.
     expect(orderAfter(column, "moved", "a", "c")).toEqual([
       "a",
       "moved",

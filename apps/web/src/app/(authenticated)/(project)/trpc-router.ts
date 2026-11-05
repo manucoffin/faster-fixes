@@ -88,8 +88,8 @@ import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnosti
 import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
 import { listArchivedFeedback } from "./inbox/_services/list-archived-feedback";
 import { ListArchivedFeedbackSchema } from "./inbox/_services/list-archived-feedback.schema";
-import { listDistinctPageUrls } from "./inbox/_services/list-distinct-page-urls";
-import { ListDistinctPageUrlsSchema } from "./inbox/_services/list-distinct-page-urls.schema";
+import { listSources } from "./inbox/_services/list-sources";
+import { ListSourcesSchema } from "./inbox/_services/list-sources.schema";
 import { listFeedback } from "./inbox/_services/list-feedback";
 import { ListFeedbackSchema } from "./inbox/_services/list-feedback.schema";
 import { moveFeedback } from "./inbox/_services/move-feedback";
@@ -296,10 +296,10 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
-    listDistinctPageUrls: protectedProcedure
-      .input(ListDistinctPageUrlsSchema)
+    listSources: protectedProcedure
+      .input(ListSourcesSchema)
       .query(({ input, ctx }) =>
-        listDistinctPageUrls({
+        listSources({
           projectId: input.projectId,
           userId: ctx.session.user.id,
         }),
