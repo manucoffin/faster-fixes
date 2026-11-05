@@ -9,7 +9,7 @@ import { getFeedbackStateId } from "./get-feedback-state-id";
 import { getValidLabelIds } from "./get-valid-label-ids";
 import { LinearRequestError } from "./linear-request-error";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -88,8 +88,7 @@ export const createLinearIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
-    const baseUrl = getAuthBaseUrl();
-    const dashboardUrl = `${baseUrl}/inbox?feedbackId=${feedback.id}`;
+    const dashboardUrl = buildFeedbackDashboardUrl(feedback);
 
     const title = formatIssueTitle(feedback.comment);
     const description = formatIssueBody({

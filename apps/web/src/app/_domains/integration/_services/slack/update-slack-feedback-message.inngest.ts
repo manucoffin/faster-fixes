@@ -1,5 +1,5 @@
 import { buildFeedbackBlocks } from "../../_helpers/slack/build-feedback-blocks";
-import { buildFeedbackDashboardUrl } from "../../_helpers/slack/build-feedback-dashboard-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { decryptSlackToken } from "./token-crypto";
 import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
@@ -60,7 +60,7 @@ export const updateSlackFeedbackMessage = inngest.createFunction(
       // The badge only distinguishes automated resolutions from human ones;
       // "user" and "tracker" both map to a human-driven change.
       actor: actor === "agent" ? "agent" : "human",
-      dashboardUrl: buildFeedbackDashboardUrl(feedback.id),
+      dashboardUrl: buildFeedbackDashboardUrl(feedback),
       screenshotUrl,
     });
 

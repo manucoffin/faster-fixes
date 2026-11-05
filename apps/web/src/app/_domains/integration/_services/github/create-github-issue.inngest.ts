@@ -5,7 +5,7 @@ import {
 import { getInstallationOctokit } from "./github-app";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
-import { getAuthBaseUrl } from "@/utils/url/get-auth-base-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import {
@@ -73,8 +73,7 @@ export const createGitHubIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
-    const baseUrl = getAuthBaseUrl();
-    const dashboardUrl = `${baseUrl}/inbox?feedbackId=${feedback.id}`;
+    const dashboardUrl = buildFeedbackDashboardUrl(feedback);
 
     const title = formatIssueTitle(feedback.comment);
     const body = formatIssueBody({

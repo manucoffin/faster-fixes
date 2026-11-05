@@ -1,5 +1,5 @@
 import { buildFeedbackBlocks } from "../../_helpers/slack/build-feedback-blocks";
-import { buildFeedbackDashboardUrl } from "../../_helpers/slack/build-feedback-dashboard-url";
+import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { decryptSlackToken } from "./token-crypto";
 import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
@@ -58,7 +58,7 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
       status: "new",
       // A freshly submitted feedback has no automated action yet.
       actor: "human",
-      dashboardUrl: buildFeedbackDashboardUrl(feedback.id),
+      dashboardUrl: buildFeedbackDashboardUrl(feedback),
       screenshotUrl,
     });
 
