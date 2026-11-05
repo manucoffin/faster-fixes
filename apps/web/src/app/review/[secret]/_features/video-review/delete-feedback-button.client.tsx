@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
 import { Button } from "@workspace/ui/components/button";
+import { Loader2, Trash2 } from "lucide-react";
 
 type DeleteFeedbackButtonProps = {
   isDeleting: boolean;
@@ -26,12 +27,14 @@ export function DeleteFeedbackButton({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          size="sm"
+          size="icon-sm"
           variant="ghost"
           className="text-destructive hover:text-destructive"
+          aria-label="Delete comment"
+          title="Delete comment"
           disabled={isDeleting}
         >
-          {isDeleting ? "Deleting..." : "Delete"}
+          {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

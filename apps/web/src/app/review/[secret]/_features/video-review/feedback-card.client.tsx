@@ -3,6 +3,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { cn } from "@workspace/ui/lib/utils";
+import { Pencil, Share2 } from "lucide-react";
 import { useState } from "react";
 import { SelectionMarker } from "@/app/_domains/video/_components/selection-marker";
 import { FeedbackStatusPill } from "@/app/_domains/feedback/_components/feedback-status-pill";
@@ -118,34 +119,37 @@ export function FeedbackCard({
             onCancel={() => setIsEditing(false)}
           />
         </div>
-      ) : null}
-
-      <div className="mt-1 flex justify-end gap-1">
-        {canManage && !isEditing ? (
-          <>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
-            </Button>
-            <DeleteFeedbackButton
-              isDeleting={deleteFeedback.isPending}
-              onConfirm={() => deleteFeedback.mutate()}
-            />
-          </>
-        ) : null}
-        <CopyButton
-          content={link}
-          size="sm"
-          variant="ghost"
-          className="text-muted-foreground"
-        >
-          Copy link
-        </CopyButton>
-      </div>
+      ) : (
+        <div className="mt-1 flex items-center justify-end gap-1">
+          <CopyButton
+            content={link}
+            icon={Share2}
+            size="icon-sm"
+            variant="ghost"
+            className="text-muted-foreground"
+            aria-label="Copy link"
+            title="Copy link"
+          />
+          {canManage ? (
+            <>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                aria-label="Edit comment"
+                title="Edit comment"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil />
+              </Button>
+              <DeleteFeedbackButton
+                isDeleting={deleteFeedback.isPending}
+                onConfirm={() => deleteFeedback.mutate()}
+              />
+            </>
+          ) : null}
+        </div>
+      )}
     </article>
   );
 }

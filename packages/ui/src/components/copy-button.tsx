@@ -5,13 +5,15 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, type LucideIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 type CopyButtonProps = {
   content: string;
   /** Duration in ms the check icon stays visible (default: 1500) */
   feedbackDuration?: number;
+  /** Icon shown before the copy confirms (default: Copy) */
+  icon?: LucideIcon;
 } & Omit<React.ComponentProps<"button">, "onClick"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
@@ -20,6 +22,7 @@ type CopyButtonProps = {
 export function CopyButton({
   content,
   feedbackDuration = 1500,
+  icon: Icon = Copy,
   children,
   className,
   ...props
@@ -60,7 +63,7 @@ export function CopyButton({
             exit={{ opacity: 0, rotate: 90 }}
             transition={{ duration: 0.1 }}
           >
-            <Copy className="size-3.5" />
+            <Icon className="size-3.5" />
           </motion.span>
         )}
       </AnimatePresence>
