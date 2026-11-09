@@ -11,14 +11,62 @@ The widget packages (`@fasterfixes/widget`, `@fasterfixes/react`, `@fasterfixes/
 
 You will need:
 
-- A **Node.js host**: Vercel is recommended (the repo is a Next.js app), but anything that runs Next.js will work (Railway, Fly, self-managed).
-- A **PostgreSQL database**: Neon, Supabase, Railway, or self-managed.
-- An **Inngest** account for background jobs (screenshot processing, GitHub sync, etc.). The free tier is enough to get started.
-- A **storage backend** for screenshots and images: Cloudflare R2 (the default), AWS S3, an S3-compatible server such as MinIO, or persistent local disk.
+- A **Node.js host**: Vercel is recommended (the repo is a Next.js app), but anything that runs Next.js will work (Railway, Fly, self-managed). On a single server, [Docker Compose](#docker-compose) runs the whole stack.
+- A **PostgreSQL database**: Neon, Supabase, Railway, or self-managed. Docker Compose includes one.
+- **Inngest** for background jobs (screenshot processing, GitHub sync, etc.): an Inngest Cloud account, where the free tier is enough to get started, or a self-hosted Inngest server. Docker Compose includes a self-hosted server, so no account is needed.
+- A **storage backend** for screenshots and images: Cloudflare R2 (the default), AWS S3, an S3-compatible server such as MinIO, or persistent local disk. Docker Compose uses local disk.
 - An **SMTP server**, **Resend**, or **Plunk** for transactional email: required to send sign-up confirmations and password resets.
 - (Optional) A **GitHub App** if you want the GitHub integration.
 
 Stripe is not needed for self-hosted installs. The billing code only runs on the hosted cloud version.
+
+## Docker Compose
+
+The repository includes a `docker-compose.yml` that runs the app, PostgreSQL, and a self-hosted Inngest server on one machine, with files stored on local disk. You need Docker with Compose 2.24 or later and an email provider. The numbered steps after this section describe a deployment without Docker.
+
+```bash
+git clone https://github.com/manucoffin/faster-fixes.git
+cd faster-fixes
+cp .env.docker.example .env
+```
+
+Set the values in `.env`:
+
+- `BASE_URL` and `DOMAIN_NAME`: the public URL and hostname of your instance.
+- `BETTER_AUTH_SECRET`, `POSTGRES_PASSWORD`, `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY`: generate each with `openssl rand -hex 32`.
+- The email provider: SMTP, Resend, or Plunk. See [SMTP](#smtp) for the SMTP variables.
+
+Compose passes `.env` to the app container, so you can add any other variable from `apps/web/.env.example`, such as integration credentials or S3 storage settings.
+
+Build and start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+The app applies pending database migrations each time it starts, then listens on `127.0.0.1:3000`. Inngest syncs the app's functions automatically and checks for changes every minute. Run the same command after `git pull` to update.
+
+### Build-time values
+
+`BASE_URL`, the `NEXT_PUBLIC_*` variables and `STORAGE_BUCKET_NAME` are inlined when the image is built. After changing one of them, rebuild with `docker compose up -d --build`. Other variables take effect with `docker compose up -d`.
+
+### Reverse proxy
+
+Ports are bound to localhost only. Put a reverse proxy that terminates TLS in front of the app, such as nginx, Caddy, or Traefik, and forward your domain to `http://127.0.0.1:3000`. Videos are uploaded in a single request, so raise the proxy's body size limit. On nginx, set `client_max_body_size`, for example to `4g`.
+
+The Inngest dashboard listens on `127.0.0.1:8288` and has no authentication. Open it through an SSH tunnel, for example `ssh -L 8288:localhost:8288 your-server`, rather than exposing it.
+
+### Data volumes
+
+Compose prefixes each volume name with `faster-fixes_`.
+
+| Volume          | Contents                               |
+| --------------- | -------------------------------------- |
+| `postgres-data` | The database                           |
+| `app-storage`   | Screenshots, videos, logos and avatars |
+| `inngest-data`  | Background job state and run history   |
+
+Back up `postgres-data` and `app-storage` together, since the database references the stored files. To dump the database, run `docker compose exec postgres pg_dump -U fasterfixes fasterfixes > backup.sql`. `docker compose down -v` deletes all volumes.
 
 ## 1. Clone and deploy
 
@@ -149,6 +197,8 @@ Copy existing files to the new bucket or directory with their keys unchanged, up
 
 Create an app at [inngest.com](https://www.inngest.com). Copy the event key and signing key. After your first deployment, connect Inngest to your instance at `https://your-domain.com/api/inngest`.
 
+With Docker Compose, skip this step: the bundled Inngest server uses the keys from `.env`.
+
 ### SMTP
 
 Set `MAILER_PROVIDER=smtp` to use your own mail server instead of Resend or Plunk:
@@ -178,7 +228,7 @@ From the repo root, with `DATABASE_URL` set to your production database:
 pnpm --filter @workspace/db migrate:prod
 ```
 
-This applies all pending Prisma migrations. Run it on every deploy. Do not use `migrate:dev` in production.
+This applies all pending Prisma migrations. Run it on every deploy. Do not use `migrate:dev` in production. With Docker Compose, the app container runs this step on start.
 
 ## 5. Verify
 

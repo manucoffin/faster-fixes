@@ -1,0 +1,80 @@
+# Self-hosted FasterFixes. Copy .env.docker.example to .env, fill it in, then run
+# `docker compose up -d --build`. See the self-hosting guide for details.
+name: faster-fixes
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fasterfixes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-fasterfixes}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  inngest:
+    image: inngest/inngest:v1.51.0
+    restart: unless-stopped
+    # Polling re-syncs the app's functions after each restart or upgrade.
+    command: >-
+      inngest start
+      --sdk-url http://app:3000/api/inngest
+      --poll-interval 60
+      --sqlite-dir /var/lib/inngest
+    environment:
+      INNGEST_EVENT_KEY: ${INNGEST_EVENT_KEY:?Set INNGEST_EVENT_KEY in .env}
+      INNGEST_SIGNING_KEY: ${INNGEST_SIGNING_KEY:?Set INNGEST_SIGNING_KEY in .env}
+    volumes:
+      - inngest-data:/var/lib/inngest
+    # The dashboard has no authentication: reach it through an SSH tunnel.
+    ports:
+      - "127.0.0.1:${INNGEST_PORT:-8288}:8288"
+
+  app:
+    build:
+      context: .
+      args:
+        BASE_URL: ${BASE_URL:?Set BASE_URL in .env}
+        NEXT_PUBLIC_FF_API_ORIGIN: ${NEXT_PUBLIC_FF_API_ORIGIN:-${BASE_URL}}
+        NEXT_PUBLIC_STORAGE_BASE_URL: ${NEXT_PUBLIC_STORAGE_BASE_URL:-}
+        NEXT_PUBLIC_GITHUB_APP_NAME: ${NEXT_PUBLIC_GITHUB_APP_NAME:-}
+        STORAGE_BUCKET_NAME: ${STORAGE_BUCKET_NAME:-}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      inngest:
+        condition: service_started
+    # Passes optional settings (email, integrations, S3 storage) through to the app.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-fasterfixes}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fasterfixes}
+      BASE_URL: ${BASE_URL}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-${BASE_URL}}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
+      DOMAIN_NAME: ${DOMAIN_NAME:?Set DOMAIN_NAME in .env}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      INNGEST_DEV: "0"
+      INNGEST_EVENT_KEY: ${INNGEST_EVENT_KEY}
+      INNGEST_SIGNING_KEY: ${INNGEST_SIGNING_KEY}
+      INNGEST_BASE_URL: http://inngest:8288
+      INNGEST_SERVE_ORIGIN: http://app:3000
+    volumes:
+      - app-storage:/data/storage
+    # Bound to localhost for a reverse proxy on the host that terminates TLS.
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+
+volumes:
+  postgres-data:
+  inngest-data:
+  app-storage:
