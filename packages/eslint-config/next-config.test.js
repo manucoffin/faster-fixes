@@ -239,7 +239,7 @@ describe("every convention rule is on", () => {
   // Every option the config passes is one a rule reads, and every ignore
   // pattern matches a file that exists: a dead pattern reads as a live
   // exemption to the next person to touch the list.
-  it("passes no-raw-tailwind-colors its allowlist and the four illustration exemptions", () => {
+  it("passes no-raw-tailwind-colors its allowlist and the five illustration exemptions", () => {
     const entry = onlyEntryFor("local/no-raw-tailwind-colors");
     const [severity, options] = entry.rules["local/no-raw-tailwind-colors"];
 
@@ -249,7 +249,7 @@ describe("every convention rule is on", () => {
       "ignorePathPatterns",
     ]);
     expect(options.allowPatterns).toHaveLength(1);
-    expect(options.ignorePathPatterns).toHaveLength(4);
+    expect(options.ignorePathPatterns).toHaveLength(5);
   });
 
   // One pattern rather than a list of loose ones: it names the whole basename
@@ -1169,6 +1169,7 @@ describe("no-raw-tailwind-colors", () => {
     "src/app/(public)/(home)/_features/how-it-works/flow-animations.tsx",
     "src/app/(public)/(home)/_features/before-after-section.tsx",
     "src/app/(public)/(home)/_features/problem/problem-chat-animation.client.tsx",
+    "src/app/(public)/(home)/_features/video-review/video-review-animation.tsx",
   ];
 
   // Two classes the hue-to-token table reports, so an empty result proves the
@@ -1188,7 +1189,7 @@ describe("no-raw-tailwind-colors", () => {
     );
   }
 
-  it("ignores the four home page illustration files", async () => {
+  it("ignores the five home page illustration files", async () => {
     for (const file of ILLUSTRATION_FILES) {
       expect([file, await rawColorWarningsFor(file)]).toEqual([file, []]);
     }
