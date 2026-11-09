@@ -339,7 +339,7 @@ describe("video on the local provider", () => {
 
     const response = await putVideo(key, size, patternStream(size));
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
     const stored = await readFile(join(storageRoot, BUCKET, key));
     expect(stored.length).toBe(size);
     expect(stored.equals(Buffer.from(await readAll(patternStream(size))))).toBe(

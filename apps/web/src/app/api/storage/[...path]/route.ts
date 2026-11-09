@@ -135,7 +135,8 @@ async function storageRequest(req: Request, { params }: Context) {
         { bucket, key, size: access.size },
         req.body as WebReadableStream<Uint8Array> | null,
       );
-      return new Response(null, { status: 204 });
+      // Better Upload's client treats any status but 200 as a failed upload.
+      return new Response(null, { status: 200 });
     }
     if (!contentType) return new Response(null, { status: 404 });
     if (contentType.startsWith("video/")) {
