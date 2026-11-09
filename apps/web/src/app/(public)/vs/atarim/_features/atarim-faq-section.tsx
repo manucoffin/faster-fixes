@@ -82,7 +82,7 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes have video recording?",
     answer:
-      "No. FasterFixes does not currently support video recording or session replay. It captures a screenshot, DOM selector, URL, browser, and viewport on each feedback item, plus the React component tree on React sites. Atarim does not offer video recording either; if video walkthroughs are a hard requirement, BugHerd or Userback include video features.",
+      "Not screen recording. FasterFixes does not record the screen or replay sessions: the widget captures a screenshot, DOM selector, URL, browser, and viewport on each feedback item, plus the React component tree on React sites. It does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. Atarim does not offer video recording either; if recorded walkthroughs are a hard requirement, BugHerd or Userback include screen recording.",
   },
   {
     question: "Does Atarim support whitelabeling?",

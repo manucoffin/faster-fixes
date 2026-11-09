@@ -62,6 +62,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [{ type: "yes" }, { type: "yes" }],
   },
   {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "yes", note: "Timestamped comments" },
+    ],
+  },
+  {
     label: "React package",
     cells: [
       { type: "yes", note: "Plus a script tag for any site" },

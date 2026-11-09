@@ -34,7 +34,8 @@ export function BugherdHonestTakeSection() {
               <strong className="text-foreground">
                 Richer feedback surface
               </strong>
-              : video feedback, feedback on Figma designs, PDFs, and images.
+              : screen-recorded video feedback, feedback on Figma designs, PDFs,
+              and images.
             </li>
             <li>
               <strong className="text-foreground">Enterprise polish</strong>:
@@ -63,6 +64,11 @@ export function BugherdHonestTakeSection() {
               : a drop-in script tag on any site, or a React package for React
               apps. On React sites, every report also carries the component
               path.
+            </li>
+            <li>
+              <strong className="text-foreground">Video review</strong>: upload
+              a video, share its link, and clients leave timestamped feedback on
+              it, on the same board as site feedback.
             </li>
             <li>
               Full control of the infrastructure: self-host the dashboard, the

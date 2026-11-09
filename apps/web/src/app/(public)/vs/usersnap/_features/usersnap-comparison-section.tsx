@@ -76,6 +76,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [{ type: "yes" }, { type: "no" }],
   },
   {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "no" },
+    ],
+  },
+  {
     label: "Session replay",
     cells: [{ type: "no" }, { type: "no" }],
   },

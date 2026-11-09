@@ -38,6 +38,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [{ type: "no" }, { type: "yes" }],
   },
   {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "no" },
+    ],
+  },
+  {
     label: "Mobile SDKs",
     cells: [
       { type: "no", note: "Web only" },

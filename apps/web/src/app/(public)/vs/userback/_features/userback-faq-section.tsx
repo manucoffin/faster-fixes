@@ -80,7 +80,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes have video recording?",
     answer:
-      "No. FasterFixes captures screenshots, component tree, DOM selector, URL, browser, and viewport. For annotated video feedback or session replay, Userback or a dedicated tool like Loom is a better fit.",
+      "Not screen recording. The widget captures screenshots, component tree, DOM selector, URL, browser, and viewport. FasterFixes does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. For recording a screen while reporting a bug, or session replay, Userback or a dedicated tool like Loom is a better fit.",
   },
   {
     question: "Does FasterFixes have session replay?",
@@ -151,7 +151,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Userback?",
     answer:
-      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that video recordings, session replays, and survey responses do not migrate. FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
+      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that screen recordings, session replays, and survey responses do not migrate. FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
   },
   {
     question: "Is FasterFixes open source?",

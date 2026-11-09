@@ -81,8 +81,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Session replay / video feedback",
+    label: "Session replay",
     cells: [{ type: "no" }, { type: "partial", note: "Team plan and above" }],
+  },
+  {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "no" },
+    ],
   },
   {
     label: "Feedback on Figma, PDFs, images",

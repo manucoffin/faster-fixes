@@ -13,7 +13,7 @@ export const migrationSteps = [
   },
   {
     label: "Know what you give up",
-    body: "Marker.io has features FasterFixes does not currently offer: session replay, video feedback, feedback on Figma / PDFs / images, browser extensions, Asana / ClickUp / Trello sync, a client-facing Guest Portal, and SSO. If those are core to your workflow, weigh them before switching.",
+    body: "Marker.io has features FasterFixes does not currently offer: session replay, feedback on Figma / PDFs / images, browser extensions, Asana / ClickUp / Trello sync, a client-facing Guest Portal, and SSO. If those are core to your workflow, weigh them before switching.",
   },
 ];
 

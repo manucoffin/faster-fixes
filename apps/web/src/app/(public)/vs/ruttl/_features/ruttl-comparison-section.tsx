@@ -52,6 +52,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "yes", note: "Timestamped comments" },
+    ],
+  },
+  {
     label: "Issue tracker sync",
     cells: [
       {

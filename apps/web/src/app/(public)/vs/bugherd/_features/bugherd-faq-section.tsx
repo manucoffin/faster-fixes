@@ -48,17 +48,19 @@ export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from BugHerd?",
     answer:
-      "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations. FasterFixes does not currently have those features.",
+      "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with screen-recorded video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations. FasterFixes does not currently have those features. On video, FasterFixes takes a different approach: clients review an uploaded video and leave timestamped feedback.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Three differences matter most. FasterFixes is open source and
         self-hostable. Pricing is flat-rate, not per-seat. And the{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> lets AI
         coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback
-        directly from the terminal. BugHerd is a more mature SaaS with video
-        feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+
-        project-management integrations. FasterFixes does not currently have
-        those features.
+        directly from the terminal. BugHerd is a more mature SaaS with
+        screen-recorded video feedback, Figma/PDF/image feedback, custom
+        branding, SSO, and 20+ project-management integrations. FasterFixes does
+        not currently have those features. On video, FasterFixes takes a
+        different approach: clients review an uploaded video and leave
+        timestamped feedback.
       </p>
     ),
   },
