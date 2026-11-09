@@ -26,6 +26,11 @@ export const faqs: {
       "No. You generate a shareable link for each client from your dashboard. Anyone with that link can leave feedback. They are authenticated transparently, no signup or login required. It keeps things secure while staying completely frictionless for your clients.",
   },
   {
+    question: "Can clients review videos too?",
+    answer:
+      "Yes. Upload a video to a project and share its link. Clients leave feedback on an exact moment or range, and can point at an area of the frame, without creating an account. Video feedback lands on the same board as site feedback, syncs to your GitHub, Linear or Jira project and Slack channel, and your coding agent can read it through MCP.",
+  },
+  {
     question: "What technical context does it capture?",
     answer:
       "Screenshot, page URL, DOM selector, element description, React component tree (when available), browser name and version, viewport dimensions, console logs, network requests, and timestamp. All captured automatically when the client clicks.",

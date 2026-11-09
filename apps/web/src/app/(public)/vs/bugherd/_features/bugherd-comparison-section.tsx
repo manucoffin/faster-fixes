@@ -71,8 +71,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Video feedback",
+    label: "Screen recording",
     cells: [{ type: "no" }, { type: "yes" }],
+  },
+  {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "no" },
+    ],
   },
   {
     label: "Feedback on Figma, PDFs, images",

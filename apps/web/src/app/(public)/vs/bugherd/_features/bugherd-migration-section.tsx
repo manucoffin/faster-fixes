@@ -13,7 +13,7 @@ export const migrationSteps = [
   },
   {
     label: "Know what you give up",
-    body: "BugHerd has features FasterFixes does not currently offer: video feedback, feedback on Figma designs / PDFs / images, a client-facing kanban (Premium), and 20+ project-management integrations (Asana, ClickUp, Monday.com, Trello, ...). If those are core to your workflow, weigh them before switching.",
+    body: "BugHerd has features FasterFixes does not currently offer: screen-recorded video feedback, feedback on Figma designs / PDFs / images, a client-facing kanban (Premium), and 20+ project-management integrations (Asana, ClickUp, Monday.com, Trello, ...). If those are core to your workflow, weigh them before switching.",
   },
 ];
 

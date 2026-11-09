@@ -6,13 +6,13 @@ import Link from "next/link";
 import * as React from "react";
 
 // Bump this key to re-show the banner after a future launch/campaign.
-const DISMISS_STORAGE_KEY = "launch-banner-universal-widget-dismissed";
+const DISMISS_STORAGE_KEY = "launch-banner-video-review-dismissed";
 
-// Announcement window: 26 Sep 2026 through 26 Oct 2026, 09:00 Paris (CEST,
-// UTC+2). Stored as fixed UTC instants so the window is identical regardless
+// Announcement window: 9 Nov 2026 through 9 Dec 2026, 09:00 Paris (CET,
+// UTC+1). Stored as fixed UTC instants so the window is identical regardless
 // of viewer timezone.
-const WINDOW_START_MS = Date.UTC(2026, 8, 26, 7, 0, 0);
-const WINDOW_END_MS = Date.UTC(2026, 9, 26, 7, 0, 0);
+const WINDOW_START_MS = Date.UTC(2026, 10, 9, 8, 0, 0);
+const WINDOW_END_MS = Date.UTC(2026, 11, 9, 8, 0, 0);
 
 // Read once per render on the client; nothing notifies a change, and a
 // dismissal in this tab is tracked in state instead.
@@ -55,13 +55,13 @@ export function LaunchBanner() {
     <div className="relative bg-primary text-primary-foreground">
       <div className="mx-auto flex items-center justify-center gap-2 px-10 py-4 text-center">
         <p>
-          <span aria-hidden="true">🎉</span> Faster Fixes now works on any
-          website, whatever your framework or CMS.{" "}
+          <span aria-hidden="true">🎉</span> Faster Fixes now works on videos
+          too. Share a link, get timestamped client feedback.{" "}
           <Link
-            href="/docs/widget/install/script-embed"
+            href="/#video-review"
             className="font-medium underline underline-offset-2"
           >
-            See how to install
+            See how it works
           </Link>
         </p>
       </div>

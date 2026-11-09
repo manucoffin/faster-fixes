@@ -20,11 +20,9 @@ export function MarkerIoHonestTakeSection() {
           </p>
           <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
             <li>
-              <strong className="text-foreground">
-                Session replay and video feedback
-              </strong>
-              : bundled on the Team plan and above. FasterFixes has no video
-              feedback.
+              <strong className="text-foreground">Session replay</strong>:
+              bundled on the Team plan and above. FasterFixes does not record
+              sessions; its video support is review of uploaded videos.
             </li>
             <li>
               <strong className="text-foreground">Browser extension</strong>:

@@ -20,6 +20,7 @@ import { IntegrationsSection } from "./_features/integrations-section";
 import { ProblemSection } from "./_features/problem/problem-section";
 import { SolutionSection } from "./_features/solution/solution-section";
 import { TestimonialsSection } from "./_features/testimonials-section";
+import { VideoReviewSection } from "./_features/video-review/video-review-section";
 import { DemoWidget } from "./_features/widget-demo/demo-widget.client";
 import { WorksWithSection } from "./_features/works-with-section";
 
@@ -67,6 +68,7 @@ export default function Page() {
         <HeroSection />
         <WorksWithSection />
         <HowItWorksSection />
+        <VideoReviewSection />
         <ProblemSection />
         <SolutionSection />
         <BeforeAfterSection />

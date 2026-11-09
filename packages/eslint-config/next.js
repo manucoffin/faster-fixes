@@ -176,6 +176,7 @@ const rawTailwindColorOptions = {
     "/\\(home\\)/_features/how-it-works/flow-animations\\.tsx$",
     "/\\(home\\)/_features/before-after-section\\.tsx$",
     "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
+    "/\\(home\\)/_features/video-review/video-review-animation\\.tsx$",
   ],
 };
 

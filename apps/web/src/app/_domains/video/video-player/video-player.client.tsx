@@ -31,12 +31,19 @@ export function VideoPlayer({
   overlay,
   onPlaybackError,
 }: VideoPlayerProps) {
+  const width = video.width ?? 16;
+  const height = video.height ?? 9;
+
   return (
     <div className="space-y-3">
       <div
-        className="relative overflow-hidden rounded-lg bg-black"
+        className="relative mx-auto overflow-hidden rounded-lg bg-black"
         style={{
-          aspectRatio: `${video.width ?? 16} / ${video.height ?? 9}`,
+          aspectRatio: `${width} / ${height}`,
+          // Capping the width, not the height, keeps the box at the video's
+          // ratio, so a portrait video stays within the viewport height and
+          // the frame overlay still maps onto the picture.
+          width: `min(100%, calc(70svh * ${width} / ${height}))`,
         }}
       >
         {/* The source is set by the player hook, so a refreshed URL resumes

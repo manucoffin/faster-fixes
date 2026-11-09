@@ -70,8 +70,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Video recording",
+    label: "Screen recording",
     cells: [{ type: "no" }, { type: "yes", note: "Annotated · Business+" }],
+  },
+  {
+    label: "Video review (uploaded videos)",
+    cells: [
+      { type: "yes", note: "Timestamped · area on the frame" },
+      { type: "no" },
+    ],
   },
   {
     label: "Session replay",

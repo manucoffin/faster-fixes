@@ -27,10 +27,11 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: true,
     storage: "database",
+    // Keys are matched against the path with the `/api/auth` base path stripped.
     customRules: {
-      "/api/auth/sign-in/email": { window: 60, max: 5 },
-      "/api/auth/sign-up/email": { window: 60, max: 3 },
-      "/api/auth/change-password": { window: 60, max: 3 },
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60, max: 3 },
+      "/change-password": { window: 60, max: 3 },
     },
   },
   session: {
