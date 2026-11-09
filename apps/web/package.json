@@ -18,7 +18,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@better-auth/stripe": "^1.5.4",
+    "@better-auth/stripe": "^1.7.18",
     "@better-upload/client": "^3.0.14",
     "@better-upload/server": "^3.0.14",
     "@c15t/nextjs": "^1.8.3",
@@ -41,7 +41,7 @@
     "@vercel/analytics": "^2.0.1",
     "@workspace/db": "workspace:*",
     "@workspace/ui": "workspace:*",
-    "better-auth": "^1.5.4",
+    "better-auth": "^1.7.18",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "facehash": "^0.1.0",
@@ -67,7 +67,7 @@
     "stripe": "^20.2.0",
     "superjson": "^2.2.6",
     "xlsx": "^0.18.5",
-    "zod": "^4.3.5"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@mdx-js/loader": "^3.1.1",
