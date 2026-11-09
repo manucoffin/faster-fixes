@@ -21,8 +21,8 @@ export function HeroSection() {
             </h1>
 
             <p className="mt-6 max-w-lg text-lg text-muted-foreground md:text-xl">
-              Open-source website feedback widget for dev teams. Clients
-              annotate issues on your live site, your AI coding agent ships the
+              Open-source client feedback tool for dev teams. Clients annotate
+              your live site and your videos, your AI coding agent ships the
               fix. No more messy revision rounds.
             </p>
 
