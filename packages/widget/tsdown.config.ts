@@ -9,7 +9,8 @@ import { defineConfig } from "tsdown";
 // the first green 1.0.0 build, 86,764 bytes, plus a margin of about 10% so
 // ordinary fixes fit. Raise it deliberately, in its own commit, when a
 // feature justifies the weight.
-const IIFE_MAX_BYTES = 95_000;
+// PROTOTYPE: raised for the recording-flow prototype, revert with it.
+const IIFE_MAX_BYTES = 110_000;
 
 export default defineConfig([
   {

@@ -13,6 +13,7 @@
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "knip": "knip",
+    "prototype:recording": "pnpm --filter @fasterfixes/widget build && pnpm --filter web dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "build:packages": "turbo run build --filter='@fasterfixes/*'",

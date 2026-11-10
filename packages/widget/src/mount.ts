@@ -7,6 +7,7 @@ import type {
   WidgetPosition,
 } from "@fasterfixes/core";
 
+import { mountRecordingPrototype } from "./_prototype-recording-flow.js";
 import { createAnnotationMode } from "./annotation.js";
 import { createCommentPopover } from "./comment-popover.js";
 import { createFeedbackList } from "./feedback-list.js";
@@ -119,6 +120,7 @@ export function mountWidget({
     if (next !== "selected") {
       selection = null;
       popover.close();
+      recordingPrototype.onPopoverClosed(); // PROTOTYPE
     }
   }
 
@@ -276,6 +278,7 @@ export function mountWidget({
         screenshot: captureViewportScreenshot(),
       };
       popover.open(element);
+      recordingPrototype.onPopoverOpen(selection.screenshot); // PROTOTYPE
     },
     onCancel: () => setMode("idle"),
   });
@@ -296,6 +299,7 @@ export function mountWidget({
         reviewerToken,
       );
       void attachScreenshot(created.id, screenshot);
+      await recordingPrototype.afterSubmit(); // PROTOTYPE
       if (destroyed) return;
       setFeedbackItems([...state.current.feedbackItems, created]);
       void loadFeedback();
@@ -341,6 +345,13 @@ export function mountWidget({
   applyStackLayout(stack, options.position);
   stack.append(toolbar.element, list.element);
   shadow.append(overlay, stack);
+  // PROTOTYPE: Recording flow variants, localhost only.
+  const recordingPrototype = mountRecordingPrototype(
+    document,
+    shadow,
+    toolbar.element,
+    stack,
+  );
 
   // A client-side route change shows the new page's pins and drops the active item.
   const stopWatchingLocation = watchLocation(() => {
@@ -408,6 +419,7 @@ export function mountWidget({
       stopWatchingLocation();
       pendingTimers.forEach(clearTimeout);
       pinLayer.destroy();
+      recordingPrototype.destroy();
       unguardHost();
       host.remove();
     },
