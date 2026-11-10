@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/replay/style.css" />
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/replay/replay.umd.min.cjs"></script>
+    <script>
+      window.load = async (name, extra) => {
+        const events = await (await fetch(`/out/${name}.events.json`)).json();
+        window.events = events;
+        window.replayer = new rrwebReplay.Replayer(events, {
+          root: document.getElementById("root"),
+          mouseTail: false,
+          ...(extra || {}),
+        });
+        return events
+          .filter((e) => e.type === 5 && e.data.tag === "marker")
+          .map((e) => ({
+            name: e.data.payload.name,
+            offset: e.timestamp - events[0].timestamp,
+          }));
+      };
+      window.facts = () => {
+        const d = window.replayer.iframe.contentDocument;
+        const w = window.replayer.iframe.contentWindow;
+        return {
+          imgs: [...d.images].map((i) => ({
+            src: (i.currentSrc || i.src).slice(0, 90),
+            ok: i.naturalWidth > 0,
+            w: i.width,
+            h: i.height,
+          })),
+          bodyFont: w.getComputedStyle(d.body).fontFamily.slice(0, 120),
+          fonts: [...d.fonts].map((f) => `${f.family} ${f.weight} ${f.status}`),
+          h: [...d.querySelectorAll("h1,h2,h3,[data-sidebar=menu-button]")]
+            .slice(0, 8)
+            .map((e) => {
+              const r = e.getBoundingClientRect();
+              return `${e.innerText.trim().slice(0, 24)}:${Math.round(r.width)}x${Math.round(r.height)}@${Math.round(r.x)},${Math.round(r.y)}`;
+            }),
+          sheets: [...d.styleSheets].map((s) => {
+            let n = -1;
+            try {
+              n = s.cssRules.length;
+            } catch {}
+            return `${(s.href || "inline").slice(-50)}:${n}`;
+          }),
+          links: [...d.querySelectorAll("link[rel=stylesheet]")].map((l) =>
+            l.href.slice(-60),
+          ),
+        };
+      };
+    </script>
+  </body>
+</html>
