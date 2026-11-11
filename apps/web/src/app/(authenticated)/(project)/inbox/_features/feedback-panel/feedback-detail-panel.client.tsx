@@ -23,6 +23,11 @@ import { ElementContextCard } from "./element-context-card.client";
 import { FeedbackPropertiesRail } from "./feedback-properties-rail.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
 import { SelectionFrameOverlay } from "./selection-frame-overlay";
+// PROTOTYPE (wayfinder ticket 377): remove with the _prototype-recording folder.
+import {
+  PrototypeRecordingMedia,
+  usePrototypeVariant,
+} from "./_prototype-recording/variants.client";
 
 type FeedbackItem = ListFeedbackOutput[number];
 
@@ -68,6 +73,7 @@ export function FeedbackDetailPanel({
   hasLinearLink = false,
   hasJiraLink = false,
 }: FeedbackDetailPanelProps) {
+  const prototypeVariant = usePrototypeVariant();
   if (!feedback) return null;
 
   const element = getElementContext(feedback);
@@ -95,23 +101,56 @@ export function FeedbackDetailPanel({
               {feedback.comment}
             </p>
 
-            {feedback.screenshotUrl ? (
-              <ScreenshotDialog
-                src={feedback.screenshotUrl}
-                overlay={overlay}
-                badge={
-                  feedback.videoId !== null && feedback.startMs !== null ? (
-                    <span className="absolute top-2 left-2 rounded border bg-background/90 px-1.5 py-0.5 font-mono text-xs text-foreground tabular-nums">
-                      {formatFeedbackTime(feedback.startMs, feedback.endMs)}
-                    </span>
-                  ) : undefined
+            {prototypeVariant !== null ? (
+              <PrototypeRecordingMedia
+                fallback={
+                  <>
+                    {feedback.screenshotUrl ? (
+                      <ScreenshotDialog
+                        src={feedback.screenshotUrl}
+                        overlay={overlay}
+                        badge={
+                          feedback.videoId !== null &&
+                          feedback.startMs !== null ? (
+                            <span className="absolute top-2 left-2 rounded border bg-background/90 px-1.5 py-0.5 font-mono text-xs text-foreground tabular-nums">
+                              {formatFeedbackTime(
+                                feedback.startMs,
+                                feedback.endMs,
+                              )}
+                            </span>
+                          ) : undefined
+                        }
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-xs text-muted-foreground">
+                        <ImageOff className="size-4 opacity-50" />
+                        No screenshot captured
+                      </div>
+                    )}
+                  </>
                 }
               />
             ) : (
-              <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-xs text-muted-foreground">
-                <ImageOff className="size-4 opacity-50" />
-                No screenshot captured
-              </div>
+              <>
+                {feedback.screenshotUrl ? (
+                  <ScreenshotDialog
+                    src={feedback.screenshotUrl}
+                    overlay={overlay}
+                    badge={
+                      feedback.videoId !== null && feedback.startMs !== null ? (
+                        <span className="absolute top-2 left-2 rounded border bg-background/90 px-1.5 py-0.5 font-mono text-xs text-foreground tabular-nums">
+                          {formatFeedbackTime(feedback.startMs, feedback.endMs)}
+                        </span>
+                      ) : undefined
+                    }
+                  />
+                ) : (
+                  <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-xs text-muted-foreground">
+                    <ImageOff className="size-4 opacity-50" />
+                    No screenshot captured
+                  </div>
+                )}
+              </>
             )}
 
             {sections.elementContext && element.hasContext && (

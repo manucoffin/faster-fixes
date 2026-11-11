@@ -1,0 +1,217 @@
+<!doctype html>
+<!-- PROTOTYPE (wayfinder ticket 377). The replayed page is untrusted HTML from a customer's site.
+     This document is framed with sandbox="allow-scripts" (opaque origin: no cookies, no dashboard DOM)
+     and talks to the dashboard through postMessage only. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline' http: https:; style-src 'unsafe-inline' http: https:; img-src * data: blob:; font-src * data:; media-src *; frame-src 'self' about: blob: data:; connect-src 'none'; form-action 'none'"
+    />
+    <!-- rrweb replay style.css, inlined -->
+    <style>
+      .replayer-wrapper {
+        position: relative;
+      }
+      .replayer-mouse {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        transition:
+          left 0.05s linear,
+          top 0.05s linear;
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzMwMHB4JyB3aWR0aD0nMzAwcHgnICBmaWxsPSIjMDAwMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDUwIDUwIiB4PSIwcHgiIHk9IjBweCI+PHRpdGxlPkRlc2lnbl90bnA8L3RpdGxlPjxwYXRoIGQ9Ik00OC43MSw0Mi45MUwzNC4wOCwyOC4yOSw0NC4zMywxOEExLDEsMCwwLDAsNDQsMTYuMzlMMi4zNSwxLjA2QTEsMSwwLDAsMCwxLjA2LDIuMzVMMTYuMzksNDRhMSwxLDAsMCwwLDEuNjUuMzZMMjguMjksMzQuMDgsNDIuOTEsNDguNzFhMSwxLDAsMCwwLDEuNDEsMGw0LjM4LTQuMzhBMSwxLDAsMCwwLDQ4LjcxLDQyLjkxWm0tNS4wOSwzLjY3TDI5LDMyYTEsMSwwLDAsMC0xLjQxLDBsLTkuODUsOS44NUwzLjY5LDMuNjlsMzguMTIsMTRMMzIsMjcuNThBMSwxLDAsMCwwLDMyLDI5TDQ2LjU5LDQzLjYyWiI+PC9wYXRoPjwvc3ZnPg==");
+        border-color: transparent; /* otherwise we transition from black when .touch-device class is added */
+      }
+      .replayer-mouse::after {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: rgb(73, 80, 246);
+        border-radius: 100%;
+        transform: translate(-50%, -50%);
+        opacity: 0.3;
+      }
+      .replayer-mouse.active::after {
+        animation: click 0.2s ease-in-out 1;
+      }
+      .replayer-mouse.touch-device {
+        background-image: none; /* there's no passive cursor on touch-only screens */
+        width: 70px;
+        height: 70px;
+        border-width: 4px;
+        border-style: solid;
+        border-radius: 100%;
+        margin-left: -37px;
+        margin-top: -37px;
+        border-color: rgba(73, 80, 246, 0);
+        transition:
+          left 0s linear,
+          top 0s linear,
+          border-color 0.2s ease-in-out;
+      }
+      .replayer-mouse.touch-device.touch-active {
+        border-color: rgba(73, 80, 246, 1);
+        transition:
+          left 0.25s linear,
+          top 0.25s linear,
+          border-color 0.2s ease-in-out;
+      }
+      .replayer-mouse.touch-device::after {
+        opacity: 0; /* there's no passive cursor on touch-only screens */
+      }
+      .replayer-mouse.touch-device.active::after {
+        animation: touch-click 0.2s ease-in-out 1;
+      }
+      .replayer-mouse-tail {
+        position: absolute;
+        pointer-events: none;
+      }
+
+      @keyframes click {
+        0% {
+          opacity: 0.3;
+          width: 20px;
+          height: 20px;
+        }
+        50% {
+          opacity: 0.5;
+          width: 10px;
+          height: 10px;
+        }
+      }
+
+      @keyframes touch-click {
+        0% {
+          opacity: 0;
+          width: 20px;
+          height: 20px;
+        }
+        50% {
+          opacity: 0.5;
+          width: 10px;
+          height: 10px;
+        }
+      }
+      /*$vite$:1*/ /*$vite$:1*/
+    </style>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #111;
+      }
+      #stage {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+      }
+      .replayer-wrapper {
+        position: relative;
+      }
+      .replayer-wrapper > iframe {
+        border: 0;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script src="/prototype-recording/replay.js"></script>
+    <script>
+      let replayer,
+        total = 0,
+        vw = 0,
+        vh = 0,
+        playing = false;
+      const send = (m) =>
+        parent.postMessage({ source: "ff-recording-player", ...m }, "*");
+      const fit = () => {
+        if (!vw) return;
+        const s = Math.min(innerWidth / vw, innerHeight / vh);
+        const st = document.getElementById("stage");
+        st.style.transform = `scale(${s})`;
+        st.style.left = (innerWidth - vw * s) / 2 + "px";
+        st.style.top = (innerHeight - vh * s) / 2 + "px";
+      };
+      addEventListener("resize", fit);
+      const assets = () => {
+        try {
+          const d = replayer.iframe.contentDocument;
+          send({
+            type: "assets",
+            images: d.images.length,
+            missingImages: [...d.images].filter(
+              (i) => i.complete && i.naturalWidth === 0,
+            ).length,
+            missingFonts: [...d.fonts].filter((f) => f.status === "error")
+              .length,
+          });
+        } catch (e) {
+          send({ type: "assets", error: String(e) });
+        }
+      };
+      const tick = () => {
+        if (replayer) {
+          const t = Math.max(0, Math.min(total, replayer.getCurrentTime()));
+          send({ type: "time", t, playing });
+        }
+        requestAnimationFrame(tick);
+      };
+      addEventListener("message", (e) => {
+        const m = e.data || {};
+        try {
+          if (m.type === "ping") {
+            if (!replayer) send({ type: "boot" });
+          } else if (m.type === "load") {
+            if (replayer) return;
+            const ev = m.events;
+            replayer = new rrwebReplay.Replayer(ev, {
+              root: document.getElementById("stage"),
+              mouseTail: false,
+              skipInactive: false,
+              speed: 1,
+            });
+            const meta = replayer.getMetaData();
+            total = meta.totalTime;
+            replayer.on("resize", (d) => {
+              vw = d.width;
+              vh = d.height;
+              fit();
+            });
+            replayer.on("finish", () => {
+              playing = false;
+            });
+            replayer.pause(m.at ?? total);
+            setTimeout(assets, 1200);
+            send({ type: "ready", duration: total });
+            requestAnimationFrame(tick);
+          } else if (m.type === "play") {
+            replayer.play(m.at >= total ? 0 : m.at);
+            playing = true;
+          } else if (m.type === "pause") {
+            replayer.pause(m.at);
+            playing = false;
+          } else if (m.type === "seek") {
+            playing ? replayer.play(m.at) : replayer.pause(m.at);
+            setTimeout(assets, 800);
+          } else if (m.type === "speed") {
+            replayer.setConfig({ speed: m.speed });
+          }
+        } catch (err) {
+          send({ type: "error", message: String((err && err.message) || err) });
+        }
+      });
+      send({ type: "boot" });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+{
+  "startedAt": 1794388443728,
+  "endedAt": 1794388457500,
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "selection": {
+    "x": 0.69140625,
+    "y": 0.385,
+    "width": 0.08621826171875,
+    "height": 0.04625
+  },
+  "trail": {
+    "console": [
+      {
+        "level": "info",
+        "message": "invoice opened INV-1042",
+        "timestamp": 1794388448013
+      },
+      {
+        "level": "error",
+        "message": "Failed to mark invoice as paid: 500 Internal Server Error",
+        "timestamp": 1794388452770
+      },
+      {
+        "level": "warn",
+        "message": "Retry scheduled in 0 ms, attempts left: 0",
+        "timestamp": 1794388452770
+      },
+      {
+        "level": "error",
+        "message": "Failed to mark invoice as paid: 500 Internal Server Error",
+        "timestamp": 1794388455984
+      },
+      {
+        "level": "warn",
+        "message": "Retry scheduled in 0 ms, attempts left: 0",
+        "timestamp": 1794388455984
+      }
+    ],
+    "network": [
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 93,
+        "timestamp": 1794388445535
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 94,
+        "timestamp": 1794388445648
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 95,
+        "timestamp": 1794388445763
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 93,
+        "timestamp": 1794388445877
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 95,
+        "timestamp": 1794388445991
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 93,
+        "timestamp": 1794388446105
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 94,
+        "timestamp": 1794388446219
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 93,
+        "timestamp": 1794388446333
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices?q=",
+        "status": 200,
+        "duration": 92,
+        "timestamp": 1794388446447
+      },
+      {
+        "method": "GET",
+        "url": "http://localhost:4377/api/invoices/INV-1042",
+        "status": 200,
+        "duration": 93,
+        "timestamp": 1794388448013
+      },
+      {
+        "method": "POST",
+        "url": "http://localhost:4377/api/invoices/INV-1042/pay",
+        "status": 500,
+        "duration": 423,
+        "timestamp": 1794388452347
+      },
+      {
+        "method": "POST",
+        "url": "http://localhost:4377/api/invoices/INV-1042/pay",
+        "status": 500,
+        "duration": 423,
+        "timestamp": 1794388455561
+      }
+    ]
+  }
+}

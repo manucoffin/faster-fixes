@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Acme Billing</title>
+    <style>
+      @font-face {
+        font-family: AcmeDisplay;
+        src: url(/display.ttc);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 14px/1.5 system-ui;
+        color: #1c1e21;
+        background: #f5f6f8;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px;
+        background: #fff;
+        border-bottom: 1px solid #e3e5e8;
+      }
+      header b {
+        font:
+          22px AcmeDisplay,
+          serif;
+        letter-spacing: 0.5px;
+      }
+      header nav {
+        display: flex;
+        gap: 16px;
+        color: #5b616b;
+      }
+      header img {
+        margin-left: auto;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+      }
+      main {
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 0 24px;
+      }
+      h1 {
+        font:
+          28px AcmeDisplay,
+          serif;
+        margin: 0 0 12px;
+      }
+      .hero {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+      input,
+      textarea {
+        font: inherit;
+        padding: 8px 10px;
+        border: 1px solid #cfd3d9;
+        border-radius: 6px;
+        width: 280px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid #e3e5e8;
+        border-radius: 8px;
+        margin-top: 12px;
+      }
+      td,
+      th {
+        padding: 10px 14px;
+        text-align: left;
+        border-bottom: 1px solid #eef0f2;
+      }
+      tr.row {
+        cursor: pointer;
+      }
+      tr.row:hover {
+        background: #f0f4ff;
+      }
+      .badge {
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 12px;
+        background: #fde8e8;
+        color: #b42318;
+      }
+      .badge.ok {
+        background: #e3f6e8;
+        color: #18794e;
+      }
+      #drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 420px;
+        height: 100%;
+        background: #fff;
+        border-left: 1px solid #e3e5e8;
+        padding: 24px;
+        transform: translateX(100%);
+        transition: transform 0.25s;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+      }
+      #drawer.open {
+        transform: none;
+      }
+      #drawer h2 {
+        font:
+          22px AcmeDisplay,
+          serif;
+        margin: 0 0 16px;
+      }
+      .card {
+        border: 1px solid #e3e5e8;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 12px 0;
+      }
+      button {
+        font: inherit;
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 0;
+        background: #2d5bd0;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.ghost {
+        background: #eef0f2;
+        color: #1c1e21;
+      }
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        translate: -50% 0;
+        background: #b42318;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        display: none;
+      }
+      #toast.show {
+        display: block;
+        animation: pop 0.3s;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          translate: -50% 20px;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <b>Acme Billing</b>
+      <nav><span>Invoices</span><span>Customers</span><span>Reports</span></nav>
+      <img src="/avatar.png" alt="" />
+    </header>
+    <main>
+      <h1>Invoices</h1>
+      <img class="hero" src="/hero.png" alt="" />
+      <input id="q" placeholder="Search invoices" />
+      <table>
+        <tr>
+          <th>Number</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+        <tr class="row" data-n="INV-1042">
+          <td>INV-1042</td>
+          <td>Northwind Traders</td>
+          <td>$4,200.00</td>
+          <td><span class="badge">Unpaid</span></td>
+        </tr>
+        <tr class="row" data-n="INV-1041">
+          <td>INV-1041</td>
+          <td>Globex</td>
+          <td>$980.00</td>
+          <td><span class="badge ok">Paid</span></td>
+        </tr>
+        <tr class="row" data-n="INV-1040">
+          <td>INV-1040</td>
+          <td>Initech</td>
+          <td>$12,750.00</td>
+          <td><span class="badge">Unpaid</span></td>
+        </tr>
+        <tr class="row" data-n="INV-1039">
+          <td>INV-1039</td>
+          <td>Umbrella</td>
+          <td>$310.00</td>
+          <td><span class="badge ok">Paid</span></td>
+        </tr>
+      </table>
+    </main>
+    <aside id="drawer">
+      <h2 id="dt">Invoice</h2>
+      <p>
+        Billing contact: <span data-ff-mask>maria.lopez@northwind.example</span>
+      </p>
+      <div class="card" data-ff-block>
+        <b>Payment method</b><br />Visa ending 4242<br />Expires 08/29
+      </div>
+      <p>
+        <textarea id="note" rows="3" placeholder="Internal note"></textarea>
+      </p>
+      <p>
+        <button id="pay">Mark as paid</button>
+        <button class="ghost" id="close">Close</button>
+      </p>
+    </aside>
+    <div id="toast">Something went wrong.</div>
+    <script>
+      const $ = (s) => document.querySelector(s);
+      document.querySelectorAll("tr.row").forEach(
+        (r) =>
+          (r.onclick = () => {
+            $("#dt").textContent = "Invoice " + r.dataset.n;
+            $("#drawer").classList.add("open");
+            console.info("invoice opened", r.dataset.n);
+            fetch("/api/invoices/" + r.dataset.n);
+          }),
+      );
+      $("#close").onclick = () => $("#drawer").classList.remove("open");
+      $("#q").oninput = () => fetch("/api/invoices?q=");
+      $("#pay").onclick = async () => {
+        const r = await fetch("/api/invoices/INV-1042/pay", { method: "POST" });
+        if (!r.ok) {
+          console.error(
+            "Failed to mark invoice as paid: 500 Internal Server Error",
+          );
+          console.warn("Retry scheduled in 0 ms, attempts left: 0");
+          const t = $("#toast");
+          t.classList.remove("show");
+          void t.offsetWidth;
+          t.classList.add("show");
+          setTimeout(() => t.classList.remove("show"), 2500);
+        }
+      };
+    </script>
+  </body>
+</html>
