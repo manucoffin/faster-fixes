@@ -1,3 +1,5 @@
+import { collapseWhitespace } from "@/app/_domains/feedback/_helpers/format-diagnostic-entry";
+import { formatTimelineStep } from "@/app/_domains/feedback/_helpers/format-timeline-lines";
 import type { RecordingTimelineEntry } from "@/app/_domains/feedback/_helpers/merge-recording-timeline";
 
 // The log beside the player: the merged timeline entries, placed on the
@@ -50,4 +52,61 @@ export function recordingLogTime(
   { startedAt, durationMs }: RecordingLogClock,
 ): number {
   return Math.min(durationMs, Math.max(0, entry.timestamp - startedAt));
+}
+
+export type RecordingTimelineMarkTone = "step" | "warning" | "error";
+
+export type RecordingTimelineMark = {
+  /** On the player's clock. */
+  time: number;
+  /** Along the duration, from 0 to 1. */
+  position: number;
+  tone: RecordingTimelineMarkTone;
+  text: string;
+};
+
+/**
+ * The marks on the player's timeline: a dot per step, a tick per console
+ * error, console warning and failed request. Other entries are in the log
+ * only. Filters of the log do not apply.
+ */
+export function recordingTimelineMarks(
+  entries: readonly RecordingTimelineEntry[],
+  clock: RecordingLogClock,
+): RecordingTimelineMark[] {
+  return entries.flatMap((entry) => {
+    const tone = markTone(entry);
+    if (!tone) return [];
+    const time = recordingLogTime(entry, clock);
+    return [
+      {
+        time,
+        position: clock.durationMs > 0 ? time / clock.durationMs : 0,
+        tone,
+        text: recordingLogEntryText(entry),
+      },
+    ];
+  });
+}
+
+function markTone(
+  entry: RecordingTimelineEntry,
+): RecordingTimelineMarkTone | null {
+  if (entry.kind === "step") return "step";
+  if (entry.kind === "console") {
+    if (entry.entry.level === "error") return "error";
+    return entry.entry.level === "warn" ? "warning" : null;
+  }
+  const { status } = entry.entry;
+  return status === 0 || status >= 400 ? "error" : null;
+}
+
+/** An entry as one line of plain text. */
+function recordingLogEntryText(entry: RecordingTimelineEntry): string {
+  if (entry.kind === "step") return formatTimelineStep(entry.step);
+  if (entry.kind === "console") {
+    return `${entry.entry.level} ${collapseWhitespace(entry.entry.message)}`;
+  }
+  const { method, url, status } = entry.entry;
+  return `${method} ${url} ${status === 0 ? "err" : String(status)}`;
 }

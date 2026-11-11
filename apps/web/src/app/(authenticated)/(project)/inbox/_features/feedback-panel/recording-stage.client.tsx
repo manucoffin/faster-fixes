@@ -10,8 +10,11 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatTimecode } from "@/app/_domains/video/_helpers/format-timecode";
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { FileWarning, Pause, Play } from "lucide-react";
 import { useState } from "react";
+import { recordingTimelineMarks } from "../../_helpers/recording-log";
 import { RECORDING_SPEEDS } from "../../_helpers/recording-stage";
 import type { SelectionFrame } from "../../_helpers/selection-frame";
 import { RecordingLog } from "./recording-log.client";
@@ -46,6 +49,20 @@ export function RecordingStage({
   const isPlaying = state === "playing";
   const isLoaded = status === "loaded";
   const [isFrameShown, setIsFrameShown] = useState(true);
+  const trpc = useTRPC();
+  // Shared with the stage hook and the log, so no second request.
+  const { data: playback } = useQuery(
+    trpc.authenticated.projects.feedback.getRecordingPlayback.queryOptions({
+      feedbackId,
+    }),
+  );
+  const marks =
+    isLoaded && playback && playback.startedAt !== null
+      ? recordingTimelineMarks(playback.entries, {
+          startedAt: playback.startedAt,
+          durationMs: playback.durationMs,
+        })
+      : [];
 
   return (
     <div className="flex min-h-0 flex-1">
@@ -122,6 +139,7 @@ export function RecordingStage({
             time={time}
             duration={duration}
             disabled={!isLoaded}
+            marks={marks}
             onSeek={seek}
           />
           <div

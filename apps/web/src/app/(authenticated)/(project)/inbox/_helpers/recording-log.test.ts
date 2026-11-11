@@ -5,6 +5,7 @@ import {
   filterRecordingLog,
   findCurrentLogEntry,
   recordingLogTime,
+  recordingTimelineMarks,
 } from "./recording-log";
 
 const STARTED_AT = 1_794_400_000_000;
@@ -98,5 +99,75 @@ describe("recordingLogTime", () => {
   it("places an entry logged before the Recording at its start", () => {
     const early = { ...entries[2]!, timestamp: STARTED_AT - 3_000 };
     expect(recordingLogTime(early, clock)).toBe(0);
+  });
+});
+
+describe("recordingTimelineMarks", () => {
+  // Every level and outcome a mark is or is not given for, at 1 s steps.
+  const all = mergeRecordingTimeline({
+    steps: [
+      { ...step("load", 0), label: "Page loaded" },
+      { ...step("click", 1_000), label: '"Save"' },
+      step("selection", 10_000),
+    ],
+    diagnosticTrail: {
+      console: (["log", "info", "debug", "warn", "error"] as const).map(
+        (level, index) => ({
+          level,
+          message: "Something\n  happened",
+          timestamp: STARTED_AT + 2_000 + index * 1_000,
+        }),
+      ),
+      network: [
+        { status: 200, at: 7_000 },
+        { status: 404, at: 8_000 },
+        { status: 0, at: 9_000 },
+      ].map(({ status, at }) => ({
+        method: "GET",
+        url: "/api/items",
+        status,
+        duration: 20,
+        timestamp: STARTED_AT + at,
+      })),
+    },
+  }).entries;
+
+  it("marks steps, console errors and warnings and failed requests only", () => {
+    expect(
+      recordingTimelineMarks(all, clock).map(({ tone, text }) => [tone, text]),
+    ).toEqual([
+      ["step", "Page loaded"],
+      ["step", 'click "Save"'],
+      ["warning", "warn Something happened"],
+      ["error", "error Something happened"],
+      ["error", "GET /api/items 404"],
+      ["error", "GET /api/items err"],
+      ["step", "selection, the element the comment is about"],
+    ]);
+  });
+
+  it("places each mark along the duration", () => {
+    expect(
+      recordingTimelineMarks(all, clock).map(({ time, position }) => [
+        time,
+        position,
+      ]),
+    ).toEqual([
+      [0, 0],
+      [1_000, 0.1],
+      [5_000, 0.5],
+      [6_000, 0.6],
+      [8_000, 0.8],
+      [9_000, 0.9],
+      [10_000, 1],
+    ]);
+  });
+
+  it("is at the start for a Recording of no duration", () => {
+    const marks = recordingTimelineMarks(entries, {
+      startedAt: STARTED_AT,
+      durationMs: 0,
+    });
+    expect(marks.map(({ position }) => position)).toEqual([0, 0, 0, 0, 0]);
   });
 });
