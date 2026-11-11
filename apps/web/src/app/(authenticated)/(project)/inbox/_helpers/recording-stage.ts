@@ -66,3 +66,17 @@ export function togglePlayback(stage: RecordingStage): DashboardMessage[] {
   }
   return [{ type: "play" }];
 }
+
+/** The playback rates the player offers, where 1 is the recorded pace. */
+export const RECORDING_SPEEDS = [1, 2, 4] as const;
+
+export type RecordingSpeed = (typeof RECORDING_SPEEDS)[number];
+
+/** The messages a seek on the timeline sends, clamped to the Recording. */
+export function seekRecording(
+  stage: RecordingStage,
+  time: number,
+): DashboardMessage[] {
+  if (stage.status !== "loaded") return [];
+  return [{ type: "seek", time: Math.min(stage.duration, Math.max(0, time)) }];
+}

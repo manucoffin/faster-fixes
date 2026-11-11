@@ -1,3 +1,4 @@
+import { isPlayPauseShortcut } from "@/app/_domains/video/_helpers/is-play-pause-shortcut";
 import { readRecordingFile } from "@/app/_domains/feedback/_helpers/read-recording-file";
 import {
   buildDashboardMessage,
@@ -6,11 +7,20 @@ import {
 } from "@/app/_domains/feedback/_helpers/recording-player-protocol";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   answerPlayerMessage,
   INITIAL_RECORDING_STAGE,
+  type RecordingSpeed,
   reduceRecordingStage,
+  seekRecording,
   togglePlayback,
 } from "../../_helpers/recording-stage";
 
@@ -24,6 +34,7 @@ export function useRecordingStage(feedbackId: string) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const [speed, setSpeedState] = useState<RecordingSpeed>(1);
   const [stage, dispatch] = useReducer(
     reduceRecordingStage,
     INITIAL_RECORDING_STAGE,
@@ -91,11 +102,38 @@ export function useRecordingStage(feedbackId: string) {
     return () => window.removeEventListener("message", onMessage);
   }, [events, post]);
 
+  const toggle = () => togglePlayback(stage).forEach(post);
+  const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    // The player fills a dialog, which would otherwise keep Space for itself.
+    const surface = frameRef.current?.closest('[role="dialog"]') ?? null;
+    if (!isPlayPauseShortcut(event, { surface })) return;
+    // Also keeps Space from clicking a focused button.
+    event.preventDefault();
+    toggle();
+  });
+
+  useEffect(() => {
+    if (!events) return;
+    // Capture runs before React's handlers, which sit on the root.
+    document.addEventListener("keydown", onKeyDown, { capture: true });
+    return () =>
+      document.removeEventListener("keydown", onKeyDown, { capture: true });
+  }, [events]);
+
   return {
     frameRef,
     events,
     status: events === null ? ("unplayable" as const) : stage.status,
     state: stage.state,
-    togglePlayback: () => togglePlayback(stage).forEach(post),
+    time: stage.time,
+    duration: stage.duration,
+    speed,
+    togglePlayback: toggle,
+    seek: (time: number) => seekRecording(stage, time).forEach(post),
+    setSpeed: (next: RecordingSpeed) => {
+      setSpeedState(next);
+      // A speed set before the Recording has loaded applies once it has.
+      post({ type: "speed", speed: next });
+    },
   };
 }

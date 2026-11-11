@@ -5,6 +5,7 @@ import {
   INITIAL_RECORDING_STAGE,
   type RecordingStage,
   reduceRecordingStage,
+  seekRecording,
   togglePlayback,
 } from "./recording-stage";
 
@@ -99,5 +100,25 @@ describe("togglePlayback", () => {
       { type: "seek", time: 0 },
       { type: "play" },
     ]);
+  });
+});
+
+describe("seekRecording", () => {
+  it("seeks to the time asked for", () => {
+    expect(seekRecording(loaded, 4_500)).toEqual([
+      { type: "seek", time: 4_500 },
+    ]);
+  });
+
+  it("keeps the playhead within the Recording", () => {
+    expect(seekRecording(loaded, -20)).toEqual([{ type: "seek", time: 0 }]);
+    expect(seekRecording(loaded, 99_000)).toEqual([
+      { type: "seek", time: 12_000 },
+    ]);
+  });
+
+  it("does nothing until the Recording has loaded, or once it cannot play", () => {
+    expect(seekRecording(INITIAL_RECORDING_STAGE, 10)).toEqual([]);
+    expect(seekRecording({ ...loaded, status: "unplayable" }, 10)).toEqual([]);
   });
 });
