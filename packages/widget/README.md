@@ -29,6 +29,7 @@ The tag works in the `<head>` with `defer`, at the end of the `<body>`, or injec
 | `data-color`               | No       | Accent color. Accepts any CSS color value. Defaults to `#02527E`.                 |
 | `data-position`            | No       | Floating button placement. Defaults to `bottom-right`.                            |
 | `data-capture-diagnostics` | No       | Set to `"false"` to disable the Diagnostic Trail. Enabled by default.             |
+| `data-capture-recording`   | No       | Set to `"false"` to disable the Recording. Enabled by default.                    |
 
 `labels` cannot be set through attributes. To set them, or to pass the full option object, see Manual initialization below.
 
@@ -72,19 +73,20 @@ The Widget mounts only for Reviewers: a Reviewer token must be present (from the
 
 `init` accepts one option object:
 
-| Option               | Type                                       | Default                        | Description                                                                                   |
-| -------------------- | ------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------- |
-| `projectId`          | `string`                                   | required                       | Your Project public ID, `proj_...`.                                                           |
-| `apiOrigin`          | `string`                                   | `https://www.faster-fixes.com` | Origin of the FasterFixes API.                                                                |
-| `color`              | `string`                                   | `#02527E`                      | Accent color.                                                                                 |
-| `position`           | `WidgetPosition`                           | `bottom-right`                 | One of `bottom-right`, `bottom-left`, `top-right`, `top-left`, `middle-right`, `middle-left`. |
-| `labels`             | `Partial<Labels>`                          | English defaults               | Replaces any visible or announced string. Omitted keys keep their default.                    |
-| `captureDiagnostics` | `boolean`                                  | `true`                         | Records the console and network history leading to a report.                                  |
-| `customMetadata`     | `CustomMetadata \| (() => CustomMetadata)` | none                           | Key/value pairs sent with every Feedback. See below.                                          |
+| Option               | Type                                       | Default                        | Description                                                                                                                           |
+| -------------------- | ------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | `string`                                   | required                       | Your Project public ID, `proj_...`.                                                                                                   |
+| `apiOrigin`          | `string`                                   | `https://www.faster-fixes.com` | Origin of the FasterFixes API.                                                                                                        |
+| `color`              | `string`                                   | `#02527E`                      | Accent color.                                                                                                                         |
+| `position`           | `WidgetPosition`                           | `bottom-right`                 | One of `bottom-right`, `bottom-left`, `top-right`, `top-left`, `middle-right`, `middle-left`.                                         |
+| `labels`             | `Partial<Labels>`                          | English defaults               | Replaces any visible or announced string. Omitted keys keep their default.                                                            |
+| `captureDiagnostics` | `boolean`                                  | `true`                         | Records the console and network history leading to a report.                                                                          |
+| `captureRecording`   | `boolean`                                  | `true`                         | Keeps a Recording of the last minute on the page with each Feedback. See [Recording](https://faster-fixes.com/docs/widget/recording). |
+| `customMetadata`     | `CustomMetadata \| (() => CustomMetadata)` | none                           | Key/value pairs sent with every Feedback. See below.                                                                                  |
 
 An unknown `position`, a `projectId` that is not a non-empty string, a `labels` value that is not an object or a `customMetadata` value that is neither an object nor a function prevents the Widget from mounting. Development builds log a console error naming the option.
 
-`customMetadata` is shown to your team, in the agent API and in mirrored Issues, never to Reviewers. Pass an object, or a synchronous function called at each submission so a value such as a signed-in user ID stays current. Values are strings, numbers, booleans or `null`. At most 50 keys are kept, keys are truncated to 40 characters and values to 500, with a console warning in development. A function that throws never blocks a submission: the Feedback is sent without Custom metadata. It is sent whether or not `captureDiagnostics` is on.
+`customMetadata` is shown to your team, in the agent API and in mirrored Issues, never to Reviewers. Pass an object, or a synchronous function called at each submission so a value such as a signed-in user ID stays current. Values are strings, numbers, booleans or `null`. At most 50 keys are kept, keys are truncated to 40 characters and values to 500, with a console warning in development. A function that throws never blocks a submission: the Feedback is sent without Custom metadata. It is sent whether or not `captureDiagnostics` or `captureRecording` is on.
 
 ## Instance
 

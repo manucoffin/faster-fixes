@@ -48,6 +48,7 @@ The CDN tag reads its options from `data-*` attributes:
 | `data-color`               | No       | Accent color. Any CSS color value. Defaults to `#02527E`                                                    |
 | `data-position`            | No       | Floating button placement. Defaults to `bottom-right`. See [Position](/docs/widget/customization#position). |
 | `data-capture-diagnostics` | No       | Set to `"false"` to disable the Diagnostic Trail.                                                           |
+| `data-capture-recording`   | No       | Set to `"false"` to disable the Recording. See [Recording](/docs/widget/recording).                         |
 
 ```html
 <script
@@ -73,6 +74,7 @@ To set `labels` or `customMetadata`, use [manual initialization](#manual-initial
 | `position`           | `WidgetPosition`                           | `bottom-right`                 | Floating button placement                                                                                         |
 | `labels`             | `Partial<Labels>`                          | English defaults               | Replaces any visible or announced string. See [Labels](/docs/widget/customization#labels).                        |
 | `captureDiagnostics` | `boolean`                                  | `true`                         | Records the console and network history leading to a report                                                       |
+| `captureRecording`   | `boolean`                                  | `true`                         | Keeps a Recording of the last minute on the page with each Feedback. See [Recording](/docs/widget/recording).     |
 | `customMetadata`     | `CustomMetadata \| (() => CustomMetadata)` | None                           | Key/value pairs sent with every Feedback, such as a user ID. See [Custom metadata](/docs/widget/custom-metadata). |
 
 ### Manual initialization
