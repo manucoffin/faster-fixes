@@ -46,7 +46,7 @@ const GB = 1_000_000_000;
 export const PLAN_LIMITS = {
   [SubscriptionPlanName.Free]: {
     projects: 1,
-    feedbacks: 50,
+    feedbacks: 20,
     seats: 1,
     organizations: 1,
     githubIntegration: false,
@@ -92,9 +92,10 @@ export const PLAN_LIMITS = {
 /**
  * Hourly ceilings for the agent API, per plan. This is an abuse/runaway-loop
  * backstop, not a monetization lever — see docs/adr/0007. Numbers are set so a
- * normal Claude Code session never hits them: Free covers a full pass over the
- * 50-feedback cap (100 writes); Paid covers ~500 tickets/hour. Self-hosted is
- * unlimited (the rate-limit check is skipped entirely off cloud).
+ * normal Claude Code session never hits them: Free covers several full passes
+ * over its Feedback cap (about two writes per Feedback); Paid covers ~500
+ * tickets/hour. Self-hosted is unlimited (the rate-limit check is skipped
+ * entirely off cloud).
  */
 export const AGENT_API_RATE_LIMITS = {
   [SubscriptionPlanName.Free]: { write: 120, read: 1000 },
@@ -126,7 +127,7 @@ export const PLAN_FEATURES = {
     },
     {
       id: "feedbacks",
-      label: "Up to 50 feedback items",
+      label: `Up to ${PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks} feedback items`,
       highlighted: false,
     },
     {

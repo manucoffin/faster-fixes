@@ -5,6 +5,7 @@
  * on how the handler reaches them.
  */
 
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { RECORDING_STEPS_VERSION } from "@/app/_domains/feedback/_helpers/read-recording-steps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -23,6 +24,9 @@ import {
   videoFeedbackRow,
   videoRow,
 } from "../_helpers/agent-api-test-doubles";
+
+const FREE_PLAN_FEEDBACK_LIMIT =
+  PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 vi.mock("@workspace/db", async () => {
   const { agentApiPrisma } = await import("../_helpers/agent-api-test-doubles");
@@ -629,7 +633,7 @@ describe("POST /api/v1/agent/feedbacks", () => {
   });
 
   it("refuses the whole batch when it would cross the plan limit", async () => {
-    agentApiPrisma.feedback.count.mockResolvedValue(50);
+    agentApiPrisma.feedback.count.mockResolvedValue(FREE_PLAN_FEEDBACK_LIMIT);
 
     const response = await POST(
       agentRequest(CREATE_URL, { method: "POST", body: validCreateBody }),
@@ -639,8 +643,8 @@ describe("POST /api/v1/agent/feedbacks", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Feedback limit would be exceeded by this batch.",
       code: "RESOURCE_LIMIT_EXCEEDED",
-      current: 50,
-      limit: 50,
+      current: FREE_PLAN_FEEDBACK_LIMIT,
+      limit: FREE_PLAN_FEEDBACK_LIMIT,
       requested: 1,
     });
     expect(agentApiPrisma.$transaction).not.toHaveBeenCalled();
@@ -683,8 +687,8 @@ describe("POST /api/v1/agent/feedbacks", () => {
 
   it("reports the caller as at the cap once the batch fills the plan", async () => {
     agentApiPrisma.feedback.count
-      .mockResolvedValueOnce(49)
-      .mockResolvedValueOnce(50);
+      .mockResolvedValueOnce(FREE_PLAN_FEEDBACK_LIMIT - 1)
+      .mockResolvedValueOnce(FREE_PLAN_FEEDBACK_LIMIT);
 
     const response = await POST(
       agentRequest(CREATE_URL, { method: "POST", body: validCreateBody }),

@@ -1,4 +1,5 @@
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
@@ -8,11 +9,12 @@ import {
 } from "@workspace/ui/components/accordion";
 import type * as React from "react";
 
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+
 export const pricingFaqs: FaqItem[] = [
   {
     question: "Is there really a free plan?",
-    answer:
-      "Yes. The Free plan includes 1 project with up to 50 feedback items and is not time-limited. It is designed for solo developers or anyone who wants to try FasterFixes on a real project before committing to a paid plan.",
+    answer: `Yes. The Free plan includes 1 project with up to ${freeFeedbackLimit} feedback items and is not time-limited. It is designed for solo developers or anyone who wants to try FasterFixes on a real project before committing to a paid plan.`,
   },
   {
     question: "Can I upgrade or downgrade at any time?",
@@ -45,8 +47,7 @@ export const pricingFaqs: FaqItem[] = [
   },
   {
     question: "What counts as a feedback item?",
-    answer:
-      "Each time a client submits feedback through the widget, it counts as one feedback item. The Free plan includes up to 50. Pro and Agency plans have unlimited feedback.",
+    answer: `Each time a client submits feedback through the widget, it counts as one feedback item. The Free plan includes up to ${freeFeedbackLimit}. Pro and Agency plans have unlimited feedback.`,
   },
   {
     question: "How does team member pricing work?",
