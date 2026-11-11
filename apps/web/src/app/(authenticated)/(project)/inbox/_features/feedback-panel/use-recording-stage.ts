@@ -18,6 +18,7 @@ import {
 import {
   answerPlayerMessage,
   INITIAL_RECORDING_STAGE,
+  isSelectionFrameShown,
   type RecordingSpeed,
   reduceRecordingStage,
   seekRecording,
@@ -127,6 +128,7 @@ export function useRecordingStage(feedbackId: string) {
     state: stage.state,
     time: stage.time,
     duration: stage.duration,
+    isOnSelectionInstant: isSelectionFrameShown(stage),
     speed,
     togglePlayback: toggle,
     seek: (time: number) => seekRecording(stage, time).forEach(post),

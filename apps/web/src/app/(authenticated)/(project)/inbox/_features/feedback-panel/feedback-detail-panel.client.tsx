@@ -139,6 +139,7 @@ export function FeedbackDetailPanel({
                 <RecordingPlayer
                   feedbackId={feedback.id}
                   projectId={projectId}
+                  selectionFrame={getSelectionFrame(feedback.metadata)}
                   open={isPlayerOpen}
                   onOpenChange={(next) => void setIsPlayerOpen(next || null)}
                 />

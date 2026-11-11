@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import type { SelectionFrame } from "../../_helpers/selection-frame";
 import { RecordingStage } from "./recording-stage.client";
 import { RemoveRecordingDialog } from "./remove-recording-dialog.client";
 import { useDeleteFeedbackRecording } from "./use-delete-feedback-recording";
@@ -13,6 +14,7 @@ import { useDeleteFeedbackRecording } from "./use-delete-feedback-recording";
 type RecordingPlayerProps = {
   feedbackId: string;
   projectId: string;
+  selectionFrame: SelectionFrame | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -21,6 +23,7 @@ type RecordingPlayerProps = {
 export function RecordingPlayer({
   feedbackId,
   projectId,
+  selectionFrame,
   open,
   onOpenChange,
 }: RecordingPlayerProps) {
@@ -44,7 +47,10 @@ export function RecordingPlayer({
             />
           </div>
         </div>
-        <RecordingStage feedbackId={feedbackId} />
+        <RecordingStage
+          feedbackId={feedbackId}
+          selectionFrame={selectionFrame}
+        />
       </DialogContent>
     </Dialog>
   );

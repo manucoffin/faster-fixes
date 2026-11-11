@@ -80,3 +80,12 @@ export function seekRecording(
   if (stage.status !== "loaded") return [];
   return [{ type: "seek", time: Math.min(stage.duration, Math.max(0, time)) }];
 }
+
+/**
+ * Whether the Selection frame is drawn over the stage. The Selection was made
+ * on the last instant only, so anywhere else it would mark a place the
+ * Reviewer did not select.
+ */
+export function isSelectionFrameShown(stage: RecordingStage): boolean {
+  return stage.status === "loaded" && stage.time >= stage.duration;
+}

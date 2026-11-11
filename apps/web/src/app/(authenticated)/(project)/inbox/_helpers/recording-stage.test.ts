@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   answerPlayerMessage,
   INITIAL_RECORDING_STAGE,
+  isSelectionFrameShown,
   type RecordingStage,
   reduceRecordingStage,
   seekRecording,
@@ -120,5 +121,49 @@ describe("seekRecording", () => {
   it("does nothing until the Recording has loaded, or once it cannot play", () => {
     expect(seekRecording(INITIAL_RECORDING_STAGE, 10)).toEqual([]);
     expect(seekRecording({ ...loaded, status: "unplayable" }, 10)).toEqual([]);
+  });
+});
+
+describe("isSelectionFrameShown", () => {
+  it("shows on the last instant, where the player opens", () => {
+    expect(isSelectionFrameShown(loaded)).toBe(true);
+  });
+
+  it("shows when playback has ended on the last instant", () => {
+    expect(isSelectionFrameShown({ ...loaded, state: "ended" })).toBe(true);
+  });
+
+  it("hides as soon as the playhead leaves the last instant", () => {
+    expect(isSelectionFrameShown({ ...loaded, time: 11_999 })).toBe(false);
+    expect(isSelectionFrameShown({ ...loaded, time: 0 })).toBe(false);
+  });
+
+  it("hides while playing towards the end", () => {
+    expect(
+      isSelectionFrameShown({ ...loaded, state: "playing", time: 6_000 }),
+    ).toBe(false);
+  });
+
+  it("hides until the Recording has loaded", () => {
+    expect(isSelectionFrameShown(INITIAL_RECORDING_STAGE)).toBe(false);
+  });
+
+  it("hides on a Recording that cannot be played", () => {
+    expect(isSelectionFrameShown({ ...loaded, status: "unplayable" })).toBe(
+      false,
+    );
+  });
+
+  it("hides until the opening seek lands on the last instant", () => {
+    const opened = fold([
+      { type: "ready" },
+      { type: "loaded", duration: 12_000, viewport: VIEWPORT },
+    ]);
+    expect(isSelectionFrameShown(opened)).toBe(false);
+    expect(
+      isSelectionFrameShown(
+        reduceRecordingStage(opened, { type: "time", time: 12_000 }),
+      ),
+    ).toBe(true);
   });
 });

@@ -10,6 +10,7 @@ const selection = {
 describe("getSelectionFrame", () => {
   it("returns the element and click point as percentages of the viewport", () => {
     expect(getSelectionFrame({ selection })).toEqual({
+      aspectRatio: 2,
       element: { left: 10, top: 10, width: 20, height: 20 },
       click: { x: 15, y: 15 },
     });

@@ -11,16 +11,25 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { formatTimecode } from "@/app/_domains/video/_helpers/format-timecode";
 import { FileWarning, Pause, Play } from "lucide-react";
+import { useState } from "react";
 import { RECORDING_SPEEDS } from "../../_helpers/recording-stage";
+import type { SelectionFrame } from "../../_helpers/selection-frame";
 import { RecordingLog } from "./recording-log.client";
 import { RecordingTimeline } from "./recording-timeline.client";
+import { SelectionFrameOverlay } from "./selection-frame-overlay";
+import { SelectionFrameSwitch } from "./selection-frame-switch.client";
 import { useRecordingStage } from "./use-recording-stage";
 
 type RecordingStageProps = {
   feedbackId: string;
+  /** Null when the Feedback has no Selection geometry: no frame, no switch. */
+  selectionFrame: SelectionFrame | null;
 };
 
-export function RecordingStage({ feedbackId }: RecordingStageProps) {
+export function RecordingStage({
+  feedbackId,
+  selectionFrame,
+}: RecordingStageProps) {
   const {
     frameRef,
     events,
@@ -28,6 +37,7 @@ export function RecordingStage({ feedbackId }: RecordingStageProps) {
     state,
     time,
     duration,
+    isOnSelectionInstant,
     speed,
     togglePlayback,
     seek,
@@ -35,6 +45,7 @@ export function RecordingStage({ feedbackId }: RecordingStageProps) {
   } = useRecordingStage(feedbackId);
   const isPlaying = state === "playing";
   const isLoaded = status === "loaded";
+  const [isFrameShown, setIsFrameShown] = useState(true);
 
   return (
     <div className="flex min-h-0 flex-1">
@@ -81,6 +92,9 @@ export function RecordingStage({ feedbackId }: RecordingStageProps) {
                   className="absolute inset-0 cursor-default"
                   onClick={togglePlayback}
                 />
+              )}
+              {selectionFrame && isFrameShown && isOnSelectionInstant && (
+                <SelectionFrameBox frame={selectionFrame} />
               )}
             </>
           )}
@@ -132,6 +146,13 @@ export function RecordingStage({ feedbackId }: RecordingStageProps) {
               </Button>
             ))}
           </div>
+          {selectionFrame && (
+            <SelectionFrameSwitch
+              checked={isFrameShown}
+              onCheckedChange={setIsFrameShown}
+              className="shrink-0"
+            />
+          )}
         </div>
       </div>
       <RecordingLog
@@ -140,6 +161,33 @@ export function RecordingStage({ feedbackId }: RecordingStageProps) {
         isLoaded={isLoaded}
         onSeek={seek}
       />
+    </div>
+  );
+}
+
+type SelectionFrameBoxProps = {
+  frame: SelectionFrame;
+};
+
+// Fits the Selection's viewport to the stage as the player document fits the
+// recorded one, so the frame's percentages land on the replayed page.
+function SelectionFrameBox({ frame }: SelectionFrameBoxProps) {
+  const ratio = frame.aspectRatio;
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      style={{ containerType: "size" }}
+    >
+      <div
+        className="relative shrink-0"
+        style={{
+          width: `min(100cqw, ${String(ratio * 100)}cqh)`,
+          height: `min(100cqh, ${String(100 / ratio)}cqw)`,
+        }}
+      >
+        <SelectionFrameOverlay frame={frame} />
+      </div>
     </div>
   );
 }
