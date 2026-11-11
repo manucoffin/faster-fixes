@@ -1,7 +1,7 @@
 export const migrationSteps = [
   {
     label: "Export your feedback data from Userback",
-    body: "Download your feedback items from Userback via Settings > Export. CSV export is available on all plans. Note: screen recordings, session replays, and survey responses do not have an equivalent in FasterFixes and will not carry over.",
+    body: "Download your feedback items from Userback via Settings > Export. CSV export is available on all plans. Note: screen recordings and survey responses have no equivalent in FasterFixes, and session replays will not carry over: a Recording is captured with each new feedback.",
   },
   {
     label: "Deploy FasterFixes",

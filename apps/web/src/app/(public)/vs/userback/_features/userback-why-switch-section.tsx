@@ -9,7 +9,7 @@ const limitations = [
   },
   {
     title: "Not built for developer workflows",
-    body: "Userback captures screenshots, video, and session replay, useful for product managers and end-user feedback. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport automatically. Every feedback item arrives with the structured technical context a developer needs to act immediately.",
+    body: "Userback captures screenshots, video, and session replay, useful for product managers and end-user feedback. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport automatically, and attaches a Recording of the last minute on the page. Every feedback item arrives with the structured technical context a developer needs to act immediately.",
   },
   {
     title: "Built for product teams, not dev agencies",

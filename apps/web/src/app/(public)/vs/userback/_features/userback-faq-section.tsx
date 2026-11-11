@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +11,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 type DocLinkProps = {
   href: Route;
@@ -30,14 +33,13 @@ function DocLink({ href, children }: DocLinkProps) {
 export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
-    answer:
-      "Yes. The free plan includes 1 project, 50 feedback items, and 1 member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).",
+    answer: `Yes. The free plan includes 1 project, ${freeFeedbackLimit} feedback items, and 1 member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The free plan includes 1 project, 50 feedback items, and 1 member,
-        no credit card required. The self-hosted version is also free under
-        AGPL-3.0; you only pay for your own hosting infrastructure (typically
-        $5-20/month on Railway or Vercel). See the{" "}
+        Yes. The free plan includes 1 project, {freeFeedbackLimit} feedback
+        items, and 1 member, no credit card required. The self-hosted version is
+        also free under AGPL-3.0; you only pay for your own hosting
+        infrastructure (typically $5-20/month on Railway or Vercel). See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
@@ -65,27 +67,40 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from Userback?",
     answer:
-      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures DOM selector, URL, browser, and viewport on every report, plus the React component tree on React sites. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes does not currently offer those features. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
+      "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures DOM selector, URL, browser, and viewport on every report, plus the React component tree on React sites. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes attaches a Recording of the last minute on the page to each report, but offers no screen recording, surveys, or feature portal. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source and self-hostable; Userback is closed-source
         and cloud-only. FasterFixes captures DOM selector, URL, browser, and
         viewport on every report, plus the React component tree on React sites.
         Userback is a broader platform with annotated video, session replay, NPS
-        surveys, and a feature portal. FasterFixes does not currently offer
-        those features.
+        surveys, and a feature portal. FasterFixes attaches a{" "}
+        <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
+        the last minute on the page to each report, but offers no screen
+        recording, surveys, or feature portal.
       </p>
     ),
   },
   {
     question: "Does FasterFixes have video recording?",
     answer:
-      "Not screen recording. The widget captures screenshots, component tree, DOM selector, URL, browser, and viewport. FasterFixes does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. For recording a screen while reporting a bug, or session replay, Userback or a dedicated tool like Loom is a better fit.",
+      "Not screen recording, and no voice. The widget captures screenshots, component tree, DOM selector, URL, browser, and viewport, and attaches a Recording of the last minute on the page to each report: a reconstruction of the page, not a video of the screen. FasterFixes does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. For recording a screen or a voice while reporting a bug, Userback or a dedicated tool like Loom is a better fit.",
   },
   {
     question: "Does FasterFixes have session replay?",
     answer:
-      "No. FasterFixes is focused on structured developer feedback, not session analytics. If session replay is a core requirement, Userback Business or a dedicated tool like LogRocket is a better fit.",
+      "Yes, for the moments before each report: every feedback carries a Recording of up to the last minute on the page, on every plan, and typed values are never captured. No for session analytics: FasterFixes does not record whole visits or aggregate sessions. If session analytics is a core requirement, Userback Business or a dedicated tool like LogRocket is a better fit.",
+    content: (
+      <p className="text-lg text-muted-foreground md:text-xl">
+        Yes, for the moments before each report: every feedback carries a{" "}
+        <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
+        up to the last minute on the page, on every plan, and typed values are
+        never captured. No for session analytics: FasterFixes does not record
+        whole visits or aggregate sessions. If session analytics is a core
+        requirement, Userback Business or a dedicated tool like LogRocket is a
+        better fit.
+      </p>
+    ),
   },
   {
     question: "What does the MCP server do?",
@@ -151,7 +166,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Userback?",
     answer:
-      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that screen recordings, session replays, and survey responses do not migrate. FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
+      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that screen recordings, session replays, and survey responses do not migrate. FasterFixes has no screen recording or surveys, and a Recording is captured with each new feedback, so existing Userback replays cannot be imported. The full 4-step guide is in the migration section above.",
   },
   {
     question: "Is FasterFixes open source?",

@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +11,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 type DocLinkProps = {
   href: Route;
@@ -30,15 +33,14 @@ function DocLink({ href, children }: DocLinkProps) {
 export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
-    answer:
-      "Yes. The Free plan includes 1 project, 50 feedback items, and 1 member, no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $20/month flat for up to 5 members, and the Agency plan is $99/month for unlimited members.",
+    answer: `Yes. The Free plan includes 1 project, ${freeFeedbackLimit} feedback items, and 1 member, no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $20/month flat for up to 5 members, and the Agency plan is $99/month for unlimited members.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The Free plan includes 1 project, 50 feedback items, and 1 member,
-        no credit card required. Self-hosting is free forever with no item or
-        member limits beyond your own infrastructure. The Pro plan is $20/month
-        flat for up to 5 members, and the Agency plan is $99/month for unlimited
-        members. See the{" "}
+        Yes. The Free plan includes 1 project, {freeFeedbackLimit} feedback
+        items, and 1 member, no credit card required. Self-hosting is free
+        forever with no item or member limits beyond your own infrastructure.
+        The Pro plan is $20/month flat for up to 5 members, and the Agency plan
+        is $99/month for unlimited members. See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
@@ -82,7 +84,7 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes have video recording?",
     answer:
-      "Not screen recording. FasterFixes does not record the screen or replay sessions: the widget captures a screenshot, DOM selector, URL, browser, and viewport on each feedback item, plus the React component tree on React sites. It does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. Atarim does not offer video recording either; if recorded walkthroughs are a hard requirement, BugHerd or Userback include screen recording.",
+      "Not screen recording, and no voice. The widget captures a screenshot, DOM selector, URL, browser, and viewport on each feedback item, plus the React component tree on React sites, and attaches a Recording of the last minute on the page: a reconstruction of the page, not a video of the screen. FasterFixes does support video review: upload a video to a project, share its link, and clients leave feedback on an exact moment or range without an account. Atarim does not offer video recording either; if recorded walkthroughs are a hard requirement, BugHerd or Userback include screen recording.",
   },
   {
     question: "Does Atarim support whitelabeling?",
