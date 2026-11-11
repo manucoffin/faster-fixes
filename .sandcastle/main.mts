@@ -19,9 +19,7 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
  * Restrict the round to these GitHub issue numbers. Leave empty to let the
  * agent pick freely from every open `ready-for-agent` issue.
  */
-const ISSUES: number[] = [
-  385, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399,
-];
+const ISSUES: number[] = [386, 400, 401, 402, 403, 404, 405, 406, 407, 408];
 
 /**
  * One issue per iteration, so this needs headroom above `ISSUES.length`: a
