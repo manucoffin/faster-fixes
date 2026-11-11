@@ -2,6 +2,7 @@ import type {
   ApiError,
   CreateFeedbacksParams,
   CreateFeedbacksResponse,
+  GetFeedbackJsonResponse,
   ListFeedbacksJsonResponse,
   ListFeedbacksParams,
   ListVideosResponse,
@@ -60,6 +61,18 @@ export class FasterFixesClient {
 
     return this.request<ListFeedbacksJsonResponse>(
       `/api/v1/agent/feedbacks?${searchParams.toString()}`,
+    );
+  }
+
+  async getFeedbackMarkdown(feedbackId: string): Promise<string> {
+    return this.request<string>(
+      `/api/v1/agent/feedbacks/${feedbackId}?format=markdown`,
+    );
+  }
+
+  async getFeedback(feedbackId: string): Promise<GetFeedbackJsonResponse> {
+    return this.request<GetFeedbackJsonResponse>(
+      `/api/v1/agent/feedbacks/${feedbackId}`,
     );
   }
 

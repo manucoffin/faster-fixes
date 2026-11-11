@@ -12,7 +12,7 @@ export function registerListFeedbacks(
     {
       title: "List Feedbacks",
       description:
-        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, the console logs and network requests captured before submission, and the Custom metadata the site attached (such as a user ID, release or tenant). Feedback left on a video carries the video id and a selection instead: the time in milliseconds and, when marked, a point or area in normalized 0..1 frame coordinates. Pass video_id (from list_videos) to list one video's feedback. Use format=markdown for agent-readable output. Workflow: list feedbacks → fix the issues in code → update status to resolved.",
+        "List feedback items from Faster Fixes. Returns client feedback with page URL, CSS selector, click coordinates, viewport info, browser details, screenshot, the console logs and network requests captured before submission, and the Custom metadata the site attached (such as a user ID, release or tenant). Feedback left on a video carries the video id and a selection instead: the time in milliseconds and, when marked, a point or area in normalized 0..1 frame coordinates. Pass video_id (from list_videos) to list one video's feedback. Feedback with a recording carries one Recording line with its duration and, when known, its number of steps: call get_feedback with its ID to read the timeline of what the reviewer did. Use format=markdown for agent-readable output. Workflow: list feedbacks → get one in full with get_feedback → fix the issue in code → update status to resolved.",
       inputSchema: {
         status: FeedbackStatusEnum.optional().describe(
           "Filter by feedback status",

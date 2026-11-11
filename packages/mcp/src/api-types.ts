@@ -61,6 +61,45 @@ export type FeedbackJson = {
   createdAt: string;
 };
 
+export type RecordingStepJson = {
+  type:
+    | "load"
+    | "click"
+    | "input"
+    | "select"
+    | "submit"
+    | "navigation"
+    | "scroll"
+    | "resize"
+    | "selection";
+  /** Epoch ms. */
+  timestamp: number;
+  /** Negative, relative to `endedAt`. */
+  offsetMs: number;
+  label: string | null;
+  selector: string | null;
+  /** A path for a navigation, a size for a resize, the origin of a load. */
+  detail: string | null;
+};
+
+export type FeedbackRecordingJson = {
+  durationMs: number;
+  /** Epoch ms; null when the file could not be read. */
+  startedAt: number | null;
+  /** Epoch ms, the Selection; null when the file could not be read. */
+  endedAt: number | null;
+  /** Signed, valid one hour. */
+  url: string;
+  readable: boolean;
+  steps: RecordingStepJson[];
+};
+
+/** One Feedback in full: the listing's item plus its Recording. */
+export type GetFeedbackJsonResponse = FeedbackJson & {
+  /** Null when no Recording has reached the server. */
+  recording: FeedbackRecordingJson | null;
+};
+
 export type VideoBlockJson = {
   id: string;
   title: string;
