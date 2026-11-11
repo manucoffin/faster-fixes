@@ -1,9 +1,14 @@
 ---
 title: Tools
-description: "Reference for MCP tools: list_feedbacks, list_videos and update_feedback_status."
+description: "Reference for MCP tools: list_feedbacks, get_feedback, list_videos and update_feedback_status."
 ---
 
-The MCP server exposes these tools.
+The MCP server exposes these tools. An agent works through them in four steps:
+
+1. `list_feedbacks` to see what is open.
+2. `get_feedback` to read one Feedback in full, with its Screenshot and, when it has a [Recording](/docs/widget/recording), the timeline of what the Reviewer did.
+3. Fix the issue in code.
+4. `update_feedback_status` to set the Status, for example `resolved`.
 
 ## `list_feedbacks`
 
@@ -31,8 +36,49 @@ The agent calls `list_feedbacks` with `status: "new"` and receives structured fe
 - Screenshot URL
 - Console logs and network requests captured before submission
 - Custom metadata: the key/value pairs your site attached with the widget's `customMetadata` option, such as a user ID or release version
+- A Recording line when the Feedback has a [Recording](/docs/widget/recording)
+
+The listing never carries a Recording's timeline. A Feedback with a Recording carries one line with its duration and, once a `get_feedback` call has read its steps, their number:
+
+```md
+**Recording:** 42.3 s, 18 steps. Call `get_feedback` with id `0b6c1f52-3d8e-4a9b-8c7d-1e2f3a4b5c6d` to read its timeline.
+```
 
 Feedback left on a Video carries its `videoId` and a `selection` instead of the page fields: the marked time in milliseconds and, when the Reviewer marked one, a point or area in coordinates normalized from 0 to 1 of the frame. With `video_id`, the JSON output starts with a `video` block holding the Video's title, filename, duration and pixel size. The Markdown output names the Video, the time and the position on the frame. See the [Agent API](/docs/api-reference/agent-api#video-feedback) for the full item shape.
+
+## `get_feedback`
+
+Gets one Feedback in full, page or Video alike. Use an ID from `list_feedbacks`.
+
+### Parameters
+
+| Parameter     | Type            | Required | Description     |
+| ------------- | --------------- | -------- | --------------- |
+| `feedback_id` | `string` (UUID) | Yes      | The feedback ID |
+
+### What it returns
+
+- The markdown of the Feedback, with the same sections as in `list_feedbacks`.
+- The Screenshot as an image, so a multimodal agent sees it without fetching a link. When the image cannot be downloaded or is larger than 3 MB, only the markdown is returned, and it still holds the Screenshot's link.
+
+When the Feedback has a Recording, a **Timeline** section takes the place of **Diagnostics**. It lists what the Reviewer did before submitting (page loads, clicks, typing, selections, navigations, scrolling, resizing), merged in time order with the console logs and network requests, each with its time before the Selection. It ends with the selected element:
+
+```md
+## Timeline
+
+- -12.4 s click button "Save changes" (form.settings > button.primary)
+- -12.0 s `POST` https://example.com/api/settings → 500 (120ms)
+- -11.0 s `error` Save failed
+- 0.0 s selection button "Save changes" (#save), the element the comment is about
+```
+
+A long Timeline keeps the entries closest to the Selection. Typed values are never captured, so a typing step names the field and not what was typed. When the Recording file cannot be read, the Feedback keeps its **Diagnostics** section and a line says it has no timeline. See the [Agent API](/docs/api-reference/agent-api#get-a-feedback) for the full shape.
+
+### Example usage (in an AI agent)
+
+> "Look at the feedback on the save button"
+
+The agent calls `get_feedback` with the feedback ID, reads the steps that led to the error, and looks at the Screenshot.
 
 ## `list_videos`
 
@@ -81,6 +127,7 @@ Screenshot and frame URLs expire one hour after the call. List again to get fres
 | Action                   | Limit                             |
 | ------------------------ | --------------------------------- |
 | `list_feedbacks`         | 200 requests/hour                 |
+| `get_feedback`           | Shares the `list_feedbacks` limit |
 | `list_videos`            | Shares the `list_feedbacks` limit |
 | `update_feedback_status` | 50 requests/hour                  |
 

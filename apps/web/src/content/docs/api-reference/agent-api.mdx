@@ -1,6 +1,6 @@
 ---
 title: Agent API
-description: REST API for AI agents to list feedback and videos and update status.
+description: REST API for AI agents to list and read feedback, list videos and update status.
 ---
 
 The Agent API is designed for programmatic access by AI coding agents. It's the same API used by the [MCP server](/docs/mcp/setup).
@@ -79,7 +79,8 @@ GET /feedbacks?project=proj_xxx
       },
       "customMetadata": { "userId": "user_42", "release": "2.4.1" },
       "reviewerName": "Sarah",
-      "createdAt": "2025-01-15T10:30:00Z"
+      "createdAt": "2025-01-15T10:30:00Z",
+      "recording": { "durationMs": 42300, "stepCount": 18 }
     }
   ],
   "count": 1
@@ -89,6 +90,15 @@ GET /feedbacks?project=proj_xxx
 `customMetadata` holds the key/value pairs your site attached with the widget's `customMetadata` option, or `null` when it attached none.
 
 `screenshotUrl` is a signed URL that expires one hour after the response. Request the listing again to get a fresh one.
+
+`recording` summarizes the Feedback's [Recording](/docs/widget/recording), or is `null` when it has none:
+
+| Field        | Type             | Description                                                                                         |
+| ------------ | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `durationMs` | `number`         | Duration of the Recording in milliseconds                                                           |
+| `stepCount`  | `number \| null` | Number of steps, or `null` until a request for the [single Feedback](#get-a-feedback) has read them |
+
+The listing never carries the timeline or a link to the Recording file. [Get a feedback](#get-a-feedback) returns both.
 
 ### Video feedback
 
@@ -152,7 +162,8 @@ When the listing is filtered by `video`, the response starts with a `video` bloc
       "diagnosticTrail": null,
       "customMetadata": null,
       "reviewerName": "Curious Otter",
-      "createdAt": "2026-11-04T09:12:33.000Z"
+      "createdAt": "2026-11-04T09:12:33.000Z",
+      "recording": null
     },
     {
       "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c0d",
@@ -179,7 +190,8 @@ When the listing is filtered by `video`, the response starts with a `video` bloc
       "diagnosticTrail": null,
       "customMetadata": null,
       "reviewerName": "Patient Heron",
-      "createdAt": "2026-11-04T09:20:05.000Z"
+      "createdAt": "2026-11-04T09:20:05.000Z",
+      "recording": null
     }
   ],
   "count": 2
@@ -205,6 +217,127 @@ For a video item, the "Where to look" section reads:
 ```
 
 A range reads `From 00:41.000 to 00:47.500 (41000 to 47500 ms)` and an area reads `Area from (10%, 20%) to (55%, 70%)`. The **Where on the frame** line is omitted when the Reviewer marked a time only.
+
+A Feedback with a Recording carries one line after its Diagnostics:
+
+```md
+**Recording:** 42.3 s, 18 steps. Call `get_feedback` with id `0b6c1f52-3d8e-4a9b-8c7d-1e2f3a4b5c6d` to read its timeline.
+```
+
+The number of steps is left out until a request for the single Feedback has read them.
+
+---
+
+## Get a feedback
+
+```
+GET /feedbacks/:id
+```
+
+Returns one Feedback of the token's Organization in full, page or Video alike. It is the call that reads a [Recording](/docs/widget/recording).
+
+### Query parameters
+
+| Parameter | Type     | Required | Description                    |
+| --------- | -------- | -------- | ------------------------------ |
+| `format`  | `string` | No       | `json` (default) or `markdown` |
+
+An `id` that is not a UUID returns `422` with `Invalid feedback ID`. A Feedback that does not exist or belongs to another Organization returns `404` with `Feedback not found`.
+
+### JSON response
+
+The item has the same keys as in [List feedbacks](#list-feedbacks), and its `recording` carries the whole Recording:
+
+```json
+{
+  "id": "0b6c1f52-3d8e-4a9b-8c7d-1e2f3a4b5c6d",
+  "status": "new",
+  "comment": "The save button does nothing",
+  "videoId": null,
+  "pageUrl": "https://myapp.com/settings",
+  "selection": null,
+  "selector": "#save",
+  "clickX": 450,
+  "clickY": 320,
+  "viewportWidth": 1920,
+  "viewportHeight": 1080,
+  "browserName": "Chrome",
+  "browserVersion": "142",
+  "os": "macOS",
+  "screenshotUrl": "https://…/shot.png?X-Amz-Expires=3600&…",
+  "metadata": { "elementDescription": "button \"Save changes\"" },
+  "diagnosticTrail": { "console": [], "network": [] },
+  "customMetadata": null,
+  "reviewerName": "Sarah",
+  "createdAt": "2026-11-04T09:12:33.000Z",
+  "recording": {
+    "durationMs": 42300,
+    "startedAt": 1794400017700,
+    "endedAt": 1794400060000,
+    "readable": true,
+    "steps": [
+      {
+        "type": "click",
+        "timestamp": 1794400047600,
+        "offsetMs": -12400,
+        "label": "button \"Save changes\"",
+        "selector": "form.settings > button.primary",
+        "detail": null
+      },
+      {
+        "type": "selection",
+        "timestamp": 1794400060000,
+        "offsetMs": 0,
+        "label": "button \"Save changes\"",
+        "selector": "#save",
+        "detail": null
+      }
+    ],
+    "url": "https://…/recording?X-Amz-Expires=3600&…"
+  }
+}
+```
+
+`recording` is `null` when the Feedback has no Recording, including one whose Recording has not reached the server yet.
+
+| Field                  | Type             | Description                                                                                               |
+| ---------------------- | ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `durationMs`           | `number`         | Duration in milliseconds                                                                                  |
+| `startedAt`, `endedAt` | `number \| null` | Both ends of the Recording, in epoch milliseconds. `null` when the file cannot be read                    |
+| `readable`             | `boolean`        | `false` when the file cannot be read                                                                      |
+| `steps`                | `array`          | What the Reviewer did, oldest first, ending with the `selection` step. Empty when the file cannot be read |
+| `steps[].type`         | `string`         | `load`, `click`, `input`, `select`, `submit`, `navigation`, `scroll`, `resize` or `selection`             |
+| `steps[].timestamp`    | `number`         | Epoch milliseconds                                                                                        |
+| `steps[].offsetMs`     | `number`         | Zero or negative: the time before the end of the Recording                                                |
+| `steps[].label`        | `string \| null` | The element in words, such as `button "Save changes"`                                                     |
+| `steps[].selector`     | `string \| null` | A CSS selector of the element                                                                             |
+| `steps[].detail`       | `string \| null` | What the step changed, such as a scroll position. Typed values are never captured                         |
+| `url`                  | `string`         | A signed link to the Recording file. It expires one hour after the response, like `screenshotUrl`         |
+
+`diagnosticTrail` is returned unchanged next to `recording`. When the file cannot be read, the response is still `200`, with `readable: false` and no steps.
+
+### Markdown response
+
+With `format=markdown`, the response is the Feedback's document, with the same sections as an item of the listing. When the Feedback has a readable Recording, a **Timeline** section takes the place of **Diagnostics**. It merges the steps with the console logs and network requests in time order, each with its time before the Selection, and ends with the selected element:
+
+```md
+## Timeline
+
+- -12.4 s click button "Save changes" (form.settings > button.primary)
+- -12.0 s `POST` https://myapp.com/api/settings → 500 (120ms)
+- -11.0 s `error` Save failed
+- 0.0 s selection button "Save changes" (#save), the element the comment is about
+```
+
+A long Timeline keeps the entries closest to the Selection, console errors and failed network responses first. A line above the entries says how many earlier entries were omitted, and another how many console logs and network requests came after the Selection, while the Reviewer wrote the comment. The markdown never carries the link to the Recording file.
+
+The listing's markdown never has a Timeline: only the single Feedback's does.
+
+When the Recording file cannot be read, the document keeps its **Diagnostics** section and adds:
+
+```md
+**Recording:** the file could not be read, so this Feedback has no timeline.
+```
 
 ---
 
@@ -296,12 +429,13 @@ If a GitHub issue is linked, the status change is automatically synced. The call
 | List feedbacks | 200 requests/hour |
 | Update status  | 50 requests/hour  |
 
-List videos counts against the same read limit as List feedbacks.
+Get a feedback and List videos count against the same read limit as List feedbacks.
 
 ## Required scopes
 
 | Endpoint                     | Scope                     |
 | ---------------------------- | ------------------------- |
 | `GET /feedbacks`             | `feedbacks:read`          |
+| `GET /feedbacks/:id`         | `feedbacks:read`          |
 | `GET /videos`                | `feedbacks:read`          |
 | `POST /feedbacks/:id/status` | `feedbacks:update_status` |

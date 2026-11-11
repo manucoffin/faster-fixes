@@ -154,6 +154,7 @@ After configuring, ask your agent:
 
 - "Check for new feedback"
 - "Get all open feedback and fix them"
+- "Show me everything about feedback abc123"
 - "Mark feedback abc123 as resolved"
 
 Or set up a scheduled task to fetch and fix feedback automatically.
@@ -178,6 +179,18 @@ List feedback items for your project. Returns page URL, CSS selector, click coor
 | `format`   | string | No       | `markdown` (default) or `json`                                               |
 
 With `video_id` and `format: json`, the response opens with a `video` block (`id`, `title`, `filename`, `durationMs`, `width`, `height`) so normalized coordinates can be converted to pixels. Screenshot URLs expire after one hour.
+
+A feedback item with a [Recording](https://faster-fixes.com/docs/widget/recording) carries one Recording line with its duration and, once `get_feedback` has read it, its number of steps. The listing never carries the timeline.
+
+### `get_feedback`
+
+Get one feedback item in full: its markdown and its screenshot as an image. When the item has a Recording, a Timeline section takes the place of Diagnostics: what the reviewer did before submitting (clicks, typing, navigations, scrolling), merged in time order with the console logs and network requests, ending with the selected element. Typed values are never captured.
+
+| Parameter     | Type   | Required | Description                           |
+| ------------- | ------ | -------- | ------------------------------------- |
+| `feedback_id` | string | Yes      | The feedback ID from `list_feedbacks` |
+
+When the screenshot cannot be downloaded or is larger than 3 MB, only the markdown is returned, with the screenshot's link.
 
 ### `list_videos`
 
