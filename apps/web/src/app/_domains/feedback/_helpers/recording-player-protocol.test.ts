@@ -17,6 +17,10 @@ describe("parseDashboardMessage", () => {
     buildDashboardMessage({ type: "listening" }),
     buildDashboardMessage({ type: "play" }),
     buildDashboardMessage({ type: "pause" }),
+    buildDashboardMessage({ type: "seek", time: 0 }),
+    buildDashboardMessage({ type: "seek", time: 3_837 }),
+    buildDashboardMessage({ type: "speed", speed: 1 }),
+    buildDashboardMessage({ type: "speed", speed: 4 }),
   ])("accepts %o", (message) => {
     expect(parseDashboardMessage(message)).toEqual(message);
   });
@@ -47,6 +51,22 @@ describe("parseDashboardMessage", () => {
         events: [{ type: 2 }],
       },
     ],
+    [
+      "seek without a time",
+      { channel: "fasterfixes/recording-player", type: "seek" },
+    ],
+    [
+      "seek to a negative time",
+      { channel: "fasterfixes/recording-player", type: "seek", time: -1 },
+    ],
+    [
+      "a zero speed",
+      { channel: "fasterfixes/recording-player", type: "speed", speed: 0 },
+    ],
+    [
+      "a speed that is not a number",
+      { channel: "fasterfixes/recording-player", type: "speed", speed: "2x" },
+    ],
     ["a string", "play"],
     ["null", null],
   ])("rejects %s", (_, data) => {
@@ -59,6 +79,15 @@ describe("parsePlayerMessage", () => {
     buildPlayerMessage({ type: "ready" }),
     buildPlayerMessage({ type: "time", time: 0 }),
     buildPlayerMessage({ type: "time", time: 4_250.5 }),
+    buildPlayerMessage({
+      type: "loaded",
+      duration: 3_837,
+      viewport: { width: 1280, height: 720 },
+    }),
+    buildPlayerMessage({ type: "state", state: "playing" }),
+    buildPlayerMessage({ type: "state", state: "paused" }),
+    buildPlayerMessage({ type: "state", state: "ended" }),
+    buildPlayerMessage({ type: "failed" }),
   ])("accepts %o", (message) => {
     expect(parsePlayerMessage(message)).toEqual(message);
   });
@@ -72,6 +101,27 @@ describe("parsePlayerMessage", () => {
     [
       "a time that is not a number",
       { channel: "fasterfixes/recording-player", type: "time", time: "1" },
+    ],
+    [
+      "loaded without a viewport",
+      { channel: "fasterfixes/recording-player", type: "loaded", duration: 1 },
+    ],
+    [
+      "loaded with an empty viewport",
+      {
+        channel: "fasterfixes/recording-player",
+        type: "loaded",
+        duration: 1,
+        viewport: { width: 0, height: 720 },
+      },
+    ],
+    [
+      "an unknown state",
+      {
+        channel: "fasterfixes/recording-player",
+        type: "state",
+        state: "stopped",
+      },
     ],
     ["a dashboard message", buildDashboardMessage({ type: "listening" })],
     ["undefined", undefined],

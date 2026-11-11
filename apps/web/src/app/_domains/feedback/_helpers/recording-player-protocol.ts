@@ -24,6 +24,18 @@ const DashboardMessageSchema = z.discriminatedUnion("type", [
   }),
   z.object({ channel: z.literal(CHANNEL), type: z.literal("play") }),
   z.object({ channel: z.literal(CHANNEL), type: z.literal("pause") }),
+  // A time in milliseconds from the start of the Recording.
+  z.object({
+    channel: z.literal(CHANNEL),
+    type: z.literal("seek"),
+    time: z.number().nonnegative(),
+  }),
+  // A playback rate, where 1 is the recorded pace.
+  z.object({
+    channel: z.literal(CHANNEL),
+    type: z.literal("speed"),
+    speed: z.number().positive().max(16),
+  }),
 ]);
 
 const PlayerMessageSchema = z.discriminatedUnion("type", [
@@ -35,6 +47,23 @@ const PlayerMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("time"),
     time: z.number().nonnegative(),
   }),
+  // Sent once the Recording is ready to play, paused on its first instant.
+  z.object({
+    channel: z.literal(CHANNEL),
+    type: z.literal("loaded"),
+    duration: z.number().nonnegative(),
+    viewport: z.object({
+      width: z.number().positive(),
+      height: z.number().positive(),
+    }),
+  }),
+  z.object({
+    channel: z.literal(CHANNEL),
+    type: z.literal("state"),
+    state: z.enum(["playing", "paused", "ended"]),
+  }),
+  // The Recording cannot be played.
+  z.object({ channel: z.literal(CHANNEL), type: z.literal("failed") }),
 ]);
 
 export type RecordingPlayerEvent = z.infer<typeof RecordingPlayerEventSchema>;
@@ -45,6 +74,14 @@ export type DashboardMessage = WithoutChannel<
   z.infer<typeof DashboardMessageSchema>
 >;
 export type PlayerMessage = WithoutChannel<z.infer<typeof PlayerMessageSchema>>;
+export type RecordingPlayerState = Extract<
+  PlayerMessage,
+  { type: "state" }
+>["state"];
+export type RecordingPlayerViewport = Extract<
+  PlayerMessage,
+  { type: "loaded" }
+>["viewport"];
 
 export function buildDashboardMessage(message: DashboardMessage) {
   return { channel: CHANNEL, ...message };
