@@ -218,6 +218,7 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
+- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. A **Recording** and a **Diagnostic Trail** never reach back before the start of their page session
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
