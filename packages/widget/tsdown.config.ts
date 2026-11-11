@@ -8,8 +8,10 @@ import { defineConfig } from "tsdown";
 // the packages in each job, so going over fails the pull request). Set from
 // the first green 1.0.0 build, 86,764 bytes, plus a margin of about 10% so
 // ordinary fixes fit. Raise it deliberately, in its own commit, when a
-// feature justifies the weight.
-const IIFE_MAX_BYTES = 95_000;
+// feature justifies the weight. Raised to 100,000 when the script gained the
+// loader of the recorder file, at 95,256 bytes, with room for the rest of
+// Recording (compression, upload and the comment form's line).
+const IIFE_MAX_BYTES = 100_000;
 
 export default defineConfig([
   {
