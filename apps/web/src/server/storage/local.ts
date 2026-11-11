@@ -41,6 +41,10 @@ function getLocalObjectPath(root: string, bucket: string, key: string) {
   return join(root, bucket, key);
 }
 
+function isMissingFileError(error: unknown) {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
 export class LocalStorage implements StorageBackend {
   constructor(private root = process.env.STORAGE_LOCAL_PATH ?? "./storage") {}
 
@@ -128,13 +132,16 @@ export class LocalStorage implements StorageBackend {
       const extension = object.key.split(".").at(-1) ?? "";
       return { size, contentType: contentTypesByExtension[extension] ?? "" };
     } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
-        return null;
-      }
+      if (isMissingFileError(error)) return null;
+      throw error;
+    }
+  }
+
+  async get(object: StorageObject) {
+    try {
+      return await this.read(object.bucket, object.key);
+    } catch (error) {
+      if (isMissingFileError(error)) return null;
       throw error;
     }
   }

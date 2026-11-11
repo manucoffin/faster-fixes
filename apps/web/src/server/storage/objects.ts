@@ -42,6 +42,10 @@ export async function headStorageObject({ key }: { key: string }) {
   return createStorage().head({ bucket: getStorageBucket(), key });
 }
 
+export async function getStorageObject({ key }: { key: string }) {
+  return createStorage().get({ bucket: getStorageBucket(), key });
+}
+
 export async function deleteStorageObjects(keys: string[]) {
   return createStorage().deleteMany(getStorageBucket(), keys);
 }
