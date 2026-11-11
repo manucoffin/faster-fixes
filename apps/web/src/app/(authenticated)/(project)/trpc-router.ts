@@ -82,6 +82,8 @@ import { createLinearIssueForFeedback } from "./inbox/_services/create-linear-is
 import { CreateLinearIssueForFeedbackSchema } from "./inbox/_services/create-linear-issue-for-feedback.schema";
 import { deleteFeedback } from "./inbox/_services/delete-feedback";
 import { DeleteFeedbackSchema } from "./inbox/_services/delete-feedback.schema";
+import { deleteFeedbackRecording } from "./inbox/_services/delete-feedback-recording";
+import { DeleteFeedbackRecordingSchema } from "./inbox/_services/delete-feedback-recording.schema";
 import { deleteFeedbacks } from "./inbox/_services/delete-feedbacks";
 import { DeleteFeedbacksSchema } from "./inbox/_services/delete-feedbacks.schema";
 import { countFeedbackDiagnostics } from "./inbox/_services/count-feedback-diagnostics";
@@ -399,6 +401,14 @@ export const projectsRouter = router({
       .input(DeleteFeedbackSchema)
       .mutation(({ input, ctx }) =>
         deleteFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    deleteRecording: protectedProcedure
+      .input(DeleteFeedbackRecordingSchema)
+      .mutation(({ input, ctx }) =>
+        deleteFeedbackRecording({
           feedbackId: input.feedbackId,
           userId: ctx.session.user.id,
         }),

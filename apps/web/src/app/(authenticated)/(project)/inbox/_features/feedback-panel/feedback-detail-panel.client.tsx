@@ -138,6 +138,7 @@ export function FeedbackDetailPanel({
                 />
                 <RecordingPlayer
                   feedbackId={feedback.id}
+                  projectId={projectId}
                   open={isPlayerOpen}
                   onOpenChange={(next) => void setIsPlayerOpen(next || null)}
                 />
