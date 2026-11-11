@@ -218,4 +218,75 @@ describe("buildFeedbackBlocks", () => {
       },
     ]);
   });
+
+  describe("page Feedback with a Recording", () => {
+    const feedback = {
+      reviewerName: "Ada",
+      comment: "The save button does nothing",
+      pageUrl: "https://example.com/settings",
+      browserName: "Chrome",
+      os: "macOS",
+    };
+    const dashboardUrl = "https://app.example.com/inbox?feedbackId=fb_1";
+    const playerUrl =
+      "https://app.example.com/inbox?feedbackId=fb_1&player=true";
+
+    function build(link: string | null) {
+      return buildFeedbackBlocks({
+        feedback,
+        status: "new",
+        actor: "human",
+        dashboardUrl,
+        playerUrl: link,
+        screenshotUrl: null,
+      });
+    }
+
+    it("puts Play recording beside Open in Faster Fixes", () => {
+      expect(build(playerUrl).blocks.at(-1)).toEqual({
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Open in Faster Fixes" },
+            url: dashboardUrl,
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Play recording" },
+            url: playerUrl,
+          },
+        ],
+      });
+    });
+
+    it("says nothing else about the Recording and keeps the fallback text", () => {
+      const withRecording = build(playerUrl);
+      const without = build(null);
+
+      expect(withRecording.text).toBe(without.text);
+      expect(withRecording.blocks.slice(0, -1)).toEqual(
+        without.blocks.slice(0, -1),
+      );
+      const announcement = JSON.stringify(withRecording).toLowerCase();
+      for (const fragment of ["timeline", "diagnostic", "duration"]) {
+        expect(announcement).not.toContain(fragment);
+      }
+    });
+
+    it("keeps today's single button without a player link", () => {
+      expect(build(null).blocks.at(-1)).toEqual({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `<${dashboardUrl}|Open in Faster Fixes>`,
+        },
+        accessory: {
+          type: "button",
+          text: { type: "plain_text", text: "Open in Faster Fixes" },
+          url: dashboardUrl,
+        },
+      });
+    });
+  });
 });

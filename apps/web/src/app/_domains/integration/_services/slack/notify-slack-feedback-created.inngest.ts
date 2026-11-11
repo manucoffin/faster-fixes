@@ -68,6 +68,11 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
       // A freshly submitted feedback has no automated action yet.
       actor: "human",
       dashboardUrl: buildFeedbackDashboardUrl(feedback),
+      // Read at each build, so a rebuild drops the button after a removal and
+      // adds it for a Recording that came in late.
+      playerUrl: feedback.recordingId
+        ? buildFeedbackDashboardUrl(feedback, { player: true })
+        : null,
       screenshotUrl,
     });
 

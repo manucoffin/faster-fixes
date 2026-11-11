@@ -70,6 +70,11 @@ export const updateSlackFeedbackMessage = inngest.createFunction(
       // "user" and "tracker" both map to a human-driven change.
       actor: actor === "agent" ? "agent" : "human",
       dashboardUrl: buildFeedbackDashboardUrl(feedback),
+      // Read at each build, so a rebuild drops the button after a removal and
+      // adds it for a Recording that came in late.
+      playerUrl: feedback.recordingId
+        ? buildFeedbackDashboardUrl(feedback, { player: true })
+        : null,
       screenshotUrl,
     });
 
