@@ -1,0 +1,78 @@
+---
+title: Content Security Policy
+description: The directives a site's Content Security Policy needs for the widget, its Screenshot and its Recording.
+---
+
+If your site sends a `Content-Security-Policy` header, it must allow what the widget loads and requests. The lists below were established by running each embed on a page with a strict policy and recording what the browser refused.
+
+## Script embed
+
+| Directive     | Allow                                                    | Why                                                                              |
+| ------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `script-src`  | `https://cdn.jsdelivr.net`, or a nonce on the script tag | The widget script, and the recorder file it loads from the same CDN              |
+| `connect-src` | `https://www.faster-fixes.com`                           | The widget's requests: configuration, Feedback, Screenshot and Recording uploads |
+| `connect-src` | The origins that serve your page's images and web fonts  | The Screenshot fetches them to draw the page                                     |
+| `img-src`     | `data:`                                                  | The Screenshot is drawn through a `data:` image                                  |
+
+```text
+Content-Security-Policy:
+  script-src 'self' https://cdn.jsdelivr.net;
+  connect-src 'self' https://www.faster-fixes.com;
+  img-src 'self' data:
+```
+
+The recorder file is loaded from `https://cdn.jsdelivr.net/npm/@fasterfixes/widget@<version>/dist/recorder.iife.js`, at the exact version of the widget script. A source that names only the path of `widget.iife.js` does not cover it: allow the host, or use a nonce.
+
+### With a nonce
+
+Put the nonce on the script tag. The widget inserts the recorder file with the nonce of the script that inserts it, so a nonce-only `script-src`, with or without `'strict-dynamic'`, covers both files.
+
+```html
+<script
+  nonce="RANDOM_NONCE"
+  src="https://cdn.jsdelivr.net/npm/@fasterfixes/widget@1/dist/widget.iife.js"
+  data-project-id="proj_your_project_id"
+></script>
+```
+
+```text
+Content-Security-Policy:
+  script-src 'nonce-RANDOM_NONCE' 'strict-dynamic';
+  connect-src 'self' https://www.faster-fixes.com;
+  img-src 'self' data:
+```
+
+## Framework packages
+
+The React, Vue, Angular and Svelte packages are bundled with your code, so they need no script source for the CDN. The recorder is a separate chunk of your bundle, loaded on demand from wherever your bundle is served, and is covered by the source that already allows your scripts, including a nonce with or without `'strict-dynamic'`.
+
+| Directive     | Allow                                                   | Why                                                                              |
+| ------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `connect-src` | `https://www.faster-fixes.com`                          | The widget's requests: configuration, Feedback, Screenshot and Recording uploads |
+| `connect-src` | The origins that serve your page's images and web fonts | The Screenshot fetches them to draw the page                                     |
+| `img-src`     | `data:`                                                 | The Screenshot is drawn through a `data:` image                                  |
+
+```text
+Content-Security-Policy:
+  script-src 'self';
+  connect-src 'self' https://www.faster-fixes.com;
+  img-src 'self' data:
+```
+
+## What needs no directive
+
+- **Styles**: the widget's styles are applied through constructed stylesheets in its shadow root, which `style-src` does not restrict. A policy that does not allow inline style attributes (`'unsafe-inline'` in `style-src` or `style-src-attr`) can report `style-src-attr` violations from the recorder when an element's inline style changes. The recorder falls back to the full style value, and the Recording is the same.
+- **Fonts**: the widget uses the system font. The Screenshot fetches your web fonts through `connect-src`, so `font-src` needs nothing beyond what your page already uses.
+- **Workers**: neither the widget nor the recorder starts a worker, so `worker-src` needs nothing.
+- **Recording**: Recording asks for no directive beyond the widget's. On the script embed, the recorder file is covered by the source that allows the widget script.
+
+## When something is blocked
+
+- **The API**: the widget's configuration request fails and the widget does not appear.
+- **`data:` images**: the Screenshot is blank.
+- **Your image or font origins in `connect-src`**: those images or fonts are missing from the Screenshot.
+- **The recorder file**: the widget works and Feedback is submitted, with no [Recording](/docs/widget/recording) and no Recording line in the comment form. The widget shows no error. The browser logs the refused script in its console, as it does for any violation.
+
+## Self-hosted
+
+On a [self-hosted](/docs/self-hosting) instance, replace `https://www.faster-fixes.com` with the origin you pass as `apiOrigin`, or `data-api-origin` on the script embed. The script embed still loads the recorder file from `https://cdn.jsdelivr.net`.

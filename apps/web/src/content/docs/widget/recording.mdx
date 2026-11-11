@@ -116,7 +116,7 @@ Recording is independent of `captureDiagnostics`: turning off the Diagnostic Tra
 A Recording is best effort. A Feedback has none when:
 
 - `captureRecording` is `false`,
-- the recorder file was blocked, for example by a Content Security Policy, or had not finished loading,
+- the recorder file was blocked, for example by a [Content Security Policy](/docs/widget/content-security-policy), or had not finished loading,
 - the browser has no native compression (`CompressionStream`),
 - the Recording was over the size cap of 4 MB once compressed, even after the widget retried with only its most recent part,
 - the upload failed, or the Reviewer left the page right after submitting, before the upload finished,

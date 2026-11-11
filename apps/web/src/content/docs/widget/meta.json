@@ -9,6 +9,7 @@
     "recording",
     "customization",
     "headless-client",
+    "content-security-policy",
     "upgrading"
   ]
 }
