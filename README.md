@@ -36,7 +36,7 @@
 
 During the review phase of a web project, clients send feedback through WhatsApp messages, scattered screenshots, and vague descriptions with no link to the page. Developers then spend time deciphering what was meant, finding the right page, and turning it into something actionable.
 
-Faster Fixes replaces that workflow. Clients leave feedback directly on the website through a lightweight widget. The system captures the full context automatically — screenshot, page URL, DOM selector, browser metadata, and React component tree when available. Developers consume that feedback from a dashboard or directly from their AI coding agent via MCP.
+Faster Fixes replaces that workflow. Clients leave feedback directly on the website through a lightweight widget. The system captures the full context automatically: screenshot, a Recording of the moments leading up to the feedback, page URL, DOM selector, browser metadata, and React component tree when available. Developers consume that feedback from a dashboard or directly from their AI coding agent via MCP.
 
 The goal is a short path from client comment to resolved fix:
 
@@ -123,6 +123,7 @@ The MCP server works with Claude Code, Cursor, VS Code, Windsurf, Codex, and Zed
 
 - **Visual feedback widget** — clients click on elements to leave feedback, no training needed
 - **Automatic context capture** — screenshot, page URL, DOM selector, component tree, browser info
+- **Recording**: the page content and the client's interactions over the last minute before each feedback, never the values typed into fields
 - **Developer dashboard** — organized view of all feedback across projects
 - **Markdown export** — copy any feedback item as a structured bug report for AI agents
 - **MCP server** — AI coding agents fetch and resolve feedback programmatically

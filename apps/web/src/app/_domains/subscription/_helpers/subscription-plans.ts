@@ -146,6 +146,11 @@ export const PLAN_FEATURES = {
       highlighted: false,
     },
     {
+      id: "recording",
+      label: "Recording",
+      highlighted: false,
+    },
+    {
       id: "dashboard",
       label: "Feedback management dashboard",
       highlighted: false,
