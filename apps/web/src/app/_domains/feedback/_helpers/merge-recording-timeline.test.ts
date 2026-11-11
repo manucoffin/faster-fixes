@@ -2,6 +2,7 @@ import type { ConsoleEntry, NetworkEntry } from "@fasterfixes/core";
 import { describe, expect, it } from "vitest";
 
 import {
+  mergeDiagnosticTrail,
   mergeRecordingTimeline,
   RECORDING_TIMELINE_MAX_ENTRIES,
 } from "./merge-recording-timeline";
@@ -155,6 +156,7 @@ describe("mergeRecordingTimeline", () => {
     const timeline = mergeRecordingTimeline({
       steps: [...clicks, selection],
       diagnosticTrail: null,
+      maxEntries: RECORDING_TIMELINE_MAX_ENTRIES,
     });
 
     expect(timeline.entries).toHaveLength(RECORDING_TIMELINE_MAX_ENTRIES);
@@ -183,6 +185,7 @@ describe("mergeRecordingTimeline", () => {
     const timeline = mergeRecordingTimeline({
       steps: [...clicks, selection],
       diagnosticTrail: evidence,
+      maxEntries: RECORDING_TIMELINE_MAX_ENTRIES,
     });
 
     const survivors = timeline.entries.filter((entry) => entry.kind !== "step");
@@ -198,5 +201,49 @@ describe("mergeRecordingTimeline", () => {
     expect(timestamps(timeline)).toEqual(
       [...timestamps(timeline)].sort((a, b) => a - b),
     );
+  });
+
+  it("returns every entry up to the Selection when the caller sets no cap", () => {
+    const clicks = Array.from({ length: 300 }, (_, index) =>
+      step("click", SELECTED_AT - (300 - index) * 1_000),
+    );
+    const timeline = mergeRecordingTimeline({
+      steps: [...clicks, selection],
+      diagnosticTrail: {
+        console: [log(SELECTED_AT - 400_000), log(SELECTED_AT + 1_000)],
+        network: [request(SELECTED_AT - 500_000)],
+      },
+    });
+
+    expect(timeline.entries).toHaveLength(303);
+    expect(timeline.droppedCount).toBe(0);
+    expect(timeline.afterSelectionCount).toBe(1);
+    expect(timeline.entries[0]?.timestamp).toBe(SELECTED_AT - 500_000);
+    expect(timeline.entries.at(-1)).toMatchObject({
+      kind: "step",
+      step: selection,
+    });
+  });
+});
+
+describe("mergeDiagnosticTrail", () => {
+  it("puts console and network entries in time order, timed from the reference", () => {
+    const entries = mergeDiagnosticTrail(
+      {
+        console: [log(SELECTED_AT - 1_000, "error"), log(SELECTED_AT + 2_000)],
+        network: [request(SELECTED_AT - 3_000)],
+      },
+      SELECTED_AT,
+    );
+
+    expect(entries.map((entry) => [entry.kind, entry.offsetMs])).toEqual([
+      ["network", -3_000],
+      ["console", -1_000],
+      ["console", 2_000],
+    ]);
+  });
+
+  it("reads a missing Diagnostic Trail as no entries", () => {
+    expect(mergeDiagnosticTrail(null, SELECTED_AT)).toEqual([]);
   });
 });

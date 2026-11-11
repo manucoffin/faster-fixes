@@ -36,15 +36,19 @@ export type RecordingTimeline = {
 
 /**
  * Merge a Recording's steps, which end with the Selection, with the Diagnostic
- * Trail in time order, capped so the entries closest to the Selection stay.
- * Console errors and failed network responses survive the cut first.
+ * Trail in time order. With `maxEntries`, capped so the entries closest to the
+ * Selection stay; console errors and failed network responses survive the cut
+ * first. Without it, every entry up to the Selection is returned.
  */
 export function mergeRecordingTimeline({
   steps,
   diagnosticTrail,
+  maxEntries = Infinity,
 }: {
   steps: readonly RecordingStep[];
   diagnosticTrail: DiagnosticTrail | null | undefined;
+  /** Selection included. */
+  maxEntries?: number;
 }): RecordingTimeline {
   const selection = steps.at(-1);
   if (!selection) {
@@ -60,6 +64,45 @@ export function mergeRecordingTimeline({
     ...steps
       .slice(0, -1)
       .map((step) => ({ kind: "step" as const, step, ...at(step.timestamp) })),
+    ...diagnosticTrailEntries(diagnosticTrail, selection.timestamp),
+  ];
+  const before = all
+    .filter((entry) => entry.offsetMs <= 0)
+    .sort((a, b) => a.timestamp - b.timestamp);
+  const kept = keepClosest(before, maxEntries - 1);
+
+  return {
+    entries: [
+      ...kept,
+      { kind: "step", step: selection, ...at(selection.timestamp) },
+    ],
+    droppedCount: before.length - kept.length,
+    afterSelectionCount: all.length - before.length,
+  };
+}
+
+/**
+ * The Diagnostic Trail alone as timeline entries, in time order, timed from
+ * `referenceAt`: what a timeline holds when a Recording cannot be read.
+ */
+export function mergeDiagnosticTrail(
+  diagnosticTrail: DiagnosticTrail | null | undefined,
+  referenceAt: number,
+): RecordingTimelineEntry[] {
+  return diagnosticTrailEntries(diagnosticTrail, referenceAt).sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
+}
+
+function diagnosticTrailEntries(
+  diagnosticTrail: DiagnosticTrail | null | undefined,
+  referenceAt: number,
+): RecordingTimelineEntry[] {
+  const at = (timestamp: number) => ({
+    timestamp,
+    offsetMs: timestamp - referenceAt,
+  });
+  return [
     ...(diagnosticTrail?.network ?? []).map((entry) => ({
       kind: "network" as const,
       entry,
@@ -71,19 +114,6 @@ export function mergeRecordingTimeline({
       ...at(entry.timestamp),
     })),
   ];
-  const before = all
-    .filter((entry) => entry.offsetMs <= 0)
-    .sort((a, b) => a.timestamp - b.timestamp);
-  const kept = keepClosest(before, RECORDING_TIMELINE_MAX_ENTRIES - 1);
-
-  return {
-    entries: [
-      ...kept,
-      { kind: "step", step: selection, ...at(selection.timestamp) },
-    ],
-    droppedCount: before.length - kept.length,
-    afterSelectionCount: all.length - before.length,
-  };
 }
 
 // Fills the budget with evidence first, then with the rest, latest first.

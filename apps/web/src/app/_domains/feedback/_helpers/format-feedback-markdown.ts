@@ -11,7 +11,10 @@ import {
   formatNetworkEntry,
 } from "./format-diagnostic-entry";
 import { formatTimelineLines } from "./format-timeline-lines";
-import { mergeRecordingTimeline } from "./merge-recording-timeline";
+import {
+  mergeRecordingTimeline,
+  RECORDING_TIMELINE_MAX_ENTRIES,
+} from "./merge-recording-timeline";
 import type { FeedbackSelection } from "./read-feedback-selection";
 import type { RecordingStep } from "./read-recording-steps";
 
@@ -186,7 +189,11 @@ function diagnosticsOrTimelineLines({
 }: Pick<FeedbackForMarkdown, "recording" | "diagnosticTrail">): string[] {
   if (recording?.readable) {
     const timelineLines = formatTimelineLines(
-      mergeRecordingTimeline({ steps: recording.steps, diagnosticTrail }),
+      mergeRecordingTimeline({
+        steps: recording.steps,
+        diagnosticTrail,
+        maxEntries: RECORDING_TIMELINE_MAX_ENTRIES,
+      }),
     );
     if (timelineLines.length > 0) {
       return ["", "## Timeline", "", ...timelineLines];
