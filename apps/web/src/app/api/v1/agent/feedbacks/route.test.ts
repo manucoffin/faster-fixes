@@ -5,6 +5,7 @@
  * on how the handler reaches them.
  */
 
+import { RECORDING_STEPS_VERSION } from "@/app/_domains/feedback/_helpers/read-recording-steps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   agentApiPrisma,
@@ -40,6 +41,11 @@ vi.mock("@/server/inngest", async () => {
   return { inngest: { send: inngestSendDouble } };
 });
 
+const getStorageObjectDouble = vi.fn();
+vi.mock("@/server/storage/objects", () => ({
+  getStorageObject: getStorageObjectDouble,
+}));
+
 const { GET, POST } = await import("./route");
 
 const LIST_URL = `https://app.test/api/v1/agent/feedbacks?project=${PROJECT_PUBLIC_ID}`;
@@ -71,6 +77,11 @@ const feedbackRow = {
   customMetadata: { userId: "user_42", beta: true },
   reviewer: { name: "Dana" },
   createdAt: new Date("2026-01-02T03:04:05.000Z"),
+  recordingId: null,
+  recordingDurationMs: null,
+  recordingFormatVersion: null,
+  recordingSteps: null,
+  recordingStepsVersion: null,
 };
 
 const createdRow = {
@@ -206,6 +217,7 @@ describe("GET /api/v1/agent/feedbacks", () => {
           customMetadata: { userId: "user_42", beta: true },
           reviewerName: "Dana",
           createdAt: "2026-01-02T03:04:05.000Z",
+          recording: null,
         },
       ],
       count: 1,
@@ -250,6 +262,114 @@ describe("GET /api/v1/agent/feedbacks", () => {
     await expect(response.json()).resolves.toMatchObject({
       feedbacks: [{ customMetadata: null }],
     });
+  });
+});
+
+describe("GET /api/v1/agent/feedbacks with a Recording", () => {
+  const SELECTION_AT = 1_794_400_060_000;
+  const cachedSteps = {
+    startedAt: SELECTION_AT - 20_000,
+    endedAt: SELECTION_AT,
+    steps: [
+      {
+        type: "click",
+        timestamp: SELECTION_AT - 4_000,
+        offsetMs: -4_000,
+        label: 'button "Save"',
+        selector: "#save",
+        detail: null,
+      },
+      {
+        type: "selection",
+        timestamp: SELECTION_AT,
+        offsetMs: 0,
+        label: null,
+        selector: "#submit",
+        detail: null,
+      },
+    ],
+  };
+  const withRecording = {
+    ...feedbackRow,
+    recordingId: "asset_recording",
+    recordingDurationMs: 20_000,
+    recordingFormatVersion: 1,
+  };
+  const withCachedSteps = {
+    ...withRecording,
+    recordingSteps: cachedSteps,
+    recordingStepsVersion: RECORDING_STEPS_VERSION,
+  };
+
+  it("summarizes the Recording with its cached step count in JSON", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([withCachedSteps]);
+
+    const response = await GET(agentRequest(LIST_URL));
+
+    await expect(response.json()).resolves.toMatchObject({
+      feedbacks: [{ recording: { durationMs: 20_000, stepCount: 2 } }],
+    });
+  });
+
+  it("gives a null step count until the steps are cached", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([
+      withRecording,
+      {
+        ...withCachedSteps,
+        recordingStepsVersion: RECORDING_STEPS_VERSION - 1,
+      },
+    ]);
+
+    const response = await GET(agentRequest(LIST_URL));
+
+    await expect(response.json()).resolves.toMatchObject({
+      feedbacks: [
+        { recording: { durationMs: 20_000, stepCount: null } },
+        { recording: { durationMs: 20_000, stepCount: null } },
+      ],
+    });
+  });
+
+  it("reads a Recording that has not reached the server as none", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([
+      { ...withRecording, recordingId: null },
+    ]);
+
+    const response = await GET(agentRequest(LIST_URL));
+
+    await expect(response.json()).resolves.toMatchObject({
+      feedbacks: [{ recording: null }],
+    });
+  });
+
+  it("adds the Recording line pointing to get_feedback in markdown", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([
+      withCachedSteps,
+      { ...withRecording, id: "feedback_3" },
+    ]);
+
+    const response = await GET(agentRequest(`${LIST_URL}&format=markdown`));
+
+    const markdown = await response.text();
+    expect(markdown).toContain(
+      "**Recording:** 20.0 s, 2 steps. Call `get_feedback` with id `feedback_1` to read its timeline.",
+    );
+    expect(markdown).toContain(
+      "**Recording:** 20.0 s. Call `get_feedback` with id `feedback_3` to read its timeline.",
+    );
+    expect(markdown).not.toContain("## Timeline");
+  });
+
+  it("never reads a Recording file", async () => {
+    agentApiPrisma.feedback.findMany.mockResolvedValue([
+      withRecording,
+      withCachedSteps,
+    ]);
+
+    await GET(agentRequest(LIST_URL));
+    await GET(agentRequest(`${LIST_URL}&format=markdown`));
+
+    expect(getStorageObjectDouble).not.toHaveBeenCalled();
   });
 });
 
@@ -321,6 +441,7 @@ describe("GET /api/v1/agent/feedbacks with the video filter", () => {
           customMetadata: null,
           reviewerName: "Curious Otter",
           createdAt: "2026-11-04T09:12:33.000Z",
+          recording: null,
         },
       ],
       count: 1,

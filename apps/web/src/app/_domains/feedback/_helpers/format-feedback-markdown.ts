@@ -44,7 +44,50 @@ export type FeedbackForMarkdown = {
   recording?: { readable: boolean; steps: RecordingStep[] } | null;
 };
 
+// A listing never carries a timeline: only that a Recording exists, how long
+// it is and how many steps are cached, from the Feedback's columns.
+export type FeedbackListItemForMarkdown = Omit<
+  FeedbackForMarkdown,
+  "recording"
+> & {
+  recording?: { durationMs: number; stepCount: number | null } | null;
+};
+
 export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
+  return renderFeedbackMarkdown(f, diagnosticsOrTimelineLines(f));
+}
+
+/** One Feedback in list form: Diagnostics as today, plus the Recording line. */
+export function formatFeedbackListItemAsMarkdown(
+  f: FeedbackListItemForMarkdown,
+): string {
+  const lines = diagnosticsOrTimelineLines({
+    diagnosticTrail: f.diagnosticTrail,
+  });
+  if (f.recording) {
+    // A Console-only trail already ends on a blank line.
+    if (lines.at(-1) !== "") lines.push("");
+    lines.push(formatRecordingListLine(f.id, f.recording));
+  }
+  return renderFeedbackMarkdown(f, lines);
+}
+
+function formatRecordingListLine(
+  feedbackId: string,
+  { durationMs, stepCount }: { durationMs: number; stepCount: number | null },
+): string {
+  const duration = `${(durationMs / 1000).toFixed(1)} s`;
+  const summary =
+    stepCount === null
+      ? duration
+      : `${duration}, ${stepCount} ${stepCount === 1 ? "step" : "steps"}`;
+  return `**Recording:** ${summary}. Call \`get_feedback\` with id \`${feedbackId}\` to read its timeline.`;
+}
+
+function renderFeedbackMarkdown(
+  f: Omit<FeedbackForMarkdown, "recording">,
+  diagnosticsLines: string[],
+): string {
   const md = f.metadata;
   const lines: string[] = [];
 
@@ -119,7 +162,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     lines.push(...customMetadataLines);
   }
 
-  lines.push(...diagnosticsOrTimelineLines(f));
+  lines.push(...diagnosticsLines);
 
   // Screenshot with instruction for multimodal AI agents
   if (f.screenshotUrl) {
@@ -140,7 +183,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
 function diagnosticsOrTimelineLines({
   recording,
   diagnosticTrail,
-}: FeedbackForMarkdown): string[] {
+}: Pick<FeedbackForMarkdown, "recording" | "diagnosticTrail">): string[] {
   if (recording?.readable) {
     const timelineLines = formatTimelineLines(
       mergeRecordingTimeline({ steps: recording.steps, diagnosticTrail }),
@@ -165,7 +208,10 @@ function diagnosticsOrTimelineLines({
   return lines;
 }
 
-function videoLocationLines({ videoTitle, selection }: FeedbackForMarkdown) {
+function videoLocationLines({
+  videoTitle,
+  selection,
+}: Pick<FeedbackForMarkdown, "videoTitle" | "selection">) {
   const lines: string[] = [];
   if (videoTitle) lines.push(`**Video:** ${videoTitle}`);
   if (!selection) return lines;
@@ -199,10 +245,10 @@ function pad(value: number, length: number) {
 }
 
 export function formatFeedbackListAsMarkdown(
-  feedbacks: FeedbackForMarkdown[],
+  feedbacks: FeedbackListItemForMarkdown[],
 ): string {
   if (feedbacks.length === 0) return "No feedback items found.";
-  return feedbacks.map((f) => formatFeedbackAsMarkdown(f)).join("\n\n---\n\n");
+  return feedbacks.map(formatFeedbackListItemAsMarkdown).join("\n\n---\n\n");
 }
 
 /**

@@ -1,39 +1,14 @@
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
-import { z } from "zod";
-
+import {
+  type CachedRecordingSteps,
+  readCachedRecordingSteps,
+} from "../_helpers/read-cached-recording-steps";
 import {
   RECORDING_STEPS_VERSION,
   readRecordingSteps,
 } from "../_helpers/read-recording-steps";
 import { getRecordingEvents } from "./get-recording-events";
-
-const CachedRecordingStepsSchema = z.object({
-  startedAt: z.number(),
-  endedAt: z.number(),
-  steps: z.array(
-    z.object({
-      type: z.enum([
-        "load",
-        "click",
-        "input",
-        "select",
-        "submit",
-        "navigation",
-        "scroll",
-        "resize",
-        "selection",
-      ]),
-      timestamp: z.number(),
-      offsetMs: z.number(),
-      label: z.string().nullable(),
-      selector: z.string().nullable(),
-      detail: z.string().nullable(),
-    }),
-  ),
-});
-
-type CachedRecordingSteps = z.infer<typeof CachedRecordingStepsSchema>;
 
 type FeedbackWithRecording = {
   id: string;
@@ -67,7 +42,7 @@ export async function refreshFeedbackRecording(
 
   const url = await getSignedAssetUrl(recording);
   const derived =
-    readCache(feedback) ??
+    readCachedRecordingSteps(feedback) ??
     (await deriveAndCache(feedback, recording, formatVersion, db));
 
   if (!derived) {
@@ -86,15 +61,6 @@ export async function refreshFeedbackRecording(
 export type RefreshFeedbackRecordingOutput = Awaited<
   ReturnType<typeof refreshFeedbackRecording>
 >;
-
-function readCache({
-  recordingSteps,
-  recordingStepsVersion,
-}: FeedbackWithRecording): CachedRecordingSteps | null {
-  if (recordingStepsVersion !== RECORDING_STEPS_VERSION) return null;
-  const cached = CachedRecordingStepsSchema.safeParse(recordingSteps);
-  return cached.success ? cached.data : null;
-}
 
 async function deriveAndCache(
   feedback: FeedbackWithRecording,

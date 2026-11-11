@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   type FeedbackForMarkdown,
   formatFeedbackAsMarkdown,
+  formatFeedbackListAsMarkdown,
+  formatFeedbackListItemAsMarkdown,
 } from "./format-feedback-markdown";
 
 const feedback: FeedbackForMarkdown = {
@@ -313,5 +315,55 @@ describe("formatFeedbackAsMarkdown on a video Feedback", () => {
         selection: null,
       }),
     ).toBe(todaysOutput);
+  });
+});
+
+describe("formatFeedbackListAsMarkdown", () => {
+  it("adds the Recording line with the duration and the cached step count", () => {
+    const markdown = formatFeedbackListItemAsMarkdown({
+      ...feedback,
+      recording: { durationMs: 42_300, stepCount: 12 },
+    });
+
+    expect(markdown).toBe(
+      `${todaysOutput}\n**Recording:** 42.3 s, 12 steps. Call \`get_feedback\` with id \`fb_1\` to read its timeline.`,
+    );
+  });
+
+  it("gives the duration alone when the steps are not cached", () => {
+    const markdown = formatFeedbackListItemAsMarkdown({
+      ...feedback,
+      recording: { durationMs: 8_000, stepCount: null },
+    });
+
+    expect(markdown).toContain(
+      "**Recording:** 8.0 s. Call `get_feedback` with id `fb_1` to read its timeline.",
+    );
+    expect(markdown).toContain("## Diagnostics");
+    expect(markdown).not.toContain("## Timeline");
+  });
+
+  it("puts the Recording line after Environment without a Diagnostic Trail", () => {
+    const markdown = formatFeedbackListItemAsMarkdown({
+      ...feedback,
+      diagnosticTrail: null,
+      recording: { durationMs: 1_000, stepCount: 1 },
+    });
+
+    expect(markdown).toContain(
+      "**Viewport:** 1280×720\n\n**Recording:** 1.0 s, 1 step.",
+    );
+  });
+
+  it.each([
+    ["absent", undefined],
+    ["null", null],
+  ])("matches today's output when the Recording is %s", (_, value) => {
+    expect(
+      formatFeedbackListAsMarkdown([
+        { ...feedback, recording: value },
+        { ...feedback, recording: value },
+      ]),
+    ).toBe(`${todaysOutput}\n\n---\n\n${todaysOutput}`);
   });
 });

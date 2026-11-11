@@ -3,6 +3,7 @@ import {
   toAgentFeedbackItem,
   toAgentVideoBlock,
 } from "@/app/_domains/feedback/_helpers/agent-feedback-serializer";
+import { summarizeFeedbackRecording } from "@/app/_domains/feedback/_helpers/read-cached-recording-steps";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
@@ -75,6 +76,7 @@ export async function listFeedbacks(
         f,
         f.screenshot ? await getSignedAssetUrl(f.screenshot) : null,
       ),
+      recording: summarizeFeedbackRecording(f),
       // Not part of the JSON item: the Markdown rendering names the Video.
       videoTitle: f.video?.title ?? null,
     })),

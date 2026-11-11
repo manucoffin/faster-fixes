@@ -1,3 +1,4 @@
+import { summarizeFeedbackRecording } from "@/app/_domains/feedback/_helpers/read-cached-recording-steps";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import type { CustomMetadata } from "@fasterfixes/core";
 import type { Prisma } from "@workspace/db/types";
@@ -83,6 +84,7 @@ export async function toInboxFeedbackItem(f: InboxFeedbackRow) {
     screenshotUrl: f.screenshot ? await getSignedAssetUrl(f.screenshot) : null,
     metadata: f.metadata as Record<string, unknown> | null,
     customMetadata: f.customMetadata as CustomMetadata | null,
+    recording: summarizeFeedbackRecording(f),
     issueLink: f.issueLink,
     linearIssueLink: f.linearIssueLink,
     jiraIssueLink: f.jiraIssueLink,
