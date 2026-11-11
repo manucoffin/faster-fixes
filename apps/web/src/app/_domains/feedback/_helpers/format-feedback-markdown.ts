@@ -4,7 +4,12 @@
  */
 
 import { describeVideoSelection } from "@/app/_domains/video";
-import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+import type {
+  ConsoleEntry,
+  CustomMetadata,
+  DiagnosticTrail,
+  NetworkEntry,
+} from "@fasterfixes/core";
 import type { FeedbackSelection } from "./read-feedback-selection";
 
 export type FeedbackForMarkdown = {
@@ -190,7 +195,7 @@ export function formatDiagnosticTrailLines(
   if (consoleEntries.length > 0) {
     lines.push("**Console**", "");
     for (const entry of consoleEntries) {
-      lines.push(`- \`${entry.level}\` ${collapseWhitespace(entry.message)}`);
+      lines.push(`- ${formatConsoleEntry(entry)}`);
     }
     lines.push("");
   }
@@ -198,14 +203,21 @@ export function formatDiagnosticTrailLines(
   if (networkEntries.length > 0) {
     lines.push("**Network**", "");
     for (const entry of networkEntries) {
-      const status = entry.status === 0 ? "ERR" : String(entry.status);
-      lines.push(
-        `- \`${entry.method}\` ${entry.url} → ${status} (${Math.round(entry.duration)}ms)`,
-      );
+      lines.push(`- ${formatNetworkEntry(entry)}`);
     }
   }
 
   return lines;
+}
+
+// One Diagnostic Trail entry, as the Diagnostics section and the timeline show it.
+export function formatConsoleEntry(entry: ConsoleEntry): string {
+  return `\`${entry.level}\` ${collapseWhitespace(entry.message)}`;
+}
+
+export function formatNetworkEntry(entry: NetworkEntry): string {
+  const status = entry.status === 0 ? "ERR" : String(entry.status);
+  return `\`${entry.method}\` ${entry.url} → ${status} (${Math.round(entry.duration)}ms)`;
 }
 
 /**
