@@ -6,14 +6,20 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { RecordingStage } from "./recording-stage.client";
 
 type RecordingPlayerProps = {
+  feedbackId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 // Full-window surface over the inbox, above the detail panel.
-export function RecordingPlayer({ open, onOpenChange }: RecordingPlayerProps) {
+export function RecordingPlayer({
+  feedbackId,
+  open,
+  onOpenChange,
+}: RecordingPlayerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-screen w-screen max-w-none flex-col gap-0 rounded-none border-none p-0 sm:max-w-none">
@@ -23,7 +29,7 @@ export function RecordingPlayer({ open, onOpenChange }: RecordingPlayerProps) {
             Recording of the page before this feedback was submitted
           </DialogDescription>
         </div>
-        <div className="min-h-0 flex-1 bg-muted/30" />
+        <RecordingStage feedbackId={feedbackId} />
       </DialogContent>
     </Dialog>
   );

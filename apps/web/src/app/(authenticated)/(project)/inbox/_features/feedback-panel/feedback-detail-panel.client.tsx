@@ -137,6 +137,7 @@ export function FeedbackDetailPanel({
                   onPlay={() => void setIsPlayerOpen(true)}
                 />
                 <RecordingPlayer
+                  feedbackId={feedback.id}
                   open={isPlayerOpen}
                   onOpenChange={(next) => void setIsPlayerOpen(next || null)}
                 />

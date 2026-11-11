@@ -10,9 +10,10 @@ import type { GetRecordingPlaybackInput } from "./get-recording-playback.schema"
 
 /**
  * What the inbox player needs for one Feedback's Recording: its duration, its
- * bounds on the clock and every entry of the merged timeline, uncapped. The
- * steps come from the agent surface's cache, so the two never disagree. An
- * unreadable file still answers, with the Diagnostic Trail alone.
+ * format version, its bounds on the clock and every entry of the merged
+ * timeline, uncapped. The steps come from the agent surface's cache, so the
+ * two never disagree. An unreadable file still answers, with the Diagnostic
+ * Trail alone.
  */
 export async function getRecordingPlayback(
   { feedbackId, userId }: GetRecordingPlaybackInput & { userId: string },
@@ -49,7 +50,8 @@ export async function getRecordingPlayback(
   }
 
   const recording = await refreshFeedbackRecordingSteps(feedback, db);
-  if (!recording) {
+  const formatVersion = feedback.recordingFormatVersion;
+  if (!recording || formatVersion === null) {
     throw new NotFoundError("Recording not found.");
   }
 
@@ -57,6 +59,8 @@ export async function getRecordingPlayback(
   const { steps, ...playback } = recording;
   return {
     ...playback,
+    // The browser checks it before playing the file (#413).
+    formatVersion,
     entries: playback.readable
       ? mergeRecordingTimeline({ steps, diagnosticTrail }).entries
       : // Without the file there is no Selection on the Recording's clock:

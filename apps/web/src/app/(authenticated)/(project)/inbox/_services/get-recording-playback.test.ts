@@ -94,6 +94,7 @@ describe("getRecordingPlayback", () => {
     expect(playback).toMatchObject({
       readable: true,
       durationMs: endedAt - startedAt,
+      formatVersion: 1,
       startedAt,
       endedAt,
     });
