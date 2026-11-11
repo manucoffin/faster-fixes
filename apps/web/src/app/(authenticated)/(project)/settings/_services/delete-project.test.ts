@@ -10,16 +10,20 @@ const { deleteProject } = await import("./delete-project");
 type FakeDb = NonNullable<Parameters<typeof deleteProject>[1]>;
 
 type VideoAssets = { fileAssetId: string | null; posterAssetId: string | null };
+type FeedbackAssets = {
+  screenshotId: string | null;
+  recordingId: string | null;
+};
 
 function fakeDb({
   project = { id: "project_1", organizationId: "org_1" },
   membership = { id: "member_1" },
-  screenshots = [] as { screenshotId: string | null }[],
+  screenshots = [] as FeedbackAssets[],
   videos = [] as VideoAssets[],
 }: {
   project?: { id: string; organizationId: string } | null;
   membership?: { id: string } | null;
-  screenshots?: { screenshotId: string | null }[];
+  screenshots?: FeedbackAssets[];
   videos?: VideoAssets[];
 } = {}) {
   return {
@@ -61,7 +65,10 @@ describe("deleteProject", () => {
 
   it("frees the screenshot of every feedback once the project is deleted", async () => {
     const db = fakeDb({
-      screenshots: [{ screenshotId: "asset_1" }, { screenshotId: "asset_2" }],
+      screenshots: [
+        { screenshotId: "asset_1", recordingId: null },
+        { screenshotId: "asset_2", recordingId: null },
+      ],
     });
 
     await expect(deleteProject(input, db)).resolves.toEqual({
@@ -75,7 +82,7 @@ describe("deleteProject", () => {
 
   it("frees the file and Poster of every Video with the screenshots in one call", async () => {
     const db = fakeDb({
-      screenshots: [{ screenshotId: "asset_shot" }],
+      screenshots: [{ screenshotId: "asset_shot", recordingId: null }],
       videos: [
         { fileAssetId: "asset_file_1", posterAssetId: "asset_poster_1" },
         { fileAssetId: "asset_file_2", posterAssetId: null },
@@ -95,6 +102,30 @@ describe("deleteProject", () => {
       "asset_file_1",
       "asset_poster_1",
       "asset_file_2",
+    ]);
+  });
+
+  it("frees the Recording of every feedback with its screenshot", async () => {
+    const db = fakeDb({
+      screenshots: [
+        { screenshotId: "asset_1", recordingId: "recording_1" },
+        { screenshotId: null, recordingId: "recording_2" },
+      ],
+    });
+
+    await deleteProject(input, db);
+
+    expect(db.feedback.findMany).toHaveBeenCalledWith({
+      where: {
+        projectId: "project_1",
+        OR: [{ screenshotId: { not: null } }, { recordingId: { not: null } }],
+      },
+      select: { screenshotId: true, recordingId: true },
+    });
+    expect(deleteAssets).toHaveBeenCalledWith([
+      "asset_1",
+      "recording_1",
+      "recording_2",
     ]);
   });
 });

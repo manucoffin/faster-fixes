@@ -12,9 +12,9 @@ type DeleteFeedbackInput = {
 export async function deleteFeedback({ feedbackId }: DeleteFeedbackInput) {
   const feedback = await prisma.feedback.delete({ where: { id: feedbackId } });
 
-  // The relation only nulls the reference, so the screenshot Asset and its S3
-  // object would outlive the Feedback.
-  if (feedback.screenshotId) {
-    await deleteAsset(feedback.screenshotId);
+  // The relations only null the references, so the screenshot and Recording
+  // Assets and their stored objects would outlive the Feedback.
+  for (const assetId of [feedback.screenshotId, feedback.recordingId]) {
+    if (assetId) await deleteAsset(assetId);
   }
 }

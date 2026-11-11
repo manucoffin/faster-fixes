@@ -152,6 +152,36 @@ describe("GET /api/storage with the local provider", () => {
     expect(response.status).toBe(403);
   });
 
+  // Served as an opaque file: a `Content-Encoding: gzip` would let the browser
+  // decompress it on the way, past the reader's cap on the decompressed size.
+  it("serves a Recording with a signed token as gzip, without Content-Encoding", async () => {
+    const key = "feedback-recordings/project_1/recording.gz";
+    const gzipBytes = Buffer.from([0x1f, 0x8b, 0x08, 0x00, 0x01, 0x02]);
+    await writeObject(key, gzipBytes);
+    const signedUrl = createLocalStorageUrl(
+      { bucket: BUCKET, key, method: "GET" },
+      60,
+    );
+
+    const response = await GET(
+      storageRequest(key, undefined, tokenOf(signedUrl)),
+      routeContext(key),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/gzip");
+    expect(response.headers.get("content-encoding")).toBeNull();
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(gzipBytes);
+  });
+
+  it("refuses a Recording without a token", async () => {
+    const key = "feedback-recordings/project_1/recording.gz";
+
+    const response = await GET(storageRequest(key), routeContext(key));
+
+    expect(response.status).toBe(403);
+  });
+
   it("returns 404 for a missing avatar", async () => {
     const key = "user-avatars/user_1/missing.png";
 

@@ -23,6 +23,7 @@ import type { StorageBackend, StorageObject } from "./types";
 
 // Local disk keeps no content type, so it is read back from the key.
 const contentTypesByExtension: Record<string, string> = {
+  gz: "application/gzip",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
   mov: "video/quicktime",
