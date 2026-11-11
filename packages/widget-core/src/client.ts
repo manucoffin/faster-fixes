@@ -3,6 +3,7 @@ import type {
   CreateFeedbackResponse,
   FeedbackClient,
   FeedbackListResponse,
+  RecordingDetails,
   UpdateFeedbackData,
   UpdateFeedbackResponse,
   WidgetConfig,
@@ -114,6 +115,24 @@ export class FasterFixesClient implements FeedbackClient {
     formData.append("screenshot", screenshot, "screenshot.png");
 
     await this.request<unknown>(`/api/v1/feedback/${feedbackId}/screenshot`, {
+      method: "PUT",
+      headers: this.headers(reviewerToken),
+      body: formData,
+    });
+  }
+
+  async attachRecording(
+    feedbackId: string,
+    recording: Blob,
+    details: RecordingDetails,
+    reviewerToken: string,
+  ): Promise<void> {
+    const formData = new FormData();
+    formData.append("recording", recording, "recording.gz");
+    formData.append("durationMs", String(details.durationMs));
+    formData.append("formatVersion", String(details.formatVersion));
+
+    await this.request<void>(`/api/v1/feedback/${feedbackId}/recording`, {
       method: "PUT",
       headers: this.headers(reviewerToken),
       body: formData,

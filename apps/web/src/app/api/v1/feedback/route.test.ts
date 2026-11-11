@@ -416,6 +416,54 @@ describe("POST /api/v1/feedback", () => {
     });
   });
 
+  it("tells the integrations a Recording follows when the widget declares one", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: true },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/created",
+      data: { feedbackId: "feedback_1", recordingFollows: true },
+    });
+  });
+
+  it("announces the feedback as before when the widget declares no Recording", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: false },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/created",
+      data: { feedbackId: "feedback_1" },
+    });
+  });
+
+  it("stores nothing of the Recording declaration on the feedback", async () => {
+    await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: true },
+        }),
+      ),
+    );
+
+    expect(widgetApiPrisma.feedback.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ recordingFollows: true }),
+      }),
+    );
+  });
+
   it("stores an allowed screenshot and answers with its signed url", async () => {
     widgetApiPrisma.feedback.create.mockResolvedValue(listedFeedbackRow);
 

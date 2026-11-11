@@ -36,6 +36,8 @@ export const CreateFeedbackSchema = z.object({
   // Only the shape is checked: limits are applied by normalisation on ingest so
   // an over-limit payload from an outdated client is never rejected.
   customMetadata: z.record(z.string(), z.unknown()).optional(),
+  // The Widget's word that a Recording upload follows; never stored.
+  recordingFollows: z.boolean().optional(),
 });
 
 export type CreateFeedbackInput = z.infer<typeof CreateFeedbackSchema>;

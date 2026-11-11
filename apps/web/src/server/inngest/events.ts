@@ -8,7 +8,11 @@ import { z } from "zod";
 // The name strings are the running system's identity: never rename one.
 
 export const feedbackCreatedEvent = eventType("feedback/created", {
-  schema: z.object({ feedbackId: z.string() }),
+  schema: z.object({
+    feedbackId: z.string(),
+    // Set when the Widget declared at creation that a Recording upload follows.
+    recordingFollows: z.literal(true).optional(),
+  }),
 });
 
 export const feedbackIntegrationIssueRequestedEvent = eventType(
