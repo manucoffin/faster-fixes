@@ -708,6 +708,7 @@ describe("the layer import table", () => {
       "`TRPCError` is transport, not domain",
       "database access lives in a services folder or the server folder",
       "the database package has public entry points",
+      "the replayer runs in the player document only",
     ]);
   });
 
@@ -844,6 +845,27 @@ describe("the layer import table", () => {
           await layerMessagesFor(SERVICE_FILE, importing(specifier)),
         ]).toEqual([specifier, []]);
       }
+    });
+  });
+
+  describe("the replayer runs in the player document only", () => {
+    it("rejects the replayer in a page of the app", async () => {
+      const messages = await layerMessagesFor(
+        "src/app/(authenticated)/(project)/inbox/_features/player.client.tsx",
+        importing("@rrweb/replay"),
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("player document");
+    });
+
+    it("accepts it in the player document's script", async () => {
+      expect(
+        await layerMessagesFor(
+          "src/app/recording-player/_features/play-recording.ts",
+          importing("@rrweb/replay"),
+        ),
+      ).toEqual([]);
     });
   });
 

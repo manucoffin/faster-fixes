@@ -60,6 +60,13 @@ const nextConfig = {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
           },
+        ],
+      },
+      {
+        // A header set here replaces the route's own, and the player document
+        // sends no referrer (ADR-0023).
+        source: "/:path((?!recording-player$).*)",
+        headers: [
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",

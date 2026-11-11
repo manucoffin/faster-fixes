@@ -38,6 +38,9 @@ build
 dist
 .source
 
+# The player document's bundle, built by `pnpm build:recording-player`
+/apps/web/public/recording-player/
+
 
 # Debug
 npm-debug.log*

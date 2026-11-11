@@ -32,7 +32,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `next dev --turbopack --port ${PORT}`,
+      // The player document loads its bundle from `public/`, which is not tracked.
+      command: `pnpm build:recording-player && next dev --turbopack --port ${PORT}`,
       url: `http://localhost:${PORT}/login`,
       // A developer's own dev server carries their env, not the stubbed API origin below.
       reuseExistingServer: false,

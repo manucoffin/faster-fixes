@@ -101,6 +101,9 @@ importers:
       "@react-email/render":
         specifier: ^2.0.2
         version: 2.0.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      "@rrweb/replay":
+        specifier: 2.2.2
+        version: 2.2.2
       "@tanstack/react-query":
         specifier: ^5.90.18
         version: 5.90.18(react@19.3.0)
@@ -7825,6 +7828,12 @@ packages:
     resolution:
       {
         integrity: sha512-/UkJQaMIDBKqoqIovVY0iIPyn9O2VLHhby+AoNI7PVmWdZBk6BEqYIAwangcXPpuTjGMIeFQIvPDPGDyet6a1Q==,
+      }
+
+  "@rrweb/replay@2.2.2":
+    resolution:
+      {
+        integrity: sha512-PumY+65QmOUje7H5TBBhpgMhucmgC9aYpkwfYoy4rhTWQzE93IuvXPivU/YGr0/QNHs+MynffrakMwcXsRcZLQ==,
       }
 
   "@rrweb/types@2.2.2":
@@ -22142,6 +22151,11 @@ snapshots:
     dependencies:
       "@rrweb/types": 2.2.2
       "@rrweb/utils": 2.2.2
+      rrweb: 2.2.2
+
+  "@rrweb/replay@2.2.2":
+    dependencies:
+      "@rrweb/types": 2.2.2
       rrweb: 2.2.2
 
   "@rrweb/types@2.2.2": {}
