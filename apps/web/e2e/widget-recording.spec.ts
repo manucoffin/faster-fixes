@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 import { RECORDING_PATH, readUploadedRecording } from "./recording-upload";
+import type { UploadedRecording } from "./recording-upload";
 import { seedReviewerToken } from "./reviewer-token";
 import {
   stubWidgetApi,
@@ -57,6 +58,26 @@ function readTexts(node: SnapshotNode): string[] {
   return (node.childNodes ?? []).flatMap(readTexts);
 }
 
+// The rrweb custom event (5) a Recording that starts at its page session's
+// start carries.
+function readMarker(recording: UploadedRecording | undefined) {
+  const events = (recording?.events ?? []) as {
+    type: number;
+    data?: { tag?: string; payload?: unknown };
+  }[];
+  const markers = events.filter(
+    ({ type, data }) => type === 5 && data?.tag === "fasterfixes/page-session",
+  );
+  expect(markers.length).toBeLessThanOrEqual(1);
+  return markers[0]?.data?.payload;
+}
+
+function fullSnapshotTimes(recording: UploadedRecording | undefined) {
+  return (recording?.events ?? [])
+    .filter(({ type }) => type === 2)
+    .map(({ timestamp }) => timestamp);
+}
+
 // The default line on a page open for less than 30 seconds.
 const RECORDING_LINE =
   /^Includes the last (second|\d+ seconds) on this page\.$/;
@@ -66,6 +87,13 @@ async function select(page: Page, target = "h1") {
   await page.locator(target).click();
   // Read right after the Selection click: no recorded event may be later.
   return page.evaluate(() => Date.now());
+}
+
+// The line shows only once the recorder file has arrived and recorded.
+async function waitForRecorder(page: Page) {
+  await select(page);
+  await expect(page.getByText(RECORDING_LINE)).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
 }
 
 async function submit(page: Page, comment: string) {
@@ -301,6 +329,168 @@ for (const embed of EMBEDS) {
 
       await expect(page.getByPlaceholder("Describe the issue...")).toBeHidden();
       expect(api.requestsTo("PUT", RECORDING_PATH)).toHaveLength(1);
+    });
+
+    test("marks a Recording that starts at the page load, with a same-origin referrer's path", async ({
+      page,
+      baseURL,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path, {
+        referer: `${baseURL ?? ""}/pricing?token=from-the-referrer`,
+      });
+
+      await select(page);
+      await submit(page, "Right after the load");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const recording = readUploadedRecording(
+        api.requestsTo("PUT", RECORDING_PATH)[0] ?? { headers: {}, body: null },
+      );
+      expect(recording.durationMs).toBeLessThan(30_000);
+      expect(readMarker(recording)).toEqual({
+        navigationType: "load",
+        referrerPath: "/pricing",
+      });
+      // Right after the meta event and the full snapshot.
+      expect(recording.events[2]?.type).toBe(5);
+      expect(recording.json).not.toContain("from-the-referrer");
+    });
+
+    test("marks a reload and never records an external referrer", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path, {
+        referer: "https://elsewhere.example/search?q=shop",
+      });
+      await page.reload();
+
+      await select(page);
+      await submit(page, "After a reload");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const recording = readUploadedRecording(
+        api.requestsTo("PUT", RECORDING_PATH)[0] ?? { headers: {}, body: null },
+      );
+      expect(readMarker(recording)).toEqual({ navigationType: "reload" });
+      expect(recording.json).not.toContain("elsewhere.example");
+    });
+
+    test("keeps an in-app route change in one Recording", async ({ page }) => {
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await expect(
+        page.getByRole("button", { name: "Start feedback" }),
+      ).toBeVisible();
+      await writeOnPage(page, "Before the route change");
+      await page.evaluate(() => {
+        window.history.pushState(null, "", "?step=2");
+      });
+      await expect(page).toHaveURL(/\?step=2$/);
+      await writeOnPage(page, "After the route change");
+
+      await select(page);
+      await submit(page, "Across two views");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const recording = readUploadedRecording(
+        api.requestsTo("PUT", RECORDING_PATH)[0] ?? { headers: {}, body: null },
+      );
+      expect(fullSnapshotTimes(recording)).toHaveLength(1);
+      expect(readMarker(recording)).toMatchObject({ navigationType: "load" });
+      expect(recording.json).toContain("Before the route change");
+      expect(recording.json).toContain("After the route change");
+    });
+
+    test("takes no snapshot while the tab is hidden", async ({ page }) => {
+      await page.clock.install();
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await waitForRecorder(page);
+
+      await page.evaluate(() => {
+        Object.defineProperty(document, "hidden", {
+          configurable: true,
+          get: () => true,
+        });
+      });
+      // Two slices' worth: a visible tab would have taken two snapshots.
+      await page.clock.runFor(65_000);
+      const visibleAt = await page.evaluate(() => {
+        // Back to the prototype's getter.
+        Reflect.deleteProperty(document, "hidden");
+        return Date.now();
+      });
+      await page.clock.runFor(2_000);
+      await writeOnPage(page, "Back on the tab");
+
+      await select(page);
+      await submit(page, "After a background tab");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const recording = readUploadedRecording(
+        api.requestsTo("PUT", RECORDING_PATH)[0] ?? { headers: {}, body: null },
+      );
+      const snapshots = fullSnapshotTimes(recording);
+      expect(snapshots).toHaveLength(1);
+      expect(snapshots[0]).toBeGreaterThanOrEqual(visibleAt);
+      expect(recording.json).toContain("Back on the tab");
+    });
+
+    test("drops the slice of a mutation burst and records the next one", async ({
+      page,
+    }) => {
+      await page.clock.install();
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await waitForRecorder(page);
+
+      // Past the recorder's threshold of mutated nodes in one slice.
+      await page.evaluate(() => {
+        const burst = document.createElement("div");
+        burst.className = "e2e-burst";
+        for (let i = 0; i < 12_000; i += 1) {
+          burst.appendChild(document.createElement("span"));
+        }
+        document.body.appendChild(burst);
+      });
+      await page.waitForTimeout(200);
+      await page.evaluate(() => {
+        document.querySelector(".e2e-burst")?.remove();
+      });
+
+      await select(page);
+      // Long enough for a Recording to have been compressed, were there one.
+      await page.waitForTimeout(500);
+      await expect(page.getByText(RECORDING_LINE)).toHaveCount(0);
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await page.clock.runFor(31_000);
+      await writeOnPage(page, "After the burst");
+
+      await select(page);
+      await expect(page.getByText(RECORDING_LINE)).toBeVisible();
+      await submit(page, "After the burst");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const recording = readUploadedRecording(
+        api.requestsTo("PUT", RECORDING_PATH)[0] ?? { headers: {}, body: null },
+      );
+      expect(recording.json).toContain("After the burst");
+      expect(recording.json).not.toContain("e2e-burst");
+      // The dropped slice was the page session's first: no marker.
+      expect(readMarker(recording)).toBeUndefined();
     });
 
     for (const { recording, attempts } of [

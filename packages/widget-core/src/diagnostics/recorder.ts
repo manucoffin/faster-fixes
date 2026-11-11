@@ -24,6 +24,8 @@ export type DiagnosticsRecorder = {
   start: () => void;
   stop: () => void;
   snapshot: () => DiagnosticTrail;
+  /** Empties the Trail, as when a new page session starts. */
+  reset: () => void;
 };
 
 export type DiagnosticsRecorderOptions = {
@@ -220,7 +222,12 @@ export function createDiagnosticsRecorder(
     };
   }
 
-  return { start, stop, snapshot };
+  function reset() {
+    consoleRing.length = 0;
+    networkRing.length = 0;
+  }
+
+  return { start, stop, snapshot, reset };
 }
 
 function serializeArgs(args: unknown[], maxBytes: number): string {

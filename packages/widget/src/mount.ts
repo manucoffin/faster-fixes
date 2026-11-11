@@ -108,6 +108,12 @@ export function mountWidget({
     recorder = createDiagnosticsRecorder({ apiOrigin: options.apiOrigin });
     recorder.start();
   }
+  // A return through the back/forward cache starts a new page session, as the
+  // Recording's buffer does on its own.
+  const onPageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) recorder?.reset();
+  };
+  window.addEventListener("pageshow", onPageShow);
 
   // The recorder file may still be on its way; it starts when it arrives.
   let recording: PageRecording | null = null;
@@ -454,6 +460,7 @@ export function mountWidget({
       list.close();
       recorder?.stop();
       recording?.stop();
+      window.removeEventListener("pageshow", onPageShow);
       recorder = null;
       stopWatchingLocation();
       pendingTimers.forEach(clearTimeout);

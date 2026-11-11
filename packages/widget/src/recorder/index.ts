@@ -7,6 +7,12 @@ import {
   WIDGET_ATTRIBUTE,
 } from "../capture-attributes.js";
 import type { PageRecording } from "./contract.js";
+import {
+  countMutations,
+  readPageSessionMarker,
+  withPageSessionMarker,
+} from "./page-session.js";
+import type { PageSessionMarker } from "./page-session.js";
 import { createRecordingBuffer } from "./recording-buffer.js";
 import { toRecordingFile } from "./recording-file.js";
 
@@ -26,6 +32,19 @@ const MASK_TEXT_SELECTOR = `[${MASK_ATTRIBUTE}], [contenteditable]:not([contente
 // and sizeless, and its shadow root is never serialized.
 const BLOCK_SELECTOR = `[${BLOCK_ATTRIBUTE}], [${WIDGET_ATTRIBUTE}]`;
 
+function sessionMarker(navigationType: string | undefined) {
+  return readPageSessionMarker({
+    navigationType,
+    referrer: document.referrer,
+    origin: window.location.origin,
+  });
+}
+
+function loadNavigationType() {
+  const [entry] = performance.getEntriesByType("navigation");
+  return entry instanceof PerformanceNavigationTiming ? entry.type : undefined;
+}
+
 const idle: PageRecording = {
   take: () => Promise.resolve(null),
   resume() {},
@@ -41,9 +60,10 @@ export function startRecording(): PageRecording {
     // From the Selection to the end of comment mode: the events of that time
     // are dropped, and a full snapshot on resume makes up for them.
     let suspended = false;
-    const buffer = createRecordingBuffer<eventWithTime, null>({
+    const buffer = createRecordingBuffer<eventWithTime, PageSessionMarker>({
       takeFullSnapshot: () => record.takeFullSnapshot(),
-      marker: null,
+      marker: sessionMarker(loadNavigationType()),
+      mutationsOf: countMutations,
     });
     const stopRecord = record({
       emit: (event) => {
@@ -67,13 +87,22 @@ export function startRecording(): PageRecording {
       errorHandler: () => true,
     });
     if (!stopRecord) return idle;
+    // A hidden tab takes no periodic snapshot; the next tick once visible does.
     const timer = setInterval(() => {
-      if (!suspended) buffer.tick();
+      if (!suspended && !document.hidden) buffer.tick();
     }, TICK_MS);
+    // A return through the back/forward cache starts a new page session.
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) buffer.reset(sessionMarker("back_forward"));
+    };
+    window.addEventListener("pageshow", onPageShow);
     return {
       take() {
         buffer.tick();
-        const candidates = buffer.copy();
+        const candidates = buffer.copy().map((recording) => ({
+          ...recording,
+          events: withPageSessionMarker(recording.events, recording.marker),
+        }));
         suspended = true;
         return toRecordingFile(candidates);
       },
@@ -84,6 +113,7 @@ export function startRecording(): PageRecording {
       },
       stop() {
         clearInterval(timer);
+        window.removeEventListener("pageshow", onPageShow);
         stopRecord();
       },
     };
