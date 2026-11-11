@@ -36,7 +36,8 @@ export function RemoveRecordingDialog({
           <AlertDialogTitle>Remove this recording?</AlertDialogTitle>
           <AlertDialogDescription>
             The recording is deleted permanently. The feedback and its
-            screenshot are kept.
+            screenshot are kept. Steps already written to mirrored issues are
+            not removed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -1,12 +1,10 @@
 import { prisma } from "@workspace/db";
 import {
   type CachedRecordingSteps,
-  readCachedRecordingSteps,
-} from "../_helpers/read-cached-recording-steps";
-import {
   RECORDING_STEPS_VERSION,
+  readCachedRecordingSteps,
   readRecordingSteps,
-} from "../_helpers/read-recording-steps";
+} from "@/app/_domains/feedback";
 import { getRecordingEvents } from "./get-recording-events";
 
 export type FeedbackWithRecording = {

@@ -3,7 +3,7 @@ import { prisma } from "@workspace/db";
 import {
   type FeedbackWithRecording,
   refreshFeedbackRecordingSteps,
-} from "./refresh-feedback-recording-steps";
+} from "@/server/recording/refresh-feedback-recording-steps";
 
 /**
  * A Feedback's Recording as the agent surface hands it out: its steps, from

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { RecordingEvent } from "../_services/get-recording-events";
+import type { RecordingEvent } from "@/server/recording/get-recording-events";
 import {
   createRecordingTree,
   MASKED_ONLY,

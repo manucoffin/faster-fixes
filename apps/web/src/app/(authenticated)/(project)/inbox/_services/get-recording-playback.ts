@@ -2,7 +2,7 @@ import {
   mergeDiagnosticTrail,
   mergeRecordingTimeline,
 } from "@/app/_domains/feedback/_helpers/merge-recording-timeline";
-import { refreshFeedbackRecordingSteps } from "@/app/_domains/feedback/_services/refresh-feedback-recording-steps";
+import { refreshFeedbackRecordingSteps } from "@/server/recording/refresh-feedback-recording-steps";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";

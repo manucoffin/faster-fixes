@@ -10,6 +10,7 @@ import { getValidLabelIds } from "./get-valid-label-ids";
 import { LinearRequestError } from "./linear-request-error";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
+import { refreshIssueRecording } from "../refresh-issue-recording";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -45,6 +46,7 @@ export const createLinearIssue = inngest.createFunction(
         reviewer: { select: { name: true } },
         video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
+        recording: { select: { key: true } },
         linearIssueLink: { select: { id: true } },
       },
     });
@@ -90,6 +92,7 @@ export const createLinearIssue = inngest.createFunction(
     }
 
     const dashboardUrl = buildFeedbackDashboardUrl(feedback);
+    const recording = await refreshIssueRecording(feedback);
 
     const title = formatIssueTitle(feedback.comment);
     const description = formatIssueBody({
@@ -119,6 +122,7 @@ export const createLinearIssue = inngest.createFunction(
       frameY: feedback.frameY,
       frameWidth: feedback.frameWidth,
       frameHeight: feedback.frameHeight,
+      recording,
     });
 
     const created = await client.createIssue({

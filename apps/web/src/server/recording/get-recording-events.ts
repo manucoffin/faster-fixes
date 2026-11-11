@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import { gunzip } from "node:zlib";
 import { z } from "zod";
 
-import { RECORDING_MAX_DECOMPRESSED_BYTES } from "../_helpers/recording-format";
+import { RECORDING_MAX_DECOMPRESSED_BYTES } from "@/app/_domains/feedback";
 
 const gunzipAsync = promisify(gunzip);
 
@@ -66,7 +66,3 @@ export async function getRecordingEvents(
   if (!events.success) return { readable: false, reason: "invalid-events" };
   return { readable: true, events: events.data };
 }
-
-export type GetRecordingEventsOutput = Awaited<
-  ReturnType<typeof getRecordingEvents>
->;
