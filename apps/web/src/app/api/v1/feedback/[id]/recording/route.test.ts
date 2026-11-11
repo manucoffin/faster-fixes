@@ -3,6 +3,7 @@ import {
   createAssetDouble,
   FEEDBACK_ID,
   feedbackRow,
+  inngestSendDouble,
   PROJECT_ID,
   putObjectDouble,
   resetWidgetApiDoubles,
@@ -23,6 +24,12 @@ vi.mock("@/server/storage/create-asset", async () => {
   const { createAssetDouble } =
     await import("../../_helpers/widget-api-test-doubles");
   return { createAsset: createAssetDouble };
+});
+
+vi.mock("@/server/inngest", async () => {
+  const { inngestSendDouble } =
+    await import("../../_helpers/widget-api-test-doubles");
+  return { inngest: { send: inngestSendDouble } };
 });
 
 vi.mock("@better-upload/server/helpers", async () => {
@@ -110,6 +117,34 @@ describe("PUT /api/v1/feedback/:id/recording", () => {
         },
       }),
     );
+  });
+
+  it("tells the integrations the Recording is attached", async () => {
+    await PUT(attachRequest(), routeParams);
+
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/recording-attached",
+      data: { feedbackId: FEEDBACK_ID },
+    });
+  });
+
+  it("answers success when the integrations cannot be told", async () => {
+    inngestSendDouble.mockRejectedValue(new Error("event API down"));
+
+    const response = await PUT(attachRequest(), routeParams);
+
+    expect(response.status).toBe(204);
+  });
+
+  it("tells the integrations nothing when the upload is refused", async () => {
+    widgetApiPrisma.feedback.findFirst.mockResolvedValue(
+      feedbackRow({ recordingId: "asset_already_there" }),
+    );
+
+    const response = await PUT(attachRequest(), routeParams);
+
+    expect(response.status).toBe(409);
+    expect(inngestSendDouble).not.toHaveBeenCalled();
   });
 
   it("stores the bytes as received, without decompressing them", async () => {

@@ -1,3 +1,8 @@
+import { inngest } from "@/server/inngest";
+import {
+  buildEvent,
+  feedbackRecordingAttachedEvent,
+} from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import type { UpdateFeedbackRecordingInput } from "./update-feedback-recording.schema";
 
@@ -22,4 +27,10 @@ export async function updateFeedbackRecording({
     },
     select: { id: true },
   });
+
+  // Fire-and-forget: a failed send never fails the upload, and an automatic
+  // Issue held back for this Recording goes out at the end of its delay.
+  inngest
+    .send(buildEvent(feedbackRecordingAttachedEvent, { feedbackId }))
+    .catch(() => {});
 }

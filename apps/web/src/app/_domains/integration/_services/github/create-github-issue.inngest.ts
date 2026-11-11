@@ -6,6 +6,7 @@ import { getInstallationOctokit } from "./github-app";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
+import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -27,37 +28,21 @@ export const createGitHubIssue = inngest.createFunction(
       },
     ],
   },
-  async ({ event }) => {
+  async ({ event, step }) => {
     const { feedbackId } = event.data;
 
-    const feedback = await prisma.feedback.findUnique({
-      where: { id: feedbackId },
-      include: {
-        project: {
-          include: {
-            gitHubLink: {
-              include: { gitHubInstallation: true },
-            },
-          },
-        },
-        reviewer: { select: { name: true } },
-        video: { select: { title: true } },
-        screenshot: { select: { key: true, bucket: true } },
-        recording: { select: { key: true } },
-        issueLink: { select: { id: true } },
-      },
-    });
+    const found = await readFeedback(feedbackId);
 
-    if (!feedback) return { skipped: "feedback_not_found" };
+    if (!found) return { skipped: "feedback_not_found" };
 
     // Handler-level idempotency closes the duplicate-issue footgun: any future
     // emit of `feedback/created` (backfills, admin re-triggers) will short-circuit
     // here instead of creating a second GH issue.
-    if (feedback.issueLink) {
+    if (found.issueLink) {
       return { skipped: "github_issue_already_exists" };
     }
 
-    const gitHubLink = feedback.project.gitHubLink;
+    const gitHubLink = found.project.gitHubLink;
     if (!gitHubLink) return { skipped: "no_github_link" };
 
     // Auto-create only on `feedback/created`. Manual trigger
@@ -66,6 +51,18 @@ export const createGitHubIssue = inngest.createFunction(
       event.name === "feedback/integration-issue-requested";
     if (!isManualTrigger && !gitHubLink.autoCreateIssues) {
       return { skipped: "auto_create_disabled" };
+    }
+
+    const feedback = await findFeedbackWithAwaitedRecording({
+      event,
+      step,
+      feedback: found,
+      readFeedback: () => readFeedback(feedbackId),
+    });
+    if (!feedback) return { skipped: "feedback_not_found" };
+    // An Issue created by hand during the wait wins.
+    if (feedback.issueLink) {
+      return { skipped: "github_issue_already_exists" };
     }
 
     const installation = gitHubLink.gitHubInstallation;
@@ -143,3 +140,23 @@ export const createGitHubIssue = inngest.createFunction(
     return { issueNumber: issue.number, issueUrl: issue.html_url };
   },
 );
+
+function readFeedback(feedbackId: string) {
+  return prisma.feedback.findUnique({
+    where: { id: feedbackId },
+    include: {
+      project: {
+        include: {
+          gitHubLink: {
+            include: { gitHubInstallation: true },
+          },
+        },
+      },
+      reviewer: { select: { name: true } },
+      video: { select: { title: true } },
+      screenshot: { select: { key: true, bucket: true } },
+      recording: { select: { key: true } },
+      issueLink: { select: { id: true } },
+    },
+  });
+}

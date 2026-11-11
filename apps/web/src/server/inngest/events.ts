@@ -15,6 +15,13 @@ export const feedbackCreatedEvent = eventType("feedback/created", {
   }),
 });
 
+// Emitted once a Recording uploaded after creation is linked to its Feedback,
+// so a function holding back an Issue or an announcement can go on.
+export const feedbackRecordingAttachedEvent = eventType(
+  "feedback/recording-attached",
+  { schema: z.object({ feedbackId: z.string() }) },
+);
+
 export const feedbackIntegrationIssueRequestedEvent = eventType(
   "feedback/integration-issue-requested",
   {
