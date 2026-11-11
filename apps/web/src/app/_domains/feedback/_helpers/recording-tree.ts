@@ -61,7 +61,7 @@ type TreeNode = {
 };
 
 // What the Widget's recorder writes for a masked character (rrweb's default).
-const MASKED_ONLY = /^[\s*]+$/;
+export const MASKED_ONLY = /^[\s*]+$/;
 const LABEL_MAX_LENGTH = 50;
 // A CSS identifier needing no escape; anything else is left out of a selector.
 const PLAIN_IDENTIFIER = /^-?[A-Za-z_][\w-]*$/;
@@ -149,7 +149,8 @@ export function createRecordingTree() {
       attribute(node, "placeholder") ??
       attribute(node, "alt") ??
       attribute(node, "title") ??
-      textOf(node)
+      // A list's text is every option run together, not a name.
+      (node.tagName === "select" ? "" : textOf(node))
     )
       .replace(/\s+/g, " ")
       .trim()
@@ -243,6 +244,20 @@ export function createRecordingTree() {
           else node.attributes[name] = value;
         }
       }
+    },
+
+    /** What an input event on a node changed: a choice, or a typed field. */
+    fieldKind(id: number): "select" | "checkbox" | "radio" | "field" {
+      const node = nodes.get(id);
+      if (node?.tagName === "select") return "select";
+      const type = node ? attribute(node, "type") : null;
+      if (
+        node?.tagName === "input" &&
+        (type === "checkbox" || type === "radio")
+      ) {
+        return type;
+      }
+      return "field";
     },
 
     /** Label and selector of a node; both null when the file cannot name it. */

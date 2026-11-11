@@ -44,6 +44,8 @@ function formatEntry(entry: RecordingTimelineEntry): string {
 }
 
 function formatStep({ type, label, selector, detail }: RecordingStep): string {
+  // The label of the opening step is its wording; the detail is where from.
+  if (type === "load") return detail ? `${label}, from ${detail}` : `${label}`;
   const parts = [type, label, selector ? `(${selector})` : null, detail].filter(
     (part) => part !== null,
   );

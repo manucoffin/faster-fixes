@@ -65,6 +65,27 @@ describe("formatTimelineLines", () => {
     ]);
   });
 
+  it("words the opening step, with the page the Reviewer came from", () => {
+    const lines = formatTimelineLines({
+      entries: [
+        stepEntry(-9_000, {
+          type: "load",
+          label: "Page loaded",
+          detail: "/cart",
+        }),
+        stepEntry(-8_000, { type: "load", label: "Page reloaded" }),
+        selection,
+      ],
+      droppedCount: 0,
+      afterSelectionCount: 0,
+    });
+
+    expect(lines.slice(0, 2)).toEqual([
+      "- -9.0 s  Page loaded, from /cart",
+      "- -8.0 s  Page reloaded",
+    ]);
+  });
+
   it("renders console and network entries as Diagnostics does, with a time in front", () => {
     const lines = formatTimelineLines({
       entries: [
