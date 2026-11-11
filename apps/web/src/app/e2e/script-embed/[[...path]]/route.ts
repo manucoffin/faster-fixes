@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     autoInit: !searchParams.has("manual"),
     color: searchParams.get("color"),
     position: searchParams.get("position"),
+    captureRecording: searchParams.get("captureRecording"),
+    nonce: searchParams.get("nonce"),
     tall: searchParams.has("tall"),
   });
   if (!html) return new Response("Not found", { status: 404 });

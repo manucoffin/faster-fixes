@@ -23,6 +23,7 @@ import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
 import { createPinPopover } from "./pin-popover.js";
 import { createPinLayer, resolveTarget } from "./pins.js";
+import type { PageRecording, RecorderModule } from "./recorder/contract.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
@@ -37,6 +38,7 @@ type MountInput = {
   reviewerToken: string;
   /** Whether the Project's config asks for the product link in the list. */
   branding: boolean;
+  recorder: Promise<RecorderModule | null> | undefined;
 };
 
 // `selected` covers the comment popover in every state: typing, submitting, error.
@@ -81,6 +83,7 @@ export function mountWidget({
   client,
   reviewerToken,
   branding,
+  recorder: recorderFile,
 }: MountInput): Widget {
   const host = document.createElement("div");
   host.setAttribute("data-ff-widget", "");
@@ -98,6 +101,14 @@ export function mountWidget({
   if (options.captureDiagnostics) {
     recorder = createDiagnosticsRecorder({ apiOrigin: options.apiOrigin });
     recorder.start();
+  }
+
+  // The recorder file may still be on its way; it starts when it arrives.
+  let recording: PageRecording | null = null;
+  if (options.captureRecording) {
+    void recorderFile?.then((module) => {
+      if (module && !destroyed) recording = module.startRecording();
+    });
   }
 
   let mode: WidgetMode = "idle";
@@ -404,6 +415,7 @@ export function mountWidget({
       closePinPopover();
       list.close();
       recorder?.stop();
+      recording?.stop();
       recorder = null;
       stopWatchingLocation();
       pendingTimers.forEach(clearTimeout);

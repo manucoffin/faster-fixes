@@ -5,6 +5,8 @@ import type {
 } from "@fasterfixes/core";
 import type { Page, Request, Route } from "@playwright/test";
 
+import { routeRecorderFile } from "./recorder-file";
+
 export const WIDGET_API_ORIGIN = "http://widget-api.e2e.test";
 export const WIDGET_PROJECT_ID = "proj_e2e";
 
@@ -29,6 +31,8 @@ type WidgetApiStub = {
   createdFeedback: () => (CreateFeedbackData | null)[];
   /** The id the stub gave each created item, in order. */
   createdIds: () => string[];
+  /** The URL of every request for the recorder file the script embed inserts. */
+  recorderRequests: string[];
 };
 
 // The widget calls the API cross-origin with custom headers, so every answer,
@@ -75,7 +79,8 @@ function toCreatedItem(data: CreateFeedbackData | null): FeedbackItem {
 
 /**
  * Answers every widget HTTP API endpoint for `page` with bodies shaped like
- * the real route handlers, and records each request for assertions. The
+ * the real route handlers, and records each request for assertions. Serves
+ * the recorder file from the workspace build, in place of the CDN. The
  * Feedback list is stateful: a created item shows up in later list calls.
  */
 export async function stubWidgetApi(
@@ -85,6 +90,7 @@ export async function stubWidgetApi(
   const requests: StubbedRequest[] = [];
   let items = [...feedback];
   const createdIds: string[] = [];
+  const recorderRequests = await routeRecorderFile(page);
 
   await page.route(`${WIDGET_API_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -158,5 +164,6 @@ export async function stubWidgetApi(
         readCreateData(request.body),
       ),
     createdIds: () => [...createdIds],
+    recorderRequests,
   };
 }

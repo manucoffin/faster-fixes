@@ -5,6 +5,7 @@
  * Under `/inline-init` the page calls `window.FasterFixes.init` itself instead,
  * the way a customer passes options with no `data-*` attribute, like `customMetadata`.
  * With `tall`, the page grows far below the fold, so a scenario can scroll before selecting.
+ * With `nonce`, the script tag carries that nonce, as under a nonce-only policy.
  */
 
 export const SCRIPT_EMBED_PAGE_PATH = "/e2e/script-embed";
@@ -19,6 +20,8 @@ type ScriptEmbedPageInput = {
   autoInit: boolean;
   color: string | null;
   position: string | null;
+  captureRecording: string | null;
+  nonce: string | null;
   tall: boolean;
 };
 
@@ -110,6 +113,8 @@ function buildScriptTag(input: ScriptEmbedPageInput, autoInit: boolean) {
     ["data-api-origin", autoInit ? input.apiOrigin : null],
     ["data-color", input.color],
     ["data-position", input.position],
+    ["data-capture-recording", input.captureRecording],
+    ["nonce", input.nonce],
   ];
   const rendered = attributes
     .filter((entry): entry is [string, string] => typeof entry[1] === "string")
