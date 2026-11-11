@@ -22,7 +22,27 @@ Authorize with a service account rather than a personal one. Jira's OAuth grant 
 
 ## Auto-create issues
 
-When enabled (on by default), new feedback automatically creates an issue in the linked Jira project.
+When enabled (on by default), new feedback automatically creates an issue in the linked Jira project. The issue includes:
+
+- Feedback comment
+- Page URL
+- DOM selector
+- Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
+- Link to the screenshot
+- Browser info and the reviewer's name (in a collapsible section)
+- Custom metadata, when the widget sends it (in a collapsible section)
+- Console logs and network requests (in a collapsible section)
+- Link to the feedback in the dashboard
+
+## Recording
+
+When the feedback has a [Recording](/docs/widget/recording), the issue gains a **Recording** line after the element, with a **Play in Faster Fixes** link and the Recording's duration, for example `48 s`. The link opens the player in the dashboard and requires a login, so anyone who can read the issue without a Faster Fixes account sees nothing of the Recording.
+
+The collapsed **Diagnostics** section is then replaced by a collapsed **Timeline** section. It lists the Reviewer's steps, console logs and network requests on one clock, ending with the selection of the element. When the timeline is too long for the issue, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue keeps the Recording line and shows Diagnostics instead.
+
+An automatic issue waits up to 30 seconds for the Recording to finish uploading, then is created with or without it. A manual issue is created at once.
+
+An issue is written once and never rewritten. A Recording that arrives after the issue was created is not added to it, and removing a Recording in the dashboard leaves the timeline already written in the issue.
 
 ## Defaults per project
 
