@@ -1,3 +1,7 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+
 export function MarkerIoHonestTakeSection() {
   return (
     <section className="w-full border-y bg-muted/30 py-16 md:py-24">
@@ -19,11 +23,6 @@ export function MarkerIoHonestTakeSection() {
             strengths FasterFixes does not match today:
           </p>
           <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
-            <li>
-              <strong className="text-foreground">Session replay</strong>:
-              bundled on the Team plan and above. FasterFixes does not record
-              sessions; its video support is review of uploaded videos.
-            </li>
             <li>
               <strong className="text-foreground">Browser extension</strong>:
               Chrome, Firefox, and Safari extensions let reviewers leave
@@ -64,11 +63,10 @@ export function MarkerIoHonestTakeSection() {
             </li>
           </ul>
           <p>
-            If your workflow centers on QA handoffs, client approvals, session
-            replay, or design-file annotation, Marker.io is the more complete
-            tool today. FasterFixes is built for a narrower brief, and we think
-            it is the right brief for most developer teams shipping client
-            websites:
+            If your workflow centers on QA handoffs, client approvals, or
+            design-file annotation, Marker.io is the more complete tool today.
+            FasterFixes is built for a narrower brief, and we think it is the
+            right brief for most developer teams shipping client websites:
           </p>
           <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
             <li>
@@ -99,16 +97,23 @@ export function MarkerIoHonestTakeSection() {
               React component path. The agent knows which file owns the bug.
             </li>
             <li>
+              <strong className="text-foreground">
+                Recording on every plan
+              </strong>
+              : each report carries a Recording of the last minute on the page.
+              Marker.io bundles session replay on the Team plan and above.
+            </li>
+            <li>
               <strong className="text-foreground">Flat pricing</strong>:
               $20/month for a 5-person team versus $149/month annual on
-              Marker.io Team. The free plan covers 1 project, 50 feedback items,
-              and 1 member at no cost.
+              Marker.io Team. The free plan covers 1 project,{" "}
+              {freeFeedbackLimit} feedback items, and 1 member at no cost.
             </li>
           </ul>
           <p>
             FasterFixes is a younger product. It does not match Marker.io&apos;s
-            integration breadth, session replay, or client portal. What it
-            offers instead is full code ownership, a self-hosted deployment
+            integration breadth, design-file annotation, or client portal. What
+            it offers instead is full code ownership, a self-hosted deployment
             path, and a developer workflow no closed-source QA tool can
             replicate.
           </p>

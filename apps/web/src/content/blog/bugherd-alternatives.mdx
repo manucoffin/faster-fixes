@@ -41,7 +41,7 @@ keywords:
 
 **Pricing:**
 
-- Free: $0/mo, 1 project, 50 feedback items, 1 member
+- Free: $0/mo, 1 project, 20 feedback items, 1 member
 - Pro: $20/mo, 5 projects, unlimited feedback, 5 members
 - Agency: $99/mo, unlimited projects, unlimited feedback, unlimited members
 - Self-hosted: free under AGPL-3.0 (dashboard, API, MCP server); widget packages under MIT
@@ -51,7 +51,7 @@ keywords:
 **Strengths:**
 
 - **MCP server ships with the product**: connect once, your AI agent fetches new feedback, locates the component, applies the fix, marks it resolved. Fully unattended.
-- **Auto-context is the deepest in this category**: every feedback item captures screenshot + URL + DOM selector + React component tree (on React sites) + browser environment + console logs + network requests.
+- **Auto-context is the deepest in this category**: every feedback item captures screenshot + URL + DOM selector + React component tree (on React sites) + browser environment + console logs + network requests, plus a Recording of the last minute on the page.
 - **Flat pricing**: $20/mo for a 5-person team is the lowest flat-rate option in this list by a wide margin.
 - **White-label widget** included on Pro (not an Enterprise-only add-on).
 - **GitHub and Linear integrations** on Pro: no Zapier dependency.
@@ -60,8 +60,8 @@ keywords:
 **Weaknesses:**
 
 - **Newer product**: smaller community and fewer third-party integrations than BugHerd or Marker.io.
-- **No session replay**: if you need to watch user recordings alongside feedback, you'll need a separate tool.
-- **50-item cap on the free plan** is tight for active projects; you'll hit it during a real client review cycle.
+- **No session analytics**: each feedback carries a Recording of the moments before it, but whole visits are not recorded; if you need to watch full user sessions, you'll need a separate tool.
+- **20-item cap on the free plan** is tight for active projects; you'll hit it during a real client review cycle.
 - **No mobile SDK**: widget is web-only; not suitable for native iOS/Android feedback.
 
 → [See our full pricing breakdown](/pricing)
@@ -87,7 +87,7 @@ keywords:
 - **Reporters (clients, end-users) are free and unlimited**: they submit via widget, no account required.
 - **Two-way sync with Jira, Linear, GitHub, GitLab, Asana, ClickUp, and more**: status changes in your tracker reflect back in Marker.io.
 - **Session replay** captures what happened before the bug was reported.
-- **Console logs and network requests** captured automatically alongside the session replay (Faster Fixes captures these too, minus the replay).
+- **Console logs and network requests** captured automatically alongside the session replay (Faster Fixes captures these too, with a Recording of the last minute before each feedback).
 - **AI features** (translation, magic rewrite, title generation) on all paid plans.
 
 **Weaknesses:**
@@ -349,7 +349,7 @@ The right tool depends on your team structure and workflow, not on feature check
     {
       question: "Is there a free BugHerd alternative?",
       answer:
-        "Yes. <strong>Faster Fixes</strong> has a free plan (1 project, 50 feedback items, 1 member) with no time limit. Userback's free plan covers 2 projects with unlimited feedback collection, though feedback expires after 7 days. Atarim and Ruttl also have free tiers. BugHerd itself has no free plan, only a 7-day trial.",
+        "Yes. <strong>Faster Fixes</strong> has a free plan (1 project, 20 feedback items, 1 member) with no time limit. Userback's free plan covers 2 projects with unlimited feedback collection, though feedback expires after 7 days. Atarim and Ruttl also have free tiers. BugHerd itself has no free plan, only a 7-day trial.",
     },
     {
       question: "What is the best open-source BugHerd alternative?",

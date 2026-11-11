@@ -1,7 +1,10 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -84,7 +87,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Session replay",
-    cells: [{ type: "no" }, { type: "no" }],
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "no" },
+    ],
   },
   {
     label: "Project management integrations",
@@ -121,7 +127,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: "1 project · 50 items · forever" },
+      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
       { type: "partial", note: "Trial only · 20 feedback items" },
     ],
   },

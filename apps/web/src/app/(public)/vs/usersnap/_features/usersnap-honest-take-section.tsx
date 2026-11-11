@@ -1,3 +1,7 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+
 export function UsersnapHonestTakeSection() {
   return (
     <section className="w-full border-y bg-muted/30 py-16 md:py-24">
@@ -89,9 +93,10 @@ export function UsersnapHonestTakeSection() {
             <li>
               <strong className="text-foreground">Flat pricing</strong>:
               $20/month for a 5-person team versus $49/month on Usersnap Starter
-              ($39/month billed annually). The free plan covers 1 project, 50
-              feedback items, and 1 member at no cost. Usersnap offers a trial
-              capped at 20 feedback items, not a permanent free tier.
+              ($39/month billed annually). The free plan covers 1 project,{" "}
+              {freeFeedbackLimit} feedback items, and 1 member at no cost, with
+              no time limit. Usersnap caps its items too, but on a trial, not a
+              permanent free tier.
             </li>
           </ul>
           <p>
