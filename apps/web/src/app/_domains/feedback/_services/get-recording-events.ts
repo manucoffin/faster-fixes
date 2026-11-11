@@ -3,9 +3,7 @@ import { promisify } from "node:util";
 import { gunzip } from "node:zlib";
 import { z } from "zod";
 
-// The upload is capped at 4 MB of gzip; DOM snapshots rarely compress past
-// 15:1, so this bound only stops a file built to inflate.
-export const RECORDING_MAX_DECOMPRESSED_BYTES = 64 * 1024 * 1024;
+import { RECORDING_MAX_DECOMPRESSED_BYTES } from "../_helpers/recording-format";
 
 const gunzipAsync = promisify(gunzip);
 

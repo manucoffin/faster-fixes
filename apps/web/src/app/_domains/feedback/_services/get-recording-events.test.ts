@@ -1,9 +1,7 @@
 import { gzipSync } from "node:zlib";
 import { describe, expect, it, vi } from "vitest";
-import {
-  getRecordingEvents,
-  RECORDING_MAX_DECOMPRESSED_BYTES,
-} from "./get-recording-events";
+import { RECORDING_MAX_DECOMPRESSED_BYTES } from "../_helpers/recording-format";
+import { getRecordingEvents } from "./get-recording-events";
 
 const RECORDING = { key: "feedback-recordings/feedback_1/recording.gz" };
 

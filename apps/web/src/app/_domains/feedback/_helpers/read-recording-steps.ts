@@ -7,13 +7,14 @@ import {
   MutationSchema,
   SerializedNodeSchema,
 } from "./recording-tree";
+import {
+  PAGE_SESSION_TAG,
+  RECORDING_FORMAT_VERSIONS,
+} from "./recording-format";
 
 // Replay events in, steps out: what the Reviewer did before the Selection, as
 // data. No storage, no HTTP, no markdown; every surface that shows a Recording
 // as text reads its steps from here.
-
-/** The replay format versions this derivation reads. */
-const KNOWN_FORMAT_VERSIONS = new Set([1]);
 
 // Bump on any change to what the derivation returns: a cached result from an
 // older version is derived again on its next read.
@@ -55,8 +56,6 @@ const VIEWPORT_RESIZE = 4;
 const INPUT = 5;
 const CLICK = 2;
 
-// The custom event the Widget writes when a Recording starts with its page.
-const PAGE_SESSION_TAG = "fasterfixes/page-session";
 const LOAD_WORDING = {
   load: "Page loaded",
   reload: "Page reloaded",
@@ -116,7 +115,7 @@ export function readRecordingSteps({
       steps: RecordingStep[];
     }
   | { readable: false; reason: "unknown-format-version" | "empty" } {
-  if (!KNOWN_FORMAT_VERSIONS.has(formatVersion)) {
+  if (!RECORDING_FORMAT_VERSIONS.has(formatVersion)) {
     return { readable: false, reason: "unknown-format-version" };
   }
   if (events.length === 0) return { readable: false, reason: "empty" };
