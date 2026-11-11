@@ -46,6 +46,11 @@ type FeedbackProviderProps = {
   // not a dashboard setting; set false to opt a site out of capture entirely.
   captureDiagnostics?: boolean;
   /**
+   * Keeps a Recording of the last minute on the page for each Feedback.
+   * Defaults to `true`; set false and the recorder is never loaded.
+   */
+  captureRecording?: boolean;
+  /**
    * Key/value pairs sent with every Feedback, shown to your team and in
    * mirrored Issues, never to Reviewers. Pass an object, or a synchronous
    * function called at each submission so values such as a signed-in user ID
@@ -124,6 +129,7 @@ export function FeedbackProvider({
   classNames,
   labels,
   captureDiagnostics = true,
+  captureRecording = true,
   customMetadata,
   children,
 }: FeedbackProviderProps) {
@@ -147,6 +153,7 @@ export function FeedbackProvider({
       position,
       labels: stableLabels,
       captureDiagnostics,
+      captureRecording,
       customMetadata: stableCustomMetadata,
     });
     slot.set(widget);
@@ -163,6 +170,7 @@ export function FeedbackProvider({
     position,
     stableLabels,
     captureDiagnostics,
+    captureRecording,
     stableCustomMetadata,
   ]);
 

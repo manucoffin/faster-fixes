@@ -25,6 +25,10 @@ export function readScriptOptions(
   if (captureDiagnostics !== null) {
     options.captureDiagnostics = captureDiagnostics.trim() !== "false";
   }
+  const captureRecording = script.getAttribute("data-capture-recording");
+  if (captureRecording !== null) {
+    options.captureRecording = captureRecording.trim() !== "false";
+  }
   return options;
 }
 

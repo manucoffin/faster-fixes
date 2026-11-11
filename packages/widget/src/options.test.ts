@@ -24,6 +24,7 @@ describe("validateOptions", () => {
         position: DEFAULT_WIDGET_POSITION,
         labels: DEFAULT_LABELS,
         captureDiagnostics: true,
+        captureRecording: true,
       },
     });
   });
@@ -36,6 +37,7 @@ describe("validateOptions", () => {
       position: "top-left",
       labels: { submitButton: "Send" },
       captureDiagnostics: false,
+      captureRecording: false,
     });
 
     expect(result.valid && result.options).toMatchObject({
@@ -44,7 +46,30 @@ describe("validateOptions", () => {
       position: "top-left",
       labels: { submitButton: "Send" },
       captureDiagnostics: false,
+      captureRecording: false,
     });
+  });
+
+  it.each([
+    [{ captureRecording: false }, { captureDiagnostics: true }],
+    [{ captureDiagnostics: false }, { captureRecording: true }],
+  ])("keeps the two capture switches independent: %j", (input, expected) => {
+    const result = validateOptions({ projectId: "proj_abc", ...input });
+
+    expect(result.valid && result.options).toMatchObject(expected);
+  });
+
+  it("handles an invalid captureRecording like captureDiagnostics", () => {
+    const result = validateOptions({
+      projectId: "proj_abc",
+      captureDiagnostics: "no",
+      captureRecording: "no",
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.valid && result.options.captureRecording).toBe(
+      result.valid && result.options.captureDiagnostics,
+    );
   });
 
   it.each([
@@ -129,6 +154,7 @@ describe("validateDisplayOptions", () => {
         position: DEFAULT_WIDGET_POSITION,
         labels: DEFAULT_LABELS,
         captureDiagnostics: true,
+        captureRecording: true,
       },
     });
   });

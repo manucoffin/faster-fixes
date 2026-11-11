@@ -32,6 +32,7 @@ describe("readScriptOptions", () => {
           "data-color": "#ff0000",
           "data-position": "top-left",
           "data-capture-diagnostics": "true",
+          "data-capture-recording": "true",
         }),
       ),
     ).toEqual({
@@ -40,6 +41,7 @@ describe("readScriptOptions", () => {
       color: "#ff0000",
       position: "top-left",
       captureDiagnostics: true,
+      captureRecording: true,
     });
   });
 
@@ -57,6 +59,31 @@ describe("readScriptOptions", () => {
         }),
       ),
     ).toMatchObject({ captureDiagnostics: expected });
+  });
+
+  it.each([
+    ["false", false],
+    [" false ", false],
+    ["true", true],
+    ["", true],
+    ["off", true],
+  ])("reads data-capture-recording=%j as %s", (value, expected) => {
+    expect(
+      readScriptOptions(
+        tag({ "data-project-id": "proj_abc", "data-capture-recording": value }),
+      ),
+    ).toMatchObject({ captureRecording: expected });
+  });
+
+  it("reads each capture attribute on its own", () => {
+    expect(
+      readScriptOptions(
+        tag({
+          "data-project-id": "proj_abc",
+          "data-capture-recording": "false",
+        }),
+      ),
+    ).toEqual({ projectId: "proj_abc", captureRecording: false });
   });
 
   it("passes invalid values through for init to validate", () => {
