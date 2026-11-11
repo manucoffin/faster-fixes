@@ -23,7 +23,12 @@ import type { ResolvedDisplayOptions } from "./options.js";
 import type { PinPoint } from "./pin-placement.js";
 import { createPinPopover } from "./pin-popover.js";
 import { createPinLayer, resolveTarget } from "./pins.js";
-import type { PageRecording, RecorderModule } from "./recorder/contract.js";
+import type {
+  PageRecording,
+  RecorderModule,
+  RecordingFile,
+} from "./recorder/contract.js";
+import { uploadRecording } from "./recording-upload.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
@@ -117,6 +122,7 @@ export function mountWidget({
     click: PinPoint;
     geometry: SelectionGeometry;
     screenshot: Promise<Blob | null>;
+    recording: Promise<RecordingFile | null> | null;
   } | null = null;
 
   function setMode(next: WidgetMode) {
@@ -130,6 +136,7 @@ export function mountWidget({
     if (next !== "selected") {
       selection = null;
       popover.close();
+      recording?.resume();
     }
   }
 
@@ -276,8 +283,27 @@ export function mountWidget({
     }
   }
 
+  function attachRecording(feedbackId: string, file: RecordingFile) {
+    const { attachRecording } = client;
+    if (!attachRecording) return;
+    void uploadRecording(() =>
+      attachRecording.call(
+        client,
+        feedbackId,
+        file.file,
+        { durationMs: file.durationMs, formatVersion: file.formatVersion },
+        reviewerToken,
+      ),
+    );
+  }
+
   const annotation = createAnnotationMode(document, overlay, {
     onSelect(element, click) {
+      // Taken first, so it ends at the Selection, before the Widget reacts to it.
+      // Recording stays suspended until the comment form closes.
+      const pendingRecording = client.attachRecording
+        ? (recording?.take() ?? null)
+        : null;
       setMode("selected");
       // Started before the popover opens; the host is excluded from the capture either way.
       selection = {
@@ -285,6 +311,7 @@ export function mountWidget({
         click,
         geometry: measureSelectionGeometry(element, click),
         screenshot: captureViewportScreenshot(),
+        recording: pendingRecording,
       };
       popover.open(element);
     },
@@ -295,18 +322,22 @@ export function mountWidget({
     async onSubmit(comment) {
       if (!selection) return;
       const { screenshot } = selection;
+      const payload = buildFeedbackPayload({
+        comment,
+        element: selection.element,
+        click: selection.click,
+        selection: selection.geometry,
+        diagnosticTrail: recorder?.snapshot(),
+        customMetadata: options.customMetadata,
+      });
+      // Compressed while the Reviewer typed, so this is settled in practice.
+      const recordingFile = await selection.recording;
       const created = await client.createFeedback(
-        buildFeedbackPayload({
-          comment,
-          element: selection.element,
-          click: selection.click,
-          selection: selection.geometry,
-          diagnosticTrail: recorder?.snapshot(),
-          customMetadata: options.customMetadata,
-        }),
+        recordingFile ? { ...payload, recordingFollows: true } : payload,
         reviewerToken,
       );
       void attachScreenshot(created.id, screenshot);
+      if (recordingFile) attachRecording(created.id, recordingFile);
       if (destroyed) return;
       setFeedbackItems([...state.current.feedbackItems, created]);
       void loadFeedback();

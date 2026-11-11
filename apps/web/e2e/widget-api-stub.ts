@@ -12,9 +12,16 @@ export const WIDGET_PROJECT_ID = "proj_e2e";
 
 const ENABLED_CONFIG: WidgetConfig = { enabled: true, branding: false };
 
+/**
+ * How the stub answers a Recording upload: stored, refused with a 409, failed
+ * at the network level, or left without an answer.
+ */
+type RecordingResponse = "stored" | "refused" | "network-error" | "hang";
+
 type StubOptions = {
   config?: WidgetConfig;
   feedback?: FeedbackItem[];
+  recording?: RecordingResponse;
 };
 
 type StubbedRequest = {
@@ -85,7 +92,11 @@ function toCreatedItem(data: CreateFeedbackData | null): FeedbackItem {
  */
 export async function stubWidgetApi(
   page: Page,
-  { config = ENABLED_CONFIG, feedback = [] }: StubOptions = {},
+  {
+    config = ENABLED_CONFIG,
+    feedback = [],
+    recording = "stored",
+  }: StubOptions = {},
 ): Promise<WidgetApiStub> {
   const requests: StubbedRequest[] = [];
   let items = [...feedback];
@@ -124,6 +135,18 @@ export async function stubWidgetApi(
       return json(route, 200, {
         screenshotUrl: `${WIDGET_API_ORIGIN}/screenshots/${screenshotMatch[1]}.png`,
       });
+    }
+
+    if (
+      /^\/api\/v1\/feedback\/[^/]+\/recording$/.test(pathname) &&
+      method === "PUT"
+    ) {
+      if (recording === "refused") {
+        return json(route, 409, { error: "Recording already attached" });
+      }
+      if (recording === "network-error") return route.abort("failed");
+      if (recording === "hang") return;
+      return route.fulfill({ status: 204, headers: corsHeaders(request) });
     }
 
     const itemMatch = /^\/api\/v1\/feedback\/([^/]+)$/.exec(pathname);

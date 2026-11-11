@@ -3,6 +3,7 @@ import type { eventWithTime } from "@rrweb/types";
 
 import type { PageRecording } from "./contract.js";
 import { createRecordingBuffer } from "./recording-buffer.js";
+import { toRecordingFile } from "./recording-file.js";
 
 // How often the buffer checks whether a new slice is due. Well under a slice,
 // so a slice lasts 30 seconds give or take this.
@@ -13,7 +14,11 @@ const TICK_MS = 1_000;
 const MOUSEMOVE_SAMPLE_MS = 100;
 const SCROLL_SAMPLE_MS = 150;
 
-const idle: PageRecording = { stop() {} };
+const idle: PageRecording = {
+  take: () => Promise.resolve(null),
+  resume() {},
+  stop() {},
+};
 
 /**
  * Records the page into the buffer from now until `stop`. Silent on failure:
@@ -21,12 +26,17 @@ const idle: PageRecording = { stop() {} };
  */
 export function startRecording(): PageRecording {
   try {
+    // From the Selection to the end of comment mode: the events of that time
+    // are dropped, and a full snapshot on resume makes up for them.
+    let suspended = false;
     const buffer = createRecordingBuffer<eventWithTime, null>({
       takeFullSnapshot: () => record.takeFullSnapshot(),
       marker: null,
     });
     const stopRecord = record({
-      emit: (event) => buffer.add(event),
+      emit: (event) => {
+        if (!suspended) buffer.add(event);
+      },
       sampling: {
         mousemove: MOUSEMOVE_SAMPLE_MS,
         scroll: SCROLL_SAMPLE_MS,
@@ -41,8 +51,21 @@ export function startRecording(): PageRecording {
       errorHandler: () => true,
     });
     if (!stopRecord) return idle;
-    const timer = setInterval(() => buffer.tick(), TICK_MS);
+    const timer = setInterval(() => {
+      if (!suspended) buffer.tick();
+    }, TICK_MS);
     return {
+      take() {
+        buffer.tick();
+        const candidates = buffer.copy();
+        suspended = true;
+        return toRecordingFile(candidates);
+      },
+      resume() {
+        if (!suspended) return;
+        suspended = false;
+        record.takeFullSnapshot();
+      },
       stop() {
         clearInterval(timer);
         stopRecord();

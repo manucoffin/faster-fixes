@@ -154,6 +154,8 @@ test.describe("recorder file (script embed)", () => {
     await createFeedback(page, "Blocked recorder");
 
     expect(stub.createdFeedback()).toHaveLength(1);
+    expect(stub.createdFeedback()[0]).not.toHaveProperty("recordingFollows");
+    expect(stub.requestsTo("PUT", /\/recording$/)).toHaveLength(0);
     expect(output).toEqual([]);
   });
 });
