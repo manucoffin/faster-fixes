@@ -8,11 +8,17 @@ export {
   formatCustomMetadataLines,
   formatDiagnosticTrailLines,
 } from "./_helpers/format-feedback-markdown";
-export { formatTimelineLines } from "./_helpers/format-timeline-lines";
+export {
+  formatTimelineLines,
+  formatTimelineNotes,
+  formatTimelineOffset,
+  formatTimelineStep,
+} from "./_helpers/format-timeline-lines";
 export {
   mergeRecordingTimeline,
   RECORDING_TIMELINE_MAX_ENTRIES,
   type RecordingTimeline,
+  type RecordingTimelineEntry,
 } from "./_helpers/merge-recording-timeline";
 export {
   type CachedRecordingSteps,

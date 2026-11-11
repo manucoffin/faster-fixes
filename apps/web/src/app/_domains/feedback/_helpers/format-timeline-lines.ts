@@ -13,13 +13,26 @@ import type { RecordingStep } from "./read-recording-steps";
  * one bullet per entry with its time from the Selection. Returns `[]` for an
  * empty timeline, like `formatDiagnosticTrailLines`.
  */
-export function formatTimelineLines({
-  entries,
+export function formatTimelineLines(timeline: RecordingTimeline): string[] {
+  if (timeline.entries.length === 0) return [];
+  const notes = formatTimelineNotes(timeline);
+
+  return [
+    ...notes,
+    ...(notes.length > 0 ? [""] : []),
+    ...timeline.entries.map(
+      (entry) =>
+        `- ${formatTimelineOffset(entry.offsetMs)}  ${formatEntry(entry)}`,
+    ),
+  ];
+}
+
+/** What the cap and the Selection left out, one sentence each. */
+export function formatTimelineNotes({
   droppedCount,
   afterSelectionCount,
 }: RecordingTimeline): string[] {
-  if (entries.length === 0) return [];
-  const notes = [
+  return [
     droppedCount > 0
       ? `${droppedCount} earlier ${entriesNoun(droppedCount)} omitted.`
       : null,
@@ -27,15 +40,6 @@ export function formatTimelineLines({
       ? `${afterSelectionCount} ${entriesNoun(afterSelectionCount)} after the Selection omitted.`
       : null,
   ].filter((note) => note !== null);
-
-  return [
-    ...notes,
-    ...(notes.length > 0 ? [""] : []),
-    ...entries.map(
-      (entry) =>
-        `- ${formatTimelineOffset(entry.offsetMs)}  ${formatEntry(entry)}`,
-    ),
-  ];
 }
 
 function formatEntry(entry: RecordingTimelineEntry): string {

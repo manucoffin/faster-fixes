@@ -177,11 +177,14 @@ function diagnosticsOrTimelineLines(feedback: FeedbackForIssue): string[] {
 }
 
 function formatRecordingLine({ playerUrl, durationMs }: IssueRecording) {
-  const seconds = Math.max(1, Math.round(durationMs / 1000));
-  return `**Recording:** [Play in Faster Fixes](${playerUrl}) \u00b7 ${seconds} s`;
+  return `**Recording:** [Play in Faster Fixes](${playerUrl}) \u00b7 ${formatRecordingDuration(durationMs)}`;
 }
 
-function describeTimeline({ entries }: RecordingTimeline) {
+export function formatRecordingDuration(durationMs: number) {
+  return `${Math.max(1, Math.round(durationMs / 1000))} s`;
+}
+
+export function describeTimeline({ entries }: RecordingTimeline) {
   const count = (kind: RecordingTimeline["entries"][number]["kind"]) =>
     entries.filter((entry) => entry.kind === kind).length;
   const steps = count("step");

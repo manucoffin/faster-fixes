@@ -8,6 +8,7 @@ import { createJiraIssue as createIssue } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
+import { refreshIssueRecording } from "../refresh-issue-recording";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -43,6 +44,7 @@ export const createJiraIssue = inngest.createFunction(
         reviewer: { select: { name: true } },
         video: { select: { title: true } },
         screenshot: { select: { key: true, bucket: true } },
+        recording: { select: { key: true } },
         jiraIssueLink: { select: { id: true } },
       },
     });
@@ -78,6 +80,8 @@ export const createJiraIssue = inngest.createFunction(
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
 
+    const recording = await refreshIssueRecording(feedback);
+
     const description = formatIssueAdf({
       comment: feedback.comment,
       pageUrl: feedback.pageUrl,
@@ -103,6 +107,7 @@ export const createJiraIssue = inngest.createFunction(
       frameY: feedback.frameY,
       frameWidth: feedback.frameWidth,
       frameHeight: feedback.frameHeight,
+      recording,
     });
 
     let issue;
