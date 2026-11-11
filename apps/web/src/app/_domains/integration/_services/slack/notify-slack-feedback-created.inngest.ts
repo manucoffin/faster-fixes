@@ -4,6 +4,7 @@ import { decryptSlackToken } from "./token-crypto";
 import { matchUnhealthySlackError } from "../../_helpers/slack/match-unhealthy-error";
 import { getFreshScreenshotUrl } from "./get-fresh-screenshot-url";
 import { postMessage } from "./slack-client";
+import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import { feedbackCreatedEvent } from "@/server/inngest/events";
@@ -15,35 +16,33 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
     concurrency: { key: "event.data.feedbackId", limit: 1 },
     triggers: [{ event: feedbackCreatedEvent }],
   },
-  async ({ event }) => {
+  async ({ event, step }) => {
     const { feedbackId } = event.data;
 
-    const feedback = await prisma.feedback.findUnique({
-      where: { id: feedbackId },
-      include: {
-        reviewer: { select: { name: true } },
-        video: { select: { title: true } },
-        screenshot: { select: { key: true, bucket: true, provider: true } },
-        slackMessage: { select: { id: true } },
-        project: {
-          include: {
-            slackLink: { include: { installation: true } },
-          },
-        },
-      },
-    });
+    const found = await readFeedback(feedbackId);
 
-    if (!feedback) return { skipped: "feedback_not_found" };
+    if (!found) return { skipped: "feedback_not_found" };
 
     // Idempotency: never post twice for the same feedback.
-    if (feedback.slackMessage) {
+    if (found.slackMessage) {
       return { skipped: "slack_message_already_exists" };
     }
 
-    const link = feedback.project.slackLink;
+    const link = found.project.slackLink;
     if (!link) return { skipped: "no_slack_link" };
     if (!link.enabled) return { skipped: "slack_link_disabled" };
     if (!link.linkHealthy) return { skipped: "slack_link_unhealthy" };
+
+    const feedback = await findFeedbackWithAwaitedRecording({
+      event,
+      step,
+      feedback: found,
+      readFeedback: () => readFeedback(feedbackId),
+    });
+    if (!feedback) return { skipped: "feedback_not_found" };
+    if (feedback.slackMessage) {
+      return { skipped: "slack_message_already_exists" };
+    }
 
     const botToken = decryptSlackToken(link.installation.botToken);
     const screenshotUrl = await getFreshScreenshotUrl(feedback);
@@ -107,3 +106,21 @@ export const notifySlackFeedbackCreated = inngest.createFunction(
     return { posted: true, messageTs: result.ts };
   },
 );
+
+function readFeedback(feedbackId: string) {
+  return prisma.feedback.findUnique({
+    where: { id: feedbackId },
+    include: {
+      reviewer: { select: { name: true } },
+      video: { select: { title: true } },
+      screenshot: { select: { key: true, bucket: true, provider: true } },
+      recording: { select: { id: true } },
+      slackMessage: { select: { id: true } },
+      project: {
+        include: {
+          slackLink: { include: { installation: true } },
+        },
+      },
+    },
+  });
+}
