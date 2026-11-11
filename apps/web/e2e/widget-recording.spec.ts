@@ -26,6 +26,33 @@ async function eraseFromPage(page: Page) {
   });
 }
 
+// A node of rrweb's serialized DOM, as far as these tests read it.
+type SnapshotNode = {
+  type: number;
+  tagName?: string;
+  textContent?: string;
+  childNodes?: SnapshotNode[];
+};
+
+function findElement(
+  node: SnapshotNode,
+  tagName: string,
+): SnapshotNode | undefined {
+  if (node.tagName === tagName) return node;
+  for (const child of node.childNodes ?? []) {
+    const found = findElement(child, tagName);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+// The text a Reviewer would read: style and script content is not page text.
+function readTexts(node: SnapshotNode): string[] {
+  if (["style", "script", "noscript"].includes(node.tagName ?? "")) return [];
+  if (node.type === 3) return [node.textContent ?? ""];
+  return (node.childNodes ?? []).flatMap(readTexts);
+}
+
 async function select(page: Page, target = "h1") {
   await page.getByRole("button", { name: "Start feedback" }).click();
   await page.locator(target).click();
@@ -122,6 +149,107 @@ for (const embed of EMBEDS) {
       expect(second?.json).not.toContain("While the form is open");
       expect(first?.json).not.toContain("Between the two");
       expect(second?.json).toContain("Between the two");
+    });
+
+    test("holds no typed value, no masked or blocked content and none of the Widget", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await expect(
+        page.getByRole("button", { name: "Start feedback" }),
+      ).toBeVisible();
+      await page.evaluate(() => {
+        const fixture = document.createElement("div");
+        fixture.innerHTML = `
+          <input id="e2e-input" />
+          <textarea id="e2e-textarea"></textarea>
+          <select id="e2e-select">
+            <option value="">Choose</option>
+            <option value="picked-option">Picked option</option>
+          </select>
+          <div id="e2e-editable" contenteditable="true"></div>
+          <section data-ff-mask>Masked secret <strong>nested secret</strong></section>
+          <div data-ff-block style="width: 120px; height: 48px">Blocked secret</div>
+        `;
+        document.body.prepend(fixture);
+      });
+      await page.locator("#e2e-input").fill("typed-in-input");
+      await page.locator("#e2e-textarea").fill("typed-in-textarea");
+      await page.locator("#e2e-select").selectOption("picked-option");
+      await page.locator("#e2e-editable").click();
+      await page.keyboard.type("typed-in-editable");
+
+      await select(page);
+      await submit(page, "Private content");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const [upload] = api.requestsTo("PUT", RECORDING_PATH);
+      const { events, json } = readUploadedRecording(
+        upload ?? { headers: {}, body: null },
+      );
+      for (const typed of [
+        "typed-in-input",
+        "typed-in-textarea",
+        "typed-in-editable",
+      ]) {
+        expect(json).not.toContain(typed);
+      }
+      // The Reviewer's changes to a field are recorded, with no value.
+      const inputs = (
+        events as { type: number; data?: { source?: number; text?: string } }[]
+      ).filter(({ type, data }) => type === 3 && data?.source === 5);
+      expect(inputs.length).toBeGreaterThan(0);
+      for (const { data } of inputs) expect(data?.text).toMatch(/^\**$/);
+      expect(json).not.toContain('"selected":true');
+
+      expect(json).not.toContain("Masked secret");
+      expect(json).not.toContain("nested secret");
+      expect(json).toContain("****** ******");
+      expect(json).not.toContain("Blocked secret");
+      expect(json).toContain('"rr_width":"120px","rr_height":"48px"');
+
+      expect(json).not.toContain("data-ff-widget");
+      expect(json).not.toContain("Start feedback");
+      expect(json).not.toContain("Private content");
+    });
+
+    test("masks all page text under data-ff-mask on the body", async ({
+      page,
+    }) => {
+      await page.addInitScript(() => {
+        document.addEventListener("DOMContentLoaded", () => {
+          document.body.setAttribute("data-ff-mask", "");
+        });
+      });
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await expect(
+        page.getByRole("button", { name: "Start feedback" }),
+      ).toBeVisible();
+      await writeOnPage(page, "Added after the snapshot");
+
+      await select(page);
+      await submit(page, "All text masked");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      const [upload] = api.requestsTo("PUT", RECORDING_PATH);
+      const { events, json } = readUploadedRecording(
+        upload ?? { headers: {}, body: null },
+      );
+      const snapshot = events.find(({ type }) => type === 2) as
+        | { data: { node: SnapshotNode } }
+        | undefined;
+      const body = snapshot && findElement(snapshot.data.node, "body");
+      expect(body).toBeDefined();
+      const texts = body ? readTexts(body) : [];
+      expect(texts.join("").trim()).not.toBe("");
+      for (const text of texts) expect(text).toMatch(/^[\s*]*$/);
+      expect(json).not.toContain("Added after the snapshot");
     });
 
     test("closes the form without waiting for the upload", async ({ page }) => {

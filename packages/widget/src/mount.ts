@@ -11,6 +11,7 @@ import { createAnnotationMode } from "./annotation.js";
 import { createCommentPopover } from "./comment-popover.js";
 import { createFeedbackList } from "./feedback-list.js";
 import { buildFeedbackPayload } from "./feedback-payload.js";
+import { WIDGET_ATTRIBUTE } from "./capture-attributes.js";
 import { guardHost } from "./host-guard.js";
 import type { Widget } from "./instance.js";
 import {
@@ -91,7 +92,7 @@ export function mountWidget({
   recorder: recorderFile,
 }: MountInput): Widget {
   const host = document.createElement("div");
-  host.setAttribute("data-ff-widget", "");
+  host.setAttribute(WIDGET_ATTRIBUTE, "");
 
   const shadow = host.attachShadow({ mode: "open" });
   const sheet = new CSSStyleSheet();

@@ -1,6 +1,11 @@
 import { record } from "@rrweb/record";
 import type { eventWithTime } from "@rrweb/types";
 
+import {
+  BLOCK_ATTRIBUTE,
+  MASK_ATTRIBUTE,
+  WIDGET_ATTRIBUTE,
+} from "../capture-attributes.js";
 import type { PageRecording } from "./contract.js";
 import { createRecordingBuffer } from "./recording-buffer.js";
 import { toRecordingFile } from "./recording-file.js";
@@ -13,6 +18,13 @@ const TICK_MS = 1_000;
 // pointer positions, and between two recorded scroll positions of one element.
 const MOUSEMOVE_SAMPLE_MS = 100;
 const SCROLL_SAMPLE_MS = 150;
+
+// Matched with `closest`, so no descendant can be exempted. A `contenteditable`
+// element's text is what the Reviewer typed, masked like a field's value.
+const MASK_TEXT_SELECTOR = `[${MASK_ATTRIBUTE}], [contenteditable]:not([contenteditable="false"])`;
+// The Widget's host renders as `display: contents`, so its placeholder is empty
+// and sizeless, and its shadow root is never serialized.
+const BLOCK_SELECTOR = `[${BLOCK_ATTRIBUTE}], [${WIDGET_ATTRIBUTE}]`;
 
 const idle: PageRecording = {
   take: () => Promise.resolve(null),
@@ -42,6 +54,10 @@ export function startRecording(): PageRecording {
         scroll: SCROLL_SAMPLE_MS,
         input: "last",
       },
+      // Every field's value, whatever its type; there is no unmasking option.
+      maskAllInputs: true,
+      maskTextSelector: MASK_TEXT_SELECTOR,
+      blockSelector: BLOCK_SELECTOR,
       // Off so rrweb creates no worker and the page needs no `worker-src`.
       recordCanvas: false,
       // Images and fonts keep their address; nothing the page references is copied.

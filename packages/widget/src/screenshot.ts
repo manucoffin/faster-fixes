@@ -1,6 +1,8 @@
 import { createContext, destroyContext, domToBlob } from "modern-screenshot";
 import type { Context } from "modern-screenshot";
 
+import { BLOCK_ATTRIBUTE, WIDGET_ATTRIBUTE } from "./capture-attributes.js";
+
 export type CaptureViewportScreenshotOptions = {
   // Fallback when the full capture timed out: no font embedding and short fetch
   // timeouts, so slow images become same-size placeholders. Elements are never
@@ -46,7 +48,7 @@ function reanchorFixedElements(cloned: Node, scrollX: number, scrollY: number) {
 // that is loaded and owned by the Widget, so the capture filter also skips it.
 async function createSandbox(): Promise<HTMLIFrameElement> {
   const sandbox = document.createElement("iframe");
-  sandbox.setAttribute("data-ff-widget", "");
+  sandbox.setAttribute(WIDGET_ATTRIBUTE, "");
   sandbox.setAttribute("aria-hidden", "true");
   sandbox.tabIndex = -1;
   sandbox.width = "0";
@@ -99,7 +101,10 @@ export async function captureViewportScreenshot(
       // Inverted from html2canvas: return true to INCLUDE, false to EXCLUDE
       filter: (node: Node) => {
         if (!(node instanceof Element)) return true;
-        if (node.hasAttribute("data-ff-widget")) return false;
+        if (node.hasAttribute(WIDGET_ATTRIBUTE)) return false;
+        // Removed rather than replaced, so a blocked element in flow shifts the
+        // layout after it; the site chose to keep it out of every capture.
+        if (node.hasAttribute(BLOCK_ATTRIBUTE)) return false;
         if (isUndecodedVideo(node)) return false;
         return true;
       },

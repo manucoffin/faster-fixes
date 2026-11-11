@@ -25,6 +25,20 @@ function isUniformColour({ data }: PNG) {
   return true;
 }
 
+function countPixels({ data }: PNG, [red, green, blue]: number[]) {
+  let count = 0;
+  for (let offset = 0; offset < data.length; offset += 4) {
+    if (
+      data[offset] === red &&
+      data[offset + 1] === green &&
+      data[offset + 2] === blue
+    ) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 test.describe("screenshot capture", () => {
   test("captures the scrolled viewport of a tall page", async ({ page }) => {
     const api = await stubWidgetApi(page);
@@ -100,5 +114,39 @@ test.describe("screenshot capture", () => {
     expect(click.x).toBeLessThanOrEqual(element.left + element.width);
     expect(click.y).toBeGreaterThanOrEqual(element.top);
     expect(click.y).toBeLessThanOrEqual(element.top + element.height);
+  });
+
+  test("leaves out an element under data-ff-block", async ({ page }) => {
+    const api = await stubWidgetApi(page);
+    await seedReviewerToken(page);
+    await page.goto(TALL_PAGE_PATH);
+    await page.evaluate(() => {
+      const box = (colour: string, left: number, blocked: boolean) => {
+        const element = document.createElement("div");
+        if (blocked) element.setAttribute("data-ff-block", "");
+        element.style.cssText = `position: fixed; top: 100px; left: ${String(left)}px; width: 80px; height: 80px; z-index: 1; background: ${colour};`;
+        document.body.appendChild(element);
+      };
+      box("rgb(255, 0, 0)", 100, true);
+      box("rgb(0, 0, 255)", 300, false);
+    });
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.locator("#below-fold-target").click();
+    await page.getByPlaceholder("Describe the issue...").fill("Blocked");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect
+      .poll(() => api.requestsTo("PUT", SCREENSHOT_PATH).length, {
+        timeout: 20_000,
+      })
+      .toBe(1);
+    const [attach] = api.requestsTo("PUT", SCREENSHOT_PATH);
+    const image = readUploadedPng(
+      attach?.body ?? Buffer.alloc(0),
+      attach?.headers["content-type"] ?? "",
+    );
+    expect(countPixels(image, [0, 0, 255])).toBeGreaterThan(0);
+    expect(countPixels(image, [255, 0, 0])).toBe(0);
   });
 });
