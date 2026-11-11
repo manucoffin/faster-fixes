@@ -84,6 +84,8 @@ import { deleteFeedback } from "./inbox/_services/delete-feedback";
 import { DeleteFeedbackSchema } from "./inbox/_services/delete-feedback.schema";
 import { deleteFeedbacks } from "./inbox/_services/delete-feedbacks";
 import { DeleteFeedbacksSchema } from "./inbox/_services/delete-feedbacks.schema";
+import { countFeedbackDiagnostics } from "./inbox/_services/count-feedback-diagnostics";
+import { CountFeedbackDiagnosticsSchema } from "./inbox/_services/count-feedback-diagnostics.schema";
 import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnostics";
 import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
 import { getRecordingPlayback } from "./inbox/_services/get-recording-playback";
@@ -313,6 +315,14 @@ export const projectsRouter = router({
       .query(({ input, ctx }) =>
         getFeedbackDiagnostics({
           projectId: input.projectId,
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    countDiagnostics: protectedProcedure
+      .input(CountFeedbackDiagnosticsSchema)
+      .query(({ input, ctx }) =>
+        countFeedbackDiagnostics({
           feedbackId: input.feedbackId,
           userId: ctx.session.user.id,
         }),
