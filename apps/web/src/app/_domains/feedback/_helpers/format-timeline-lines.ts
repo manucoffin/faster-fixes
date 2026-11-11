@@ -32,7 +32,8 @@ export function formatTimelineLines({
     ...notes,
     ...(notes.length > 0 ? [""] : []),
     ...entries.map(
-      (entry) => `- ${formatOffset(entry.offsetMs)}  ${formatEntry(entry)}`,
+      (entry) =>
+        `- ${formatTimelineOffset(entry.offsetMs)}  ${formatEntry(entry)}`,
     ),
   ];
 }
@@ -40,10 +41,15 @@ export function formatTimelineLines({
 function formatEntry(entry: RecordingTimelineEntry): string {
   if (entry.kind === "console") return formatConsoleEntry(entry.entry);
   if (entry.kind === "network") return formatNetworkEntry(entry.entry);
-  return formatStep(entry.step);
+  return formatTimelineStep(entry.step);
 }
 
-function formatStep({ type, label, selector, detail }: RecordingStep): string {
+export function formatTimelineStep({
+  type,
+  label,
+  selector,
+  detail,
+}: RecordingStep): string {
   // The label of the opening step is its wording; the detail is where from.
   if (type === "load") return detail ? `${label}, from ${detail}` : `${label}`;
   const parts = [type, label, selector ? `(${selector})` : null, detail].filter(
@@ -55,7 +61,7 @@ function formatStep({ type, label, selector, detail }: RecordingStep): string {
     : line;
 }
 
-function formatOffset(offsetMs: number): string {
+export function formatTimelineOffset(offsetMs: number): string {
   const seconds = Math.round(offsetMs / 100) / 10;
   // Rounding a few milliseconds before the Selection gives -0.
   return `${(seconds === 0 ? 0 : seconds).toFixed(1)} s`;
