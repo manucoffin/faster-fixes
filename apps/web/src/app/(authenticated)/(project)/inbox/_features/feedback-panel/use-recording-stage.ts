@@ -19,10 +19,13 @@ import {
   answerPlayerMessage,
   INITIAL_RECORDING_STAGE,
   isSelectionFrameShown,
+  RECORDING_HANDSHAKE_TIMEOUT_MS,
+  type RecordingFile,
   type RecordingSpeed,
   reduceRecordingStage,
   seekRecording,
   togglePlayback,
+  viewRecordingStage,
 } from "../../_helpers/recording-stage";
 
 /**
@@ -41,27 +44,29 @@ export function useRecordingStage(feedbackId: string) {
     INITIAL_RECORDING_STAGE,
   );
 
-  // `null` when the Recording cannot be fetched or read: never thrown, since
-  // every such cause leads to the same notice.
-  const eventsQuery = useQuery({
+  // A file that cannot be fetched or read resolves with its cause, never
+  // throws, since every cause leads to the same notice.
+  const fileQuery = useQuery({
     queryKey: ["recording-events", feedbackId],
-    queryFn: async () => {
+    queryFn: async (): Promise<RecordingFile> => {
       try {
         const playback = await queryClient.fetchQuery(
           trpc.authenticated.projects.feedback.getRecordingPlayback.queryOptions(
             { feedbackId },
           ),
         );
-        if (!playback.readable) return null;
+        if (!playback.readable) {
+          return { readable: false, cause: "unreadable-on-server" };
+        }
         const response = await fetch(`/api/feedback/${feedbackId}/recording`);
-        if (!response.ok) return null;
+        if (!response.ok) return { readable: false, cause: "not-fetched" };
         const file = await readRecordingFile({
           file: await response.arrayBuffer(),
           formatVersion: playback.formatVersion,
         });
-        return file.readable ? file.events : null;
+        return file.readable ? file : { readable: false, cause: file.reason };
       } catch {
-        return null;
+        return { readable: false, cause: "not-fetched" };
       }
     },
     // The file is fixed at creation; it is read once per opening.
@@ -69,7 +74,9 @@ export function useRecordingStage(feedbackId: string) {
     gcTime: 0,
     retry: false,
   });
-  const events = eventsQuery.data;
+  const file = fileQuery.data;
+  const events = file?.readable ? file.events : null;
+  const view = viewRecordingStage(file, stage);
 
   const post = useCallback((message: DashboardMessage) => {
     frameRef.current?.contentWindow?.postMessage(
@@ -100,7 +107,13 @@ export function useRecordingStage(feedbackId: string) {
     window.addEventListener("message", onMessage);
     // Either side may be ready first: the player answers this with `ready`.
     post({ type: "listening" });
-    return () => window.removeEventListener("message", onMessage);
+    const timeout = window.setTimeout(() => {
+      dispatch({ type: "handshakeTimeout" });
+    }, RECORDING_HANDSHAKE_TIMEOUT_MS);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.clearTimeout(timeout);
+    };
   }, [events, post]);
 
   const toggle = () => togglePlayback(stage).forEach(post);
@@ -124,7 +137,9 @@ export function useRecordingStage(feedbackId: string) {
   return {
     frameRef,
     events,
-    status: events === null ? ("unplayable" as const) : stage.status,
+    status: view.status,
+    areControlsEnabled: view.areControlsEnabled,
+    isResourceNoticeShown: view.isResourceNoticeShown,
     state: stage.state,
     time: stage.time,
     duration: stage.duration,

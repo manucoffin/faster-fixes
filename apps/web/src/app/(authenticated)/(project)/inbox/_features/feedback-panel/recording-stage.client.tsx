@@ -37,6 +37,8 @@ export function RecordingStage({
     frameRef,
     events,
     status,
+    areControlsEnabled,
+    isResourceNoticeShown,
     state,
     time,
     duration,
@@ -116,6 +118,12 @@ export function RecordingStage({
             </>
           )}
         </div>
+        {isResourceNoticeShown && (
+          <p className="shrink-0 border-t px-4 py-2 text-xs text-muted-foreground">
+            This page may look different from what the reviewer saw. The
+            screenshot is exact.
+          </p>
+        )}
         <div className="flex shrink-0 items-center gap-3 border-t px-4 py-2">
           <Button
             variant="ghost"
@@ -123,7 +131,7 @@ export function RecordingStage({
             aria-label={isPlaying ? "Pause" : "Play"}
             aria-keyshortcuts="Space"
             title={isPlaying ? "Pause (Space)" : "Play (Space)"}
-            disabled={!isLoaded}
+            disabled={!areControlsEnabled}
             onClick={togglePlayback}
           >
             {isPlaying ? <Pause /> : <Play />}
@@ -138,7 +146,7 @@ export function RecordingStage({
           <RecordingTimeline
             time={time}
             duration={duration}
-            disabled={!isLoaded}
+            disabled={!areControlsEnabled}
             marks={marks}
             onSeek={seek}
           />
@@ -153,7 +161,7 @@ export function RecordingStage({
                 variant="ghost"
                 size="sm"
                 aria-pressed={speed === rate}
-                disabled={!isLoaded}
+                disabled={!areControlsEnabled}
                 className={cn(
                   "font-mono tabular-nums",
                   speed !== rate && "text-muted-foreground",

@@ -1,24 +1,27 @@
-import type { PlayerMessage } from "@/app/_domains/feedback/_helpers/recording-player-protocol";
 import { describe, expect, it } from "vitest";
 import {
   answerPlayerMessage,
   INITIAL_RECORDING_STAGE,
   isSelectionFrameShown,
+  type RecordingFile,
   type RecordingStage,
+  type RecordingStageAction,
   reduceRecordingStage,
   seekRecording,
   togglePlayback,
+  viewRecordingStage,
 } from "./recording-stage";
 
 const VIEWPORT = { width: 1280, height: 800 };
 
-function fold(messages: PlayerMessage[]) {
+function fold(messages: RecordingStageAction[]) {
   return messages.reduce(reduceRecordingStage, INITIAL_RECORDING_STAGE);
 }
 
 const loaded: RecordingStage = {
+  ...INITIAL_RECORDING_STAGE,
   status: "loaded",
-  state: "paused",
+  isAnswered: true,
   time: 12_000,
   duration: 12_000,
 };
@@ -31,7 +34,12 @@ describe("reduceRecordingStage", () => {
         { type: "ready" },
         { type: "loaded", duration: 12_000, viewport: VIEWPORT },
       ]),
-    ).toEqual({ status: "loaded", state: "paused", time: 0, duration: 12_000 });
+    ).toEqual({
+      ...INITIAL_RECORDING_STAGE,
+      status: "loaded",
+      isAnswered: true,
+      duration: 12_000,
+    });
   });
 
   it("follows the playhead and the player's state", () => {
@@ -53,7 +61,120 @@ describe("reduceRecordingStage", () => {
         { type: "state", state: "playing" },
         { type: "loaded", duration: 12_000, viewport: VIEWPORT },
       ]),
-    ).toMatchObject({ status: "unplayable", state: "paused" });
+    ).toMatchObject({
+      status: "unplayable",
+      state: "paused",
+      cause: "player-failed",
+    });
+  });
+
+  it("is unplayable when the player never answers the handshake", () => {
+    expect(fold([{ type: "handshakeTimeout" }])).toMatchObject({
+      status: "unplayable",
+      cause: "no-handshake",
+    });
+  });
+
+  it("ignores the handshake timeout once the player has answered", () => {
+    expect(fold([{ type: "ready" }, { type: "handshakeTimeout" }]).status).toBe(
+      "loading",
+    );
+    expect(
+      fold([
+        { type: "loaded", duration: 12_000, viewport: VIEWPORT },
+        { type: "handshakeTimeout" },
+      ]).status,
+    ).toBe("loaded");
+  });
+
+  it("keeps playing when a resource is missing, and remembers it", () => {
+    expect(
+      fold([
+        { type: "loaded", duration: 12_000, viewport: VIEWPORT },
+        { type: "state", state: "playing" },
+        { type: "resourcesMissing" },
+        { type: "time", time: 4_000 },
+        { type: "state", state: "paused" },
+      ]),
+    ).toMatchObject({
+      status: "loaded",
+      state: "paused",
+      time: 4_000,
+      isResourceMissing: true,
+    });
+  });
+});
+
+describe("viewRecordingStage", () => {
+  const readable: RecordingFile = { readable: true, events: [] };
+
+  it("shows the loading state until the file is read", () => {
+    expect(viewRecordingStage(undefined, loaded)).toEqual({
+      status: "loading",
+      cause: null,
+      areControlsEnabled: false,
+      isResourceNoticeShown: false,
+    });
+  });
+
+  it("enables the controls once the Recording has loaded", () => {
+    expect(viewRecordingStage(readable, INITIAL_RECORDING_STAGE)).toMatchObject(
+      { status: "loading", areControlsEnabled: false },
+    );
+    expect(viewRecordingStage(readable, loaded)).toEqual({
+      status: "loaded",
+      cause: null,
+      areControlsEnabled: true,
+      isResourceNoticeShown: false,
+    });
+  });
+
+  it.each([
+    "not-fetched",
+    "unreadable-on-server",
+    "too-large",
+    "not-gzip",
+    "invalid-events",
+    "unknown-format-version",
+  ] as const)("shows the notice for a file refused as %s", (cause) => {
+    expect(
+      viewRecordingStage({ readable: false, cause }, INITIAL_RECORDING_STAGE),
+    ).toEqual({
+      status: "unplayable",
+      cause,
+      areControlsEnabled: false,
+      isResourceNoticeShown: false,
+    });
+  });
+
+  it.each([
+    ["player-failed", { type: "failed" }],
+    ["no-handshake", { type: "handshakeTimeout" }],
+  ] as const)("shows the notice when the cause is %s", (cause, action) => {
+    expect(viewRecordingStage(readable, fold([action]))).toEqual({
+      status: "unplayable",
+      cause,
+      areControlsEnabled: false,
+      isResourceNoticeShown: false,
+    });
+  });
+
+  it("shows the line on a missing resource while the Recording plays", () => {
+    expect(
+      viewRecordingStage(readable, { ...loaded, isResourceMissing: true }),
+    ).toMatchObject({ status: "loaded", isResourceNoticeShown: true });
+    expect(
+      viewRecordingStage(readable, fold([{ type: "resourcesMissing" }])),
+    ).toMatchObject({ status: "loading", isResourceNoticeShown: true });
+  });
+
+  it("drops the line once the notice replaces the stage", () => {
+    expect(
+      viewRecordingStage(
+        readable,
+        fold([{ type: "resourcesMissing" }, { type: "failed" }]),
+      ),
+    ).toMatchObject({ status: "unplayable", isResourceNoticeShown: false });
   });
 });
 

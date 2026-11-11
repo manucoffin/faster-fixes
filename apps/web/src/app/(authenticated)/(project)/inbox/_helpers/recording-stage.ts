@@ -1,8 +1,33 @@
+import type { RecordingFileRefusal } from "@/app/_domains/feedback/_helpers/read-recording-file";
 import type {
   DashboardMessage,
   PlayerMessage,
+  RecordingPlayerEvent,
   RecordingPlayerState,
 } from "@/app/_domains/feedback/_helpers/recording-player-protocol";
+
+/** How long the player document has to answer the handshake. */
+export const RECORDING_HANDSHAKE_TIMEOUT_MS = 10_000;
+
+/** Why a Recording cannot be played. Every cause shows the same notice. */
+export type RecordingUnplayableCause =
+  | "not-fetched"
+  // The server's own read of the file failed, so the dashboard skips its own.
+  | "unreadable-on-server"
+  | RecordingFileRefusal
+  | "player-failed"
+  | "no-handshake";
+
+/** The Recording file as the dashboard fetched and read it. */
+export type RecordingFile =
+  | { readable: true; events: RecordingPlayerEvent[] }
+  | {
+      readable: false;
+      cause: Extract<
+        RecordingUnplayableCause,
+        "not-fetched" | "unreadable-on-server" | RecordingFileRefusal
+      >;
+    };
 
 /**
  * What the dashboard knows of the player document while a Recording plays,
@@ -14,6 +39,11 @@ export type RecordingStage = {
   state: RecordingPlayerState;
   time: number;
   duration: number;
+  /** Whether the player document has answered the handshake. */
+  isAnswered: boolean;
+  /** Whether an image or a font of the replayed page failed. Never reset. */
+  isResourceMissing: boolean;
+  cause: RecordingUnplayableCause | null;
 };
 
 export const INITIAL_RECORDING_STAGE: RecordingStage = {
@@ -21,27 +51,80 @@ export const INITIAL_RECORDING_STAGE: RecordingStage = {
   state: "paused",
   time: 0,
   duration: 0,
+  isAnswered: false,
+  isResourceMissing: false,
+  cause: null,
 };
+
+/** A player message, or the dashboard's own timer on the handshake. */
+export type RecordingStageAction = PlayerMessage | { type: "handshakeTimeout" };
 
 export function reduceRecordingStage(
   stage: RecordingStage,
-  message: PlayerMessage,
+  action: RecordingStageAction,
 ): RecordingStage {
   if (stage.status === "unplayable") return stage;
 
-  switch (message.type) {
+  switch (action.type) {
+    case "handshakeTimeout":
+      return stage.isAnswered ? stage : unplayable(stage, "no-handshake");
     case "failed":
-      return { ...stage, status: "unplayable", state: "paused" };
-    case "loaded":
-      return { ...stage, status: "loaded", duration: message.duration };
-    case "time":
-      return { ...stage, time: message.time };
-    case "state":
-      return { ...stage, state: message.state };
+      return unplayable({ ...stage, isAnswered: true }, "player-failed");
     case "ready":
+      return { ...stage, isAnswered: true };
+    case "loaded":
+      return {
+        ...stage,
+        isAnswered: true,
+        status: "loaded",
+        duration: action.duration,
+      };
+    case "time":
+      return { ...stage, time: action.time };
+    case "state":
+      return { ...stage, state: action.state };
     case "resourcesMissing":
-      return stage;
+      return { ...stage, isResourceMissing: true };
   }
+}
+
+function unplayable(
+  stage: RecordingStage,
+  cause: RecordingUnplayableCause,
+): RecordingStage {
+  return { ...stage, status: "unplayable", state: "paused", cause };
+}
+
+/**
+ * What the player shows for a Recording file and the player document's
+ * stage: the notice replaces the stage for every cause, and the line on
+ * missing fonts or images only shows on a stage that still plays.
+ */
+export function viewRecordingStage(
+  file: RecordingFile | undefined,
+  stage: RecordingStage,
+): {
+  status: RecordingStage["status"];
+  cause: RecordingUnplayableCause | null;
+  areControlsEnabled: boolean;
+  isResourceNoticeShown: boolean;
+} {
+  if (file && !file.readable) {
+    return {
+      status: "unplayable",
+      cause: file.cause,
+      areControlsEnabled: false,
+      isResourceNoticeShown: false,
+    };
+  }
+  // Until the file is read, the player document has nothing to play.
+  const status = file ? stage.status : "loading";
+  return {
+    status,
+    cause: stage.cause,
+    areControlsEnabled: status === "loaded",
+    isResourceNoticeShown: status !== "unplayable" && stage.isResourceMissing,
+  };
 }
 
 /**
