@@ -4,13 +4,16 @@
  */
 
 import { describeVideoSelection } from "@/app/_domains/video";
-import type {
-  ConsoleEntry,
-  CustomMetadata,
-  DiagnosticTrail,
-  NetworkEntry,
-} from "@fasterfixes/core";
+import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+import {
+  collapseWhitespace,
+  formatConsoleEntry,
+  formatNetworkEntry,
+} from "./format-diagnostic-entry";
+import { formatTimelineLines } from "./format-timeline-lines";
+import { mergeRecordingTimeline } from "./merge-recording-timeline";
 import type { FeedbackSelection } from "./read-feedback-selection";
+import type { RecordingStep } from "./read-recording-steps";
 
 export type FeedbackForMarkdown = {
   id: string;
@@ -36,6 +39,9 @@ export type FeedbackForMarkdown = {
   videoId?: string | null;
   videoTitle?: string | null;
   selection?: FeedbackSelection | null;
+  // Optional: only the single Feedback reads its Recording. Readable → the
+  // Timeline takes the place of Diagnostics.
+  recording?: { readable: boolean; steps: RecordingStep[] } | null;
 };
 
 export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
@@ -113,14 +119,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     lines.push(...customMetadataLines);
   }
 
-  // Diagnostics — console + network captured before submission
-  const diagnosticLines = formatDiagnosticTrailLines(f.diagnosticTrail);
-  if (diagnosticLines.length > 0) {
-    lines.push("");
-    lines.push("## Diagnostics");
-    lines.push("");
-    lines.push(...diagnosticLines);
-  }
+  lines.push(...diagnosticsOrTimelineLines(f));
 
   // Screenshot with instruction for multimodal AI agents
   if (f.screenshotUrl) {
@@ -134,6 +133,36 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
   }
 
   return lines.join("\n");
+}
+
+// The Timeline already holds the Diagnostic Trail's entries, on one clock with
+// the Reviewer's steps; Diagnostics stays when there is no readable Recording.
+function diagnosticsOrTimelineLines({
+  recording,
+  diagnosticTrail,
+}: FeedbackForMarkdown): string[] {
+  if (recording?.readable) {
+    const timelineLines = formatTimelineLines(
+      mergeRecordingTimeline({ steps: recording.steps, diagnosticTrail }),
+    );
+    if (timelineLines.length > 0) {
+      return ["", "## Timeline", "", ...timelineLines];
+    }
+  }
+
+  const lines: string[] = [];
+  const diagnosticLines = formatDiagnosticTrailLines(diagnosticTrail);
+  if (diagnosticLines.length > 0) {
+    lines.push("", "## Diagnostics", "", ...diagnosticLines);
+  }
+  if (recording && !recording.readable) {
+    // A Console-only trail already ends on a blank line.
+    if (lines.at(-1) !== "") lines.push("");
+    lines.push(
+      "**Recording:** the file could not be read, so this Feedback has no timeline.",
+    );
+  }
+  return lines;
 }
 
 function videoLocationLines({ videoTitle, selection }: FeedbackForMarkdown) {
@@ -210,16 +239,6 @@ export function formatDiagnosticTrailLines(
   return lines;
 }
 
-// One Diagnostic Trail entry, as the Diagnostics section and the timeline show it.
-export function formatConsoleEntry(entry: ConsoleEntry): string {
-  return `\`${entry.level}\` ${collapseWhitespace(entry.message)}`;
-}
-
-export function formatNetworkEntry(entry: NetworkEntry): string {
-  const status = entry.status === 0 ? "ERR" : String(entry.status);
-  return `\`${entry.method}\` ${entry.url} → ${status} (${Math.round(entry.duration)}ms)`;
-}
-
 /**
  * Render Custom metadata as `key: value` bullet lines in declared order.
  * Returns `[]` when there are no pairs, like `formatDiagnosticTrailLines`.
@@ -231,9 +250,4 @@ export function formatCustomMetadataLines(
   return Object.entries(customMetadata).map(
     ([key, value]) => `- ${key}: ${collapseWhitespace(String(value))}`,
   );
-}
-
-// Console messages can be multi-line; flatten so each entry stays one bullet.
-function collapseWhitespace(value: string): string {
-  return value.replace(/\s*\n\s*/g, " ").trim();
 }

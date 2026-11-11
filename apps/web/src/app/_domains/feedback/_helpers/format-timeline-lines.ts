@@ -1,7 +1,7 @@
 import {
   formatConsoleEntry,
   formatNetworkEntry,
-} from "./format-feedback-markdown";
+} from "./format-diagnostic-entry";
 import type {
   RecordingTimeline,
   RecordingTimelineEntry,

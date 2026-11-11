@@ -14,6 +14,10 @@ import {
 /** The replay format versions this derivation reads. */
 const KNOWN_FORMAT_VERSIONS = new Set([1]);
 
+// Bump on any change to what the derivation returns: a cached result from an
+// older version is derived again on its next read.
+export const RECORDING_STEPS_VERSION = 1;
+
 // Keeps the cached value small; the steps closest to the Selection are kept.
 export const RECORDING_STEPS_MAX = 200;
 

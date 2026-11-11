@@ -120,6 +120,100 @@ describe("formatFeedbackAsMarkdown", () => {
   });
 });
 
+describe("formatFeedbackAsMarkdown with a Recording", () => {
+  const SELECTION_AT = 1_794_400_060_000;
+  const recording = {
+    readable: true,
+    steps: [
+      {
+        type: "click" as const,
+        timestamp: SELECTION_AT - 12_400,
+        offsetMs: -12_400,
+        label: 'button "Save changes"',
+        selector: "form.settings > button.primary",
+        detail: null,
+      },
+      {
+        type: "selection" as const,
+        timestamp: SELECTION_AT,
+        offsetMs: 0,
+        label: 'button "Save changes"',
+        selector: "#save",
+        detail: null,
+      },
+    ],
+  };
+  const withTrail: FeedbackForMarkdown = {
+    ...feedback,
+    diagnosticTrail: {
+      console: [
+        {
+          level: "error",
+          message: "Save failed",
+          timestamp: SELECTION_AT - 11_000,
+        },
+      ],
+      network: [
+        {
+          method: "POST",
+          url: "https://example.com/api/settings",
+          status: 500,
+          duration: 120,
+          timestamp: SELECTION_AT - 12_000,
+        },
+      ],
+    },
+  };
+
+  it("puts the Timeline in place of Diagnostics, ending with the Selection", () => {
+    const markdown = formatFeedbackAsMarkdown({ ...withTrail, recording });
+
+    expect(markdown).not.toContain("## Diagnostics");
+    expect(markdown).toContain(
+      [
+        "## Timeline",
+        "",
+        '- -12.4 s  click button "Save changes" (form.settings > button.primary)',
+        "- -12.0 s  `POST` https://example.com/api/settings → 500 (120ms)",
+        "- -11.0 s  `error` Save failed",
+        '- 0.0 s  selection button "Save changes" (#save), the element the comment is about',
+      ].join("\n"),
+    );
+  });
+
+  it("keeps Diagnostics and says so when the Recording could not be read", () => {
+    const markdown = formatFeedbackAsMarkdown({
+      ...feedback,
+      recording: { readable: false, steps: [] },
+    });
+
+    expect(markdown).toBe(
+      `${todaysOutput}\n**Recording:** the file could not be read, so this Feedback has no timeline.`,
+    );
+  });
+
+  it("says the Recording could not be read without a Diagnostic Trail", () => {
+    const markdown = formatFeedbackAsMarkdown({
+      ...feedback,
+      diagnosticTrail: null,
+      recording: { readable: false, steps: [] },
+    });
+
+    expect(markdown).toContain(
+      "**Viewport:** 1280×720\n\n**Recording:** the file could not be read",
+    );
+  });
+
+  it.each([
+    ["absent", undefined],
+    ["null", null],
+  ])("matches today's output when the Recording is %s", (_, value) => {
+    expect(formatFeedbackAsMarkdown({ ...feedback, recording: value })).toBe(
+      todaysOutput,
+    );
+  });
+});
+
 describe("formatFeedbackAsMarkdown on a video Feedback", () => {
   const videoFeedback: FeedbackForMarkdown = {
     ...feedback,

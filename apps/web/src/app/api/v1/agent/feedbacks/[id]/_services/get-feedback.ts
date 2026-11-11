@@ -1,4 +1,5 @@
 import { toAgentFeedbackItem } from "@/app/_domains/feedback/_helpers/agent-feedback-serializer";
+import { refreshFeedbackRecording } from "@/app/_domains/feedback/_services/refresh-feedback-recording";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
@@ -11,7 +12,7 @@ type GetFeedbackInput = {
 
 /**
  * One Feedback for an Agent token, page or Video alike: the listing's item
- * plus `recording`, which stays `null` until the Recording is read here.
+ * plus `recording`, its steps derived on the first read and cached after.
  */
 export async function getFeedback(
   { feedbackId, organizationProjects }: GetFeedbackInput,
@@ -26,6 +27,7 @@ export async function getFeedback(
       reviewer: { select: { name: true } },
       video: { select: { title: true } },
       screenshot: { select: { key: true, provider: true, bucket: true } },
+      recording: { select: { key: true } },
     },
   });
 
@@ -34,14 +36,15 @@ export async function getFeedback(
     throw new NotFoundError("Feedback not found");
   }
 
-  const screenshotUrl = feedback.screenshot
-    ? await getSignedAssetUrl(feedback.screenshot)
-    : null;
+  const [screenshotUrl, recording] = await Promise.all([
+    feedback.screenshot ? getSignedAssetUrl(feedback.screenshot) : null,
+    refreshFeedbackRecording(feedback, db),
+  ]);
 
   return {
     item: {
       ...toAgentFeedbackItem(feedback, screenshotUrl),
-      recording: null,
+      recording,
     },
     // Not part of the JSON item: the Markdown rendering names the Video.
     videoTitle: feedback.video?.title ?? null,
