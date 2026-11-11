@@ -3,7 +3,11 @@ import type { Page } from "@playwright/test";
 
 import { RECORDING_PATH, readUploadedRecording } from "./recording-upload";
 import { seedReviewerToken } from "./reviewer-token";
-import { stubWidgetApi } from "./widget-api-stub";
+import {
+  stubWidgetApi,
+  WIDGET_API_ORIGIN,
+  WIDGET_PROJECT_ID,
+} from "./widget-api-stub";
 
 const EMBEDS = [
   { name: "React Embed", path: "/login" },
@@ -52,6 +56,10 @@ function readTexts(node: SnapshotNode): string[] {
   if (node.type === 3) return [node.textContent ?? ""];
   return (node.childNodes ?? []).flatMap(readTexts);
 }
+
+// The default line on a page open for less than 30 seconds.
+const RECORDING_LINE =
+  /^Includes the last (second|\d+ seconds) on this page\.$/;
 
 async function select(page: Page, target = "h1") {
   await page.getByRole("button", { name: "Start feedback" }).click();
@@ -113,6 +121,38 @@ for (const embed of EMBEDS) {
       expect(recording.json).toContain("Reproduced before the Selection");
       const lastEvent = recording.events.at(-1);
       expect(lastEvent?.timestamp).toBeLessThanOrEqual(selectedBy);
+    });
+
+    test("states in the comment form that the Recording is included, with its real duration", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await page.goto(embed.path);
+
+      await select(page);
+
+      const line = page.getByText(RECORDING_LINE);
+      await expect(line).toBeVisible();
+      // Muted text between the comment field and the buttons, with no control.
+      expect(
+        await line.evaluate((node) => ({
+          tagName: node.tagName,
+          controls: node.querySelectorAll("a, button, input, label").length,
+        })),
+      ).toEqual({ tagName: "P", controls: 0 });
+      const field = await page
+        .getByPlaceholder("Describe the issue...")
+        .boundingBox();
+      const lineBox = await line.boundingBox();
+      const button = await page
+        .getByRole("button", { name: "Submit" })
+        .boundingBox();
+      expect(lineBox?.y).toBeGreaterThan(
+        (field?.y ?? 0) + (field?.height ?? 0) - 1,
+      );
+      expect((lineBox?.y ?? 0) + (lineBox?.height ?? 0)).toBeLessThanOrEqual(
+        (button?.y ?? 0) + 1,
+      );
     });
 
     test("gives each Feedback its own Recording, without the comment mode", async ({
@@ -306,6 +346,9 @@ test.describe("Recording upload (opted out)", () => {
     await page.goto("/e2e/script-embed?captureRecording=false");
 
     await select(page);
+    // Long enough for a Recording to have been compressed, were there one.
+    await page.waitForTimeout(500);
+    await expect(page.getByText(RECORDING_LINE)).toHaveCount(0);
     await submit(page, "No Recording");
 
     await expect
@@ -313,5 +356,33 @@ test.describe("Recording upload (opted out)", () => {
       .toHaveLength(1);
     expect(api.requestsTo("PUT", RECORDING_PATH)).toHaveLength(0);
     expect(api.createdFeedback()[0]).not.toHaveProperty("recordingFollows");
+  });
+});
+
+test.describe("Recording line (labels)", () => {
+  test("uses the site's own wording", async ({ page }) => {
+    await seedReviewerToken(page);
+    await stubWidgetApi(page);
+    await page.goto("/e2e/script-embed?manual");
+    await page.evaluate(
+      ([projectId, apiOrigin]) => {
+        window.FasterFixes?.init({
+          projectId,
+          apiOrigin,
+          labels: {
+            recordingIncluded: (seconds: number) =>
+              `Inclut les ${seconds} dernières secondes.`,
+          },
+        });
+      },
+      [WIDGET_PROJECT_ID, WIDGET_API_ORIGIN] as const,
+    );
+
+    await select(page);
+
+    await expect(
+      page.getByText(/^Inclut les \d+ dernières secondes\.$/),
+    ).toBeVisible();
+    await expect(page.getByText(RECORDING_LINE)).toHaveCount(0);
   });
 });

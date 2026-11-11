@@ -315,6 +315,12 @@ export function mountWidget({
         recording: pendingRecording,
       };
       popover.open(element);
+      // Compression settles while the Reviewer types; a later Selection owns the form.
+      void pendingRecording?.then((file) => {
+        if (file && selection?.recording === pendingRecording) {
+          popover.showRecordingIncluded(file.durationMs);
+        }
+      });
     },
     onCancel: () => setMode("idle"),
   });

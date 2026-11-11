@@ -15,6 +15,8 @@ type CommentPopoverActions = {
 
 export type CommentPopover = {
   open: (reference: Element) => void;
+  /** States that a Recording of this length leaves with the Feedback. */
+  showRecordingIncluded: (durationMs: number) => void;
   close: () => void;
 };
 
@@ -38,6 +40,9 @@ export function createCommentPopover(
   textarea.setAttribute("part", "textarea");
   textarea.placeholder = labels.textareaPlaceholder;
   textarea.setAttribute("aria-label", labels.textareaPlaceholder);
+  // Muted text only: present while a Recording will be attached, absent otherwise.
+  const recordingLine = document.createElement("p");
+  recordingLine.className = "recording-included";
   const formActions = document.createElement("div");
   formActions.className = "actions";
   const cancelButton = createActionButton(
@@ -148,11 +153,18 @@ export function createCommentPopover(
       teardown();
       isOpen = true;
       textarea.value = "";
+      recordingLine.remove();
       showError(null);
       render();
       container.appendChild(popover);
       stopAutoUpdate = anchorBelow(reference, popover);
       textarea.focus();
+    },
+    showRecordingIncluded(durationMs) {
+      if (!isOpen) return;
+      const seconds = Math.max(1, Math.round(durationMs / 1000));
+      recordingLine.textContent = labels.recordingIncluded(seconds);
+      formActions.before(recordingLine);
     },
     close: teardown,
   };

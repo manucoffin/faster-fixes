@@ -8,6 +8,7 @@ import {
   expectLabelsEverywhere,
   LABEL_OVERRIDES,
   PIN_LABEL_PREFIX,
+  RECORDING_LABEL_PREFIX,
 } from "./widget-labels";
 
 const HOME = `${ANGULAR_EXAMPLE_ORIGIN}/`;
@@ -91,16 +92,18 @@ test.describe("Angular Embed", () => {
   }) => {
     await stubWidgetApi(page, { config: { enabled: true, branding: true } });
     await page.addInitScript(
-      ([labels, pinPrefix]) => {
+      ([labels, pinPrefix, recordingPrefix]) => {
         const options: Partial<WidgetOptions> = {
           labels: {
             ...labels,
             pinAriaLabel: (excerpt: string) => `${pinPrefix}${excerpt}`,
+            recordingIncluded: (seconds: number) =>
+              `${recordingPrefix}${seconds}`,
           },
         };
         Object.assign(window, { __ffE2eOptions: options });
       },
-      [LABEL_OVERRIDES, PIN_LABEL_PREFIX] as const,
+      [LABEL_OVERRIDES, PIN_LABEL_PREFIX, RECORDING_LABEL_PREFIX] as const,
     );
     // The example stays free of test hooks, so its provider call is patched to
     // merge the options above. Vite serves the Vue entry as its own module, so the

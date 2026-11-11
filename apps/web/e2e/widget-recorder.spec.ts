@@ -151,6 +151,11 @@ test.describe("recorder file (script embed)", () => {
     );
 
     await page.goto(SCRIPT_EMBED_PATH);
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    await page.locator("h1").click();
+    await expect(page.getByPlaceholder("Describe the issue...")).toBeFocused();
+    await expect(page.getByText(/on this page\.$/)).toHaveCount(0);
+    await page.keyboard.press("Escape");
     await createFeedback(page, "Blocked recorder");
 
     expect(stub.createdFeedback()).toHaveLength(1);

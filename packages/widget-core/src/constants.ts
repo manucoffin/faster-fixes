@@ -56,6 +56,9 @@ export type Labels = {
   brandingLink: string;
   // Receives the excerpt of the Feedback comment the pin stands for.
   pinAriaLabel: (commentExcerpt: string) => string;
+  // Shown in the comment form when a Recording will be attached. Receives its
+  // duration in whole seconds, at least 1.
+  recordingIncluded: (seconds: number) => string;
 };
 
 export const DEFAULT_LABELS: Labels = {
@@ -82,6 +85,11 @@ export const DEFAULT_LABELS: Labels = {
   hideMarkers: "Hide markers",
   brandingLink: "Powered by FasterFixes",
   pinAriaLabel: (commentExcerpt) => `Feedback: ${commentExcerpt}`,
+  // A warm buffer holds 30 to 60 seconds; a shorter one states its real length.
+  recordingIncluded: (seconds) =>
+    seconds >= 30
+      ? "Includes the last minute on this page."
+      : `Includes the last ${seconds === 1 ? "second" : `${seconds} seconds`} on this page.`,
 };
 
 export const STORAGE_KEY_TOKEN = "ff_reviewer_token";

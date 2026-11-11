@@ -5,7 +5,7 @@ import type { Page } from "@playwright/test";
 
 const HOST = "[data-ff-widget]";
 
-type TextLabels = Omit<Labels, "pinAriaLabel">;
+type TextLabels = Omit<Labels, "pinAriaLabel" | "recordingIncluded">;
 
 // None contains a default label, so any default found on screen is a leak.
 export const LABEL_OVERRIDES: TextLabels = {
@@ -33,11 +33,15 @@ export const LABEL_OVERRIDES: TextLabels = {
   brandingLink: "Propulsé par FasterFixes",
 };
 export const PIN_LABEL_PREFIX = "Retour : ";
+export const RECORDING_LABEL_PREFIX = "Inclut les dernières secondes : ";
 
-const { pinAriaLabel, ...defaultTextLabels } = DEFAULT_LABELS;
+const { pinAriaLabel, recordingIncluded, ...defaultTextLabels } =
+  DEFAULT_LABELS;
 const DEFAULT_STRINGS = [
   ...Object.values(defaultTextLabels),
   pinAriaLabel("").trim(),
+  // The words every default Recording line starts with, whatever its duration.
+  recordingIncluded(2).split("2")[0]?.trim() ?? "",
 ];
 
 // Everything a Reviewer can read or hear: the text of every node, hidden panes
