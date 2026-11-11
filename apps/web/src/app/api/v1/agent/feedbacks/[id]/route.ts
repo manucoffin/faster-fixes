@@ -5,6 +5,7 @@
  */
 
 import { formatFeedbackAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
+import { getFeedback } from "@/app/_domains/feedback/_services/get-feedback";
 import { domainErrorResponse } from "@/server/errors/http-response";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -15,7 +16,6 @@ import {
   GetFeedbackQuerySchema,
 } from "../../_services/agent.schema";
 import { requireAgentAuth } from "../../_services/require-agent-auth";
-import { getFeedback } from "./_services/get-feedback";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const { item, videoTitle } = await getFeedback({
       feedbackId: idParsed.data,
-      organizationProjects: agentToken.organization.projects,
+      projectIds: agentToken.organization.projects.map(({ id }) => id),
     });
 
     console.info(

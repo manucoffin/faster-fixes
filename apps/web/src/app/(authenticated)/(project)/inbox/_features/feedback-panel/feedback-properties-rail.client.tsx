@@ -129,7 +129,7 @@ export function FeedbackPropertiesRail({
             feedbackId={feedback.id}
           />
         )}
-        <CopyFeedbackMarkdown feedback={feedback} />
+        <CopyFeedbackMarkdown projectId={projectId} feedbackId={feedback.id} />
       </div>
     </aside>
   );

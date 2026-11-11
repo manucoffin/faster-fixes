@@ -1,7 +1,7 @@
 import realRecording from "@/app/_domains/feedback/_helpers/read-recording-steps.real-recording.json";
 import { RECORDING_STEPS_VERSION } from "@/app/_domains/feedback/_helpers/read-recording-steps";
 import { gzipSync } from "node:zlib";
-import type { GetFeedbackOutput } from "./_services/get-feedback";
+import type { GetFeedbackOutput } from "@/app/_domains/feedback/_services/get-feedback";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   agentApiPrisma,

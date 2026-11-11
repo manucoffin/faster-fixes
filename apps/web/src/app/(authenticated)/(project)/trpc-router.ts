@@ -86,6 +86,8 @@ import { deleteFeedbacks } from "./inbox/_services/delete-feedbacks";
 import { DeleteFeedbacksSchema } from "./inbox/_services/delete-feedbacks.schema";
 import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnostics";
 import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
+import { getFeedbackMarkdown } from "./inbox/_services/get-feedback-markdown";
+import { GetFeedbackMarkdownSchema } from "./inbox/_services/get-feedback-markdown.schema";
 import { listArchivedFeedback } from "./inbox/_services/list-archived-feedback";
 import { ListArchivedFeedbackSchema } from "./inbox/_services/list-archived-feedback.schema";
 import { listSources } from "./inbox/_services/list-sources";
@@ -308,6 +310,15 @@ export const projectsRouter = router({
       .input(GetFeedbackDiagnosticsSchema)
       .query(({ input, ctx }) =>
         getFeedbackDiagnostics({
+          projectId: input.projectId,
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    getMarkdown: protectedProcedure
+      .input(GetFeedbackMarkdownSchema)
+      .query(({ input, ctx }) =>
+        getFeedbackMarkdown({
           projectId: input.projectId,
           feedbackId: input.feedbackId,
           userId: ctx.session.user.id,

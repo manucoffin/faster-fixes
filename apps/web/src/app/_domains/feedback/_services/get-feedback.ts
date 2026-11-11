@@ -1,27 +1,29 @@
-import { toAgentFeedbackItem } from "@/app/_domains/feedback/_helpers/agent-feedback-serializer";
-import { refreshFeedbackRecording } from "@/app/_domains/feedback/_services/refresh-feedback-recording";
+import { toAgentFeedbackItem } from "../_helpers/agent-feedback-serializer";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { prisma } from "@workspace/db";
+import { refreshFeedbackRecording } from "./refresh-feedback-recording";
 
 type GetFeedbackInput = {
   feedbackId: string;
-  /** The projects the Agent token's Organization owns: the read's whole scope. */
-  organizationProjects: Array<{ id: string }>;
+  /** The Projects the caller may read: the read's whole scope. */
+  projectIds: string[];
 };
 
 /**
- * One Feedback for an Agent token, page or Video alike: the listing's item
- * plus `recording`, its steps derived on the first read and cached after.
+ * One Feedback as the agent surface hands it out, page or Video alike: the
+ * listing's item plus `recording`, its steps derived on the first read and
+ * cached after. The agent route and the inbox copy share it, so the two
+ * documents never disagree.
  */
 export async function getFeedback(
-  { feedbackId, organizationProjects }: GetFeedbackInput,
+  { feedbackId, projectIds }: GetFeedbackInput,
   db: typeof prisma = prisma,
 ) {
   const feedback = await db.feedback.findFirst({
     where: {
       id: feedbackId,
-      projectId: { in: organizationProjects.map((p) => p.id) },
+      projectId: { in: projectIds },
     },
     include: {
       reviewer: { select: { name: true } },
