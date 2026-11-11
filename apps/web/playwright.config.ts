@@ -22,11 +22,16 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    // Guards Firefox-only regressions such as screenshot capture. The framework
-    // embed specs check parity between Embeds, which Chromium alone covers.
+    // Guards Firefox-only regressions such as screenshot capture and the player
+    // document's isolation. The framework embed specs check parity between
+    // Embeds, which Chromium alone covers.
     {
       name: "firefox",
-      testMatch: ["widget.spec.ts", "widget-screenshot.spec.ts"],
+      testMatch: [
+        "widget.spec.ts",
+        "widget-screenshot.spec.ts",
+        "recording-player*.spec.ts",
+      ],
       use: { ...devices["Desktop Firefox"] },
     },
   ],

@@ -29,6 +29,7 @@ let duration = 0;
 let speed = 1;
 let state: RecordingPlayerState = "paused";
 let failed = false;
+let resourcesMissing = false;
 
 function send(message: PlayerMessage) {
   window.parent.postMessage(
@@ -70,6 +71,61 @@ function reportTimeWhilePlaying() {
   requestAnimationFrame(reportTimeWhilePlaying);
 }
 
+function reportResourcesMissing() {
+  if (resourcesMissing || failed) return;
+  resourcesMissing = true;
+  send({ type: "resourcesMissing" });
+}
+
+// The replayed page lives in another realm, so its elements fail `instanceof`.
+function reportFailedImage(event: Event) {
+  const target = event.target as Element | null;
+  if (target?.localName === "img" || target?.localName === "image") {
+    reportResourcesMissing();
+  }
+}
+
+// Firefox does not carry the player's referrer policy into the reopened
+// document. Added last, this outranks any policy in the recorded snapshot, and
+// precedes the requests for its images and fonts, which start after the rebuild.
+function sendNoReferrer(document: Document) {
+  const meta = document.createElement("meta");
+  meta.name = "referrer";
+  meta.content = "no-referrer";
+  (document.querySelector("head") ?? document.documentElement).append(meta);
+}
+
+const watchedFonts = new WeakSet<FontFace>();
+
+// Firefox fires no event on a failed font of the reopened document, but each
+// font's own promise still rejects.
+function watchFonts(document: Document) {
+  for (const font of document.fonts) {
+    if (watchedFonts.has(font)) continue;
+    watchedFonts.add(font);
+    font.loaded.catch(reportResourcesMissing);
+  }
+}
+
+// A load error does not bubble, so it is caught on the way down. Rebuilding a
+// snapshot reopens the document, which drops its listeners, so this runs again
+// after each one.
+function watchResources(document: Document) {
+  document.addEventListener("error", reportFailedImage, true);
+  watchFonts(document);
+  // A font the page declares later starts loading on its first use.
+  document.fonts.onloading = () => {
+    watchFonts(document);
+  };
+}
+
+function prepareRebuiltPage() {
+  const document = replayer?.iframe.contentDocument;
+  if (!document?.documentElement) return;
+  sendNoReferrer(document);
+  watchResources(document);
+}
+
 function fail() {
   if (failed) return;
   failed = true;
@@ -103,6 +159,7 @@ function load(events: RecordingPlayerEvent[]) {
       recordedViewport = dimension as RecordingPlayerViewport;
       fitStage();
     });
+    replayer.on("fullsnapshot-rebuilded", prepareRebuiltPage);
     replayer.on("finish", () => {
       // rrweb also finishes when a paused seek reaches the last event.
       if (state !== "playing") return;

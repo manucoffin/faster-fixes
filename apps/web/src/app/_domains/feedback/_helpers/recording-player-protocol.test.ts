@@ -87,6 +87,7 @@ describe("parsePlayerMessage", () => {
     buildPlayerMessage({ type: "state", state: "playing" }),
     buildPlayerMessage({ type: "state", state: "paused" }),
     buildPlayerMessage({ type: "state", state: "ended" }),
+    buildPlayerMessage({ type: "resourcesMissing" }),
     buildPlayerMessage({ type: "failed" }),
   ])("accepts %o", (message) => {
     expect(parsePlayerMessage(message)).toEqual(message);
@@ -123,6 +124,7 @@ describe("parsePlayerMessage", () => {
         state: "stopped",
       },
     ],
+    ["resourcesMissing without a channel", { type: "resourcesMissing" }],
     ["a dashboard message", buildDashboardMessage({ type: "listening" })],
     ["undefined", undefined],
   ])("rejects %s", (_, data) => {

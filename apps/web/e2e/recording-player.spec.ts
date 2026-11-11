@@ -1,36 +1,17 @@
 import { expect, type Page, test } from "@playwright/test";
 
-const FIXTURE_PATH = "/e2e/recording-player";
+import {
+  FIXTURE_PATH,
+  locateReplayedPage,
+  openLoadedPlayer,
+  readPlayerMessages,
+  readTypes,
+  sendToPlayer,
+} from "./recording-player-fixture";
 
 // The sample Recording the fixture plays.
 const SAMPLE_DURATION = 3_837;
 const SAMPLE_VIEWPORT = { width: 1280, height: 720 };
-
-type PlayerMessage = {
-  type: string;
-  time?: number;
-  state?: string;
-  receivedAt: number;
-};
-
-declare global {
-  interface Window {
-    playerMessages: PlayerMessage[];
-    sendToPlayer: (message: Record<string, unknown>) => void;
-    postFromStranger: (
-      message: Record<string, unknown>,
-      options?: { sameOrigin?: boolean },
-    ) => Promise<void>;
-  }
-}
-
-function readPlayerMessages(page: Page) {
-  return page.evaluate(() => window.playerMessages);
-}
-
-async function readTypes(page: Page) {
-  return (await readPlayerMessages(page)).map((message) => message.type);
-}
 
 async function readTimes(page: Page) {
   const messages = await readPlayerMessages(page);
@@ -42,17 +23,6 @@ async function readTimes(page: Page) {
 async function readLastState(page: Page) {
   const messages = await readPlayerMessages(page);
   return messages.filter((message) => message.type === "state").at(-1)?.state;
-}
-
-function sendToPlayer(page: Page, message: Record<string, unknown>) {
-  return page.evaluate((sent) => {
-    window.sendToPlayer(sent);
-  }, message);
-}
-
-async function openLoadedPlayer(page: Page, path = FIXTURE_PATH) {
-  await page.goto(path);
-  await expect.poll(() => readTypes(page)).toContain("loaded");
 }
 
 // Seeks while paused and waits for the player to report the new playhead.
@@ -69,11 +39,9 @@ test.describe("Recording player document", () => {
 
     await expect.poll(() => readTypes(page)).toContain("ready");
 
-    // rrweb rebuilds the recorded page into a frame of its own inside the player.
-    const replayedPage = page
-      .frameLocator("#player")
-      .frameLocator(".replayer-wrapper iframe");
-    await expect(replayedPage.getByText("Billing").first()).toBeVisible();
+    await expect(
+      locateReplayedPage(page).getByText("Billing").first(),
+    ).toBeVisible();
 
     await sendToPlayer(page, { type: "play" });
 

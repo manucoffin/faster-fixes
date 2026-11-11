@@ -62,6 +62,11 @@ const PlayerMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("state"),
     state: z.enum(["playing", "paused", "ended"]),
   }),
+  // An image or a font of the replayed page failed to load. Sent once.
+  z.object({
+    channel: z.literal(CHANNEL),
+    type: z.literal("resourcesMissing"),
+  }),
   // The Recording cannot be played.
   z.object({ channel: z.literal(CHANNEL), type: z.literal("failed") }),
 ]);

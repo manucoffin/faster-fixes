@@ -39,6 +39,7 @@ export function reduceRecordingStage(
     case "state":
       return { ...stage, state: message.state };
     case "ready":
+    case "resourcesMissing":
       return stage;
   }
 }
