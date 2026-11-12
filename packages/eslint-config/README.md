@@ -111,7 +111,7 @@ a disable comment.
 Twelve rules take options from `next.js`: the eleven the table's last column names, and
 `test-file-placement`, whose one option is inline. Nine of them take options of their own: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
-(`allowPatterns`, `ignorePathPatterns` for the five home page illustrations),
+(`allowPatterns`, `ignorePathPatterns` for the six home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
 client imports of the server folder, empty today), `services-verb-prefix`
 (`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary),
