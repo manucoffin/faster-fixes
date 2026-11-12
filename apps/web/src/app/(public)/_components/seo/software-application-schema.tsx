@@ -46,6 +46,7 @@ export function SoftwareApplicationSchema() {
     featureList: [
       "Visual feedback widget for any website, as a script tag or a React embed",
       "Automatic context capture (screenshot, URL, DOM selector, React component tree on React sites, console logs, network requests)",
+      "Replay of the last minute on the page before each feedback",
       "Structured markdown bug reports for AI coding agents",
       "MCP server integration for Claude Code, Cursor, Windsurf",
       "GitHub issue sync",

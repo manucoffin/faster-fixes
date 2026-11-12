@@ -12,7 +12,7 @@ const capabilities = [
   },
   {
     title: "Issues created with the data engineers actually need",
-    body: "When a client submits feedback, Faster Fixes opens a Linear issue in the linked team. The body contains the annotated screenshot, page URL, CSS selector, React component path, source file, click coordinates, browser/OS/viewport, and the console logs and network requests captured before submission.",
+    body: "When a client submits feedback, Faster Fixes opens a Linear issue in the linked team. The body contains the annotated screenshot, page URL, CSS selector, React component path, source file, click coordinates, browser/OS/viewport, a link to replay the last minute on the page, and a timeline of the client's steps, console logs and network requests before submission.",
   },
   {
     title: "Track the Linear identifier without leaving Faster Fixes",

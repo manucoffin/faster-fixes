@@ -16,7 +16,7 @@ const steps = [
     cardTitle: "yourapp.com",
     title: "Client annotate your site",
     description:
-      "No account, no onboarding. They click, leave a comment, and move on. Screenshot, URL, component path, browser details, console logs, and network requests are captured automatically.",
+      "No account, no onboarding. They click, leave a comment, and move on. Screenshot, a replay of the last minute, URL, component path, browser details, console logs, and network requests are captured automatically.",
     Content: AnnotateContent,
   },
   {

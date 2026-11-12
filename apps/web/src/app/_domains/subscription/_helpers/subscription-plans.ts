@@ -147,7 +147,7 @@ export const PLAN_FEATURES = {
     },
     {
       id: "recording",
-      label: "Recording",
+      label: "Replay of the last minute before each feedback",
       highlighted: false,
     },
     {
