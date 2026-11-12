@@ -1,4 +1,5 @@
 import { CameraIcon, MousePointer2Icon } from "lucide-react";
+import type { ReactNode } from "react";
 import { TerminalFrame } from "../how-it-works/flow-animations";
 
 const CYCLE = 9;
@@ -26,7 +27,7 @@ const HUMAN_ARIA_LABEL =
   "Animation showing a cursor moving through a checkout page while the last minute is recorded, ending on the Pay button, which is outlined on the screenshot.";
 
 const AGENT_ARIA_LABEL =
-  "Animation showing a coding agent fetching a feedback through MCP, reading its console error, failed network request and React component path, then fixing it.";
+  "Animation showing a Claude Code session fetching a feedback through MCP, reading its console error, failed network request and React component path, editing the source file, then marking the feedback resolved.";
 
 function cursorKeyframes() {
   const stops = CURSOR_PATH.map(
@@ -48,12 +49,12 @@ function rippleKeyframes() {
     .join("\n");
 }
 
-// The agent's lines appear one after the other and all stay until the reset.
-const AGENT_LINE_COUNT = 7;
+// The agent's steps appear one after the other and all stay until the reset.
+const AGENT_STEP_COUNT = 5;
 
 function agentLineKeyframes() {
-  return Array.from({ length: AGENT_LINE_COUNT }, (_, i) => {
-    const start = 4 + i * 10;
+  return Array.from({ length: AGENT_STEP_COUNT }, (_, i) => {
+    const start = 6 + i * 13;
     return `@keyframes ctx-agent-line-${i} {
   0%, ${start}% { opacity: 0; transform: translateX(-4px); }
   ${start + 4}%, ${RESET}% { opacity: 1; transform: translateX(0); }
@@ -95,7 +96,7 @@ ${agentLineKeyframes()}
   .ctx-playhead { animation: none; left: 100%; }
   .ctx-captured { animation: none; opacity: 1; }
   .ctx-flash { animation: none; opacity: 0; }
-  ${Array.from({ length: AGENT_LINE_COUNT }, (_, i) => `.ctx-agent-line-${i}`).join(", ")} { animation: none; opacity: 1; }
+  ${Array.from({ length: AGENT_STEP_COUNT }, (_, i) => `.ctx-agent-line-${i}`).join(", ")} { animation: none; opacity: 1; }
   ${CURSOR_PATH.filter(({ click }) => click)
     .map((_, i) => `.ctx-ripple-${i}`)
     .join(", ")} { animation: none; opacity: 0; }
@@ -210,48 +211,107 @@ function RecordingTimeline() {
   );
 }
 
-const AGENT_LINES = [
-  {
-    label: ">",
-    value: "Fix the open feedback on /checkout",
-    labelClassName: "text-indigo-400",
-    valueClassName: "text-zinc-200",
-  },
-  {
-    label: "mcp",
-    value: 'get_feedback · "Pay button does nothing"',
-    labelClassName: "text-zinc-600",
-    valueClassName: "text-emerald-400/80",
-  },
+// Claude Code's terminal accent.
+const CLAUDE_ORANGE = "#D97757";
+
+// The Claude Code mascot on a 24 x 17 grid: body, arms and legs as [x, y,
+// width, height], with the eyes cut out in the terminal background color.
+const MASCOT_SHAPES = [
+  [2, 0, 20, 14],
+  [0, 7, 2, 3],
+  [22, 7, 2, 3],
+  [3, 14, 1, 3],
+  [6, 14, 1, 3],
+  [17, 14, 1, 3],
+  [20, 14, 1, 3],
+] as const;
+const MASCOT_EYES = [
+  [5, 4, 1, 3],
+  [18, 4, 1, 3],
+] as const;
+
+function ClaudeMascot() {
+  return (
+    <svg
+      viewBox="0 0 24 17"
+      className="h-6 w-[34px] shrink-0"
+      shapeRendering="crispEdges"
+      aria-hidden
+    >
+      {MASCOT_SHAPES.map(([x, y, width, height]) => (
+        <rect
+          key={`${x}-${y}`}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill={CLAUDE_ORANGE}
+        />
+      ))}
+      {MASCOT_EYES.map(([x, y, width, height]) => (
+        <rect
+          key={`${x}-${y}`}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          className="fill-zinc-900"
+        />
+      ))}
+    </svg>
+  );
+}
+
+type AgentStepProps = {
+  step: number;
+  bullet?: string;
+  head: ReactNode;
+  children?: ReactNode;
+};
+
+// A tool call or message, in Claude Code's `⏺` / `⎿` layout.
+function AgentStep({
+  step,
+  bullet = "text-emerald-400",
+  head,
+  children,
+}: AgentStepProps) {
+  return (
+    <div className={`ctx-agent-line-${step} flex min-w-0 flex-col gap-1`}>
+      <div className="flex min-w-0 gap-2">
+        <span className={`shrink-0 ${bullet}`}>⏺</span>
+        <span className="truncate text-zinc-200">{head}</span>
+      </div>
+      {children && (
+        <div className="flex min-w-0 gap-2 pl-4">
+          <span className="shrink-0 text-zinc-600">⎿</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">{children}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const FEEDBACK_CONTEXT = [
   {
     label: "console",
     value: "TypeError: cart.total is undefined",
-    labelClassName: "text-zinc-600",
-    valueClassName: "text-red-400",
+    className: "text-red-400",
   },
   {
     label: "network",
     value: "POST /api/checkout · 500 · 182ms",
-    labelClassName: "text-zinc-600",
-    valueClassName: "text-red-400",
+    className: "text-red-400",
   },
   {
     label: "react",
     value: "<Checkout> <PaymentForm> <PayButton>",
-    labelClassName: "text-zinc-600",
-    valueClassName: "text-indigo-300",
+    className: "text-indigo-300",
   },
   {
     label: "source",
     value: "src/checkout/pay-button.tsx:42",
-    labelClassName: "text-zinc-600",
-    valueClassName: "text-zinc-400",
-  },
-  {
-    label: "✓",
-    value: "Fixed pay-button.tsx, feedback resolved",
-    labelClassName: "text-emerald-400/80",
-    valueClassName: "text-emerald-400/80",
+    className: "text-zinc-300",
   },
 ] as const;
 
@@ -259,22 +319,101 @@ export function AgentContextIllustration() {
   return (
     <div role="img" aria-label={AGENT_ARIA_LABEL}>
       <TerminalFrame
-        title="terminal"
-        contentClassName="flex flex-col gap-2.5 px-4 py-4"
+        title="~/yourapp"
+        contentClassName="flex min-h-[440px] flex-col gap-4 p-4 font-mono text-[11px] leading-relaxed sm:text-xs"
       >
-        {AGENT_LINES.map((line, i) => (
-          <div
-            key={line.label}
-            className={`ctx-agent-line-${i} flex min-w-0 gap-2.5 font-mono text-[11px]`}
-          >
-            <span className={`w-12 shrink-0 text-right ${line.labelClassName}`}>
-              {line.label}
-            </span>
-            <span className={`truncate ${line.valueClassName}`}>
-              {line.value}
+        <div
+          className="flex items-center gap-3 rounded-md border px-3 py-2.5"
+          style={{ borderColor: `${CLAUDE_ORANGE}80` }}
+        >
+          <ClaudeMascot />
+          <div className="flex min-w-0 flex-col">
+            <span className="font-semibold text-zinc-100">Claude Code</span>
+            <span className="truncate text-zinc-500">
+              ~/yourapp · faster-fixes MCP connected
             </span>
           </div>
-        ))}
+        </div>
+
+        <div className="ctx-agent-line-0 flex min-w-0 gap-2 text-zinc-400">
+          <span className="shrink-0">&gt;</span>
+          <span className="truncate">Fix the open feedback on /checkout</span>
+        </div>
+
+        <AgentStep
+          step={1}
+          head={
+            <>
+              <span className="font-semibold">faster-fixes - get_feedback</span>{" "}
+              <span className="text-zinc-500">(MCP)</span>
+            </>
+          }
+        >
+          <span className="truncate text-zinc-400">
+            &quot;Pay button does nothing&quot; · /checkout
+          </span>
+        </AgentStep>
+
+        <AgentStep
+          step={2}
+          bullet="text-zinc-200"
+          head="The feedback points to:"
+        >
+          {FEEDBACK_CONTEXT.map(({ label, value, className }) => (
+            <div key={label} className="flex min-w-0 gap-2">
+              <span className="w-14 shrink-0 text-zinc-600">{label}</span>
+              <span className={`truncate ${className}`}>{value}</span>
+            </div>
+          ))}
+        </AgentStep>
+
+        <AgentStep
+          step={3}
+          head={
+            <>
+              <span className="font-semibold">Update</span>
+              <span className="text-zinc-400">
+                (src/checkout/pay-button.tsx)
+              </span>
+            </>
+          }
+        >
+          <span className="truncate text-zinc-400">
+            1 addition and 1 removal
+          </span>
+          <div className="flex flex-col">
+            <span className="truncate rounded-[2px] bg-red-500/10 px-1 text-red-300">
+              42 - const total = cart.total.amount;
+            </span>
+            <span className="truncate rounded-[2px] bg-emerald-500/10 px-1 text-emerald-300">
+              42 + const total = cart.total?.amount ?? 0;
+            </span>
+          </div>
+        </AgentStep>
+
+        <AgentStep
+          step={4}
+          head={
+            <>
+              <span className="font-semibold">
+                faster-fixes - update_feedback_status
+              </span>{" "}
+              <span className="text-zinc-500">(MCP)</span>
+            </>
+          }
+        >
+          <span className="truncate text-emerald-400/90">
+            Feedback marked as resolved
+          </span>
+        </AgentStep>
+
+        <div className="mt-auto flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 rounded-md border border-zinc-700 px-3 py-2 text-zinc-500">
+            <span>&gt;</span>
+            <span className="h-3.5 w-1.5 bg-zinc-400" />
+          </div>
+          <span className="px-1 text-zinc-600">? for shortcuts</span>
+        </div>
       </TerminalFrame>
     </div>
   );
