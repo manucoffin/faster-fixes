@@ -5,9 +5,9 @@ description: What the widget records before each Feedback, what it never records
 
 ## What it is
 
-Every Feedback on a page carries a Recording: the last moments on the page before the Reviewer selected an element, up to about a minute. The Reviewer takes no extra step. The widget keeps a short buffer of the recent past while the page is open and attaches it when a Feedback is submitted.
+A Recording works like a session replay, scoped to a single Feedback: it covers up to about a minute on the page before the Reviewer selected an element. Only Reviewers are recorded, never the other visitors of your site.
 
-A Recording is a reconstruction of the page, not a film of the screen, and it holds no voice. It ends at the Selection. One muted line in the comment form tells the Reviewer that a Recording is attached, for example "Includes the last minute on this page."
+The widget keeps a buffer of the recent past while the page is open and attaches it when the Feedback is submitted, with no extra step for the Reviewer. A Recording is a reconstruction of the page, not a video of the screen, and holds no audio.
 
 ## What is captured
 
@@ -21,7 +21,7 @@ A Recording is a reconstruction of the page, not a film of the screen, and it ho
 - Anything before the last full page load, or before a return to the page through the browser's back or forward buttons.
 - Canvas content, video frames, and the content of third-party iframes.
 
-## Marking content
+## Masking and blocking content
 
 Two attributes let your site keep more out of the Recording. Each applies to the element and to all its descendants. A descendant cannot be exempted.
 
@@ -118,46 +118,22 @@ A Recording is best effort. A Feedback has none when:
 - `captureRecording` is `false`,
 - the recorder file was blocked, for example by a [Content Security Policy](/docs/widget/content-security-policy), or had not finished loading,
 - the browser has no native compression (`CompressionStream`),
-- the Recording was over the size cap of 4 MB once compressed, even after the widget retried with only its most recent part,
+- the Recording was over the size cap of 4 MB once compressed,
 - the upload failed, or the Reviewer left the page right after submitting, before the upload finished,
 - the Feedback was sent with the [headless client](/docs/widget/headless-client), which does not record,
 - the Feedback is on a Video.
 
-None of these shows an error. The Feedback is submitted, and the comment form simply does not show the Recording line.
-
-## Where it goes
-
-- **Inbox**: a player replays the Recording next to the Screenshot, with the Selection frame on its last instant.
-- **Agents**: the [MCP](/docs/mcp/tools) and the [Agent API](/docs/api-reference/agent-api) return the Recording as a text timeline of steps in a single Feedback.
-- **Trackers**: [GitHub](/docs/integrations/github), [Linear](/docs/integrations/linear) and [Jira](/docs/integrations/jira) Issues carry a link to play the Recording and a collapsed timeline. The link opens the inbox and requires a login.
-- **Slack**: the [Slack](/docs/integrations/slack) announcement carries a "Play recording" button.
+None of these shows an error: the Feedback is submitted without a Recording.
 
 ## Playback limits
 
-Web fonts are not stored with the Recording, and images are fetched from your site at playback. An image or font that was removed, moved or served behind a login can be missing, and the player then says the page may look different from what the Reviewer saw. To fetch them, the browser of the Member who plays a Recording contacts your site, with no referrer. The Screenshot is exact.
+Web fonts are not stored with the Recording, and images are fetched from your site at playback. An image or font that was removed, moved or served behind a login can be missing at playback. To fetch them, the browser of the Member who plays a Recording contacts your site, with no referrer. The Screenshot is exact.
 
 ## Storage and removal
 
 A Recording is stored with the Feedback's other files and kept as long as the Feedback. Deleting the Feedback deletes it.
 
 Any Member can remove a Recording from the inbox and keep the Feedback. Removal is permanent. It does not reach Issues already mirrored to a Tracker: the timeline written into them stays.
-
-## Plans
-
-Every Plan has the same Recording, and so does a self-hosted instance.
-
-## Translating the Reviewer's line
-
-The line shown in the comment form is the `recordingIncluded` label. Translate it like the other [labels](/docs/widget/customization#labels). It is a function that receives the duration in seconds:
-
-```ts
-labels: {
-  recordingIncluded: (seconds) =>
-    seconds >= 30
-      ? "Inclut la dernière minute sur cette page."
-      : `Inclut les ${seconds} dernières secondes sur cette page.`,
-}
-```
 
 ## A sentence for your privacy policy
 
