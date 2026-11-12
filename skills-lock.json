@@ -137,6 +137,12 @@
       "skillPath": "skills/engineering/research/SKILL.md",
       "computedHash": "5bd6a6b833227dd87ee023c2d4734f4c349f290140514bb80bdc041ead1e837e"
     },
+    "retro": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/retro/SKILL.md",
+      "computedHash": "e260aefb7b75b3548a3ee9883afbf8808e521f2e86feec92399617894f83b7c2"
+    },
     "seo-audit": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
