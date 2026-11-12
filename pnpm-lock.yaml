@@ -68,6 +68,9 @@ importers:
       "@c15t/nextjs":
         specifier: ^1.8.3
         version: 1.8.3(@electric-sql/pglite@0.3.2)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.213.0(@opentelemetry/api@1.9.0))(@prisma/client@7.2.0(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.16.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(next@16.4.5(@opentelemetry/api@1.9.0)(@playwright/test@1.63.0)(@types/node@20.19.25)(babel-plugin-macros@3.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.104.1))(pg@8.17.1)(postgres@3.4.7)(prisma@7.2.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typeorm@0.3.28(babel-plugin-macros@3.1.0)(mongodb@6.21.0(socks@2.8.6))(mysql2@3.15.3)(pg@8.17.1)(ts-node@10.9.2(@types/node@20.19.25)(typescript@5.9.3)))(use-sync-external-store@1.6.0(react@19.3.0))(ws@8.19.0)
+      "@chenglou/pretext":
+        specifier: ^1.0.0
+        version: 1.0.0
       "@dnd-kit/core":
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1735,6 +1738,12 @@ packages:
         integrity: sha512-q/ThtP9gcnEP6xlv7LrY26C2mHqdGBti/MmOVngt/M/oIGYkssmQGxPK9WzBNt2juVcH/vml2WQ+ra8LXYOTaA==,
       }
     engines: { node: ^22.11 || ^24 || >=26 }
+
+  "@chenglou/pretext@1.0.0":
+    resolution:
+      {
+        integrity: sha512-BxKiDMxWJhyzL8asvcgg3T9YnUU7OUFsKO8oRaR2SYAPX4Sh2wM9gqTBjrBaZ4fnl84cEQ8czC0Q1M83z3chsA==,
+      }
 
   "@chevrotain/cst-dts-gen@10.5.0":
     resolution:
@@ -18366,6 +18375,8 @@ snapshots:
       "@changesets/format": 0.1.2
       "@changesets/types": 7.0.0
       human-id: 4.2.1
+
+  "@chenglou/pretext@1.0.0": {}
 
   "@chevrotain/cst-dts-gen@10.5.0":
     dependencies:
