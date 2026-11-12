@@ -1,4 +1,11 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/accordion";
+import { SectionHeading } from "../_components/section-heading";
 
 export const websiteAnnotationFaqs: FaqItem[] = [
   {
@@ -30,14 +37,27 @@ export const websiteAnnotationFaqs: FaqItem[] = [
 
 export function WebsiteAnnotationFaq() {
   return (
-    <section>
-      <h2>Frequently asked questions</h2>
-      {websiteAnnotationFaqs.map((faq) => (
-        <div key={faq.question}>
-          <h3>{faq.question}</h3>
-          <p>{faq.answer}</p>
-        </div>
-      ))}
+    <section className="w-full py-20 md:py-28">
+      <div className="container mx-auto grid grid-cols-1 gap-10 px-4 lg:grid-cols-[1fr_2fr] lg:gap-16">
+        <SectionHeading className="lg:sticky lg:top-24 lg:self-start">
+          Frequently asked questions
+        </SectionHeading>
+
+        <Accordion type="single" collapsible className="border-t">
+          {websiteAnnotationFaqs.map((faq) => (
+            <AccordionItem key={faq.question} value={faq.question}>
+              <AccordionTrigger className="py-5 text-lg md:text-xl">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground">
+                  {faq.answer}
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
     </section>
   );
 }
