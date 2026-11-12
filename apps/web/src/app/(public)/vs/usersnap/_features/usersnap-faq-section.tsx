@@ -87,14 +87,16 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap has no equivalent.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap's MCP server targets product analysis instead: it searches feedback, summarizes topics, and creates opportunities, but cannot edit existing feedback.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context (URL, DOM selector, React component path when available,
         browser, viewport), apply a fix, and mark the item resolved, all from
-        the terminal. Usersnap has no equivalent. See{" "}
+        the terminal. Usersnap&apos;s MCP server targets product analysis
+        instead: it searches feedback, summarizes topics, and creates
+        opportunities, but cannot edit existing feedback. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>

@@ -15,7 +15,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "$0 self-hosted / $20/mo Pro (up to 5 members)",
-      "$39/mo (1 member only) / $149/mo Team (unlimited members)",
+      "From $29/mo Hobby (1 seat) / $99/mo Growth (4 seats) / $299/mo Pro (unlimited seats), billed yearly",
     ],
   },
   {
@@ -42,6 +42,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [
       { type: "yes", note: "Timestamped · area on the frame" },
       { type: "no" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "yes", note: "Last 10 to 15 min before each report · Growth+" },
     ],
   },
   {

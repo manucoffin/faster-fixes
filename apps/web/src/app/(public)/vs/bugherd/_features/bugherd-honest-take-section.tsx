@@ -28,7 +28,8 @@ export function BugherdHonestTakeSection() {
                 20+ project-management integrations
               </strong>
               : Jira, Asana, ClickUp, Monday.com, Linear, Trello, Teamwork, and
-              more, with deep two-way sync.
+              more, with deep two-way sync. Jira, Linear, Asana, ClickUp,
+              Monday.com and Teamwork require Premium or above.
             </li>
             <li>
               <strong className="text-foreground">

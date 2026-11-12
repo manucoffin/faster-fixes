@@ -31,9 +31,9 @@ const cards: {
   {
     vendor: "Usersnap · Professional",
     plan: "Cloud-only, closed source",
-    price: "$199",
+    price: "$259",
     suffix: "/ month",
-    note: "Tiered by seat count: 20 seats, 1M page views, NPS surveys, feature boards, Jira/Slack/GitHub integrations. Starter starts at $49/mo for 5 seats; Premium from $319/mo.",
+    note: "Unlimited seats, 20 projects, 1M page views, surveys, feature boards, Jira/Slack/Linear integrations. $209/mo billed annually. Starter is $59/mo for 2 seats and 2 projects; Premium is $549/mo.",
   },
 ];
 
@@ -52,10 +52,12 @@ export function UsersnapPricingSection() {
             FasterFixes is open source. The lowest plan in any honest comparison
             is &quot;free, forever, on your own server.&quot; If you would
             rather not run it yourself, the hosted plans are flat-rate, not
-            tiered by team size. Usersnap is tiered by seat count: Starter
-            $49/mo (5 seats), Growth $109/mo (10 seats), Professional $199/mo
-            (20 seats), Premium from $319/mo (50 seats). Annual billing brings
-            the first three tiers to $39, $89, and $159/mo.
+            tiered by team size. Usersnap is tiered by project count: Starter
+            $59/mo (2 seats, 2 projects), then unlimited seats on Growth $159/mo
+            (10 projects), Professional $259/mo (20 projects), and Premium
+            $549/mo (50 projects). Annual billing brings them to $49, $129,
+            $209, and $449/mo. These are Usersnap&apos;s USD prices; outside the
+            US it lists EUR prices.
           </p>
         </div>
 

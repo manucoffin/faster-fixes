@@ -29,7 +29,7 @@ const title = `Marker.io alternative · Open-source feedback widget · ${SITE_NA
 const description =
   "FasterFixes is the open-source, self-hostable Marker.io alternative for developer teams. Free when self-hosted, flat-rate when hosted, and shipped with an MCP server for Claude Code, Cursor, and Codex.";
 const datePublished = "2026-04-26T00:00:00.000Z";
-const dateModified = "2026-04-26T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

@@ -68,16 +68,20 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from Atarim?",
     answer:
-      "FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is proprietary and cloud-only. FasterFixes charges a flat monthly rate; Atarim charges per seat ($25/seat/month on Pro). FasterFixes ships a widget that installs with a script tag on any site or as a React package, and captures DOM selector, full browser context, and the React component tree on React sites; Atarim uses a JS snippet, Chrome extension, or WordPress plugin with no React SDK and no component tree capture. FasterFixes includes an MCP server for AI coding agents; Atarim has no MCP integration.",
+      "FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is proprietary and cloud-only. FasterFixes Pro is $20/month for up to 5 members; Atarim Pro is $67/month ($53.60/month billed yearly) for up to 100 seats, with AI credits on top. FasterFixes ships a widget that installs with a script tag on any site or as a React package, and captures DOM selector, full browser context, and the React component tree on React sites; Atarim uses a JS snippet, Chrome extension, or WordPress plugin with no React SDK and no component tree capture. Both offer an MCP server: FasterFixes gives AI coding agents each Feedback with its DOM selector, Screenshot, Diagnostic Trail, and Recording timeline; the Atarim MCP connects Claude, Codex, and other MCP clients to Atarim tasks, sites, and workflows.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is
-        proprietary and cloud-only. FasterFixes charges a flat monthly rate;
-        Atarim charges per seat ($25/seat/month on Pro). FasterFixes ships a
-        widget that installs with a script tag on any site or as a React
-        package, and captures DOM selector, full browser context, and the React
-        component tree on React sites. FasterFixes also includes an MCP server
-        for AI coding agents; Atarim has no MCP integration.
+        proprietary and cloud-only. FasterFixes Pro is $20/month for up to 5
+        members; Atarim Pro is $67/month ($53.60/month billed yearly) for up to
+        100 seats, with AI credits on top. FasterFixes ships a widget that
+        installs with a script tag on any site or as a React package, and
+        captures DOM selector, full browser context, and the React component
+        tree on React sites. Both offer an MCP server: FasterFixes gives AI
+        coding agents each Feedback with its DOM selector, Screenshot,
+        Diagnostic Trail, and Recording timeline; the Atarim MCP connects
+        Claude, Codex, and other MCP clients to Atarim tasks, sites, and
+        workflows.
       </p>
     ),
   },
@@ -89,19 +93,21 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Does Atarim support whitelabeling?",
     answer:
-      "Yes, on the Enterprise plan (custom pricing). Atarim's whitelabel options include custom logo, favicon, color scheme, plugin name, and removal of all Atarim branding. This is one of Atarim's genuine strengths for agencies on Enterprise that deliver a branded client experience. FasterFixes does not currently offer whitelabeling.",
+      "Yes. Atarim Pro ($67/month) puts your brand on the client dashboard instead of Atarim's. This is one of Atarim's genuine strengths for agencies that deliver a branded client experience. FasterFixes does not currently offer whitelabeling.",
   },
   {
     question: "What does the MCP server do?",
     answer:
-      "@fasterfixes/mcp is a Model Context Protocol server that connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal, no browser tab switching, no copy-pasting issue descriptions into a chat window. Atarim does not have an MCP integration: its InnerCircle AI agents run only inside the Atarim dashboard.",
+      "@fasterfixes/mcp is a Model Context Protocol server that connects Claude Code, Cursor, and Codex to your FasterFixes workspace. The agent lists open Feedback, reads one in full with its DOM selector, Screenshot, console and network Diagnostic Trail, and the timeline of its Recording when it has one, then sets its Status once the fix is in. Atarim also offers a free MCP, which connects Claude, Codex, and other MCP clients to Atarim tasks, sites, and workflows, including changes to WordPress sites; some of its actions draw on AI credits.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp is a Model Context Protocol server that connects Claude
-        Code, Cursor, and Codex to your FasterFixes workspace. Feedback items
-        are accessible directly in the terminal. Atarim does not have an MCP
-        integration: its InnerCircle AI agents run only inside the Atarim
-        dashboard. See{" "}
+        Code, Cursor, and Codex to your FasterFixes workspace. The agent lists
+        open Feedback, reads one in full with its DOM selector, Screenshot,
+        console and network Diagnostic Trail, and the timeline of its Recording
+        when it has one, then sets its Status once the fix is in. Atarim also
+        offers a free MCP, which connects Claude, Codex, and other MCP clients
+        to Atarim tasks, sites, and workflows. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>

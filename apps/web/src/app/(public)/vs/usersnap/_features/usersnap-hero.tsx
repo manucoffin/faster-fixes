@@ -18,8 +18,8 @@ export function UsersnapHero() {
             The open-source Usersnap alternative
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Usersnap is closed-source and tiered by seat count. FasterFixes is
-            the open-source alternative: AGPL-3.0, self-hostable for free, or
+            Usersnap is closed-source and tiered by project count. FasterFixes
+            is the open-source alternative: AGPL-3.0, self-hostable for free, or
             $20 a month flat for up to five members, built around structured bug
             reports rather than a product feedback widget. Reports sync to
             GitHub, Linear, or Jira, and an MCP server makes them readable by

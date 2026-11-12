@@ -1,7 +1,7 @@
 const limitations = [
   {
-    title: "Per-seat pricing scales against you",
-    body: "Atarim Pro costs $25/seat/month billed yearly. A 5-person team pays $125/month, or $1,500/year. FasterFixes Pro is $20/month flat for up to 5 members, or $240/year. That is a $1,260/year difference for the same team size, before you hit Atarim's 5-seat cap and need to upgrade to Business at $35/seat/month. Per-seat models also create friction when onboarding contractors or reviewers who only need temporary access.",
+    title: "Priced for AI agency work, not bug reports",
+    body: "Atarim sells one paid plan, Pro, at $67/month or $643.20/year billed yearly, for up to 100 seats. The price is built around its AI agents: Pro includes 5,000 AI credits a month, and further AI work is billed in credit packs. FasterFixes Pro is $20/month flat for up to 5 members, or $240/year, which is $403.20/year less than Atarim billed yearly. Past 5 members, FasterFixes Agency is $99/month for unlimited members, more than Atarim Pro. If your team needs structured bug reports rather than AI-run site work, a small team pays less on FasterFixes and has no credit balance to watch.",
   },
   {
     title: "Cloud-only with no self-hosting option",
@@ -12,8 +12,8 @@ const limitations = [
     body: "Atarim works via a JS snippet, a Chrome extension, or a WordPress plugin. There is no React or Next.js SDK, no component tree capture, and no DOM selector attached to feedback items. When a client clicks on a broken element, the report contains a screenshot and a URL, not the React component path, not the CSS selector, not the browser/viewport metadata a developer needs to locate the issue in code.",
   },
   {
-    title: "AI stays inside the dashboard, no IDE or terminal access",
-    body: "Atarim's InnerCircle agents (Pixel, Claro, Lexi, Index, Navi, Glitch) run inside the Atarim dashboard and generate analysis there. There is no MCP server, no Claude Code integration, no Cursor or Codex support. An AI coding agent cannot read an Atarim feedback item from the terminal. FasterFixes ships @fasterfixes/mcp, a Model Context Protocol server that lets AI agents fetch feedback, locate the relevant code, and apply fixes without leaving the editor.",
+    title: "An MCP built for agency operations, not bug context",
+    body: "Atarim's InnerCircle agents (Claro, Pixel, Lexi, Index, Navi, Glitch) work inside the Atarim platform. Its free Atarim MCP connects Claude, Codex, and other MCP clients to Atarim tasks, sites, and workflows: reading and updating tasks, running workflows, and changing WordPress sites, with some actions drawing on AI credits. FasterFixes ships @fasterfixes/mcp for Claude Code, Cursor, and Codex, scoped to fixing what a Reviewer reported: get_feedback returns the Feedback with its DOM selector, Screenshot, console and network Diagnostic Trail, and the timeline of its Recording when it has one. The agent locates the code, applies the fix, and sets the Status without leaving the editor.",
   },
 ];
 

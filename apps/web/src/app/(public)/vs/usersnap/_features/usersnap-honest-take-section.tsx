@@ -38,6 +38,12 @@ export function UsersnapHonestTakeSection() {
               FasterFixes does not support this.
             </li>
             <li>
+              <strong className="text-foreground">AI feedback analysis</strong>:
+              topic classification, sentiment analysis, and an AI chat over your
+              feedback, plus an MCP server that brings it into Claude or
+              ChatGPT. Scope varies by plan.
+            </li>
+            <li>
               <strong className="text-foreground">Browser extension</strong>:
               lets non-technical reporters submit feedback on any site without
               installing a widget. FasterFixes needs its script tag or React
@@ -92,11 +98,11 @@ export function UsersnapHonestTakeSection() {
             </li>
             <li>
               <strong className="text-foreground">Flat pricing</strong>:
-              $20/month for a 5-person team versus $49/month on Usersnap Starter
-              ($39/month billed annually). The free plan covers 1 project,{" "}
-              {freeFeedbackLimit} feedback items, and 1 member at no cost, with
-              no time limit. Usersnap caps its items too, but on a trial, not a
-              permanent free tier.
+              $20/month for a 5-person team versus $159/month on Usersnap Growth
+              ($129/month billed annually), since Starter includes 2 seats. The
+              free plan covers 1 project, {freeFeedbackLimit} feedback items,
+              and 1 member at no cost, with no time limit. Usersnap offers a
+              free trial, not a permanent free tier.
             </li>
           </ul>
           <p>

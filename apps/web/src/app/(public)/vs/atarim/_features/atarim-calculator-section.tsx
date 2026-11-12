@@ -9,11 +9,11 @@ export function AtarimCalculatorSection() {
             Cost calculator
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">
-            How much do you save vs Atarim?
+            FasterFixes vs Atarim: annual cost
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Drag the sliders to match your team. We pick the right plan on each
-            side and show your annual savings in real time.
+            side and compare the annual cost in real time.
           </p>
         </div>
 

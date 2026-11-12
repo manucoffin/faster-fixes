@@ -36,14 +36,14 @@ const alternatives: Alternative[] = [
   {
     name: "Userback",
     bestFor: "Product teams needing session replay with feedback",
-    startingPrice: "$59/mo",
+    startingPrice: "$39/mo",
     openSource: { type: "no" },
     href: "/vs/userback" as Route,
   },
   {
     name: "Atarim",
     bestFor: "Web agencies running WordPress client review cycles",
-    startingPrice: "$25/seat/mo",
+    startingPrice: "$67/mo",
     openSource: { type: "no" },
     href: "/vs/atarim" as Route,
   },

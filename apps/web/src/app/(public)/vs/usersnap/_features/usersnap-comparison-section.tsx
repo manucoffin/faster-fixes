@@ -26,26 +26,35 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "Flat per-workspace · free, $20/mo, $99/mo",
-      "Tiered by seat count · $49/mo Starter to $319/mo Premium",
+      "Tiered by project count · $59/mo Starter to $549/mo Premium",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       "$0 self-host · $20/mo hosted Pro",
-      "$49/mo Starter (5 seats, $39/mo billed annually)",
+      "$159/mo Growth ($129/mo billed annually) · Starter has 2 seats",
     ],
   },
   {
     label: "Bring your own AI agent (MCP)",
     cells: [
-      { type: "yes", note: "Claude Code, Cursor, Codex · any model" },
-      { type: "no" },
+      {
+        type: "yes",
+        note: "Selector, Screenshot, Recording, console, network · sets Status",
+      },
+      {
+        type: "partial",
+        note: "Searches feedback, creates opportunities · cannot edit feedback",
+      },
     ],
   },
   {
     label: "In-dashboard AI",
-    cells: [{ type: "partial", note: "Roadmap" }, { type: "no" }],
+    cells: [
+      { type: "partial", note: "Roadmap" },
+      { type: "yes", note: "Topics, sentiment, AI chat · varies by plan" },
+    ],
   },
   {
     label: "Stack support",
@@ -64,7 +73,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Auto context (URL, DOM, browser, viewport)",
-    cells: [{ type: "yes" }, { type: "partial", note: "Screenshot only" }],
+    cells: [
+      { type: "yes" },
+      {
+        type: "partial",
+        note: "URL, browser, device, console · no DOM selector",
+      },
+    ],
   },
   {
     label: "NPS / microsurveys",
@@ -89,14 +104,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Session replay",
     cells: [
       { type: "yes", note: "Last minute before each feedback · all plans" },
-      { type: "no" },
+      { type: "no", note: "Manual screen recording only" },
     ],
   },
   {
     label: "Project management integrations",
     cells: [
       "GitHub, Linear, Jira · more coming",
-      "Jira, GitHub, Slack, Zendesk, Azure DevOps, +",
+      "Jira, Linear, Asana, Azure DevOps, GitHub, +",
     ],
   },
   {
@@ -110,12 +125,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Linear two-way sync",
     cells: [
       { type: "yes", note: "Bidirectional · workflow-state aware" },
-      { type: "no" },
+      { type: "yes", note: "Status sync · maps Default and Resolved" },
     ],
   },
   {
     label: "Custom branding",
-    cells: [{ type: "partial", note: "Roadmap" }, { type: "yes" }],
+    cells: [
+      { type: "partial", note: "Roadmap" },
+      { type: "partial", note: "Premium and Enterprise" },
+    ],
   },
   {
     label: "SSO",
@@ -128,7 +146,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Free plan",
     cells: [
       { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
-      { type: "partial", note: "Trial only · 20 feedback items" },
+      { type: "partial", note: "Free trial only" },
     ],
   },
 ];
@@ -224,7 +242,7 @@ export function UsersnapComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated May 12, 2026.
+          vendor&apos;s website. Last updated Nov 12, 2026.
         </p>
       </div>
     </section>

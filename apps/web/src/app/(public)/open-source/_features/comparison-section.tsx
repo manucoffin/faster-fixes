@@ -22,7 +22,7 @@ const rows: { label: string; cells: [Cell, Cell, Cell, Cell] }[] = [
       { type: "yes", note: "Claude Code, Cursor, Windsurf" },
       { type: "no" },
       { type: "no" },
-      { type: "no" },
+      { type: "yes", note: "Feedback search · cannot edit feedback" },
     ],
   },
   {
@@ -31,7 +31,7 @@ const rows: { label: string; cells: [Cell, Cell, Cell, Cell] }[] = [
       "Free self-hosted · flat hosted plan",
       "$50/mo for 5 members, $8 per extra seat",
       "$59/mo Starter for 3 seats",
-      "$49/mo Starter for 5 seats",
+      "$59/mo Starter for 2 seats, then unlimited seats",
     ],
   },
   {
@@ -44,7 +44,7 @@ const rows: { label: string; cells: [Cell, Cell, Cell, Cell] }[] = [
       "Screenshot, URL, DOM selector, React tree, browser",
       "Screenshot, annotations",
       "Screenshot, annotations",
-      "Screenshot, annotations",
+      "Screenshot, video, URL, browser, console logs",
     ],
   },
 ];

@@ -89,7 +89,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Does FasterFixes have session replay?",
     answer:
-      "Yes, for the moments before each report: every feedback carries a Recording of up to the last minute on the page, on every plan, and typed values are never captured. No for session analytics: FasterFixes does not record whole visits or aggregate sessions. If session analytics is a core requirement, Userback Business or a dedicated tool like LogRocket is a better fit.",
+      "Yes, for the moments before each report: every feedback carries a Recording of up to the last minute on the page, on every plan, and typed values are never captured. No for session analytics: FasterFixes does not record whole visits or aggregate sessions. If session analytics is a core requirement, Userback Business Plus (whole-visit recording at custom pricing) or a dedicated tool like LogRocket is a better fit.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes, for the moments before each report: every feedback carries a{" "}
@@ -97,8 +97,8 @@ export const userbackFaqs: RichFaqItem[] = [
         up to the last minute on the page, on every plan, and typed values are
         never captured. No for session analytics: FasterFixes does not record
         whole visits or aggregate sessions. If session analytics is a core
-        requirement, Userback Business or a dedicated tool like LogRocket is a
-        better fit.
+        requirement, Userback Business Plus (whole-visit recording at custom
+        pricing) or a dedicated tool like LogRocket is a better fit.
       </p>
     ),
   },

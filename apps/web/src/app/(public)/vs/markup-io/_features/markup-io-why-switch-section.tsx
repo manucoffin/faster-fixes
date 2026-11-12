@@ -4,8 +4,8 @@ const cards = [
     body: "In January 2025 Markup.io raised Pro from $29 to $79 per month and eliminated the free plan entirely. Long-time customers reported a 280% increase on existing accounts and threats of data deletion for non-payment. FasterFixes is $20/mo flat, or $0 if you self-host.",
   },
   {
-    title: "No integrations unless you pay Enterprise",
-    body: "Jira, Linear, GitHub, Asana, and ClickUp are gated behind Enterprise pricing on Markup.io. The Pro plan ships feedback to a comments tab, not to your tracker. FasterFixes includes GitHub, Linear, and Jira sync from the $20/mo plan.",
+    title: "No native tracker integrations",
+    body: "Markup.io has no native Jira, Linear, or GitHub sync on any plan. Feedback stays in a comments tab unless you route it to your tracker yourself through Zapier. FasterFixes includes GitHub, Linear, and Jira sync from the $20/mo plan.",
   },
   {
     title: "Chrome extension dependency",

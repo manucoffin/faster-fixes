@@ -175,16 +175,17 @@ export const markerIoFaqs: RichFaqItem[] = [
     question:
       "How do the FasterFixes integrations compare to Marker.io's Jira-heavy stack?",
     answer:
-      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io gates Jira and Linear sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
+      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
         every paid plan, included by default. A single feedback item can mirror
         to all three at once, and Jira sync maps by status category rather than
-        status name, so custom workflows need no configuration. Marker.io gates
-        Jira and Linear sync behind the Team plan at $149/month annual.
-        Marker.io still covers a broader roster: Asana, ClickUp, Trello,
-        Monday.com and more. Weigh that if your backlog lives elsewhere. See the{" "}
+        status name, so custom workflows need no configuration. Marker.io
+        includes Linear on every plan but gates Jira sync behind the Team plan
+        at $149/month annual. Marker.io still covers a broader roster: Asana,
+        ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives
+        elsewhere. See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
           GitHub integration docs
         </DocLink>{" "}

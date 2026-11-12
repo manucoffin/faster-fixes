@@ -1,7 +1,7 @@
 const cards = [
   {
     title: "Per-seat pricing that scales against you",
-    body: "Ruttl Pro is $18 per user per month, with a 2-seat minimum. A 5-person team pays $90 a month, or $1,080 a year. The Business plan jumps to $90 per user per month. FasterFixes is flat: $20 a month hosted up to 5 members, $0 self-hosted.",
+    body: "Ruttl Pro is $18 per user per month. A 5-person team pays $90 a month, or $1,080 a year. The Business plan is custom-priced through sales. FasterFixes is flat: $20 a month hosted up to 5 members, $0 self-hosted.",
   },
   {
     title: "No self-hosting, no open-source option",

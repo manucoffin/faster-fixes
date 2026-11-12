@@ -1,11 +1,11 @@
 const rows = [
   {
-    label: "Gleap Team (5 people, monthly)",
-    value: "$149/mo = $1,788/year",
+    label: "Gleap Growth (5 people, monthly)",
+    value: "$144/mo = $1,728/year",
   },
   {
-    label: "Gleap Team (5 people, annual)",
-    value: "$119/mo = $1,428/year",
+    label: "Gleap Growth (5 people, yearly)",
+    value: "$1,438/year (about $120/mo)",
   },
   {
     label: "FasterFixes Pro (up to 5)",
@@ -24,9 +24,10 @@ export function GleapPricingSection() {
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">Pricing comparison</h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Gleap&apos;s Hobby plan ($39/mo) is limited to 1 member and 1
-            project, not viable for any real team. For 5 people, the minimum is
-            the Team plan.
+            Gleap&apos;s Hobby plan ($29/mo billed yearly, $35/mo monthly) is
+            limited to 1 seat and 1 project, not viable for any real team. For 5
+            people, the minimum is Growth: 4 seats included, plus 1 extra seat
+            at $25/mo or $250/year.
           </p>
         </div>
 
@@ -49,8 +50,8 @@ export function GleapPricingSection() {
         </div>
 
         <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
-          Note: Gleap AI features (Kai) are billed separately at ~$0.02 per AI
-          response.
+          Note: Gleap AI (Kai) is not included in any plan. It is billed from a
+          prepaid balance, at about $0.05 per conversation.
         </p>
       </div>
     </section>

@@ -52,10 +52,8 @@ const competitors: { vendor: string; plans: PricedPlan[] }[] = [
   {
     vendor: "Usersnap",
     plans: [
-      { name: "Starter", price: 49, seats: 5 },
-      { name: "Growth", price: 109, seats: 10 },
-      { name: "Professional", price: 199, seats: 20 },
-      { name: "Premium", price: 319, seats: 50 },
+      { name: "Starter", price: 59, seats: 2 },
+      { name: "Growth", price: 159, seats: Infinity },
     ],
   },
 ];
@@ -157,7 +155,8 @@ export function TeamSizePricingSection() {
           <li>
             Monthly billing in USD, at list prices published at time of writing.
             Annual billing lowers several competitor prices: Marker.io Starter
-            and Usersnap Starter drop to $39 per month, BugHerd Standard to $42.
+            drops to $39 per month, Usersnap Growth to $129, BugHerd Standard to
+            $42.
           </li>
           <li>
             Seat counts only. Project, page view and feedback limits differ by

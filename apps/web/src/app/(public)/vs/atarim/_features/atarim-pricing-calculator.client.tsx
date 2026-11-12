@@ -5,7 +5,9 @@ import { useState } from "react";
 
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
-const ATARIM_PRO_SEAT_PRICE = 25;
+// Atarim Pro is flat up to 100 seats and 1,000 projects, beyond both sliders.
+const ATARIM_PRO_MONTHLY_PRICE = 67;
+const ATARIM_PRO_ANNUAL_PRICE = 643.2;
 
 type PlanResult = {
   planLabel: string;
@@ -24,27 +26,40 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
   return { planLabel: "Agency", monthly: 99, annual: 1188 };
 }
 
-function pickAtarimPlan(team: number): PlanResult {
-  const monthly = team * ATARIM_PRO_SEAT_PRICE;
-  return {
-    planLabel: team <= 5 ? "Pro" : "Business",
-    monthly,
-    annual: monthly * 12,
-  };
+const atarim: PlanResult = {
+  planLabel: "Pro · up to 100 seats",
+  monthly: ATARIM_PRO_MONTHLY_PRICE,
+  annual: ATARIM_PRO_ANNUAL_PRICE,
+};
+
+function formatAmount(value: number): string {
+  const fractionDigits = Number.isInteger(value) ? 0 : 2;
+  return `$${value.toLocaleString("en-US", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })}`;
 }
 
 function formatPrice(value: number | null): string {
   if (value === null) return "Custom";
-  return `$${value.toLocaleString("en-US")}`;
+  return formatAmount(value);
 }
 
 function formatSavings(atarim: PlanResult, fasterFixes: PlanResult) {
   if (atarim.annual === null || fasterFixes.annual === null) {
-    return "Compare with FasterFixes Agency";
+    return null;
   }
   const diff = atarim.annual - fasterFixes.annual;
-  if (diff <= 0) return null;
-  return `Save $${diff.toLocaleString("en-US")} per year`;
+  if (diff > 0) {
+    return { saves: true, text: `Save ${formatAmount(diff)} per year` };
+  }
+  if (diff < 0) {
+    return {
+      saves: false,
+      text: `${formatAmount(-diff)} per year more than Atarim Pro`,
+    };
+  }
+  return null;
 }
 
 export function AtarimPricingCalculator() {
@@ -52,11 +67,10 @@ export function AtarimPricingCalculator() {
   const [projects, setProjects] = useState(3);
 
   const fasterFixesHosted = pickFasterFixesPlan(team, projects);
-  const atarim = pickAtarimPlan(team);
   const hostedSavings = formatSavings(atarim, fasterFixesHosted);
   const selfHostedSavings =
     atarim.annual !== null
-      ? `Save $${atarim.annual.toLocaleString("en-US")} per year`
+      ? `Save ${formatAmount(atarim.annual)} per year`
       : "Save the full Atarim subscription";
 
   return (
@@ -119,7 +133,7 @@ export function AtarimPricingCalculator() {
           </p>
           <p className="mt-1 text-sm text-muted-foreground tabular-nums">
             {atarim.annual !== null
-              ? `${formatPrice(atarim.annual)}/year`
+              ? `${formatPrice(atarim.annual)}/year billed yearly`
               : atarim.note}
           </p>
         </div>
@@ -139,8 +153,12 @@ export function AtarimPricingCalculator() {
             {formatPrice(fasterFixesHosted.annual)}/year
           </p>
           {hostedSavings && (
-            <p className="mt-3 text-sm font-semibold text-success">
-              {hostedSavings}
+            <p
+              className={`mt-3 text-sm font-semibold ${
+                hostedSavings.saves ? "text-success" : "text-muted-foreground"
+              }`}
+            >
+              {hostedSavings.text}
             </p>
           )}
         </div>
@@ -161,10 +179,11 @@ export function AtarimPricingCalculator() {
       </div>
 
       <p className="mt-6 text-xs text-muted-foreground">
-        Comparison based on Atarim Pro at $25/seat/month (billed yearly) vs
-        FasterFixes Pro ($20/month flat for up to 5 members). Atarim&apos;s Pro
-        plan caps at 5 seats; teams larger than 5 are estimated on Business
-        ($35/seat/month). Check atarim.io/pricing for current rates.
+        Comparison based on Atarim Pro at $67/month, or $643.20/year billed
+        yearly, flat for up to 100 seats and 1,000 projects, vs FasterFixes Pro
+        ($20/month for up to 5 members and 5 projects) and Agency ($99/month,
+        unlimited). Atarim AI credits beyond the 5,000 included each month are
+        not counted. Check atarim.io/pricing for current rates.
       </p>
     </div>
   );
