@@ -12,6 +12,7 @@ import {
 } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
 import { ImageOff } from "lucide-react";
+import { parseAsBoolean, useQueryState } from "nuqs";
 import {
   getElementContext,
   getFeedbackDetailSections,
@@ -21,6 +22,8 @@ import type { ListFeedbackOutput } from "../../_services/list-feedback";
 import { getFeedbackStatusAppearance } from "@/app/_domains/feedback/_components/feedback-status-appearance";
 import { ElementContextCard } from "./element-context-card.client";
 import { FeedbackPropertiesRail } from "./feedback-properties-rail.client";
+import { RecordingPlayer } from "./recording-player.client";
+import { RecordingRow } from "./recording-row.client";
 import { ScreenshotDialog } from "./screenshot-dialog.client";
 import { SelectionFrameOverlay } from "./selection-frame-overlay";
 
@@ -68,6 +71,12 @@ export function FeedbackDetailPanel({
   hasLinearLink = false,
   hasJiraLink = false,
 }: FeedbackDetailPanelProps) {
+  // Beside `feedbackId` in the address, so a link can land on the player.
+  const [isPlayerOpen, setIsPlayerOpen] = useQueryState(
+    "player",
+    parseAsBoolean.withDefault(false),
+  );
+
   if (!feedback) return null;
 
   const element = getElementContext(feedback);
@@ -75,7 +84,13 @@ export function FeedbackDetailPanel({
   const overlay = renderScreenshotOverlay(feedback);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) void setIsPlayerOpen(null);
+        onOpenChange(next);
+      }}
+    >
       <SheetContent className="gap-0 overflow-y-auto sm:max-w-3xl">
         <SheetTitle className="sr-only">Feedback detail</SheetTitle>
         <SheetDescription className="sr-only">
@@ -112,6 +127,23 @@ export function FeedbackDetailPanel({
                 <ImageOff className="size-4 opacity-50" />
                 No screenshot captured
               </div>
+            )}
+
+            {feedback.recording && (
+              <>
+                <RecordingRow
+                  feedbackId={feedback.id}
+                  durationMs={feedback.recording.durationMs}
+                  onPlay={() => void setIsPlayerOpen(true)}
+                />
+                <RecordingPlayer
+                  feedbackId={feedback.id}
+                  projectId={projectId}
+                  selectionFrame={getSelectionFrame(feedback.metadata)}
+                  open={isPlayerOpen}
+                  onOpenChange={(next) => void setIsPlayerOpen(next || null)}
+                />
+              </>
             )}
 
             {sections.elementContext && element.hasContext && (

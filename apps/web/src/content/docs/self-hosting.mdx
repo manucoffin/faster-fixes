@@ -20,6 +20,8 @@ You will need:
 
 Stripe is not needed for self-hosted installs. The billing code only runs on the hosted cloud version.
 
+[Recording](/docs/widget/recording) is included and needs no extra service and no configuration. It works as on the cloud, with the same 4 MB cap per Recording, and each Recording is stored with the screenshots and videos in your storage backend. The script embed fetches the recorder file from the public CDN, `cdn.jsdelivr.net`, at the widget's version, whatever host serves your backend; the framework packages bundle it. On a network that blocks the CDN, feedback is still sent, without a Recording.
+
 ## Docker Compose
 
 The repository includes a `docker-compose.yml` that runs the app, PostgreSQL, and a self-hosted Inngest server on one machine, with files stored on local disk. You need Docker with Compose 2.24 or later and an email provider. The numbered steps after this section describe a deployment without Docker.
@@ -60,11 +62,11 @@ The Inngest dashboard listens on `127.0.0.1:8288` and has no authentication. Ope
 
 Compose prefixes each volume name with `faster-fixes_`.
 
-| Volume          | Contents                               |
-| --------------- | -------------------------------------- |
-| `postgres-data` | The database                           |
-| `app-storage`   | Screenshots, videos, logos and avatars |
-| `inngest-data`  | Background job state and run history   |
+| Volume          | Contents                                           |
+| --------------- | -------------------------------------------------- |
+| `postgres-data` | The database                                       |
+| `app-storage`   | Screenshots, recordings, videos, logos and avatars |
+| `inngest-data`  | Background job state and run history               |
 
 Back up `postgres-data` and `app-storage` together, since the database references the stored files. To dump the database, run `docker compose exec postgres pg_dump -U fasterfixes fasterfixes > backup.sql`. `docker compose down -v` deletes all volumes.
 

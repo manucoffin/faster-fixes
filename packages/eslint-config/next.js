@@ -177,6 +177,7 @@ const rawTailwindColorOptions = {
     "/\\(home\\)/_features/before-after-section\\.tsx$",
     "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
     "/\\(home\\)/_features/video-review/video-review-animation\\.tsx$",
+    "/\\(home\\)/_features/context/context-illustrations\\.tsx$",
   ],
 };
 
@@ -316,6 +317,18 @@ const layerImportRows = [
     message:
       "The database package is imported through its public entry points (ADR-0013): `@workspace/db` for the client instance, `@workspace/db/types` for Prisma row and input types, `@workspace/db/generated/prisma/enums` for the generated enums. Everything else inside the package is private to it.",
   },
+  {
+    name: "the replayer runs in the player document only",
+    sourcePathPattern: "/src/",
+    // The player document's script, bundled on its own by
+    // `pnpm build:recording-player` and never by Next.js.
+    exemptPathPatterns: [
+      "/src/app/recording-player/_features/play-recording\\.ts$",
+    ],
+    forbiddenPatterns: ["^@rrweb/replay(/|$)"],
+    message:
+      "A Recording plays in the player document, framed by the dashboard under its own Content Security Policy (ADR-0023); the replayer is never mounted in a page of the app. Drive the player document through the protocol in `_domains/feedback/_helpers/recording-player-protocol.ts`.",
+  },
 ];
 
 // The server folder holds wiring and cross-cutting abstractions only, so it
@@ -396,7 +409,12 @@ const notDisableableRules = [
 export const nextJsConfig = withBinarySeverity([
   // Next.js and Fumadocs write these; they are build output, not source.
   {
-    ignores: [".next/**", ".source/**", "next-env.d.ts"],
+    ignores: [
+      ".next/**",
+      ".source/**",
+      "next-env.d.ts",
+      "public/recording-player/**",
+    ],
   },
   ...baseConfig,
   {

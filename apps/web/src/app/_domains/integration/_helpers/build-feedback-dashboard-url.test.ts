@@ -21,4 +21,22 @@ describe("buildFeedbackDashboardUrl", () => {
       "https://app.example.com/inbox?feedbackId=feedback-1",
     );
   });
+
+  it("opens the inbox at the Feedback with the player open when asked", () => {
+    expect(
+      buildFeedbackDashboardUrl(
+        { id: "feedback-1", videoId: null },
+        { player: true },
+      ),
+    ).toBe("https://app.example.com/inbox?feedbackId=feedback-1&player=true");
+  });
+
+  it("keeps the Video page address for a video Feedback asked for the player", () => {
+    expect(
+      buildFeedbackDashboardUrl(
+        { id: "feedback-1", videoId: "video-1" },
+        { player: true },
+      ),
+    ).toBe("https://app.example.com/videos/video-1?feedbackId=feedback-1");
+  });
 });

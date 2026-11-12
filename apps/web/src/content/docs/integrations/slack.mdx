@@ -18,6 +18,12 @@ The bot is installed once per organization. Each project then links to a single 
 
 Faster Fixes notifies the linked channel when feedback is created or its status changes. The full diagnostic trail (DOM selector, browser info, console logs, network requests) stays in the dashboard. Follow the link in the message to see it.
 
+## Recording
+
+When the feedback has a [Recording](/docs/widget/recording), the message carries a **Play recording** button next to **Open in Faster Fixes**. The button opens the player in the dashboard and requires a login. The message carries no timeline: like the diagnostic trail, it stays in the dashboard.
+
+The message for new feedback waits up to 30 seconds for the Recording to finish uploading, then is posted with or without the button. If the Recording is removed, the button disappears at the next status change.
+
 ## Channels
 
 Public channels are selectable from a dropdown out of the box. Private channels are supported only if the Faster Fixes bot is invited to them first.

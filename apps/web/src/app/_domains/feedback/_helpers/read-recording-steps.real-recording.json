@@ -1,0 +1,580 @@
+[
+  {
+    "type": 4,
+    "data": {
+      "href": "file:///tmp/rec/page.html",
+      "width": 1280,
+      "height": 720
+    },
+    "timestamp": 1794408189219
+  },
+  {
+    "type": 2,
+    "data": {
+      "node": {
+        "type": 0,
+        "childNodes": [
+          {
+            "type": 1,
+            "name": "html",
+            "publicId": "",
+            "systemId": "",
+            "id": 2
+          },
+          {
+            "type": 2,
+            "tagName": "html",
+            "attributes": {},
+            "childNodes": [
+              {
+                "type": 2,
+                "tagName": "head",
+                "attributes": {},
+                "childNodes": [
+                  {
+                    "type": 2,
+                    "tagName": "title",
+                    "attributes": {},
+                    "childNodes": [
+                      { "type": 3, "textContent": "Settings", "id": 6 }
+                    ],
+                    "id": 5
+                  },
+                  {
+                    "type": 2,
+                    "tagName": "script",
+                    "attributes": { "type": "text/javascript" },
+                    "childNodes": [
+                      {
+                        "type": 3,
+                        "textContent": "SCRIPT_PLACEHOLDER",
+                        "id": 8
+                      }
+                    ],
+                    "id": 7
+                  }
+                ],
+                "id": 4
+              },
+              {
+                "type": 2,
+                "tagName": "body",
+                "attributes": { "style": "height:3000px" },
+                "childNodes": [
+                  { "type": 3, "textContent": "\n", "id": 10 },
+                  {
+                    "type": 2,
+                    "tagName": "nav",
+                    "attributes": {},
+                    "childNodes": [
+                      {
+                        "type": 2,
+                        "tagName": "a",
+                        "attributes": {
+                          "id": "home",
+                          "href": "file:///tmp/rec/page.html#"
+                        },
+                        "childNodes": [
+                          { "type": 3, "textContent": "Home", "id": 13 }
+                        ],
+                        "id": 12
+                      },
+                      { "type": 3, "textContent": " ", "id": 14 },
+                      {
+                        "type": 2,
+                        "tagName": "a",
+                        "attributes": {
+                          "class": "nav-link",
+                          "href": "file:///tmp/rec/page.html#"
+                        },
+                        "childNodes": [
+                          { "type": 3, "textContent": "Billing", "id": 16 }
+                        ],
+                        "id": 15
+                      }
+                    ],
+                    "id": 11
+                  },
+                  { "type": 3, "textContent": "\n", "id": 17 },
+                  {
+                    "type": 2,
+                    "tagName": "form",
+                    "attributes": {
+                      "class": "settings",
+                      "onsubmit": "event.preventDefault()"
+                    },
+                    "childNodes": [
+                      { "type": 3, "textContent": "\n  ", "id": 19 },
+                      {
+                        "type": 2,
+                        "tagName": "label",
+                        "attributes": {},
+                        "childNodes": [
+                          { "type": 3, "textContent": "Email ", "id": 21 },
+                          {
+                            "type": 2,
+                            "tagName": "input",
+                            "attributes": {
+                              "name": "email",
+                              "type": "email",
+                              "placeholder": "you@example.com"
+                            },
+                            "childNodes": [],
+                            "id": 22
+                          }
+                        ],
+                        "id": 20
+                      },
+                      { "type": 3, "textContent": "\n  ", "id": 23 },
+                      {
+                        "type": 2,
+                        "tagName": "span",
+                        "attributes": {
+                          "data-ff-mask": "",
+                          "class": "account-id"
+                        },
+                        "childNodes": [
+                          { "type": 3, "textContent": "**********", "id": 25 }
+                        ],
+                        "id": 24
+                      },
+                      { "type": 3, "textContent": "\n  ", "id": 26 },
+                      {
+                        "type": 2,
+                        "tagName": "div",
+                        "attributes": {
+                          "class": "card",
+                          "rr_width": "1264px",
+                          "rr_height": "21px"
+                        },
+                        "childNodes": [],
+                        "id": 27
+                      },
+                      { "type": 3, "textContent": "\n  ", "id": 28 },
+                      {
+                        "type": 2,
+                        "tagName": "select",
+                        "attributes": { "name": "plan", "value": "****" },
+                        "childNodes": [
+                          {
+                            "type": 2,
+                            "tagName": "option",
+                            "attributes": { "value": "free" },
+                            "childNodes": [
+                              { "type": 3, "textContent": "Free", "id": 31 }
+                            ],
+                            "id": 30
+                          },
+                          {
+                            "type": 2,
+                            "tagName": "option",
+                            "attributes": { "value": "pro" },
+                            "childNodes": [
+                              { "type": 3, "textContent": "Pro", "id": 33 }
+                            ],
+                            "id": 32
+                          }
+                        ],
+                        "id": 29
+                      },
+                      { "type": 3, "textContent": "\n  ", "id": 34 },
+                      {
+                        "type": 2,
+                        "tagName": "label",
+                        "attributes": {},
+                        "childNodes": [
+                          {
+                            "type": 2,
+                            "tagName": "input",
+                            "attributes": {
+                              "type": "checkbox",
+                              "name": "news"
+                            },
+                            "childNodes": [],
+                            "id": 36
+                          },
+                          { "type": 3, "textContent": " Newsletter", "id": 37 }
+                        ],
+                        "id": 35
+                      },
+                      { "type": 3, "textContent": "\n  ", "id": 38 },
+                      {
+                        "type": 2,
+                        "tagName": "button",
+                        "attributes": { "type": "submit", "class": "primary" },
+                        "childNodes": [
+                          { "type": 3, "textContent": "Save changes", "id": 40 }
+                        ],
+                        "id": 39
+                      },
+                      { "type": 3, "textContent": "\n", "id": 41 }
+                    ],
+                    "id": 18
+                  },
+                  { "type": 3, "textContent": "\n", "id": 42 },
+                  {
+                    "type": 2,
+                    "tagName": "div",
+                    "attributes": { "id": "toasts" },
+                    "childNodes": [],
+                    "id": 43
+                  },
+                  { "type": 3, "textContent": "\n\n", "id": 44 }
+                ],
+                "id": 9
+              }
+            ],
+            "id": 3
+          }
+        ],
+        "id": 1
+      },
+      "initialOffset": { "left": 0, "top": 0 }
+    },
+    "timestamp": 1794408189224
+  },
+  {
+    "type": 5,
+    "timestamp": 1794408189224,
+    "data": {
+      "tag": "fasterfixes/page-session",
+      "payload": { "navigationType": "load" }
+    }
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 84, "y": 17, "id": 15, "timeOffset": 0 }]
+    },
+    "timestamp": 1794408189580
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 15, "x": 84.5, "y": 17.5 },
+    "timestamp": 1794408189580
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 15 },
+    "timestamp": 1794408189580
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 15, "x": 84.5, "y": 17.5 },
+    "timestamp": 1794408189580
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 15,
+      "x": 84,
+      "y": 17,
+      "pointerType": 0
+    },
+    "timestamp": 1794408189580
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 6, "id": 15 },
+    "timestamp": 1794408189797
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 22 },
+    "timestamp": 1794408189798
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 22, "x": 146.5, "y": 37.5 },
+    "timestamp": 1794408190029
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 22, "x": 146.5, "y": 37.5 },
+    "timestamp": 1794408190029
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 22,
+      "x": 146,
+      "y": 37,
+      "pointerType": 0
+    },
+    "timestamp": 1794408190030
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 146, "y": 37, "id": 22, "timeOffset": -57 }]
+    },
+    "timestamp": 1794408190085
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 24, "x": 287, "y": 36.5 },
+    "timestamp": 1794408190264
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 5,
+      "text": "*****************",
+      "isChecked": false,
+      "id": 22
+    },
+    "timestamp": 1794408190265
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 6, "id": 22 },
+    "timestamp": 1794408190265
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 24, "x": 287, "y": 36.5 },
+    "timestamp": 1794408190265
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 24,
+      "x": 287,
+      "y": 36,
+      "pointerType": 0
+    },
+    "timestamp": 1794408190265
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [
+        { "x": 287, "y": 36, "id": 24, "timeOffset": -322 },
+        { "x": 72, "y": 58, "id": -1, "timeOffset": -105 }
+      ]
+    },
+    "timestamp": 1794408190586
+  },
+  {
+    "type": 3,
+    "data": { "source": 5, "text": "***", "isChecked": false, "id": 29 },
+    "timestamp": 1794408190693
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 36, "x": 72.5, "y": 78.5 },
+    "timestamp": 1794408190928
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 36 },
+    "timestamp": 1794408190928
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 36, "x": 72.5, "y": 78.5 },
+    "timestamp": 1794408190928
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 36,
+      "x": 72,
+      "y": 78,
+      "pointerType": 0
+    },
+    "timestamp": 1794408190928
+  },
+  {
+    "type": 3,
+    "data": { "source": 5, "text": "on", "isChecked": true, "id": 36 },
+    "timestamp": 1794408190928
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 72, "y": 78, "id": 36, "timeOffset": -162 }]
+    },
+    "timestamp": 1794408191089
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 39, "x": 231, "y": 80.5 },
+    "timestamp": 1794408191360
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 6, "id": 36 },
+    "timestamp": 1794408191360
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 39 },
+    "timestamp": 1794408191361
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 39, "x": 231, "y": 80.5 },
+    "timestamp": 1794408191361
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 39,
+      "x": 231,
+      "y": 80,
+      "pointerType": 0
+    },
+    "timestamp": 1794408191361
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 0,
+      "texts": [],
+      "attributes": [],
+      "removes": [],
+      "adds": [
+        {
+          "parentId": 43,
+          "nextId": null,
+          "node": {
+            "type": 2,
+            "tagName": "button",
+            "attributes": { "class": "toast-close", "aria-label": "Dismiss" },
+            "childNodes": [],
+            "id": 45
+          }
+        },
+        {
+          "parentId": 45,
+          "nextId": null,
+          "node": { "type": 3, "textContent": "x", "id": 46 }
+        }
+      ]
+    },
+    "timestamp": 1794408191571
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 231, "y": 80, "id": 39, "timeOffset": -232 }]
+    },
+    "timestamp": 1794408191592
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 45, "x": 20, "y": 101.5 },
+    "timestamp": 1794408191796
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 6, "id": 39 },
+    "timestamp": 1794408191796
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 45 },
+    "timestamp": 1794408191796
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 45, "x": 20, "y": 101.5 },
+    "timestamp": 1794408191796
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 45,
+      "x": 20,
+      "y": 101,
+      "pointerType": 0
+    },
+    "timestamp": 1794408191796
+  },
+  {
+    "type": 3,
+    "data": { "source": 3, "id": 1, "x": 0, "y": 400 },
+    "timestamp": 1794408192006
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 20, "y": 101, "id": 45, "timeOffset": -299 }]
+    },
+    "timestamp": 1794408192095
+  },
+  {
+    "type": 3,
+    "data": { "source": 3, "id": 1, "x": 0, "y": 800 },
+    "timestamp": 1794408192325
+  },
+  {
+    "type": 3,
+    "data": { "source": 4, "width": 1024, "height": 700 },
+    "timestamp": 1794408192620
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 1,
+      "positions": [{ "x": 231, "y": 80, "id": 39, "timeOffset": 0 }]
+    },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 1, "id": 39, "x": 231, "y": 80.5 },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 6, "id": 45 },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 5, "id": 39 },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": { "source": 2, "type": 0, "id": 39, "x": 231, "y": 80.5 },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": {
+      "source": 2,
+      "type": 2,
+      "id": 39,
+      "x": 231,
+      "y": 80,
+      "pointerType": 0
+    },
+    "timestamp": 1794408193050
+  },
+  {
+    "type": 3,
+    "data": { "source": 3, "id": 1, "x": 0, "y": 0 },
+    "timestamp": 1794408193056
+  }
+]

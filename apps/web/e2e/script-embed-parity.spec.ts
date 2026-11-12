@@ -9,6 +9,7 @@ import {
   expectLabelsEverywhere,
   LABEL_OVERRIDES,
   PIN_LABEL_PREFIX,
+  RECORDING_LABEL_PREFIX,
 } from "./widget-labels";
 import {
   stubWidgetApi,
@@ -118,13 +119,15 @@ test.describe("script embed style and labels", () => {
     await stubWidgetApi(page, { config: { enabled: true, branding: true } });
     await page.goto(`${FIXTURE_PATH}?manual`);
     await page.evaluate(
-      ([projectId, apiOrigin, labels, pinPrefix]) => {
+      ([projectId, apiOrigin, labels, pinPrefix, recordingPrefix]) => {
         window.FasterFixes?.init({
           projectId,
           apiOrigin,
           labels: {
             ...labels,
             pinAriaLabel: (excerpt: string) => `${pinPrefix}${excerpt}`,
+            recordingIncluded: (seconds: number) =>
+              `${recordingPrefix}${seconds}`,
           },
         });
       },
@@ -133,6 +136,7 @@ test.describe("script embed style and labels", () => {
         WIDGET_API_ORIGIN,
         LABEL_OVERRIDES,
         PIN_LABEL_PREFIX,
+        RECORDING_LABEL_PREFIX,
       ] as const,
     );
 
@@ -190,7 +194,9 @@ test.describe("script embed style and labels", () => {
     await page.route("**/e2e-golden-font.ttf", (route) =>
       route.fulfill({ contentType: "font/ttf", body: font }),
     );
-    await page.goto(FIXTURE_PATH);
+    // Without a Recording, so the form's Recording line, whose text and arrival
+    // vary, stays out of the golden image.
+    await page.goto(`${FIXTURE_PATH}?captureRecording=false`);
     await page.addStyleTag({
       content: `
         @font-face { font-family: "FF Golden"; src: url("/e2e-golden-font.ttf"); }

@@ -27,6 +27,7 @@ model Asset {
   uploadedBy   User?   @relation("AssetUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   feedbackScreenshots Feedback[] @relation("FeedbackScreenshot")
+  feedbackRecordings  Feedback[] @relation("FeedbackRecording")
   videoFiles          Video[]    @relation("VideoFile")
   videoPosters        Video[]    @relation("VideoPoster")
 

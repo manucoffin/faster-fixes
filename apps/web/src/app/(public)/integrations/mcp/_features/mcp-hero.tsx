@@ -35,10 +35,10 @@ export function McpHero() {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             A client leaves feedback on your staging site. Your agent fetches
-            it, with the page URL, the exact DOM element, console logs, network
-            requests, a screenshot, and full browser context already attached.
-            It fixes the code and marks the item resolved. No copy-pasting, no
-            &ldquo;can you reproduce this?&rdquo;
+            it, with the page URL, the exact DOM element, the steps the client
+            took, console logs, network requests, a screenshot, and full browser
+            context already attached. It fixes the code and marks the item
+            resolved. No copy-pasting, no &ldquo;can you reproduce this?&rdquo;
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

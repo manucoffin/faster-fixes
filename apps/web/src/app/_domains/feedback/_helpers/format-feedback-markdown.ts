@@ -5,7 +5,18 @@
 
 import { describeVideoSelection } from "@/app/_domains/video";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+import {
+  collapseWhitespace,
+  formatConsoleEntry,
+  formatNetworkEntry,
+} from "./format-diagnostic-entry";
+import { formatTimelineLines } from "./format-timeline-lines";
+import {
+  mergeRecordingTimeline,
+  RECORDING_TIMELINE_MAX_ENTRIES,
+} from "./merge-recording-timeline";
 import type { FeedbackSelection } from "./read-feedback-selection";
+import type { RecordingStep } from "./read-recording-steps";
 
 export type FeedbackForMarkdown = {
   id: string;
@@ -31,9 +42,55 @@ export type FeedbackForMarkdown = {
   videoId?: string | null;
   videoTitle?: string | null;
   selection?: FeedbackSelection | null;
+  // Optional: only the single Feedback reads its Recording. Readable → the
+  // Timeline takes the place of Diagnostics.
+  recording?: { readable: boolean; steps: RecordingStep[] } | null;
+};
+
+// A listing never carries a timeline: only that a Recording exists, how long
+// it is and how many steps are cached, from the Feedback's columns.
+export type FeedbackListItemForMarkdown = Omit<
+  FeedbackForMarkdown,
+  "recording"
+> & {
+  recording?: { durationMs: number; stepCount: number | null } | null;
 };
 
 export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
+  return renderFeedbackMarkdown(f, diagnosticsOrTimelineLines(f));
+}
+
+/** One Feedback in list form: Diagnostics as today, plus the Recording line. */
+export function formatFeedbackListItemAsMarkdown(
+  f: FeedbackListItemForMarkdown,
+): string {
+  const lines = diagnosticsOrTimelineLines({
+    diagnosticTrail: f.diagnosticTrail,
+  });
+  if (f.recording) {
+    // A Console-only trail already ends on a blank line.
+    if (lines.at(-1) !== "") lines.push("");
+    lines.push(formatRecordingListLine(f.id, f.recording));
+  }
+  return renderFeedbackMarkdown(f, lines);
+}
+
+function formatRecordingListLine(
+  feedbackId: string,
+  { durationMs, stepCount }: { durationMs: number; stepCount: number | null },
+): string {
+  const duration = `${(durationMs / 1000).toFixed(1)} s`;
+  const summary =
+    stepCount === null
+      ? duration
+      : `${duration}, ${stepCount} ${stepCount === 1 ? "step" : "steps"}`;
+  return `**Recording:** ${summary}. Call \`get_feedback\` with id \`${feedbackId}\` to read its timeline.`;
+}
+
+function renderFeedbackMarkdown(
+  f: Omit<FeedbackForMarkdown, "recording">,
+  diagnosticsLines: string[],
+): string {
   const md = f.metadata;
   const lines: string[] = [];
 
@@ -108,14 +165,7 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
     lines.push(...customMetadataLines);
   }
 
-  // Diagnostics — console + network captured before submission
-  const diagnosticLines = formatDiagnosticTrailLines(f.diagnosticTrail);
-  if (diagnosticLines.length > 0) {
-    lines.push("");
-    lines.push("## Diagnostics");
-    lines.push("");
-    lines.push(...diagnosticLines);
-  }
+  lines.push(...diagnosticsLines);
 
   // Screenshot with instruction for multimodal AI agents
   if (f.screenshotUrl) {
@@ -131,7 +181,44 @@ export function formatFeedbackAsMarkdown(f: FeedbackForMarkdown): string {
   return lines.join("\n");
 }
 
-function videoLocationLines({ videoTitle, selection }: FeedbackForMarkdown) {
+// The Timeline already holds the Diagnostic Trail's entries, on one clock with
+// the Reviewer's steps; Diagnostics stays when there is no readable Recording.
+function diagnosticsOrTimelineLines({
+  recording,
+  diagnosticTrail,
+}: Pick<FeedbackForMarkdown, "recording" | "diagnosticTrail">): string[] {
+  if (recording?.readable) {
+    const timelineLines = formatTimelineLines(
+      mergeRecordingTimeline({
+        steps: recording.steps,
+        diagnosticTrail,
+        maxEntries: RECORDING_TIMELINE_MAX_ENTRIES,
+      }),
+    );
+    if (timelineLines.length > 0) {
+      return ["", "## Timeline", "", ...timelineLines];
+    }
+  }
+
+  const lines: string[] = [];
+  const diagnosticLines = formatDiagnosticTrailLines(diagnosticTrail);
+  if (diagnosticLines.length > 0) {
+    lines.push("", "## Diagnostics", "", ...diagnosticLines);
+  }
+  if (recording && !recording.readable) {
+    // A Console-only trail already ends on a blank line.
+    if (lines.at(-1) !== "") lines.push("");
+    lines.push(
+      "**Recording:** the file could not be read, so this Feedback has no timeline.",
+    );
+  }
+  return lines;
+}
+
+function videoLocationLines({
+  videoTitle,
+  selection,
+}: Pick<FeedbackForMarkdown, "videoTitle" | "selection">) {
   const lines: string[] = [];
   if (videoTitle) lines.push(`**Video:** ${videoTitle}`);
   if (!selection) return lines;
@@ -165,10 +252,10 @@ function pad(value: number, length: number) {
 }
 
 export function formatFeedbackListAsMarkdown(
-  feedbacks: FeedbackForMarkdown[],
+  feedbacks: FeedbackListItemForMarkdown[],
 ): string {
   if (feedbacks.length === 0) return "No feedback items found.";
-  return feedbacks.map((f) => formatFeedbackAsMarkdown(f)).join("\n\n---\n\n");
+  return feedbacks.map(formatFeedbackListItemAsMarkdown).join("\n\n---\n\n");
 }
 
 /**
@@ -190,7 +277,7 @@ export function formatDiagnosticTrailLines(
   if (consoleEntries.length > 0) {
     lines.push("**Console**", "");
     for (const entry of consoleEntries) {
-      lines.push(`- \`${entry.level}\` ${collapseWhitespace(entry.message)}`);
+      lines.push(`- ${formatConsoleEntry(entry)}`);
     }
     lines.push("");
   }
@@ -198,10 +285,7 @@ export function formatDiagnosticTrailLines(
   if (networkEntries.length > 0) {
     lines.push("**Network**", "");
     for (const entry of networkEntries) {
-      const status = entry.status === 0 ? "ERR" : String(entry.status);
-      lines.push(
-        `- \`${entry.method}\` ${entry.url} → ${status} (${Math.round(entry.duration)}ms)`,
-      );
+      lines.push(`- ${formatNetworkEntry(entry)}`);
     }
   }
 
@@ -219,9 +303,4 @@ export function formatCustomMetadataLines(
   return Object.entries(customMetadata).map(
     ([key, value]) => `- ${key}: ${collapseWhitespace(String(value))}`,
   );
-}
-
-// Console messages can be multi-line; flatten so each entry stays one bullet.
-function collapseWhitespace(value: string): string {
-  return value.replace(/\s*\n\s*/g, " ").trim();
 }

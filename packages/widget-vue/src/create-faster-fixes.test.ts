@@ -38,6 +38,7 @@ describe("createFasterFixes", () => {
       position: "top-left",
       labels: { submitButton: "Send" },
       captureDiagnostics: false,
+      captureRecording: false,
       customMetadata: () => ({ userId: "user_42" }),
     } as const;
 

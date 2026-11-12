@@ -239,7 +239,7 @@ describe("every convention rule is on", () => {
   // Every option the config passes is one a rule reads, and every ignore
   // pattern matches a file that exists: a dead pattern reads as a live
   // exemption to the next person to touch the list.
-  it("passes no-raw-tailwind-colors its allowlist and the five illustration exemptions", () => {
+  it("passes no-raw-tailwind-colors its allowlist and the six illustration exemptions", () => {
     const entry = onlyEntryFor("local/no-raw-tailwind-colors");
     const [severity, options] = entry.rules["local/no-raw-tailwind-colors"];
 
@@ -249,7 +249,7 @@ describe("every convention rule is on", () => {
       "ignorePathPatterns",
     ]);
     expect(options.allowPatterns).toHaveLength(1);
-    expect(options.ignorePathPatterns).toHaveLength(5);
+    expect(options.ignorePathPatterns).toHaveLength(6);
   });
 
   // One pattern rather than a list of loose ones: it names the whole basename
@@ -708,6 +708,7 @@ describe("the layer import table", () => {
       "`TRPCError` is transport, not domain",
       "database access lives in a services folder or the server folder",
       "the database package has public entry points",
+      "the replayer runs in the player document only",
     ]);
   });
 
@@ -844,6 +845,27 @@ describe("the layer import table", () => {
           await layerMessagesFor(SERVICE_FILE, importing(specifier)),
         ]).toEqual([specifier, []]);
       }
+    });
+  });
+
+  describe("the replayer runs in the player document only", () => {
+    it("rejects the replayer in a page of the app", async () => {
+      const messages = await layerMessagesFor(
+        "src/app/(authenticated)/(project)/inbox/_features/player.client.tsx",
+        importing("@rrweb/replay"),
+      );
+
+      expect(messages.map((message) => message.severity)).toEqual([2]);
+      expect(messages[0].message).toContain("player document");
+    });
+
+    it("accepts it in the player document's script", async () => {
+      expect(
+        await layerMessagesFor(
+          "src/app/recording-player/_features/play-recording.ts",
+          importing("@rrweb/replay"),
+        ),
+      ).toEqual([]);
     });
   });
 
@@ -1170,6 +1192,7 @@ describe("no-raw-tailwind-colors", () => {
     "src/app/(public)/(home)/_features/before-after-section.tsx",
     "src/app/(public)/(home)/_features/problem/problem-chat-animation.client.tsx",
     "src/app/(public)/(home)/_features/video-review/video-review-animation.tsx",
+    "src/app/(public)/(home)/_features/context/context-illustrations.tsx",
   ];
 
   // Two classes the hue-to-token table reports, so an empty result proves the
@@ -1189,7 +1212,7 @@ describe("no-raw-tailwind-colors", () => {
     );
   }
 
-  it("ignores the five home page illustration files", async () => {
+  it("ignores the six home page illustration files", async () => {
     for (const file of ILLUSTRATION_FILES) {
       expect([file, await rawColorWarningsFor(file)]).toEqual([file, []]);
     }

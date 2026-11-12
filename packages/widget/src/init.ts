@@ -5,11 +5,12 @@ import { createDeferredWidget, createInertWidget } from "./instance.js";
 import type { Widget } from "./instance.js";
 import { validateOptions } from "./options.js";
 import type { WidgetOptions } from "./options.js";
+import type { LoadRecorder } from "./recorder/contract.js";
 import { whenBodyReady } from "./script-options.js";
 
 let current: Widget | null = null;
 
-function start(input: unknown): Widget {
+function start(input: unknown, loadRecorder: LoadRecorder): Widget {
   const result = validateOptions(input);
   if (!result.valid) return createInertWidget();
 
@@ -22,6 +23,8 @@ function start(input: unknown): Widget {
     apiOrigin: options.apiOrigin,
   });
   const deferred = createDeferredWidget();
+  // Fetched alongside the config; started at mount, if the Widget mounts.
+  const recorder = options.captureRecording ? loadRecorder() : undefined;
 
   // The script tag may run in the head, before `document.body` exists.
   Promise.all([client.getConfig(), whenBodyReady(document)])
@@ -29,7 +32,7 @@ function start(input: unknown): Widget {
       // A later `init` or `destroy` may have landed while the request ran.
       if (deferred.destroyed) return;
       deferred.attach(
-        createWidget({ ...options, client, reviewerToken, config }),
+        createWidget({ ...options, client, reviewerToken, config, recorder }),
       );
     })
     .catch(() => {
@@ -40,12 +43,14 @@ function start(input: unknown): Widget {
 }
 
 /**
- * Installs the Widget on the page. It mounts only when a Reviewer token is
- * present and the Project has the Widget enabled. Calling `init` again
- * destroys the previous instance first.
+ * `init` with the way the recorder file is reached, which differs between the
+ * script embed and a bundled import.
  */
-export function init(options: WidgetOptions): Widget {
+export function startWidget(
+  options: WidgetOptions,
+  loadRecorder: LoadRecorder,
+): Widget {
   current?.destroy();
-  current = start(options);
+  current = start(options, loadRecorder);
   return current;
 }

@@ -13,7 +13,7 @@ const cards = [
   },
   {
     title: "Structured output to GitHub, Linear, Jira, or MCP",
-    body: "Each feedback item is a structured task. Sync to GitHub, Linear, or Jira Cloud with workflow-state-aware two-way updates, or expose it to Claude Code, Cursor, and Codex via the built-in MCP server. Markup.io reserves integrations for Enterprise.",
+    body: "Each feedback item is a structured task. Sync to GitHub, Linear, or Jira Cloud with workflow-state-aware two-way updates, or expose it to Claude Code, Cursor, and Codex via the built-in MCP server. Markup.io has no native tracker sync and relies on Zapier.",
   },
 ];
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@workspace/ui/lib/utils";
-import { useState, type PointerEvent } from "react";
 import { formatFeedbackTime } from "../_helpers/format-timecode";
+import { useTimelineScrub } from "./use-timeline-scrub";
 
 /** One Feedback on the timeline, coloured by the caller. */
 export type VideoTimelineMarker = {
@@ -30,10 +30,6 @@ type VideoTimelineProps = {
   onMarkerClick: (markerId: string) => void;
 };
 
-function clamp(value: number) {
-  return Math.min(1, Math.max(0, value));
-}
-
 // Every marker as a dot (instant) or a bar (range) along the Video. A press on
 // the bar seeks, and dragging scrubs.
 export function VideoTimeline({
@@ -45,30 +41,12 @@ export function VideoTimeline({
   onSeek,
   onMarkerClick,
 }: VideoTimelineProps) {
-  const [scrubbing, setScrubbing] = useState(false);
-
-  function seekToPointer(event: PointerEvent<HTMLDivElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    onSeek(clamp((event.clientX - rect.left) / rect.width) * durationMs);
-  }
-
-  const position = (ms: number) =>
-    durationMs ? `${clamp(ms / durationMs) * 100}%` : "0%";
+  const { position, handlers } = useTimelineScrub(durationMs, onSeek);
 
   return (
     <div
       className="relative h-8 w-full cursor-pointer touch-none select-none"
-      onPointerDown={(event) => {
-        if (!durationMs) return;
-        event.currentTarget.setPointerCapture(event.pointerId);
-        setScrubbing(true);
-        seekToPointer(event);
-      }}
-      onPointerMove={(event) => {
-        if (scrubbing) seekToPointer(event);
-      }}
-      onPointerUp={() => setScrubbing(false)}
-      onPointerCancel={() => setScrubbing(false)}
+      {...handlers}
     >
       <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-muted">
         <div

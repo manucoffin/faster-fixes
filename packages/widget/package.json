@@ -26,7 +26,8 @@
     "qa"
   ],
   "sideEffects": [
-    "./dist/widget.iife.js"
+    "./dist/widget.iife.js",
+    "./dist/recorder.iife.js"
   ],
   "engines": {
     "node": ">=18"
@@ -81,9 +82,11 @@
   "dependencies": {
     "@fasterfixes/core": "workspace:*",
     "@floating-ui/dom": "^1.7.4",
+    "@rrweb/record": "^2.2.2",
     "modern-screenshot": "^4.6.8"
   },
   "devDependencies": {
+    "@rrweb/types": "^2.2.2",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.1",

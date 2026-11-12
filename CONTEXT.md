@@ -40,8 +40,12 @@ _Avoid_: Marker, Dot, Annotation.
 The capture of the Reviewer's viewport taken at the moment of Selection and attached to the Feedback. Best-effort: a Feedback may have none, and a late capture may be of lower fidelity.
 _Avoid_: Capture (the act of taking it), Image, Attachment.
 
+**Recording**:
+A demonstration over time of what happened on the page, attached to a Feedback. Today it has one form: the replay of the moments leading up to the Feedback, the page's content as it changed and the Reviewer's interactions with it, taken with no step for the Reviewer. That form is a reconstruction of the page, not a film of the screen, and carries no voice. It ends at the Selection and never shows the Widget's own interface. It never holds what the Reviewer typed, nor what the customer's site marked as sensitive. Fixed when the Feedback is created: never added or changed afterwards, though the team can remove it and keep the Feedback. Best-effort: a Feedback may have none. A film of the screen that a Reviewer makes on purpose, with or without their voice, would be another form of Recording, never a Video.
+_Avoid_: Video (a file uploaded for review), Screen recording, Session replay (a Recording exists only attached to a Feedback), Replay.
+
 **Selection frame**:
-The outline of the Selection and its click point drawn over the Screenshot in the inbox. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
+The outline of the Selection and its click point drawn in the inbox over the Screenshot, and over the last instant of the Recording. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
 _Avoid_: Highlight, Overlay, Annotation.
 
 ### Video review
@@ -178,7 +182,7 @@ The per-Feedback record connecting a single Feedback to its mirrored issue in a 
 
 **Diagnostic Trail**:
 The console and network history captured leading up to a Feedback submission, attached to that Feedback to aid reproduction.
-_Avoid_: Session, Logs, Recording (the Trail is a bounded snapshot, not a continuous session recording).
+_Avoid_: Session, Logs, Recording (the Recording replays the page; the Trail is the console and network history).
 
 **Console Entry**:
 One captured `console.*` call: level (`log`/`info`/`warn`/`error`/`debug`), message, timestamp. All levels captured.
@@ -198,10 +202,11 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
+- A **Feedback** has zero or one **Recording**, only when it is about a page; the Recording ends at the Feedback's **Selection** and complements it, never replaces it; two Feedbacks never share a Recording, though their Recordings may cover the same moments
 - A **Testimonial** is given by one **User** on behalf of one **Organization**; it is the outcome of at most one **Testimonial request**
 - A **Testimonial** is deleted with its **User**; it outlives its **Organization**, whose name it carries as a snapshot
 - A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
-- A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has both a Screenshot and the Selection's geometry
+- A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has the Selection's geometry and a Screenshot or a Recording to draw it on
 - A **Feedback** belongs to one **Project** and is about either a page of its website or one of its **Videos**, never both; its **Selection** takes the shape of that subject
 - A **Project** holds many **Videos**; a **Video** belongs to exactly one **Project** and is deleted with it
 - A **Video** has zero or one **Poster**
@@ -209,10 +214,11 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Reviewer** belongs to exactly one **Project**; a Reviewer who came through a **Share link** is also bound to that **Video**, where their name is unique
 - A **Tracker** mirrors and a **Notification channel** announces every Feedback of a **Project** through its **Project links**, page and video alike
 - A video Feedback's **Screenshot** is the frame captured at its **Selection**
-- A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot
+- A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot and at the end of its Recording
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
+- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. A **Recording** and a **Diagnostic Trail** never reach back before the start of their page session
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**

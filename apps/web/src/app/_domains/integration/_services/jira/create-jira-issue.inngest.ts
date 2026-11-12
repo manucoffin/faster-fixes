@@ -8,6 +8,8 @@ import { createJiraIssue as createIssue } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
+import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
+import { refreshIssueRecording } from "../refresh-issue-recording";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -29,33 +31,20 @@ export const createJiraIssue = inngest.createFunction(
       },
     ],
   },
-  async ({ event }) => {
+  async ({ event, step }) => {
     const { feedbackId } = event.data;
 
-    const feedback = await prisma.feedback.findUnique({
-      where: { id: feedbackId },
-      include: {
-        project: {
-          include: {
-            jiraLink: { include: { jiraInstallation: true } },
-          },
-        },
-        reviewer: { select: { name: true } },
-        video: { select: { title: true } },
-        screenshot: { select: { key: true, bucket: true } },
-        jiraIssueLink: { select: { id: true } },
-      },
-    });
+    const found = await readFeedback(feedbackId);
 
-    if (!feedback) return { skipped: "feedback_not_found" };
+    if (!found) return { skipped: "feedback_not_found" };
 
     // Handler-level idempotency: any re-emit of `feedback/created` (backfills,
     // admin re-triggers) short-circuits instead of creating a second issue.
-    if (feedback.jiraIssueLink) {
+    if (found.jiraIssueLink) {
       return { skipped: "jira_issue_already_exists" };
     }
 
-    const link = feedback.project.jiraLink;
+    const link = found.project.jiraLink;
     if (!link) return { skipped: "no_jira_link" };
 
     // Auto-create only gates `feedback/created`. Manual export
@@ -64,6 +53,18 @@ export const createJiraIssue = inngest.createFunction(
       event.name === "feedback/integration-issue-requested";
     if (!isManualTrigger && !link.autoCreateIssues) {
       return { skipped: "auto_create_disabled" };
+    }
+
+    const feedback = await findFeedbackWithAwaitedRecording({
+      event,
+      step,
+      feedback: found,
+      readFeedback: () => readFeedback(feedbackId),
+    });
+    if (!feedback) return { skipped: "feedback_not_found" };
+    // An Issue created by hand during the wait wins.
+    if (feedback.jiraIssueLink) {
+      return { skipped: "jira_issue_already_exists" };
     }
 
     const installation = link.jiraInstallation;
@@ -77,6 +78,8 @@ export const createJiraIssue = inngest.createFunction(
     if (feedback.screenshot) {
       screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
     }
+
+    const recording = await refreshIssueRecording(feedback);
 
     const description = formatIssueAdf({
       comment: feedback.comment,
@@ -103,6 +106,7 @@ export const createJiraIssue = inngest.createFunction(
       frameY: feedback.frameY,
       frameWidth: feedback.frameWidth,
       frameHeight: feedback.frameHeight,
+      recording,
     });
 
     let issue;
@@ -143,3 +147,21 @@ export const createJiraIssue = inngest.createFunction(
     return { issueId: issue.id, issueKey: issue.key };
   },
 );
+
+function readFeedback(feedbackId: string) {
+  return prisma.feedback.findUnique({
+    where: { id: feedbackId },
+    include: {
+      project: {
+        include: {
+          jiraLink: { include: { jiraInstallation: true } },
+        },
+      },
+      reviewer: { select: { name: true } },
+      video: { select: { title: true } },
+      screenshot: { select: { key: true, bucket: true } },
+      recording: { select: { key: true } },
+      jiraIssueLink: { select: { id: true } },
+    },
+  });
+}

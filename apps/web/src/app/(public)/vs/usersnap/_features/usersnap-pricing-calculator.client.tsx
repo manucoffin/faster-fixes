@@ -24,18 +24,18 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
 }
 
 function pickUsersnapPlan(team: number, projects: number): PlanResult {
-  const seats = Math.max(team, projects);
-  if (seats <= 5) {
-    return { planLabel: "Starter", monthly: 49, annual: 468 };
+  // Only Starter caps seats; every higher tier has unlimited seats and is sized by projects.
+  if (team <= 2 && projects <= 2) {
+    return { planLabel: "Starter", monthly: 59, annual: 708 };
   }
-  if (seats <= 10) {
-    return { planLabel: "Growth", monthly: 109, annual: 1068 };
+  if (projects <= 10) {
+    return { planLabel: "Growth", monthly: 159, annual: 1908 };
   }
-  if (seats <= 20) {
-    return { planLabel: "Professional", monthly: 199, annual: 1908 };
+  if (projects <= 20) {
+    return { planLabel: "Professional", monthly: 259, annual: 3108 };
   }
-  if (seats <= 50) {
-    return { planLabel: "Premium", monthly: 319, annual: 3828 };
+  if (projects <= 50) {
+    return { planLabel: "Premium", monthly: 549, annual: 6588 };
   }
   return {
     planLabel: "Enterprise",
@@ -173,11 +173,11 @@ export function UsersnapPricingCalculator() {
       </div>
 
       <p className="mt-6 text-xs text-muted-foreground">
-        Usersnap tiers: Starter (5 seats / 5 projects), Growth (10 / 10),
-        Professional (20 / 20), Premium (50 / 50). Beyond 50, Usersnap requires
-        an Enterprise contract. Annual savings are calculated against Usersnap
-        monthly billing; their annual plans discount the first three tiers by
-        ~20%.
+        Usersnap tiers: Starter (2 seats, 2 projects), then unlimited seats on
+        Growth (10 projects), Professional (20) and Premium (50). Beyond 50
+        projects, Usersnap requires an Enterprise contract. Prices are
+        Usersnap&apos;s USD monthly rates; annual billing lowers them to $49,
+        $129, $209 and $449 per month.
       </p>
     </div>
   );

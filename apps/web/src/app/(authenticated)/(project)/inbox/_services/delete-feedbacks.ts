@@ -34,7 +34,7 @@ export async function deleteFeedbacks(
 
   const candidates = await db.feedback.findMany({
     where,
-    select: { screenshotId: true },
+    select: { screenshotId: true, recordingId: true },
   });
 
   if (candidates.length === 0) {
@@ -43,15 +43,20 @@ export async function deleteFeedbacks(
 
   const { count: deleted } = await db.feedback.deleteMany({ where });
 
-  const screenshotIds = candidates
-    .map((f) => f.screenshotId)
+  const assetIds = candidates
+    .flatMap((f) => [f.screenshotId, f.recordingId])
     .filter((id): id is string => id !== null);
 
-  if (screenshotIds.length > 0) {
+  if (assetIds.length > 0) {
     // A row restored between the read and the delete still references its
-    // screenshot, so only the Assets no Feedback points to anymore are freed.
+    // screenshot and Recording, so only the Assets no Feedback points to
+    // anymore are freed.
     const orphaned = await db.asset.findMany({
-      where: { id: { in: screenshotIds }, feedbackScreenshots: { none: {} } },
+      where: {
+        id: { in: assetIds },
+        feedbackScreenshots: { none: {} },
+        feedbackRecordings: { none: {} },
+      },
       select: { id: true },
     });
     await deleteAssets(orphaned.map((asset) => asset.id));

@@ -7,6 +7,7 @@ import type { ReadableStream as WebReadableStream } from "node:stream/web";
 
 type Context = { params: Promise<{ path: string[] }> };
 const contentTypes: Record<string, string> = {
+  gz: "application/gzip",
   png: "image/png",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
@@ -85,7 +86,7 @@ const SIGNED_URL_EXPIRES_IN = 3600;
 const REDIRECT_MAX_AGE = 600;
 
 // Avatar and logo keys are the only ones readable without a token. Everything
-// else (screenshots) is reached through a signed URL only.
+// else (screenshots, Recordings) is reached through a signed URL only.
 function isPublicImageKey(key: string) {
   return /^(user-avatars|organization-logos)\//.test(key);
 }

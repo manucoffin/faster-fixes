@@ -5,7 +5,21 @@ import { useState } from "react";
 
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
-const USERBACK_BUSINESS_SEAT_PRICE = 19;
+// Userback monthly billing: a plan price covers a bundle of seats and sites,
+// extra seats cost $9/month each on Business and Business Plus.
+const USERBACK_EXTRA_SEAT_PRICE = 9;
+const USERBACK_BUSINESS = {
+  label: "Business",
+  price: 119,
+  seats: 15,
+  sites: 25,
+};
+const USERBACK_BUSINESS_PLUS = {
+  label: "Business Plus",
+  price: 199,
+  seats: 25,
+  sites: 50,
+};
 
 type PlanResult = {
   planLabel: string;
@@ -24,10 +38,18 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
   return { planLabel: "Agency", monthly: 99, annual: 1188 };
 }
 
-function pickUserbackPlan(team: number): PlanResult {
-  const monthly = team * USERBACK_BUSINESS_SEAT_PRICE;
+function pickUserbackPlan(team: number, projects: number): PlanResult {
+  const plan =
+    projects <= USERBACK_BUSINESS.sites
+      ? USERBACK_BUSINESS
+      : USERBACK_BUSINESS_PLUS;
+  const extraSeats = Math.max(0, team - plan.seats);
+  const monthly = plan.price + extraSeats * USERBACK_EXTRA_SEAT_PRICE;
   return {
-    planLabel: "Business",
+    planLabel:
+      extraSeats > 0
+        ? `${plan.label} + ${extraSeats} extra ${extraSeats === 1 ? "seat" : "seats"}`
+        : plan.label,
     monthly,
     annual: monthly * 12,
   };
@@ -52,7 +74,7 @@ export function UserbackPricingCalculator() {
   const [projects, setProjects] = useState(3);
 
   const fasterFixesHosted = pickFasterFixesPlan(team, projects);
-  const userback = pickUserbackPlan(team);
+  const userback = pickUserbackPlan(team, projects);
   const hostedSavings = formatSavings(userback, fasterFixesHosted);
   const selfHostedSavings =
     userback.annual !== null
@@ -161,13 +183,14 @@ export function UserbackPricingCalculator() {
       </div>
 
       <p className="mt-6 text-xs text-muted-foreground">
-        Calculation uses Userback Business at $19/seat/month, the closest
-        equivalent to FasterFixes for structured bug reporting. The cheaper Team
-        tier ($9/seat) omits console logs, network capture, video, and surveys.
-        Annual savings are calculated against Userback monthly billing; annual
-        billing brings Business to $15/seat. The Feature Portal add-on
-        (+$39/month) is not included above. Check userback.io/pricing for
-        current rates.
+        Calculation uses Userback Business, the closest equivalent to
+        FasterFixes for structured bug reporting: $119/month for 15 seats and 25
+        sites, plus $9/month per extra seat. Above 25 projects it uses Business
+        Plus: $199/month for 25 seats and 50 sites. The cheaper Team plan
+        ($49/month for 5 seats) omits console logs, network capture, session
+        replay, and surveys. Annual savings are calculated against Userback
+        monthly billing; annual billing brings Business to $89/month and extra
+        seats to $7/month. Check userback.io/pricing for current rates.
       </p>
     </div>
   );

@@ -1,7 +1,10 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -81,14 +84,17 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Session replay",
-    cells: [{ type: "no" }, { type: "partial", note: "Team plan and above" }],
-  },
-  {
     label: "Video review (uploaded videos)",
     cells: [
       { type: "yes", note: "Timestamped · area on the frame" },
       { type: "no" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "yes", note: "Last 3 min before each report · Team+" },
     ],
   },
   {
@@ -110,7 +116,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Linear two-way sync",
     cells: [
       { type: "yes", note: "Bidirectional · workflow-state aware" },
-      { type: "yes", note: "Team plan and above" },
+      { type: "yes", note: "All plans" },
     ],
   },
   {
@@ -144,7 +150,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: "1 project · 50 items · forever" },
+      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
       { type: "partial", note: "15-day trial · no permanent free plan" },
     ],
   },
@@ -241,7 +247,7 @@ export function MarkerIoComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated May 12, 2026.
+          vendor&apos;s website. Last updated Nov 12, 2026.
         </p>
       </div>
     </section>

@@ -4,8 +4,8 @@ const rows = [
     value: "$90/mo = $1,080/year",
   },
   {
-    label: "Ruttl Business (5 people)",
-    value: "$450/mo = $5,400/year",
+    label: "Ruttl Business",
+    value: "Custom: contact sales",
   },
   {
     label: "FasterFixes Pro (up to 5)",
@@ -31,9 +31,9 @@ export function RuttlPricingSection() {
             Free if you self-host. Flat rate if you don&apos;t.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Ruttl Pro is $18 per user per month with a 2-seat minimum. Every new
-            teammate adds $18. FasterFixes is flat: one price for up to 5
-            members, or $0 if you self-host.
+            Ruttl Pro is $18 per user per month. Every new teammate adds $18.
+            FasterFixes is flat: one price for up to 5 members, or $0 if you
+            self-host.
           </p>
         </div>
 

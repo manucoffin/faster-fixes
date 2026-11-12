@@ -8,6 +8,7 @@ import {
   expectLabelsEverywhere,
   LABEL_OVERRIDES,
   PIN_LABEL_PREFIX,
+  RECORDING_LABEL_PREFIX,
 } from "./widget-labels";
 
 const HOME = `${VUE_EXAMPLE_ORIGIN}/`;
@@ -91,16 +92,18 @@ test.describe("Vue Embed", () => {
   }) => {
     await stubWidgetApi(page, { config: { enabled: true, branding: true } });
     await page.addInitScript(
-      ([labels, pinPrefix]) => {
+      ([labels, pinPrefix, recordingPrefix]) => {
         const options: Partial<WidgetOptions> = {
           labels: {
             ...labels,
             pinAriaLabel: (excerpt: string) => `${pinPrefix}${excerpt}`,
+            recordingIncluded: (seconds: number) =>
+              `${recordingPrefix}${seconds}`,
           },
         };
         Object.assign(window, { __ffE2eOptions: options });
       },
-      [LABEL_OVERRIDES, PIN_LABEL_PREFIX] as const,
+      [LABEL_OVERRIDES, PIN_LABEL_PREFIX, RECORDING_LABEL_PREFIX] as const,
     );
     // The example stays free of test hooks: its entry, as the dev server serves
     // it, is patched to merge the options above into the plugin's options.

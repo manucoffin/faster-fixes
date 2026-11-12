@@ -15,7 +15,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "$0 self-hosted / $20/mo Pro (up to 5 members)",
-      "$79/mo Pro / Enterprise custom",
+      "$79/mo Pro / $499/mo Business / Enterprise custom",
     ],
   },
   {
@@ -29,7 +29,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Integrations (GitHub, Linear, Jira)",
     cells: [
       { type: "yes", note: "GitHub, Linear, Jira included from $20/mo" },
-      { type: "no", note: "Enterprise-only" },
+      { type: "no", note: "No native sync · Slack and Zapier only" },
     ],
   },
   {
@@ -66,6 +66,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [
       { type: "yes", note: "Timestamped · area on the frame" },
       { type: "yes", note: "Timestamped comments" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "no" },
     ],
   },
   {

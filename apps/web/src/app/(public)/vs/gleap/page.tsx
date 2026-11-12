@@ -18,7 +18,7 @@ const title = "Gleap Alternative: Open-Source, Self-Hosted, No Per-Seat Fee";
 const description =
   "FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $20/mo pricing.";
 const datePublished = "2026-05-03T00:00:00.000Z";
-const dateModified = "2026-05-03T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

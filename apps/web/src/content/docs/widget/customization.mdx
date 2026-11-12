@@ -87,31 +87,32 @@ window.FasterFixes.init({
 
 ### Available `labels` keys
 
-| Key                   | Default                                   | Used for                                                                      |
-| --------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `submitButton`        | `"Submit"`                                | Submit button of the comment popover                                          |
-| `cancelButton`        | `"Cancel"`                                | Cancel button of the comment popover                                          |
-| `textareaPlaceholder` | `"Describe the issue..."`                 | Placeholder of the comment field                                              |
-| `retryButton`         | `"Retry"`                                 | Retry button after a failed submission                                        |
-| `errorMessage`        | `"Something went wrong"`                  | Message after a failed submission                                             |
-| `deleteConfirm`       | `"Delete this feedback?"`                 | Confirmation before deleting a Feedback                                       |
-| `deleteButton`        | `"Delete"`                                | Delete action on a pin                                                        |
-| `editButton`          | `"Edit"`                                  | Edit action on a pin                                                          |
-| `saveButton`          | `"Save"`                                  | Save action when editing a Feedback                                           |
-| `showResolved`        | `"Show resolved"`                         | Feedback list filter                                                          |
-| `hideResolved`        | `"Hide resolved"`                         | Feedback list filter                                                          |
-| `feedbackListTitle`   | `"Feedback"`                              | Title of the Feedback list                                                    |
-| `emptyList`           | `"No feedback on this page"`              | Feedback list with no items                                                   |
-| `closeButton`         | `"Close"`                                 | Accessible name of the pin popover close control                              |
-| `startFeedback`       | `"Start feedback"`                        | Accessible name of the floating button                                        |
-| `exitFeedbackMode`    | `"Exit feedback mode"`                    | Accessible name of the exit control                                           |
-| `showFeedbackList`    | `"Show feedback list"`                    | Accessible name of the list control, list closed                              |
-| `hideFeedbackList`    | `"Hide feedback list"`                    | Accessible name of the list control, list open                                |
-| `showMarkers`         | `"Show markers"`                          | Accessible name of the pins control, pins hidden                              |
-| `hideMarkers`         | `"Hide markers"`                          | Accessible name of the pins control, pins shown                               |
-| `brandingLink`        | `"Powered by FasterFixes"`                | Branding link, when the Project shows branding                                |
-| `pinAriaLabel`        | `` (comment) => `Feedback: ${comment}` `` | Accessible name of a pin. A function that receives an excerpt of the comment. |
-| `successMessage`      | `"Feedback sent"`                         | Not displayed. Kept so existing `labels` objects remain valid.                |
+| Key                   | Default                                                                           | Used for                                                                                                       |
+| --------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `submitButton`        | `"Submit"`                                                                        | Submit button of the comment popover                                                                           |
+| `cancelButton`        | `"Cancel"`                                                                        | Cancel button of the comment popover                                                                           |
+| `textareaPlaceholder` | `"Describe the issue..."`                                                         | Placeholder of the comment field                                                                               |
+| `retryButton`         | `"Retry"`                                                                         | Retry button after a failed submission                                                                         |
+| `errorMessage`        | `"Something went wrong"`                                                          | Message after a failed submission                                                                              |
+| `deleteConfirm`       | `"Delete this feedback?"`                                                         | Confirmation before deleting a Feedback                                                                        |
+| `deleteButton`        | `"Delete"`                                                                        | Delete action on a pin                                                                                         |
+| `editButton`          | `"Edit"`                                                                          | Edit action on a pin                                                                                           |
+| `saveButton`          | `"Save"`                                                                          | Save action when editing a Feedback                                                                            |
+| `showResolved`        | `"Show resolved"`                                                                 | Feedback list filter                                                                                           |
+| `hideResolved`        | `"Hide resolved"`                                                                 | Feedback list filter                                                                                           |
+| `feedbackListTitle`   | `"Feedback"`                                                                      | Title of the Feedback list                                                                                     |
+| `emptyList`           | `"No feedback on this page"`                                                      | Feedback list with no items                                                                                    |
+| `closeButton`         | `"Close"`                                                                         | Accessible name of the pin popover close control                                                               |
+| `startFeedback`       | `"Start feedback"`                                                                | Accessible name of the floating button                                                                         |
+| `exitFeedbackMode`    | `"Exit feedback mode"`                                                            | Accessible name of the exit control                                                                            |
+| `showFeedbackList`    | `"Show feedback list"`                                                            | Accessible name of the list control, list closed                                                               |
+| `hideFeedbackList`    | `"Hide feedback list"`                                                            | Accessible name of the list control, list open                                                                 |
+| `showMarkers`         | `"Show markers"`                                                                  | Accessible name of the pins control, pins hidden                                                               |
+| `hideMarkers`         | `"Hide markers"`                                                                  | Accessible name of the pins control, pins shown                                                                |
+| `brandingLink`        | `"Powered by FasterFixes"`                                                        | Branding link, when the Project shows branding                                                                 |
+| `pinAriaLabel`        | `` (comment) => `Feedback: ${comment}` ``                                         | Accessible name of a pin. A function that receives an excerpt of the comment.                                  |
+| `recordingIncluded`   | `"Includes the last minute on this page."`, or the real duration below 30 seconds | Muted line of the comment form when a Recording is attached. A function that receives its duration in seconds. |
+| `successMessage`      | `"Feedback sent"`                                                                 | Not displayed. Kept so existing `labels` objects remain valid.                                                 |
 
 ## Color
 

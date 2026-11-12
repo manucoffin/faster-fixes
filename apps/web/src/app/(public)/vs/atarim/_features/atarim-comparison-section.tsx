@@ -1,7 +1,10 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -23,21 +26,21 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "Flat per-workspace · free, $20/mo, $99/mo",
-      "Per seat · Pro $25/yr or $29/mo · Business $35/yr or $42/mo",
+      "Flat per workspace · free, Pro $67/mo or $53.60/mo billed yearly, Enterprise custom · AI credits on top",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       "$0 self-host · $20/mo hosted Pro",
-      "$125/mo Pro (billed yearly) · $1,500/year",
+      "$67/mo Pro · $643.20/year billed yearly",
     ],
   },
   {
     label: "MCP / AI agent integration",
     cells: [
-      { type: "yes", note: "Claude Code, Cursor, Codex" },
-      { type: "no" },
+      { type: "yes", note: "Feedback context · Claude Code, Cursor, Codex" },
+      { type: "yes", note: "Tasks, sites, workflows · Claude, Codex" },
     ],
   },
   {
@@ -82,13 +85,16 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Session replay",
-    cells: [{ type: "no" }, { type: "no" }],
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "no" },
+    ],
   },
   {
     label: "Whitelabel / custom branding",
     cells: [
       { type: "partial", note: "Roadmap" },
-      { type: "yes", note: "Enterprise only" },
+      { type: "yes", note: "Your brand on the client dashboard · Pro" },
     ],
   },
   {
@@ -130,8 +136,8 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: "1 project · 50 items · forever" },
-      { type: "yes", note: "1 seat · 2 projects · 200 AI credits/mo" },
+      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      { type: "yes", note: "1 project · 200 AI credits, one time" },
     ],
   },
   {
@@ -231,7 +237,7 @@ export function AtarimComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated May 12, 2026.
+          vendor&apos;s website. Last updated Nov 12, 2026.
         </p>
       </div>
     </section>

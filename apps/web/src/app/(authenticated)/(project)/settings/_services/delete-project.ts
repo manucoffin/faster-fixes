@@ -27,12 +27,15 @@ export async function deleteProject(
     throw new ForbiddenError("Access denied.");
   }
 
-  // The cascades only null each Asset reference, so the screenshots and the
-  // Videos' file and Poster Assets are collected first and freed once the
-  // Project is gone.
-  const screenshots = await db.feedback.findMany({
-    where: { projectId, screenshotId: { not: null } },
-    select: { screenshotId: true },
+  // The cascades only null each Asset reference, so the screenshots, the
+  // Recordings and the Videos' file and Poster Assets are collected first and
+  // freed once the Project is gone.
+  const feedbackAssets = await db.feedback.findMany({
+    where: {
+      projectId,
+      OR: [{ screenshotId: { not: null } }, { recordingId: { not: null } }],
+    },
+    select: { screenshotId: true, recordingId: true },
   });
   const videos = await db.video.findMany({
     where: { projectId },
@@ -43,7 +46,10 @@ export async function deleteProject(
 
   await deleteAssets(
     [
-      ...screenshots.map(({ screenshotId }) => screenshotId),
+      ...feedbackAssets.flatMap(({ screenshotId, recordingId }) => [
+        screenshotId,
+        recordingId,
+      ]),
       ...videos.flatMap(({ fileAssetId, posterAssetId }) => [
         fileAssetId,
         posterAssetId,

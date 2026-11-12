@@ -9,7 +9,7 @@
     },
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"],
+      "outputs": [".next/**", "!.next/cache/**", "public/recording-player/**"],
       "env": [
         "DOMAIN_NAME",
         "DATABASE_URL",

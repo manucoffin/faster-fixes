@@ -3,7 +3,8 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "@/server/errors/domain-errors";
-import { describe, expect, it, vi } from "vitest";
+import { deleteAsset } from "@/server/storage/delete-asset";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { deleteFeedback } from "./delete-feedback";
 
 vi.mock("@/server/storage/delete-asset", () => ({
@@ -15,6 +16,7 @@ type FakeDb = NonNullable<Parameters<typeof deleteFeedback>[1]>;
 type FakeFeedback = {
   status: string;
   screenshotId: string | null;
+  recordingId: string | null;
   project: { organizationId: string };
 };
 
@@ -34,12 +36,17 @@ function fakeDb(
 const archived: FakeFeedback = {
   status: "closed",
   screenshotId: null,
+  recordingId: null,
   project: { organizationId: "org_1" },
 };
 
 const input = { feedbackId: "feedback_1", userId: "user_1" };
 
 describe("deleteFeedback", () => {
+  beforeEach(() => {
+    vi.mocked(deleteAsset).mockClear();
+  });
+
   it("reports an unknown feedback as not found", async () => {
     await expect(deleteFeedback(input, fakeDb(null, null))).rejects.toThrow(
       new NotFoundError("Feedback not found."),
@@ -69,5 +76,17 @@ describe("deleteFeedback", () => {
     expect(db.feedback.delete).toHaveBeenCalledWith({
       where: { id: "feedback_1" },
     });
+  });
+
+  it("frees the screenshot and the Recording of the feedback", async () => {
+    const db = fakeDb(
+      { ...archived, screenshotId: "asset_1", recordingId: "recording_1" },
+      { id: "member_1" },
+    );
+
+    await deleteFeedback(input, db);
+
+    expect(deleteAsset).toHaveBeenCalledWith("asset_1");
+    expect(deleteAsset).toHaveBeenCalledWith("recording_1");
   });
 });

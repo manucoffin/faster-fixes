@@ -3,6 +3,16 @@ title: Upgrading
 description: Upgrade the widget packages to a new major version.
 ---
 
+<Callout title="Recording is on by default">
+  The minor release that brings Recording turns it on for every site that
+  installs it, with no code change. Each page Feedback carries a reconstruction
+  of the last minute on the page: its content as it changed, and the Reviewer's
+  clicks, scrolling and pointer, without the values typed into form fields. To
+  turn it off, pass `captureRecording: false`, or set
+  `data-capture-recording="false"` on the script tag. See
+  [Recording](/docs/widget/recording).
+</Callout>
+
 ## Upgrade with an agent
 
 Paste this prompt into Claude Code, Codex, Cursor or any coding agent that runs in your project:

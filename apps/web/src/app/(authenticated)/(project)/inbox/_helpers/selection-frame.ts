@@ -1,6 +1,8 @@
 import type { SelectionGeometry } from "@fasterfixes/core";
 
 export type SelectionFrame = {
+  /** Width over height of the viewport the Selection was made in. */
+  aspectRatio: number;
   element: { left: number; top: number; width: number; height: number };
   click: { x: number; y: number };
 };
@@ -81,6 +83,7 @@ export function getSelectionFrame(
   const visibleBottom = Math.min(bottom, viewport.height);
 
   return {
+    aspectRatio: viewport.width / viewport.height,
     element: {
       left: toPercent(left, viewport.width),
       top: toPercent(top, viewport.height),

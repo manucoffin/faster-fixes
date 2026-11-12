@@ -14,6 +14,12 @@ export type ListFeedbacksQueryInput = z.infer<typeof ListFeedbacksQuerySchema>;
 // `format` carries a default, so a caller may omit it.
 export type ListFeedbacksQueryValues = z.input<typeof ListFeedbacksQuerySchema>;
 
+export const GetFeedbackQuerySchema = z.object({
+  format: z.enum(["json", "markdown"]).default("json"),
+});
+
+export type GetFeedbackQueryInput = z.infer<typeof GetFeedbackQuerySchema>;
+
 export const ListVideosQuerySchema = z.object({
   project: z.string().min(1),
 });

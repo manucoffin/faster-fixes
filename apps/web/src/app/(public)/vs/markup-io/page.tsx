@@ -24,7 +24,7 @@ const title = `Markup.io Alternative: Open-Source & Developer-First | ${SITE_NAM
 const description =
   "Markup.io raised prices 172% and killed its free plan. FasterFixes is open-source, self-hostable, $20/mo: feedback flows to Claude Code, Cursor, Linear, and Jira.";
 const datePublished = "2026-05-12T00:00:00.000Z";
-const dateModified = "2026-05-12T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

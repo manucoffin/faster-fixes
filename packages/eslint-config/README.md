@@ -111,7 +111,7 @@ a disable comment.
 Twelve rules take options from `next.js`: the eleven the table's last column names, and
 `test-file-placement`, whose one option is inline. Nine of them take options of their own: `require-schema-conventions`
 (`requirePascalCaseSchema`, `requireSingularInput`), `no-raw-tailwind-colors`
-(`allowPatterns`, `ignorePathPatterns` for the five home page illustrations),
+(`allowPatterns`, `ignorePathPatterns` for the six home page illustrations),
 `no-client-import-of-server-folder` (`allowImportPatterns`, the sanctioned
 client imports of the server folder, empty today), `services-verb-prefix`
 (`readVerbs`, `writeVerbs`, `exemptSuffixes`, the service naming vocabulary),
@@ -181,27 +181,29 @@ reaches a runtime, where a type import is erased and so does not cross the
 boundary. Patterns are regular expressions over the posix path or the
 specifier, as in every other rule here.
 
-The nine rows today fall into two halves. Six scope themselves to one bucket
+The ten rows today fall into two halves. Six scope themselves to one bucket
 and say what that bucket is for: a domain barrel exports capabilities and not
 services or routers (a type-only re-export of a service's output type stays
 free); a tRPC router does not import Prisma; a helper imports neither the
 database, nor Next.js, nor React; a service does not reach for the request or
 the response itself; root `_components/`, `_providers/` and `_constants/` do
 not import a domain; and `src/lib/` and `src/utils/` do not import the app
-tree. Three watch the whole source tree for a specifier that belongs to one
+tree. Four watch the whole source tree for a specifier that belongs to one
 layer only: `TRPCError` is confined to routers and `src/server/trpc/`; runtime
-database imports are confined to `_services/` and `src/server/`; and the
+database imports are confined to `_services/` and `src/server/`; the
 database package is reached through `@workspace/db`, `@workspace/db/types` and
 `@workspace/db/generated/prisma/enums`, which closes the deep-import leak
-ADR-0013 records.
+ADR-0013 records; and `@rrweb/replay` is confined to the player document's
+script, so no page of the app loads the replayer (ADR-0023).
 
-Two rows carry a named path exemption rather than a specifier allowlist,
+Three rows carry a named path exemption rather than a specifier allowlist,
 because the exception is a whole file and not an import. The helper row spares
 the three scope-local API error mappers and the two `NextRequest` test-double
 modules: purity is about IO, and `NextResponse.json(…)` is a value
 constructor. The service row spares
 `api/v1/agent/_services/require-agent-auth.ts`, the one sanctioned exception to
-transport agnosticism the backend standard records.
+transport agnosticism the backend standard records. The replayer row spares
+the player document's script, which is its one importer.
 
 `require-inngest-function-placement` and `no-client-domain-error-instanceof`
 are the two conventions of the same lot that are not import-shaped, so neither

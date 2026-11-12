@@ -8,8 +8,19 @@ import { z } from "zod";
 // The name strings are the running system's identity: never rename one.
 
 export const feedbackCreatedEvent = eventType("feedback/created", {
-  schema: z.object({ feedbackId: z.string() }),
+  schema: z.object({
+    feedbackId: z.string(),
+    // Set when the Widget declared at creation that a Recording upload follows.
+    recordingFollows: z.literal(true).optional(),
+  }),
 });
+
+// Emitted once a Recording uploaded after creation is linked to its Feedback,
+// so a function holding back an Issue or an announcement can go on.
+export const feedbackRecordingAttachedEvent = eventType(
+  "feedback/recording-attached",
+  { schema: z.object({ feedbackId: z.string() }) },
+);
 
 export const feedbackIntegrationIssueRequestedEvent = eventType(
   "feedback/integration-issue-requested",

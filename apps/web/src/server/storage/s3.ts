@@ -74,6 +74,18 @@ export class S3Storage implements StorageBackend {
     };
   }
 
+  async get({ bucket, key }: StorageObject) {
+    const response = await this.uploadClient.s3.fetch(
+      `${this.uploadClient.buildBucketUrl(bucket)}/${key}`,
+      { method: "GET", aws: { signQuery: true, allHeaders: true } },
+    );
+    if (response.status === 404) return null;
+    if (!response.ok) {
+      throw new Error(`GetObject failed with status ${response.status}.`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
   deleteMany(bucket: string, keys: string[]) {
     return deleteObjects(this.uploadClient, {
       bucket,

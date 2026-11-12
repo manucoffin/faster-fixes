@@ -1,7 +1,7 @@
 const limitations = [
   {
-    title: "Per-seat pricing compounds",
-    body: "Userback charges per seat across every tier. The Business plan, the closest equivalent to FasterFixes, runs $19/seat/month, so a 5-person team pays $95/month, or $1,140/year. FasterFixes Pro is $20/month flat for up to 5 members. Headcount stops being a pricing variable.",
+    title: "Developer context starts at Business",
+    body: "Console logs, network requests, and session replay are not on Userback's Team plan. They start on Business at $119/month ($89 billed annually), or $1,428/year on monthly billing, even for a 5-person team. FasterFixes Pro is $20/month flat for up to 5 members, with console and network capture included.",
   },
   {
     title: "Cloud-only, no data sovereignty",
@@ -9,11 +9,11 @@ const limitations = [
   },
   {
     title: "Not built for developer workflows",
-    body: "Userback captures screenshots, video, and session replay, useful for product managers and end-user feedback. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport automatically. Every feedback item arrives with the structured technical context a developer needs to act immediately.",
+    body: "Userback captures screenshots, video, and session replay, useful for product managers and end-user feedback. FasterFixes captures React component tree, DOM selector, URL, browser, and viewport automatically, and attaches a Recording of the last minute on the page. Every feedback item arrives with the structured technical context a developer needs to act immediately.",
   },
   {
     title: "Built for product teams, not dev agencies",
-    body: "Userback ships a feature portal, NPS/CSAT/CES surveys, user segmentation, and a public roadmap. These are powerful for SaaS product teams collecting end-user feedback at scale. If you are a dev agency delivering client projects, you are paying for a feature set you will not use, and per-seat pricing that grows with every new team member.",
+    body: "Userback ships a feature portal, NPS/CSAT/CES surveys, user segmentation, and a public roadmap. These are powerful for SaaS product teams collecting end-user feedback at scale. If you are a dev agency delivering client projects, you are paying for a feature set you will not use.",
   },
 ];
 

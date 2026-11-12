@@ -1,7 +1,10 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -23,21 +26,21 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "Flat per-workspace · free, $20/mo, $99/mo",
-      "Per seat · Team $9, Business $19, Business Plus $29",
+      "Seat bundles · Team $49 (5 seats), Business $119 (15), Business Plus $199 (25) · extra seats $9/mo",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       "$0 self-host · $20/mo hosted Pro",
-      "$45/mo Team · $95/mo Business · $145/mo Business Plus",
+      "$49/mo Team · $119/mo Business · $199/mo Business Plus",
     ],
   },
   {
     label: "Bring your own AI agent (MCP)",
     cells: [
       { type: "yes", note: "Claude Code, Cursor, Codex · any model" },
-      { type: "yes", note: "Claude, ChatGPT, Cursor" },
+      { type: "yes", note: "Claude, ChatGPT, Cursor · Team+" },
     ],
   },
   {
@@ -71,7 +74,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Screen recording",
-    cells: [{ type: "no" }, { type: "yes", note: "Annotated · Business+" }],
+    cells: [{ type: "no" }, { type: "yes", note: "Annotated · all plans" }],
   },
   {
     label: "Video review (uploaded videos)",
@@ -82,7 +85,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Session replay",
-    cells: [{ type: "no" }, { type: "yes", note: "Business+" }],
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "yes", note: "Last 3 min before each report · Business+" },
+    ],
   },
   {
     label: "NPS / microsurveys",
@@ -90,7 +96,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Feature request portal",
-    cells: [{ type: "no" }, { type: "yes", note: "Add-on, +$39/mo" }],
+    cells: [
+      { type: "no" },
+      { type: "yes", note: "Team add-on · included on Business+" },
+    ],
   },
   {
     label: "Team kanban board",
@@ -128,14 +137,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "SSO",
     cells: [
       { type: "partial", note: "Roadmap" },
-      { type: "partial", note: "Business Plus, min 25 seats" },
+      { type: "partial", note: "Enterprise, custom pricing" },
     ],
   },
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: "1 project · 50 items · forever" },
-      { type: "yes", note: "2 seats · 2 projects · 7-day history" },
+      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      { type: "yes", note: "2 seats · 2 sites · 7-day history" },
     ],
   },
 ];
@@ -231,7 +240,7 @@ export function UserbackComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated May 12, 2026.
+          vendor&apos;s website. Last updated Nov 12, 2026.
         </p>
       </div>
     </section>

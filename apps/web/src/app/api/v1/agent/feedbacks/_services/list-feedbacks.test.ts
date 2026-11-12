@@ -118,6 +118,7 @@ describe("listFeedbacks", () => {
         customMetadata: { userId: "user_42", beta: true },
         reviewerName: "Dana",
         createdAt: new Date("2026-01-02T03:04:05.000Z"),
+        recording: null,
         videoTitle: null,
       },
     ]);

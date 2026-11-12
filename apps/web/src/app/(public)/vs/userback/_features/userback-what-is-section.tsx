@@ -18,17 +18,19 @@ export function UserbackWhatIsSection() {
           </p>
           <p>
             The platform layers in NPS, CSAT, and CES microsurveys, AI-driven
-            sentiment analysis on the Business and Business Plus tiers, and a
-            public Feature Portal add-on for collecting and prioritizing feature
-            requests. Integrations cover Jira, ClickUp (with two-way sync), and
-            Zapier, with a JavaScript SDK and mobile SDK on paid plans.
+            sentiment analysis on the Business and Business Plus plans, and a
+            public Feature Portal for collecting and prioritizing feature
+            requests, an add-on on Team and included from Business. Integrations
+            cover Jira, ClickUp (with two-way sync), and Zapier, with a
+            JavaScript SDK from Business and a mobile SDK on Business Plus.
           </p>
           <p>
             Userback is closed-source and cloud-only. There is no self-hosted
-            option, and pricing is per-seat across every tier (Team $9, Business
-            $19, Business Plus $29 monthly). It is built primarily for SaaS
-            product teams collecting end-user feedback at scale, not for
-            developer teams running structured bug-fix workflows.
+            option, and plans include a fixed number of seats (Team $49/month
+            for 5, Business $119/month for 15, Business Plus $199/month for 25,
+            monthly billing). It is built primarily for SaaS product teams
+            collecting end-user feedback at scale, not for developer teams
+            running structured bug-fix workflows.
           </p>
         </div>
       </div>

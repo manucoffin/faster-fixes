@@ -28,6 +28,11 @@ vi.mock("@workspace/db", async () => {
 
 vi.mock("@/server/storage", () => ({ s3Client: {} }));
 
+const deleteAssetDouble = vi.fn();
+vi.mock("@/server/storage/delete-asset", () => ({
+  deleteAsset: deleteAssetDouble,
+}));
+
 const { DELETE, PUT } = await import("./route");
 
 const ROUTE_URL = `https://app.test/api/v1/feedback/${FEEDBACK_ID}`;
@@ -324,6 +329,19 @@ describe("DELETE /api/v1/feedback/:id", () => {
     expect(widgetApiPrisma.feedback.delete).toHaveBeenCalledWith({
       where: { id: FEEDBACK_ID },
     });
+    expect(deleteAssetDouble).not.toHaveBeenCalled();
+  });
+
+  it("frees the screenshot and the Recording of the deleted feedback", async () => {
+    widgetApiPrisma.feedback.delete.mockResolvedValue(
+      feedbackRow({ screenshotId: "asset_1", recordingId: "recording_1" }),
+    );
+
+    const response = await DELETE(deleteRequest(), routeParams);
+
+    expect(response.status).toBe(204);
+    expect(deleteAssetDouble).toHaveBeenCalledWith("asset_1");
+    expect(deleteAssetDouble).toHaveBeenCalledWith("recording_1");
   });
 
   // Any active Reviewer of the Project may delete any of its Feedback: the

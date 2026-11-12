@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { isPlayPauseShortcut } from "./is-play-pause-shortcut";
 
-function fakeTarget(insideSpaceOwner: boolean) {
-  return {
-    closest: () => (insideSpaceOwner ? {} : null),
-  } as unknown as EventTarget;
+function fakeTarget(insideSpaceOwner: boolean | Element) {
+  const owner = insideSpaceOwner === true ? {} : insideSpaceOwner || null;
+  return { closest: () => owner } as unknown as EventTarget;
 }
 
 function keyEvent(
@@ -55,5 +54,20 @@ describe("isPlayPauseShortcut", () => {
     expect(isPlayPauseShortcut(keyEvent({ target: fakeTarget(true) }))).toBe(
       false,
     );
+  });
+
+  it("toggles inside the dialog the player fills, given as its surface", () => {
+    const surface = {} as Element;
+    const event = keyEvent({ target: fakeTarget(surface) });
+    expect(isPlayPauseShortcut(event, { surface })).toBe(true);
+    // Without a surface, that dialog keeps Space, as on the Video page.
+    expect(isPlayPauseShortcut(event)).toBe(false);
+  });
+
+  it("leaves Space to a field, menu or dialog within or over the surface", () => {
+    const surface = {} as Element;
+    expect(
+      isPlayPauseShortcut(keyEvent({ target: fakeTarget(true) }), { surface }),
+    ).toBe(false);
   });
 });

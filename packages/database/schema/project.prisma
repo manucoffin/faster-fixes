@@ -118,6 +118,21 @@ model Feedback {
   screenshotId String?
   screenshot   Asset?  @relation("FeedbackScreenshot", fields: [screenshotId], references: [id], onDelete: SetNull)
 
+  // Recording: a gzip file of the page's last moments before the Selection,
+  // attached once after creation by the Widget (ADR-0021). The duration and
+  // the replay format version are the ones the Widget declared at upload.
+  // Never selected on the widget read path.
+  recordingId            String?
+  recording              Asset?  @relation("FeedbackRecording", fields: [recordingId], references: [id], onDelete: SetNull)
+  recordingDurationMs    Int?
+  recordingFormatVersion Int?
+  // The steps derived from the Recording file, `{ startedAt, endedAt, steps }`,
+  // and the derivation version that produced them. Filled by the first read of
+  // the single Feedback, derived again when the version is older. Removing the
+  // Recording must clear both.
+  recordingSteps         Json?
+  recordingStepsVersion  Int?
+
   assigneeId String?
   assignee   Member? @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
 

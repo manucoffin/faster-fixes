@@ -36,8 +36,8 @@ export async function deleteFeedback(
     throw new ForbiddenError("Access denied.");
   }
 
-  if (feedback.screenshotId) {
-    await deleteAsset(feedback.screenshotId);
+  for (const assetId of [feedback.screenshotId, feedback.recordingId]) {
+    if (assetId) await deleteAsset(assetId);
   }
 
   await db.feedback.delete({ where: { id: feedbackId } });

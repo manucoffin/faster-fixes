@@ -17,7 +17,7 @@ describe("resolveLabels", () => {
   });
 
   it("resolves every text key to a string", () => {
-    const { pinAriaLabel, ...textLabels } = resolveLabels({
+    const { pinAriaLabel, recordingIncluded, ...textLabels } = resolveLabels({
       emptyList: "Aucun retour",
     });
 
@@ -25,6 +25,20 @@ describe("resolveLabels", () => {
       expect(typeof value).toBe("string");
     }
     expect(pinAriaLabel("Broken link")).toBe("Feedback: Broken link");
+    expect(recordingIncluded(3)).toBe(
+      "Includes the last 3 seconds on this page.",
+    );
+  });
+
+  it("uses an overridden Recording line", () => {
+    const labels = resolveLabels({
+      recordingIncluded: (seconds) =>
+        `Inclut les ${seconds} dernières secondes.`,
+    });
+
+    expect(labels.recordingIncluded(12)).toBe(
+      "Inclut les 12 dernières secondes.",
+    );
   });
 
   it("uses an overridden pin aria-label pattern", () => {

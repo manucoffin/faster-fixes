@@ -23,6 +23,7 @@ import type { StorageBackend, StorageObject } from "./types";
 
 // Local disk keeps no content type, so it is read back from the key.
 const contentTypesByExtension: Record<string, string> = {
+  gz: "application/gzip",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
   mov: "video/quicktime",
@@ -38,6 +39,10 @@ function getLocalObjectPath(root: string, bucket: string, key: string) {
     throw new BadRequestError("Invalid storage path.");
   }
   return join(root, bucket, key);
+}
+
+function isMissingFileError(error: unknown) {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
 
 export class LocalStorage implements StorageBackend {
@@ -127,13 +132,16 @@ export class LocalStorage implements StorageBackend {
       const extension = object.key.split(".").at(-1) ?? "";
       return { size, contentType: contentTypesByExtension[extension] ?? "" };
     } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
-        return null;
-      }
+      if (isMissingFileError(error)) return null;
+      throw error;
+    }
+  }
+
+  async get(object: StorageObject) {
+    try {
+      return await this.read(object.bucket, object.key);
+    } catch (error) {
+      if (isMissingFileError(error)) return null;
       throw error;
     }
   }

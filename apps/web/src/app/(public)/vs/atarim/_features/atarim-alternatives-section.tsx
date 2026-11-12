@@ -40,14 +40,14 @@ const alternatives: Alternative[] = [
     name: "Usersnap",
     bestFor:
       "SaaS product teams collecting end-user feedback, NPS, and microsurveys",
-    startingPrice: "$49/mo",
+    startingPrice: "$59/mo",
     openSource: { type: "no" },
     href: "/vs/usersnap" as Route,
   },
   {
     name: "Userback",
     bestFor: "Product teams needing session replay, NPS, and feature portals",
-    startingPrice: "$19/seat/mo",
+    startingPrice: "$39/mo",
     openSource: { type: "no" },
     href: "/vs/userback" as Route,
   },

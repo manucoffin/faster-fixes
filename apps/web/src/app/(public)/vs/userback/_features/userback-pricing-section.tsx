@@ -31,9 +31,9 @@ const cards: {
   {
     vendor: "Userback · Business",
     plan: "Cloud-only, closed source",
-    price: "$95",
-    suffix: "/ month for 5 seats",
-    note: "Per-seat pricing at $19/seat/month ($15 billed annually). Includes session replay, AI Feedback & Insights, and surveys. Team tier exists at $9/seat without these features. Feature Portal add-on is +$39/month.",
+    price: "$119",
+    suffix: "/ month for up to 15 seats",
+    note: "$89/month billed annually. Extra seats are $9/month each ($7 billed annually). Includes session replay, console and network capture, AI Feedback & Insights, surveys, and the Feature Portal. The Team plan is $49/month for 5 seats without these features.",
   },
 ];
 
@@ -52,10 +52,12 @@ export function UserbackPricingSection() {
             FasterFixes is open source. The lowest plan in any honest comparison
             is &quot;free, forever, on your own server.&quot; If you would
             rather not run it yourself, the hosted plans are flat-rate, not
-            tiered by team size. Userback is per-seat across every tier: Team
-            $9, Business $19, Business Plus $29 (monthly billing). The Business
-            plan is the closest equivalent to FasterFixes for structured bug
-            reporting; a 5-person team pays $95/month, $1,140/year.
+            tiered by team size. Userback sells plans with a fixed number of
+            seats: Team $49/month for 5, Business $119/month for 15, Business
+            Plus $199/month for 25 (monthly billing), with extra seats at
+            $9/month on Business and above. The Business plan is the closest
+            equivalent to FasterFixes for structured bug reporting: $1,428/year
+            on monthly billing, $1,068/year billed annually.
           </p>
         </div>
 

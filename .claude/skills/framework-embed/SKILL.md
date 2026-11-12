@@ -103,4 +103,4 @@ Use the `release` skill: `@fasterfixes/<fw>: major`, which releases 0.0.0 as 1.0
 
 ## Finish
 
-`sh .husky/pre-commit`, `pnpm lint` and `pnpm format:check` green. Commit one concern per step with the `commit` skill.
+`pnpm lint` and `pnpm format:check` green. Commit one concern per step with the `commit` skill; each commit runs the pre-commit hook.

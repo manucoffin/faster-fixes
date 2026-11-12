@@ -1,4 +1,6 @@
+import { mergeRecordingTimeline } from "@/app/_domains/feedback";
 import { describe, expect, it } from "vitest";
+import { formatIssueBody } from "../github/format-issue-body";
 import { type FeedbackForJiraIssue, formatIssueAdf } from "./format-issue-adf";
 
 const feedback: FeedbackForJiraIssue = {
@@ -241,5 +243,286 @@ describe("formatIssueAdf for a video Feedback", () => {
     expect(json).not.toContain("Element: ");
     expect(json).not.toContain("/review/");
     expect(json).not.toContain("/inbox");
+  });
+});
+
+describe("formatIssueAdf with a Recording", () => {
+  const SELECTION_AT = 1_794_400_060_000;
+  const steps = [
+    {
+      type: "click" as const,
+      timestamp: SELECTION_AT - 12_400,
+      offsetMs: -12_400,
+      label: 'button "Save changes"',
+      selector: "form.settings > button.primary",
+      detail: null,
+    },
+    {
+      type: "selection" as const,
+      timestamp: SELECTION_AT,
+      offsetMs: 0,
+      label: 'button "Save changes"',
+      selector: "#save",
+      detail: null,
+    },
+  ];
+  const withTrail: FeedbackForJiraIssue = {
+    ...feedback,
+    screenshotUrl: "https://cdn.example.com/shot.png",
+    diagnosticTrail: {
+      console: [
+        {
+          level: "error",
+          message: "Save failed",
+          timestamp: SELECTION_AT - 11_000,
+        },
+      ],
+      network: [
+        {
+          method: "POST",
+          url: "https://example.com/api/settings",
+          status: 500,
+          duration: 120,
+          timestamp: SELECTION_AT - 12_000,
+        },
+      ],
+    },
+  };
+  const playerUrl = "https://app.example.com/inbox?feedbackId=fb_1&player=true";
+  const recording = {
+    playerUrl,
+    durationMs: 48_300,
+    timeline: mergeRecordingTimeline({
+      steps,
+      diagnosticTrail: withTrail.diagnosticTrail,
+    }),
+  };
+
+  const recordingParagraph = (duration: string) => ({
+    type: "paragraph",
+    content: [
+      { type: "text", text: "Recording: ", marks: [{ type: "strong" }] },
+      {
+        type: "text",
+        text: "Play in Faster Fixes",
+        marks: [{ type: "link", attrs: { href: playerUrl } }],
+      },
+      { type: "text", text: ` · ${duration}` },
+    ],
+  });
+
+  const item = (...content: unknown[]) => ({
+    type: "listItem",
+    content: [{ type: "paragraph", content }],
+  });
+
+  // First words of each top-level node, to compare section order.
+  const sections = (doc: ReturnType<typeof formatIssueAdf>) =>
+    doc.content.map((node) => {
+      if (node.type === "expand") return node.attrs.title.split(" ")[0] ?? "";
+      if (node.type === "blockquote") return "Comment";
+      const first = node.type === "paragraph" ? node.content?.[0] : undefined;
+      return first?.type === "text" ? first.text.replace(/: $/, "") : "";
+    });
+
+  it("puts the Recording paragraph after Element and the Timeline in place of Diagnostics", () => {
+    const doc = formatIssueAdf({ ...withTrail, recording });
+
+    expect(sections(doc)).toEqual([
+      "Comment",
+      "Page",
+      "Element",
+      "Recording",
+      "Screenshot",
+      "Environment",
+      "Timeline",
+      "Faster Fixes",
+    ]);
+    expect(doc.content[3]).toEqual(recordingParagraph("48 s"));
+    expect(doc.content[6]).toEqual({
+      type: "expand",
+      attrs: { title: "Timeline (2 steps, 1 console, 1 network)" },
+      content: [
+        {
+          type: "bulletList",
+          content: [
+            item(
+              { type: "text", text: "-12.4 s  " },
+              {
+                type: "text",
+                text: 'click button "Save changes" (form.settings > button.primary)',
+              },
+            ),
+            item(
+              { type: "text", text: "-12.0 s  " },
+              { type: "text", text: "POST", marks: [{ type: "code" }] },
+              {
+                type: "text",
+                text: " https://example.com/api/settings → 500 (120ms)",
+              },
+            ),
+            item(
+              { type: "text", text: "-11.0 s  " },
+              { type: "text", text: "error", marks: [{ type: "code" }] },
+              { type: "text", text: " Save failed" },
+            ),
+            item(
+              { type: "text", text: "0.0 s  " },
+              {
+                type: "text",
+                text: 'selection button "Save changes" (#save), the element the comment is about',
+              },
+            ),
+          ],
+        },
+      ],
+    });
+  });
+
+  it("orders its sections as the GitHub body does", () => {
+    const githubSections = formatIssueBody({
+      ...withTrail,
+      id: "fb_1",
+      projectId: "prj_1",
+      recording,
+    })
+      .split("\n")
+      .flatMap((line) => {
+        const label = /^\*\*(\w+):\*\*/.exec(line)?.[1];
+        if (label) return [label];
+        const summary = /^<summary>(\w+)/.exec(line)?.[1];
+        if (summary) return [summary];
+        if (line.startsWith("![Screenshot]")) return ["Screenshot"];
+        return [];
+      });
+
+    expect(
+      sections(formatIssueAdf({ ...withTrail, recording })).filter((section) =>
+        githubSections.includes(section),
+      ),
+    ).toEqual(githubSections);
+  });
+
+  it("prints a sub-second Recording as 1 s", () => {
+    expect(
+      formatIssueAdf({
+        ...feedback,
+        recording: { ...recording, durationMs: 300 },
+      }).content,
+    ).toContainEqual(recordingParagraph("1 s"));
+  });
+
+  it("states the omitted entries before the list", () => {
+    const doc = formatIssueAdf({
+      ...feedback,
+      recording: {
+        ...recording,
+        timeline: { ...recording.timeline, droppedCount: 3 },
+      },
+    });
+    const timeline = doc.content.find(
+      (node) =>
+        node.type === "expand" && node.attrs.title.startsWith("Timeline"),
+    );
+
+    expect(timeline?.type === "expand" && timeline.content[0]).toEqual({
+      type: "paragraph",
+      content: [{ type: "text", text: "3 earlier entries omitted." }],
+    });
+  });
+
+  it("keeps the paragraph and Diagnostics as today when the Recording cannot be read", () => {
+    const today = formatIssueAdf(feedback);
+    const doc = formatIssueAdf({
+      ...feedback,
+      recording: { playerUrl, durationMs: 48_300, timeline: null },
+    });
+
+    expect(doc.content).toEqual([
+      ...today.content.slice(0, 3),
+      recordingParagraph("48 s"),
+      ...today.content.slice(3),
+    ]);
+  });
+
+  it("renders today's document when the Feedback has no Recording", () => {
+    expect(formatIssueAdf({ ...feedback, recording: null })).toEqual(
+      formatIssueAdf(feedback),
+    );
+  });
+
+  it("renders a video Feedback exactly as today", () => {
+    const videoFeedback = { ...feedback, videoId: "vid_1", videoTitle: "Demo" };
+
+    expect(formatIssueAdf({ ...videoFeedback, recording })).toEqual(
+      formatIssueAdf(videoFeedback),
+    );
+  });
+
+  it("keeps a full capped Timeline of typical entries whole", () => {
+    const timeline = mergeRecordingTimeline({
+      steps: [
+        ...Array.from({ length: 59 }, (_, index) => ({
+          ...steps[0]!,
+          timestamp: SELECTION_AT - 60_000 + index * 1_000,
+          offsetMs: -60_000 + index * 1_000,
+        })),
+        steps[1]!,
+      ],
+      diagnosticTrail: {
+        console: Array.from({ length: 30 }, (_, index) => ({
+          level: "error" as const,
+          message:
+            "TypeError: Cannot read properties of undefined (reading 'id')",
+          timestamp: SELECTION_AT - 59_500 + index * 2_000,
+        })),
+        network: Array.from({ length: 30 }, (_, index) => ({
+          method: "GET",
+          url: "https://example.com/api/projects/prj_1/settings?include=members",
+          status: 200,
+          duration: 84,
+          timestamp: SELECTION_AT - 58_500 + index * 2_000,
+        })),
+      },
+      maxEntries: 120,
+    });
+
+    const doc = formatIssueAdf({
+      ...feedback,
+      recording: { ...recording, timeline },
+    });
+
+    expect(JSON.stringify(doc).length).toBeLessThanOrEqual(32_767);
+    expect(expandTitles(doc)).toContain(
+      "Timeline (60 steps, 30 console, 30 network)",
+    );
+  });
+
+  it("drops the earliest entries and says so when the description would pass Jira's limit", () => {
+    const message = "x".repeat(2_000);
+    const timeline = mergeRecordingTimeline({
+      steps,
+      diagnosticTrail: {
+        console: Array.from({ length: 40 }, (_, index) => ({
+          level: "log" as const,
+          message,
+          timestamp: SELECTION_AT - 40_000 + index * 1_000,
+        })),
+        network: [],
+      },
+    });
+
+    const doc = formatIssueAdf({
+      ...feedback,
+      recording: { ...recording, timeline },
+    });
+    const json = JSON.stringify(doc);
+
+    expect(json.length).toBeLessThanOrEqual(32_767);
+    expect(expandTitles(doc)).toContain(
+      "Timeline (2 steps, 14 console, 0 network)",
+    );
+    expect(json).toContain("26 earlier entries omitted.");
+    expect(json).toContain(", the element the comment is about");
   });
 });

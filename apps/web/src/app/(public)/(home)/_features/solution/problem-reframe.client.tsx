@@ -30,8 +30,8 @@ export function ProblemReframe() {
         {...fadeUp}
         transition={{ duration: 0.6, delay: 0.5 }}
       >
-        It connects your coding agent to client feedback via MCP and lets it fix
-        issues for you.
+        Your client points at the problem. You and your coding agent get the
+        technical context to fix it, without asking for details.
       </motion.p>
 
       <motion.p

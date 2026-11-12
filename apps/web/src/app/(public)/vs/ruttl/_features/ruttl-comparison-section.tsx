@@ -15,7 +15,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "$0 self-hosted / $20/mo Pro (up to 5 members)",
-      "$18/user/mo Pro / $90/user/mo Business",
+      "$18/user/mo Pro / custom Business",
     ],
   },
   {
@@ -56,6 +56,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [
       { type: "yes", note: "Timestamped · area on the frame" },
       { type: "yes", note: "Timestamped comments" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "no" },
     ],
   },
   {

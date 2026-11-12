@@ -10,6 +10,7 @@ export type {
   FeedbackListResponse,
   CreateFeedbackData,
   UpdateFeedbackData,
+  RecordingDetails,
   CreateFeedbackResponse,
   UpdateFeedbackResponse,
   ApiErrorResponse,

@@ -31,9 +31,9 @@ const cards: {
   {
     vendor: "Atarim · Pro",
     plan: "Cloud-only, closed source",
-    price: "$125",
-    suffix: "/ month for 5 seats",
-    note: "Per-seat pricing: $25/seat/month billed yearly, $29/seat/month billed monthly. Plan caps at 5 seats; teams larger than 5 move to Business at $35/seat/month yearly ($42 monthly, up to 100 seats). Whitelabel is Enterprise-only.",
+    price: "$67",
+    suffix: "/ month, up to 100 seats",
+    note: "$53.60/month billed yearly ($643.20/year). Includes 1,000 projects, 5,000 AI credits a month, and your brand on the client dashboard. Extra credits cost $6 to $10 per 1,000. Enterprise adds SSO, SAML, and an SLA at custom pricing.",
   },
 ];
 
@@ -49,12 +49,13 @@ export function AtarimPricingSection() {
             Atarim pricing vs FasterFixes: what you actually pay
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Atarim uses per-seat pricing. On the Pro plan (billed yearly), that
-            is $25/seat/month. A 5-person team pays $125/month, or $1,500/year,
-            and hits the 5-seat cap. FasterFixes Pro is $20/month flat for up to
-            5 members, totaling $240/year. The difference: $1,260/year saved,
-            with no seat cap to manage. If you self-host FasterFixes, the cost
-            is $0 forever.
+            Atarim sells one paid plan: Pro at $67/month, or $643.20/year billed
+            yearly, for up to 100 seats, with AI credits included and more sold
+            in packs. FasterFixes Pro is $20/month flat for up to 5 members,
+            totaling $240/year: $403.20/year less than Atarim billed yearly.
+            Larger teams move to FasterFixes Agency at $99/month for unlimited
+            members, which costs more than Atarim Pro. If you self-host
+            FasterFixes, the cost is $0 forever.
           </p>
         </div>
 

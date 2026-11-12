@@ -1,3 +1,7 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+
 export function UsersnapHonestTakeSection() {
   return (
     <section className="w-full border-y bg-muted/30 py-16 md:py-24">
@@ -32,6 +36,12 @@ export function UsersnapHonestTakeSection() {
               </strong>
               : built-in public roadmap and voting for product teams.
               FasterFixes does not support this.
+            </li>
+            <li>
+              <strong className="text-foreground">AI feedback analysis</strong>:
+              topic classification, sentiment analysis, and an AI chat over your
+              feedback, plus an MCP server that brings it into Claude or
+              ChatGPT. Scope varies by plan.
             </li>
             <li>
               <strong className="text-foreground">Browser extension</strong>:
@@ -88,10 +98,11 @@ export function UsersnapHonestTakeSection() {
             </li>
             <li>
               <strong className="text-foreground">Flat pricing</strong>:
-              $20/month for a 5-person team versus $49/month on Usersnap Starter
-              ($39/month billed annually). The free plan covers 1 project, 50
-              feedback items, and 1 member at no cost. Usersnap offers a trial
-              capped at 20 feedback items, not a permanent free tier.
+              $20/month for a 5-person team versus $159/month on Usersnap Growth
+              ($129/month billed annually), since Starter includes 2 seats. The
+              free plan covers 1 project, {freeFeedbackLimit} feedback items,
+              and 1 member at no cost, with no time limit. Usersnap offers a
+              free trial, not a permanent free tier.
             </li>
           </ul>
           <p>

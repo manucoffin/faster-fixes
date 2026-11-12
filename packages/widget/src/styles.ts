@@ -356,6 +356,12 @@ export const WIDGET_CSS = `
     color: #71717a;
   }
 
+  .recording-included {
+    margin: 8px 0 0;
+    color: #71717a;
+    font-size: 12px;
+  }
+
   .actions {
     display: flex;
     justify-content: flex-end;

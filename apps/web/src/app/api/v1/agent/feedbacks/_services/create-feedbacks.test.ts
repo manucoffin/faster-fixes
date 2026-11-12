@@ -1,3 +1,4 @@
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { NotFoundError } from "@/server/errors/domain-errors";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFeedbacks } from "./create-feedbacks";
@@ -9,7 +10,8 @@ const ORGANIZATION_PROJECTS = [{ id: "project_1", publicId: "proj_public_1" }];
 const REVIEWER_ID = "reviewer_1";
 
 /** The Free plan's feedback ceiling, which the fake subscription row resolves to. */
-const FREE_PLAN_FEEDBACK_LIMIT = 50;
+const FREE_PLAN_FEEDBACK_LIMIT =
+  PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 const createdRow = {
   id: "feedback_2",
@@ -103,6 +105,28 @@ describe("createFeedbacks", () => {
       current: FREE_PLAN_FEEDBACK_LIMIT,
       limit: FREE_PLAN_FEEDBACK_LIMIT,
       requested: 1,
+    });
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("refuses a whole batch that would cross the plan limit even with room for part of it", async () => {
+    const db = fakeDb({ feedbackCount: [FREE_PLAN_FEEDBACK_LIMIT - 1] });
+
+    const result = await createFeedbacks(
+      {
+        project: "proj_public_1",
+        organizationId: ORGANIZATION_ID,
+        organizationProjects: ORGANIZATION_PROJECTS,
+        feedbacks: [feedbackItem, feedbackItem],
+      },
+      db,
+    );
+
+    expect(result).toEqual({
+      limitExceeded: true,
+      current: FREE_PLAN_FEEDBACK_LIMIT - 1,
+      limit: FREE_PLAN_FEEDBACK_LIMIT,
+      requested: 2,
     });
     expect(db.$transaction).not.toHaveBeenCalled();
   });

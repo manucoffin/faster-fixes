@@ -6,8 +6,10 @@
     "install",
     "control-the-widget",
     "custom-metadata",
+    "recording",
     "customization",
     "headless-client",
+    "content-security-policy",
     "upgrading"
   ]
 }

@@ -82,10 +82,18 @@ import { createLinearIssueForFeedback } from "./inbox/_services/create-linear-is
 import { CreateLinearIssueForFeedbackSchema } from "./inbox/_services/create-linear-issue-for-feedback.schema";
 import { deleteFeedback } from "./inbox/_services/delete-feedback";
 import { DeleteFeedbackSchema } from "./inbox/_services/delete-feedback.schema";
+import { deleteFeedbackRecording } from "./inbox/_services/delete-feedback-recording";
+import { DeleteFeedbackRecordingSchema } from "./inbox/_services/delete-feedback-recording.schema";
 import { deleteFeedbacks } from "./inbox/_services/delete-feedbacks";
 import { DeleteFeedbacksSchema } from "./inbox/_services/delete-feedbacks.schema";
+import { countFeedbackDiagnostics } from "./inbox/_services/count-feedback-diagnostics";
+import { CountFeedbackDiagnosticsSchema } from "./inbox/_services/count-feedback-diagnostics.schema";
 import { getFeedbackDiagnostics } from "./inbox/_services/get-feedback-diagnostics";
 import { GetFeedbackDiagnosticsSchema } from "./inbox/_services/get-feedback-diagnostics.schema";
+import { getRecordingPlayback } from "./inbox/_services/get-recording-playback";
+import { GetRecordingPlaybackSchema } from "./inbox/_services/get-recording-playback.schema";
+import { getFeedbackMarkdown } from "./inbox/_services/get-feedback-markdown";
+import { GetFeedbackMarkdownSchema } from "./inbox/_services/get-feedback-markdown.schema";
 import { listArchivedFeedback } from "./inbox/_services/list-archived-feedback";
 import { ListArchivedFeedbackSchema } from "./inbox/_services/list-archived-feedback.schema";
 import { listSources } from "./inbox/_services/list-sources";
@@ -313,6 +321,31 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
+    countDiagnostics: protectedProcedure
+      .input(CountFeedbackDiagnosticsSchema)
+      .query(({ input, ctx }) =>
+        countFeedbackDiagnostics({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    getRecordingPlayback: protectedProcedure
+      .input(GetRecordingPlaybackSchema)
+      .query(({ input, ctx }) =>
+        getRecordingPlayback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    getMarkdown: protectedProcedure
+      .input(GetFeedbackMarkdownSchema)
+      .query(({ input, ctx }) =>
+        getFeedbackMarkdown({
+          projectId: input.projectId,
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
     updateStatus: protectedProcedure
       .input(UpdateFeedbackStatusSchema)
       .mutation(({ input, ctx }) =>
@@ -368,6 +401,14 @@ export const projectsRouter = router({
       .input(DeleteFeedbackSchema)
       .mutation(({ input, ctx }) =>
         deleteFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    deleteRecording: protectedProcedure
+      .input(DeleteFeedbackRecordingSchema)
+      .mutation(({ input, ctx }) =>
+        deleteFeedbackRecording({
           feedbackId: input.feedbackId,
           userId: ctx.session.user.id,
         }),

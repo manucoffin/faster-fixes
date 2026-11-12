@@ -1,6 +1,8 @@
 import {
   formatCustomMetadataLines,
   formatDiagnosticTrailLines,
+  formatTimelineLines,
+  type RecordingTimeline,
 } from "@/app/_domains/feedback";
 import {
   describeVideoFeedbackTime,
@@ -8,6 +10,17 @@ import {
   readVideoSelection,
 } from "@/app/_domains/video";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+
+// GitHub's limit on an Issue body is 65,536 characters; this leaves room for
+// the rest of the body. Linear's is higher.
+const TIMELINE_MAX_CHARACTERS = 50_000;
+
+export type IssueRecording = {
+  playerUrl: string;
+  durationMs: number;
+  // `null` when the file cannot be read: Diagnostics is rendered instead.
+  timeline: RecordingTimeline | null;
+};
 
 type FeedbackForIssue = {
   id: string;
@@ -28,6 +41,8 @@ type FeedbackForIssue = {
   customMetadata?: CustomMetadata | null;
   projectId: string;
   dashboardUrl: string;
+  // Optional: absent or null when the Feedback has no Recording.
+  recording?: IssueRecording | null;
   // Optional: absent or null on a page Feedback (ADR-0020).
   videoId?: string | null;
   videoTitle?: string | null;
@@ -80,6 +95,10 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
     lines.push(`**Element:** ${locationParts.join(" \u00b7 ")}`);
   }
 
+  if (feedback.recording) {
+    lines.push(formatRecordingLine(feedback.recording));
+  }
+
   // Screenshot
   if (feedback.screenshotUrl) {
     lines.push("");
@@ -115,7 +134,31 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
     lines.push("</details>");
   }
 
-  // Collapsible diagnostics block (console + network)
+  lines.push(...diagnosticsOrTimelineLines(feedback));
+
+  lines.push("", dashboardFooter(feedback.dashboardUrl));
+
+  return lines.join("\n");
+}
+
+// The Timeline already holds the Diagnostic Trail's entries, on one clock with
+// the Reviewer's steps; Diagnostics stays when there is no readable Recording.
+function diagnosticsOrTimelineLines(feedback: FeedbackForIssue): string[] {
+  const timeline = feedback.recording?.timeline;
+  if (timeline && timeline.entries.length > 0) {
+    const fitted = fitTimeline(timeline);
+    return [
+      "",
+      "<details>",
+      `<summary>${describeTimeline(fitted)}</summary>`,
+      "",
+      ...formatTimelineLines(fitted),
+      "",
+      "</details>",
+    ];
+  }
+
+  const lines: string[] = [];
   const diagnosticLines = formatDiagnosticTrailLines(feedback.diagnosticTrail);
   if (diagnosticLines.length > 0) {
     const consoleCount = feedback.diagnosticTrail?.console.length ?? 0;
@@ -130,10 +173,38 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
     lines.push("");
     lines.push("</details>");
   }
+  return lines;
+}
 
-  lines.push("", dashboardFooter(feedback.dashboardUrl));
+function formatRecordingLine({ playerUrl, durationMs }: IssueRecording) {
+  return `**Recording:** [Play in Faster Fixes](${playerUrl}) \u00b7 ${formatRecordingDuration(durationMs)}`;
+}
 
-  return lines.join("\n");
+export function formatRecordingDuration(durationMs: number) {
+  return `${Math.max(1, Math.round(durationMs / 1000))} s`;
+}
+
+export function describeTimeline({ entries }: RecordingTimeline) {
+  const count = (kind: RecordingTimeline["entries"][number]["kind"]) =>
+    entries.filter((entry) => entry.kind === kind).length;
+  const steps = count("step");
+  return `Timeline (${steps} ${steps === 1 ? "step" : "steps"}, ${count("console")} console, ${count("network")} network)`;
+}
+
+// Drops entries from the start, the Selection always kept, until the lines fit.
+function fitTimeline(timeline: RecordingTimeline): RecordingTimeline {
+  let fitted = timeline;
+  while (
+    fitted.entries.length > 1 &&
+    formatTimelineLines(fitted).join("\n").length > TIMELINE_MAX_CHARACTERS
+  ) {
+    fitted = {
+      ...fitted,
+      entries: fitted.entries.slice(1),
+      droppedCount: fitted.droppedCount + 1,
+    };
+  }
+  return fitted;
 }
 
 // A video Feedback has no page, element, Custom metadata or Diagnostics: the

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatFeedbackAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
+import { formatFeedbackListAsMarkdown } from "@/app/_domains/feedback/_helpers/format-feedback-markdown";
 import { readFeedbackSelection } from "@/app/_domains/feedback/_helpers/read-feedback-selection";
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { useMemo } from "react";
@@ -15,14 +15,12 @@ type CopySelectedMarkdownProps = {
 export function CopySelectedMarkdown({ items }: CopySelectedMarkdownProps) {
   const markdown = useMemo(
     () =>
-      items
-        .map((item) =>
-          formatFeedbackAsMarkdown({
-            ...item,
-            selection: readFeedbackSelection(item),
-          }),
-        )
-        .join("\n\n---\n\n"),
+      formatFeedbackListAsMarkdown(
+        items.map((item) => ({
+          ...item,
+          selection: readFeedbackSelection(item),
+        })),
+      ),
     [items],
   );
 

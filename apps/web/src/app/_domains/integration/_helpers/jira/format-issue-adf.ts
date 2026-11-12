@@ -4,10 +4,24 @@
 // two cannot share a renderer. Keep the section order in sync when either side changes.
 
 import {
+  formatTimelineNotes,
+  formatTimelineOffset,
+  formatTimelineStep,
+  type RecordingTimeline,
+  type RecordingTimelineEntry,
+} from "@/app/_domains/feedback";
+import {
+  describeTimeline,
   describeVideoLocation,
   formatIssueTitle,
+  formatRecordingDuration,
+  type IssueRecording,
 } from "../github/format-issue-body";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
+
+// Jira's limit on a description, counted here on the serialized document,
+// which is never shorter than the text Jira may count instead.
+const JIRA_DESCRIPTION_MAX_CHARACTERS = 32_767;
 
 type AdfMark =
   | { type: "strong" }
@@ -48,6 +62,8 @@ export type FeedbackForJiraIssue = {
   diagnosticTrail: DiagnosticTrail | null;
   customMetadata?: CustomMetadata | null;
   dashboardUrl: string;
+  // Optional: absent or null when the Feedback has no Recording.
+  recording?: IssueRecording | null;
   // Optional: absent or null on a page Feedback (ADR-0020).
   videoId?: string | null;
   videoTitle?: string | null;
@@ -113,6 +129,10 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
     );
   }
 
+  if (feedback.recording) {
+    content.push(recordingParagraph(feedback.recording));
+  }
+
   if (feedback.screenshotUrl) {
     content.push(screenshotParagraph(feedback.screenshotUrl));
   }
@@ -123,10 +143,17 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
   const customMetadata = buildCustomMetadataExpand(feedback.customMetadata);
   if (customMetadata) content.push(customMetadata);
 
-  const diagnostics = buildDiagnosticsExpand(feedback.diagnosticTrail);
-  if (diagnostics) content.push(diagnostics);
-
   content.push(dashboardFooter(feedback.dashboardUrl));
+
+  // The Timeline already holds the Diagnostic Trail's entries, on one clock
+  // with the Reviewer's steps; Diagnostics stays when there is no readable
+  // Recording. Inserted last so its budget is what the rest leaves.
+  const timeline = feedback.recording?.timeline;
+  const tail =
+    timeline && timeline.entries.length > 0
+      ? buildTimelineExpand(fitTimeline(timeline, content))
+      : buildDiagnosticsExpand(feedback.diagnosticTrail);
+  if (tail) content.splice(content.length - 1, 0, tail);
 
   return { version: 1, type: "doc", content };
 }
@@ -185,6 +212,17 @@ function screenshotParagraph(screenshotUrl: string): AdfNode {
   return paragraph([
     text("Screenshot: ", [{ type: "strong" }]),
     link("view", screenshotUrl),
+  ]);
+}
+
+function recordingParagraph({
+  playerUrl,
+  durationMs,
+}: IssueRecording): AdfNode {
+  return paragraph([
+    text("Recording: ", [{ type: "strong" }]),
+    link("Play in Faster Fixes", playerUrl),
+    text(`${SEPARATOR}${formatRecordingDuration(durationMs)}`),
   ]);
 }
 
@@ -312,6 +350,68 @@ function buildDiagnosticsExpand(trail: DiagnosticTrail | null): AdfNode | null {
     },
     content: body,
   };
+}
+
+function buildTimelineExpand(timeline: RecordingTimeline): AdfNode {
+  return {
+    type: "expand",
+    attrs: { title: describeTimeline(timeline) },
+    content: [
+      ...formatTimelineNotes(timeline).map((note) => paragraph([text(note)])),
+      {
+        type: "bulletList",
+        content: timeline.entries.map((entry) =>
+          bullet([
+            text(`${formatTimelineOffset(entry.offsetMs)}  `),
+            ...timelineEntryNodes(entry),
+          ]),
+        ),
+      },
+    ],
+  };
+}
+
+function timelineEntryNodes(entry: RecordingTimelineEntry): AdfText[] {
+  if (entry.kind === "console") {
+    return [
+      text(entry.entry.level, [{ type: "code" }]),
+      text(` ${collapseWhitespace(entry.entry.message)}`),
+    ];
+  }
+  if (entry.kind === "network") {
+    const { method, url, status, duration } = entry.entry;
+    return [
+      text(method, [{ type: "code" }]),
+      text(
+        ` ${url} → ${status === 0 ? "ERR" : status} (${Math.round(duration)}ms)`,
+      ),
+    ];
+  }
+  return [text(formatTimelineStep(entry.step))];
+}
+
+// Drops entries from the start, the Selection always kept, until the whole
+// description fits Jira's limit.
+function fitTimeline(
+  timeline: RecordingTimeline,
+  rest: AdfNode[],
+): RecordingTimeline {
+  const budget =
+    JIRA_DESCRIPTION_MAX_CHARACTERS -
+    JSON.stringify({ version: 1, type: "doc", content: rest }).length;
+  let fitted = timeline;
+  while (
+    fitted.entries.length > 1 &&
+    // +1 for the comma that joins the expand to its neighbours.
+    JSON.stringify(buildTimelineExpand(fitted)).length + 1 > budget
+  ) {
+    fitted = {
+      ...fitted,
+      entries: fitted.entries.slice(1),
+      droppedCount: fitted.droppedCount + 1,
+    };
+  }
+  return fitted;
 }
 
 // Console messages can be multi-line; ADF list items read better as one line.

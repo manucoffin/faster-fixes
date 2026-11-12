@@ -1,8 +1,5 @@
 import { getTestimonialAffiliation } from "@/app/_domains/testimonial/_helpers/get-testimonial-affiliation";
-import {
-  listPublishedTestimonials,
-  type ListPublishedTestimonialsOutput,
-} from "@/app/_domains/testimonial/_services/list-published-testimonials";
+import { type ListPublishedTestimonialsOutput } from "@/app/_domains/testimonial/_services/list-published-testimonials";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import {
   Avatar,
@@ -11,50 +8,11 @@ import {
 } from "@workspace/ui/components/avatar";
 import { StarIcon } from "lucide-react";
 
-export async function TestimonialsSection() {
-  // An optional section: a database outage hides it rather than taking down the homepage.
-  const testimonials = await listPublishedTestimonials().catch(
-    (error: unknown) => {
-      console.error("Failed to list published Testimonials", error);
-      return [];
-    },
-  );
-
-  if (testimonials.length === 0) return null;
-
-  return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Testimonials
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            What users say about FasterFixes
-          </h2>
-        </div>
-
-        {/* Flex wrap rather than a grid, so one or two cards stay centered. */}
-        <ul className="mx-auto mt-12 flex max-w-6xl flex-wrap justify-center gap-6">
-          {testimonials.map((testimonial) => (
-            <li
-              key={testimonial.id}
-              className="flex w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
-            >
-              <TestimonialCard testimonial={testimonial} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 type TestimonialCardProps = {
   testimonial: ListPublishedTestimonialsOutput[number];
 };
 
-function TestimonialCard({ testimonial }: TestimonialCardProps) {
+export function TestimonialCard({ testimonial }: TestimonialCardProps) {
   const { title, organization, websiteUrl } =
     getTestimonialAffiliation(testimonial);
 
@@ -77,7 +35,11 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
           />
         ))}
       </div>
-      <blockquote className="mt-5 flex-1 text-lg leading-relaxed whitespace-pre-line">
+      {/* The masonry reads this element's font to measure every quote. */}
+      <blockquote
+        data-testimonial-text
+        className="mt-5 text-lg leading-relaxed break-words whitespace-pre-line"
+      >
         {testimonial.text}
       </blockquote>
       <figcaption className="mt-6 flex items-center gap-3 border-t pt-5 text-sm">

@@ -19,6 +19,11 @@ export type WidgetOptions = {
   /** Records the Diagnostic Trail from mount. Defaults to `true`. */
   captureDiagnostics?: boolean;
   /**
+   * Keeps a Recording of the last minute on the page for each Feedback.
+   * Defaults to `true`. At `false` the recorder is never loaded.
+   */
+  captureRecording?: boolean;
+  /**
    * Key/value pairs sent with every Feedback, shown to your team and in
    * mirrored Issues, never to Reviewers. Pass an object, or a synchronous
    * function called at each submission so values such as a signed-in user ID
@@ -116,6 +121,7 @@ function resolveDisplayOptions(
     position: options.position ?? DEFAULT_WIDGET_POSITION,
     labels: resolveLabels(options.labels),
     captureDiagnostics: options.captureDiagnostics ?? true,
+    captureRecording: options.captureRecording ?? true,
     customMetadata: options.customMetadata,
   };
 }

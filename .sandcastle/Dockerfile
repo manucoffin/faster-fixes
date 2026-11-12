@@ -15,6 +15,14 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
   && apt-get update && apt-get install -y gh \
   && rm -rf /var/lib/apt/lists/*
 
+# Headless Chromium for Playwright (e2e suite, reading pages, screenshots). Its
+# system libraries need root, which the agent does not have at run time. Keep
+# the version in step with `playwright` in the lockfile: each release expects
+# its own browser build.
+ARG PLAYWRIGHT_VERSION=1.63.0
+RUN npx -y playwright@${PLAYWRIGHT_VERSION} install-deps chromium \
+  && rm -rf /var/lib/apt/lists/*
+
 # Build-args for UID/GID alignment: sandcastle docker build-image
 # defaults these to the host user's UID/GID so image-built files
 # and bind-mounted files share an owner without runtime chown.
@@ -30,6 +38,8 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Add Claude to PATH
 ENV PATH="/home/agent/.local/bin:$PATH"
+
+RUN npx -y playwright@${PLAYWRIGHT_VERSION} install chromium
 
 WORKDIR /home/agent
 

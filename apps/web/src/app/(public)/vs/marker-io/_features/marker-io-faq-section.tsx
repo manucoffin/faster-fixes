@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +11,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 type DocLinkProps = {
   href: Route;
@@ -30,13 +33,12 @@ function DocLink({ href, children }: DocLinkProps) {
 export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free to use?",
-    answer:
-      "Yes. The hosted Free plan is permanent: 1 project, 50 feedback items, 1 member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $20/month for Pro and $99/month for Agency.",
+    answer: `Yes. The hosted Free plan is permanent: 1 project, ${freeFeedbackLimit} feedback items, 1 member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $20/month for Pro and $99/month for Agency.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The hosted Free plan is permanent: 1 project, 50 feedback items, 1
-        member, no time limit, no credit card. The dashboard is open source
-        under AGPL-3.0 and the widget is MIT, so{" "}
+        Yes. The hosted Free plan is permanent: 1 project, {freeFeedbackLimit}{" "}
+        feedback items, 1 member, no time limit, no credit card. The dashboard
+        is open source under AGPL-3.0 and the widget is MIT, so{" "}
         <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
         also free regardless of team size. Paid hosted plans are $20/month for
         Pro and $99/month for Agency.
@@ -64,7 +66,7 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "How is FasterFixes different from Marker.io?",
     answer:
-      "FasterFixes is open-source and self-hostable; Marker.io is closed-source and cloud-only. FasterFixes ships an MCP server so AI coding agents (Claude Code, Cursor, Codex) can fetch and resolve feedback from the terminal. Marker.io has no MCP support. Marker.io has the broader feature set today: session replay, Figma/PDF annotation, deep PM integrations, and a client Guest Portal. FasterFixes does not currently match those features.",
+      "FasterFixes is open-source and self-hostable; Marker.io is closed-source and cloud-only. FasterFixes ships an MCP server so AI coding agents (Claude Code, Cursor, Codex) can fetch and resolve feedback from the terminal. Marker.io has no MCP support. Marker.io has the broader feature set today: Figma/PDF annotation, deep PM integrations, and a client Guest Portal. FasterFixes does not currently match those features. Both replay the moments before a report: Marker.io bundles session replay from the Team plan, and FasterFixes attaches a Recording of the last minute on the page to each feedback on every plan.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source and self-hostable; Marker.io is closed-source
@@ -72,9 +74,12 @@ export const markerIoFaqs: RichFaqItem[] = [
         <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> so AI
         coding agents (Claude Code, Cursor, Codex) can fetch and resolve
         feedback from the terminal. Marker.io has no MCP support. Marker.io has
-        the broader feature set today: session replay, Figma/PDF annotation,
-        deep PM integrations, and a client Guest Portal. FasterFixes does not
-        currently match those features.
+        the broader feature set today: Figma/PDF annotation, deep PM
+        integrations, and a client Guest Portal. FasterFixes does not currently
+        match those features. Both replay the moments before a report: Marker.io
+        bundles session replay from the Team plan, and FasterFixes attaches a{" "}
+        <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
+        the last minute on the page to each feedback on every plan.
       </p>
     ),
   },
@@ -170,16 +175,17 @@ export const markerIoFaqs: RichFaqItem[] = [
     question:
       "How do the FasterFixes integrations compare to Marker.io's Jira-heavy stack?",
     answer:
-      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io gates Jira and Linear sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
+      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
         every paid plan, included by default. A single feedback item can mirror
         to all three at once, and Jira sync maps by status category rather than
-        status name, so custom workflows need no configuration. Marker.io gates
-        Jira and Linear sync behind the Team plan at $149/month annual.
-        Marker.io still covers a broader roster: Asana, ClickUp, Trello,
-        Monday.com and more. Weigh that if your backlog lives elsewhere. See the{" "}
+        status name, so custom workflows need no configuration. Marker.io
+        includes Linear on every plan but gates Jira sync behind the Team plan
+        at $149/month annual. Marker.io still covers a broader roster: Asana,
+        ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives
+        elsewhere. See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
           GitHub integration docs
         </DocLink>{" "}

@@ -22,17 +22,23 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    // Guards Firefox-only regressions such as screenshot capture. The framework
-    // embed specs check parity between Embeds, which Chromium alone covers.
+    // Guards Firefox-only regressions such as screenshot capture and the player
+    // document's isolation. The framework embed specs check parity between
+    // Embeds, which Chromium alone covers.
     {
       name: "firefox",
-      testMatch: ["widget.spec.ts", "widget-screenshot.spec.ts"],
+      testMatch: [
+        "widget.spec.ts",
+        "widget-screenshot.spec.ts",
+        "recording-player*.spec.ts",
+      ],
       use: { ...devices["Desktop Firefox"] },
     },
   ],
   webServer: [
     {
-      command: `next dev --turbopack --port ${PORT}`,
+      // The player document loads its bundle from `public/`, which is not tracked.
+      command: `pnpm build:recording-player && next dev --turbopack --port ${PORT}`,
       url: `http://localhost:${PORT}/login`,
       // A developer's own dev server carries their env, not the stubbed API origin below.
       reuseExistingServer: false,

@@ -19,12 +19,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "Free self-host · flat hosted plans",
-      "Per-seat tiers · $8/extra user/month",
+      "Per-seat tiers · $8/extra user/month (monthly billing)",
     ],
   },
   {
     label: "Cost for a 5-person team",
-    cells: ["$0 self-host · $20/mo hosted Pro", "$50/mo Standard"],
+    cells: [
+      "$0 self-host · $20/mo hosted Pro",
+      "$50/mo Standard ($42/mo annual)",
+    ],
   },
   {
     label: "Bring your own AI agent (MCP)",
@@ -67,18 +70,28 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Client-facing task board",
     cells: [
       { type: "no", note: "On the roadmap" },
-      { type: "yes", note: "Premium plan only" },
+      { type: "yes", note: "Premium plan and above" },
     ],
   },
   {
     label: "Screen recording",
-    cells: [{ type: "no" }, { type: "yes" }],
+    cells: [
+      { type: "no" },
+      { type: "yes", note: "Up to 1 minute · all plans" },
+    ],
   },
   {
     label: "Video review (uploaded videos)",
     cells: [
       { type: "yes", note: "Timestamped · area on the frame" },
       { type: "no" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      { type: "no", note: "Links to LogRocket or FullStory sessions" },
     ],
   },
   {
@@ -93,14 +106,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Linear two-way sync",
     cells: [
       { type: "yes", note: "Bidirectional · workflow-state aware" },
-      { type: "yes" },
+      { type: "yes", note: "Premium plan and above" },
     ],
   },
   {
     label: "Project management integrations",
     cells: [
       "GitHub, Linear, Jira · more coming",
-      "Jira, Asana, ClickUp, Monday.com, Linear, +",
+      "Trello, GitHub, Slack on all plans · Jira, Linear, Asana, ClickUp, Monday.com from Premium",
     ],
   },
   {
@@ -114,7 +127,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Custom branding",
     cells: [
       "Self-host: full · hosted: planned",
-      { type: "yes", note: "Premium plan only" },
+      { type: "yes", note: "Premium plan and above" },
     ],
   },
   {
@@ -205,7 +218,7 @@ export function BugherdComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated May 12, 2026.
+          vendor&apos;s website. Last updated Nov 12, 2026.
         </p>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import { mergeRecordingTimeline } from "@/app/_domains/feedback";
 import { describe, expect, it } from "vitest";
 import { formatIssueBody } from "./format-issue-body";
 
@@ -189,5 +190,170 @@ describe("formatIssueBody for a video Feedback", () => {
     expect(body).not.toContain("Diagnostics");
     expect(body).not.toContain("/review/");
     expect(body).not.toContain("/inbox");
+  });
+});
+
+describe("formatIssueBody with a Recording", () => {
+  const SELECTION_AT = 1_794_400_060_000;
+  const steps = [
+    {
+      type: "click" as const,
+      timestamp: SELECTION_AT - 12_400,
+      offsetMs: -12_400,
+      label: 'button "Save changes"',
+      selector: "form.settings > button.primary",
+      detail: null,
+    },
+    {
+      type: "selection" as const,
+      timestamp: SELECTION_AT,
+      offsetMs: 0,
+      label: 'button "Save changes"',
+      selector: "#save",
+      detail: null,
+    },
+  ];
+  const withTrail: Parameters<typeof formatIssueBody>[0] = {
+    ...feedback,
+    screenshotUrl: "https://cdn.example.com/shot.png",
+    diagnosticTrail: {
+      console: [
+        {
+          level: "error",
+          message: "Save failed",
+          timestamp: SELECTION_AT - 11_000,
+        },
+      ],
+      network: [
+        {
+          method: "POST",
+          url: "https://example.com/api/settings",
+          status: 500,
+          duration: 120,
+          timestamp: SELECTION_AT - 12_000,
+        },
+      ],
+    },
+  };
+  const playerUrl = "https://app.example.com/inbox?feedbackId=fb_1&player=true";
+  const recording = {
+    playerUrl,
+    durationMs: 48_300,
+    timeline: mergeRecordingTimeline({
+      steps,
+      diagnosticTrail: withTrail.diagnosticTrail,
+    }),
+  };
+
+  it("puts the Recording line before the Screenshot and the Timeline in place of Diagnostics", () => {
+    expect(formatIssueBody({ ...withTrail, recording })).toBe(
+      [
+        "> The save button does nothing",
+        "",
+        "**Page:** [example.com/settings](https://example.com/settings)",
+        "**Element:** `#save`",
+        `**Recording:** [Play in Faster Fixes](${playerUrl}) · 48 s`,
+        "",
+        "![Screenshot](https://cdn.example.com/shot.png)",
+        "",
+        "<details>",
+        "<summary>Environment</summary>",
+        "",
+        "Chrome 130 · macOS · 1280 × 720",
+        "Submitted by Ada",
+        "",
+        "</details>",
+        "",
+        "<details>",
+        "<summary>Timeline (2 steps, 1 console, 1 network)</summary>",
+        "",
+        '- -12.4 s  click button "Save changes" (form.settings > button.primary)',
+        "- -12.0 s  `POST` https://example.com/api/settings → 500 (120ms)",
+        "- -11.0 s  `error` Save failed",
+        '- 0.0 s  selection button "Save changes" (#save), the element the comment is about',
+        "",
+        "</details>",
+        "",
+        '<sub><a href="https://faster-fixes.com">Faster Fixes</a> · <a href="https://app.example.com/inbox?feedback=fb_1">View in dashboard</a></sub>',
+      ].join("\n"),
+    );
+  });
+
+  it("renders today's body when the Feedback has no Recording", () => {
+    expect(formatIssueBody({ ...feedback, recording: null })).toBe(
+      todaysOutput,
+    );
+  });
+
+  it("prints a sub-second Recording as 1 s", () => {
+    expect(
+      formatIssueBody({
+        ...feedback,
+        recording: { ...recording, durationMs: 300 },
+      }),
+    ).toContain(`**Recording:** [Play in Faster Fixes](${playerUrl}) · 1 s`);
+  });
+
+  it("keeps the line and Diagnostics as today when the Recording cannot be read", () => {
+    expect(
+      formatIssueBody({
+        ...feedback,
+        recording: { playerUrl, durationMs: 48_300, timeline: null },
+      }),
+    ).toBe(
+      todaysOutput.replace(
+        "**Element:** `#save`\n",
+        `**Element:** \`#save\`\n**Recording:** [Play in Faster Fixes](${playerUrl}) · 48 s\n`,
+      ),
+    );
+  });
+
+  it("drops the earliest entries and says so when the Timeline is too long", () => {
+    const message = "x".repeat(2_000);
+    const timeline = mergeRecordingTimeline({
+      steps,
+      diagnosticTrail: {
+        console: Array.from({ length: 40 }, (_, index) => ({
+          level: "log" as const,
+          message,
+          timestamp: SELECTION_AT - 40_000 + index * 1_000,
+        })),
+        network: [],
+      },
+    });
+
+    const body = formatIssueBody({
+      ...feedback,
+      recording: { ...recording, timeline },
+    });
+
+    expect(body.length).toBeLessThan(65_536);
+    expect(body).toContain(
+      "<summary>Timeline (2 steps, 24 console, 0 network)</summary>\n\n16 earlier entries omitted.",
+    );
+    expect(body).toContain(", the element the comment is about");
+  });
+
+  it("counts a single step in the singular", () => {
+    expect(
+      formatIssueBody({
+        ...feedback,
+        recording: {
+          ...recording,
+          timeline: mergeRecordingTimeline({
+            steps: steps.slice(1),
+            diagnosticTrail: null,
+          }),
+        },
+      }),
+    ).toContain("<summary>Timeline (1 step, 0 console, 0 network)</summary>");
+  });
+
+  it("renders a video Feedback exactly as today", () => {
+    const videoFeedback = { ...feedback, videoId: "vid_1", videoTitle: "Demo" };
+
+    expect(formatIssueBody({ ...videoFeedback, recording })).toBe(
+      formatIssueBody(videoFeedback),
+    );
   });
 });

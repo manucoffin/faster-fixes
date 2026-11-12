@@ -12,6 +12,8 @@ export type StorageBackend = {
   copy(source: StorageObject, destination: StorageObject): Promise<void>;
   delete(object: StorageObject): Promise<void>;
   head(object: StorageObject): Promise<StoredObjectInfo>;
+  // The stored bytes, `null` when the object is absent.
+  get(object: StorageObject): Promise<Buffer | null>;
   deleteMany(
     bucket: string,
     keys: string[],

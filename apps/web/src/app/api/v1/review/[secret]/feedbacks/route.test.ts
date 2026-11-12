@@ -5,6 +5,7 @@
  * handler reaches them.
  */
 
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   blockRateLimit,
@@ -27,6 +28,9 @@ import {
   VIDEO_ID,
   videoRow,
 } from "../../_helpers/review-api-test-doubles";
+
+const FREE_PLAN_FEEDBACK_LIMIT =
+  PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 vi.mock("@workspace/db", async () => {
   const { reviewApiPrisma } =
@@ -346,7 +350,7 @@ describe("POST /api/v1/review/:secret/feedbacks", () => {
   it("answers the Widget's capacity error once the Plan's Feedback cap is reached", async () => {
     // Self-hosted instances have no Plan cap: billing is a Cloud concern.
     vi.stubEnv("NEXT_PUBLIC_IS_CLOUD", "true");
-    reviewApiPrisma.feedback.count.mockResolvedValue(50);
+    reviewApiPrisma.feedback.count.mockResolvedValue(FREE_PLAN_FEEDBACK_LIMIT);
 
     const response = await postFeedback(feedbackFormData(pointPayload));
 
@@ -354,10 +358,22 @@ describe("POST /api/v1/review/:secret/feedbacks", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Feedback limit reached for this organization's plan.",
       code: "RESOURCE_LIMIT_EXCEEDED",
-      current: 50,
-      limit: 50,
+      current: FREE_PLAN_FEEDBACK_LIMIT,
+      limit: FREE_PLAN_FEEDBACK_LIMIT,
     });
     expect(reviewApiTables.feedbacks).toHaveLength(0);
+  });
+
+  it("accepts a Feedback while the Plan is one under its Feedback cap", async () => {
+    vi.stubEnv("NEXT_PUBLIC_IS_CLOUD", "true");
+    reviewApiPrisma.feedback.count.mockResolvedValue(
+      FREE_PLAN_FEEDBACK_LIMIT - 1,
+    );
+
+    const response = await postFeedback(feedbackFormData(pointPayload));
+
+    expect(response.status).toBe(201);
+    expect(reviewApiTables.feedbacks).toHaveLength(1);
   });
 
   it("answers 404 link_not_found for an unknown link", async () => {

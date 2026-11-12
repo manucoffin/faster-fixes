@@ -28,9 +28,9 @@ import { VsCrossLinks } from "../_features/vs-cross-links";
 const pageUrl = `${APP_URL}/vs/atarim`;
 const title = `Atarim Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
 const description =
-  "Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents, without per-seat pricing or vendor lock-in.";
+  "Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents, from $20/month hosted or $0 self-hosted, with no vendor lock-in.";
 const datePublished = "2026-04-30T00:00:00.000Z";
-const dateModified = "2026-04-30T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

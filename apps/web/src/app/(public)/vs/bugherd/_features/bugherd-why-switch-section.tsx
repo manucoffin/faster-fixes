@@ -5,7 +5,7 @@ const limitations = [
   },
   {
     title: "Per-seat pricing scales with your team",
-    body: "Standard is $50/month for 5 members and every extra user is $8/month. Studio jumps to $80/month for 10, Premium to $150/month for 25. The bill grows with the team, not with the value delivered.",
+    body: "Standard is $50/month for 5 members and every extra user is $8/month. Studio jumps to $80/month for 10, Premium to $150/month for 25, and Premium is the first plan with Jira and Linear. The bill grows with the team, not with the value delivered.",
   },
   {
     title: "AI is bundled, not bring-your-own",

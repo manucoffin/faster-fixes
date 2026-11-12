@@ -10,6 +10,8 @@ import { getValidLabelIds } from "./get-valid-label-ids";
 import { LinearRequestError } from "./linear-request-error";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
+import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
+import { refreshIssueRecording } from "../refresh-issue-recording";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -31,30 +33,17 @@ export const createLinearIssue = inngest.createFunction(
       },
     ],
   },
-  async ({ event }) => {
+  async ({ event, step }) => {
     const { feedbackId } = event.data;
 
-    const feedback = await prisma.feedback.findUnique({
-      where: { id: feedbackId },
-      include: {
-        project: {
-          include: {
-            linearLink: { include: { linearInstallation: true } },
-          },
-        },
-        reviewer: { select: { name: true } },
-        video: { select: { title: true } },
-        screenshot: { select: { key: true, bucket: true } },
-        linearIssueLink: { select: { id: true } },
-      },
-    });
+    const found = await readFeedback(feedbackId);
 
-    if (!feedback) return { skipped: "feedback_not_found" };
-    if (feedback.linearIssueLink) {
+    if (!found) return { skipped: "feedback_not_found" };
+    if (found.linearIssueLink) {
       return { skipped: "linear_issue_already_exists" };
     }
 
-    const link = feedback.project.linearLink;
+    const link = found.project.linearLink;
     if (!link) return { skipped: "no_linear_link" };
 
     // Auto-create only fires on `feedback/created`. Manual trigger
@@ -63,6 +52,18 @@ export const createLinearIssue = inngest.createFunction(
       event.name === "feedback/integration-issue-requested";
     if (!isManualTrigger && !link.autoCreateIssues) {
       return { skipped: "auto_create_disabled" };
+    }
+
+    const feedback = await findFeedbackWithAwaitedRecording({
+      event,
+      step,
+      feedback: found,
+      readFeedback: () => readFeedback(feedbackId),
+    });
+    if (!feedback) return { skipped: "feedback_not_found" };
+    // An Issue created by hand during the wait wins.
+    if (feedback.linearIssueLink) {
+      return { skipped: "linear_issue_already_exists" };
     }
 
     const accessToken = decryptToken(link.linearInstallation.accessToken);
@@ -90,6 +91,7 @@ export const createLinearIssue = inngest.createFunction(
     }
 
     const dashboardUrl = buildFeedbackDashboardUrl(feedback);
+    const recording = await refreshIssueRecording(feedback);
 
     const title = formatIssueTitle(feedback.comment);
     const description = formatIssueBody({
@@ -119,6 +121,7 @@ export const createLinearIssue = inngest.createFunction(
       frameY: feedback.frameY,
       frameWidth: feedback.frameWidth,
       frameHeight: feedback.frameHeight,
+      recording,
     });
 
     const created = await client.createIssue({
@@ -171,3 +174,21 @@ export const createLinearIssue = inngest.createFunction(
     return { issueId: issue.id, issueIdentifier: issue.identifier };
   },
 );
+
+function readFeedback(feedbackId: string) {
+  return prisma.feedback.findUnique({
+    where: { id: feedbackId },
+    include: {
+      project: {
+        include: {
+          linearLink: { include: { linearInstallation: true } },
+        },
+      },
+      reviewer: { select: { name: true } },
+      video: { select: { title: true } },
+      screenshot: { select: { key: true, bucket: true } },
+      recording: { select: { key: true } },
+      linearIssueLink: { select: { id: true } },
+    },
+  });
+}

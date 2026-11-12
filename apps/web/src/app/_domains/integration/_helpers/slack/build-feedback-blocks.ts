@@ -59,6 +59,8 @@ type BuildFeedbackBlocksParams = {
   status: FeedbackStatus;
   actor: FeedbackActor;
   dashboardUrl: string;
+  // The player link, only for a Feedback that has a Recording at build time.
+  playerUrl?: string | null;
   screenshotUrl: string | null;
 };
 
@@ -76,6 +78,7 @@ export function buildFeedbackBlocks({
   status,
   actor,
   dashboardUrl,
+  playerUrl = null,
   screenshotUrl,
 }: BuildFeedbackBlocksParams): BuildFeedbackBlocksResult {
   const reviewerName = feedback.reviewerName ?? "Anonymous";
@@ -135,18 +138,35 @@ export function buildFeedbackBlocks({
     },
   });
 
-  blocks.push({
-    type: "section",
-    text: {
-      type: "mrkdwn",
-      text: `<${dashboardUrl}|Open in Faster Fixes>`,
-    },
-    accessory: {
-      type: "button",
-      text: { type: "plain_text", text: "Open in Faster Fixes" },
-      url: dashboardUrl,
-    },
-  });
+  const openButton = {
+    type: "button",
+    text: { type: "plain_text", text: "Open in Faster Fixes" },
+    url: dashboardUrl,
+  };
+
+  // A section holds a single accessory, so two buttons need an actions block.
+  if (playerUrl) {
+    blocks.push({
+      type: "actions",
+      elements: [
+        openButton,
+        {
+          type: "button",
+          text: { type: "plain_text", text: "Play recording" },
+          url: playerUrl,
+        },
+      ],
+    });
+  } else {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `<${dashboardUrl}|Open in Faster Fixes>`,
+      },
+      accessory: openButton,
+    });
+  }
 
   const text = `New feedback from ${reviewerName}: ${feedback.comment}`;
 

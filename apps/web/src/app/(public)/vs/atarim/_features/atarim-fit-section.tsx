@@ -4,7 +4,7 @@ const fitPoints = [
   "You're a dev agency or product team and need feedback that maps directly to DOM selectors and, on React apps, component trees.",
   "You want AI coding agents such as Claude Code, Cursor, and Codex to read and act on feedback directly from the terminal or IDE, without context-switching to a browser dashboard.",
   "You need to self-host: client feedback must stay in your own infrastructure, not a third-party cloud.",
-  "You want flat pricing: one plan covers your whole team at a fixed monthly rate, not a per-seat bill that grows with every new member.",
+  "You want a fixed price with no usage meter: one plan covers your team at a set monthly rate, with no AI credits to buy or top up.",
   "You don't need whitelabel or a client portal. You need structured, code-mapped feedback that goes straight into GitHub issues, Linear tickets, Jira issues, and your AI agent's context.",
 ];
 

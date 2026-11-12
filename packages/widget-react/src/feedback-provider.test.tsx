@@ -41,6 +41,7 @@ describe("FeedbackProvider", () => {
         position="top-left"
         labels={labels}
         captureDiagnostics={false}
+        captureRecording={false}
       >
         <p>child</p>
       </FeedbackProvider>,
@@ -54,6 +55,7 @@ describe("FeedbackProvider", () => {
       position: "top-left",
       labels,
       captureDiagnostics: false,
+      captureRecording: false,
     });
     expect(console.warn).not.toHaveBeenCalled();
   });
@@ -156,6 +158,7 @@ describe("FeedbackProvider", () => {
     ["position", { position: "top-right" }],
     ["labels", { labels: { submitButton: "Go" } }],
     ["captureDiagnostics", { captureDiagnostics: false }],
+    ["captureRecording", { captureRecording: false }],
   ] as const)("re-initialises when %s changes", (_, changed) => {
     const base = {
       projectId: "proj_1",
@@ -164,6 +167,7 @@ describe("FeedbackProvider", () => {
       position: "bottom-right",
       labels: { submitButton: "Send" },
       captureDiagnostics: true,
+      captureRecording: true,
     } as const;
     const { rerender } = render(
       <FeedbackProvider {...base}>child</FeedbackProvider>,

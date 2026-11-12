@@ -7,10 +7,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/ui/components/dialog";
-import { Label } from "@workspace/ui/components/label";
-import { Switch } from "@workspace/ui/components/switch";
-import { cn } from "@workspace/ui/lib/utils";
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useState } from "react";
+import { SelectionFrameSwitch } from "./selection-frame-switch.client";
 
 type ScreenshotDialogProps = {
   src: string;
@@ -77,29 +75,6 @@ export function ScreenshotDialog({
           onCheckedChange={setIsFrameShown}
         />
       )}
-    </div>
-  );
-}
-
-type SelectionFrameSwitchProps = {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  className?: string;
-};
-
-function SelectionFrameSwitch({
-  checked,
-  onCheckedChange,
-  className,
-}: SelectionFrameSwitchProps) {
-  const id = useId();
-
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
-      <Label htmlFor={id} className="text-xs font-normal text-muted-foreground">
-        Show selection frame
-      </Label>
     </div>
   );
 }

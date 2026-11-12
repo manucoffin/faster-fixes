@@ -12,7 +12,10 @@ type FakeDb = NonNullable<Parameters<typeof deleteFeedbacks>[1]>;
 type FakeState = {
   project: { organizationId: string } | null;
   membership: { id: string } | null;
-  candidates?: Array<{ screenshotId: string | null }>;
+  candidates?: Array<{
+    screenshotId: string | null;
+    recordingId: string | null;
+  }>;
   deletedCount?: number;
   orphanedAssets?: Array<{ id: string }>;
 };
@@ -76,7 +79,10 @@ describe("deleteFeedbacks", () => {
     const db = fakeDb({
       project,
       membership: member,
-      candidates: [{ screenshotId: null }, { screenshotId: null }],
+      candidates: [
+        { screenshotId: null, recordingId: null },
+        { screenshotId: null, recordingId: null },
+      ],
     });
 
     await expect(deleteFeedbacks(input, db)).resolves.toEqual({
@@ -85,7 +91,7 @@ describe("deleteFeedbacks", () => {
     });
     expect(db.feedback.findMany).toHaveBeenCalledWith({
       where: scopedWhere,
-      select: { screenshotId: true },
+      select: { screenshotId: true, recordingId: true },
     });
     expect(db.feedback.deleteMany).toHaveBeenCalledWith({
       where: scopedWhere,
@@ -114,27 +120,28 @@ describe("deleteFeedbacks", () => {
     expect(deleteAssets).not.toHaveBeenCalled();
   });
 
-  it("frees only the screenshots no feedback references anymore", async () => {
+  it("frees only the screenshots and Recordings no feedback references anymore", async () => {
     const db = fakeDb({
       project,
       membership: member,
       candidates: [
-        { screenshotId: "asset_1" },
-        { screenshotId: "asset_2" },
-        { screenshotId: null },
+        { screenshotId: "asset_1", recordingId: "recording_1" },
+        { screenshotId: "asset_2", recordingId: null },
+        { screenshotId: null, recordingId: "recording_2" },
       ],
-      orphanedAssets: [{ id: "asset_1" }],
+      orphanedAssets: [{ id: "asset_1" }, { id: "recording_1" }],
     });
 
     await deleteFeedbacks(input, db);
 
     expect(db.asset.findMany).toHaveBeenCalledWith({
       where: {
-        id: { in: ["asset_1", "asset_2"] },
+        id: { in: ["asset_1", "recording_1", "asset_2", "recording_2"] },
         feedbackScreenshots: { none: {} },
+        feedbackRecordings: { none: {} },
       },
       select: { id: true },
     });
-    expect(deleteAssets).toHaveBeenCalledWith(["asset_1"]);
+    expect(deleteAssets).toHaveBeenCalledWith(["asset_1", "recording_1"]);
   });
 });

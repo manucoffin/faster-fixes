@@ -21,7 +21,7 @@ const title = `Ruttl Alternative: Open-Source, No Per-Seat Pricing | ${SITE_NAME
 const description =
   "Ruttl charges $18/user/month, or $90/mo for a 5-person team. FasterFixes is open-source, self-hostable, flat-rate, with an MCP server for AI coding agents.";
 const datePublished = "2026-05-12T00:00:00.000Z";
-const dateModified = "2026-05-12T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

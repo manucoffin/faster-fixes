@@ -59,7 +59,12 @@ export async function createFeedback({
   // Fire-and-forget: a Tracker or a Notification channel that is slow or down
   // must not hold up the widget's answer.
   inngest
-    .send(buildEvent(feedbackCreatedEvent, { feedbackId: feedback.id }))
+    .send(
+      buildEvent(feedbackCreatedEvent, {
+        feedbackId: feedback.id,
+        ...(data.recordingFollows && { recordingFollows: true }),
+      }),
+    )
     .catch(() => {});
 
   const screenshotUrl = feedback.screenshot

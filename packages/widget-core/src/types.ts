@@ -88,6 +88,15 @@ export type CreateFeedbackData = {
   metadata?: Record<string, unknown>;
   diagnosticTrail?: DiagnosticTrail;
   customMetadata?: CustomMetadata;
+  /** Declares that a Recording upload follows the creation. */
+  recordingFollows?: boolean;
+};
+
+/** What travels with a Recording file, beside the gzip body itself. */
+export type RecordingDetails = {
+  durationMs: number;
+  /** The replay format version the Widget wrote the events in. */
+  formatVersion: number;
 };
 
 export type UpdateFeedbackData = {
@@ -133,6 +142,16 @@ export type FeedbackClient = {
   attachScreenshot(
     feedbackId: string,
     screenshot: Blob,
+    reviewerToken: string,
+  ): Promise<void>;
+  /**
+   * Optional so a client injected before Recording existed keeps working: the
+   * Widget attaches no Recording when it is absent.
+   */
+  attachRecording?(
+    feedbackId: string,
+    recording: Blob,
+    details: RecordingDetails,
     reviewerToken: string,
   ): Promise<void>;
 };

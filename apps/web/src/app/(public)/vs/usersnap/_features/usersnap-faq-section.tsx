@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +11,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
+
+const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 type DocLinkProps = {
   href: Route;
@@ -30,13 +33,12 @@ function DocLink({ href, children }: DocLinkProps) {
 export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free to use?",
-    answer:
-      "Yes. The hosted Free plan is permanent: 1 project, 50 feedback items, 1 member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $20/month for Pro and $99/month for Agency.",
+    answer: `Yes. The hosted Free plan is permanent: 1 project, ${freeFeedbackLimit} feedback items, 1 member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $20/month for Pro and $99/month for Agency.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The hosted Free plan is permanent: 1 project, 50 feedback items, 1
-        member, no time limit, no credit card. The dashboard is open source
-        under AGPL-3.0 and the widget is MIT, so{" "}
+        Yes. The hosted Free plan is permanent: 1 project, {freeFeedbackLimit}{" "}
+        feedback items, 1 member, no time limit, no credit card. The dashboard
+        is open source under AGPL-3.0 and the widget is MIT, so{" "}
         <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
         also free regardless of team size. Paid hosted plans are $20/month for
         Pro and $99/month for Agency.
@@ -85,14 +87,16 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap has no equivalent.",
+      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap's MCP server targets product analysis instead: it searches feedback, summarizes topics, and creates opportunities, but cannot edit existing feedback.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context (URL, DOM selector, React component path when available,
         browser, viewport), apply a fix, and mark the item resolved, all from
-        the terminal. Usersnap has no equivalent. See{" "}
+        the terminal. Usersnap&apos;s MCP server targets product analysis
+        instead: it searches feedback, summarizes topics, and creates
+        opportunities, but cannot edit existing feedback. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
       </p>

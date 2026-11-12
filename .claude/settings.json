@@ -34,13 +34,21 @@
     "ask": [],
     "deny": [
       "Bash(npm run:*)",
-      "Bash(pnpm build:*)",
+      "Bash(pnpm build)",
+
       "Bash(pnpm db:seed)",
       "Bash(pnpm db:pull)",
-      "Bash(pnpm migrate:dev)",
       "Bash(pnpm migrate:prod)",
       "Bash(pnpm migrate:createonly)",
       "Bash(pnpm migrate:reset)",
+      "Bash(pnpm --filter @workspace/db db:seed:*)",
+      "Bash(pnpm --filter @workspace/db db:pull:*)",
+      "Bash(pnpm --filter @workspace/db migrate:prod:*)",
+      "Bash(pnpm --filter @workspace/db migrate:createonly:*)",
+      "Bash(pnpm --filter @workspace/db migrate:reset:*)",
+
+      "Bash(pnpm release:*)",
+      "Bash(pnpm changeset publish:*)",
 
       "Bash(cat *.env*)",
       "Read(**/.env)",

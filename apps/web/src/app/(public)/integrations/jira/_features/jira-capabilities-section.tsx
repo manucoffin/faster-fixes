@@ -12,7 +12,7 @@ const capabilities = [
   },
   {
     title: "Issues created with the data engineers need",
-    body: "Each issue carries the client's comment, the page URL, the React component path, source file and CSS selector, a screenshot link, and the browser, OS, console logs and network errors captured at submission.",
+    body: "Each issue carries the client's comment, the page URL, the React component path, source file and CSS selector, a screenshot link, the browser and OS, a link to replay the last minute on the page, and a timeline of the client's steps, console logs and network errors before submission.",
   },
   {
     title: "Track the issue key without leaving Faster Fixes",

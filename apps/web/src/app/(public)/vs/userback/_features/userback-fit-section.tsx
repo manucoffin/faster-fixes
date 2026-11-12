@@ -4,7 +4,7 @@ const fitPoints = [
   "You're a dev agency billing clients per project, not per seat.",
   "You want feedback piped directly into Claude Code, Cursor, or Codex via MCP.",
   "You need to self-host for data sovereignty or compliance.",
-  "You don't need screen recording, session replay, or NPS surveys.",
+  "You don't need screen recording, session analytics, or NPS surveys.",
   "You want one widget for every client site: a script tag on any stack, or a React package for React apps.",
 ];
 

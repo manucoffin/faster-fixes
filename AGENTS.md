@@ -1,64 +1,36 @@
 ## Approach
 
-- Think before acting. Read existing files before writing code.
-- Be concise in output but thorough in reasoning.
-- Prefer editing over rewriting whole files.
-- Do not re-read files you have already read unless the file may have changed.
 - Skip files over 100KB unless explicitly required.
-- Suggest running /cost when a session is running long to monitor cache ratio.
-- Recommend starting a new session when switching to an unrelated task.
-- Test your code before declaring done.
-- No sycophantic openers or closing fluff.
-- Keep solutions simple and direct.
-- User instructions always override this file.
+- Quote glob arguments (`--include='*.tsx'`) or use `rg`: zsh aborts on an unmatched glob. macOS has no `timeout`.
+- Recommend a new session when the user switches to an unrelated task.
+- Prefer enforceable rules in lint/CI/hooks over prompt text.
 
 ## Non-negotiables
 
-- Delete files your change makes obsolete.
-- If a file is already deleted (shows as `deleted` in git status), the user removed it on purpose: include the deletion as-is in the commit.
+- Delete files your change makes obsolete. Never delete untracked or gitignored files you did not create: git cannot restore them.
+- If a file already shows as `deleted` in git status, the user removed it on purpose: include the deletion as-is in the commit.
 - If env vars change, update `.env.example` only.
-- Never run a bare `pnpm install` to "refresh" anything. `pnpm-lock.yaml` is committed with Prettier's quoting (lint-staged reformats it), and pnpm rewrites it with its own, producing a ~20,000-line diff unrelated to your change. Install only when you are deliberately adding or removing a dependency, and check the lockfile diff before committing.
-- Never run production database migrations (`pnpm --filter @workspace/db migrate:prod`).
-- Only run development migrations (`pnpm --filter @workspace/db migrate:dev`); production migration execution is user-managed.
+- Install only to add or remove a dependency, never a bare `pnpm install` to refresh: pnpm rewrites the Prettier-quoted `pnpm-lock.yaml` into a ~20,000-line unrelated diff. Check the lockfile diff before committing.
+- Run development migrations only (`pnpm --filter @workspace/db migrate:dev`); production migrations are user-managed.
 - Code identifiers, comments, filenames, schemas: English only.
-- User-facing UI copy: English only. Professional, clear, and concise — match the tone of serious developer tools (e.g., Vercel, Linear, Stripe). No marketing fluff, no casual language, no exclamation marks. Prefer precise, understated wording.
+- User-facing UI copy: English, in the precise, understated register of Vercel, Linear or Stripe. End sentences with periods, never exclamation marks.
 - Never use the em dash character (`—`) in user-facing text. Use a comma, colon, or period instead.
+- CI is the only publisher of `@fasterfixes/*` packages: write a changeset with the `release` skill and leave publishing to CI.
 
-## Code comments
+## Conventions
 
-- Add inline comments only when the logic is not self-evident — complex conditions, non-obvious side effects, tricky workarounds, or subtle business rules.
-- Never comment what the code plainly says (e.g. no `// get user` above `getUser()`).
-- Prefer a short inline `// why` over a multi-line block above a function.
-
-## Critical conventions
-
-All coding standards for this project live in the `coding-standards` skill at `.claude/skills/coding-standards/`.
-
-**Load that skill** before writing code, reviewing changes, or answering questions about conventions.
-
-- Use canonical domain terms defined in `CONTEXT.md`.
+- Load the `coding-standards` skill before writing code, reviewing changes, or answering questions about conventions.
+- Comment only what the code cannot say (complex conditions, side effects, workarounds, business rules), as a short inline `// why`.
+- Next.js in `apps/web` postdates your training: before writing Next.js code, read its guide in `apps/web/node_modules/next/dist/docs/` and heed deprecation notices.
 
 ## Required checks before done
 
-- Work is done only when these pass, whether or not you commit:
-  - `sh .husky/pre-commit` from the repo root. The hook is the single list of checks, so read it rather than restating it. Typecheck, tests and Knip read the whole working tree, so unstaged work can fail the hook too.
-  - `pnpm lint` and `pnpm format:check`. The hook's lint-staged step covers staged files only; these cover every workspace, so they catch a file your change broke without touching it. Every lint rule is at `error` with zero warnings tolerated, so any report is a regression.
-- **On a fresh clone, generate before you lint.** The Prisma client, the published package builds and the Next.js route types are all untracked. `pnpm typecheck` generates them itself (the task depends on `^build`, and the web script runs `next typegen` first), but the type-aware lint rules report errors unrelated to your change until you have run `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and `pnpm --filter web exec next typegen`.
-- If DB schema changed: run `pnpm --filter @workspace/db migrate:dev`, then `pnpm --filter @workspace/db db:gen`.
-- A production build is `pnpm --filter web build` from the repo root, not `pnpm build` inside `apps/web`: the filter is what resolves the workspace packages. Note that `apps/web/src/app/_domains/integration/_services/github/github-app.ts` reads `GITHUB_PRIVATE_KEY` at module evaluation, so page-data collection for `/api/github/setup` fails without a value in the environment.
-
-## Keep costs low
-
-- Reuse existing patterns in touched folders.
-- Keep edits scoped to the task.
-- Prefer enforceable rules in lint/CI/hooks over prompt text.
-
-## Subagent Strategy
-
-- Use subagents liberally to keep main context window clean
-- Offload research, exploration, and parallel analysis to subagents
-- For complex problems, throw more compute at it via subagents
-- One task per subagent for focused execution
+- Work is done only when these pass:
+  - The pre-commit hook, `.husky/pre-commit`, the single list of checks: read it rather than restating it. `git commit` runs it, so a successful commit is your proof; with no commit, run `sh .husky/pre-commit` from the repo root. Typecheck, tests and Knip read the whole working tree, so unstaged work fails the hook too, and parallel sessions each need their own worktree.
+  - `pnpm lint` and `pnpm format:check`. They cover every workspace where lint-staged covers only staged files, so they catch a file your change broke without touching it. Every lint rule is at `error` with zero warnings, so any report is a regression.
+- On a fresh clone or worktree, generate before you lint: the Prisma client, package builds and Next.js route types are untracked, and the type-aware lint rules report unrelated errors until `pnpm build:packages`, `pnpm --filter @workspace/db db:gen` and `pnpm --filter web exec next typegen` have run. `pnpm typecheck` generates them itself.
+- If the DB schema changed: `pnpm --filter @workspace/db migrate:dev`, then `pnpm --filter @workspace/db db:gen`.
+- A production build is `pnpm --filter web build` from the repo root: the filter resolves the workspace packages. It needs `GITHUB_PRIVATE_KEY` set, since `github-app.ts` reads it at module evaluation and page-data collection for `/api/github/setup` fails without it.
 
 ## Agent skills
 
@@ -68,16 +40,13 @@ Issues live in GitHub Issues at `manucoffin/faster-fixes`. See `docs/agents/issu
 
 ### Triage labels
 
-Default canonical vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
-
-### Releasing packages
-
-`@fasterfixes/*` packages are published by CI from `main` through Changesets. Use the `release` skill to write the changeset; CI is the only publisher.
+Five canonical triage roles, all using default label names. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context repo. Glossary at `CONTEXT.md`; ADRs in `docs/adr/`. See `docs/agents/domain.md`.
+Single-context repo. Glossary at `CONTEXT.md`: name domain concepts with its terms. ADRs in `docs/adr/`. See `docs/agents/domain.md`.
 
-## Next.js
+### Web app
 
-`apps/web` runs a Next.js version with breaking changes against your training data. Before writing Next.js code, read the relevant guide in `apps/web/node_modules/next/dist/docs/` (see `apps/web/AGENTS.md`).
+- `pnpm dev:server start|stop|status` runs the dev server in the background, in cloud mode so `/`, `/docs` and `/blog` render instead of redirecting to `/login`. `start` returns once the server answers, with its URL and log path.
+- Public docs and blog pages are MDX in `apps/web/src/content/docs` and `apps/web/src/content/blog`; each docs folder's `meta.json` sets its sidebar order.

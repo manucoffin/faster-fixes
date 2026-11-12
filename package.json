@@ -5,6 +5,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:server": "sh scripts/dev-server.sh",
     "dev:example-vue": "turbo run dev --filter=@workspace/example-vue",
     "dev:example-angular": "turbo run dev --filter=@workspace/example-angular",
     "dev:example-svelte": "turbo run dev --filter=@workspace/example-svelte",

@@ -9,6 +9,7 @@
  * widgets already installed on customer sites cannot be forced to update.
  */
 
+import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ALLOWED_ORIGIN,
@@ -30,6 +31,9 @@ import {
   widgetApiPrisma,
   widgetRequest,
 } from "./_helpers/widget-api-test-doubles";
+
+const FREE_PLAN_FEEDBACK_LIMIT =
+  PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 vi.mock("@workspace/db", async () => {
   const { widgetApiPrisma } =
@@ -157,7 +161,7 @@ describe("POST /api/v1/feedback", () => {
   });
 
   it("refuses a submit that would cross the plan's feedback limit", async () => {
-    widgetApiPrisma.feedback.count.mockResolvedValue(50);
+    widgetApiPrisma.feedback.count.mockResolvedValue(FREE_PLAN_FEEDBACK_LIMIT);
 
     const response = await POST(submitRequest(feedbackFormData()));
 
@@ -165,10 +169,20 @@ describe("POST /api/v1/feedback", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Feedback limit reached for this organization's plan.",
       code: "RESOURCE_LIMIT_EXCEEDED",
-      current: 50,
-      limit: 50,
+      current: FREE_PLAN_FEEDBACK_LIMIT,
+      limit: FREE_PLAN_FEEDBACK_LIMIT,
     });
     expect(widgetApiPrisma.feedback.create).not.toHaveBeenCalled();
+  });
+
+  it("accepts a submit that leaves the plan one feedback under its limit", async () => {
+    widgetApiPrisma.feedback.count.mockResolvedValue(
+      FREE_PLAN_FEEDBACK_LIMIT - 1,
+    );
+
+    const response = await POST(submitRequest(feedbackFormData()));
+
+    expect(response.status).toBe(201);
   });
 
   it("rejects a body that is not readable as form data", async () => {
@@ -414,6 +428,54 @@ describe("POST /api/v1/feedback", () => {
       name: "feedback/created",
       data: { feedbackId: "feedback_1" },
     });
+  });
+
+  it("tells the integrations a Recording follows when the widget declares one", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: true },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/created",
+      data: { feedbackId: "feedback_1", recordingFollows: true },
+    });
+  });
+
+  it("announces the feedback as before when the widget declares no Recording", async () => {
+    const response = await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: false },
+        }),
+      ),
+    );
+
+    expect(response.status).toBe(201);
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "feedback/created",
+      data: { feedbackId: "feedback_1" },
+    });
+  });
+
+  it("stores nothing of the Recording declaration on the feedback", async () => {
+    await POST(
+      submitRequest(
+        feedbackFormData({
+          data: { ...validFeedbackPayload, recordingFollows: true },
+        }),
+      ),
+    );
+
+    expect(widgetApiPrisma.feedback.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ recordingFollows: true }),
+      }),
+    );
   });
 
   it("stores an allowed screenshot and answers with its signed url", async () => {

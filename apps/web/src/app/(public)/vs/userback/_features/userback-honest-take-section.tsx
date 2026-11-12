@@ -1,5 +1,5 @@
 const userbackWins = [
-  "You need screen-recorded video feedback or session replay.",
+  "You need screen-recorded video feedback or session analytics across whole visits.",
   "You run NPS, CSAT, or in-app microsurveys.",
   "You want a public feature request portal with voting.",
   "You need SOC 2 Type II compliance or SSO available today.",

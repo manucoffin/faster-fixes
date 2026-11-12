@@ -5,14 +5,23 @@ import type {
 } from "@fasterfixes/core";
 import type { Page, Request, Route } from "@playwright/test";
 
+import { routeRecorderFile } from "./recorder-file";
+
 export const WIDGET_API_ORIGIN = "http://widget-api.e2e.test";
 export const WIDGET_PROJECT_ID = "proj_e2e";
 
 const ENABLED_CONFIG: WidgetConfig = { enabled: true, branding: false };
 
+/**
+ * How the stub answers a Recording upload: stored, refused with a 409, failed
+ * at the network level, or left without an answer.
+ */
+type RecordingResponse = "stored" | "refused" | "network-error" | "hang";
+
 type StubOptions = {
   config?: WidgetConfig;
   feedback?: FeedbackItem[];
+  recording?: RecordingResponse;
 };
 
 type StubbedRequest = {
@@ -29,6 +38,8 @@ type WidgetApiStub = {
   createdFeedback: () => (CreateFeedbackData | null)[];
   /** The id the stub gave each created item, in order. */
   createdIds: () => string[];
+  /** The URL of every request for the recorder file the script embed inserts. */
+  recorderRequests: string[];
 };
 
 // The widget calls the API cross-origin with custom headers, so every answer,
@@ -75,16 +86,22 @@ function toCreatedItem(data: CreateFeedbackData | null): FeedbackItem {
 
 /**
  * Answers every widget HTTP API endpoint for `page` with bodies shaped like
- * the real route handlers, and records each request for assertions. The
+ * the real route handlers, and records each request for assertions. Serves
+ * the recorder file from the workspace build, in place of the CDN. The
  * Feedback list is stateful: a created item shows up in later list calls.
  */
 export async function stubWidgetApi(
   page: Page,
-  { config = ENABLED_CONFIG, feedback = [] }: StubOptions = {},
+  {
+    config = ENABLED_CONFIG,
+    feedback = [],
+    recording = "stored",
+  }: StubOptions = {},
 ): Promise<WidgetApiStub> {
   const requests: StubbedRequest[] = [];
   let items = [...feedback];
   const createdIds: string[] = [];
+  const recorderRequests = await routeRecorderFile(page);
 
   await page.route(`${WIDGET_API_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -118,6 +135,18 @@ export async function stubWidgetApi(
       return json(route, 200, {
         screenshotUrl: `${WIDGET_API_ORIGIN}/screenshots/${screenshotMatch[1]}.png`,
       });
+    }
+
+    if (
+      /^\/api\/v1\/feedback\/[^/]+\/recording$/.test(pathname) &&
+      method === "PUT"
+    ) {
+      if (recording === "refused") {
+        return json(route, 409, { error: "Recording already attached" });
+      }
+      if (recording === "network-error") return route.abort("failed");
+      if (recording === "hang") return;
+      return route.fulfill({ status: 204, headers: corsHeaders(request) });
     }
 
     const itemMatch = /^\/api\/v1\/feedback\/([^/]+)$/.exec(pathname);
@@ -158,5 +187,6 @@ export async function stubWidgetApi(
         readCreateData(request.body),
       ),
     createdIds: () => [...createdIds],
+    recorderRequests,
   };
 }

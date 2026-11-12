@@ -28,7 +28,7 @@ const title = "BugHerd Alternative: Open-Source, Self-Hosted, No Seat Fees";
 const description =
   "BugHerd costs $50/mo for 5 members. FasterFixes is an open-source feedback widget, free to self-host, with MCP for Claude Code and Cursor.";
 const datePublished = "2026-04-25T00:00:00.000Z";
-const dateModified = "2026-04-25T00:00:00.000Z";
+const dateModified = "2026-11-12T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {

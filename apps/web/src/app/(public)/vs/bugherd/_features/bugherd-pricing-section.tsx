@@ -33,7 +33,7 @@ const cards: {
     plan: "5 members included",
     price: "$50",
     suffix: "/ month",
-    note: "Each extra user is $8/month. Studio (10 members) is $80/month. Premium (25 members, kanban for clients) is $150/month.",
+    note: "Each extra user is $8/month. Studio (10 members) is $80/month. Premium (25 members, client task board, Jira and Linear) is $150/month. Annual billing saves two months.",
   },
 ];
 
