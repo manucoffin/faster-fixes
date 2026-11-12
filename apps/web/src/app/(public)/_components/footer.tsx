@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AppLogo } from "@/app/_components/app-logo";
 
 const productLinks: { text: string; href: string; external?: boolean }[] = [
+  { text: "Features", href: "/features" },
   { text: "Documentation", href: "/docs" },
   { text: "Blog", href: "/blog" },
   { text: "Pricing", href: "/pricing" },
