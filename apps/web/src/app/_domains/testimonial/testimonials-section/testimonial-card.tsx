@@ -1,5 +1,5 @@
-import { getTestimonialAffiliation } from "@/app/_domains/testimonial/_helpers/get-testimonial-affiliation";
-import { type ListPublishedTestimonialsOutput } from "@/app/_domains/testimonial/_services/list-published-testimonials";
+import { getTestimonialAffiliation } from "../_helpers/get-testimonial-affiliation";
+import { type ListPublishedTestimonialsOutput } from "../_services/list-published-testimonials";
 import { resolveS3Url } from "@/utils/url/resolve-s3-url";
 import {
   Avatar,

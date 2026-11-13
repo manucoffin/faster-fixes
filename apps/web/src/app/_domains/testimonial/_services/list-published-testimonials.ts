@@ -2,7 +2,7 @@ import { prisma } from "@workspace/db";
 import { unstable_cache } from "next/cache";
 
 // Revalidated by the admin status change, so a newly published Testimonial
-// shows on the homepage without waiting for the hourly refresh.
+// shows on every page that lists them without waiting for the hourly refresh.
 export const PUBLISHED_TESTIMONIALS_CACHE_TAG = "published-testimonials";
 
 export const listPublishedTestimonials = unstable_cache(

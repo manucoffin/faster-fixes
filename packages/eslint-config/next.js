@@ -169,8 +169,8 @@ const rawTailwindColorOptions = {
   allowPatterns: [
     "^fill-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\\d{2,3}$",
   ],
-  // The home page illustrations only: drawn mock screens keep fixed colours on
-  // purpose, independently of the theme.
+  // The home page and feature page illustrations only: drawn mock screens keep
+  // fixed colours on purpose, independently of the theme.
   ignorePathPatterns: [
     "/\\(home\\)/_features/hero/hero-flow-animation\\.client\\.tsx$",
     "/\\(home\\)/_features/how-it-works/flow-animations\\.tsx$",
@@ -178,6 +178,7 @@ const rawTailwindColorOptions = {
     "/\\(home\\)/_features/problem/problem-chat-animation\\.client\\.tsx$",
     "/\\(home\\)/_features/video-review/video-review-animation\\.tsx$",
     "/\\(home\\)/_features/context/context-illustrations\\.tsx$",
+    "/features/website-annotation/_components/illustrations/[^/]+\\.tsx$",
   ],
 };
 

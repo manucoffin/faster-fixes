@@ -30,6 +30,7 @@ const leadingNavLinks = [{ href: "/docs", label: "Documentation" }] satisfies {
 }[];
 
 const trailingNavLinks = [
+  { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
   // { href: "/open-source", label: "Open source" },
   // { href: "/blog", label: "Blog" },

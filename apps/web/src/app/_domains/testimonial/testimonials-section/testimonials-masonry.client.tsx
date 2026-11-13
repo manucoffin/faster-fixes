@@ -4,7 +4,7 @@ import { layout, prepare } from "@chenglou/pretext";
 import { cn } from "@workspace/ui/lib/utils";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
-import { distributeIntoColumns } from "../../_helpers/distribute-into-columns";
+import { distributeIntoColumns } from "../_helpers/distribute-into-columns";
 
 // Mirror the card classes: `gap-6`, and `p-7` plus a 1px border per side.
 const GAP_PX = 24;

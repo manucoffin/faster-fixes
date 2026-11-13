@@ -4,7 +4,21 @@ import Link from "next/link";
 const points = [
   {
     title: "One widget, any stack",
-    body: "Paste one script tag on any site, or run npm install @fasterfixes/react and wrap your React app in FeedbackProvider. Both embeds capture the same context, and on React sites every report also carries the component path. No browser extension for reviewers to install.",
+    body: (
+      <>
+        Paste one script tag on any site, or run npm install @fasterfixes/react
+        and wrap your React app in FeedbackProvider. Both embeds capture the
+        same context, and on React sites every report also carries the component
+        path. Reviewers get{" "}
+        <Link
+          href={"/features/website-annotation" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          website annotation
+        </Link>{" "}
+        with no browser extension to install.
+      </>
+    ),
     href: "/docs/widget/install/react" as Route,
     linkLabel: "Widget setup guide",
   },

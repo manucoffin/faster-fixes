@@ -1,3 +1,6 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 const cards = [
   {
     title: "Feedback flows to your AI coding agent",
@@ -9,7 +12,20 @@ const cards = [
   },
   {
     title: "No client account required",
-    body: "Guests annotate directly on the page, no signup, no email confirmation, no per-seat fee for the client. The friction that kills feedback loops with non-technical stakeholders is gone.",
+    body: (
+      <>
+        Guests{" "}
+        <Link
+          href={"/features/website-annotation" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          annotate the live website
+        </Link>{" "}
+        directly, with no signup, no email confirmation, and no per-seat fee for
+        the client. The friction that kills feedback loops with non-technical
+        stakeholders is gone.
+      </>
+    ),
   },
   {
     title: "Self-host on your own stack",

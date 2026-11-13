@@ -1,10 +1,10 @@
-import { listPublishedTestimonials } from "@/app/_domains/testimonial/_services/list-published-testimonials";
+import { listPublishedTestimonials } from "../_services/list-published-testimonials";
 
 import { TestimonialCard } from "./testimonial-card";
 import { TestimonialsMasonry } from "./testimonials-masonry.client";
 
 export async function TestimonialsSection() {
-  // An optional section: a database outage hides it rather than taking down the homepage.
+  // An optional section: a database outage hides it rather than taking down the page.
   const testimonials = await listPublishedTestimonials().catch(
     (error: unknown) => {
       console.error("Failed to list published Testimonials", error);
