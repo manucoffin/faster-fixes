@@ -17,6 +17,10 @@ const steps = [
     title: "Client annotate your site",
     description:
       "No account, no onboarding. They click, leave a comment, and move on. Screenshot, a replay of the last minute, URL, component path, browser details, console logs, and network requests are captured automatically.",
+    link: {
+      href: "/features/website-annotation" as Route,
+      label: "How client annotation works",
+    },
     Content: AnnotateContent,
   },
   {
@@ -74,6 +78,14 @@ export function HowItWorksSection() {
               <p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
                 {step.description}
               </p>
+              {step.link && (
+                <Link
+                  href={step.link.href}
+                  className="text-sm text-foreground underline underline-offset-4 hover:no-underline"
+                >
+                  {step.link.label} →
+                </Link>
+              )}
             </div>
           ))}
         </div>

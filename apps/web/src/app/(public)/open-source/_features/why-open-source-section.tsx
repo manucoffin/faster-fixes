@@ -1,7 +1,23 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 const pillars = [
   {
     title: "Open source, not a black box",
-    body: "The dashboard, the widget, and the MCP server are on GitHub: the app under AGPL-3.0, the widget packages and the MCP server under MIT. Read the code, audit the behaviour, fork it the day its roadmap stops matching yours.",
+    body: (
+      <>
+        The dashboard, the{" "}
+        <Link
+          href={"/features/website-annotation" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          website annotation widget
+        </Link>
+        , and the MCP server are on GitHub: the app under AGPL-3.0, the widget
+        packages and the MCP server under MIT. Read the code, audit the
+        behaviour, fork it the day its roadmap stops matching yours.
+      </>
+    ),
   },
   {
     title: "One less SaaS to depend on",

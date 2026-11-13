@@ -1,7 +1,24 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 const cards = [
   {
     title: "Screenshot + annotated coordinates",
-    body: "Every report ships with a screenshot of the page exactly as the client saw it, plus the annotated coordinates and visible viewport. The same baseline Markup.io captures, included on every plan, including self-hosted.",
+    body: (
+      <>
+        Clients leave an{" "}
+        <Link
+          href={"/features/website-annotation" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          annotation on any page
+        </Link>{" "}
+        of the live site, and every report ships with a screenshot of the page
+        exactly as they saw it, plus the annotated coordinates and visible
+        viewport. The same baseline Markup.io captures, included on every plan,
+        including self-hosted.
+      </>
+    ),
   },
   {
     title: "CSS selector + React component path",

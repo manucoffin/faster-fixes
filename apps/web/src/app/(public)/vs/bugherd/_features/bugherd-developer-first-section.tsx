@@ -4,7 +4,21 @@ import Link from "next/link";
 const points = [
   {
     title: "One widget, any stack",
-    body: "Paste one script tag on any site, from WordPress and Webflow to Vue, Angular, or Svelte apps, or run npm install @fasterfixes/react and wrap your React app in FeedbackProvider. Same widget, same options, same captured context either way.",
+    body: (
+      <>
+        Paste one script tag on any site, from WordPress and Webflow to Vue,
+        Angular, or Svelte apps, or run npm install @fasterfixes/react and wrap
+        your React app in FeedbackProvider. Same widget, same options, same
+        captured context either way: a{" "}
+        <Link
+          href={"/features/website-annotation" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          website annotation tool
+        </Link>{" "}
+        your clients use without an account or an extension.
+      </>
+    ),
     href: "/docs/widget/install/script-embed" as Route,
     linkLabel: "Script embed docs",
   },
