@@ -11,6 +11,11 @@ import { MaskingMatrix } from "./masking-matrix";
 const attributes = [
   {
     name: "data-ff-mask",
+    title: (
+      <>
+        Mask text with <code>data-ff-mask</code>
+      </>
+    ),
     body: (
       <>
         Replaces the text of the element with <code>*</code> and keeps the
@@ -21,6 +26,11 @@ const attributes = [
   },
   {
     name: "data-ff-block",
+    title: (
+      <>
+        Block an element with <code>data-ff-block</code>
+      </>
+    ),
     body: "Replaces the element with an empty placeholder of the same size.",
     Illustration: BlockElementAnimation,
   },
@@ -30,9 +40,7 @@ export function WebsiteAnnotationMasking() {
   return (
     <section className="w-full bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <SectionHeading>
-          Keeping sensitive data out of the Recording and the Screenshot
-        </SectionHeading>
+        <SectionHeading>Keep sensitive data out of the report</SectionHeading>
 
         <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <SectionBody>
@@ -69,14 +77,16 @@ export function WebsiteAnnotationMasking() {
           </SectionBody>
 
           <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-            {attributes.map(({ name, body, Illustration }) => (
+            {attributes.map(({ name, title, body, Illustration }) => (
               <li
                 key={name}
                 className="flex flex-col gap-6 rounded-2xl border bg-background p-6 md:p-8"
               >
                 <Illustration />
                 <div>
-                  <h3 className="font-mono text-lg font-medium">{name}</h3>
+                  <h3 className="text-lg font-medium [&_code]:font-mono">
+                    {title}
+                  </h3>
                   <SectionBody className="mt-2 text-base">
                     <p>{body}</p>
                   </SectionBody>

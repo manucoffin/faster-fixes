@@ -17,7 +17,7 @@ export function WebsiteAnnotationHero() {
           <div className="mt-12 grid grid-cols-1 items-center gap-12 md:mt-16 lg:grid-cols-2 lg:gap-16">
             <div className="flex flex-col items-start">
               <h1 className="max-w-xl text-4xl leading-tight font-normal tracking-tight text-balance md:text-5xl lg:text-6xl">
-                Website annotation for client reviews: click, comment, fix
+                Website annotation tool for client reviews: click, comment, fix
               </h1>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">

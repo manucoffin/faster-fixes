@@ -1,9 +1,9 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { TestimonialsSection } from "@/app/_domains/testimonial/testimonials-section/testimonials-section";
 import type { Metadata } from "next";
 import { WebsiteAnnotationCta } from "./_features/website-annotation-cta";
 import {
@@ -18,11 +18,12 @@ import { WebsiteAnnotationMcp } from "./_features/website-annotation-mcp";
 import { WebsiteAnnotationOpenSource } from "./_features/website-annotation-open-source";
 
 const pageUrl = `${APP_URL}/features/website-annotation`;
-const title = `Website annotation tool for client reviews · ${SITE_NAME}`;
+// Without the site name suffix: with it, the title overflows the search result width.
+const title = "Website annotation tool: client clicks become agent-ready tasks";
 const description =
-  "A website annotation tool that also works as a feedback tool for websites: mask fields, block screenshots, self-host it, hand it to your agent.";
+  "Website annotation tool for client reviews: one click, one sentence, and a report with selector, console log and a one-minute replay. Free plan.";
 const datePublished = "2026-11-12T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-13T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -62,6 +63,7 @@ export default function Page() {
       <WebsiteAnnotationMasking />
       <WebsiteAnnotationOpenSource />
       <WebsiteAnnotationMcp />
+      <TestimonialsSection />
       <WebsiteAnnotationFaq />
       <WebsiteAnnotationCta />
 

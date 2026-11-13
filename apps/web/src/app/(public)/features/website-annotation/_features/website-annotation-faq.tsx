@@ -9,6 +9,21 @@ import { SectionHeading } from "../_components/section-heading";
 
 export const websiteAnnotationFaqs: FaqItem[] = [
   {
+    question: "What is a website annotation tool?",
+    answer:
+      "A website annotation tool lets someone point at an element of a live web page and leave a comment on it, instead of describing the problem in an email or a call. Faster Fixes attaches the technical context to each annotation automatically: the page URL, the CSS selector, the click position and viewport, the browser and OS, a screenshot, the console output, the network requests and a replay of the last minute.",
+  },
+  {
+    question: "How do you annotate a website?",
+    answer:
+      "Install the widget on the site with a framework package or one script tag, then create a review link for your client from the project dashboard. The client opens the site through that link, clicks the element that looks wrong, types one sentence and submits. The annotation reaches your dashboard as a complete report.",
+  },
+  {
+    question: "Can you annotate a live website without a browser extension?",
+    answer:
+      "Yes. The widget runs inside the site itself, so reviewers install nothing and create no account: they open the review link and start commenting. The widget only renders for reviewers who arrive through a review link, so your public visitors never see it.",
+  },
+  {
     question: "Is a website annotation tool the same thing as a feedback tool?",
     answer:
       "Not in the usual sense. A canvas annotator marks up a screenshot and gives you back an image, and someone still has to translate it. Here the client's click, comment and all the technical context become one structured item, which is why the same tool serves as a feedback tool for a build review and as input for an agent.",
@@ -29,9 +44,9 @@ export const websiteAnnotationFaqs: FaqItem[] = [
       "Any site. One script tag covers WordPress, Webflow and static HTML. There are packages for React and Next.js, Vue and Nuxt, Angular, Svelte and SvelteKit, and snippets for Astro, Solid, Preact and vanilla JavaScript. Every path mounts the same widget and captures the same context.",
   },
   {
-    question: "Is the website annotation tool free to try?",
+    question: "Is there a free website annotation tool?",
     answer:
-      "Yes, and the Free plan is not time-limited: 1 project, up to 20 feedback items, 1 team member, 1 video up to 500 MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira and Slack need Pro at $20/month flat for up to 5 members, or Agency at $99/month with unlimited members. Your data is never deleted when a plan ends.",
+      "Faster Fixes has a Free plan that is not time-limited: 1 project, up to 20 feedback items, 1 team member, 1 video up to 500 MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira and Slack need Pro at $20/month flat for up to 5 members, or Agency at $99/month with unlimited members. Your data is never deleted when a plan ends.",
   },
 ];
 
