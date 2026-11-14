@@ -188,7 +188,7 @@ test.describe("script embed style and labels", () => {
     const font = await readFile(
       path.join(
         import.meta.dirname,
-        "../src/app/(public)/blog/[slug]/og/_fonts/space-grotesk-bold.ttf",
+        "../src/app/og/_fonts/space-grotesk-bold.ttf",
       ),
     );
     await page.route("**/e2e-golden-font.ttf", (route) =>
