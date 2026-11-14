@@ -14,3 +14,7 @@ export const PUBLISHER_LOGO = {
 } as const;
 
 export const SITE_LANGUAGE = "en";
+export const SITE_OG_LOCALE = "en_US";
+
+// The size every social card is rendered at by the `/og` route.
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;

@@ -1,3 +1,4 @@
+import { cn } from "@workspace/ui/lib/utils";
 import { CameraIcon, MousePointer2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 import { TerminalFrame } from "../how-it-works/flow-animations";
@@ -262,6 +263,41 @@ function ClaudeMascot() {
   );
 }
 
+// The welcome box Claude Code draws at the top of a session.
+export function ClaudeCodeWelcome() {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-md border px-3 py-2.5"
+      style={{ borderColor: `${CLAUDE_ORANGE}80` }}
+    >
+      <ClaudeMascot />
+      <div className="flex min-w-0 flex-col">
+        <span className="font-semibold text-zinc-100">Claude Code</span>
+        <span className="truncate text-zinc-500">
+          ~/yourapp · faster-fixes MCP connected
+        </span>
+      </div>
+    </div>
+  );
+}
+
+type ClaudeCodeInputProps = {
+  className?: string;
+};
+
+// The empty prompt Claude Code waits on at the bottom of a session.
+export function ClaudeCodeInput({ className }: ClaudeCodeInputProps) {
+  return (
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      <div className="flex items-center gap-2 rounded-md border border-zinc-700 px-3 py-2 text-zinc-500">
+        <span>&gt;</span>
+        <span className="h-3.5 w-1.5 bg-zinc-400" />
+      </div>
+      <span className="px-1 text-zinc-600">? for shortcuts</span>
+    </div>
+  );
+}
+
 type AgentStepProps = {
   step: number;
   bullet?: string;
@@ -322,18 +358,7 @@ export function AgentContextIllustration() {
         title="~/yourapp"
         contentClassName="flex min-h-[440px] flex-col gap-4 p-4 font-mono text-[11px] leading-relaxed sm:text-xs"
       >
-        <div
-          className="flex items-center gap-3 rounded-md border px-3 py-2.5"
-          style={{ borderColor: `${CLAUDE_ORANGE}80` }}
-        >
-          <ClaudeMascot />
-          <div className="flex min-w-0 flex-col">
-            <span className="font-semibold text-zinc-100">Claude Code</span>
-            <span className="truncate text-zinc-500">
-              ~/yourapp · faster-fixes MCP connected
-            </span>
-          </div>
-        </div>
+        <ClaudeCodeWelcome />
 
         <div className="ctx-agent-line-0 flex min-w-0 gap-2 text-zinc-400">
           <span className="shrink-0">&gt;</span>
@@ -407,13 +432,7 @@ export function AgentContextIllustration() {
           </span>
         </AgentStep>
 
-        <div className="mt-auto flex flex-col gap-1.5">
-          <div className="flex items-center gap-2 rounded-md border border-zinc-700 px-3 py-2 text-zinc-500">
-            <span>&gt;</span>
-            <span className="h-3.5 w-1.5 bg-zinc-400" />
-          </div>
-          <span className="px-1 text-zinc-600">? for shortcuts</span>
-        </div>
+        <ClaudeCodeInput className="mt-auto" />
       </TerminalFrame>
     </div>
   );

@@ -4,6 +4,7 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { TestimonialsSection } from "@/app/_domains/testimonial/testimonials-section/testimonials-section";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { WebsiteAnnotationCta } from "./_features/website-annotation-cta";
 import {
@@ -42,16 +43,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/features/website-annotation",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

@@ -1,13 +1,14 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { FeatureCards } from "./_features/feature-cards";
 
 const pageUrl = `${APP_URL}/features`;
 const title = `Features · ${SITE_NAME}`;
 const description =
-  "Website annotation, bug reports with a replay, video review, a kanban board and an MCP server for coding agents. Everything FasterFixes does, in one place.";
+  "A website annotation tool, a website bug reporting tool with a replay, video review, a kanban board and an MCP server for coding agents. Everything FasterFixes does, in one place.";
 
 export const metadata: Metadata = {
   title: {
@@ -17,16 +18,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/features",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

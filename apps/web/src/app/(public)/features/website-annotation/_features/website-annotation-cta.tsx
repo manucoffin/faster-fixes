@@ -2,9 +2,9 @@ import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
-import { InstallPanel } from "./install-panel.client";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
+import { InstallPanel } from "../../_components/install-panel.client";
 
 export function WebsiteAnnotationCta() {
   return (

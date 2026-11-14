@@ -29,6 +29,10 @@ const steps = [
     title: "Output as structured markdown",
     description:
       "The widget structures every detail automatically. Your agent receives a complete report and knows exactly where to look.",
+    link: {
+      href: "/features/actionable-bug-reports" as Route,
+      label: "What a complete bug report contains",
+    },
     Content: StructureContent,
   },
   {

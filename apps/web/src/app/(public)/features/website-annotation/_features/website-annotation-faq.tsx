@@ -5,7 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
-import { SectionHeading } from "../_components/section-heading";
+import { SectionHeading } from "../../_components/section-heading";
 
 export const websiteAnnotationFaqs: FaqItem[] = [
   {

@@ -1,8 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { ReportAnatomyIllustration } from "../_components/illustrations/report-anatomy-illustration";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
 
 const steps = [
   {
@@ -15,7 +15,17 @@ const steps = [
   },
   {
     title: "You get a complete report.",
-    body: "Page URL, CSS selector, click position and viewport, browser and OS, a screenshot, console output and network requests, plus a replay of the previous minute.",
+    body: (
+      <>
+        Page URL, CSS selector, click position and viewport, browser and OS, a
+        screenshot, console output and network requests, plus a replay of the
+        previous minute: a{" "}
+        <Link href={"/features/actionable-bug-reports" as Route}>
+          bug reporting tool
+        </Link>{" "}
+        and an annotation tool in one widget.
+      </>
+    ),
   },
 ];
 

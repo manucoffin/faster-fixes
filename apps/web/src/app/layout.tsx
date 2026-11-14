@@ -1,5 +1,11 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_META_DESCRIPTION, SITE_NAME } from "@/app/_constants/seo";
+import {
+  OG_IMAGE_SIZE,
+  SITE_META_DESCRIPTION,
+  SITE_NAME,
+  SITE_OG_LOCALE,
+  SITE_TAGLINE,
+} from "@/app/_constants/seo";
 import { TRPCProviderWrapper as TRPCProvider } from "@/lib/trpc/trpc-provider.client";
 import { isCloud } from "@/utils/environment/env";
 import { Analytics } from "@vercel/analytics/next";
@@ -24,6 +30,15 @@ const fontMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
+// Pages outside `(public)` set no social metadata of their own and share the
+// home page's card.
+const defaultOgImage = {
+  url: "/og",
+  ...OG_IMAGE_SIZE,
+  alt: `${SITE_NAME}: ${SITE_TAGLINE}`,
+  type: "image/png",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
@@ -34,10 +49,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    locale: "en_US",
+    locale: SITE_OG_LOCALE,
+    images: [defaultOgImage],
   },
   twitter: {
     card: "summary_large_image",
+    images: [defaultOgImage],
   },
   robots: {
     index: true,

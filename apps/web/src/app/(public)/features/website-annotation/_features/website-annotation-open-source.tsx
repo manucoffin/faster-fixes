@@ -3,8 +3,8 @@ import { ArrowRightIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { LicenceBoundaryIllustration } from "../_components/illustrations/licence-boundary-illustration";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
 
 export function WebsiteAnnotationOpenSource() {
   return (

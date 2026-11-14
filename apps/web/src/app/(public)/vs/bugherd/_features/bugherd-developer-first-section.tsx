@@ -24,7 +24,20 @@ const points = [
   },
   {
     title: "Captures the React component tree",
-    body: "Every feedback item ships with the DOM selector and, when the site runs React, the React component path. Your agent knows which file owns the bug, not just where it appears on screen.",
+    body: (
+      <>
+        Every feedback item ships with the DOM selector and, when the site runs
+        React, the React component path. Your agent knows which file owns the
+        bug, not just where it appears on screen: a{" "}
+        <Link
+          href={"/features/actionable-bug-reports" as Route}
+          className="text-foreground underline underline-offset-4 hover:no-underline"
+        >
+          website bug reporting tool
+        </Link>{" "}
+        built for developers.
+      </>
+    ),
     href: "/docs/concepts/how-it-works" as Route,
     linkLabel: "How it works",
   },

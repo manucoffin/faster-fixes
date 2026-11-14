@@ -1,4 +1,4 @@
-import { TerminalFrame } from "../../../../(home)/_features/how-it-works/flow-animations";
+import { TerminalFrame } from "../../(home)/_features/how-it-works/flow-animations";
 
 const CYCLE = 8;
 

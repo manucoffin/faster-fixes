@@ -179,6 +179,8 @@ const rawTailwindColorOptions = {
     "/\\(home\\)/_features/video-review/video-review-animation\\.tsx$",
     "/\\(home\\)/_features/context/context-illustrations\\.tsx$",
     "/features/website-annotation/_components/illustrations/[^/]+\\.tsx$",
+    "/features/actionable-bug-reports/_components/illustrations/[^/]+\\.tsx$",
+    "/features/_components/typed-never-captured-animation\\.tsx$",
   ],
 };
 

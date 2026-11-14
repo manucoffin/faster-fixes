@@ -21,6 +21,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { GitHubStarsHeaderLink } from "../_features/github-stars/github-stars-header-link.client";
+import { featureLinks } from "./feature-links";
 import { MobileNav } from "./mobile-nav.client";
 import { ThemeToggle } from "@/app/_components/theme-toggle.client";
 
@@ -30,13 +31,16 @@ const leadingNavLinks = [{ href: "/docs", label: "Documentation" }] satisfies {
 }[];
 
 const trailingNavLinks = [
-  { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
   // { href: "/open-source", label: "Open source" },
   // { href: "/blog", label: "Blog" },
 ] satisfies { href: string; label: string }[];
 
-const navLinks = [...leadingNavLinks, ...trailingNavLinks];
+const navLinks = [
+  ...leadingNavLinks,
+  { href: "/features", label: "Features" },
+  ...trailingNavLinks,
+];
 
 const integrationLinks = [
   {
@@ -91,7 +95,16 @@ export async function Header() {
             <div className="md:hidden">
               <MobileNav
                 links={[{ href: "/", label: "Home" }, ...navLinks]}
-                integrationLinks={integrationLinks}
+                sections={[
+                  {
+                    title: "Features",
+                    links: featureLinks.map((feature) => ({
+                      href: feature.href,
+                      label: feature.title,
+                    })),
+                  },
+                  { title: "Integrations", links: integrationLinks },
+                ]}
               />
             </div>
           )}
@@ -141,6 +154,35 @@ export async function Header() {
                               <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                                 {link.description}
                               </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  {/* asChild: a click still opens /features, hover opens the list. */}
+                  <NavigationMenuTrigger
+                    asChild
+                    className="bg-transparent px-0 text-sm font-normal hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-[state=open]:hover:bg-transparent data-[state=open]:focus:bg-transparent"
+                  >
+                    <Link href="/features">Features</Link>
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    {/* Plain Link for the same Radix FocusGroupItem reason as Integrations. */}
+                    <ul className="grid w-[520px] grid-cols-2 gap-1 p-2">
+                      {featureLinks.map((feature) => (
+                        <li key={feature.slug}>
+                          <Link
+                            href={feature.href}
+                            className="flex flex-col gap-1 rounded-sm p-2 transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                          >
+                            <span className="text-sm font-medium">
+                              {feature.title}
+                            </span>
+                            <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                              {feature.summary}
                             </span>
                           </Link>
                         </li>
