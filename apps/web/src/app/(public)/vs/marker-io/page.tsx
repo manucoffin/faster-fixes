@@ -5,6 +5,7 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { MarkerIoBreadcrumb } from "./_features/marker-io-breadcrumb";
 import { MarkerIoComparisonSection } from "./_features/marker-io-comparison-section";
@@ -51,16 +52,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/vs/marker-io",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

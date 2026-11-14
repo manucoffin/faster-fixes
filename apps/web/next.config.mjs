@@ -40,6 +40,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Social caches and shared links still point at the blog's former card route.
+        source: "/blog/:slug/og",
+        destination: "/og/blog/:slug",
+        permanent: true,
+      },
+      {
         source: "/docs/widget/use-feedback-hook",
         destination: "/docs/widget/control-the-widget",
         permanent: true,

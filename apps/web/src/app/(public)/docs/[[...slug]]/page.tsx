@@ -10,6 +10,7 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { getDocsMDXComponents } from "mdx-components";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { docsHowToSchemas } from "./_features/docs-how-to-schemas";
@@ -81,14 +82,6 @@ export async function generateMetadata(
     alternates: {
       canonical: `${APP_URL}${canonicalPath}`,
     },
-    openGraph: {
-      title,
-      description,
-      url: `${APP_URL}${canonicalPath}`,
-    },
-    twitter: {
-      title,
-      description,
-    },
+    ...buildSocialMetadata({ path: canonicalPath, title, description }),
   };
 }

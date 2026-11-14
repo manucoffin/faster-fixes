@@ -5,6 +5,7 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { SlackBreadcrumb } from "./_features/slack-breadcrumb";
 import { SlackCtaSection } from "./_features/slack-cta-section";
@@ -44,28 +45,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/integrations/slack",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    description,
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
+    imageAlt: ogImageAlt,
+  }),
 };
 
 export default function Page() {

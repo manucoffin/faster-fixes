@@ -2,6 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { LinearBreadcrumb } from "./_features/linear-breadcrumb";
 import { LinearCapabilitiesSection } from "./_features/linear-capabilities-section";
@@ -38,28 +39,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/integrations/linear",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    description,
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
+    imageAlt: ogImageAlt,
+  }),
 };
 
 export default function Page() {

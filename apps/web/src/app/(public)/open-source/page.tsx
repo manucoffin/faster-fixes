@@ -2,6 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { ComparisonSection } from "./_features/comparison-section";
 import { LicenseSection } from "./_features/license-section";
@@ -39,15 +40,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${APP_URL}/open-source`,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/open-source",
     title,
     description,
-    url: `${APP_URL}/open-source`,
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

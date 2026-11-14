@@ -5,6 +5,7 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { McpBreadcrumb } from "./_features/mcp-breadcrumb";
 import { McpCtaSection } from "./_features/mcp-cta-section";
@@ -49,28 +50,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/integrations/mcp",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
-  twitter: {
-    title,
-    description,
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: ogImageAlt,
-      },
-    ],
-  },
+    imageAlt: ogImageAlt,
+  }),
 };
 
 export default function Page() {

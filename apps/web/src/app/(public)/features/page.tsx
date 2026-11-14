@@ -1,6 +1,7 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { FeatureCards } from "./_features/feature-cards";
 
@@ -17,16 +18,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/features",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

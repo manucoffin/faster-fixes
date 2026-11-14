@@ -8,6 +8,7 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { OrganizationSchema } from "@/app/_components/seo/organization-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebSiteSchema } from "@/app/_components/seo/website-schema";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 
 import { BeforeAfterSection } from "./_features/before-after-section";
@@ -51,15 +52,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: APP_URL,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/",
     title: `${SITE_NAME}: ${SITE_TAGLINE}`,
     description: SITE_META_DESCRIPTION,
-    url: APP_URL,
-  },
-  twitter: {
-    title: `${SITE_NAME}: ${SITE_TAGLINE}`,
-    description: SITE_META_DESCRIPTION,
-  },
+  }),
 };
 
 export default function Page() {

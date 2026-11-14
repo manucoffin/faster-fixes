@@ -7,6 +7,7 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { Button } from "@workspace/ui/components/button";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
@@ -40,16 +41,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: pageUrl,
   },
-  openGraph: {
+  ...buildSocialMetadata({
+    path: "/pricing",
     title,
     description,
-    url: pageUrl,
-    type: "website",
-  },
-  twitter: {
-    title,
-    description,
-  },
+  }),
 };
 
 export default function Page() {

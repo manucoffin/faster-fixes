@@ -2,6 +2,7 @@ import { APP_URL } from "@/app/_constants/app";
 import { SITE_LANGUAGE, SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { blogSource } from "@/lib/blog/source";
+import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Blog, WithContext } from "schema-dts";
@@ -15,14 +16,7 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: pageUrl },
-  openGraph: {
-    title,
-    description,
-    url: pageUrl,
-    type: "website",
-    siteName: SITE_NAME,
-  },
-  twitter: { title, description, card: "summary_large_image" },
+  ...buildSocialMetadata({ path: "/blog", title, description }),
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -90,7 +84,7 @@ export default function BlogPage() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element -- the card art is the post's own generated OG route, already sized and cached, so the image optimizer would only add a round trip */}
                   <img
-                    src={`/blog/${slug}/og`}
+                    src={`/og/blog/${slug}`}
                     alt={post.data.title}
                     className="h-auto w-full border border-border transition-transform duration-300 group-hover:scale-[1.02]"
                   />
