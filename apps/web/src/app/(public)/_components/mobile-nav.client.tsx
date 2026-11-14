@@ -13,19 +13,15 @@ import Link from "next/link";
 import { useState } from "react";
 
 type NavLink = { href: string; label: string };
-type IntegrationLink = {
-  href: string;
-  label: string;
-  description: string;
-  icon?: React.ReactNode;
-};
+type SectionLink = NavLink & { icon?: React.ReactNode };
+type NavSection = { title: string; links: SectionLink[] };
 
 type MobileNavProps = {
   links: NavLink[];
-  integrationLinks?: IntegrationLink[];
+  sections?: NavSection[];
 };
 
-export function MobileNav({ links, integrationLinks }: MobileNavProps) {
+export function MobileNav({ links, sections = [] }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -52,12 +48,12 @@ export function MobileNav({ links, integrationLinks }: MobileNavProps) {
             </Link>
           ))}
 
-          {integrationLinks && integrationLinks.length > 0 && (
-            <div className="mt-4">
+          {sections.map((section) => (
+            <div key={section.title} className="mt-4">
               <p className="px-3 pb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                Integrations
+                {section.title}
               </p>
-              {integrationLinks.map((link) => (
+              {section.links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href as never}
@@ -73,7 +69,7 @@ export function MobileNav({ links, integrationLinks }: MobileNavProps) {
                 </Link>
               ))}
             </div>
-          )}
+          ))}
         </nav>
       </SheetContent>
     </Sheet>

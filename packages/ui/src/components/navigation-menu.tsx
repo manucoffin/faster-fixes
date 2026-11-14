@@ -69,19 +69,41 @@ const navigationMenuTriggerStyle = cva(
 function NavigationMenuTrigger({
   className,
   children,
+  asChild,
   ...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
+  const chevron = (
+    <ChevronDownIcon
+      className="relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+      aria-hidden="true"
+    />
+  );
+
+  // With asChild (a link trigger), Slot needs a single child, so the chevron goes inside it.
+  const content =
+    asChild &&
+    React.isValidElement<{ children?: React.ReactNode }>(children) ? (
+      React.cloneElement(
+        children,
+        undefined,
+        <>
+          {children.props.children} {chevron}
+        </>,
+      )
+    ) : (
+      <>
+        {children} {chevron}
+      </>
+    );
+
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
       className={cn(navigationMenuTriggerStyle(), "group", className)}
+      asChild={asChild}
       {...props}
     >
-      {children}{" "}
-      <ChevronDownIcon
-        className="relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
-        aria-hidden="true"
-      />
+      {content}
     </NavigationMenuPrimitive.Trigger>
   );
 }

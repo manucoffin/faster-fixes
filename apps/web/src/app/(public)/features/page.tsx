@@ -7,7 +7,7 @@ import { FeatureCards } from "./_features/feature-cards";
 const pageUrl = `${APP_URL}/features`;
 const title = `Features · ${SITE_NAME}`;
 const description =
-  "Website annotation, bug reports with a replay, video review, a kanban board and an MCP server for coding agents. Everything FasterFixes does, in one place.";
+  "A website annotation tool, a website bug reporting tool with a replay, video review, a kanban board and an MCP server for coding agents. Everything FasterFixes does, in one place.";
 
 export const metadata: Metadata = {
   title: {
