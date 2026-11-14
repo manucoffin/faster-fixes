@@ -3,9 +3,9 @@ import type { Route } from "next";
 import Link from "next/link";
 import { BlockElementAnimation } from "../_components/illustrations/block-element-animation";
 import { MaskTextAnimation } from "../_components/illustrations/mask-text-animation";
-import { TypedNeverCapturedAnimation } from "../_components/illustrations/typed-never-captured-animation";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
+import { TypedNeverCapturedAnimation } from "../../_components/typed-never-captured-animation";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
 import { MaskingMatrix } from "./masking-matrix";
 
 const attributes = [

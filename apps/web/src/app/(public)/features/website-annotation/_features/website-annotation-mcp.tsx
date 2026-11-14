@@ -1,8 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { BoardMatchesBranchAnimation } from "../_components/illustrations/board-matches-branch-animation";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
 
 const mcpSetupCommand = `claude mcp add faster-fixes -s project \\
   --env FASTER_FIXES_TOKEN=ff_agent_xxx \\

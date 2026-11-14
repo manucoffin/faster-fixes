@@ -1,8 +1,8 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { ReportAnatomyIllustration } from "../_components/illustrations/report-anatomy-illustration";
-import { SectionBody } from "../_components/section-body";
-import { SectionHeading } from "../_components/section-heading";
+import { SectionBody } from "../../_components/section-body";
+import { SectionHeading } from "../../_components/section-heading";
 
 const steps = [
   {
