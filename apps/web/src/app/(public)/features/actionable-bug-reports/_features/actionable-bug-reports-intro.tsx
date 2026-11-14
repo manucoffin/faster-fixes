@@ -4,16 +4,16 @@ export function ActionableBugReportsIntro() {
       <div className="container mx-auto px-4">
         <p className="max-w-4xl text-2xl leading-snug font-normal tracking-tight text-pretty text-muted-foreground md:text-3xl md:leading-snug">
           <span className="text-foreground">
-            Faster Fixes turns a client&apos;s one-line comment into a bug
-            report a developer can act on.
+            &quot;The form is broken.&quot; Which form, on which page, in which
+            browser?
           </span>{" "}
-          The Reviewer clicks the element that looks wrong, types a sentence and
-          submits it. What lands in your inbox already carries the page, the
-          element, the browser, the Screenshot, the console output, the network
-          requests and a Recording of the last minute on the page.{" "}
+          Clients and project managers describe what they see, not what a
+          developer needs, and every vague ticket turns into a round of
+          questions before anyone can fix it.{" "}
           <span className="text-foreground">
-            Nobody has to go back and ask which page, which browser, what was
-            clicked, or for a screenshot.
+            With Faster Fixes, the client clicks the element and writes one
+            sentence. The report arrives with the page, the element, the
+            screenshot, the logs and a replay of what they did.
           </span>
         </p>
       </div>

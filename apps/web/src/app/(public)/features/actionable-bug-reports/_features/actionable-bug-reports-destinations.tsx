@@ -8,7 +8,6 @@ import Link from "next/link";
 import { SectionBody } from "../../_components/section-body";
 import { SectionHeading } from "../../_components/section-heading";
 import { AgentMcpSessionAnimation } from "../_components/illustrations/agent-mcp-session-animation";
-import { InboxBoardCopyAnimation } from "../_components/illustrations/inbox-board-copy-animation";
 import { IssueAndSlackIllustration } from "../_components/illustrations/issue-and-slack-illustration";
 
 const trackers = [
@@ -21,44 +20,23 @@ export function ActionableBugReportsDestinations() {
   return (
     <section className="w-full bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <SectionHeading>Where the report goes</SectionHeading>
+        <SectionHeading>
+          Send bug reports to GitHub, Linear or Jira, or to your coding agent
+        </SectionHeading>
 
         <div className="mt-12 flex flex-col gap-20 md:gap-24">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h3 className="text-xl font-medium tracking-tight">The inbox</h3>
-              <SectionBody className="mt-4">
-                <p>
-                  Feedbacks arrive on a Kanban board and in the inbox, where the
-                  team triages, assigns and moves them from new to in progress
-                  to resolved. A &quot;copy as markdown&quot; action puts any
-                  Feedback on the clipboard as plain text.
-                </p>
-              </SectionBody>
-            </div>
-
-            <InboxBoardCopyAnimation />
-          </div>
-
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
               <h3 className="text-xl font-medium tracking-tight">
-                GitHub, Linear and Jira
+                Your whole team reads the same report
               </h3>
               <SectionBody className="mt-4">
                 <p>
-                  Issues are created automatically in GitHub, Linear and Jira.
-                  Each issue carries the comment, the page URL, the selector,
-                  the browser information, a link to the Screenshot, and the
-                  console and network logs in a collapsible section. When the
-                  Feedback has a Recording, the issue also carries a &quot;Play
-                  in Faster Fixes&quot; link with its duration, such as 48 s,
-                  and a collapsed Timeline section.{" "}
-                  <span className="text-foreground">
-                    The player link requires a login, so a public repository
-                    exposes nothing of the Recording.
-                  </span>{" "}
-                  Slack notifications carry a &quot;Play recording&quot; button.
+                  Reports land on a Kanban board where you sort, assign and
+                  close them. Connect GitHub, Linear or Jira and each one also
+                  becomes an issue with the comment, the screenshot, the logs
+                  and a link to the replay, so developers work from the tracker
+                  they already use.
                 </p>
               </SectionBody>
 
@@ -82,23 +60,22 @@ export function ActionableBugReportsDestinations() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <h3 className="text-xl font-medium tracking-tight">
-                Coding agents over MCP
+                Your coding agent fixes it with the full context
               </h3>
               <SectionBody className="mt-4">
                 <p>
-                  A coding agent reads the same Feedbacks. It calls{" "}
-                  <code>list_feedbacks</code> to get each report as markdown
-                  with its full context, <code>get_feedback</code> to read one
-                  in full with the Screenshot as an image and the Timeline, then{" "}
-                  <code>update_feedback_status</code> to mark it resolved.
-                  Claude Code, Cursor, Windsurf, VS Code, Codex and Zed are
-                  supported, and the MCP server works on the Free plan.
+                  You watch the replay and read the comment. Through the MCP
+                  server, Claude Code, Cursor or any MCP client reads far more:
+                  each report as markdown, with the selector, the screenshot,
+                  the console and network logs, and the recording as a
+                  step-by-step timeline. With that context, it finds the code,
+                  makes the fix and marks the report resolved.
                 </p>
               </SectionBody>
 
-              <Button asChild variant="outline" className="mt-8">
+              <Button asChild className="mt-8">
                 <Link href={"/integrations/mcp" as Route}>
-                  Setup is on the MCP server page
+                  Set up the MCP server
                   <ArrowRightIcon />
                 </Link>
               </Button>

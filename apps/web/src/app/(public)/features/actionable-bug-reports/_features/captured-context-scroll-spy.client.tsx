@@ -27,15 +27,16 @@ export function CapturedContextScrollSpy({
     );
     if (!items?.length) return;
 
-    // A thin band across the middle of the viewport: the item crossing it is
-    // the one being read.
+    // A thin band in the upper part of the viewport: the item crossing it is
+    // the one being read. Higher than the middle so the first item lights up
+    // once the sticky illustration is fully in view, not as it scrolls in.
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries.find(({ isIntersecting }) => isIntersecting);
         const key = entry?.target.getAttribute(CONTEXT_GROUP_ATTRIBUTE);
         if (isContextGroupKey(key)) setActiveGroup(key);
       },
-      { rootMargin: "-45% 0px -45% 0px" },
+      { rootMargin: "-20% 0px -75% 0px" },
     );
     items.forEach((item) => observer.observe(item));
     return () => observer.disconnect();

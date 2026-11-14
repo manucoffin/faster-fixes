@@ -11,42 +11,33 @@ export const actionableBugReportsFaqs: FaqItem[] = [
   {
     question: "What does a good bug report contain?",
     answer:
-      "The page URL, the CSS selector of the clicked element, the click coordinates, the element's position and size, the viewport size, the browser name and version, the operating system, a full-page Screenshot, the React component tree on React development builds, the Diagnostic Trail, any Custom metadata the site attaches, and the Recording of the previous minute when one was captured.",
+      "The page URL, the exact element, the browser and operating system, a screenshot, the console logs and network requests, and a way to see what happened before the bug. Faster Fixes attaches all of it automatically, along with a replay of the last minute on the page.",
   },
   {
-    question: "How does a Reviewer submit a bug report?",
+    question:
+      "Do clients need an account or a browser extension to report a bug?",
     answer:
-      "They open the site through a review link, click the element that looks wrong, type one sentence and submit. No account and no browser extension.",
+      "No. They open the site through a review link, click the element that looks wrong, write one sentence and submit.",
   },
   {
-    question: "Can public visitors be recorded?",
+    question: "Are regular visitors of my site recorded?",
     answer:
-      "No. The widget renders only for Reviewers who arrive through a review link. Public visitors never see it and are never recorded.",
+      "No. The widget only appears for people who open the site through a review link. Regular visitors never see it and are never recorded.",
   },
   {
-    question: "Does the Recording capture what a Reviewer typed?",
+    question: "Does the session replay capture what clients type?",
     answer:
-      "No. The value of inputs, textareas, selects and contenteditable text is never captured. The Recording shows that the Reviewer typed and where, not what.",
+      "No. The content of form fields is never recorded: the replay shows where the client typed, not what. You can also mask or block any element on the page.",
   },
   {
-    question: "What happens if the Recording fails?",
+    question: "Can bug reports go to GitHub, Linear or Jira?",
     answer:
-      "The Feedback is still submitted. Capture is best effort, and it can fail past the 4 MB compressed size cap or when a content security policy blocks it.",
-  },
-  {
-    question: "Can I turn the Diagnostic Trail or the Recording off?",
-    answer:
-      "Yes. captureDiagnostics turns the Diagnostic Trail off and captureRecording turns the Recording off. To hide parts of a page, use data-ff-mask and data-ff-block, as the Recording documentation describes.",
-  },
-  {
-    question: "Which frameworks and CMSs can I install the widget on?",
-    answer:
-      "Packages for React and Next.js, Vue and Nuxt, Angular, Svelte and SvelteKit. A script tag for WordPress, Webflow and static HTML. Snippets for Astro, Solid, Preact and vanilla JavaScript.",
+      "Yes. Each report can become an issue in GitHub, Linear or Jira with its screenshot, logs and a link to the replay. Coding agents can also read reports through the MCP server.",
   },
   {
     question: "Is Faster Fixes free, and is it open source?",
     answer:
-      "The Free plan is not time-limited and the MCP server works on every plan. The app is AGPL-3.0, the widget packages are MIT, and a self-hosted install resolves to the Agency plan.",
+      "The Free plan has no time limit and includes the full capture and the MCP server. Faster Fixes is open source, so you can also self-host it.",
   },
 ];
 

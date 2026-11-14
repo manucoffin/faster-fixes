@@ -3,9 +3,9 @@ import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { TestimonialsSection } from "@/app/_domains/testimonial/testimonials-section/testimonials-section";
 import type { Metadata } from "next";
 import { ActionableBugReportsCapturedContext } from "./_features/actionable-bug-reports-captured-context";
-import { ActionableBugReportsCreation } from "./_features/actionable-bug-reports-creation";
 import { ActionableBugReportsCta } from "./_features/actionable-bug-reports-cta";
 import { ActionableBugReportsDestinations } from "./_features/actionable-bug-reports-destinations";
 import {
@@ -13,16 +13,14 @@ import {
   actionableBugReportsFaqs,
 } from "./_features/actionable-bug-reports-faq";
 import { ActionableBugReportsHero } from "./_features/actionable-bug-reports-hero";
-import { ActionableBugReportsInstall } from "./_features/actionable-bug-reports-install";
 import { ActionableBugReportsIntro } from "./_features/actionable-bug-reports-intro";
-import { ActionableBugReportsPricing } from "./_features/actionable-bug-reports-pricing";
 import { ActionableBugReportsRecording } from "./_features/actionable-bug-reports-recording";
 
 const pageUrl = `${APP_URL}/features/actionable-bug-reports`;
 // Without the site name suffix: with it, the title overflows the search result width.
-const title = "Website bug reporting tool with console logs and replay";
+const title = "Website bug reporting tool: replay, logs, selector";
 const description =
-  "Website bug reporting tool for client projects: every report carries the page URL, selector, console logs, network requests and a replay. Free plan.";
+  "Website bug reporting tool: the client clicks once, and the page URL, CSS selector, console logs and a replay arrive with the report. Free plan.";
 const datePublished = "2026-11-14T00:00:00.000Z";
 const dateModified = "2026-11-14T00:00:00.000Z";
 
@@ -31,6 +29,13 @@ export const metadata: Metadata = {
     absolute: title,
   },
   description,
+  keywords: [
+    "website bug reporting tool",
+    "bug reporting tool",
+    "bug reporting tool with console logs",
+    "bug reporting tool with session replay",
+    "bug reporting tool for clients",
+  ],
   alternates: {
     canonical: pageUrl,
   },
@@ -51,12 +56,10 @@ export default function Page() {
     <div>
       <ActionableBugReportsHero />
       <ActionableBugReportsIntro />
-      <ActionableBugReportsCreation />
       <ActionableBugReportsCapturedContext />
       <ActionableBugReportsRecording />
       <ActionableBugReportsDestinations />
-      <ActionableBugReportsInstall />
-      <ActionableBugReportsPricing />
+      <TestimonialsSection />
       <ActionableBugReportsFaq />
       <ActionableBugReportsCta />
 

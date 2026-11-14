@@ -15,64 +15,57 @@ type ContextGroup = {
 const contextGroups: ContextGroup[] = [
   {
     key: "page",
-    title: "Page and element context",
+    title: "The page and the exact element",
     body: (
       <>
-        The page URL. The CSS selector of the clicked element, generated with
-        fallback strategies. The click coordinates, the element&apos;s position
-        and size, and the viewport size. The inbox draws the Selection frame
-        over the Screenshot, so a comment stays tied to the element it is about.
+        The page URL, the CSS selector of the clicked element, where it sits on
+        the page and the viewport size. Nobody has to guess which button
+        &quot;the button&quot; was.
       </>
     ),
   },
   {
     key: "browser",
-    title: "Browser, OS and Screenshot",
+    title: "Browser, OS and a screenshot",
     body: (
       <>
-        The browser name and version, and the operating system. A full-page
-        Screenshot is taken at submission, with the widget&apos;s own UI left
-        out of the image.
+        The browser and its version, the operating system, and a full-page
+        screenshot with the selected element framed on it.
       </>
     ),
   },
   {
     key: "components",
-    title: "React component tree",
+    title: "The React component behind the element",
     body: (
       <>
-        On React sites running development builds, the Feedback also carries the
-        React component tree and the source file behind the selected element.
+        On React development builds, the component tree and the source file of
+        the selected element, so the fix starts in the right file.
       </>
     ),
   },
   {
     key: "diagnostics",
-    title: "The Diagnostic Trail",
+    title: "Console logs and network requests",
     body: (
       <>
-        The last 50 console entries, covering log, info, warn, error and debug,
-        with each message capped at 2 KB. The last 50 network requests made with
-        fetch or XMLHttpRequest, with method, URL, status and duration.
-        Sensitive query parameters, such as token, api key, password, session,
-        email or jwt, are redacted from captured URLs. Set{" "}
-        <code>captureDiagnostics</code> to <code>false</code> to turn the
-        Diagnostic Trail off.
+        The last console entries and network requests before the report, with
+        their status and duration. The error the client never saw is already in
+        the report. Sensitive values such as tokens and passwords are redacted.
       </>
     ),
   },
   {
     key: "metadata",
-    title: "Custom metadata",
+    title: "Your own metadata",
     body: (
       <>
-        Your site can attach key/value pairs: a user ID, a tenant, a release
-        version, a feature flag. Up to 50 keys, with values as string, number,
-        boolean or null.{" "}
+        Your site can attach its own context: a user ID, a tenant, a release
+        version, a feature flag.{" "}
         <Link href={"/docs/widget/custom-metadata" as Route}>
           Custom metadata
         </Link>{" "}
-        shows how to attach them.
+        shows how.
       </>
     ),
   },
@@ -82,9 +75,10 @@ export function ActionableBugReportsCapturedContext() {
   return (
     <section className="w-full bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <SectionHeading>What every Feedback carries</SectionHeading>
+        <SectionHeading>What every bug report carries</SectionHeading>
         <p className="mt-4 max-w-3xl text-xl leading-snug tracking-tight text-pretty text-muted-foreground md:text-2xl">
-          All of it is captured at submission. The Reviewer fills in nothing.
+          Captured automatically when the client submits. They only write the
+          comment.
         </p>
 
         <CapturedContextScrollSpy>
