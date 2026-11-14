@@ -1,4 +1,8 @@
 import type { ReactNode } from "react";
+import {
+  ClaudeCodeInput,
+  ClaudeCodeWelcome,
+} from "../../../../(home)/_features/context/context-illustrations";
 import { TerminalFrame } from "../../../../(home)/_features/how-it-works/flow-animations";
 
 const CYCLE = 14;
@@ -27,7 +31,7 @@ const EMERALD_400 = "rgb(52 211 153)";
 const FEEDBACK_ID = "3f9c2a1e";
 
 const ARIA_LABEL =
-  "Animation showing a coding agent session in a terminal. The agent calls list_feedbacks and receives the new Feedbacks as markdown, with the page URL, the DOM selector and the comment. It calls get_feedback on one and reads its Screenshot and its Timeline: a click on Upgrade, a failed request to /api/checkout and a console error. It edits src/components/plan-card.tsx, then calls update_feedback_status to mark the Feedback resolved.";
+  "Animation showing a Claude Code session connected to the Faster Fixes MCP server. The agent calls list_feedbacks and receives the new Feedbacks as markdown, with the page URL, the DOM selector and the comment. It calls get_feedback on one and reads its Screenshot and its Timeline: a click on Upgrade, a failed request to /api/checkout and a console error. It edits src/components/plan-card.tsx, then calls update_feedback_status to mark the Feedback resolved.";
 
 type Block = {
   name: string;
@@ -127,7 +131,7 @@ function StepHead({ block, children }: StepHeadProps) {
   return (
     <Reveal block={block}>
       <div className="flex min-w-0 gap-2">
-        <span className={`abr-agent-dot-${block} shrink-0`}>●</span>
+        <span className={`abr-agent-dot-${block} shrink-0`}>⏺</span>
         <span className="min-w-0 truncate text-zinc-200">{children}</span>
       </div>
     </Reveal>
@@ -158,9 +162,8 @@ type McpCallProps = {
 function McpCall({ tool, args }: McpCallProps) {
   return (
     <>
-      <span className="text-zinc-500">faster-fixes · </span>
-      <span className="font-semibold">{tool}</span>
-      <span className="text-zinc-500">{args}</span>
+      <span className="font-semibold">faster-fixes - {tool}</span>{" "}
+      <span className="text-zinc-500">(MCP){args}</span>
     </>
   );
 }
@@ -283,60 +286,67 @@ function EditOutput() {
 function AgentSession() {
   return (
     <TerminalFrame
-      title="agent · ~/yourapp"
-      contentClassName="flex min-h-0 flex-1 flex-col justify-end overflow-hidden px-2.5 pt-2 pb-2.5 font-mono text-[9px] leading-normal [mask-image:linear-gradient(to_bottom,transparent,black_0.5rem)] sm:px-4 sm:pb-4 sm:text-[11px] sm:leading-relaxed"
+      title="~/yourapp"
+      contentClassName="flex min-h-0 flex-1 flex-col gap-2 px-2.5 pt-2 pb-2.5 font-mono text-[9px] leading-normal sm:gap-3 sm:px-4 sm:pb-4 sm:text-[11px] sm:leading-relaxed"
     >
-      {/* At least as tall as the frame so lines start at the top, and anchored
-          to its bottom once taller, so the oldest lines scroll out of view. */}
-      <div className="flex min-h-full shrink-0 flex-col">
-        <Reveal block="prompt">
-          <div className="flex min-w-0 gap-2 text-zinc-400">
-            <span className="shrink-0">&gt;</span>
-            <span className="truncate">Fix the new feedback on /pricing</span>
-          </div>
-        </Reveal>
+      <div className="flex min-h-0 flex-1 flex-col justify-end overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_0.5rem)]">
+        {/* At least as tall as the area so lines start at the top, and
+            anchored to its bottom once taller, so the welcome box and the
+            oldest lines scroll out of view. */}
+        <div className="flex min-h-full shrink-0 flex-col">
+          <ClaudeCodeWelcome />
+          <Reveal block="prompt">
+            <div className="flex min-w-0 gap-2 text-zinc-400">
+              <span className="shrink-0">&gt;</span>
+              <span className="truncate">Fix the new feedback on /pricing</span>
+            </div>
+          </Reveal>
 
-        <StepHead block="list">
-          <McpCall tool="list_feedbacks" args={`(status: "new")`} />
-        </StepHead>
-        <ListOutput />
-        <StepOutput block="list-sum">
-          <span className="truncate text-zinc-500">
-            2 Feedbacks, as markdown
-          </span>
-        </StepOutput>
+          <StepHead block="list">
+            <McpCall tool="list_feedbacks" args={`(status: "new")`} />
+          </StepHead>
+          <ListOutput />
+          <StepOutput block="list-sum">
+            <span className="truncate text-zinc-500">
+              2 Feedbacks, as markdown
+            </span>
+          </StepOutput>
 
-        <StepHead block="get">
-          <McpCall
-            tool="get_feedback"
-            args={`(feedback_id: "${FEEDBACK_ID}…")`}
-          />
-        </StepHead>
-        <GetOutput />
-        <StepOutput block="get-sum">
-          <span className="truncate text-zinc-500">
-            Markdown, Screenshot image, Timeline
-          </span>
-        </StepOutput>
+          <StepHead block="get">
+            <McpCall
+              tool="get_feedback"
+              args={`(feedback_id: "${FEEDBACK_ID}…")`}
+            />
+          </StepHead>
+          <GetOutput />
+          <StepOutput block="get-sum">
+            <span className="truncate text-zinc-500">
+              Markdown, Screenshot image, Timeline
+            </span>
+          </StepOutput>
 
-        <StepHead block="edit">
-          <span className="font-semibold">Edit</span>
-          <span className="text-zinc-400">(src/components/plan-card.tsx)</span>
-        </StepHead>
-        <EditOutput />
+          <StepHead block="edit">
+            <span className="font-semibold">Update</span>
+            <span className="text-zinc-400">
+              (src/components/plan-card.tsx)
+            </span>
+          </StepHead>
+          <EditOutput />
 
-        <StepHead block="status">
-          <McpCall
-            tool="update_feedback_status"
-            args={`(status: "resolved")`}
-          />
-        </StepHead>
-        <StepOutput block="status-out">
-          <span className="truncate text-emerald-400/90">
-            Feedback {FEEDBACK_ID}… status updated to &quot;resolved&quot;.
-          </span>
-        </StepOutput>
+          <StepHead block="status">
+            <McpCall
+              tool="update_feedback_status"
+              args={`(status: "resolved")`}
+            />
+          </StepHead>
+          <StepOutput block="status-out">
+            <span className="truncate text-emerald-400/90">
+              Feedback {FEEDBACK_ID}… status updated to &quot;resolved&quot;.
+            </span>
+          </StepOutput>
+        </div>
       </div>
+      <ClaudeCodeInput className="shrink-0" />
     </TerminalFrame>
   );
 }
@@ -346,7 +356,7 @@ export function AgentMcpSessionAnimation() {
     <div
       role="img"
       aria-label={ARIA_LABEL}
-      className="flex aspect-[16/10] w-full flex-col [&>div]:min-h-0 [&>div]:flex-1"
+      className="flex aspect-[5/4] w-full flex-col [&>div]:min-h-0 [&>div]:flex-1"
     >
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <AgentSession />
