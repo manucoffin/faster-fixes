@@ -20,8 +20,8 @@ const features: Feature[] = [
     title: "Bug reports with a replay",
     description:
       "Each feedback carries the console and network history and a replay of the last minute before the reviewer clicked, so a developer can reproduce it without a follow-up question.",
-    href: "/docs/widget/recording" as Route,
-    linkLabel: "Read the recording docs",
+    href: "/features/actionable-bug-reports" as Route,
+    linkLabel: "Learn about the website bug reporting tool",
   },
   {
     title: "Video review",

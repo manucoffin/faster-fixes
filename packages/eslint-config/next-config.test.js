@@ -239,7 +239,7 @@ describe("every convention rule is on", () => {
   // Every option the config passes is one a rule reads, and every ignore
   // pattern matches a file that exists: a dead pattern reads as a live
   // exemption to the next person to touch the list.
-  it("passes no-raw-tailwind-colors its allowlist and the eight illustration exemptions", () => {
+  it("passes no-raw-tailwind-colors its allowlist and the nine illustration exemptions", () => {
     const entry = onlyEntryFor("local/no-raw-tailwind-colors");
     const [severity, options] = entry.rules["local/no-raw-tailwind-colors"];
 
@@ -249,7 +249,7 @@ describe("every convention rule is on", () => {
       "ignorePathPatterns",
     ]);
     expect(options.allowPatterns).toHaveLength(1);
-    expect(options.ignorePathPatterns).toHaveLength(8);
+    expect(options.ignorePathPatterns).toHaveLength(9);
   });
 
   // One pattern rather than a list of loose ones: it names the whole basename
@@ -1194,6 +1194,7 @@ describe("no-raw-tailwind-colors", () => {
     "src/app/(public)/(home)/_features/video-review/video-review-animation.tsx",
     "src/app/(public)/(home)/_features/context/context-illustrations.tsx",
     "src/app/(public)/features/website-annotation/_components/illustrations/report-anatomy-illustration.tsx",
+    "src/app/(public)/features/actionable-bug-reports/_components/illustrations/issue-and-slack-illustration.tsx",
     "src/app/(public)/features/_components/typed-never-captured-animation.tsx",
   ];
 
