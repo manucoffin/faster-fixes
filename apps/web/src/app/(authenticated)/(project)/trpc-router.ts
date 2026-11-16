@@ -43,7 +43,7 @@ import { unlinkJiraProject } from "./settings/_services/unlink-jira-project";
 import { UnlinkJiraProjectSchema } from "./settings/_services/unlink-jira-project.schema";
 import { updateProjectJiraLink } from "./settings/_services/update-project-jira-link";
 import { UpdateProjectJiraLinkSchema } from "./settings/_services/update-project-jira-link.schema";
-import { getProjectTrelloLink } from "./settings/_services/get-project-trello-link";
+import { refreshProjectTrelloLink } from "./settings/_services/refresh-project-trello-link";
 import { GetProjectTrelloLinkSchema } from "./settings/_services/get-project-trello-link.schema";
 import { linkTrelloBoard } from "./settings/_services/link-trello-board";
 import { LinkTrelloBoardSchema } from "./settings/_services/link-trello-board.schema";
@@ -617,7 +617,7 @@ export const projectsRouter = router({
     getLink: protectedProcedure
       .input(GetProjectTrelloLinkSchema)
       .query(({ input, ctx }) =>
-        getProjectTrelloLink({
+        refreshProjectTrelloLink({
           projectId: input.projectId,
           userId: ctx.session.user.id,
         }),

@@ -1,3 +1,4 @@
+import { getTrelloLinkHealth } from "@/app/_domains/integration/_services/trello/get-trello-link-health";
 import { checkFeatureAccess } from "@/server/auth/subscription";
 import {
   BadRequestError,
@@ -55,12 +56,22 @@ export async function updateProjectTrelloLink(
 
   const link = await db.projectTrelloLink.findUnique({
     where: { projectId },
-    select: { id: true },
+    select: { id: true, boardId: true },
   });
 
   if (!link) {
     throw new NotFoundError("This project is not linked to a Trello board.");
   }
+
+  // A remap is checked against the board before it is saved, so mapping open
+  // lists clears a stale list issue and resumes card creation. A Trello outage
+  // fails the update rather than recording a health issue.
+  const linkHealthIssue = mapping
+    ? await getTrelloLinkHealth(organizationId, {
+        boardId: link.boardId,
+        ...mapping.data,
+      })
+    : undefined;
 
   await db.projectTrelloLink.update({
     where: { id: link.id },
@@ -69,6 +80,7 @@ export async function updateProjectTrelloLink(
         newListId: mapping.data.newListId,
         inProgressListId: mapping.data.inProgressListId,
         resolvedListId: mapping.data.resolvedListId,
+        linkHealthIssue,
       }),
       ...(defaultLabelIds !== undefined && { defaultLabelIds }),
       ...(autoCreateIssues !== undefined && { autoCreateIssues }),

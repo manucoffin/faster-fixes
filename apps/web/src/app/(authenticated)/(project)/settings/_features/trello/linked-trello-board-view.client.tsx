@@ -17,6 +17,20 @@ import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.
 import { DefaultLabelsEditor } from "./update-link/default-labels-editor.client";
 import { ListMappingEditor } from "./update-link/list-mapping-editor.client";
 
+// Keyed on ProjectTrelloLink.linkHealthIssue. Each reason names its own remedy:
+// a stale list needs a remap, a closed or unreachable board is fixed in Trello.
+const LINK_HEALTH_MESSAGES: Record<string, string> = {
+  stale_list:
+    "A mapped list was archived or deleted in Trello. Card creation is paused until each status is mapped to an open list.",
+  board_closed:
+    "This Trello board is closed. Card creation is paused until the board is reopened in Trello, or you unlink it and link another board.",
+  board_unreachable:
+    "This Trello board is no longer reachable by the connected Trello member. Card creation is paused until their access is restored, or you unlink it and link another board.",
+};
+
+const FALLBACK_LINK_HEALTH_MESSAGE =
+  "This Trello board link needs attention. Card creation is paused until it is fixed.";
+
 type LinkedTrelloBoardViewProps = {
   projectId: string;
   link: NonNullable<GetProjectTrelloLinkOutput>;
@@ -39,6 +53,15 @@ export function LinkedTrelloBoardView({
 
   return (
     <div className="flex flex-col gap-4">
+      {link.linkHealthIssue && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {LINK_HEALTH_MESSAGES[link.linkHealthIssue] ??
+              FALLBACK_LINK_HEALTH_MESSAGE}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <a
         href={link.boardUrl}
         target="_blank"

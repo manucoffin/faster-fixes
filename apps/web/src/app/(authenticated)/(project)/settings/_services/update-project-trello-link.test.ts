@@ -6,13 +6,40 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { updateProjectTrelloLink } from "./update-project-trello-link";
 
+vi.mock("@/app/_domains/integration/_services/trello/token-access", () => ({
+  withTrelloAccessToken: (
+    _organizationId: string,
+    call: (accessToken: string) => Promise<unknown>,
+  ) => call("access_token"),
+}));
+
+const openBoard = {
+  id: "board_1",
+  closed: false,
+  lists: [
+    { id: "list_new", closed: false },
+    { id: "list_doing", closed: false },
+    { id: "list_done", closed: false },
+    { id: "list_old", closed: true },
+  ],
+};
+
+// Trello's answer to the board re-read of the link health check.
+function stubTrelloBoard(status: number, body: unknown = openBoard) {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValue(new Response(JSON.stringify(body), { status }));
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
 type FakeDb = NonNullable<Parameters<typeof updateProjectTrelloLink>[1]>;
 
 type FakeDbState = {
   membership?: { id: string } | null;
   installation?: { id: string; healthState: string } | null;
   subscription?: { plan: string; status: string } | null;
-  link?: { id: string } | null;
+  link?: { id: string; boardId: string } | null;
   update?: ReturnType<typeof vi.fn>;
 };
 
@@ -20,7 +47,7 @@ function fakeDb({
   membership = { id: "member_1" },
   installation = { id: "installation_1", healthState: "connected" },
   subscription = { plan: "pro", status: "active" },
-  link = { id: "link_1" },
+  link = { id: "link_1", boardId: "board_1" },
   update = vi.fn().mockResolvedValue({ id: "link_1" }),
 }: FakeDbState = {}) {
   return {
@@ -55,6 +82,7 @@ describe("updateProjectTrelloLink", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
   });
 
   it("refuses a caller who is not an owner or an admin", async () => {
@@ -150,6 +178,7 @@ describe("updateProjectTrelloLink", () => {
   });
 
   it("stores a new mapping, clearing the in-progress list", async () => {
+    stubTrelloBoard(200);
     const update = vi.fn().mockResolvedValue({ id: "link_1" });
 
     await updateProjectTrelloLink(
@@ -162,11 +191,76 @@ describe("updateProjectTrelloLink", () => {
         newListId: "list_new",
         inProgressListId: null,
         resolvedListId: "list_done",
+        linkHealthIssue: null,
       },
     });
   });
 
+  it("records a stale list when a mapped list is archived", async () => {
+    stubTrelloBoard(200);
+    const update = vi.fn().mockResolvedValue({ id: "link_1" });
+
+    await updateProjectTrelloLink(
+      { ...input, lists: { ...lists, inProgressListId: "list_old" } },
+      fakeDb({ update }),
+    );
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "link_1" },
+      data: expect.objectContaining({ linkHealthIssue: "stale_list" }),
+    });
+  });
+
+  it("records a stale list when a mapped list is missing from the board", async () => {
+    stubTrelloBoard(200);
+    const update = vi.fn().mockResolvedValue({ id: "link_1" });
+
+    await updateProjectTrelloLink(
+      { ...input, lists: { ...lists, resolvedListId: "list_deleted" } },
+      fakeDb({ update }),
+    );
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "link_1" },
+      data: expect.objectContaining({ linkHealthIssue: "stale_list" }),
+    });
+  });
+
+  it("records a closed board", async () => {
+    stubTrelloBoard(200, { ...openBoard, closed: true });
+    const update = vi.fn().mockResolvedValue({ id: "link_1" });
+
+    await updateProjectTrelloLink({ ...input, lists }, fakeDb({ update }));
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "link_1" },
+      data: expect.objectContaining({ linkHealthIssue: "board_closed" }),
+    });
+  });
+
+  it.each([403, 404])(
+    "records an unreachable board when Trello answers %i",
+    async (status) => {
+      stubTrelloBoard(status, "board not found");
+      const update = vi.fn().mockResolvedValue({ id: "link_1" });
+
+      await updateProjectTrelloLink({ ...input, lists }, fakeDb({ update }));
+      expect(update).toHaveBeenCalledWith({
+        where: { id: "link_1" },
+        data: expect.objectContaining({ linkHealthIssue: "board_unreachable" }),
+      });
+    },
+  );
+
+  it("leaves the link untouched when Trello fails", async () => {
+    stubTrelloBoard(503, "unavailable");
+    const update = vi.fn();
+
+    await expect(
+      updateProjectTrelloLink({ ...input, lists }, fakeDb({ update })),
+    ).rejects.toThrow();
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("changes only the fields it is given", async () => {
+    const fetchMock = stubTrelloBoard(200);
     const update = vi.fn().mockResolvedValue({ id: "link_1" });
 
     await updateProjectTrelloLink(
@@ -177,5 +271,6 @@ describe("updateProjectTrelloLink", () => {
       where: { id: "link_1" },
       data: { defaultLabelIds: ["label_1"], autoCreateIssues: false },
     });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

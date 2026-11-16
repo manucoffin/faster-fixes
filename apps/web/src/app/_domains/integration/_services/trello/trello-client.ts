@@ -215,6 +215,24 @@ export function listOpenBoardLists(
   );
 }
 
+export type TrelloBoardWithLists = {
+  id: string;
+  closed: boolean;
+  lists: { id: string; closed: boolean }[];
+};
+
+// One call for the board and every list, archived included, so the link health
+// check can tell an archived list from a deleted one at no extra cost.
+export function getBoardWithLists(
+  accessToken: string,
+  boardId: string,
+): Promise<TrelloBoardWithLists> {
+  return getTrelloResource(
+    accessToken,
+    `/boards/${encodeURIComponent(boardId)}?fields=id,closed&lists=all&list_fields=id,closed`,
+  );
+}
+
 // A Trello label may have a color and no name, or a name and no color.
 export type TrelloLabel = {
   id: string;

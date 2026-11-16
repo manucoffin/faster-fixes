@@ -5,6 +5,7 @@ import {
 } from "../../_helpers/trello/format-card-description";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { refreshIssueRecording } from "../refresh-issue-recording";
+import { refreshTrelloLinkHealth } from "./refresh-trello-link-health";
 import { createCard } from "./trello-client";
 import { withTrelloAccessToken } from "./token-access";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
@@ -18,8 +19,9 @@ export const createTrelloCard = inngest.createFunction(
     retries: 3,
     concurrency: { key: "event.data.feedbackId", limit: 1 },
     // Trello allows 100 requests per 10 seconds per token. A card costs a
-    // few calls (creation, then its Screenshot), so 20 cards leave headroom
-    // for the Status sync and the pickers on the same token.
+    // few calls (the link health check, creation, then its Screenshot), so
+    // 20 cards leave headroom for the Status sync and the pickers on the
+    // same token.
     throttle: { key: "event.data.installationId", limit: 20, period: "10s" },
     triggers: [{ event: trelloCardCreateRequestedEvent }],
   },
@@ -38,6 +40,16 @@ export const createTrelloCard = inngest.createFunction(
     // Unlinked, or relinked through another Installation, since the request.
     if (!link || link.trelloInstallationId !== installationId) {
       return { skipped: "no_trello_link" };
+    }
+
+    // An unhealthy link suspends card creation, by hand or not, so a card
+    // never lands in an archived list or a dead board.
+    const healthIssue = await step.run("refresh-link-health", () =>
+      refreshTrelloLinkHealth(link.id).catch(rethrowDomainErrorsAsNonRetriable),
+    );
+
+    if (healthIssue) {
+      return { skipped: "trello_link_unhealthy", reason: healthIssue };
     }
 
     const recording = await refreshIssueRecording(feedback);
