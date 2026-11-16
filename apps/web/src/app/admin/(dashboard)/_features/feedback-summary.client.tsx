@@ -48,6 +48,11 @@ export function FeedbackSummary() {
               <Count value={data.pending} label="pending" />
               <Count value={data.resolved} label="resolved" />
               <Count value={data.archived} label="archived" />
+              <span className="text-muted-foreground" aria-hidden>
+                |
+              </span>
+              <Count value={data.bySource.onWebsites} label="on websites" />
+              <Count value={data.bySource.onVideos} label="on videos" />
             </>
           );
         },

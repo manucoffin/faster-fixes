@@ -27,21 +27,37 @@ export async function getFeedbackOverview({ now }: GetFeedbackOverviewInput) {
   const countByStatus = (status: FeedbackStatus) =>
     prisma.feedback.count({ where: { ...nonInternalFeedbackWhere, status } });
 
-  const [received, previousReceived, pending, resolved, archived] =
-    await Promise.all([
-      countReceived(windowStart, now),
-      countReceived(previousWindowStart, windowStart),
-      countByStatus(FeedbackStatusEnum.enum.new),
-      countByStatus(FeedbackStatusEnum.enum.resolved),
-      // Archived is stored as `closed` (see CONTEXT.md).
-      countByStatus(FeedbackStatusEnum.enum.closed),
-    ]);
+  const [
+    received,
+    previousReceived,
+    pending,
+    resolved,
+    archived,
+    onWebsites,
+    onVideos,
+  ] = await Promise.all([
+    countReceived(windowStart, now),
+    countReceived(previousWindowStart, windowStart),
+    countByStatus(FeedbackStatusEnum.enum.new),
+    countByStatus(FeedbackStatusEnum.enum.resolved),
+    // Archived is stored as `closed` (see CONTEXT.md).
+    countByStatus(FeedbackStatusEnum.enum.closed),
+    // A Feedback with a `videoId` is a video Feedback, any other a page
+    // Feedback left on a website (ADR-0020).
+    prisma.feedback.count({
+      where: { ...nonInternalFeedbackWhere, videoId: null },
+    }),
+    prisma.feedback.count({
+      where: { ...nonInternalFeedbackWhere, videoId: { not: null } },
+    }),
+  ]);
 
   return {
     received: { current: received, previous: previousReceived },
     pending,
     resolved,
     archived,
+    bySource: { onWebsites, onVideos },
   };
 }
 
