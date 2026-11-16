@@ -226,10 +226,11 @@ SMTP does not need Resend or Plunk API keys. It sends rendered transactional ema
 
 The [Trello integration](/docs/integrations/trello) is optional. Skip this step unless you need it. It connects through an OAuth 2.0 (3LO) client that you register for your instance:
 
-1. In the [Atlassian developer console](https://developer.atlassian.com/console/myapps/), create an OAuth 2.0 integration.
-2. Under **Permissions**, add the Trello API with the `read:member:trello`, `read:board:trello` and `write:board:trello` scopes. Faster Fixes also requests `offline_access` to refresh its token.
-3. Under **Authorization**, set the callback URL to `https://your-domain.com/api/trello/callback`.
-4. Copy the client ID and secret from **Settings**.
+1. On the [Trello apps administration page](https://trello.com/apps/admin), click **New**, choose **My app doesn't use Power-Up capabilities**, fill in the name, workspace and contact details, then click **Create**.
+2. Open the app's **OAuth 2.0** tab and set the client security type to **Confidential**, so the client gets a secret.
+3. Under **Callback URLs**, add `https://your-domain.com/api/trello/callback`.
+4. In the scopes table, enable `read:member:trello`, `read:board:trello` and `write:board:trello`, then click **Save**. Faster Fixes also requests `offline_access` to refresh its token: it is not listed in the table.
+5. Copy the client ID and secret from the **OAuth 2.0** tab.
 
 Then set the variables:
 
@@ -244,7 +245,7 @@ TRELLO_TOKEN_ENCRYPTION_KEY="<generate with: openssl rand -hex 32>"
 
 `TRELLO_TOKEN_ENCRYPTION_KEY` encrypts the stored Trello tokens. Changing it makes existing connections unreadable until each organization reconnects Trello.
 
-The callback URL defaults to `BETTER_AUTH_URL` followed by `/api/trello/callback`. Set `TRELLO_OAUTH_REDIRECT_URI` only when it differs, and keep it identical to the one registered in the console.
+The callback URL defaults to `BETTER_AUTH_URL` followed by `/api/trello/callback`. Set `TRELLO_OAUTH_REDIRECT_URI` only when it differs, and keep it identical to the one registered on the **OAuth 2.0** tab.
 
 Trello delivers card changes to `https://your-domain.com/api/webhooks/trello`, so your instance must be reachable from the internet for status sync. `TRELLO_WEBHOOK_BASE_URL` overrides the base URL, for example with a tunnel during local development.
 

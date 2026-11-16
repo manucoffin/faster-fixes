@@ -17,7 +17,7 @@ export function verifyTrelloWebhookSignature(
   const secret = process.env.TRELLO_CLIENT_SECRET;
   if (!secret) {
     throw new IntegrationConfigurationError(
-      "TRELLO_CLIENT_SECRET is not set. Configure it in .env.local with the value from the Atlassian developer console.",
+      "TRELLO_CLIENT_SECRET is not set. Configure it in .env.local with the secret from the OAuth 2.0 tab of your app at https://trello.com/apps/admin.",
     );
   }
 
