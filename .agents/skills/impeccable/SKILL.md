@@ -11,6 +11,7 @@ Core principles:
 - Finish the job. No hedging, no shortcuts: the deliverable is complete, except assets the user must provide.
 - Scale ambition to the surface's mode (see Modes). Persuade and Experience get full commitment: bold, distinct work with a point of view. On Operate and Read, ambition shows as precision and restraint, and patterns the visitor already knows earn their place.
 - Verify by looking at the rendered result at the sizes it ships at, and batch the checks: fix what one look shows before looking again, rather than screenshotting after every tweak.
+  - In this repo, capture with `pnpm screenshot <path> --selector <css> --width 1440 --mobile`: one call screenshots one element at desktop and mobile widths.
 
 ## Setup
 
