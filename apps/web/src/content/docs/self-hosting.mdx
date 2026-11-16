@@ -222,6 +222,32 @@ Use a sender address authorized by your mail server. `EMAIL_FROM` overrides both
 
 SMTP does not need Resend or Plunk API keys. It sends rendered transactional emails, but has no contact-management API, so marketing contact/segment synchronization is skipped. Keep credentials in your private environment file, not in Git.
 
+### Trello
+
+The [Trello integration](/docs/integrations/trello) is optional. Skip this step unless you need it. It connects through an OAuth 2.0 (3LO) client that you register for your instance:
+
+1. In the [Atlassian developer console](https://developer.atlassian.com/console/myapps/), create an OAuth 2.0 integration.
+2. Under **Permissions**, add the Trello API with the `read:member:trello`, `read:board:trello` and `write:board:trello` scopes. Faster Fixes also requests `offline_access` to refresh its token.
+3. Under **Authorization**, set the callback URL to `https://your-domain.com/api/trello/callback`.
+4. Copy the client ID and secret from **Settings**.
+
+Then set the variables:
+
+```bash
+TRELLO_CLIENT_ID="..."
+TRELLO_CLIENT_SECRET="..."
+TRELLO_TOKEN_ENCRYPTION_KEY="<generate with: openssl rand -hex 32>"
+# Optional overrides
+# TRELLO_OAUTH_REDIRECT_URI="https://your-domain.com/api/trello/callback"
+# TRELLO_WEBHOOK_BASE_URL="https://your-domain.com"
+```
+
+`TRELLO_TOKEN_ENCRYPTION_KEY` encrypts the stored Trello tokens. Changing it makes existing connections unreadable until each organization reconnects Trello.
+
+The callback URL defaults to `BETTER_AUTH_URL` followed by `/api/trello/callback`. Set `TRELLO_OAUTH_REDIRECT_URI` only when it differs, and keep it identical to the one registered in the console.
+
+Trello delivers card changes to `https://your-domain.com/api/webhooks/trello`, so your instance must be reachable from the internet for status sync. `TRELLO_WEBHOOK_BASE_URL` overrides the base URL, for example with a tunnel during local development.
+
 ## 4. Run migrations
 
 From the repo root, with `DATABASE_URL` set to your production database:

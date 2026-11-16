@@ -13,11 +13,19 @@ const ROW_LABELS = {
   gitHub: "GitHub, of paying",
   linear: "Linear, of paying",
   jira: "Jira, of paying",
+  trello: "Trello, of paying",
   slack: "Slack, of paying",
   agentToken: "Agent token, of engaged",
 } as const;
 
-const ROW_KEYS = ["gitHub", "linear", "jira", "slack", "agentToken"] as const;
+const ROW_KEYS = [
+  "gitHub",
+  "linear",
+  "jira",
+  "trello",
+  "slack",
+  "agentToken",
+] as const;
 
 export function AdoptionCard() {
   const trpc = useTRPC();

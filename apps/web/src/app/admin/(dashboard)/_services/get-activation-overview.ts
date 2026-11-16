@@ -52,6 +52,7 @@ export async function getActivationOverview(
     withGitHub,
     withLinear,
     withJira,
+    withTrello,
     withSlack,
     engagedBase,
     withAgentToken,
@@ -77,6 +78,9 @@ export async function getActivationOverview(
     }),
     prisma.organization.count({
       where: { ...payingWhere, jiraInstallation: { isNot: null } },
+    }),
+    prisma.organization.count({
+      where: { ...payingWhere, trelloInstallation: { isNot: null } },
     }),
     prisma.organization.count({
       where: { ...payingWhere, slackInstallation: { isNot: null } },
@@ -127,6 +131,7 @@ export async function getActivationOverview(
       gitHub: { count: withGitHub, base: payingBase },
       linear: { count: withLinear, base: payingBase },
       jira: { count: withJira, base: payingBase },
+      trello: { count: withTrello, base: payingBase },
       slack: { count: withSlack, base: payingBase },
       agentToken: { count: withAgentToken, base: engagedBase },
     },

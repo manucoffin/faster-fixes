@@ -1,6 +1,6 @@
 # Faster Fixes
 
-A widget that lets a website's end-users report bugs and feedback in-page, and a review page that lets a customer's clients annotate an uploaded video; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira), and announced to notification channels (Slack).
+A widget that lets a website's end-users report bugs and feedback in-page, and a review page that lets a customer's clients annotate an uploaded video; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira, Trello), and announced to notification channels (Slack).
 
 ## Language
 
@@ -147,11 +147,11 @@ _Avoid_: Unarchive, Reopen (reserved for the Tracker-side action on an Issue), U
 ### Integrations
 
 **Integration**:
-An external system Faster Fixes connects to through an **Installation**. Comes in two categories: a **Tracker** (two-way mirror) or a **Notification channel** (one-way announce). Currently GitHub Issues, Linear, Jira and Slack.
+An external system Faster Fixes connects to through an **Installation**. Comes in two categories: a **Tracker** (two-way mirror) or a **Notification channel** (one-way announce). Currently GitHub Issues, Linear, Jira, Trello and Slack.
 _Avoid_: Connector, Plugin, External system.
 
 **Tracker**:
-A category of **Integration**: an external issue-tracking system Faster Fixes can mirror Feedback into, converging its state with the Feedback's. Currently GitHub Issues, Linear and Jira. The category is defined by the mirroring behaviour, not by the product type.
+A category of **Integration**: an external issue-tracking system Faster Fixes can mirror Feedback into, converging its state with the Feedback's. Currently GitHub Issues, Linear, Jira and Trello. The category is defined by the mirroring behaviour, not by the product type.
 _Avoid_: Integration target, Sink.
 
 **Notification channel**:
@@ -159,7 +159,7 @@ A category of **Integration** where Faster Fixes _announces_ Feedback one-way, h
 _Avoid_: Webhook (implementation detail), Sink.
 
 **Installation**:
-The org-level connection to an **Integration** — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × Integration).
+The org-level connection to an **Integration** — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`, `TrelloInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × Integration).
 
 **Reconnect required**:
 The state of an **Installation** whose authorization the **Integration** has explicitly refused or revoked. Only a User re-authorizing the connection clears it. A transient failure of the Integration never puts an Installation in this state.

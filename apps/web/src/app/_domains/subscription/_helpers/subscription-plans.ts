@@ -201,6 +201,11 @@ export const PLAN_FEATURES = {
       highlighted: false,
     },
     {
+      id: "trello_integration",
+      label: "Trello integration",
+      highlighted: false,
+    },
+    {
       id: "slack_integration",
       label: "Slack notifications",
       highlighted: false,
