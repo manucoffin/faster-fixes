@@ -172,6 +172,13 @@ _Avoid_: Jira instance, Jira workspace.
 **Jira project**:
 A project inside a Jira site (e.g. `PAY`). The per-Project tracker scope a Faster Fixes Project links to — the analog of a GitHub repo or a Linear team. Always written "Jira project" in full; bare "project" means a Faster Fixes Project.
 
+**Trello board**:
+A board a Trello member can reach. The per-Project tracker scope a Faster Fixes Project links to, the analog of a GitHub repo, a Linear team or a Jira project. A Trello Installation is one Trello member's authorization and has no org-level scope of its own: there is no Trello analog of a **Jira site**. Always written "Trello board" in full; bare "board" means a Faster Fixes Project's board.
+_Avoid_: Trello workspace (not a scope Faster Fixes links to).
+
+**Trello card**:
+The **Issue** a Feedback is mirrored as in Trello. The domain keeps saying Issue and **Issue link**; "card" is the Trello-facing word, used in UI copy on Trello screens.
+
 **Project link**:
 The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × Integration).
 
