@@ -8,10 +8,12 @@ import { disconnectGitHub } from "./_services/disconnect-github";
 import { disconnectJira } from "./_services/disconnect-jira";
 import { disconnectLinear } from "./_services/disconnect-linear";
 import { disconnectSlack } from "./_services/disconnect-slack";
+import { disconnectTrello } from "./_services/disconnect-trello";
 import { getGitHubInstallation } from "./_services/get-github-installation";
 import { getJiraInstallation } from "./_services/get-jira-installation";
 import { getLinearInstallation } from "./_services/get-linear-installation";
 import { getSlackInstallation } from "./_services/get-slack-installation";
+import { getTrelloInstallation } from "./_services/get-trello-installation";
 import { listAccessibleJiraSites } from "./_services/list-accessible-jira-sites";
 import { listAgentTokens } from "./_services/list-agent-tokens";
 import { ListAgentTokensSchema } from "./_services/list-agent-tokens.schema";
@@ -115,6 +117,20 @@ export const integrationsRouter = router({
       ),
     disconnect: protectedProcedure.mutation(async ({ ctx }) =>
       disconnectJira({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+  }),
+  trello: router({
+    getInstallation: protectedProcedure.query(async ({ ctx }) =>
+      getTrelloInstallation({
+        headers: await headers(),
+        userId: ctx.session.user.id,
+      }),
+    ),
+    disconnect: protectedProcedure.mutation(async ({ ctx }) =>
+      disconnectTrello({
         headers: await headers(),
         userId: ctx.session.user.id,
       }),

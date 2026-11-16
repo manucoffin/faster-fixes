@@ -3,9 +3,20 @@
 import { Button } from "@workspace/ui/components/button";
 import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 
-export function TrelloNotConnected() {
+type TrelloNotConnectedProps = {
+  consentCancelled: boolean;
+};
+
+export function TrelloNotConnected({
+  consentCancelled,
+}: TrelloNotConnectedProps) {
   return (
     <div className="flex flex-col gap-4">
+      {consentCancelled ? (
+        <p className="rounded-md border p-3 text-sm text-muted-foreground">
+          Authorization was cancelled. Nothing was connected.
+        </p>
+      ) : null}
       <p className="text-sm text-muted-foreground">
         No Trello account connected. Authorize Faster Fixes to mirror feedback
         into Trello as cards that move with each status change.

@@ -12,9 +12,15 @@ import { GitHubIntegrationSection } from "./_features/github/github-integration-
 import { JiraIntegrationSection } from "./_features/jira/jira-integration-section.client";
 import { LinearIntegrationSection } from "./_features/linear/linear-integration-section.client";
 import { SlackIntegrationSection } from "./_features/slack/slack-integration-section.client";
-import { TrelloNotConnected } from "./_features/trello/trello-not-connected.client";
+import { TrelloIntegrationSection } from "./_features/trello/trello-integration-section.client";
 
-export default function IntegrationsPage() {
+export default async function IntegrationsPage({
+  searchParams,
+}: PageProps<"/integrations">) {
+  // The Trello callback lands here with `?trello=cancelled` when the User
+  // declined the consent screen.
+  const { trello } = await searchParams;
+
   return (
     <DashboardPageContent breadcrumbs={[{ label: "Integrations" }]}>
       <div className="flex flex-col gap-12">
@@ -71,7 +77,7 @@ export default function IntegrationsPage() {
           cardTitle="Trello integration"
           cardClassName="lg:max-w-lg"
         >
-          <TrelloNotConnected />
+          <TrelloIntegrationSection consentCancelled={trello === "cancelled"} />
         </DashboardSection>
 
         <DashboardSection
