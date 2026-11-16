@@ -44,6 +44,7 @@ import { UnlinkJiraProjectSchema } from "./settings/_services/unlink-jira-projec
 import { updateProjectJiraLink } from "./settings/_services/update-project-jira-link";
 import { UpdateProjectJiraLinkSchema } from "./settings/_services/update-project-jira-link.schema";
 import { refreshProjectTrelloLink } from "./settings/_services/refresh-project-trello-link";
+import { getProjectTrelloLink } from "./settings/_services/get-project-trello-link";
 import { GetProjectTrelloLinkSchema } from "./settings/_services/get-project-trello-link.schema";
 import { linkTrelloBoard } from "./settings/_services/link-trello-board";
 import { LinkTrelloBoardSchema } from "./settings/_services/link-trello-board.schema";
@@ -92,6 +93,8 @@ import { createGitHubIssueForFeedback } from "./inbox/_services/create-github-is
 import { CreateGitHubIssueForFeedbackSchema } from "./inbox/_services/create-github-issue-for-feedback.schema";
 import { createJiraIssueForFeedback } from "./inbox/_services/create-jira-issue-for-feedback";
 import { CreateJiraIssueForFeedbackSchema } from "./inbox/_services/create-jira-issue-for-feedback.schema";
+import { createTrelloCardForFeedback } from "./inbox/_services/create-trello-card-for-feedback";
+import { CreateTrelloCardForFeedbackSchema } from "./inbox/_services/create-trello-card-for-feedback.schema";
 import { createLinearIssueForFeedback } from "./inbox/_services/create-linear-issue-for-feedback";
 import { CreateLinearIssueForFeedbackSchema } from "./inbox/_services/create-linear-issue-for-feedback.schema";
 import { deleteFeedback } from "./inbox/_services/delete-feedback";
@@ -462,6 +465,14 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
+    createTrelloCard: protectedProcedure
+      .input(CreateTrelloCardForFeedbackSchema)
+      .mutation(({ input, ctx }) =>
+        createTrelloCardForFeedback({
+          feedbackId: input.feedbackId,
+          userId: ctx.session.user.id,
+        }),
+      ),
   }),
   // The plan-gated writes keep `enforceFeature`: a plan denial is transport
   // policy and has no domain-error equivalent.
@@ -618,6 +629,16 @@ export const projectsRouter = router({
       .input(GetProjectTrelloLinkSchema)
       .query(({ input, ctx }) =>
         refreshProjectTrelloLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    // The stored link without re-reading Trello, for the inbox and the Video
+    // review, which only need to know whether a board is linked.
+    getStoredLink: protectedProcedure
+      .input(GetProjectTrelloLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectTrelloLink({
           projectId: input.projectId,
           userId: ctx.session.user.id,
         }),

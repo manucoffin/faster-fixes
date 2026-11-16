@@ -129,6 +129,11 @@ function VideoReviewWorkspace({
       projectId: video.projectId,
     }),
   );
+  const trelloLinkQuery = useQuery(
+    trpc.authenticated.projects.trello.getStoredLink.queryOptions({
+      projectId: video.projectId,
+    }),
+  );
 
   const selectedFeedback =
     video.feedback.find((item) => item.id === selectedFeedbackId) ?? null;
@@ -229,6 +234,7 @@ function VideoReviewWorkspace({
         hasGitHubLink={!!gitHubLinkQuery.data}
         hasLinearLink={!!linearLinkQuery.data}
         hasJiraLink={!!jiraLinkQuery.data}
+        hasTrelloLink={!!trelloLinkQuery.data}
       />
     </div>
   );
