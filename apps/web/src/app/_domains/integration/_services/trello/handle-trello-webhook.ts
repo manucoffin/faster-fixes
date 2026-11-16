@@ -1,5 +1,7 @@
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
+import { inngest } from "@/server/inngest";
+import { buildEvent, trelloWebhookCardEvent } from "@/server/inngest/events";
 import type { TrackerWebhookOutcome } from "../../_types/webhook-outcome";
 
 /**
@@ -70,26 +72,31 @@ export async function handleTrelloWebhook({
 
   const type = action?.type;
 
-  if (!action?.data?.card?.id) {
+  const cardId = action?.data?.card?.id;
+  if (!cardId) {
     return { status: "ignored", reason: `action:${type}` };
   }
 
-  if (type === "deleteCard" || type === "moveCardFromBoard") {
-    return { status: "accepted" };
-  }
-
   if (type === "updateCard") {
-    const changed = Object.keys(action.data.old ?? {});
-    if (changed.some((field) => TRACKED_CARD_FIELDS.includes(field))) {
-      return { status: "accepted" };
+    const changed = Object.keys(action.data?.old ?? {});
+    if (!changed.some((field) => TRACKED_CARD_FIELDS.includes(field))) {
+      return {
+        status: "ignored",
+        reason: `card_change:${changed.sort().join(",")}`,
+      };
     }
-    return {
-      status: "ignored",
-      reason: `card_change:${changed.sort().join(",")}`,
-    };
+  } else if (type !== "deleteCard" && type !== "moveCardFromBoard") {
+    return { status: "ignored", reason: `action:${type}` };
   }
 
-  return { status: "ignored", reason: `action:${type}` };
+  await inngest.send(
+    buildEvent(trelloWebhookCardEvent, {
+      projectTrelloLinkId: link.id,
+      cardId,
+    }),
+  );
+
+  return { status: "accepted" };
 }
 
 /**

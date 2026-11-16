@@ -23,7 +23,13 @@ const trelloWebhookPrisma = {
   projectTrelloLink: { findUnique: vi.fn() },
 };
 
+const inngestSendDouble = vi.fn();
+
 vi.mock("@workspace/db", () => ({ prisma: trelloWebhookPrisma }));
+
+vi.mock("@/server/inngest", () => ({
+  inngest: { send: inngestSendDouble },
+}));
 
 const { HEAD, POST } = await import("./route");
 
@@ -82,6 +88,7 @@ beforeEach(() => {
     boardId: BOARD_ID,
   });
   trelloWebhookPrisma.rateLimit.create.mockResolvedValue({});
+  inngestSendDouble.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -251,6 +258,45 @@ describe("POST /api/webhooks/trello", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
+  });
+
+  it("hands an accepted delivery to the Status sync with the link and the card", async () => {
+    await POST(webhookRequest());
+
+    expect(inngestSendDouble).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "trello/webhook.card",
+        data: { projectTrelloLinkId: LINK_ID, cardId: "card-1" },
+      }),
+    );
+  });
+
+  it("hands nothing to the Status sync for an ignored delivery", async () => {
+    await POST(
+      webhookRequest({
+        rawBody: cardPayload("updateCard", { name: "Old title" }),
+      }),
+    );
+
+    expect(inngestSendDouble).not.toHaveBeenCalled();
+  });
+
+  it("hands nothing to the Status sync for a replayed delivery", async () => {
+    trelloWebhookPrisma.rateLimit.create.mockRejectedValue(
+      new Error("Unique constraint failed on the fields: (`key`)"),
+    );
+
+    await POST(webhookRequest());
+
+    expect(inngestSendDouble).not.toHaveBeenCalled();
+  });
+
+  it("hands nothing to the Status sync for an unknown link", async () => {
+    trelloWebhookPrisma.projectTrelloLink.findUnique.mockResolvedValue(null);
+
+    await POST(webhookRequest());
+
+    expect(inngestSendDouble).not.toHaveBeenCalled();
   });
 
   it.each([

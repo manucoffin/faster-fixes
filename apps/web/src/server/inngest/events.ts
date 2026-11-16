@@ -93,6 +93,12 @@ export const jiraOAuthRevokedEvent = eventType("jira/oauth.revoked", {
   schema: z.object({ installationId: z.string() }),
 });
 
+// A hint that a mirrored card moved, was archived or left the board. The sync
+// re-reads the card, so the payload carries only what names it.
+export const trelloWebhookCardEvent = eventType("trello/webhook.card", {
+  schema: z.object({ projectTrelloLinkId: z.string(), cardId: z.string() }),
+});
+
 export const trelloOAuthRevokedEvent = eventType("trello/oauth.revoked", {
   schema: z.object({ installationId: z.string() }),
 });

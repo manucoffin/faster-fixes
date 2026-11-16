@@ -258,6 +258,23 @@ export function createCard(
   });
 }
 
+export type TrelloCardPosition = {
+  id: string;
+  idBoard: string;
+  idList: string;
+  closed: boolean;
+};
+
+export function getCard(
+  accessToken: string,
+  cardId: string,
+): Promise<TrelloCardPosition> {
+  return getTrelloResource(
+    accessToken,
+    `/cards/${encodeURIComponent(cardId)}?fields=id,idBoard,idList,closed`,
+  );
+}
+
 // JSON drops an undefined field, so an absent write leaves it as it is.
 export function updateCard(
   accessToken: string,

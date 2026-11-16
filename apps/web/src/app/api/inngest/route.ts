@@ -18,6 +18,7 @@ import { sendWelcomeEmail } from "@/app/_domains/user/_services/send-welcome-ema
 import { syncFeedbackStatusToGitHub } from "@/app/_domains/integration/_services/github/sync-feedback-status-to-github.inngest";
 import { syncFeedbackStatusToJira } from "@/app/_domains/integration/_services/jira/sync-feedback-status-to-jira.inngest";
 import { syncFeedbackStatusToTrello } from "@/app/_domains/integration/_services/trello/sync-feedback-status-to-trello.inngest";
+import { syncTrelloCardStatus } from "@/app/_domains/integration/_services/trello/sync-trello-card-status.inngest";
 import { syncFeedbackStatusToLinear } from "@/app/_domains/integration/_services/linear/sync-feedback-status-to-linear.inngest";
 import { syncGitHubIssueStatus } from "@/app/_domains/integration/_services/github/sync-github-issue-status.inngest";
 import { syncJiraIssueStatus } from "@/app/_domains/integration/_services/jira/sync-jira-issue-status.inngest";
@@ -42,6 +43,7 @@ export const { GET, POST, PUT } = serve({
     syncJiraIssueStatus,
     syncFeedbackStatusToJira,
     syncFeedbackStatusToTrello,
+    syncTrelloCardStatus,
     handleJiraOAuthRevoked,
     refreshJiraWebhooks,
     refreshJiraInstallationWebhooks,
