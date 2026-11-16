@@ -148,6 +148,28 @@ async function postTrelloResource<T>(
   return (await res.json()) as T;
 }
 
+async function putTrelloResource<T>(
+  accessToken: string,
+  path: string,
+  body: Record<string, unknown>,
+): Promise<T> {
+  const res = await fetch(`${TRELLO_API_BASE_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new TrelloRequestError(res.status, await res.text(), path);
+  }
+
+  return (await res.json()) as T;
+}
+
 async function deleteTrelloResource(
   accessToken: string,
   path: string,
@@ -234,6 +256,23 @@ export function createCard(
     pos: "top",
     idLabels: input.labelIds,
   });
+}
+
+// JSON drops an undefined field, so an absent write leaves it as it is.
+export function updateCard(
+  accessToken: string,
+  cardId: string,
+  input: { listId?: string; closed: boolean; dueComplete?: boolean },
+): Promise<TrelloCard> {
+  return putTrelloResource(
+    accessToken,
+    `/cards/${encodeURIComponent(cardId)}`,
+    {
+      idList: input.listId,
+      closed: input.closed,
+      dueComplete: input.dueComplete,
+    },
+  );
 }
 
 export type TrelloWebhook = {
