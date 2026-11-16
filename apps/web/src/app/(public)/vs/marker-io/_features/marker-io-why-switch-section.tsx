@@ -1,7 +1,16 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 const limitations = [
   {
     title: "The bill grows every time you hire",
-    body: "Marker.io charges per seat: Starter covers 3 members, Team covers 15, and every additional member is $4–$6/month on top with annual billing ($6–$9 monthly). A 5-person dev team that needs Jira and devtools already starts at $149/month annual before adding anyone. FasterFixes charges per workspace: $20/month flat for up to 5 members, $99/month for unlimited. Headcount stops being a pricing variable.",
+    body: `Marker.io charges per seat: Starter covers 3 members, Team covers 15, and every additional member is $4–$6/month on top with annual billing ($6–$9 monthly). A 5-person dev team that needs Jira and devtools already starts at $149/month annual before adding anyone. FasterFixes charges per workspace: $${proPrice}/month flat for up to ${proPlan.seats} members, $${agencyPrice}/month for unlimited. Headcount stops being a pricing variable.`,
   },
   {
     title: "No way to self-host or own your data",
@@ -9,7 +18,7 @@ const limitations = [
   },
   {
     title: "Key features locked behind the $149/month tier",
-    body: "On Marker.io Starter ($39/month annual), you do not get Jira sync, session replay, devtools (console and network logs), or custom branding. Those require Team at $149/month annual, a 3.8× jump. FasterFixes does not gate developer context by tier: React component tree capture, the Recording and MCP access are on every plan, including Free, and GitHub, Linear and Jira sync are included from Pro at $20/month.",
+    body: `On Marker.io Starter ($39/month annual), you do not get Jira sync, session replay, devtools (console and network logs), or custom branding. Those require Team at $149/month annual, a 3.8× jump. FasterFixes does not gate developer context by tier: React component tree capture, the Recording and MCP access are on every plan, including Free, and GitHub, Linear and Jira sync are included from Pro at $${proPrice}/month.`,
   },
   {
     title: "Built for QA reviewers, not the developer fixing the bug",

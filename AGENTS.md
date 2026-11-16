@@ -49,4 +49,5 @@ Single-context repo. Glossary at `CONTEXT.md`: name domain concepts with its ter
 ### Web app
 
 - `pnpm dev:server start|stop|status` runs the dev server in the background, in cloud mode so `/`, `/docs` and `/blog` render instead of redirecting to `/login`. `start` returns once the server answers, with its URL and log path.
+- `pnpm screenshot <path-or-url> [--selector <css>] [--width <px>]... [--mobile] [--full]` screenshots a dev server page, or the element `--selector` matches, at each width (`--mobile` adds 390px), and prints each PNG's path to open with Read.
 - Public docs and blog pages are MDX in `apps/web/src/content/docs` and `apps/web/src/content/blog`; each docs folder's `meta.json` sets its sidebar order.

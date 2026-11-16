@@ -47,14 +47,19 @@ export const slackFaqs: RichFaqItem[] = [
   {
     question: "Does the Slack integration create tasks or issues?",
     answer:
-      "No. Slack is a one-way notification channel: it announces feedback and updates the status badge. For two-way issue tracking, use the GitHub or Linear integrations, which create issues and sync status both ways.",
+      "No. Slack is a one-way notification channel: it announces feedback and updates the status badge. For two-way issue tracking, use the GitHub, Linear or Jira integrations, which create issues and sync status both ways, or mirror feedback to Trello as cards.",
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         No. Slack is a one-way notification channel: it announces feedback and
         updates the status badge. For two-way issue tracking, use the{" "}
-        <DocLink href={"/docs/integrations/github" as Route}>GitHub</DocLink> or{" "}
-        <DocLink href={"/docs/integrations/linear" as Route}>Linear</DocLink>{" "}
-        integrations, which create issues and sync status both ways.
+        <DocLink href={"/docs/integrations/github" as Route}>GitHub</DocLink>,{" "}
+        <DocLink href={"/docs/integrations/linear" as Route}>Linear</DocLink> or{" "}
+        <DocLink href={"/docs/integrations/jira" as Route}>Jira</DocLink>{" "}
+        integrations, which create issues and sync status both ways, or{" "}
+        <DocLink href={"/integrations/trello" as Route}>
+          mirror feedback to Trello
+        </DocLink>{" "}
+        as cards.
       </p>
     ),
   },

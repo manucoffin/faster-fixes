@@ -1,0 +1,76 @@
+---
+title: Trello integration setup
+description: Set up the Faster Fixes Trello integration to mirror feedback as Trello cards and sync status through the lists of your board.
+---
+
+Faster Fixes mirrors each feedback as a card on a Trello board and keeps the card's list in step with the feedback's status. For a product overview, see the [Trello integration overview](/integrations/trello).
+
+The Trello integration is available on paid plans.
+
+## Setup
+
+1. Go to **[Application Settings](/integrations) → Integrations** from the sidebar
+2. Click **Connect to Trello** and authorize Faster Fixes
+3. In **[Project Settings](/settings) → Trello**, pick a board
+4. Map the board's lists to the feedback statuses, choose default labels, and link the board
+
+Connecting requires the owner or admin role. One Trello account is connected per organization, and each project links to one board.
+
+Authorize with a service account rather than a personal one. Cards are created as the authorizing Trello member, and the connection breaks if that member leaves the boards or revokes access.
+
+## Map lists to statuses
+
+Trello has no statuses, so each feedback status is mapped to a list of the board:
+
+| Status          | List                                                     |
+| --------------- | -------------------------------------------------------- |
+| **New**         | Required. New cards are created at the top of this list. |
+| **In progress** | Optional.                                                |
+| **Resolved**    | Required. Cards in this list are marked complete.        |
+
+A list maps to one status only. Unmapped lists, such as a QA list, are ignored by the sync. The mapping, the default labels and auto-create can be edited after linking.
+
+## Cards
+
+With auto-create on, the default, each new feedback creates a card at the top of the **New** list. Feedback that existed before the link is not sent: create its card with the **Create Trello card** action in the Trackers section of the feedback, which also works with auto-create off.
+
+A card contains:
+
+- Feedback comment
+- Page URL
+- DOM selector
+- Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
+- Browser info, viewport and the reviewer's name
+- Custom metadata, when the widget sends it
+- Console logs and network requests
+- Link to the feedback in the dashboard
+
+The screenshot is attached as the card's cover. When the console logs and network requests exceed Trello's description limit, the description is cut and keeps the dashboard link.
+
+An automatic card waits up to 30 seconds for the Recording to upload, a manual card is created at once, and a Recording that arrives later is added to the card. The Recording link requires a Faster Fixes login, and the share link of a Video never appears on a card.
+
+## Status sync
+
+| Change                                                  | Result                                                              |
+| ------------------------------------------------------- | ------------------------------------------------------------------- |
+| Feedback status changed in the dashboard or by an agent | Card moves to the mapped list. With no In progress list, it stays.  |
+| Feedback archived                                       | Card is archived                                                    |
+| Archived feedback restored                              | Card is unarchived and moves to the New list                        |
+| Card moved or unarchived into a mapped list             | Feedback takes that list's status                                   |
+| Card archived from the Resolved list                    | Feedback stays resolved                                             |
+| Card archived from any other list                       | Feedback is archived                                                |
+| Card deleted or moved to another board                  | Card is detached. The feedback keeps its status and can get a card. |
+
+Marking a card complete without moving it does not resolve the feedback.
+
+## When sync stops
+
+Project settings flag the link when a mapped list is archived or deleted, the board is closed, or the connected member can no longer reach the board. Card creation is paused for the project until you remap the lists, reopen the board or restore access.
+
+When the Trello member revokes the authorization, the integrations page shows **Reconnection required** and owners and admins receive an email. Card creation and sync stop until you click **Reconnect** and authorize again, ideally as the same member. Project links and cards are kept.
+
+## Unlink and disconnect
+
+Unlink a board from **[Project Settings](/settings) → Trello**, including on the free plan. Its cards stay on Trello and stop syncing. To switch boards, unlink the current one, then link the new one.
+
+Disconnecting from **[Application Settings](/integrations) → Integrations** unlinks every project and leaves existing cards on Trello. Disconnecting is owner-only.

@@ -20,6 +20,7 @@ model Project {
   linearLink   ProjectLinearLink?
   jiraLink     ProjectJiraLink?
   slackLink    ProjectSlackLink?
+  trelloLink   ProjectTrelloLink?
 
   @@index([organizationId])
   @@index([publicId])
@@ -139,6 +140,7 @@ model Feedback {
   issueLink       FeedbackIssueLink?
   linearIssueLink FeedbackLinearIssueLink?
   jiraIssueLink   FeedbackJiraIssueLink?
+  trelloIssueLink FeedbackTrelloIssueLink?
   slackMessage    FeedbackSlackMessage?
   rank            FeedbackRank?
 

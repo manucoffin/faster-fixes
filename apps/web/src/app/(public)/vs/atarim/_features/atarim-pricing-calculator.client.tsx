@@ -1,7 +1,16 @@
 "use client";
 
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { Slider } from "@workspace/ui/components/slider";
 import { useState } from "react";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
@@ -181,7 +190,8 @@ export function AtarimPricingCalculator() {
       <p className="mt-6 text-xs text-muted-foreground">
         Comparison based on Atarim Pro at $67/month, or $643.20/year billed
         yearly, flat for up to 100 seats and 1,000 projects, vs FasterFixes Pro
-        ($20/month for up to 5 members and 5 projects) and Agency ($99/month,
+        (${proPrice}/month for up to {proPlan.seats} members and{" "}
+        {proPlan.projects} projects) and Agency (${agencyPrice}/month,
         unlimited). Atarim AI credits beyond the 5,000 included each month are
         not counted. Check atarim.io/pricing for current rates.
       </p>

@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
@@ -6,6 +11,11 @@ import {
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
 import { SectionHeading } from "../../_components/section-heading";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 export const websiteAnnotationFaqs: FaqItem[] = [
   {
@@ -45,8 +55,7 @@ export const websiteAnnotationFaqs: FaqItem[] = [
   },
   {
     question: "Is there a free website annotation tool?",
-    answer:
-      "Faster Fixes has a Free plan that is not time-limited: 1 project, up to 20 feedback items, 1 team member, 1 video up to 500 MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira and Slack need Pro at $20/month flat for up to 5 members, or Agency at $99/month with unlimited members. Your data is never deleted when a plan ends.",
+    answer: `Faster Fixes has a Free plan that is not time-limited: ${freePlan.projects} project, up to ${freePlan.feedbacks} feedback items, ${freePlan.seats} team member, ${freePlan.videos} video up to ${freePlan.videoFileSize / 1_000_000} MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira, Trello and Slack need Pro at $${proPrice}/month flat for up to ${proPlan.seats} members, or Agency at $${agencyPrice}/month with unlimited members. Your data is never deleted when a plan ends.`,
   },
 ];
 

@@ -1,10 +1,18 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -25,14 +33,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "Flat per-workspace · free, $20/mo, $99/mo",
+      `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
       "Tiered by project count · $59/mo Starter to $549/mo Premium",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
-      "$0 self-host · $20/mo hosted Pro",
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
       "$159/mo Growth ($129/mo billed annually) · Starter has 2 seats",
     ],
   },
@@ -110,7 +118,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Jira, Linear, Asana, Azure DevOps, GitHub, +",
     ],
   },
@@ -119,6 +127,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [
       { type: "yes", note: "New feedback + live status, per project" },
       { type: "yes", note: "New feedback + status events · one-way" },
+    ],
+  },
+  {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "partial", note: "Creates cards only" },
     ],
   },
   {
@@ -145,7 +160,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      {
+        type: "yes",
+        note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
+      },
       { type: "partial", note: "Free trial only" },
     ],
   },

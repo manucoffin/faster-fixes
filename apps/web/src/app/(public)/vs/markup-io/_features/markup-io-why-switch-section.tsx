@@ -1,11 +1,14 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const cards = [
   {
     title: "The 172% price shock",
-    body: "In January 2025 Markup.io raised Pro from $29 to $79 per month and eliminated the free plan entirely. Long-time customers reported a 280% increase on existing accounts and threats of data deletion for non-payment. FasterFixes is $20/mo flat, or $0 if you self-host.",
+    body: `In January 2025 Markup.io raised Pro from $29 to $79 per month and eliminated the free plan entirely. Long-time customers reported a 280% increase on existing accounts and threats of data deletion for non-payment. FasterFixes is $${proPrice}/mo flat, or $0 if you self-host.`,
   },
   {
     title: "No native tracker integrations",
-    body: "Markup.io has no native Jira, Linear, or GitHub sync on any plan. Feedback stays in a comments tab unless you route it to your tracker yourself through Zapier. FasterFixes includes GitHub, Linear, and Jira sync from the $20/mo plan.",
+    body: `Markup.io has no native Jira, Linear, or GitHub sync on any plan. Feedback stays in a comments tab unless you route it to your tracker yourself through Zapier. FasterFixes includes GitHub, Linear, and Jira sync from the $${proPrice}/mo plan.`,
   },
   {
     title: "Chrome extension dependency",

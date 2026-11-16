@@ -1,4 +1,11 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -97,12 +104,13 @@ export function UsersnapHonestTakeSection() {
               React component path. The agent knows which file owns the bug.
             </li>
             <li>
-              <strong className="text-foreground">Flat pricing</strong>:
-              $20/month for a 5-person team versus $159/month on Usersnap Growth
-              ($129/month billed annually), since Starter includes 2 seats. The
-              free plan covers 1 project, {freeFeedbackLimit} feedback items,
-              and 1 member at no cost, with no time limit. Usersnap offers a
-              free trial, not a permanent free tier.
+              <strong className="text-foreground">Flat pricing</strong>: $
+              {proPrice}/month for a 5-person team versus $159/month on Usersnap
+              Growth ($129/month billed annually), since Starter includes 2
+              seats. The free plan covers {freePlan.projects} project,{" "}
+              {freeFeedbackLimit} feedback items, and {freePlan.seats} member at
+              no cost, with no time limit. Usersnap offers a free trial, not a
+              permanent free tier.
             </li>
           </ul>
           <p>

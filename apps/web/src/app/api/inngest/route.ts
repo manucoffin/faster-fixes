@@ -4,6 +4,10 @@ import { createGitHubIssue } from "@/app/_domains/integration/_services/github/c
 import { createJiraIssue } from "@/app/_domains/integration/_services/jira/create-jira-issue.inngest";
 import { createLinearIssue } from "@/app/_domains/integration/_services/linear/create-linear-issue.inngest";
 import { handleJiraOAuthRevoked } from "@/app/_domains/integration/_services/jira/handle-jira-oauth-revoked.inngest";
+import { handleTrelloOAuthRevoked } from "@/app/_domains/integration/_services/trello/handle-trello-oauth-revoked.inngest";
+import { requestTrelloCard } from "@/app/_domains/integration/_services/trello/request-trello-card.inngest";
+import { createTrelloCard } from "@/app/_domains/integration/_services/trello/create-trello-card.inngest";
+import { refreshTrelloCardRecording } from "@/app/_domains/integration/_services/trello/refresh-trello-card-recording.inngest";
 import { handleLinearOAuthRevoked } from "@/app/_domains/integration/_services/linear/handle-linear-oauth-revoked.inngest";
 import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services/slack/notify-slack-feedback-created.inngest";
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
@@ -14,6 +18,8 @@ import { reapAbandonedVideoUploads } from "@/app/_domains/video/_services/reap-a
 import { sendWelcomeEmail } from "@/app/_domains/user/_services/send-welcome-email.inngest";
 import { syncFeedbackStatusToGitHub } from "@/app/_domains/integration/_services/github/sync-feedback-status-to-github.inngest";
 import { syncFeedbackStatusToJira } from "@/app/_domains/integration/_services/jira/sync-feedback-status-to-jira.inngest";
+import { syncFeedbackStatusToTrello } from "@/app/_domains/integration/_services/trello/sync-feedback-status-to-trello.inngest";
+import { syncTrelloCardStatus } from "@/app/_domains/integration/_services/trello/sync-trello-card-status.inngest";
 import { syncFeedbackStatusToLinear } from "@/app/_domains/integration/_services/linear/sync-feedback-status-to-linear.inngest";
 import { syncGitHubIssueStatus } from "@/app/_domains/integration/_services/github/sync-github-issue-status.inngest";
 import { syncJiraIssueStatus } from "@/app/_domains/integration/_services/jira/sync-jira-issue-status.inngest";
@@ -37,9 +43,15 @@ export const { GET, POST, PUT } = serve({
     createJiraIssue,
     syncJiraIssueStatus,
     syncFeedbackStatusToJira,
+    syncFeedbackStatusToTrello,
+    syncTrelloCardStatus,
     handleJiraOAuthRevoked,
     refreshJiraWebhooks,
     refreshJiraInstallationWebhooks,
+    handleTrelloOAuthRevoked,
+    requestTrelloCard,
+    createTrelloCard,
+    refreshTrelloCardRecording,
     sendWelcomeEmail,
     addContactToSegment,
     scanTestimonialRequests,

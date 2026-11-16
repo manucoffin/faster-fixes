@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
@@ -6,11 +11,13 @@ import {
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
 export const markupIoFaqs: FaqItem[] = [
   {
     question: "Is there a free Markup.io alternative?",
-    answer:
-      "Yes. FasterFixes is free to self-host with no member limits, and the hosted Pro plan is $20 a month flat for up to 5 members. The dashboard is AGPL-3.0 and the widget is MIT.",
+    answer: `Yes. FasterFixes is free to self-host with no member limits, and the hosted Pro plan is $${proPrice} a month flat for up to ${proPlan.seats} members. The dashboard is AGPL-3.0 and the widget is MIT.`,
   },
   {
     question: "Why did Markup.io raise its prices?",

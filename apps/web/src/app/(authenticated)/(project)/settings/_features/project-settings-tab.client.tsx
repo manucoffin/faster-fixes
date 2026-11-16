@@ -10,6 +10,7 @@ import { GitHubSection } from "./github/github-section.client";
 import { JiraSection } from "./jira/jira-section.client";
 import { LinearSection } from "./linear/linear-section.client";
 import { SlackSection } from "./slack/slack-section.client";
+import { TrelloSection } from "./trello/trello-section.client";
 import { UpdateProjectForm } from "./update/update-project-form.client";
 
 type ProjectSettingsTabProps = {
@@ -62,6 +63,15 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         cardClassName="lg:max-w-lg"
       >
         <JiraSection projectId={projectId} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Trello"
+        description="Link a Trello board to mirror feedback into Trello as cards."
+        cardTitle="Trello integration"
+        cardClassName="lg:max-w-lg"
+      >
+        <TrelloSection projectId={projectId} />
       </DashboardSection>
 
       <DashboardSection

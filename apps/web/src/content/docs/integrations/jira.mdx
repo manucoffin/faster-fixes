@@ -3,9 +3,7 @@ title: Jira integration setup
 description: Set up the Faster Fixes Jira integration to automatically create Jira issues from feedback and sync status bidirectionally.
 ---
 
-Faster Fixes integrates with Jira Cloud to automatically create issues when new feedback is submitted and sync status changes between the dashboard and Jira. The integration runs alongside GitHub and Linear: a feedback can mirror to all three at once, and status changes propagate to each independently.
-
-Jira Server and Data Center are not supported.
+Faster Fixes creates a Jira Cloud issue for each new feedback and syncs status between the dashboard and Jira. Jira Server and Data Center are not supported.
 
 The Jira integration is available on paid plans.
 
@@ -16,87 +14,57 @@ The Jira integration is available on paid plans.
 3. If your account has access to several Jira sites, pick the one to connect
 4. In **[Project Settings](/settings) → Jira**, link your project to a Jira project and issue type
 
-Connecting requires the owner or admin role. One Jira site is connected per organization; each project then links to a single Jira project within that site.
+Connecting requires the owner or admin role. One Jira site is connected per organization, and each project links to one Jira project within that site.
 
-Authorize with a service account rather than a personal one. Jira's OAuth grant is bound to the authorizing user, so issues are attributed to that account and the connection breaks if they lose Jira access or leave the company.
+Authorize with a service account rather than a personal one. Issues are attributed to the authorizing user, and the connection breaks if they lose Jira access or leave the company.
 
-## Auto-create issues
+## Project settings
 
-When enabled (on by default), new feedback automatically creates an issue in the linked Jira project. The issue includes:
+| Setting            | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| **Jira project**   | The Jira project that receives new issues                                  |
+| **Issue type**     | Pre-selected to Bug when available                                         |
+| **Default labels** | Applied to every created issue, `faster-fixes` by default. No spaces.      |
+| **Auto-create**    | Turns automatic issue creation on or off without unlinking. On by default. |
+
+Faster Fixes fills only the project, issue type, summary and description. If the issue type requires any other field, linking is blocked and lists the fields at fault: make them optional in Jira or pick another issue type. Changing the Jira project or issue type runs this check again. If a required field is added after linking, issue creation fails and the link is flagged in project settings.
+
+## Issues
+
+With auto-create on, each new feedback creates an issue in the linked Jira project. To create one manually, including with auto-create off, use the **Create Jira issue** action in the Trackers section of the feedback. The Trackers section then shows the issue key and a status dot linking to Jira.
+
+An issue contains:
 
 - Feedback comment
 - Page URL
 - DOM selector
 - Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
 - Link to the screenshot
-- Browser info and the reviewer's name (in a collapsible section)
-- Custom metadata, when the widget sends it (in a collapsible section)
-- Console logs and network requests (in a collapsible section)
+- Browser info and the reviewer's name, collapsed
+- Custom metadata, when the widget sends it, collapsed
+- Console logs and network requests in a collapsed **Diagnostics** section
 - Link to the feedback in the dashboard
 
-## Recording
+When the feedback has a Recording, **Diagnostics** is replaced by a collapsed **Timeline** that lists the reviewer's steps, console logs and network requests on one clock. When the timeline is too long, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue shows Diagnostics instead. The **Play in Faster Fixes** link requires a Faster Fixes login.
 
-When the feedback has a [Recording](/docs/widget/recording), the issue gains a **Recording** line after the element, with a **Play in Faster Fixes** link and the Recording's duration, for example `48 s`. The link opens the player in the dashboard and requires a login, so anyone who can read the issue without a Faster Fixes account sees nothing of the Recording.
+An automatic issue waits up to 30 seconds for the Recording to upload, and a manual issue is created at once. An issue is never rewritten: a Recording that arrives later is not added, and removing a Recording in the dashboard leaves the Timeline in the issue.
 
-The collapsed **Diagnostics** section is then replaced by a collapsed **Timeline** section. It lists the Reviewer's steps, console logs and network requests on one clock, ending with the selection of the element. When the timeline is too long for the issue, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue keeps the Recording line and shows Diagnostics instead.
+## Status sync
 
-An automatic issue waits up to 30 seconds for the Recording to finish uploading, then is created with or without it. A manual issue is created at once.
+Statuses map by Jira status category (To Do, In Progress, Done), not by name, so custom and renamed workflow statuses work without configuration.
 
-An issue is written once and never rewritten. A Recording that arrives after the issue was created is not added to it, and removing a Recording in the dashboard leaves the timeline already written in the issue.
+| Change                                          | Result                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| Feedback marked **resolved** or **closed**      | Issue transitions to a Done-category status                         |
+| Feedback reopened to **new** or **in progress** | Issue transitions out of Done, to In Progress where available       |
+| Issue moved to a **Done**-category status       | Feedback is resolved                                                |
+| Issue moved to **To Do** or **In Progress**     | Feedback is set to **in progress**, never back to **new**           |
+| Issue deleted in Jira                           | Issue is detached. The feedback is unchanged and can get a new one. |
 
-## Defaults per project
+Only crossing the Done boundary moves the issue: moving a feedback between **new** and **in progress** leaves it where it is. Where a transition accepts a resolution, resolved sets Done and closed sets Won't Do. If the workflow has no transition into the target category, the change is skipped.
 
-Each project link controls how new issues are created:
+## Unlink and disconnect
 
-| Setting            | Description                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **Jira project**   | The Jira project that receives new issues                                                   |
-| **Issue type**     | The issue type created, pre-selected to Bug when available                                  |
-| **Default labels** | Labels applied to every created issue, defaulting to `faster-fixes`. Cannot contain spaces. |
-| **Auto-create**    | Toggle automatic issue creation off without unlinking                                       |
+Unlink a Jira project from **[Project Settings](/settings) → Jira**, including on the free plan. Its issues stay in Jira and stop syncing.
 
-### Required fields
-
-Faster Fixes fills only the project, issue type, summary, and description. If the Jira project and issue type you pick require any other field, linking is blocked with the list of fields at fault. Make those fields optional in Jira, or choose an issue type that does not require them.
-
-If a required field is added after linking, issue creation starts failing and the link is flagged in project settings.
-
-## Bidirectional status sync
-
-Status changes propagate in both directions. Mapping is by Jira's status **category**, To Do, In Progress, Done, not by status name, so custom and renamed workflow statuses still work without configuration.
-
-| Action                                                       | Result                                                             |
-| ------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Feedback marked **resolved** or **closed** in dashboard      | Jira issue transitions to a Done-category status                   |
-| Feedback reopened to **new** or **in progress** in dashboard | Jira issue transitions out of Done, to In Progress where available |
-| Jira issue moved to a **Done**-category status               | Feedback status updated to resolved                                |
-| Jira issue moved to **To Do** or **In Progress**             | Feedback status updated to in progress                             |
-
-Two behaviors are worth knowing:
-
-- Only crossing the Done boundary triggers a transition. Moving a feedback between **new** and **in progress** leaves the Jira issue where it is, so the integration does not fight your team's board.
-- Reopening from Jira sets the feedback to **in progress**, never back to **new**. Feedback that has already been triaged does not reappear as untriaged.
-
-Where a transition accepts a resolution, resolved sets Done and closed sets Won't Do. If a workflow offers no transition into the target category, the change is skipped and logged rather than treated as an error.
-
-## Manual issue creation
-
-You can create a Jira issue manually from any feedback item in the Task board using the **Create Jira issue** action in the Trackers section. This works even when auto-create is off. Once an issue exists, the Trackers section shows its key and a status dot linking to Jira.
-
-## Changing the Jira project or issue type
-
-Switching either re-runs the link, including the required-fields check. Auto-create and labels can be edited in place.
-
-## Issues deleted in Jira
-
-Deleting a mirrored issue in Jira detaches it from the feedback and leaves the feedback untouched. You can export it to Jira again afterwards.
-
-## Unlinking
-
-You can unlink a Jira project from **[Project Settings](/settings) → Jira** at any time. Existing issue links are preserved but sync stops. Unlinking stays available on the free plan so a downgrade never traps you.
-
-## Disconnecting
-
-Disconnecting from **[Application Settings](/integrations) → Integrations** removes the Jira site and cascades all project links. Existing Jira issues are not deleted; they simply stop syncing. Disconnecting is owner-only.
-
-Atlassian provides no API to revoke a grant, so also remove Faster Fixes from your Atlassian account's connected apps to fully revoke access.
+Disconnecting from **[Application Settings](/integrations) → Integrations** unlinks every project and leaves existing issues in Jira. Disconnecting is owner-only. Atlassian has no API to revoke a grant, so also remove Faster Fixes from your Atlassian account's connected apps.

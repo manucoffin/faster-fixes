@@ -1,10 +1,18 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -25,14 +33,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "Flat per-workspace · free, $20/mo, $99/mo",
+      `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
       "Per-seat tiers · $39 Starter, $149 Team (annual)",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
-      "$0 self-host · $20/mo hosted Pro",
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
       "$149/mo Team (annual · min for Jira & devtools)",
     ],
   },
@@ -120,9 +128,16 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "partial", note: "Resolves when the card is Done in Trello" },
+    ],
+  },
+  {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Jira, Linear, Asana, ClickUp, Trello, Monday.com, +",
     ],
   },
@@ -150,7 +165,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      {
+        type: "yes",
+        note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
+      },
       { type: "partial", note: "15-day trial · no permanent free plan" },
     ],
   },

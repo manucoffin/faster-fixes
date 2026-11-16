@@ -71,6 +71,7 @@ function feedbackRow(overrides: Record<string, unknown> = {}) {
     issueLink: null,
     linearIssueLink: null,
     jiraIssueLink: null,
+    trelloIssueLink: null,
     rank: null,
     ...overrides,
   };

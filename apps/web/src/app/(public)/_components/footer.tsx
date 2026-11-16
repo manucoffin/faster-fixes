@@ -19,6 +19,7 @@ const integrationLinks: { text: string; href: Route }[] = [
   { text: "GitHub integration", href: "/integrations/github" as Route },
   { text: "Linear integration", href: "/integrations/linear" as Route },
   { text: "Jira integration", href: "/integrations/jira" as Route },
+  { text: "Trello integration", href: "/integrations/trello" as Route },
   { text: "Slack integration", href: "/integrations/slack" as Route },
   { text: "MCP server", href: "/integrations/mcp" as Route },
 ];

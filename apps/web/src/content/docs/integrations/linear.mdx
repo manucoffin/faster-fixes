@@ -3,7 +3,7 @@ title: Linear integration setup
 description: Set up the Faster Fixes Linear integration to automatically create Linear issues from feedback and sync status bidirectionally.
 ---
 
-Faster Fixes integrates with Linear to automatically create issues when new feedback is submitted and sync status changes between the dashboard and Linear. The integration runs alongside GitHub: you can connect either, both, or neither. For a product overview, see the [Linear integration overview](/integrations/linear).
+Faster Fixes creates a Linear issue for each new feedback and syncs status between the dashboard and Linear in both directions. For a product overview, see the [Linear integration overview](/integrations/linear).
 
 ## Setup
 
@@ -12,35 +12,9 @@ Faster Fixes integrates with Linear to automatically create issues when new feed
 3. In **[Project Settings](/settings) → Linear**, link your project to a team
 4. Pick the default state, labels, and priority for new issues
 
-The OAuth grant is workspace-wide. Each project then links to a single team within that workspace.
+The OAuth grant is workspace-wide. Each project links to a single team within that workspace.
 
-## Auto-create issues
-
-When enabled (on by default), new feedback automatically creates a Linear issue in the linked team. The issue includes:
-
-- Feedback comment
-- Page URL
-- DOM selector
-- Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
-- Browser info
-- Link to the screenshot
-- Console logs and network requests (in a collapsible section)
-
-Issues are attributed to the Faster Fixes app, not to the member who installed the integration, so they survive that member leaving the workspace.
-
-## Recording
-
-When the feedback has a [Recording](/docs/widget/recording), the issue gains a **Recording** line after the element, with a **Play in Faster Fixes** link and the Recording's duration, for example `48 s`. The link opens the player in the dashboard and requires a login, so sharing an issue exposes nothing of the Recording.
-
-The collapsed **Diagnostics** section is then replaced by a collapsed **Timeline** section. It lists the Reviewer's steps, console logs and network requests on one clock, ending with the selection of the element. When the timeline is too long for the issue, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue keeps the Recording line and shows Diagnostics instead.
-
-An automatic issue waits up to 30 seconds for the Recording to finish uploading, then is created with or without it. A manual issue is created at once.
-
-An issue is written once and never rewritten. A Recording that arrives after the issue was created is not added to it, and removing a Recording in the dashboard leaves the timeline already written in the issue.
-
-## Defaults per project
-
-Each project link controls how new issues are created:
+## Project defaults
 
 | Setting              | Description                                           |
 | -------------------- | ----------------------------------------------------- |
@@ -50,37 +24,45 @@ Each project link controls how new issues are created:
 | **Default priority** | None, Urgent, High, Medium, or Low                    |
 | **Auto-create**      | Toggle automatic issue creation off without unlinking |
 
-If a saved state or label is later deleted in Linear, Faster Fixes falls back to a state of the matching type and surfaces a banner in project settings prompting you to re-pick.
+Switching to a different team requires re-picking the default state and labels in the same step.
 
-## Bidirectional status sync
+If a saved state or label is deleted in Linear, Faster Fixes falls back to a state of the matching type and shows a banner in project settings prompting you to re-pick.
 
-Status changes propagate in both directions. Mapping is by Linear's workflow state **type**, not name, so renamed or custom states still work.
+## Issues
 
-| Action                                             | Result                                            |
-| -------------------------------------------------- | ------------------------------------------------- |
-| Feedback marked **resolved** in dashboard          | Linear issue moves to a `completed`-type state    |
-| Feedback marked **closed** (Archived) in dashboard | Linear issue moves to a `canceled`-type state     |
-| Feedback marked **in progress** in dashboard       | Linear issue moves to a `started`-type state      |
-| Feedback marked **new** in dashboard               | Linear issue moves to the project's default state |
-| Linear issue moved to **Done / completed**         | Feedback status updated to resolved               |
-| Linear issue **canceled**                          | Feedback status updated to closed                 |
-| Linear issue moved to **In Progress / started**    | Feedback status updated to in progress            |
-| Linear issue moved to **Triage / Backlog / Todo**  | Feedback status updated to new                    |
+With auto-create on, the default, each new feedback creates an issue in the linked team. To create one manually, use the **Create Linear issue** action on a feedback in the Task board. A manual issue is created in the state matching the feedback's current status, so an already-resolved feedback opens a `completed`-type issue.
 
-## Manual issue creation
+An issue contains:
 
-You can create a Linear issue manually from any feedback item in the Task board using the **Create Linear issue** action. The issue is created in a state matching the feedback's current status, so manually linking an already-resolved feedback opens the Linear issue directly in a `completed`-type state.
+- Feedback comment
+- Page URL
+- DOM selector
+- Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
+- Browser info
+- Link to the screenshot
+- Console logs and network requests, in a collapsed **Diagnostics** section
 
-A feedback can be linked to a GitHub issue and a Linear issue at the same time. Status changes propagate to both.
+Issues are created as the Faster Fixes app, not as the member who installed the integration.
 
-## Changing teams
+When the feedback has a Recording, **Diagnostics** is replaced by a collapsed **Timeline** section listing the Reviewer's steps, console logs and network requests on one clock. When the timeline is too long, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue shows Diagnostics instead. The **Play in Faster Fixes** link requires a Faster Fixes login.
 
-Switching a project to a different team requires re-picking the default state and labels in the same step, since IDs are not portable across teams. Faster Fixes opens a full form for this case.
+An automatic issue waits up to 30 seconds for the Recording to upload, a manual issue is created at once. An issue is never rewritten: a Recording that arrives later is not added, and removing a Recording in the dashboard leaves the timeline already in the issue.
 
-## Unlinking
+## Status sync
 
-You can unlink a team from **[Project Settings](/settings) → Linear** at any time. Existing issue links are preserved but sync stops.
+Statuses map to Linear's workflow state **type**, not its name, so renamed or custom states work.
 
-## Disconnecting
+| Feedback status       | Linear state type                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| **New**               | The project's default state. An issue moved to Triage, Backlog or Todo sets the feedback to New. |
+| **In progress**       | `started`                                                                                        |
+| **Resolved**          | `completed`                                                                                      |
+| **Closed** (Archived) | `canceled`                                                                                       |
 
-Disconnecting from **[Application Settings](/integrations) → Integrations** removes the OAuth grant and cascades all project links. Existing Linear issues are not deleted; they simply stop syncing.
+Changes apply in both directions. A feedback can be linked to a GitHub issue and a Linear issue at the same time, and status changes propagate to both.
+
+## Unlink and disconnect
+
+Unlink a team from **[Project Settings](/settings) → Linear** at any time. Existing issue links are kept but sync stops.
+
+Disconnecting from **[Application Settings](/integrations) → Integrations** removes the OAuth grant and unlinks every project. Existing Linear issues are not deleted and stop syncing.

@@ -6,6 +6,7 @@ import {
 } from "@workspace/ui/components/avatar";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
+import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { cn } from "@workspace/ui/lib/utils";
 import { Clock, UserRound } from "lucide-react";
@@ -92,6 +93,11 @@ export function TrackerChips({ feedback }: TrackerChipsProps) {
       key: "jira",
       icon: JiraIcon,
       label: feedback.jiraIssueLink.issueKey,
+    },
+    feedback.trelloIssueLink && {
+      key: "trello",
+      icon: TrelloIcon,
+      label: "Card",
     },
   ].filter((chip) => !!chip);
 

@@ -41,6 +41,14 @@ export const inboxFeedbackInclude = {
       issueStatusCategory: true,
     },
   },
+  trelloIssueLink: {
+    select: {
+      cardId: true,
+      cardShortLink: true,
+      cardUrl: true,
+      archived: true,
+    },
+  },
   rank: { select: { key: true } },
 } satisfies Prisma.FeedbackInclude;
 
@@ -88,6 +96,7 @@ export async function toInboxFeedbackItem(f: InboxFeedbackRow) {
     issueLink: f.issueLink,
     linearIssueLink: f.linearIssueLink,
     jiraIssueLink: f.jiraIssueLink,
+    trelloIssueLink: f.trelloIssueLink,
     rank: f.rank?.key ?? null,
   };
 }

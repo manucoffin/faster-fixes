@@ -1,9 +1,18 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 const cards: {
   vendor: string;
@@ -23,10 +32,10 @@ const cards: {
   },
   {
     vendor: "FasterFixes · Hosted",
-    plan: "Pro plan, up to 5 members",
-    price: "$20",
+    plan: `Pro plan, up to ${proPlan.seats} members`,
+    price: `$${proPrice}`,
     suffix: "/ month",
-    note: "Flat rate. Agency tier unlocks unlimited members at $99/month. No per-seat charges as your team grows.",
+    note: `Flat rate. Agency tier unlocks unlimited members at $${agencyPrice}/month. No per-seat charges as your team grows.`,
   },
   {
     vendor: "Marker.io · Team",

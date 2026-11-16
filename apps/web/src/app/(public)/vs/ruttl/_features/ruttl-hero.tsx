@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
@@ -5,6 +10,9 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function RuttlHero() {
   return (
@@ -19,7 +27,8 @@ export function RuttlHero() {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Ruttl charges $18 per user per month. A five-person team pays $1,080
-            a year. FasterFixes is flat-rate: $20 a month hosted for up to five
+            a year. FasterFixes is flat-rate: ${proPrice} a month hosted for up
+            to {proPlan.seats}
             members, or free if you self-host, with no per-seat math at any
             scale. AGPL-3.0 licensed, with an MCP server so Claude Code and
             Cursor can fix feedback from the terminal.

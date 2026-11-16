@@ -49,10 +49,14 @@ export async function getActivationOverview(
     withFeedback,
     paying,
     payingBase,
-    withTracker,
+    withGitHub,
+    withLinear,
+    withJira,
+    withTrello,
     withSlack,
     engagedBase,
     withAgentToken,
+    videosUploaded,
     freeProjects,
   ] = await Promise.all([
     prisma.organization.count({ where: funnelWhere }),
@@ -67,14 +71,16 @@ export async function getActivationOverview(
     }),
     prisma.organization.count({ where: payingWhere }),
     prisma.organization.count({
-      where: {
-        ...payingWhere,
-        OR: [
-          { gitHubInstallations: { some: {} } },
-          { linearInstallation: { isNot: null } },
-          { jiraInstallation: { isNot: null } },
-        ],
-      },
+      where: { ...payingWhere, gitHubInstallations: { some: {} } },
+    }),
+    prisma.organization.count({
+      where: { ...payingWhere, linearInstallation: { isNot: null } },
+    }),
+    prisma.organization.count({
+      where: { ...payingWhere, jiraInstallation: { isNot: null } },
+    }),
+    prisma.organization.count({
+      where: { ...payingWhere, trelloInstallation: { isNot: null } },
     }),
     prisma.organization.count({
       where: { ...payingWhere, slackInstallation: { isNot: null } },
@@ -84,6 +90,13 @@ export async function getActivationOverview(
       where: {
         ...engagedWhere,
         agentTokens: { some: { lastUsedAt: { gte: windowStart, lt: now } } },
+      },
+    }),
+    // An `uploading` Video never finished its transfer, so it is not counted.
+    prisma.video.count({
+      where: {
+        state: "ready",
+        project: { organization: nonInternalOrganizationWhere },
       },
     }),
     // The free Feedback limit is lifetime and counted across every Project of
@@ -115,10 +128,14 @@ export async function getActivationOverview(
   return {
     funnel: { created, withProject, withFeedback, paying },
     adoption: {
-      tracker: { count: withTracker, base: payingBase },
+      gitHub: { count: withGitHub, base: payingBase },
+      linear: { count: withLinear, base: payingBase },
+      jira: { count: withJira, base: payingBase },
+      trello: { count: withTrello, base: payingBase },
       slack: { count: withSlack, base: payingBase },
       agentToken: { count: withAgentToken, base: engagedBase },
     },
+    videosUploaded,
     freeNearLimit: {
       count: freeNearLimitCount,
       threshold: NEAR_LIMIT_FEEDBACK_COUNT,

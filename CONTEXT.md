@@ -1,6 +1,6 @@
 # Faster Fixes
 
-A widget that lets a website's end-users report bugs and feedback in-page, and a review page that lets a customer's clients annotate an uploaded video; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira), and announced to notification channels (Slack).
+A widget that lets a website's end-users report bugs and feedback in-page, and a review page that lets a customer's clients annotate an uploaded video; reports flow into a project inbox, can be mirrored to external trackers (GitHub Issues, Linear, Jira, Trello), and announced to notification channels (Slack).
 
 ## Language
 
@@ -147,11 +147,11 @@ _Avoid_: Unarchive, Reopen (reserved for the Tracker-side action on an Issue), U
 ### Integrations
 
 **Integration**:
-An external system Faster Fixes connects to through an **Installation**. Comes in two categories: a **Tracker** (two-way mirror) or a **Notification channel** (one-way announce). Currently GitHub Issues, Linear, Jira and Slack.
+An external system Faster Fixes connects to through an **Installation**. Comes in two categories: a **Tracker** (two-way mirror) or a **Notification channel** (one-way announce). Currently GitHub Issues, Linear, Jira, Trello and Slack.
 _Avoid_: Connector, Plugin, External system.
 
 **Tracker**:
-A category of **Integration**: an external issue-tracking system Faster Fixes can mirror Feedback into, converging its state with the Feedback's. Currently GitHub Issues, Linear and Jira. The category is defined by the mirroring behaviour, not by the product type.
+A category of **Integration**: an external issue-tracking system Faster Fixes can mirror Feedback into, converging its state with the Feedback's. Currently GitHub Issues, Linear, Jira and Trello. The category is defined by the mirroring behaviour, not by the product type.
 _Avoid_: Integration target, Sink.
 
 **Notification channel**:
@@ -159,7 +159,7 @@ A category of **Integration** where Faster Fixes _announces_ Feedback one-way, h
 _Avoid_: Webhook (implementation detail), Sink.
 
 **Installation**:
-The org-level connection to an **Integration** — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × Integration).
+The org-level connection to an **Integration** — a **Tracker** (`GitHubInstallation`, `LinearInstallation`, `JiraInstallation`, `TrelloInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × Integration).
 
 **Reconnect required**:
 The state of an **Installation** whose authorization the **Integration** has explicitly refused or revoked. Only a User re-authorizing the connection clears it. A transient failure of the Integration never puts an Installation in this state.
@@ -171,6 +171,13 @@ _Avoid_: Jira instance, Jira workspace.
 
 **Jira project**:
 A project inside a Jira site (e.g. `PAY`). The per-Project tracker scope a Faster Fixes Project links to — the analog of a GitHub repo or a Linear team. Always written "Jira project" in full; bare "project" means a Faster Fixes Project.
+
+**Trello board**:
+A board a Trello member can reach. The per-Project tracker scope a Faster Fixes Project links to, the analog of a GitHub repo, a Linear team or a Jira project. A Trello Installation is one Trello member's authorization and has no org-level scope of its own: there is no Trello analog of a **Jira site**. Always written "Trello board" in full; bare "board" means a Faster Fixes Project's board.
+_Avoid_: Trello workspace (not a scope Faster Fixes links to).
+
+**Trello card**:
+The **Issue** a Feedback is mirrored as in Trello. The domain keeps saying Issue and **Issue link**; "card" is the Trello-facing word, used in UI copy on Trello screens.
 
 **Project link**:
 The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × Integration).

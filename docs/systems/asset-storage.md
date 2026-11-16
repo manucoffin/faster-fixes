@@ -11,7 +11,6 @@
 | **DB helper**       | `server/storage/create-asset.ts`         | `createAsset()` — creates an Asset row                    |
 | **Backend factory** | `server/storage/index.ts`                | `createStorage()` — selects the configured backend        |
 | **Upload API**      | `app/api/upload/route.ts`                | Presigned URL routes per upload context                   |
-| **Legacy**          | `lib/s3-client.ts`                       | Old `getS3FileUrl()` — prefer `getSignedAssetUrl()`       |
 
 All `server/` and `app/` paths relative to `apps/web/src/`.
 

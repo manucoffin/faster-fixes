@@ -22,6 +22,7 @@ model Organization {
   linearInstallation  LinearInstallation?
   jiraInstallation    JiraInstallation?
   slackInstallation   SlackInstallation?
+  trelloInstallation  TrelloInstallation?
 
   testimonialRequest TestimonialRequest?
   testimonials       Testimonial[]
@@ -46,6 +47,7 @@ model Member {
   linearInstallationsInstalled LinearInstallation[]
   jiraInstallationsInstalled   JiraInstallation[]
   slackInstallations           SlackInstallation[]
+  trelloInstallationsInstalled TrelloInstallation[]
 
   @@index([organizationId])
   @@index([userId])

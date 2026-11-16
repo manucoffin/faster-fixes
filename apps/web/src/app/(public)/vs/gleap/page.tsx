@@ -1,3 +1,4 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
@@ -14,10 +15,11 @@ import { GleapFeatureCardsSection } from "./_features/gleap-feature-cards-sectio
 import { GleapHero } from "./_features/gleap-hero";
 import { GleapPricingSection } from "./_features/gleap-pricing-section";
 
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
 const pageUrl = `${APP_URL}/vs/gleap`;
 const title = "Gleap Alternative: Open-Source, Self-Hosted, No Per-Seat Fee";
-const description =
-  "FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $20/mo pricing.";
+const description = `FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $${proPrice}/mo pricing.`;
 const datePublished = "2026-05-03T00:00:00.000Z";
 const dateModified = "2026-11-12T00:00:00.000Z";
 

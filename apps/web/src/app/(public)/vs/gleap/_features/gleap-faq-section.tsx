@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
@@ -6,11 +11,13 @@ import {
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
 export const gleapFaqs: FaqItem[] = [
   {
     question: "Is FasterFixes a free Gleap alternative?",
-    answer:
-      "Yes. Free to self-host with no member limits. Hosted Pro plan is $20/mo flat for up to 5 members.",
+    answer: `Yes. Free to self-host with no member limits. Hosted Pro plan is $${proPrice}/mo flat for up to ${proPlan.seats} members.`,
   },
   {
     question: "Can I self-host FasterFixes?",

@@ -52,6 +52,7 @@ export const PLAN_LIMITS = {
     githubIntegration: false,
     linearIntegration: false,
     jiraIntegration: false,
+    trelloIntegration: false,
     slackIntegration: false,
     whiteLabel: false,
     videos: 1,
@@ -67,6 +68,7 @@ export const PLAN_LIMITS = {
     githubIntegration: true,
     linearIntegration: true,
     jiraIntegration: true,
+    trelloIntegration: true,
     slackIntegration: true,
     whiteLabel: true,
     videos: Infinity,
@@ -81,6 +83,7 @@ export const PLAN_LIMITS = {
     githubIntegration: true,
     linearIntegration: true,
     jiraIntegration: true,
+    trelloIntegration: true,
     slackIntegration: true,
     whiteLabel: true,
     videos: Infinity,
@@ -195,6 +198,11 @@ export const PLAN_FEATURES = {
     {
       id: "jira_integration",
       label: "Jira integration",
+      highlighted: false,
+    },
+    {
+      id: "trello_integration",
+      label: "Trello integration",
       highlighted: false,
     },
     {

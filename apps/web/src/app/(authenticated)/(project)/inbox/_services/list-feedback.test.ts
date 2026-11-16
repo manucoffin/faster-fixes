@@ -29,6 +29,7 @@ const baseRow = {
   issueLink: null,
   linearIssueLink: null,
   jiraIssueLink: null,
+  trelloIssueLink: null,
   rank: null,
 };
 

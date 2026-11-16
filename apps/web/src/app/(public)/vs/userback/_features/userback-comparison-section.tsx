@@ -1,10 +1,18 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -25,14 +33,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "Flat per-workspace · free, $20/mo, $99/mo",
+      `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
       "Seat bundles · Team $49 (5 seats), Business $119 (15), Business Plus $199 (25) · extra seats $9/mo",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
-      "$0 self-host · $20/mo hosted Pro",
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
       "$49/mo Team · $119/mo Business · $199/mo Business Plus",
     ],
   },
@@ -108,8 +116,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Jira, ClickUp (2-way sync), Zapier, +",
+    ],
+  },
+  {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "yes", note: "Sends feedback as cards" },
     ],
   },
   {
@@ -143,7 +158,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      {
+        type: "yes",
+        note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
+      },
       { type: "yes", note: "2 seats · 2 sites · 7-day history" },
     ],
   },

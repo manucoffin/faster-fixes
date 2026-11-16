@@ -1,4 +1,7 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -25,7 +28,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Cost for a 5-person team",
     cells: [
-      "$0 self-host · $20/mo hosted Pro",
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
       "$50/mo Standard ($42/mo annual)",
     ],
   },
@@ -110,9 +113,16 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "yes", note: "All plans" },
+    ],
+  },
+  {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Trello, GitHub, Slack on all plans · Jira, Linear, Asana, ClickUp, Monday.com from Premium",
     ],
   },

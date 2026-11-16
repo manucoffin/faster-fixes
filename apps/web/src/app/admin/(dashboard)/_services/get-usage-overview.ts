@@ -31,11 +31,17 @@ export async function getUsageOverview({ now }: GetUsageOverviewInput) {
     });
 
   const [
+    totalUsers,
+    previousTotalUsers,
     signups,
     previousSignups,
     engagedOrganizations,
     previousEngagedOrganizations,
   ] = await Promise.all([
+    prisma.user.count({ where: nonInternalSignupWhere }),
+    prisma.user.count({
+      where: { ...nonInternalSignupWhere, createdAt: { lt: windowStart } },
+    }),
     countSignups(windowStart, now),
     countSignups(previousWindowStart, windowStart),
     countEngagedOrganizations(windowStart, now),
@@ -43,6 +49,7 @@ export async function getUsageOverview({ now }: GetUsageOverviewInput) {
   ]);
 
   return {
+    totalUsers: { current: totalUsers, previous: previousTotalUsers },
     signups: { current: signups, previous: previousSignups },
     engagedOrganizations: {
       current: engagedOrganizations,

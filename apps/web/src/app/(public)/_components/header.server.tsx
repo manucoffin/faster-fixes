@@ -9,6 +9,7 @@ import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
+import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -63,6 +64,12 @@ const integrationLinks = [
     icon: <JiraIcon colored className="size-4 shrink-0" />,
   },
   {
+    href: "/integrations/trello",
+    label: "Trello",
+    description: "Mirror feedback as Trello cards, sync lists both ways.",
+    icon: <TrelloIcon colored className="size-4 shrink-0" />,
+  },
+  {
     href: "/integrations/slack",
     label: "Slack",
     description: "Get notified in Slack when feedback arrives or changes.",
@@ -100,7 +107,7 @@ export async function Header() {
                     title: "Features",
                     links: featureLinks.map((feature) => ({
                       href: feature.href,
-                      label: feature.title,
+                      label: feature.navLabel ?? feature.title,
                     })),
                   },
                   { title: "Integrations", links: integrationLinks },
@@ -133,7 +140,7 @@ export async function Header() {
                     Integrations
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[320px] gap-1 p-2">
+                    <ul className="grid w-[520px] grid-cols-2 gap-1 p-2">
                       {/* Plain Link, not NavigationMenuLink: Radix's FocusGroupItem
                           collection (nav-menu 1.2.14) drops this content's children
                           once the list reaches 4+ items. A styled anchor renders
@@ -179,7 +186,7 @@ export async function Header() {
                             className="flex flex-col gap-1 rounded-sm p-2 transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
                           >
                             <span className="text-sm font-medium">
-                              {feature.title}
+                              {feature.navLabel ?? feature.title}
                             </span>
                             <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                               {feature.summary}

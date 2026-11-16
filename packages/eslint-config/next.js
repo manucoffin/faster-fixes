@@ -614,6 +614,7 @@ export const nextJsConfig = withBinarySeverity([
           structuralCheckPathPatterns: [
             "/src/app/_domains/domain-cycles\\.test\\.ts$",
             "/src/mdx-no-em-dash\\.test\\.ts$",
+            "/src/plan-facts\\.test\\.ts$",
             "/src/server/server-only-alias\\.test\\.ts$",
             // Not structural: it tests the error formatter of `trpc.ts` under
             // a behaviour name. Listed until it is renamed `trpc.test.ts`.

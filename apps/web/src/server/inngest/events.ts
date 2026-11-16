@@ -27,7 +27,7 @@ export const feedbackIntegrationIssueRequestedEvent = eventType(
   {
     schema: z.object({
       feedbackId: z.string(),
-      target: z.enum(["github", "linear", "jira"]),
+      target: z.enum(["github", "linear", "jira", "trello"]),
     }),
   },
 );
@@ -37,7 +37,7 @@ export const feedbackStatusChangedEvent = eventType("feedback/status-changed", {
     feedbackId: z.string(),
     newStatus: FeedbackStatusEnum,
     // Set when a Tracker webhook drove the change, so that Tracker is not echoed back.
-    origin: z.enum(["github", "linear", "jira"]).optional(),
+    origin: z.enum(["github", "linear", "jira", "trello"]).optional(),
     actor: z.enum(["user", "agent", "tracker"]),
   }),
 });
@@ -92,6 +92,24 @@ export const jiraWebhookIssueEvent = eventType("jira/webhook.issue", {
 export const jiraOAuthRevokedEvent = eventType("jira/oauth.revoked", {
   schema: z.object({ installationId: z.string() }),
 });
+
+// A hint that a mirrored card moved, was archived or left the board. The sync
+// re-reads the card, so the payload carries only what names it.
+export const trelloWebhookCardEvent = eventType("trello/webhook.card", {
+  schema: z.object({ projectTrelloLinkId: z.string(), cardId: z.string() }),
+});
+
+export const trelloOAuthRevokedEvent = eventType("trello/oauth.revoked", {
+  schema: z.object({ installationId: z.string() }),
+});
+
+// Emitted once a Feedback is cleared for a Trello card, Recording wait included,
+// so the creation itself can be throttled per Installation: Trello's rate limit
+// is per token, and only this event carries the Installation.
+export const trelloCardCreateRequestedEvent = eventType(
+  "trello/card.create-requested",
+  { schema: z.object({ feedbackId: z.string(), installationId: z.string() }) },
+);
 
 export const jiraWebhooksRefreshRequestedEvent = eventType(
   "jira/webhooks.refresh-requested",

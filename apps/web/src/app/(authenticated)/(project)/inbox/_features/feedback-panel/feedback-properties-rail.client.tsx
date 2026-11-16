@@ -27,6 +27,7 @@ type FeedbackPropertiesRailProps = {
   hasGitHubLink: boolean;
   hasLinearLink: boolean;
   hasJiraLink: boolean;
+  hasTrelloLink: boolean;
 };
 
 export function FeedbackPropertiesRail({
@@ -36,6 +37,7 @@ export function FeedbackPropertiesRail({
   hasGitHubLink,
   hasLinearLink,
   hasJiraLink,
+  hasTrelloLink,
 }: FeedbackPropertiesRailProps) {
   const environment = formatEnvironment(feedback);
 
@@ -56,9 +58,11 @@ export function FeedbackPropertiesRail({
         hasGitHubLink={hasGitHubLink}
         hasLinearLink={hasLinearLink}
         hasJiraLink={hasJiraLink}
+        hasTrelloLink={hasTrelloLink}
         githubIssueLink={feedback.issueLink}
         linearIssueLink={feedback.linearIssueLink}
         jiraIssueLink={feedback.jiraIssueLink}
+        trelloIssueLink={feedback.trelloIssueLink}
       />
 
       <div className="h-px bg-border" />

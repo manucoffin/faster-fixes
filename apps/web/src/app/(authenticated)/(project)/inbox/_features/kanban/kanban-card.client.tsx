@@ -60,6 +60,7 @@ function KanbanCardView({
     feedback.issueLink,
     feedback.linearIssueLink,
     feedback.jiraIssueLink,
+    feedback.trelloIssueLink,
   ].some(Boolean);
 
   return (

@@ -1,3 +1,11 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const rows = [
   {
     label: "Gleap Growth (5 people, monthly)",
@@ -8,8 +16,8 @@ const rows = [
     value: "$1,438/year (about $120/mo)",
   },
   {
-    label: "FasterFixes Pro (up to 5)",
-    value: "$20/mo = $240/year",
+    label: `FasterFixes Pro (up to ${proPlan.seats})`,
+    value: `$${proPrice}/mo = $${proPrice * 12}/year`,
     highlight: true,
   },
 ];

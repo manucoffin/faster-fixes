@@ -60,6 +60,7 @@ type FeedbackDetailPanelProps = {
   hasGitHubLink?: boolean;
   hasLinearLink?: boolean;
   hasJiraLink?: boolean;
+  hasTrelloLink?: boolean;
 };
 
 export function FeedbackDetailPanel({
@@ -70,6 +71,7 @@ export function FeedbackDetailPanel({
   hasGitHubLink = false,
   hasLinearLink = false,
   hasJiraLink = false,
+  hasTrelloLink = false,
 }: FeedbackDetailPanelProps) {
   // Beside `feedbackId` in the address, so a link can land on the player.
   const [isPlayerOpen, setIsPlayerOpen] = useQueryState(
@@ -158,6 +160,7 @@ export function FeedbackDetailPanel({
             hasGitHubLink={hasGitHubLink}
             hasLinearLink={hasLinearLink}
             hasJiraLink={hasJiraLink}
+            hasTrelloLink={hasTrelloLink}
           />
         </div>
       </SheetContent>

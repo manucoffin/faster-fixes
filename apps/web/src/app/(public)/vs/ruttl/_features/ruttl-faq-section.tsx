@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   Accordion,
@@ -5,6 +10,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export const ruttlFaqs: FaqItem[] = [
   {
@@ -20,8 +28,7 @@ export const ruttlFaqs: FaqItem[] = [
   {
     question:
       "Which Ruttl alternative is cheapest for teams larger than three people?",
-    answer:
-      "FasterFixes. The hosted Pro plan is $20 a month flat for up to 5 members. Self-hosting is free. Ruttl Pro at $18 per user per month scales linearly with team size.",
+    answer: `FasterFixes. The hosted Pro plan is $${proPrice} a month flat for up to ${proPlan.seats} members. Self-hosting is free. Ruttl Pro at $18 per user per month scales linearly with team size.`,
   },
   {
     question: "Can FasterFixes replace Ruttl for client feedback?",
