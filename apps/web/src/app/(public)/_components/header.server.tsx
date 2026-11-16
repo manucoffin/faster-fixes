@@ -107,7 +107,7 @@ export async function Header() {
                     title: "Features",
                     links: featureLinks.map((feature) => ({
                       href: feature.href,
-                      label: feature.title,
+                      label: feature.navLabel ?? feature.title,
                     })),
                   },
                   { title: "Integrations", links: integrationLinks },
@@ -186,7 +186,7 @@ export async function Header() {
                             className="flex flex-col gap-1 rounded-sm p-2 transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
                           >
                             <span className="text-sm font-medium">
-                              {feature.title}
+                              {feature.navLabel ?? feature.title}
                             </span>
                             <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
                               {feature.summary}

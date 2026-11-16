@@ -4,6 +4,8 @@ type FeatureLink = {
   // Also the card's `id` on /features, so a feature without a page links to its card.
   slug: string;
   title: string;
+  // Header menu only: the card and page keep the keyword, the sitewide nav favors clarity.
+  navLabel?: string;
   summary: string;
   description: string;
   href: Route;
@@ -24,6 +26,7 @@ export const featureLinks: FeatureLink[] = [
   {
     slug: "website-bug-reporting",
     title: "Website bug reporting tool",
+    navLabel: "Actionable bug reports",
     summary: "Bug reports with a replay, console and network logs.",
     description:
       "Each bug report carries the console and network history and a replay of the last minute before the reviewer clicked, so a developer can reproduce it without a follow-up question.",
