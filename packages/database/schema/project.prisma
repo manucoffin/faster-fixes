@@ -20,6 +20,7 @@ model Project {
   linearLink   ProjectLinearLink?
   jiraLink     ProjectJiraLink?
   slackLink    ProjectSlackLink?
+  trelloLink   ProjectTrelloLink?
 
   @@index([organizationId])
   @@index([publicId])

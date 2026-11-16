@@ -97,10 +97,21 @@ export async function refreshAccessToken(
   return (await res.json()) as TrelloTokenResponse;
 }
 
-export async function getAuthorizedMember(
+export type TrelloBoard = {
+  id: string;
+  name: string;
+  url: string;
+};
+
+export type TrelloList = {
+  id: string;
+  name: string;
+};
+
+async function getTrelloResource<T>(
   accessToken: string,
-): Promise<TrelloMember> {
-  const path = "/members/me?fields=id,fullName,username";
+  path: string,
+): Promise<T> {
   const res = await fetch(`${TRELLO_API_BASE_URL}${path}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -112,7 +123,35 @@ export async function getAuthorizedMember(
     throw new TrelloRequestError(res.status, await res.text(), path);
   }
 
-  return (await res.json()) as TrelloMember;
+  return (await res.json()) as T;
+}
+
+export function getAuthorizedMember(
+  accessToken: string,
+): Promise<TrelloMember> {
+  return getTrelloResource(
+    accessToken,
+    "/members/me?fields=id,fullName,username",
+  );
+}
+
+// The boards of the authorizing member, which are every board the Installation
+// can reach. Closed boards cannot take new cards, so they are never offered.
+export function listOpenBoards(accessToken: string): Promise<TrelloBoard[]> {
+  return getTrelloResource(
+    accessToken,
+    "/members/me/boards?filter=open&fields=id,name,url",
+  );
+}
+
+export function listOpenBoardLists(
+  accessToken: string,
+  boardId: string,
+): Promise<TrelloList[]> {
+  return getTrelloResource(
+    accessToken,
+    `/boards/${encodeURIComponent(boardId)}/lists?filter=open&fields=id,name`,
+  );
 }
 
 export function getTrelloOAuthRedirectUri(): string {

@@ -30,6 +30,44 @@ model TrelloInstallation {
   installedById String?
   installedBy   Member? @relation(fields: [installedById], references: [id], onDelete: SetNull)
 
+  projectLinks ProjectTrelloLink[]
+
   @@index([organizationId])
   @@map("trello_installation")
+}
+
+model ProjectTrelloLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  trelloInstallationId String
+  trelloInstallation   TrelloInstallation @relation(fields: [trelloInstallationId], references: [id], onDelete: Cascade)
+
+  boardId   String
+  boardName String
+  boardUrl  String
+
+  // The Status mapping of ADR 0024: Trello has no status primitive, so the
+  // lists standing for each Status are chosen by the User. Mapped lists are
+  // distinct, so a list always names one Status.
+  newListId        String
+  inProgressListId String?
+  resolvedListId   String
+
+  autoCreateIssues Boolean  @default(true)
+  defaultLabelIds  String[] @default([])
+
+  // The id of the webhook Faster Fixes registered on the board, so unlinking
+  // and disconnecting can remove it.
+  webhookId String?
+
+  linkHealthIssue String? // null=healthy
+
+  @@index([trelloInstallationId])
+  @@index([boardId])
+  @@map("project_trello_link")
 }

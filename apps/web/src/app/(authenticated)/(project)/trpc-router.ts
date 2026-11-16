@@ -43,6 +43,14 @@ import { unlinkJiraProject } from "./settings/_services/unlink-jira-project";
 import { UnlinkJiraProjectSchema } from "./settings/_services/unlink-jira-project.schema";
 import { updateProjectJiraLink } from "./settings/_services/update-project-jira-link";
 import { UpdateProjectJiraLinkSchema } from "./settings/_services/update-project-jira-link.schema";
+import { getProjectTrelloLink } from "./settings/_services/get-project-trello-link";
+import { GetProjectTrelloLinkSchema } from "./settings/_services/get-project-trello-link.schema";
+import { linkTrelloBoard } from "./settings/_services/link-trello-board";
+import { LinkTrelloBoardSchema } from "./settings/_services/link-trello-board.schema";
+import { listAccessibleTrelloBoards } from "./settings/_services/list-accessible-trello-boards";
+import { ListAccessibleTrelloBoardsSchema } from "./settings/_services/list-accessible-trello-boards.schema";
+import { listTrelloBoardLists } from "./settings/_services/list-trello-board-lists";
+import { ListTrelloBoardListsSchema } from "./settings/_services/list-trello-board-lists.schema";
 import { getProjectLinearLink } from "./settings/_services/get-project-linear-link";
 import { GetProjectLinearLinkSchema } from "./settings/_services/get-project-linear-link.schema";
 import { linkLinearTeam } from "./settings/_services/link-linear-team";
@@ -597,6 +605,39 @@ export const projectsRouter = router({
           defaultLabels: input.defaultLabels,
           userId: ctx.session.user.id,
         }),
+      ),
+  }),
+  trello: router({
+    getLink: protectedProcedure
+      .input(GetProjectTrelloLinkSchema)
+      .query(({ input, ctx }) =>
+        getProjectTrelloLink({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listBoards: protectedProcedure
+      .input(ListAccessibleTrelloBoardsSchema)
+      .query(({ input, ctx }) =>
+        listAccessibleTrelloBoards({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    listBoardLists: protectedProcedure
+      .input(ListTrelloBoardListsSchema)
+      .query(({ input, ctx }) =>
+        listTrelloBoardLists({
+          projectId: input.projectId,
+          boardId: input.boardId,
+          userId: ctx.session.user.id,
+        }),
+      ),
+    // The plan gate lives in the service, so no `enforceFeature` here.
+    linkBoard: protectedProcedure
+      .input(LinkTrelloBoardSchema)
+      .mutation(({ input, ctx }) =>
+        linkTrelloBoard({ ...input, userId: ctx.session.user.id }),
       ),
   }),
   slack: router({
