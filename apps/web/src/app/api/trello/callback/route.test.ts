@@ -335,6 +335,27 @@ describe("GET /api/trello/callback", () => {
     );
   });
 
+  it("re-authorizing an Installation in Reconnect required clears it in place", async () => {
+    // The double has no delete: the Installation row, and so every Project link
+    // and Issue link hanging off it, must be updated rather than replaced.
+    const response = await GET(callbackRequest());
+
+    expect(location(response)).toBe(
+      `${BASE_URL}/integrations?trello=connected`,
+    );
+    expect(callbackPrisma.trelloInstallation.upsert).toHaveBeenCalledTimes(1);
+    expect(callbackPrisma.trelloInstallation.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizationId: ORGANIZATION_ID },
+        update: expect.objectContaining({
+          accessToken: "encrypted:access_token_value",
+          healthState: "connected",
+          reconnectNotifiedAt: null,
+        }),
+      }),
+    );
+  });
+
   it("clears both consent cookies once the Installation is recorded", async () => {
     const response = await GET(callbackRequest());
 

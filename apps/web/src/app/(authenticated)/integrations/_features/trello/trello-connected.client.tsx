@@ -40,6 +40,8 @@ export function TrelloConnected({ installation }: TrelloConnectedProps) {
     }),
   );
 
+  const needsReconnect = installation.healthState === "reconnect_required";
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
@@ -60,6 +62,22 @@ export function TrelloConnected({ installation }: TrelloConnectedProps) {
           . Faster Fixes reaches the boards this Trello member can reach.
         </span>
       </div>
+
+      {needsReconnect ? (
+        <div className="flex flex-col gap-2 rounded-md border border-destructive/50 p-3">
+          <span className="text-sm font-medium text-destructive">
+            Reconnection required
+          </span>
+          <span className="text-sm text-muted-foreground">
+            Trello refused the authorization, likely because the authorizing
+            member revoked it or lost access. Reconnect to resume syncing. Your
+            linked projects are kept.
+          </span>
+          <Button size="sm" className="self-start" asChild>
+            <a href="/api/trello/install">Reconnect</a>
+          </Button>
+        </div>
+      ) : null}
 
       {installation.canDisconnect ? (
         <AlertDialog>

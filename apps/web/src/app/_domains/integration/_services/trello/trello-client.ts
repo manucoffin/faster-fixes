@@ -74,6 +74,29 @@ export async function exchangeOAuthCode({
   return (await res.json()) as TrelloTokenResponse;
 }
 
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<TrelloTokenResponse> {
+  const { clientId, clientSecret } = getClientCredentials();
+
+  const res = await fetch(TRELLO_OAUTH_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "refresh_token",
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new TrelloRequestError(res.status, await res.text(), "/oauth/token");
+  }
+
+  return (await res.json()) as TrelloTokenResponse;
+}
+
 export async function getAuthorizedMember(
   accessToken: string,
 ): Promise<TrelloMember> {

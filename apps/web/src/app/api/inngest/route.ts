@@ -4,6 +4,7 @@ import { createGitHubIssue } from "@/app/_domains/integration/_services/github/c
 import { createJiraIssue } from "@/app/_domains/integration/_services/jira/create-jira-issue.inngest";
 import { createLinearIssue } from "@/app/_domains/integration/_services/linear/create-linear-issue.inngest";
 import { handleJiraOAuthRevoked } from "@/app/_domains/integration/_services/jira/handle-jira-oauth-revoked.inngest";
+import { handleTrelloOAuthRevoked } from "@/app/_domains/integration/_services/trello/handle-trello-oauth-revoked.inngest";
 import { handleLinearOAuthRevoked } from "@/app/_domains/integration/_services/linear/handle-linear-oauth-revoked.inngest";
 import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services/slack/notify-slack-feedback-created.inngest";
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
@@ -40,6 +41,7 @@ export const { GET, POST, PUT } = serve({
     handleJiraOAuthRevoked,
     refreshJiraWebhooks,
     refreshJiraInstallationWebhooks,
+    handleTrelloOAuthRevoked,
     sendWelcomeEmail,
     addContactToSegment,
     scanTestimonialRequests,

@@ -93,6 +93,10 @@ export const jiraOAuthRevokedEvent = eventType("jira/oauth.revoked", {
   schema: z.object({ installationId: z.string() }),
 });
 
+export const trelloOAuthRevokedEvent = eventType("trello/oauth.revoked", {
+  schema: z.object({ installationId: z.string() }),
+});
+
 export const jiraWebhooksRefreshRequestedEvent = eventType(
   "jira/webhooks.refresh-requested",
   { schema: z.object({ installationId: z.string() }) },
