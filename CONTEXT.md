@@ -185,6 +185,10 @@ The project-level binding from a Faster Fixes Project to an external scope — a
 **Issue link**:
 The per-Feedback record connecting a single Feedback to its mirrored issue in a Tracker. A Feedback can have at most one issue link per Tracker, but may have one for each Tracker simultaneously.
 
+**Mirrored Status**:
+The Status an **Issue link** last converged on, together with the Issue's state at that moment. An Issue link whose Mirrored Status differs from its Feedback's Status, or has none yet, is _pending_: the Feedback wins until the Tracker has converged to it.
+_Avoid_: Synced status, Last sync source.
+
 ### Diagnostics
 
 **Diagnostic Trail**:
@@ -229,6 +233,8 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
+- An Issue's state _mirrors_ a **Status** when the Tracker would accept it for that Status; one state may mirror several (a Jira issue in Done mirrors Resolved and Archived)
+- A **Tracker** sets a Feedback's **Status** only when its **Issue link** is not pending and the Issue's state has changed since its **Mirrored Status** into one that does not mirror the current Status; an edit that leaves the state as it was (a comment, an assignee) never moves the Feedback
 - A **Reviewer** submits **Feedback** through the **Widget**; Reviewers are not authenticated app users
 - A **Widget** is installed through exactly one **Embed**; Embeds differ in install mechanism only, never in behaviour or customization
 - An **Installation** is owned by an Organization and shared across all Projects in that Organization
