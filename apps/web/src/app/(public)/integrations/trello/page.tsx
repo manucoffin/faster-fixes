@@ -6,11 +6,11 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
-import { TrelloBreadcrumb } from "./_features/trello-breadcrumb";
 import { TrelloCardSection } from "./_features/trello-card-section";
 import { TrelloCtaSection } from "./_features/trello-cta-section";
 import { TrelloFaqSection, trelloFaqs } from "./_features/trello-faq-section";
 import { TrelloHero } from "./_features/trello-hero";
+import { TrelloIntro } from "./_features/trello-intro";
 import {
   TrelloHowItWorksSection,
   trelloSetupSteps,
@@ -58,8 +58,8 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <TrelloBreadcrumb />
       <TrelloHero />
+      <TrelloIntro />
       <TrelloCardSection />
       <TrelloSyncSection />
       <TrelloHowItWorksSection />

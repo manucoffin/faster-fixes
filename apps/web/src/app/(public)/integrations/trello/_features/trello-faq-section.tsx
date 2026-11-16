@@ -8,6 +8,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { SectionHeading } from "../../../features/_components/section-heading";
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
@@ -24,6 +25,18 @@ function DocLink({ href, children }: DocLinkProps) {
     >
       {children}
     </Link>
+  );
+}
+
+type FaqAnswerProps = {
+  children: ReactNode;
+};
+
+function FaqAnswer({ children }: FaqAnswerProps) {
+  return (
+    <p className="max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground">
+      {children}
+    </p>
   );
 }
 
@@ -58,12 +71,12 @@ export const trelloFaqs: RichFaqItem[] = [
     answer:
       "The Trello integration is included in every paid plan. If you downgrade, you can still unlink the board, and the existing cards stay on Trello.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <FaqAnswer>
         The Trello integration is included in every{" "}
         <DocLink href={"/pricing" as Route}>paid plan</DocLink>. If you
         downgrade, you can still unlink the board, and the existing cards stay
         on Trello.
-      </p>
+      </FaqAnswer>
     ),
   },
   {
@@ -71,46 +84,38 @@ export const trelloFaqs: RichFaqItem[] = [
     answer:
       "Yes. A project can mirror to Trello, GitHub, Linear and Jira at once, and status changes propagate to each of them independently, so every team follows the work in its own tool.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <FaqAnswer>
         Yes. A project can mirror to Trello,{" "}
         <DocLink href={"/integrations/github" as Route}>GitHub</DocLink>,{" "}
         <DocLink href={"/integrations/linear" as Route}>Linear</DocLink> and{" "}
         <DocLink href={"/integrations/jira" as Route}>Jira</DocLink> at once,
         and status changes propagate to each of them independently, so every
         team follows the work in its own tool.
-      </p>
+      </FaqAnswer>
     ),
   },
 ];
 
 export function TrelloFaqSection() {
   return (
-    <section className="w-full border-t py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Trello integration FAQ
-          </h2>
-        </div>
+    <section className="w-full py-20 md:py-28">
+      <div className="container mx-auto grid grid-cols-1 gap-10 px-4 lg:grid-cols-[1fr_2fr] lg:gap-16">
+        <SectionHeading className="lg:sticky lg:top-24 lg:self-start">
+          Trello integration FAQ
+        </SectionHeading>
 
-        <div className="mx-auto mt-12 max-w-2xl">
-          <Accordion type="single" collapsible>
-            {trelloFaqs.map((faq) => (
-              <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {faq.content ?? (
-                    <p className="text-lg text-muted-foreground md:text-xl">
-                      {faq.answer}
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
+        <Accordion type="single" collapsible className="border-t">
+          {trelloFaqs.map((faq) => (
+            <AccordionItem key={faq.question} value={faq.question}>
+              <AccordionTrigger className="py-5 text-lg md:text-xl">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent>
+                {faq.content ?? <FaqAnswer>{faq.answer}</FaqAnswer>}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

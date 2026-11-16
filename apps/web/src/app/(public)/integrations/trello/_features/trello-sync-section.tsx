@@ -1,3 +1,8 @@
+import { BotIcon, RepeatIcon } from "lucide-react";
+import { SectionBody } from "../../../features/_components/section-body";
+import { SectionHeading } from "../../../features/_components/section-heading";
+import { TrelloSyncAnimation } from "../_components/trello-sync-animation.client";
+
 const syncDirections = [
   {
     title: "From Faster Fixes to Trello",
@@ -47,35 +52,42 @@ const syncDirections = [
 
 export function TrelloSyncSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
+    <section className="w-full py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Two-way sync
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
+        <div className="grid grid-cols-1 items-end gap-6 lg:grid-cols-2 lg:gap-16">
+          <SectionHeading>
             Two-way status sync between Trello lists and Faster Fixes
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Trello has no statuses, so you choose which list stands for new, in
-            progress and resolved. Drag a card and the feedback follows. Change
-            the status and the card moves. Many feedback tools only mark the
-            feedback resolved when the card is done.
-          </p>
+          </SectionHeading>
+          <SectionBody>
+            <p>
+              Trello has no statuses, so you choose which list stands for new,
+              in progress and resolved.{" "}
+              <span className="text-foreground">
+                Drag a card and the feedback follows. Change the status and the
+                card moves.
+              </span>{" "}
+              Many feedback tools only mark the feedback resolved when the card
+              is done.
+            </p>
+          </SectionBody>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
+        <TrelloSyncAnimation className="mt-12 aspect-[4/3] md:aspect-[21/9]" />
+
+        <div className="mt-16 grid grid-cols-1 gap-12 md:mt-20 lg:grid-cols-2 lg:gap-16">
           {syncDirections.map((direction) => (
-            <div
-              key={direction.title}
-              className="rounded-xl border bg-background p-6"
-            >
-              <h3 className="font-semibold">{direction.title}</h3>
-              <dl className="mt-4 divide-y">
+            <div key={direction.title}>
+              <h3 className="text-xl font-medium tracking-tight">
+                {direction.title}
+              </h3>
+              <dl className="mt-6 flex flex-col border-t">
                 {direction.rows.map((row) => (
-                  <div key={row.action} className="py-3">
+                  <div
+                    key={row.action}
+                    className="grid grid-cols-1 gap-1 border-b py-4 sm:grid-cols-[2fr_3fr] sm:gap-6"
+                  >
                     <dt className="font-medium">{row.action}</dt>
-                    <dd className="mt-1 leading-relaxed text-muted-foreground">
+                    <dd className="leading-relaxed text-muted-foreground">
                       {row.result}
                     </dd>
                   </div>
@@ -85,11 +97,38 @@ export function TrelloSyncSection() {
           ))}
         </div>
 
-        <p className="mx-auto mt-10 max-w-2xl text-center text-muted-foreground">
-          A change that came from Trello is never written back to Trello, so the
-          two sides never loop. Feedback resolved by your coding agent moves the
-          card like any other change.
-        </p>
+        <div className="mt-16 grid grid-cols-1 gap-12 md:mt-20 lg:grid-cols-2 lg:gap-16">
+          <div className="flex gap-4">
+            <RepeatIcon
+              aria-hidden
+              className="mt-1.5 size-5 shrink-0 text-muted-foreground"
+            />
+            <SectionBody>
+              <p>
+                <span className="text-foreground">
+                  A change that came from Trello is never written back to
+                  Trello,
+                </span>{" "}
+                so the two sides never loop.
+              </p>
+            </SectionBody>
+          </div>
+
+          <div className="flex gap-4">
+            <BotIcon
+              aria-hidden
+              className="mt-1.5 size-5 shrink-0 text-muted-foreground"
+            />
+            <SectionBody>
+              <p>
+                <span className="text-foreground">
+                  Feedback resolved by your coding agent
+                </span>{" "}
+                moves the card like any other change.
+              </p>
+            </SectionBody>
+          </div>
+        </div>
       </div>
     </section>
   );

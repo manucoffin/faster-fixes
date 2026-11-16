@@ -1,9 +1,7 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
+import { VideoIcon } from "lucide-react";
+import { SectionBody } from "../../../features/_components/section-body";
+import { SectionHeading } from "../../../features/_components/section-heading";
+import { TrelloCardAnatomy } from "../_components/trello-card-anatomy";
 
 const cardContents = [
   {
@@ -34,39 +32,55 @@ const cardContents = [
 
 export function TrelloCardSection() {
   return (
-    <section className="w-full py-16 md:py-24">
+    <section className="w-full bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Trello bug tracking
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Every Trello card arrives with the full diagnostic trail
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Most feedback tools drop a title and a link on the board. Faster
-            Fixes writes the context a developer needs into the card itself.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {cardContents.map((item) => (
-            <Card key={item.title} className="bg-muted/30">
-              <CardHeader>
-                <CardTitle className="text-lg">{item.title}</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
-                  {item.body}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <p className="mx-auto mt-10 max-w-2xl text-center text-muted-foreground">
-          Feedback left on a Video is mirrored the same way, with a link to the
-          Video in the dashboard. The share link you send your client never
-          appears on the card.
+        <SectionHeading>
+          Every Trello card arrives with the full diagnostic trail
+        </SectionHeading>
+        <p className="mt-4 max-w-3xl text-xl leading-snug tracking-tight text-pretty text-muted-foreground md:text-2xl">
+          Most feedback tools drop a title and a link on the board. Faster Fixes
+          writes the context a developer needs into the card itself.
         </p>
+
+        <div className="mt-12 grid grid-cols-1 items-start gap-12 lg:grid-cols-[5fr_6fr] lg:gap-16">
+          <TrelloCardAnatomy className="aspect-[4/3] lg:sticky lg:top-24 lg:aspect-[4/5]" />
+
+          <ul className="flex flex-col border-t">
+            {cardContents.map((item, index) => (
+              <li key={item.title} className="flex gap-4 border-b py-6 md:py-7">
+                {/* Matches the numbered marker on the card illustration */}
+                <span
+                  aria-hidden
+                  className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-[11px] leading-none font-semibold text-white tabular-nums"
+                >
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="text-lg font-medium">{item.title}</h3>
+                  <SectionBody className="mt-2 text-base">
+                    <p>{item.body}</p>
+                  </SectionBody>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-12 flex max-w-3xl gap-4">
+          <VideoIcon
+            aria-hidden
+            className="mt-1.5 size-5 shrink-0 text-muted-foreground"
+          />
+          <SectionBody>
+            <p>
+              <span className="text-foreground">
+                Feedback left on a Video is mirrored the same way,
+              </span>{" "}
+              with a link to the Video in the dashboard. The share link you send
+              your client never appears on the card.
+            </p>
+          </SectionBody>
+        </div>
       </div>
     </section>
   );
