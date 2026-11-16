@@ -1,0 +1,35 @@
+model TrelloInstallation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // The Trello member who authorized. The token is bound to that member's grant:
+  // there is no Workspace selection step, so the Installation reaches every
+  // board that member can reach.
+  trelloMemberId    String
+  memberDisplayName String
+
+  // Encrypted at rest with AES-256-GCM via trello/token-crypto.ts, under a key
+  // dedicated to Trello (ADR 0003).
+  accessToken    String // ciphertext
+  refreshToken   String? // ciphertext
+  tokenScope     String
+  tokenExpiresAt DateTime?
+
+  // "connected" | "reconnect_required". reconnect_required is set only when
+  // Trello explicitly refuses the grant, never on a transient failure.
+  healthState String @default("connected")
+
+  // When the organization was last emailed about a reconnect_required flip, so
+  // each failing call does not send one more email.
+  reconnectNotifiedAt DateTime?
+
+  installedById String?
+  installedBy   Member? @relation(fields: [installedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@map("trello_installation")
+}
