@@ -2,6 +2,7 @@ import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
+import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 import { ArrowRightIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -14,6 +15,7 @@ const trackers = [
   { label: "GitHub", href: "/integrations/github", Icon: GithubIcon },
   { label: "Linear", href: "/integrations/linear", Icon: LinearIcon },
   { label: "Jira", href: "/integrations/jira", Icon: JiraIcon },
+  { label: "Trello", href: "/integrations/trello", Icon: TrelloIcon },
 ];
 
 export function ActionableBugReportsDestinations() {
@@ -21,7 +23,8 @@ export function ActionableBugReportsDestinations() {
     <section className="w-full bg-muted/50 py-20 md:py-28">
       <div className="container mx-auto px-4">
         <SectionHeading>
-          Send bug reports to GitHub, Linear or Jira, or to your coding agent
+          Send bug reports to GitHub, Linear, Jira or Trello, or to your coding
+          agent
         </SectionHeading>
 
         <div className="mt-12 flex flex-col gap-20 md:gap-24">
@@ -33,10 +36,10 @@ export function ActionableBugReportsDestinations() {
               <SectionBody className="mt-4">
                 <p>
                   Reports land on a Kanban board where you sort, assign and
-                  close them. Connect GitHub, Linear or Jira and each one also
-                  becomes an issue with the comment, the screenshot, the logs
-                  and a link to the replay, so developers work from the tracker
-                  they already use.
+                  close them. Connect GitHub, Linear, Jira or Trello and each
+                  one also becomes an issue or a card with the comment, the
+                  screenshot, the logs and a link to the replay, so developers
+                  work from the tracker they already use.
                 </p>
               </SectionBody>
 

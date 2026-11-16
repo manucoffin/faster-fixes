@@ -7,13 +7,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import type { Route } from "next";
+import Link from "next/link";
 import type * as React from "react";
+
+type RichFaqItem = FaqItem & { content?: React.ReactNode };
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
-export const pricingFaqs: FaqItem[] = [
+export const pricingFaqs: RichFaqItem[] = [
   {
     question: "Is there really a free plan?",
     answer: `Yes. The Free plan includes ${freePlan.projects} project with up to ${freeFeedbackLimit} feedback items and is not time-limited. It is designed for solo developers or anyone who wants to try FasterFixes on a real project before committing to a paid plan.`,
@@ -43,9 +47,24 @@ export const pricingFaqs: FaqItem[] = [
       "We use Stripe for billing. You can pay with any major credit or debit card. All payments are processed securely through Stripe. We never store your card details.",
   },
   {
-    question: "Do I need a paid plan for the MCP server or GitHub integration?",
+    question:
+      "Do I need a paid plan for the MCP server or the tracker integrations?",
     answer:
-      "The MCP server works on all plans, including Free. The GitHub integration, which automatically creates issues from feedback, requires a Pro or Agency plan.",
+      "The MCP server works on all plans, including Free. The GitHub, Linear, Jira and Trello integrations, which automatically create issues or cards from feedback, require a Pro or Agency plan.",
+    content: (
+      <>
+        The MCP server works on all plans, including Free. The GitHub, Linear,
+        Jira and{" "}
+        <Link
+          href={"/integrations/trello" as Route}
+          className="text-foreground underline underline-offset-4"
+        >
+          Trello
+        </Link>{" "}
+        integrations, which automatically create issues or cards from feedback,
+        require a Pro or Agency plan.
+      </>
+    ),
   },
   {
     question: "What counts as a feedback item?",
@@ -97,7 +116,7 @@ export function PricingFaqSection() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <p className="text-lg text-muted-foreground md:text-xl">
-                    {linkifyAnswer(faq.answer)}
+                    {faq.content ?? linkifyAnswer(faq.answer)}
                   </p>
                 </AccordionContent>
               </AccordionItem>

@@ -116,8 +116,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Jira, ClickUp (2-way sync), Zapier, +",
+    ],
+  },
+  {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "yes", note: "Sends feedback as cards" },
     ],
   },
   {

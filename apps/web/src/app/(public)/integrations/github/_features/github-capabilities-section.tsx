@@ -4,6 +4,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import type { Route } from "next";
+import Link from "next/link";
 
 const capabilities = [
   {
@@ -53,6 +55,18 @@ export function GithubCapabilitiesSection() {
             </Card>
           ))}
         </div>
+
+        <p className="mx-auto mt-10 max-w-2xl text-center text-muted-foreground">
+          Your project managers work on a board? The{" "}
+          <Link
+            href={"/integrations/trello" as Route}
+            className="text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            Trello integration
+          </Link>{" "}
+          mirrors the same feedback as a card, and its status stays in sync with
+          the GitHub issue.
+        </p>
       </div>
     </section>
   );

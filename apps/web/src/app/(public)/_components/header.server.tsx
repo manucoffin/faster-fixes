@@ -9,6 +9,7 @@ import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
+import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -61,6 +62,12 @@ const integrationLinks = [
     label: "Jira",
     description: "Auto-create Jira Cloud issues, sync status both ways.",
     icon: <JiraIcon colored className="size-4 shrink-0" />,
+  },
+  {
+    href: "/integrations/trello",
+    label: "Trello",
+    description: "Mirror feedback as Trello cards, sync lists both ways.",
+    icon: <TrelloIcon colored className="size-4 shrink-0" />,
   },
   {
     href: "/integrations/slack",
@@ -133,7 +140,7 @@ export async function Header() {
                     Integrations
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[320px] gap-1 p-2">
+                    <ul className="grid w-[520px] grid-cols-2 gap-1 p-2">
                       {/* Plain Link, not NavigationMenuLink: Radix's FocusGroupItem
                           collection (nav-menu 1.2.14) drops this content's children
                           once the list reaches 4+ items. A styled anchor renders

@@ -78,9 +78,16 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     cells: [
       {
         type: "yes",
-        note: "GitHub, Linear, Jira: two-way, workflow-state aware",
+        note: "GitHub, Linear, Jira, Trello: two-way, workflow-state aware",
       },
       { type: "yes", note: "Jira, Trello, ClickUp, Asana: link-back only" },
+    ],
+  },
+  {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "yes", note: "Link-back only" },
     ],
   },
   {

@@ -113,9 +113,16 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "yes", note: "All plans" },
+    ],
+  },
+  {
     label: "Project management integrations",
     cells: [
-      "GitHub, Linear, Jira · more coming",
+      "GitHub, Linear, Jira, Trello · more coming",
       "Trello, GitHub, Slack on all plans · Jira, Linear, Asana, ClickUp, Monday.com from Premium",
     ],
   },

@@ -55,7 +55,7 @@ export const websiteAnnotationFaqs: FaqItem[] = [
   },
   {
     question: "Is there a free website annotation tool?",
-    answer: `Faster Fixes has a Free plan that is not time-limited: ${freePlan.projects} project, up to ${freePlan.feedbacks} feedback items, ${freePlan.seats} team member, ${freePlan.videos} video up to ${freePlan.videoFileSize / 1_000_000} MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira and Slack need Pro at $${proPrice}/month flat for up to ${proPlan.seats} members, or Agency at $${agencyPrice}/month with unlimited members. Your data is never deleted when a plan ends.`,
+    answer: `Faster Fixes has a Free plan that is not time-limited: ${freePlan.projects} project, up to ${freePlan.feedbacks} feedback items, ${freePlan.seats} team member, ${freePlan.videos} video up to ${freePlan.videoFileSize / 1_000_000} MB, the widget, the replay of the last minute before each feedback, and the feedback dashboard. The MCP server works on all plans, including Free. GitHub, Linear, Jira, Trello and Slack need Pro at $${proPrice}/month flat for up to ${proPlan.seats} members, or Agency at $${agencyPrice}/month with unlimited members. Your data is never deleted when a plan ends.`,
   },
 ];
 

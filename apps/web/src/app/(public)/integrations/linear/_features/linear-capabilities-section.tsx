@@ -4,6 +4,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import type { Route } from "next";
+import Link from "next/link";
 
 const capabilities = [
   {
@@ -16,7 +18,7 @@ const capabilities = [
   },
   {
     title: "Track the Linear identifier without leaving Faster Fixes",
-    body: "Once an issue is created, the Faster Fixes inbox shows a Linear badge: the identifier (e.g. ENG-123) and a colored dot reflecting the issue's current state. The integration is independent of GitHub: a feedback item can be linked to a Linear issue, a GitHub issue, both, or neither.",
+    body: "Once an issue is created, the Faster Fixes inbox shows a Linear badge: the identifier (e.g. ENG-123) and a colored dot reflecting the issue's current state. The integration is independent of the others: a feedback item can be linked to Linear, GitHub, Jira, Trello, any combination, or none.",
   },
 ];
 
@@ -50,6 +52,18 @@ export function LinearCapabilitiesSection() {
             </Card>
           ))}
         </div>
+
+        <p className="mx-auto mt-10 max-w-2xl text-center text-muted-foreground">
+          Part of the team plans on a board? The{" "}
+          <Link
+            href={"/integrations/trello" as Route}
+            className="text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            Trello integration
+          </Link>{" "}
+          mirrors the same feedback as a card, and its status stays in sync with
+          the Linear issue.
+        </p>
       </div>
     </section>
   );

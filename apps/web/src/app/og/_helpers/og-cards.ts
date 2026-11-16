@@ -75,6 +75,12 @@ export const OG_CARDS: Record<string, OgCardContent> = {
     highlight: "your coding agent",
     tags: ["Claude Code", "Cursor", "Codex"],
   },
+  "/integrations/trello": {
+    eyebrow: "Trello integration",
+    title: "Client feedback becomes Trello cards",
+    highlight: "Trello cards",
+    tags: ["Screenshot cover", "Console logs", "Two-way list sync"],
+  },
   "/integrations/slack": {
     eyebrow: "Slack integration",
     title: "Know in Slack the moment a client reports a bug",

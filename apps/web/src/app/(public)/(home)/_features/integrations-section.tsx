@@ -10,6 +10,7 @@ import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
+import { TrelloIcon } from "@workspace/ui/components/icons/trello-icon";
 import { ArrowRightIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -42,6 +43,13 @@ const integrations: Integration[] = [
     description:
       "Auto-create Jira Cloud issues from feedback with full dev context. Status sync keys on Jira's status category, so custom workflows keep working.",
     icon: <JiraIcon colored className="size-5 shrink-0" />,
+  },
+  {
+    label: "Trello integration",
+    href: "/integrations/trello" as Route,
+    description:
+      "Mirror feedback as Trello cards with the screenshot as cover and full dev context. Moving a card between lists updates the status.",
+    icon: <TrelloIcon colored className="size-5 shrink-0" />,
   },
   {
     label: "Slack integration",

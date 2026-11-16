@@ -34,13 +34,20 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Integrations (GitHub, Linear, Jira)",
+    label: "Integrations (GitHub, Linear, Jira, Trello)",
     cells: [
       {
         type: "yes",
-        note: `GitHub, Linear, Jira included from $${proPrice}/mo`,
+        note: `GitHub, Linear, Jira, Trello included from $${proPrice}/mo`,
       },
       { type: "no", note: "No native sync · Slack and Zapier only" },
+    ],
+  },
+  {
+    label: "Trello sync",
+    cells: [
+      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
+      { type: "no", note: "Zapier only" },
     ],
   },
   {

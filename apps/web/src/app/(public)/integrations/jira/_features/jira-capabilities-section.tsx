@@ -4,6 +4,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import type { Route } from "next";
+import Link from "next/link";
 
 const capabilities = [
   {
@@ -16,7 +18,7 @@ const capabilities = [
   },
   {
     title: "Track the issue key without leaving Faster Fixes",
-    body: "The Faster Fixes inbox shows a Jira badge with the issue key (e.g. PROJ-123) and a status dot. A feedback item can be linked to Jira, GitHub, Linear, any combination, or none.",
+    body: "The Faster Fixes inbox shows a Jira badge with the issue key (e.g. PROJ-123) and a status dot. A feedback item can be linked to Jira, GitHub, Linear, Trello, any combination, or none.",
   },
 ];
 
@@ -49,6 +51,18 @@ export function JiraCapabilitiesSection() {
             </Card>
           ))}
         </div>
+
+        <p className="mx-auto mt-10 max-w-2xl text-center text-muted-foreground">
+          Client-facing work tracked on a board? The{" "}
+          <Link
+            href={"/integrations/trello" as Route}
+            className="text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            Trello integration
+          </Link>{" "}
+          mirrors the same feedback as a card, and its status stays in sync with
+          the Jira issue.
+        </p>
       </div>
     </section>
   );
