@@ -165,6 +165,8 @@ The five boundary rules (`no-client-import-of-server-folder`, `no-client-import-
 exception to one of them is a named entry in `next.js`. Every other rule is disableable with a
 written reason, which `eslint-comments/require-description` makes mandatory.
 
-Two conventions of the tree are held by a test rather than by lint, because each is a property of
+Three conventions of the tree are held by a test rather than by lint, because each is a property of
 the whole tree that ESLint cannot see one file at a time: `src/app/_domains/domain-cycles.test.ts`
-(no domain import cycle) and `src/mdx-no-em-dash.test.ts` (no em dash in the MDX content).
+(no domain import cycle), `src/mdx-no-em-dash.test.ts` (no em dash in the MDX content) and
+`src/plan-facts.test.ts` (plan limits and prices on the marketing pages come from `PLAN_LIMITS` and
+`PLAN_PRICES`).

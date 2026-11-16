@@ -1,3 +1,4 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
@@ -20,10 +21,11 @@ import { MarkupIoHonestTakeSection } from "./_features/markup-io-honest-take-sec
 import { MarkupIoPricingSection } from "./_features/markup-io-pricing-section";
 import { MarkupIoWhySwitchSection } from "./_features/markup-io-why-switch-section";
 
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
 const pageUrl = `${APP_URL}/vs/markup-io`;
 const title = `Markup.io Alternative: Open-Source & Developer-First | ${SITE_NAME}`;
-const description =
-  "Markup.io raised prices 172% and killed its free plan. FasterFixes is open-source, self-hostable, $20/mo: feedback flows to Claude Code, Cursor, Linear, and Jira.";
+const description = `Markup.io raised prices 172% and killed its free plan. FasterFixes is open-source, self-hostable, $${proPrice}/mo: feedback flows to Claude Code, Cursor, Linear, and Jira.`;
 const datePublished = "2026-05-12T00:00:00.000Z";
 const dateModified = "2026-11-12T00:00:00.000Z";
 

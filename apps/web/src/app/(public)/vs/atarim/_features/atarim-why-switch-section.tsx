@@ -1,7 +1,16 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 const limitations = [
   {
     title: "Priced for AI agency work, not bug reports",
-    body: "Atarim sells one paid plan, Pro, at $67/month or $643.20/year billed yearly, for up to 100 seats. The price is built around its AI agents: Pro includes 5,000 AI credits a month, and further AI work is billed in credit packs. FasterFixes Pro is $20/month flat for up to 5 members, or $240/year, which is $403.20/year less than Atarim billed yearly. Past 5 members, FasterFixes Agency is $99/month for unlimited members, more than Atarim Pro. If your team needs structured bug reports rather than AI-run site work, a small team pays less on FasterFixes and has no credit balance to watch.",
+    body: `Atarim sells one paid plan, Pro, at $67/month or $643.20/year billed yearly, for up to 100 seats. The price is built around its AI agents: Pro includes 5,000 AI credits a month, and further AI work is billed in credit packs. FasterFixes Pro is $${proPrice}/month flat for up to ${proPlan.seats} members, or $${proPrice * 12}/year, which is $403.20/year less than Atarim billed yearly. Past ${proPlan.seats} members, FasterFixes Agency is $${agencyPrice}/month for unlimited members, more than Atarim Pro. If your team needs structured bug reports rather than AI-run site work, a small team pays less on FasterFixes and has no credit balance to watch.`,
   },
   {
     title: "Cloud-only with no self-hosting option",

@@ -1,5 +1,9 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +13,10 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
@@ -33,15 +41,16 @@ function DocLink({ href, children }: DocLinkProps) {
 export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free to use?",
-    answer: `Yes. The hosted Free plan is permanent: 1 project, ${freeFeedbackLimit} feedback items, 1 member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $20/month for Pro and $99/month for Agency.`,
+    answer: `Yes. The hosted Free plan is permanent: ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, ${freePlan.seats} member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The hosted Free plan is permanent: 1 project, {freeFeedbackLimit}{" "}
-        feedback items, 1 member, no time limit, no credit card. The dashboard
-        is open source under AGPL-3.0 and the widget is MIT, so{" "}
+        Yes. The hosted Free plan is permanent: {freePlan.projects} project,{" "}
+        {freeFeedbackLimit} feedback items, {freePlan.seats} member, no time
+        limit, no credit card. The dashboard is open source under AGPL-3.0 and
+        the widget is MIT, so{" "}
         <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
-        also free regardless of team size. Paid hosted plans are $20/month for
-        Pro and $99/month for Agency.
+        also free regardless of team size. Paid hosted plans are ${proPrice}
+        /month for Pro and ${agencyPrice}/month for Agency.
       </p>
     ),
   },
@@ -161,8 +170,7 @@ export const usersnapFaqs: RichFaqItem[] = [
   },
   {
     question: "What is the FasterFixes Agency plan?",
-    answer:
-      "The Agency plan costs $99/month and includes unlimited members, unlimited projects, MCP server access, GitHub, Linear, and Jira two-way sync, team kanban, and email support. It is designed for agencies managing multiple client sites from a single workspace at a flat monthly rate.",
+    answer: `The Agency plan costs $${agencyPrice}/month and includes unlimited members, unlimited projects, MCP server access, GitHub, Linear, and Jira two-way sync, team kanban, and email support. It is designed for agencies managing multiple client sites from a single workspace at a flat monthly rate.`,
   },
 ];
 

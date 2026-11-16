@@ -1,4 +1,11 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -104,10 +111,11 @@ export function MarkerIoHonestTakeSection() {
               Marker.io bundles session replay on the Team plan and above.
             </li>
             <li>
-              <strong className="text-foreground">Flat pricing</strong>:
-              $20/month for a 5-person team versus $149/month annual on
-              Marker.io Team. The free plan covers 1 project,{" "}
-              {freeFeedbackLimit} feedback items, and 1 member at no cost.
+              <strong className="text-foreground">Flat pricing</strong>: $
+              {proPrice}/month for a 5-person team versus $149/month annual on
+              Marker.io Team. The free plan covers {freePlan.projects} project,{" "}
+              {freeFeedbackLimit} feedback items, and {freePlan.seats} member at
+              no cost.
             </li>
           </ul>
           <p>

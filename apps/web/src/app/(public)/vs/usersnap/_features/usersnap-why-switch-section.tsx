@@ -1,7 +1,16 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 const limitations = [
   {
     title: "Pricing scales with projects",
-    body: "Usersnap is tiered by project count: Starter $59/mo (2 seats, 2 projects), Growth $159/mo (10 projects), Professional $259/mo (20 projects), Premium $549/mo (50 projects). A third team member or project moves you off Starter, and each new batch of projects moves you up a tier. FasterFixes charges a flat $20/mo for Pro (up to 5 members) and $99/mo for Agency with unlimited members and projects.",
+    body: `Usersnap is tiered by project count: Starter $59/mo (2 seats, 2 projects), Growth $159/mo (10 projects), Professional $259/mo (20 projects), Premium $549/mo (50 projects). A third team member or project moves you off Starter, and each new batch of projects moves you up a tier. FasterFixes charges a flat $${proPrice}/mo for Pro (up to ${proPlan.seats} members) and $${agencyPrice}/mo for Agency with unlimited members and projects.`,
   },
   {
     title: "No self-hosting option",

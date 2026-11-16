@@ -1,9 +1,12 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function MarkupIoCtaSection() {
   return (
@@ -14,9 +17,9 @@ export function MarkupIoCtaSection() {
             Ready to switch from Markup.io?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-            Try FasterFixes free: open-source, self-hostable, $20 a month flat,
-            with GitHub, Linear, and Jira sync on paid plans and an MCP server
-            for your AI coding agent.
+            Try FasterFixes free: open-source, self-hostable, ${proPrice} a
+            month flat, with GitHub, Linear, and Jira sync on paid plans and an
+            MCP server for your AI coding agent.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">

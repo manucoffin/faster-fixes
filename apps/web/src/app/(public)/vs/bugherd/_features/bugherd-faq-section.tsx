@@ -1,5 +1,9 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +13,10 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
@@ -33,7 +41,7 @@ function DocLink({ href, children }: DocLinkProps) {
 export const bugherdFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes really free?",
-    answer: `Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT. Clone the repo and self-host for free. The hosted Free plan is also permanently free (one project, up to ${freeFeedbackLimit} feedback items, one team member). Paid hosted plans are $20/month for Pro and $99/month for Agency.`,
+    answer: `Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT. Clone the repo and self-host for free. The hosted Free plan is also permanently free (${freePlan.projects} project, up to ${freeFeedbackLimit} feedback items, ${freePlan.seats} team member). Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         Yes. The dashboard is open source under AGPL-3.0 and the widget under
@@ -41,9 +49,10 @@ export const bugherdFaqs: RichFaqItem[] = [
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
-        . The hosted Free plan is also permanently free (one project, up to{" "}
-        {freeFeedbackLimit} feedback items, one team member). Paid hosted plans
-        are $20/month for Pro and $99/month for Agency.
+        . The hosted Free plan is also permanently free ({freePlan.projects}{" "}
+        project, up to {freeFeedbackLimit} feedback items, {freePlan.seats} team
+        member). Paid hosted plans are ${proPrice}/month for Pro and $
+        {agencyPrice}/month for Agency.
       </p>
     ),
   },

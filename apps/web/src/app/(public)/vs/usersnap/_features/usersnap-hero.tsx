@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
@@ -5,6 +10,9 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function UsersnapHero() {
   return (
@@ -20,10 +28,10 @@ export function UsersnapHero() {
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Usersnap is closed-source and tiered by project count. FasterFixes
             is the open-source alternative: AGPL-3.0, self-hostable for free, or
-            $20 a month flat for up to five members, built around structured bug
-            reports rather than a product feedback widget. Reports sync to
-            GitHub, Linear, or Jira, and an MCP server makes them readable by
-            Claude Code and Cursor.
+            ${proPrice} a month flat for up to {proPlan.seats} members, built
+            around structured bug reports rather than a product feedback widget.
+            Reports sync to GitHub, Linear, or Jira, and an MCP server makes
+            them readable by Claude Code and Cursor.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

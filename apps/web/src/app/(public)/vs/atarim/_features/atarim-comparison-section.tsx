@@ -1,10 +1,18 @@
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
 const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
@@ -25,14 +33,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "Flat per-workspace · free, $20/mo, $99/mo",
+      `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
       "Flat per workspace · free, Pro $67/mo or $53.60/mo billed yearly, Enterprise custom · AI credits on top",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
-      "$0 self-host · $20/mo hosted Pro",
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
       "$67/mo Pro · $643.20/year billed yearly",
     ],
   },
@@ -136,7 +144,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Free plan",
     cells: [
-      { type: "yes", note: `1 project · ${freeFeedbackLimit} items · forever` },
+      {
+        type: "yes",
+        note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
+      },
       { type: "yes", note: "1 project · 200 AI credits, one time" },
     ],
   },

@@ -10,6 +10,8 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
@@ -33,13 +35,14 @@ function DocLink({ href, children }: DocLinkProps) {
 export const userbackFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
-    answer: `Yes. The free plan includes 1 project, ${freeFeedbackLimit} feedback items, and 1 member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).`,
+    answer: `Yes. The free plan includes ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, and ${freePlan.seats} member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The free plan includes 1 project, {freeFeedbackLimit} feedback
-        items, and 1 member, no credit card required. The self-hosted version is
-        also free under AGPL-3.0; you only pay for your own hosting
-        infrastructure (typically $5-20/month on Railway or Vercel). See the{" "}
+        Yes. The free plan includes {freePlan.projects} project,{" "}
+        {freeFeedbackLimit} feedback items, and {freePlan.seats} member, no
+        credit card required. The self-hosted version is also free under
+        AGPL-3.0; you only pay for your own hosting infrastructure (typically
+        $5-20/month on Railway or Vercel). See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>

@@ -1,3 +1,11 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const rows = [
   {
     label: "Ruttl Pro (5 people)",
@@ -8,8 +16,8 @@ const rows = [
     value: "Custom: contact sales",
   },
   {
-    label: "FasterFixes Pro (up to 5)",
-    value: "$20/mo = $240/year",
+    label: `FasterFixes Pro (up to ${proPlan.seats})`,
+    value: `$${proPrice}/mo = $${proPrice * 12}/year`,
     highlight: true,
   },
   {
@@ -32,8 +40,8 @@ export function RuttlPricingSection() {
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Ruttl Pro is $18 per user per month. Every new teammate adds $18.
-            FasterFixes is flat: one price for up to 5 members, or $0 if you
-            self-host.
+            FasterFixes is flat: one price for up to {proPlan.seats} members, or
+            $0 if you self-host.
           </p>
         </div>
 

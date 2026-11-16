@@ -1,4 +1,12 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -14,13 +22,13 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "$0 self-hosted / $20/mo Pro (up to 5 members)",
+      `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
       "$18/user/mo Pro / custom Business",
     ],
   },
   {
     label: "Cost for a 5-person team",
-    cells: ["$20/mo = $240/year", "$90/mo = $1,080/year"],
+    cells: [`$${proPrice}/mo = $${proPrice * 12}/year`, "$90/mo = $1,080/year"],
   },
   {
     label: "MCP server (Claude Code / Cursor)",

@@ -3,6 +3,7 @@ import { signupUrl } from "@/app/_constants/routes";
 import {
   PLAN_DESCRIPTIONS,
   PLAN_FEATURES,
+  PLAN_LIMITS,
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
@@ -20,13 +21,16 @@ import {
   pricingFaqs,
 } from "./_features/pricing-faq-section";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+
 const pageUrl = `${APP_URL}/pricing`;
 // GSC shows the impressions here come from competitor price research
 // ("atarim pricing", "ruttl pricing"), not from brand queries — so the snippet
 // leads with the numbers and the flat-rate model rather than "simple pricing".
-const title = "Pricing: $0 self-hosted, $20/mo flat rate";
-const description =
-  "Self-host free under AGPL-3.0, or $20/month flat for up to 5 members and $99 for unlimited. Flat rate, not per seat. See what you would actually pay.";
+const title = `Pricing: $0 self-hosted, $${proPrice}/mo flat rate`;
+const description = `Self-host free under AGPL-3.0, or $${proPrice}/month flat for up to ${proPlan.seats} members and $${agencyPrice} for unlimited. Flat rate, not per seat. See what you would actually pay.`;
 
 export const metadata: Metadata = {
   title,

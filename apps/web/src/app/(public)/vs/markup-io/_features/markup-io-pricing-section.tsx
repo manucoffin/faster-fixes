@@ -1,3 +1,11 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const rows = [
   {
     label: "Markup.io Pro (50 MarkUps/mo)",
@@ -12,8 +20,8 @@ const rows = [
     value: "Custom: quote required",
   },
   {
-    label: "FasterFixes Pro (up to 5)",
-    value: "$20/mo = $240/year",
+    label: `FasterFixes Pro (up to ${proPlan.seats})`,
+    value: `$${proPrice}/mo = $${proPrice * 12}/year`,
     highlight: true,
   },
   {
@@ -37,8 +45,8 @@ export function MarkupIoPricingSection() {
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Markup.io raised Pro from $29 to $79 in January 2025 and removed its
             free plan. It has no native GitHub, Linear, or Jira sync.
-            FasterFixes includes GitHub, Linear, and Jira sync on the $20/mo
-            plan, and the self-hosted version is free.
+            FasterFixes includes GitHub, Linear, and Jira sync on the $
+            {proPrice}/mo plan, and the self-hosted version is free.
           </p>
         </div>
 

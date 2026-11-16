@@ -1,3 +1,8 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
@@ -5,6 +10,9 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function BugherdHero() {
   return (
@@ -25,11 +33,11 @@ export function BugherdHero() {
             >
               open-source feedback widget
             </Link>{" "}
-            and the self-hostable alternative to BugHerd: flat-rate at $20 a
-            month for up to five members, or free if you self-host. Where
-            BugHerd routes feedback to a Kanban board, FasterFixes routes it to
-            GitHub, Linear, or Jira with a full repro bundle, and exposes every
-            report to Claude Code and Cursor over MCP.
+            and the self-hostable alternative to BugHerd: flat-rate at $
+            {proPrice} a month for up to {proPlan.seats} members, or free if you
+            self-host. Where BugHerd routes feedback to a Kanban board,
+            FasterFixes routes it to GitHub, Linear, or Jira with a full repro
+            bundle, and exposes every report to Claude Code and Cursor over MCP.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

@@ -9,12 +9,14 @@ import {
 } from "@workspace/ui/components/accordion";
 import type * as React from "react";
 
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 export const pricingFaqs: FaqItem[] = [
   {
     question: "Is there really a free plan?",
-    answer: `Yes. The Free plan includes 1 project with up to ${freeFeedbackLimit} feedback items and is not time-limited. It is designed for solo developers or anyone who wants to try FasterFixes on a real project before committing to a paid plan.`,
+    answer: `Yes. The Free plan includes ${freePlan.projects} project with up to ${freeFeedbackLimit} feedback items and is not time-limited. It is designed for solo developers or anyone who wants to try FasterFixes on a real project before committing to a paid plan.`,
   },
   {
     question: "Can I upgrade or downgrade at any time?",

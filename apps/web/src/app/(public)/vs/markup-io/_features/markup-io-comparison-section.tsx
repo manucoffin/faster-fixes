@@ -1,4 +1,12 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -14,7 +22,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Pricing model",
     cells: [
-      "$0 self-hosted / $20/mo Pro (up to 5 members)",
+      `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
       "$79/mo Pro / $499/mo Business / Enterprise custom",
     ],
   },
@@ -28,7 +36,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Integrations (GitHub, Linear, Jira)",
     cells: [
-      { type: "yes", note: "GitHub, Linear, Jira included from $20/mo" },
+      {
+        type: "yes",
+        note: `GitHub, Linear, Jira included from $${proPrice}/mo`,
+      },
       { type: "no", note: "No native sync · Slack and Zapier only" },
     ],
   },

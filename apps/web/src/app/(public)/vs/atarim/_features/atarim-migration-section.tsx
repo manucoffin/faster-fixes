@@ -1,3 +1,6 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 export const migrationSteps = [
   {
     label: "Export your feedback from Atarim",
@@ -5,7 +8,7 @@ export const migrationSteps = [
   },
   {
     label: "Deploy FasterFixes",
-    body: "Choose self-hosted (Next.js, Postgres, Inngest, R2/S3-compatible storage) or sign up for the hosted Pro plan at $20/month. The self-hosted path takes roughly 30 minutes with the provided setup docs. No account required for clients submitting feedback.",
+    body: `Choose self-hosted (Next.js, Postgres, Inngest, R2/S3-compatible storage) or sign up for the hosted Pro plan at $${proPrice}/month. The self-hosted path takes roughly 30 minutes with the provided setup docs. No account required for clients submitting feedback.`,
   },
   {
     label: "Replace the Atarim widget",

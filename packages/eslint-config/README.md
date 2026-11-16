@@ -92,9 +92,10 @@ every exported config to it.
 The core `no-restricted-imports` is the
 `src/server/**` deep-import lock and nothing else.
 
-Two conventions of the tree are held by a test in `apps/web` rather than by lint, because each is a
-property of the whole tree: `src/app/_domains/domain-cycles.test.ts` (no domain import cycle) and
-`src/mdx-no-em-dash.test.ts` (no em dash in the MDX content).
+Three conventions of the tree are held by a test in `apps/web` rather than by lint, because each is
+a property of the whole tree: `src/app/_domains/domain-cycles.test.ts` (no domain import cycle),
+`src/mdx-no-em-dash.test.ts` (no em dash in the MDX content) and `src/plan-facts.test.ts` (plan
+limits and prices on the marketing pages come from `PLAN_LIMITS` and `PLAN_PRICES`).
 
 The coding standards skill at `.agents/skills/coding-standards/` is the reader's half of this
 table: every checkable convention there names its rule, and every other one is marked prose only.

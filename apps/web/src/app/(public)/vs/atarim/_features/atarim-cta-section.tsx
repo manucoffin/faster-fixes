@@ -1,9 +1,12 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function AtarimCtaSection() {
   return (
@@ -14,8 +17,8 @@ export function AtarimCtaSection() {
             Ready to switch from Atarim?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-            Try FasterFixes free: self-host for $0 or use hosted Pro at
-            $20/month flat. No per-seat pricing, no vendor lock-in.
+            Try FasterFixes free: self-host for $0 or use hosted Pro at $
+            {proPrice}/month flat. No per-seat pricing, no vendor lock-in.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">

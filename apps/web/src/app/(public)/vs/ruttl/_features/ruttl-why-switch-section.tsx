@@ -1,7 +1,15 @@
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const cards = [
   {
     title: "Per-seat pricing that scales against you",
-    body: "Ruttl Pro is $18 per user per month. A 5-person team pays $90 a month, or $1,080 a year. The Business plan is custom-priced through sales. FasterFixes is flat: $20 a month hosted up to 5 members, $0 self-hosted.",
+    body: `Ruttl Pro is $18 per user per month. A 5-person team pays $90 a month, or $1,080 a year. The Business plan is custom-priced through sales. FasterFixes is flat: $${proPrice} a month hosted up to ${proPlan.seats} members, $0 self-hosted.`,
   },
   {
     title: "No self-hosting, no open-source option",

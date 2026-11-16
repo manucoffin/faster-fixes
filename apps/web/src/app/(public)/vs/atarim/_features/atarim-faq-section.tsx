@@ -1,5 +1,9 @@
 import type { FaqItem } from "@/app/_components/seo/faq-schema";
-import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +13,11 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 type RichFaqItem = FaqItem & { content?: ReactNode };
 
@@ -33,14 +42,15 @@ function DocLink({ href, children }: DocLinkProps) {
 export const atarimFaqs: RichFaqItem[] = [
   {
     question: "Is FasterFixes free?",
-    answer: `Yes. The Free plan includes 1 project, ${freeFeedbackLimit} feedback items, and 1 member, no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $20/month flat for up to 5 members, and the Agency plan is $99/month for unlimited members.`,
+    answer: `Yes. The Free plan includes ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, and ${freePlan.seats} member, no credit card required. Self-hosting is free forever with no item or member limits beyond your own infrastructure. The Pro plan is $${proPrice}/month flat for up to ${proPlan.seats} members, and the Agency plan is $${agencyPrice}/month for unlimited members.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
-        Yes. The Free plan includes 1 project, {freeFeedbackLimit} feedback
-        items, and 1 member, no credit card required. Self-hosting is free
-        forever with no item or member limits beyond your own infrastructure.
-        The Pro plan is $20/month flat for up to 5 members, and the Agency plan
-        is $99/month for unlimited members. See the{" "}
+        Yes. The Free plan includes {freePlan.projects} project,{" "}
+        {freeFeedbackLimit} feedback items, and {freePlan.seats} member, no
+        credit card required. Self-hosting is free forever with no item or
+        member limits beyond your own infrastructure. The Pro plan is $
+        {proPrice}/month flat for up to {proPlan.seats} members, and the Agency
+        plan is ${agencyPrice}/month for unlimited members. See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
@@ -67,12 +77,12 @@ export const atarimFaqs: RichFaqItem[] = [
   },
   {
     question: "How is FasterFixes different from Atarim?",
-    answer:
-      "FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is proprietary and cloud-only. FasterFixes Pro is $20/month for up to 5 members; Atarim Pro is $67/month ($53.60/month billed yearly) for up to 100 seats, with AI credits on top. FasterFixes ships a widget that installs with a script tag on any site or as a React package, and captures DOM selector, full browser context, and the React component tree on React sites; Atarim uses a JS snippet, Chrome extension, or WordPress plugin with no React SDK and no component tree capture. Both offer an MCP server: FasterFixes gives AI coding agents each Feedback with its DOM selector, Screenshot, Diagnostic Trail, and Recording timeline; the Atarim MCP connects Claude, Codex, and other MCP clients to Atarim tasks, sites, and workflows.",
+    answer: `FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is proprietary and cloud-only. FasterFixes Pro is $${proPrice}/month for up to ${proPlan.seats} members; Atarim Pro is $67/month ($53.60/month billed yearly) for up to 100 seats, with AI credits on top. FasterFixes ships a widget that installs with a script tag on any site or as a React package, and captures DOM selector, full browser context, and the React component tree on React sites; Atarim uses a JS snippet, Chrome extension, or WordPress plugin with no React SDK and no component tree capture. Both offer an MCP server: FasterFixes gives AI coding agents each Feedback with its DOM selector, Screenshot, Diagnostic Trail, and Recording timeline; the Atarim MCP connects Claude, Codex, and other MCP clients to Atarim tasks, sites, and workflows.`,
     content: (
       <p className="text-lg text-muted-foreground md:text-xl">
         FasterFixes is open-source (AGPL-3.0 + MIT) and self-hostable; Atarim is
-        proprietary and cloud-only. FasterFixes Pro is $20/month for up to 5
+        proprietary and cloud-only. FasterFixes Pro is ${proPrice}/month for up
+        to {proPlan.seats}
         members; Atarim Pro is $67/month ($53.60/month billed yearly) for up to
         100 seats, with AI credits on top. FasterFixes ships a widget that
         installs with a script tag on any site or as a React package, and
