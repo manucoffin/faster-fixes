@@ -22,7 +22,7 @@ export type IssueRecording = {
   timeline: RecordingTimeline | null;
 };
 
-type FeedbackForIssue = {
+export type FeedbackForIssue = {
   id: string;
   comment: string;
   pageUrl: string | null;
@@ -66,7 +66,19 @@ export function formatIssueTitle(comment: string): string {
 }
 
 export function formatIssueBody(feedback: FeedbackForIssue): string {
-  if (feedback.videoId) return formatVideoIssueBody(feedback);
+  return [
+    formatIssueBodyContent(feedback),
+    "",
+    dashboardFooter(feedback.dashboardUrl),
+  ].join("\n");
+}
+
+/**
+ * The body without its dashboard footer, for a Tracker that renders its own
+ * footer or must truncate the content and still keep the dashboard link.
+ */
+export function formatIssueBodyContent(feedback: FeedbackForIssue): string {
+  if (feedback.videoId) return formatVideoIssueContent(feedback);
 
   const lines: string[] = [quoteComment(feedback.comment), ""];
 
@@ -135,8 +147,6 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
   }
 
   lines.push(...diagnosticsOrTimelineLines(feedback));
-
-  lines.push("", dashboardFooter(feedback.dashboardUrl));
 
   return lines.join("\n");
 }
@@ -209,7 +219,7 @@ function fitTimeline(timeline: RecordingTimeline): RecordingTimeline {
 
 // A video Feedback has no page, element, Custom metadata or Diagnostics: the
 // Video line says where to look and the captured frame is the Screenshot.
-function formatVideoIssueBody(feedback: FeedbackForIssue): string {
+function formatVideoIssueContent(feedback: FeedbackForIssue): string {
   const lines = [
     quoteComment(feedback.comment),
     "",
@@ -226,8 +236,6 @@ function formatVideoIssueBody(feedback: FeedbackForIssue): string {
   if (envParts.length > 0) {
     lines.push("", `**Environment:** ${envParts.join(" \u00b7 ")}`);
   }
-
-  lines.push("", dashboardFooter(feedback.dashboardUrl));
 
   return lines.join("\n");
 }

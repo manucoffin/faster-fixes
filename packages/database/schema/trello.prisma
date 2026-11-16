@@ -67,7 +67,38 @@ model ProjectTrelloLink {
 
   linkHealthIssue String? // null=healthy
 
+  feedbackIssueLinks FeedbackTrelloIssueLink[]
+
   @@index([trelloInstallationId])
   @@index([boardId])
   @@map("project_trello_link")
+}
+
+model FeedbackTrelloIssueLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  feedbackId String   @unique
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  projectTrelloLinkId String
+  projectTrelloLink   ProjectTrelloLink @relation(fields: [projectTrelloLinkId], references: [id], onDelete: Cascade)
+
+  // `cardId` is the sync key. `cardShortLink` and `cardUrl` are for display.
+  cardId        String
+  cardShortLink String
+  cardUrl       String
+
+  // The card's state as last written or read, so the Status sync can tell a
+  // move from an archive without another round-trip.
+  listId   String
+  archived Boolean @default(false)
+
+  lastSyncSource String?
+  lastSyncAt     DateTime?
+
+  @@index([projectTrelloLinkId])
+  @@index([cardId])
+  @@map("feedback_trello_issue_link")
 }

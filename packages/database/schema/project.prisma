@@ -140,6 +140,7 @@ model Feedback {
   issueLink       FeedbackIssueLink?
   linearIssueLink FeedbackLinearIssueLink?
   jiraIssueLink   FeedbackJiraIssueLink?
+  trelloIssueLink FeedbackTrelloIssueLink?
   slackMessage    FeedbackSlackMessage?
   rank            FeedbackRank?
 

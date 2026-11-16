@@ -126,6 +126,28 @@ async function getTrelloResource<T>(
   return (await res.json()) as T;
 }
 
+async function postTrelloResource<T>(
+  accessToken: string,
+  path: string,
+  body: Record<string, unknown>,
+): Promise<T> {
+  const res = await fetch(`${TRELLO_API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new TrelloRequestError(res.status, await res.text(), path);
+  }
+
+  return (await res.json()) as T;
+}
+
 export function getAuthorizedMember(
   accessToken: string,
 ): Promise<TrelloMember> {
@@ -152,6 +174,32 @@ export function listOpenBoardLists(
     accessToken,
     `/boards/${encodeURIComponent(boardId)}/lists?filter=open&fields=id,name`,
   );
+}
+
+export type TrelloCard = {
+  id: string;
+  shortLink: string;
+  url: string;
+  idList: string;
+  closed: boolean;
+};
+
+export function createCard(
+  accessToken: string,
+  input: {
+    listId: string;
+    name: string;
+    description: string;
+    labelIds: string[];
+  },
+): Promise<TrelloCard> {
+  return postTrelloResource(accessToken, "/cards", {
+    idList: input.listId,
+    name: input.name,
+    desc: input.description,
+    pos: "top",
+    idLabels: input.labelIds,
+  });
 }
 
 export function getTrelloOAuthRedirectUri(): string {
