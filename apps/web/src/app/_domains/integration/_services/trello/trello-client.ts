@@ -310,6 +310,59 @@ export function updateCard(
   );
 }
 
+export function updateCardDescription(
+  accessToken: string,
+  cardId: string,
+  description: string,
+): Promise<TrelloCard> {
+  return putTrelloResource(
+    accessToken,
+    `/cards/${encodeURIComponent(cardId)}`,
+    { desc: description },
+  );
+}
+
+// Trello refuses a file over 10 MB on a free Workspace, the lowest limit any
+// board can have.
+export const TRELLO_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
+
+export type TrelloAttachment = {
+  id: string;
+};
+
+// Multipart, unlike every other write: Trello reads the file from a `file` part.
+export async function createCardAttachment(
+  accessToken: string,
+  cardId: string,
+  input: { file: Buffer; name: string; mimeType: string; setCover: boolean },
+): Promise<TrelloAttachment> {
+  const path = `/cards/${encodeURIComponent(cardId)}/attachments`;
+  const form = new FormData();
+  form.append(
+    "file",
+    new Blob([new Uint8Array(input.file)], { type: input.mimeType }),
+    input.name,
+  );
+  form.append("name", input.name);
+  form.append("mimeType", input.mimeType);
+  form.append("setCover", String(input.setCover));
+
+  const res = await fetch(`${TRELLO_API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+    body: form,
+  });
+
+  if (!res.ok) {
+    throw new TrelloRequestError(res.status, await res.text(), path);
+  }
+
+  return (await res.json()) as TrelloAttachment;
+}
+
 export type TrelloWebhook = {
   id: string;
 };

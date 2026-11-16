@@ -7,6 +7,7 @@ import { handleJiraOAuthRevoked } from "@/app/_domains/integration/_services/jir
 import { handleTrelloOAuthRevoked } from "@/app/_domains/integration/_services/trello/handle-trello-oauth-revoked.inngest";
 import { requestTrelloCard } from "@/app/_domains/integration/_services/trello/request-trello-card.inngest";
 import { createTrelloCard } from "@/app/_domains/integration/_services/trello/create-trello-card.inngest";
+import { refreshTrelloCardRecording } from "@/app/_domains/integration/_services/trello/refresh-trello-card-recording.inngest";
 import { handleLinearOAuthRevoked } from "@/app/_domains/integration/_services/linear/handle-linear-oauth-revoked.inngest";
 import { notifySlackFeedbackCreated } from "@/app/_domains/integration/_services/slack/notify-slack-feedback-created.inngest";
 import { refreshJiraInstallationWebhooks } from "@/app/_domains/integration/_services/jira/refresh-jira-installation-webhooks.inngest";
@@ -50,6 +51,7 @@ export const { GET, POST, PUT } = serve({
     handleTrelloOAuthRevoked,
     requestTrelloCard,
     createTrelloCard,
+    refreshTrelloCardRecording,
     sendWelcomeEmail,
     addContactToSegment,
     scanTestimonialRequests,

@@ -1,14 +1,13 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
+import { formatTrelloCardName } from "../../_helpers/trello/format-card-description";
+import { createTrelloCardCover } from "./create-trello-card-cover";
 import {
-  formatTrelloCardDescription,
-  formatTrelloCardName,
-} from "../../_helpers/trello/format-card-description";
-import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
-import { refreshIssueRecording } from "../refresh-issue-recording";
+  getTrelloCardDescription,
+  trelloCardFeedbackInclude,
+} from "./get-trello-card-description";
 import { refreshTrelloLinkHealth } from "./refresh-trello-link-health";
 import { createCard } from "./trello-client";
 import { withTrelloAccessToken } from "./token-access";
-import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import { trelloCardCreateRequestedEvent } from "@/server/inngest/events";
@@ -52,49 +51,32 @@ export const createTrelloCard = inngest.createFunction(
       return { skipped: "trello_link_unhealthy", reason: healthIssue };
     }
 
-    const recording = await refreshIssueRecording(feedback);
+    const description = await getTrelloCardDescription(feedback);
 
-    const description = formatTrelloCardDescription({
-      id: feedback.id,
-      comment: feedback.comment,
-      pageUrl: feedback.pageUrl,
-      selector: feedback.selector,
-      clickX: feedback.clickX,
-      clickY: feedback.clickY,
-      browserName: feedback.browserName,
-      browserVersion: feedback.browserVersion,
-      os: feedback.os,
-      viewportWidth: feedback.viewportWidth,
-      viewportHeight: feedback.viewportHeight,
-      reviewerName: feedback.reviewer.name,
-      metadata: feedback.metadata as Record<string, unknown> | null,
-      diagnosticTrail: feedback.diagnosticTrail as DiagnosticTrail | null,
-      customMetadata: feedback.customMetadata as CustomMetadata | null,
-      projectId: feedback.projectId,
-      dashboardUrl: buildFeedbackDashboardUrl(feedback),
-      videoId: feedback.videoId,
-      videoTitle: feedback.video?.title,
-      startMs: feedback.startMs,
-      endMs: feedback.endMs,
-      frameX: feedback.frameX,
-      frameY: feedback.frameY,
-      frameWidth: feedback.frameWidth,
-      frameHeight: feedback.frameHeight,
-      recording,
-    });
+    const organizationId = link.trelloInstallation.organizationId;
 
     // A step, so a retry after a failed write below reuses the card instead
-    // of creating a second one.
-    const card = await step.run("create-card", () =>
-      withTrelloAccessToken(link.trelloInstallation.organizationId, (token) =>
+    // of creating a second one. The cover upload shares it because it never
+    // throws, and a second step would replay the idempotency check above
+    // once the Issue link exists.
+    const { card, cover } = await step.run("create-card", async () => {
+      const card = await withTrelloAccessToken(organizationId, (token) =>
         createCard(token, {
           listId: link.newListId,
           name: formatTrelloCardName(feedback.comment),
           description,
           labelIds: link.defaultLabelIds,
         }),
-      ).catch(rethrowDomainErrorsAsNonRetriable),
-    );
+      ).catch(rethrowDomainErrorsAsNonRetriable);
+
+      const cover = await createTrelloCardCover({
+        organizationId,
+        cardId: card.id,
+        screenshot: feedback.screenshot,
+      });
+
+      return { card, cover };
+    });
 
     await prisma.feedbackTrelloIssueLink.create({
       data: {
@@ -110,7 +92,7 @@ export const createTrelloCard = inngest.createFunction(
       },
     });
 
-    return { cardId: card.id, cardShortLink: card.shortLink };
+    return { cardId: card.id, cardShortLink: card.shortLink, cover };
   },
 );
 
@@ -123,9 +105,10 @@ function readFeedback(feedbackId: string) {
           trelloLink: { include: { trelloInstallation: true } },
         },
       },
-      reviewer: { select: { name: true } },
-      video: { select: { title: true } },
-      recording: { select: { key: true } },
+      ...trelloCardFeedbackInclude,
+      screenshot: {
+        select: { key: true, filename: true, mimeType: true, size: true },
+      },
       trelloIssueLink: { select: { id: true } },
     },
   });
