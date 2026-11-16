@@ -51,6 +51,12 @@ import { listAccessibleTrelloBoards } from "./settings/_services/list-accessible
 import { ListAccessibleTrelloBoardsSchema } from "./settings/_services/list-accessible-trello-boards.schema";
 import { listTrelloBoardLists } from "./settings/_services/list-trello-board-lists";
 import { ListTrelloBoardListsSchema } from "./settings/_services/list-trello-board-lists.schema";
+import { listTrelloBoardLabels } from "./settings/_services/list-trello-board-labels";
+import { ListTrelloBoardLabelsSchema } from "./settings/_services/list-trello-board-labels.schema";
+import { unlinkTrelloBoard } from "./settings/_services/unlink-trello-board";
+import { UnlinkTrelloBoardSchema } from "./settings/_services/unlink-trello-board.schema";
+import { updateProjectTrelloLink } from "./settings/_services/update-project-trello-link";
+import { UpdateProjectTrelloLinkSchema } from "./settings/_services/update-project-trello-link.schema";
 import { getProjectLinearLink } from "./settings/_services/get-project-linear-link";
 import { GetProjectLinearLinkSchema } from "./settings/_services/get-project-linear-link.schema";
 import { linkLinearTeam } from "./settings/_services/link-linear-team";
@@ -633,11 +639,33 @@ export const projectsRouter = router({
           userId: ctx.session.user.id,
         }),
       ),
+    listBoardLabels: protectedProcedure
+      .input(ListTrelloBoardLabelsSchema)
+      .query(({ input, ctx }) =>
+        listTrelloBoardLabels({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
+      ),
     // The plan gate lives in the service, so no `enforceFeature` here.
     linkBoard: protectedProcedure
       .input(LinkTrelloBoardSchema)
       .mutation(({ input, ctx }) =>
         linkTrelloBoard({ ...input, userId: ctx.session.user.id }),
+      ),
+    updateLink: protectedProcedure
+      .input(UpdateProjectTrelloLinkSchema)
+      .mutation(({ input, ctx }) =>
+        updateProjectTrelloLink({ ...input, userId: ctx.session.user.id }),
+      ),
+    // Not plan-gated: a downgraded Organization must always be able to unlink.
+    unlinkBoard: protectedProcedure
+      .input(UnlinkTrelloBoardSchema)
+      .mutation(({ input, ctx }) =>
+        unlinkTrelloBoard({
+          projectId: input.projectId,
+          userId: ctx.session.user.id,
+        }),
       ),
   }),
   slack: router({

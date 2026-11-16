@@ -14,7 +14,6 @@ import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,18 +27,14 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { useForm, useWatch, type Control } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import {
   LinkTrelloBoardSchema,
   type LinkTrelloBoardInput,
 } from "../../../_services/link-trello-board.schema";
 import type { ListAccessibleTrelloBoardsOutput } from "../../../_services/list-accessible-trello-boards";
-import type { ListTrelloBoardListsOutput } from "../../../_services/list-trello-board-lists";
-
-// Select items cannot carry an empty value, so the optional mapping uses a
-// sentinel that the form turns back into null.
-const UNMAPPED_LIST = "unmapped";
+import { TrelloListMappingFields } from "../trello-list-mapping-fields.client";
 
 type TrelloBoardPickerProps = {
   projectId: string;
@@ -157,7 +152,7 @@ export function TrelloBoardPicker({
               </p>
             ),
             Success: ({ data: lists }) => (
-              <ListMappingFields control={form.control} lists={lists} />
+              <TrelloListMappingFields lists={lists} />
             ),
           })}
 
@@ -176,112 +171,5 @@ export function TrelloBoardPicker({
         </Button>
       </form>
     </Form>
-  );
-}
-
-type ListMappingFieldsProps = {
-  control: Control<LinkTrelloBoardInput>;
-  lists: ListTrelloBoardListsOutput;
-};
-
-function ListMappingFields({ control, lists }: ListMappingFieldsProps) {
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">
-        Choose the list that stands for each status. Moving a card into a mapped
-        list updates the feedback, and changing the feedback moves the card.
-      </p>
-
-      <FormField
-        control={control}
-        name="newListId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>New</FormLabel>
-            <ListSelect
-              value={field.value}
-              onValueChange={field.onChange}
-              lists={lists}
-            />
-            <FormDescription>
-              New cards are created in this list.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="inProgressListId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>In Progress</FormLabel>
-            <ListSelect
-              value={field.value ?? UNMAPPED_LIST}
-              onValueChange={(value) =>
-                field.onChange(value === UNMAPPED_LIST ? null : value)
-              }
-              lists={lists}
-              allowUnmapped
-            />
-            <FormDescription>
-              Optional. Without a list, the card stays where it is.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="resolvedListId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Resolved</FormLabel>
-            <ListSelect
-              value={field.value}
-              onValueChange={field.onChange}
-              lists={lists}
-            />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </div>
-  );
-}
-
-type ListSelectProps = {
-  value: string;
-  onValueChange: (value: string) => void;
-  lists: ListTrelloBoardListsOutput;
-  allowUnmapped?: boolean;
-};
-
-function ListSelect({
-  value,
-  onValueChange,
-  lists,
-  allowUnmapped = false,
-}: ListSelectProps) {
-  return (
-    <Select value={value} onValueChange={onValueChange}>
-      <FormControl>
-        <SelectTrigger>
-          <SelectValue placeholder="Select a list" />
-        </SelectTrigger>
-      </FormControl>
-      <SelectContent>
-        {allowUnmapped && (
-          <SelectItem value={UNMAPPED_LIST}>No list</SelectItem>
-        )}
-        {lists.map((list) => (
-          <SelectItem key={list.id} value={list.id}>
-            {list.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }

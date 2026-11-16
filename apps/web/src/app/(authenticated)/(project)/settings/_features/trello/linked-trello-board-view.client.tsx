@@ -12,7 +12,10 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { ExternalLink } from "lucide-react";
 import type { GetProjectTrelloLinkOutput } from "../../_services/get-project-trello-link";
-import type { ListTrelloBoardListsOutput } from "../../_services/list-trello-board-lists";
+import { UnlinkTrelloBoardButton } from "./unlink-board/unlink-trello-board-button.client";
+import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.client";
+import { DefaultLabelsEditor } from "./update-link/default-labels-editor.client";
+import { ListMappingEditor } from "./update-link/list-mapping-editor.client";
 
 type LinkedTrelloBoardViewProps = {
   projectId: string;
@@ -55,41 +58,25 @@ export function LinkedTrelloBoardView({
           </Alert>
         ),
         Success: ({ data: lists }) => (
-          <MappedLists link={link} lists={lists ?? []} />
+          <ListMappingEditor
+            projectId={projectId}
+            link={link}
+            lists={lists ?? []}
+          />
         ),
       })}
+
+      <AutoCreateIssuesSwitch
+        projectId={projectId}
+        checked={link.autoCreateIssues}
+      />
+
+      <DefaultLabelsEditor
+        projectId={projectId}
+        labelIds={link.defaultLabelIds}
+      />
+
+      <UnlinkTrelloBoardButton projectId={projectId} />
     </div>
   );
-}
-
-type MappedListsProps = {
-  link: NonNullable<GetProjectTrelloLinkOutput>;
-  lists: ListTrelloBoardListsOutput;
-};
-
-function MappedLists({ link, lists }: MappedListsProps) {
-  const rows = [
-    { status: "New", listId: link.newListId },
-    { status: "In Progress", listId: link.inProgressListId },
-    { status: "Resolved", listId: link.resolvedListId },
-  ];
-
-  return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-      {rows.map(({ status, listId }) => (
-        <div key={status} className="contents">
-          <dt className="text-muted-foreground">{status}</dt>
-          <dd>{describeList(lists, listId)}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-function describeList(
-  lists: ListTrelloBoardListsOutput,
-  listId: string | null,
-) {
-  if (!listId) return "Not mapped";
-  return lists.find((list) => list.id === listId)?.name ?? "List not found";
 }

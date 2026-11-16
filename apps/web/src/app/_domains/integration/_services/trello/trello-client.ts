@@ -176,6 +176,23 @@ export function listOpenBoardLists(
   );
 }
 
+// A Trello label may have a color and no name, or a name and no color.
+export type TrelloLabel = {
+  id: string;
+  name: string;
+  color: string | null;
+};
+
+export function listBoardLabels(
+  accessToken: string,
+  boardId: string,
+): Promise<TrelloLabel[]> {
+  return getTrelloResource(
+    accessToken,
+    `/boards/${encodeURIComponent(boardId)}/labels?fields=id,name,color`,
+  );
+}
+
 export type TrelloCard = {
   id: string;
   shortLink: string;

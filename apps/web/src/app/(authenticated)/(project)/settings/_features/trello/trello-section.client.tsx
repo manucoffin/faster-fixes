@@ -15,6 +15,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { TrelloBoardPicker } from "./link-board/trello-board-picker.client";
 import { LinkedTrelloBoardView } from "./linked-trello-board-view.client";
+import { UnlinkTrelloBoardButton } from "./unlink-board/unlink-trello-board-button.client";
 
 type TrelloSectionProps = {
   projectId: string;
@@ -33,6 +34,7 @@ export function TrelloSection({ projectId }: TrelloSectionProps) {
         <Button className="w-fit" asChild>
           <a href="/account/billing">Upgrade your plan</a>
         </Button>
+        <ExistingTrelloBoardLink projectId={projectId} />
       </div>
     );
   }
@@ -83,14 +85,40 @@ function TrelloSectionInner({ orgId, projectId }: TrelloSectionInnerProps) {
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">
             The Trello connection needs attention before a Trello board can be
-            linked.
+            linked or changed.
           </p>
           <Button variant="link" className="w-fit px-0" asChild>
             <a href="/integrations">Go to integrations</a>
           </Button>
+          <ExistingTrelloBoardLink projectId={projectId} />
         </div>
       ),
   });
+}
+
+type ExistingTrelloBoardLinkProps = {
+  projectId: string;
+};
+
+// Without plan access or a working Installation, an existing link can no
+// longer be edited, but it can always be removed.
+function ExistingTrelloBoardLink({ projectId }: ExistingTrelloBoardLinkProps) {
+  const trpc = useTRPC();
+
+  const linkQuery = useQuery(
+    trpc.authenticated.projects.trello.getLink.queryOptions({ projectId }),
+  );
+
+  if (!linkQuery.data) return null;
+
+  return (
+    <div className="mt-2 flex flex-col gap-2">
+      <p className="text-sm">
+        Linked to the Trello board {linkQuery.data.boardName}.
+      </p>
+      <UnlinkTrelloBoardButton projectId={projectId} />
+    </div>
+  );
 }
 
 type LinkOrPickTrelloBoardProps = {
