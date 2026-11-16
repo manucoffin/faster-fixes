@@ -1,3 +1,4 @@
+import { registerTrelloBoardWebhook } from "@/app/_domains/integration/_services/trello/register-trello-board-webhook";
 import { checkFeatureAccess } from "@/server/auth/subscription";
 import {
   BadRequestError,
@@ -83,6 +84,25 @@ export async function linkTrelloBoard(
       resolvedListId: mapping.data.resolvedListId,
     },
     select: { id: true },
+  });
+
+  // The link is written first because the callback URL carries its id. A
+  // failed registration fails the link: without a webhook, moves on the board
+  // would never reach the Feedback.
+  let webhookId: string;
+  try {
+    webhookId = await registerTrelloBoardWebhook(organizationId, {
+      linkId: link.id,
+      boardId,
+    });
+  } catch (error) {
+    await db.projectTrelloLink.delete({ where: { id: link.id } });
+    throw error;
+  }
+
+  await db.projectTrelloLink.update({
+    where: { id: link.id },
+    data: { webhookId },
   });
 
   return { id: link.id };

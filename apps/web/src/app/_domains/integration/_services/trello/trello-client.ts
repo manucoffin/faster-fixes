@@ -148,6 +148,23 @@ async function postTrelloResource<T>(
   return (await res.json()) as T;
 }
 
+async function deleteTrelloResource(
+  accessToken: string,
+  path: string,
+): Promise<void> {
+  const res = await fetch(`${TRELLO_API_BASE_URL}${path}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new TrelloRequestError(res.status, await res.text(), path);
+  }
+}
+
 export function getAuthorizedMember(
   accessToken: string,
 ): Promise<TrelloMember> {
@@ -217,6 +234,33 @@ export function createCard(
     pos: "top",
     idLabels: input.labelIds,
   });
+}
+
+export type TrelloWebhook = {
+  id: string;
+};
+
+// Trello sends a HEAD request to `callbackURL` before it accepts the webhook,
+// so the route must already answer it.
+export function createWebhook(
+  accessToken: string,
+  input: { callbackUrl: string; boardId: string },
+): Promise<TrelloWebhook> {
+  return postTrelloResource(accessToken, "/webhooks", {
+    callbackURL: input.callbackUrl,
+    idModel: input.boardId,
+    description: "Faster Fixes",
+  });
+}
+
+export function deleteWebhook(
+  accessToken: string,
+  webhookId: string,
+): Promise<void> {
+  return deleteTrelloResource(
+    accessToken,
+    `/webhooks/${encodeURIComponent(webhookId)}`,
+  );
 }
 
 export function getTrelloOAuthRedirectUri(): string {

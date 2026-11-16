@@ -5,7 +5,15 @@ import {
   NotFoundError,
 } from "@/server/errors/domain-errors";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { linkTrelloBoard } from "./link-trello-board";
+
+const registerTrelloBoardWebhook = vi.fn();
+
+vi.mock(
+  "@/app/_domains/integration/_services/trello/register-trello-board-webhook",
+  () => ({ registerTrelloBoardWebhook }),
+);
+
+const { linkTrelloBoard } = await import("./link-trello-board");
 
 type FakeDb = NonNullable<Parameters<typeof linkTrelloBoard>[1]>;
 
@@ -16,6 +24,8 @@ type FakeDbState = {
   subscription?: { plan: string; status: string } | null;
   existingLink?: { id: string } | null;
   create?: ReturnType<typeof vi.fn>;
+  update?: ReturnType<typeof vi.fn>;
+  deleteLink?: ReturnType<typeof vi.fn>;
 };
 
 function fakeDb({
@@ -25,6 +35,8 @@ function fakeDb({
   subscription = { plan: "pro", status: "active" },
   existingLink = null,
   create = vi.fn().mockResolvedValue({ id: "link_1" }),
+  update = vi.fn().mockResolvedValue({ id: "link_1" }),
+  deleteLink = vi.fn().mockResolvedValue({ id: "link_1" }),
 }: FakeDbState = {}) {
   return {
     project: { findUnique: vi.fn().mockResolvedValue(project) },
@@ -36,6 +48,8 @@ function fakeDb({
     projectTrelloLink: {
       findUnique: vi.fn().mockResolvedValue(existingLink),
       create,
+      update,
+      delete: deleteLink,
     },
   } as unknown as FakeDb;
 }
@@ -55,6 +69,8 @@ describe("linkTrelloBoard", () => {
   // Plans are only enforced on cloud; self-hosted resolves to Agency.
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_IS_CLOUD", "true");
+    registerTrelloBoardWebhook.mockReset();
+    registerTrelloBoardWebhook.mockResolvedValue("webhook_1");
   });
 
   afterEach(() => {
@@ -213,5 +229,41 @@ describe("linkTrelloBoard", () => {
         data: expect.objectContaining({ inProgressListId: null }),
       }),
     );
+  });
+
+  it("registers one webhook on the board and stores its id", async () => {
+    const update = vi.fn().mockResolvedValue({ id: "link_1" });
+
+    await linkTrelloBoard(input, fakeDb({ update }));
+
+    expect(registerTrelloBoardWebhook).toHaveBeenCalledTimes(1);
+    expect(registerTrelloBoardWebhook).toHaveBeenCalledWith("org_1", {
+      linkId: "link_1",
+      boardId: "board_1",
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "link_1" },
+      data: { webhookId: "webhook_1" },
+    });
+  });
+
+  it("fails the link when the webhook cannot be registered", async () => {
+    const failure = new Error("Trello request failed (400)");
+    registerTrelloBoardWebhook.mockRejectedValue(failure);
+    const update = vi.fn();
+    const deleteLink = vi.fn().mockResolvedValue({ id: "link_1" });
+
+    await expect(
+      linkTrelloBoard(input, fakeDb({ update, deleteLink })),
+    ).rejects.toThrow(failure);
+    expect(deleteLink).toHaveBeenCalledWith({ where: { id: "link_1" } });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("registers no webhook when the link is refused", async () => {
+    await expect(
+      linkTrelloBoard(input, fakeDb({ subscription: null })),
+    ).rejects.toThrow(ForbiddenError);
+    expect(registerTrelloBoardWebhook).not.toHaveBeenCalled();
   });
 });

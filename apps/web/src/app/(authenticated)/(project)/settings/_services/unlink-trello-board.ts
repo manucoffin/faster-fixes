@@ -1,3 +1,4 @@
+import { deleteTrelloBoardWebhooks } from "@/app/_domains/integration/_services/trello/delete-trello-board-webhooks";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import type { UnlinkTrelloBoardInput } from "./unlink-trello-board.schema";
@@ -5,7 +6,7 @@ import type { UnlinkTrelloBoardInput } from "./unlink-trello-board.schema";
 // Not plan-gated, so a downgraded Organization can always unlink, and not
 // through getTrelloAccess, so unlinking still works while the Installation
 // needs re-authorization. The cards stay on Trello: deleting the link cascades
-// to its Issue links and writes nothing to the board.
+// to its Issue links, and the only write to Trello removes the webhook.
 export async function unlinkTrelloBoard(
   { projectId, userId }: UnlinkTrelloBoardInput & { userId: string },
   db: typeof prisma = prisma,
@@ -33,6 +34,23 @@ export async function unlinkTrelloBoard(
     throw new ForbiddenError(
       "Only owners and admins can unlink Trello boards.",
     );
+  }
+
+  const link = await db.projectTrelloLink.findUnique({
+    where: { projectId },
+    select: {
+      webhookId: true,
+      trelloInstallation: { select: { healthState: true } },
+    },
+  });
+
+  // A dead grant cannot remove the webhook, and Trello already deleted it when
+  // the grant was revoked.
+  if (
+    link?.webhookId &&
+    link.trelloInstallation.healthState !== "reconnect_required"
+  ) {
+    await deleteTrelloBoardWebhooks(project.organizationId, [link.webhookId]);
   }
 
   await db.projectTrelloLink.deleteMany({ where: { projectId } });

@@ -1,3 +1,4 @@
+import { deleteTrelloBoardWebhooks } from "@/app/_domains/integration/_services/trello/delete-trello-board-webhooks";
 import { auth } from "@/server/auth";
 import { BadRequestError, ForbiddenError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
@@ -25,6 +26,28 @@ export async function disconnectTrello(
   if (!membership) {
     throw new ForbiddenError(
       "Only the organization owner can disconnect Trello.",
+    );
+  }
+
+  const installation = await db.trelloInstallation.findUnique({
+    where: { organizationId: activeOrganization.id },
+    select: {
+      healthState: true,
+      projectLinks: {
+        where: { webhookId: { not: null } },
+        select: { webhookId: true },
+      },
+    },
+  });
+
+  // A dead grant cannot remove the webhooks, and Trello already deleted them
+  // when the grant was revoked.
+  if (installation && installation.healthState !== "reconnect_required") {
+    await deleteTrelloBoardWebhooks(
+      activeOrganization.id,
+      installation.projectLinks.flatMap((link) =>
+        link.webhookId ? [link.webhookId] : [],
+      ),
     );
   }
 
