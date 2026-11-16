@@ -3,7 +3,7 @@ title: GitHub integration setup
 description: Set up the Faster Fixes GitHub integration to automatically create GitHub issues from feedback and sync status bidirectionally.
 ---
 
-Faster Fixes integrates with GitHub to automatically create issues when new feedback is submitted and sync status changes between the dashboard and GitHub. For a product overview, see the [GitHub integration overview](/integrations/github).
+Faster Fixes creates a GitHub issue for each new feedback and syncs status between the dashboard and GitHub. For a product overview, see the [GitHub integration overview](/integrations/github).
 
 ## Setup
 
@@ -14,7 +14,7 @@ Faster Fixes integrates with GitHub to automatically create issues when new feed
 
 ## Auto-create issues
 
-When enabled (on by default), new feedback automatically creates a GitHub issue in the linked repository. The issue includes:
+With auto-create on, the default, each new feedback creates an issue in the linked repository. The issue includes:
 
 - Feedback comment
 - Page URL
@@ -22,25 +22,23 @@ When enabled (on by default), new feedback automatically creates a GitHub issue 
 - Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
 - Browser info
 - Link to the screenshot
-- Console logs and network requests (in a collapsible section)
+- Console logs and network requests, in a collapsible section
 
 ## Recording
 
-When the feedback has a [Recording](/docs/widget/recording), the issue gains a **Recording** line after the element, with a **Play in Faster Fixes** link and the Recording's duration, for example `48 s`. The link opens the player in the dashboard and requires a login, so an issue in a public repository exposes nothing of the Recording.
+The **Recording** line links to the player in the dashboard. The link requires a Faster Fixes login, so an issue in a public repository exposes nothing of the Recording.
 
-The collapsed **Diagnostics** section is then replaced by a collapsed **Timeline** section. It lists the Reviewer's steps, console logs and network requests on one clock, ending with the selection of the element. When the timeline is too long for the issue, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue keeps the Recording line and shows Diagnostics instead.
+With a Recording, the collapsed **Diagnostics** section becomes a collapsed **Timeline**: the Reviewer's steps, console logs and network requests on one clock, ending with the element selection. A timeline too long for the issue drops its earliest entries and states how many. If the Recording cannot be read, the issue shows Diagnostics instead.
 
-An automatic issue waits up to 30 seconds for the Recording to finish uploading, then is created with or without it. A manual issue is created at once.
+An automatic issue waits up to 30 seconds for the Recording to upload. A manual issue is created at once.
 
-An issue is written once and never rewritten. A Recording that arrives after the issue was created is not added to it, and removing a Recording in the dashboard leaves the timeline already written in the issue.
+An issue is written once. A Recording that arrives later is not added, and removing a Recording in the dashboard leaves the timeline already written in the issue.
 
 ## Default labels
 
-Issues are tagged with `faster-fixes` by default. You can customize labels in the GitHub link settings.
+Issues are tagged `faster-fixes` by default. Change the labels in the GitHub link settings.
 
 ## Bidirectional status sync
-
-Status changes propagate in both directions:
 
 | Action                                                  | Result                            |
 | ------------------------------------------------------- | --------------------------------- |
@@ -51,8 +49,8 @@ Status changes propagate in both directions:
 
 ## Manual issue creation
 
-You can create a GitHub issue manually from any feedback item in the Task board using the **Create Issue** action.
+Create an issue from any feedback in the Task board with the **Create Issue** action.
 
 ## Unlinking
 
-You can unlink a repository from **[Project Settings](/settings) → GitHub** at any time. Existing issue links are preserved but sync stops.
+Unlink a repository from **[Project Settings](/settings) → GitHub**. Existing issue links are kept, and sync stops.
