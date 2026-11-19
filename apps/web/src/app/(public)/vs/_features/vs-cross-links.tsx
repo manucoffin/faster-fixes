@@ -50,16 +50,16 @@ export function VsCrossLinks({ currentSlug }: VsCrossLinksProps) {
   const others = allComparisons.filter((c) => c.slug !== currentSlug);
 
   return (
-    <section className="w-full py-12 md:py-16">
+    <section className="w-full border-t py-16 md:py-20">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+        <div className="max-w-4xl">
+          <p className="mb-4 text-sm text-muted-foreground">
             Compare other tools
           </p>
-          <h2 className="text-2xl font-bold md:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
             Also comparing FasterFixes to
           </h2>
-          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base">
+          <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-base">
             {others.map((item, i) => (
               <li key={item.slug} className="flex items-center gap-x-6">
                 <Link

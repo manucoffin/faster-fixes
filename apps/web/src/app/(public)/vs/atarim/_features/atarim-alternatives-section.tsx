@@ -1,182 +1,108 @@
-import { CheckIcon, XIcon } from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
+import {
+  type VsAlternative,
+  VsAlternativesSection,
+} from "../../_features/vs-alternatives-section";
+import {
+  ALTERNATIVES_CLOSING_NOTE,
+  COMPETITOR_STARTING_PRICES as prices,
+  SELF_HOSTED_NOTE,
+} from "../../_features/vs-competitor-prices";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
-type Alternative = {
-  name: string;
-  bestFor: string;
-  startingPrice: string;
-  openSource: { type: "yes"; note: string } | { type: "no" };
-  href?: Route;
-  highlight?: boolean;
-};
+const bugherdStandard = COMPETITOR_PRICES.bugherd.plans.standard;
+const bugherdExtraSeat = COMPETITOR_PRICES.bugherd.otherPrices.extraSeat;
+const markupIoPro = COMPETITOR_PRICES.markupIo.plans.pro;
 
-const alternatives: Alternative[] = [
+const alternatives: VsAlternative[] = [
   {
     name: "FasterFixes",
+    verdict:
+      "Open source and $0 on your own server. Feedback reaches Claude Code and Cursor over MCP.",
     bestFor:
-      "Dev agencies shipping sites on any stack; self-hosted feedback with MCP + GitHub, Linear & Jira sync",
-    startingPrice: "Free (self-hosted)",
-    openSource: { type: "yes", note: "AGPL-3.0 + MIT" },
+      "Dev agencies shipping sites on any stack, self-hosted with MCP and tracker sync",
+    startingPrice: prices.fasterFixes,
+    selfHosted: { type: "yes", note: SELF_HOSTED_NOTE },
     highlight: true,
   },
   {
     name: "BugHerd",
-    bestFor:
-      "Agencies collecting client feedback on websites via sticky-note pins; on-page guest portal",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    verdict: `Battle-tested client review with a Kanban board. ${formatPrice(bugherdStandard)}/mo for ${bugherdStandard.seats} members, then ${formatPrice(bugherdExtraSeat)}/seat.`,
+    bestFor: "Agencies collecting client feedback through sticky-note pins",
+    startingPrice: prices.bugherd,
+    selfHosted: { type: "no" },
     href: "/vs/bugherd" as Route,
   },
   {
     name: "Marker.io",
-    bestFor:
-      "Internal dev QA and bug reporting with screenshot annotation and PM tool sync",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    verdict: `Two-way sync with the tracker you already run. ${COMPETITOR_PRICES.markerIo.plans.starter.name} stops at ${COMPETITOR_PRICES.markerIo.plans.starter.seats} seats.`,
+    bestFor: "Internal dev QA with screenshot annotation and tracker sync",
+    startingPrice: prices.markerIo,
+    selfHosted: { type: "no" },
     href: "/vs/marker-io" as Route,
   },
   {
     name: "Usersnap",
-    bestFor:
-      "SaaS product teams collecting end-user feedback, NPS, and microsurveys",
-    startingPrice: "$59/mo",
-    openSource: { type: "no" },
+    verdict: `Survey and NPS tooling nobody else here has. ${COMPETITOR_PRICES.usersnap.plans.starter.name} covers ${COMPETITOR_PRICES.usersnap.plans.starter.seats} seats and ${COMPETITOR_PRICES.usersnap.plans.starter.projects} projects.`,
+    bestFor: "SaaS product teams collecting end-user feedback and NPS",
+    startingPrice: prices.usersnap,
+    selfHosted: { type: "no" },
     href: "/vs/usersnap" as Route,
   },
   {
     name: "Userback",
-    bestFor: "Product teams needing session replay, NPS, and feature portals",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    verdict:
+      "Fair price for a small team. Developer context starts on Business.",
+    bestFor: "Product teams needing replay, NPS, and feature portals",
+    startingPrice: prices.userback,
+    selfHosted: { type: "no" },
     href: "/vs/userback" as Route,
   },
   {
     name: "Gleap",
-    bestFor:
-      "SaaS teams needing all-in-one bug reporting, AI chatbot, ticketing, and knowledge base",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    verdict: "A support platform first. No free plan, one seat on Hobby.",
+    bestFor: "SaaS teams wanting bug reporting, chatbot, and ticketing in one",
+    startingPrice: prices.gleap,
+    selfHosted: { type: "no" },
     href: "/vs/gleap" as Route,
   },
   {
     name: "Ruttl",
-    bestFor:
-      "Designers and clients reviewing live web pages with on-page annotations",
-    startingPrice: "$18/user/mo",
-    openSource: { type: "no" },
+    verdict:
+      "Fast reviews on live pages. Its integrations link back instead of syncing data.",
+    bestFor: "Designers and clients reviewing live web pages",
+    startingPrice: prices.ruttl,
+    selfHosted: { type: "no" },
     href: "/vs/ruttl" as Route,
   },
   {
     name: "Markup.io",
-    bestFor:
-      "Design review across 30+ file types: PDFs, images, video, and live URLs",
-    startingPrice: "$79/mo",
-    openSource: { type: "no" },
+    verdict: `Best on PDFs, images, and video stills. ${formatPrice(markupIoPro)}/mo with no free tier left.`,
+    bestFor: "Design review across 30+ file types",
+    startingPrice: prices.markupIo,
+    selfHosted: { type: "no" },
     href: "/vs/markup-io" as Route,
   },
   {
     name: "Feedbucket",
-    bestFor:
-      "Web agencies managing client website reviews with deep two-way PM tool sync",
-    startingPrice: "$29/mo",
-    openSource: { type: "no" },
+    verdict: "Low-friction widget, nothing to run on your own server.",
+    bestFor: "Web agencies managing client website reviews",
+    startingPrice: prices.feedbucket,
+    selfHosted: { type: "no" },
   },
 ];
 
 export function AtarimAlternativesSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Alternatives
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Best Atarim alternatives in 2026
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Not every team needs the same thing. Here is how the main
-            alternatives stack up.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-5xl overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Tool
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Best for
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Starting price
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Open source
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {alternatives.map((row) => (
-                <tr
-                  key={row.name}
-                  className={`border-b last:border-b-0 ${
-                    row.highlight ? "bg-muted/30" : ""
-                  }`}
-                >
-                  <th
-                    scope="row"
-                    className="p-4 text-left align-top text-sm font-semibold"
-                  >
-                    {row.href ? (
-                      <Link
-                        href={row.href}
-                        className="text-foreground underline underline-offset-4 hover:no-underline"
-                      >
-                        {row.name}
-                      </Link>
-                    ) : (
-                      row.name
-                    )}
-                  </th>
-                  <td className="p-4 align-top text-sm text-muted-foreground">
-                    {row.bestFor}
-                  </td>
-                  <td className="p-4 align-top text-sm text-muted-foreground">
-                    {row.startingPrice}
-                  </td>
-                  <td className="p-4 align-top">
-                    {row.openSource.type === "yes" ? (
-                      <div className="flex flex-col gap-1">
-                        <CheckIcon
-                          className="size-5 text-success"
-                          aria-label="Yes"
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {row.openSource.note}
-                        </span>
-                      </div>
-                    ) : (
-                      <XIcon
-                        className="size-5 text-destructive"
-                        aria-label="No"
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-muted-foreground">
-          FasterFixes is the only tool in this list with a permanent free tier,
-          self-hosting support, and an MCP server for AI coding agents.
-        </p>
-      </div>
-    </section>
+    <VsAlternativesSection
+      title="Atarim alternatives compared"
+      intro="The verdict sits under each tool name. Pricing is each vendor's monthly rate, with the annual rate in parentheses."
+      alternatives={alternatives}
+      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
+    />
   );
 }

@@ -1,5 +1,4 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
@@ -8,15 +7,11 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { UsersnapAlternativesSection } from "./_features/usersnap-alternatives-section";
-import { UsersnapBreadcrumb } from "./_features/usersnap-breadcrumb";
 import { UsersnapCalculatorSection } from "./_features/usersnap-calculator-section";
 import { UsersnapComparisonSection } from "./_features/usersnap-comparison-section";
 import { UsersnapCtaSection } from "./_features/usersnap-cta-section";
-import { UsersnapDeveloperFirstSection } from "./_features/usersnap-developer-first-section";
-import {
-  UsersnapFaqSection,
-  usersnapFaqs,
-} from "./_features/usersnap-faq-section";
+import { UsersnapEditorSection } from "./_features/usersnap-editor-section";
+import { usersnapFaqs } from "./_features/usersnap-faqs";
 import { UsersnapFitSection } from "./_features/usersnap-fit-section";
 import { UsersnapHero } from "./_features/usersnap-hero";
 import { UsersnapHonestTakeSection } from "./_features/usersnap-honest-take-section";
@@ -25,15 +20,15 @@ import {
   migrationSteps,
 } from "./_features/usersnap-migration-section";
 import { UsersnapPricingSection } from "./_features/usersnap-pricing-section";
-import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const pageUrl = `${APP_URL}/vs/usersnap`;
-const title = `Usersnap Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
+const title = "Usersnap alternatives: 9 tools compared (2026)";
 const description =
-  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context, no per-seat pricing, no vendor lock-in. Compare features and pricing.";
+  "Usersnap alternatives: nine tools compared on price, free plan and self-hosting, including an open-source option you can host yourself for $0.";
 const datePublished = "2026-04-27T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-19T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +36,7 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
+    "Usersnap alternatives",
     "Usersnap alternative",
     "Usersnap open source alternative",
     "Usersnap free alternative",
@@ -65,18 +61,16 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <UsersnapBreadcrumb />
       <UsersnapHero />
-      <UsersnapWhySwitchSection />
+      <UsersnapAlternativesSection />
       <UsersnapFitSection />
+      <UsersnapEditorSection />
+      <UsersnapPricingSection />
       <UsersnapCalculatorSection />
       <UsersnapHonestTakeSection />
-      <UsersnapAlternativesSection />
-      <UsersnapDeveloperFirstSection />
       <UsersnapComparisonSection />
-      <UsersnapPricingSection />
       <UsersnapMigrationSection />
-      <UsersnapFaqSection />
+      <VsFaqSection faqs={usersnapFaqs} />
       <UsersnapCtaSection />
       <VsCrossLinks currentSlug="usersnap" />
 
@@ -93,7 +87,7 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Usersnap alternative", url: pageUrl },
+          { name: "Usersnap alternatives", url: pageUrl },
         ]}
       />
       <HowToSchema

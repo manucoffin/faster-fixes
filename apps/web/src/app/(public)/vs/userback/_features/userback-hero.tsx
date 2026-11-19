@@ -1,51 +1,21 @@
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+import { UserbackReportToTrackerAnimation } from "../_components/illustrations/userback-report-to-tracker-animation";
+import { VsActions } from "../../_features/vs-actions";
+import { VsHero } from "../../_features/vs-hero";
 
 export function UserbackHero() {
   return (
-    <HeroDotBackground>
-      <section className="w-full py-20 md:py-24">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Userback alternative
-          </p>
-          <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            The open-source Userback alternative
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            FasterFixes is an open-source, self-hostable alternative to
-            Userback, licensed AGPL-3.0 and priced flat rather than per seat.
-            Each report captures a screenshot, DOM selector, React component
-            tree, console logs, and network requests, structured for GitHub,
-            Linear, or Jira rather than a support inbox. An MCP server exposes
-            those reports to Claude Code, Cursor, and Codex.
-          </p>
-
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href={signupUrl}>
-                Start for free
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GithubIcon className="size-5" />
-                View source on GitHub
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </HeroDotBackground>
+    <VsHero
+      breadcrumbLabel="Userback alternative"
+      eyebrow="Userback alternative"
+      title="The open-source Userback alternative"
+      description="FasterFixes is an open-source, self-hostable alternative to Userback, licensed AGPL-3.0 and priced flat rather than per seat. Each report captures a screenshot, DOM selector, React component tree, console logs, and network requests, structured for GitHub, Linear, or Jira rather than a support inbox. An MCP server exposes those reports to Claude Code, Cursor, and Codex."
+      actions={
+        <VsActions
+          signupLabel="Start for free"
+          githubLabel="View source on GitHub"
+        />
+      }
+      illustration={<UserbackReportToTrackerAnimation />}
+    />
   );
 }

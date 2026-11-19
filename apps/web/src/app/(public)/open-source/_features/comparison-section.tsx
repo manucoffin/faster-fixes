@@ -1,4 +1,12 @@
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPrice,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import { CheckIcon, XIcon } from "lucide-react";
+
+const { bugherd, markerIo, usersnap } = COMPETITOR_PRICES;
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -29,9 +37,9 @@ const rows: { label: string; cells: [Cell, Cell, Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       "Free self-hosted · flat hosted plan",
-      "$50/mo for 5 members, $8 per extra seat",
-      "$59/mo Starter for 3 seats",
-      "$59/mo Starter for 2 seats, then unlimited seats",
+      `${formatPublishedPrice(bugherd.plans.standard, "/mo")} for ${bugherd.plans.standard.seats} members, ${formatPrice(bugherd.otherPrices.extraSeat)} per extra seat`,
+      `${formatPublishedPrice(markerIo.plans.starter, "/mo")} ${markerIo.plans.starter.name} for ${markerIo.plans.starter.seats} seats`,
+      `${formatPublishedPrice(usersnap.plans.starter, "/mo")} ${usersnap.plans.starter.name} for ${usersnap.plans.starter.seats} seats, then unlimited seats`,
     ],
   },
   {
@@ -128,7 +136,7 @@ export function ComparisonSection() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Pricing as publicly listed at time of writing. Check each vendor for
-          current plans.
+          current plans. {EXCHANGE_RATE_NOTE}
         </p>
       </div>
     </section>

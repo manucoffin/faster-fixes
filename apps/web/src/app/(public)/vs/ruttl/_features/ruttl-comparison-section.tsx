@@ -4,9 +4,18 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const ruttlPro = COMPETITOR_PRICES.ruttl.plans.pro;
+const teamSize = 5;
+const ruttlTeamMonthly = ruttlPro.amount * teamSize;
+const usd = (amount: number) => formatAmount(amount, "USD");
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -23,12 +32,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
-      "$18/user/mo Pro / custom Business",
+      `${formatPrice(ruttlPro)}/user/mo Pro / custom Business`,
     ],
   },
   {
     label: "Cost for a 5-person team",
-    cells: [`$${proPrice}/mo = $${proPrice * 12}/year`, "$90/mo = $1,080/year"],
+    cells: [
+      `$${proPrice}/mo = $${proPrice * 12}/year`,
+      `${usd(ruttlTeamMonthly)}/mo = ${usd(ruttlTeamMonthly * 12)}/year`,
+    ],
   },
   {
     label: "MCP server (Claude Code / Cursor)",

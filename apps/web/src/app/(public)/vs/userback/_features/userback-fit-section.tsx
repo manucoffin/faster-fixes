@@ -1,4 +1,5 @@
-import { CheckIcon } from "lucide-react";
+import { VsFitList } from "../../_features/vs-fit-list";
+import { VsSection } from "../../_features/vs-section";
 
 const fitPoints = [
   "You're a dev agency billing clients per project, not per seat.",
@@ -10,29 +11,12 @@ const fitPoints = [
 
 export function UserbackFitSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Right fit
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            FasterFixes is the right fit if
-          </h2>
-        </div>
-
-        <ul className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-4">
-          {fitPoints.map((point) => (
-            <li
-              key={point}
-              className="flex items-start gap-3 rounded-xl border bg-muted/30 p-5"
-            >
-              <CheckIcon className="mt-1 size-5 shrink-0 text-success" />
-              <span className="leading-relaxed text-foreground">{point}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Right fit"
+      title="FasterFixes is the right fit if"
+      tone="muted"
+    >
+      <VsFitList points={fitPoints} className="max-w-4xl" />
+    </VsSection>
   );
 }

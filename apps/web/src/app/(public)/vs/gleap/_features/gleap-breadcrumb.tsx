@@ -24,7 +24,7 @@ export function GleapBreadcrumb() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Gleap alternative</BreadcrumbPage>
+            <BreadcrumbPage>Gleap alternatives</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

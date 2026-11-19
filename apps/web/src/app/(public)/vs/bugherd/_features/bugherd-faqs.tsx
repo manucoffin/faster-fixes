@@ -1,24 +1,16 @@
-import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   PLAN_LIMITS,
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@workspace/ui/components/accordion";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-
-type RichFaqItem = FaqItem & { content?: ReactNode };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -28,22 +20,15 @@ type DocLinkProps = {
 };
 
 function DocLink({ href, children }: DocLinkProps) {
-  return (
-    <Link
-      href={href}
-      className="text-foreground underline underline-offset-4 hover:no-underline"
-    >
-      {children}
-    </Link>
-  );
+  return <Link href={href}>{children}</Link>;
 }
 
-export const bugherdFaqs: RichFaqItem[] = [
+export const bugherdFaqs: VsFaqItem[] = [
   {
     question: "Is FasterFixes really free?",
     answer: `Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT. Clone the repo and self-host for free. The hosted Free plan is also permanently free (${freePlan.projects} project, up to ${freeFeedbackLimit} feedback items, ${freePlan.seats} team member). Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The dashboard is open source under AGPL-3.0 and the widget under
         MIT. Clone the repo and self-host for free. See the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
@@ -53,7 +38,7 @@ export const bugherdFaqs: RichFaqItem[] = [
         project, up to {freeFeedbackLimit} feedback items, {freePlan.seats} team
         member). Paid hosted plans are ${proPrice}/month for Pro and $
         {agencyPrice}/month for Agency.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -61,7 +46,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with screen-recorded video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations. FasterFixes does not currently have those features. On video, FasterFixes takes a different approach: clients review an uploaded video and leave timestamped feedback.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Three differences matter most. FasterFixes is open source and
         self-hostable. Pricing is flat-rate, not per-seat. And the{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> lets AI
@@ -72,7 +57,7 @@ export const bugherdFaqs: RichFaqItem[] = [
         not currently have those features. On video, FasterFixes takes a
         different approach: clients review an uploaded video and leave
         timestamped feedback.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -80,7 +65,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Deploy on your own infrastructure and run it without a FasterFixes hosted account. The dashboard is AGPL-3.0; the widget packages are MIT.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
         storage. Deploy on your own infrastructure and run it without a
         FasterFixes hosted account. The dashboard is AGPL-3.0; the widget
@@ -89,7 +74,7 @@ export const bugherdFaqs: RichFaqItem[] = [
           self-hosting guide
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -102,7 +87,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal, without leaving the editor.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context for each item (URL, DOM selector, React component path when
@@ -110,7 +95,7 @@ export const bugherdFaqs: RichFaqItem[] = [
         all from the terminal, without leaving the editor. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -118,7 +103,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context.',
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         On any site, paste one script tag with your Project ID, or run npm
         install @fasterfixes/widget and call init({"{ projectId }"}). In a React
         or Next.js app, you can instead run npm install @fasterfixes/react and
@@ -136,7 +121,7 @@ export const bugherdFaqs: RichFaqItem[] = [
           quickstart
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -144,7 +129,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. Every report carries the screenshot, DOM selector, URL, browser, viewport, and console and network logs. The React component path is added when the site runs React.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The script embed installs the widget with one script tag on any
         website: WordPress, Webflow, static HTML, or an app built with Vue,
         Angular, Svelte, or no framework at all. It needs no framework runtime
@@ -156,7 +141,7 @@ export const bugherdFaqs: RichFaqItem[] = [
           script embed docs
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -164,13 +149,13 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "Yes. The MCP server is model-agnostic. Pick the agent you already use, whether Claude Code, Cursor, Codex, or any other MCP-compatible client, and the agent runs whichever model you have configured. BugHerd AI, by contrast, is bundled into the BugHerd dashboard and does not let you bring your own model.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink>{" "}
         is model-agnostic. Pick the agent you already use, whether Claude Code,
         Cursor, Codex, or any other MCP-compatible client, and the agent runs
         whichever model you have configured. BugHerd AI, by contrast, is bundled
         into the BugHerd dashboard and does not let you bring your own model.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -184,7 +169,7 @@ export const bugherdFaqs: RichFaqItem[] = [
     answer:
       "Yes. The GitHub, Linear, and Jira Cloud integrations each create an issue from a feedback item with the full structured report: screenshot, component path, selector, environment. The Trello integration creates a card with the screenshot as its cover. Status syncs both ways. Closing the issue on GitHub, moving it to Done in Linear, transitioning it to a Done-category status in Jira, or moving the card to your Resolved list in Trello resolves the feedback in FasterFixes, and vice versa. A feedback can be linked to all four at once.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The GitHub, Linear, and Jira Cloud integrations each create an
         issue from a feedback item with the full structured report: screenshot,
         component path, selector, environment. The Trello integration creates a
@@ -209,40 +194,7 @@ export const bugherdFaqs: RichFaqItem[] = [
           Trello integration
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
 ];
-
-export function BugherdFaqSection() {
-  return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Frequently asked questions
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-2xl">
-          <Accordion type="single" collapsible>
-            {bugherdFaqs.map((faq) => (
-              <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {faq.content ?? (
-                    <p className="text-lg text-muted-foreground md:text-xl">
-                      {faq.answer}
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </div>
-    </section>
-  );
-}

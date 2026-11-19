@@ -4,9 +4,13 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatAmount } from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { hobby, growth, pro: gleapPro } = COMPETITOR_PRICES.gleap.plans;
+const billedYearly = (amount: number) => `${formatAmount(amount, "USD")}/mo`;
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -23,7 +27,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
-      "From $29/mo Hobby (1 seat) / $99/mo Growth (4 seats) / $299/mo Pro (unlimited seats), billed yearly",
+      `From ${billedYearly(hobby.billedYearlyAmount)} Hobby (${hobby.seats} seat) / ${billedYearly(growth.billedYearlyAmount)} Growth (${growth.seats} seats) / ${billedYearly(gleapPro.amount)} Pro (unlimited seats), billed yearly`,
     ],
   },
   {

@@ -24,7 +24,7 @@ export function AtarimBreadcrumb() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Atarim alternative</BreadcrumbPage>
+            <BreadcrumbPage>Atarim alternatives</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

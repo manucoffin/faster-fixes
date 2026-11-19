@@ -10,15 +10,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice } from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const ruttlPro = formatPrice(COMPETITOR_PRICES.ruttl.plans.pro);
 
 export const ruttlFaqs: FaqItem[] = [
   {
     question: "Does Ruttl have a free plan?",
-    answer:
-      "Yes. The Basic plan is free for up to 5 users with 1 project, 5 pages, and 1 GB of storage. Paid plans start at $18 per user per month.",
+    answer: `Yes. The Basic plan is free for up to 5 users with 1 project, 5 pages, and 1 GB of storage. Paid plans start at ${ruttlPro} per user per month.`,
   },
   {
     question: "Does Ruttl require a Chrome extension?",
@@ -28,7 +30,7 @@ export const ruttlFaqs: FaqItem[] = [
   {
     question:
       "Which Ruttl alternative is cheapest for teams larger than three people?",
-    answer: `FasterFixes. The hosted Pro plan is $${proPrice} a month flat for up to ${proPlan.seats} members. Self-hosting is free. Ruttl Pro at $18 per user per month scales linearly with team size.`,
+    answer: `FasterFixes. The hosted Pro plan is $${proPrice} a month flat for up to ${proPlan.seats} members. Self-hosting is free. Ruttl Pro at ${ruttlPro} per user per month scales linearly with team size.`,
   },
   {
     question: "Can FasterFixes replace Ruttl for client feedback?",

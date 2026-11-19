@@ -1,59 +1,21 @@
-import {
-  PLAN_LIMITS,
-  PLAN_PRICES,
-  SubscriptionPlanName,
-} from "@/app/_domains/subscription";
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
-
-const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
-const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+import { UsersnapProjectTierAnimation } from "../_components/illustrations/usersnap-project-tier-animation";
+import { VsActions } from "../../_features/vs-actions";
+import { VsHero } from "../../_features/vs-hero";
 
 export function UsersnapHero() {
   return (
-    <HeroDotBackground>
-      <section className="w-full py-20 md:py-24">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Usersnap alternative
-          </p>
-          <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            The open-source Usersnap alternative
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Usersnap is closed-source and tiered by project count. FasterFixes
-            is the open-source alternative: AGPL-3.0, self-hostable for free, or
-            ${proPrice} a month flat for up to {proPlan.seats} members, built
-            around structured bug reports rather than a product feedback widget.
-            Reports sync to GitHub, Linear, or Jira, and an MCP server makes
-            them readable by Claude Code and Cursor.
-          </p>
-
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href={signupUrl}>
-                Start for free
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GithubIcon className="size-5" />
-                View source on GitHub
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </HeroDotBackground>
+    <VsHero
+      breadcrumbLabel="Usersnap alternatives"
+      eyebrow="Usersnap alternatives"
+      title="The Usersnap alternatives a small dev team should weigh"
+      description="Nine tools compared on price, free plan and self-hosting, plus the open-source Usersnap alternative you install with one script tag."
+      actions={
+        <VsActions
+          signupLabel="Start for free"
+          githubLabel="View source on GitHub"
+        />
+      }
+      illustration={<UsersnapProjectTierAnimation />}
+    />
   );
 }

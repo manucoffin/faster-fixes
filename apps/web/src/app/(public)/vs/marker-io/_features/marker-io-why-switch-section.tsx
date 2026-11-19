@@ -3,22 +3,43 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
+import { MarkerIoTierGatingIllustration } from "../_components/illustrations/marker-io-tier-gating-illustration";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
+import { VsSection } from "../../_features/vs-section";
+
+const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const { extraSeat, extraSeatBilledYearly } =
+  COMPETITOR_PRICES.markerIo.otherPrices;
+const starterAnnual = formatAmount(
+  starter.billedYearlyAmount,
+  starter.currency,
+);
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
+const teamPriceJump = (
+  team.billedYearlyAmount / starter.billedYearlyAmount
+).toFixed(1);
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-const limitations = [
+
+const limitations: VsPoint[] = [
   {
     title: "The bill grows every time you hire",
-    body: `Marker.io charges per seat: Starter covers 3 members, Team covers 15, and every additional member is $4–$6/month on top with annual billing ($6–$9 monthly). A 5-person dev team that needs Jira and devtools already starts at $149/month annual before adding anyone. FasterFixes charges per workspace: $${proPrice}/month flat for up to ${proPlan.seats} members, $${agencyPrice}/month for unlimited. Headcount stops being a pricing variable.`,
+    body: `Marker.io charges per seat: Starter covers ${starter.seats} members, Team covers ${team.seats}, and every additional member is ${formatPrice(extraSeatBilledYearly)}/month on top with annual billing (${formatPrice(extraSeat)} monthly). A 5-person dev team that needs Jira and devtools already starts at ${teamAnnual}/month annual before adding anyone. FasterFixes charges per workspace: $${proPrice}/month flat for up to ${proPlan.seats} members, $${agencyPrice}/month for unlimited. Headcount stops being a pricing variable.`,
   },
   {
     title: "No way to self-host or own your data",
     body: "Marker.io is SaaS-only: no self-hosted option, no public source code, no path to running it on your own infrastructure. This is the most-cited complaint in FOSS communities; the top result for the keyword is a Reddit thread literally titled “Looking for a self-hosted marker.io alternative.” FasterFixes is open source (dashboard AGPL-3.0, widget MIT) and self-hostable on Next.js, Postgres, Inngest, and R2/S3.",
   },
   {
-    title: "Key features locked behind the $149/month tier",
-    body: `On Marker.io Starter ($39/month annual), you do not get Jira sync, session replay, devtools (console and network logs), or custom branding. Those require Team at $149/month annual, a 3.8× jump. FasterFixes does not gate developer context by tier: React component tree capture, the Recording and MCP access are on every plan, including Free, and GitHub, Linear and Jira sync are included from Pro at $${proPrice}/month.`,
+    title: `Key features locked behind the ${teamAnnual}/month tier`,
+    body: `On Marker.io Starter (${starterAnnual}/month annual), you do not get Jira sync, session replay, devtools (console and network logs), or custom branding. Those require Team at ${teamAnnual}/month annual, a ${teamPriceJump}× jump. FasterFixes does not gate developer context by tier: React component tree capture, the Recording and MCP access are on every plan, including Free, and GitHub, Linear and Jira sync are included from Pro at $${proPrice}/month.`,
   },
   {
     title: "Built for QA reviewers, not the developer fixing the bug",
@@ -28,28 +49,17 @@ const limitations = [
 
 export function MarkerIoWhySwitchSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Where Marker.io falls short
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Why teams switch from Marker.io
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {limitations.map((item) => (
-            <div key={item.title} className="rounded-xl border bg-muted/30 p-7">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                {item.body}
-              </p>
-            </div>
-          ))}
+    <VsSection
+      eyebrow="Where Marker.io falls short"
+      title="Why teams switch from Marker.io"
+      className="border-t"
+    >
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <VsPointGrid points={limitations} columns={1} />
+        <div className="rounded-2xl bg-muted/50 p-4 sm:p-8 lg:sticky lg:top-24">
+          <MarkerIoTierGatingIllustration />
         </div>
       </div>
-    </section>
+    </VsSection>
   );
 }

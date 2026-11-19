@@ -1,18 +1,10 @@
-import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import { PLAN_LIMITS, SubscriptionPlanName } from "@/app/_domains/subscription";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@workspace/ui/components/accordion";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
-
-type RichFaqItem = FaqItem & { content?: ReactNode };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -32,12 +24,12 @@ function DocLink({ href, children }: DocLinkProps) {
   );
 }
 
-export const userbackFaqs: RichFaqItem[] = [
+export const userbackFaqs: VsFaqItem[] = [
   {
     question: "Is FasterFixes free?",
     answer: `Yes. The free plan includes ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, and ${freePlan.seats} member, no credit card required. The self-hosted version is also free under AGPL-3.0; you only pay for your own hosting infrastructure (typically $5-20/month on Railway or Vercel).`,
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The free plan includes {freePlan.projects} project,{" "}
         {freeFeedbackLimit} feedback items, and {freePlan.seats} member, no
         credit card required. The self-hosted version is also free under
@@ -47,7 +39,7 @@ export const userbackFaqs: RichFaqItem[] = [
           self-hosting guide
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -55,7 +47,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Userback has no self-hosted option. Deploy on Vercel, Railway, or any Node-compatible host. The dashboard is AGPL-3.0; the widget packages are MIT.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
         storage. Userback has no self-hosted option. Deploy on Vercel, Railway,
         or any Node-compatible host. The dashboard is AGPL-3.0; the widget
@@ -64,7 +56,7 @@ export const userbackFaqs: RichFaqItem[] = [
           self-hosting guide
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -72,7 +64,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "FasterFixes is open-source and self-hostable; Userback is closed-source and cloud-only. FasterFixes captures DOM selector, URL, browser, and viewport on every report, plus the React component tree on React sites. Userback is a broader platform with annotated video, session replay, NPS surveys, and a feature portal. FasterFixes attaches a Recording of the last minute on the page to each report, but offers no screen recording, surveys, or feature portal. FasterFixes is built specifically for developer teams who need structured bug reports, not a full product analytics suite.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         FasterFixes is open-source and self-hostable; Userback is closed-source
         and cloud-only. FasterFixes captures DOM selector, URL, browser, and
         viewport on every report, plus the React component tree on React sites.
@@ -81,7 +73,7 @@ export const userbackFaqs: RichFaqItem[] = [
         <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
         the last minute on the page to each report, but offers no screen
         recording, surveys, or feature portal.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -94,7 +86,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "Yes, for the moments before each report: every feedback carries a Recording of up to the last minute on the page, on every plan, and typed values are never captured. No for session analytics: FasterFixes does not record whole visits or aggregate sessions. If session analytics is a core requirement, Userback Business Plus (whole-visit recording at custom pricing) or a dedicated tool like LogRocket is a better fit.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes, for the moments before each report: every feedback carries a{" "}
         <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
         up to the last minute on the page, on every plan, and typed values are
@@ -102,7 +94,7 @@ export const userbackFaqs: RichFaqItem[] = [
         whole visits or aggregate sessions. If session analytics is a core
         requirement, Userback Business Plus (whole-visit recording at custom
         pricing) or a dedicated tool like LogRocket is a better fit.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -110,7 +102,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "@fasterfixes/mcp connects Claude Code, Cursor, and Codex to your FasterFixes workspace. Feedback items are accessible directly in the terminal, no browser tab switching, no copy-pasting issue descriptions into a chat window. Userback also offers an MCP server, but FasterFixes is open-source and self-hostable end to end.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         @fasterfixes/mcp connects Claude Code, Cursor, and Codex to your
         FasterFixes workspace. Feedback items are accessible directly in the
         terminal, no browser tab switching, no copy-pasting issue descriptions
@@ -118,7 +110,7 @@ export const userbackFaqs: RichFaqItem[] = [
         is open-source and self-hostable end to end. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -126,7 +118,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "Add one script tag with your Project ID to any site: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or any other framework. In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap the app in FeedbackProvider with your Project ID. Both embeds share the same widget, options, and captured context.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Add one script tag with your Project ID to any site: WordPress, Webflow,
         static HTML, or an app built with Vue, Angular, Svelte, or any other
         framework. In a React or Next.js app, you can instead run npm install
@@ -145,7 +137,7 @@ export const userbackFaqs: RichFaqItem[] = [
           quickstart
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -153,7 +145,7 @@ export const userbackFaqs: RichFaqItem[] = [
     answer:
       "Yes. The script embed installs the widget with one script tag on any site, with the same screenshot, DOM selector, URL, browser, viewport, console, and network capture as the React embed. The React component path is added when the site runs React. Unlike Userback, FasterFixes does not offer a browser extension.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The script embed installs the widget with one script tag on any
         site, with the same screenshot, DOM selector, URL, browser, viewport,
         console, and network capture as the React embed. The React component
@@ -163,7 +155,7 @@ export const userbackFaqs: RichFaqItem[] = [
           script embed docs
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -177,36 +169,3 @@ export const userbackFaqs: RichFaqItem[] = [
       "Yes. The FasterFixes dashboard is licensed under AGPL-3.0 and the widget under MIT. The source code is publicly available on GitHub. You can inspect it, self-host it, and contribute to it. Userback is proprietary and closed-source.",
   },
 ];
-
-export function UserbackFaqSection() {
-  return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Frequently asked questions
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-2xl">
-          <Accordion type="single" collapsible>
-            {userbackFaqs.map((faq) => (
-              <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {faq.content ?? (
-                    <p className="text-lg text-muted-foreground md:text-xl">
-                      {faq.answer}
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </div>
-    </section>
-  );
-}

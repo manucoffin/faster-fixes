@@ -288,6 +288,8 @@ describe("GET /api/v1/agent/feedbacks/[id] with a Recording", () => {
   const RECORDING_KEY = "recordings/feedback.json.gz";
   const RECORDING_URL = `https://assets.example.test/signed/${RECORDING_KEY}`;
   const recordingFile = gzipSync(JSON.stringify(realRecording));
+  // Built once: gzipping 65 MB inside the test ate most of its timeout on slow CI runners.
+  const oversizedRecordingFile = gzipSync(Buffer.alloc(65 * 1024 * 1024));
   const timestamps = realRecording.map(({ timestamp }) => timestamp);
   const startedAt = Math.min(...timestamps);
   const endedAt = Math.max(...timestamps);
@@ -454,39 +456,41 @@ describe("GET /api/v1/agent/feedbacks/[id] with a Recording", () => {
     ],
     [
       "the file inflates past the cap",
-      () =>
-        getStorageObjectDouble.mockResolvedValue(
-          gzipSync(Buffer.alloc(65 * 1024 * 1024)),
-        ),
+      () => getStorageObjectDouble.mockResolvedValue(oversizedRecordingFile),
     ],
     [
       "the format version is unknown",
       () => seedFeedback({ ...recordingRow, recordingFormatVersion: 99 }),
     ],
-  ])("still answers 200 with the fallback when %s", async (_, arrange) => {
-    arrange();
+  ])(
+    "still answers 200 with the fallback when %s",
+    async (_, arrange) => {
+      arrange();
 
-    const json = await GET(agentRequest(FEEDBACK_URL), routeContext());
-    expect(json.status).toBe(200);
-    const body = await readItem(json);
-    expect(body.recording).toEqual({
-      durationMs: endedAt - startedAt,
-      startedAt: null,
-      endedAt: null,
-      url: RECORDING_URL,
-      readable: false,
-      steps: [],
-    });
-    expect(body.diagnosticTrail).toEqual(recordingRow.diagnosticTrail);
+      const json = await GET(agentRequest(FEEDBACK_URL), routeContext());
+      expect(json.status).toBe(200);
+      const body = await readItem(json);
+      expect(body.recording).toEqual({
+        durationMs: endedAt - startedAt,
+        startedAt: null,
+        endedAt: null,
+        url: RECORDING_URL,
+        readable: false,
+        steps: [],
+      });
+      expect(body.diagnosticTrail).toEqual(recordingRow.diagnosticTrail);
 
-    const markdown = await markdownRequest();
-    expect(markdown.status).toBe(200);
-    const text = await markdown.text();
-    expect(text).toContain("## Diagnostics");
-    expect(text).not.toContain("## Timeline");
-    expect(text).toContain(
-      "**Recording:** the file could not be read, so this Feedback has no timeline.",
-    );
-    expect(agentApiPrisma.feedback.update).not.toHaveBeenCalled();
-  });
+      const markdown = await markdownRequest();
+      expect(markdown.status).toBe(200);
+      const text = await markdown.text();
+      expect(text).toContain("## Diagnostics");
+      expect(text).not.toContain("## Timeline");
+      expect(text).toContain(
+        "**Recording:** the file could not be read, so this Feedback has no timeline.",
+      );
+      expect(agentApiPrisma.feedback.update).not.toHaveBeenCalled();
+    },
+    // The oversized case inflates up to the cap twice (JSON, then markdown).
+    20_000,
+  );
 });

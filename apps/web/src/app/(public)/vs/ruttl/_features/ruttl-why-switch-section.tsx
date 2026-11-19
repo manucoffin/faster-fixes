@@ -3,13 +3,23 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const ruttlPro = COMPETITOR_PRICES.ruttl.plans.pro;
+const teamSize = 5;
+const ruttlTeamMonthly = ruttlPro.amount * teamSize;
+const usd = (amount: number) => formatAmount(amount, "USD");
+
 const cards = [
   {
     title: "Per-seat pricing that scales against you",
-    body: `Ruttl Pro is $18 per user per month. A 5-person team pays $90 a month, or $1,080 a year. The Business plan is custom-priced through sales. FasterFixes is flat: $${proPrice} a month hosted up to ${proPlan.seats} members, $0 self-hosted.`,
+    body: `Ruttl Pro is ${formatPrice(ruttlPro)} per user per month. A ${teamSize}-person team pays ${usd(ruttlTeamMonthly)} a month, or ${usd(ruttlTeamMonthly * 12)} a year. The Business plan is custom-priced through sales. FasterFixes is flat: $${proPrice} a month hosted up to ${proPlan.seats} members, $0 self-hosted.`,
   },
   {
     title: "No self-hosting, no open-source option",

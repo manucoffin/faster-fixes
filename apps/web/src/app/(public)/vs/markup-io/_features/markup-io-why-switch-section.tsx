@@ -1,10 +1,15 @@
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  markupIoPriceRise,
+  markupIoPro,
+  markupIoProBefore2025,
+} from "../_helpers/markup-io-prices";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const cards = [
   {
-    title: "The 172% price shock",
-    body: `In January 2025 Markup.io raised Pro from $29 to $79 per month and eliminated the free plan entirely. Long-time customers reported a 280% increase on existing accounts and threats of data deletion for non-payment. FasterFixes is $${proPrice}/mo flat, or $0 if you self-host.`,
+    title: `The ${markupIoPriceRise}% price shock`,
+    body: `In January 2025 Markup.io raised Pro from ${markupIoProBefore2025} to ${markupIoPro} per month and eliminated the free plan entirely. Long-time customers reported a 280% increase on existing accounts and threats of data deletion for non-payment. FasterFixes is $${proPrice}/mo flat, or $0 if you self-host.`,
   },
   {
     title: "No native tracker integrations",

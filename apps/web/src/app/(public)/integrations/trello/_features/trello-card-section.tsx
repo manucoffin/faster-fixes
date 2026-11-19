@@ -1,7 +1,7 @@
 import { VideoIcon } from "lucide-react";
 import { SectionBody } from "../../../features/_components/section-body";
 import { SectionHeading } from "../../../features/_components/section-heading";
-import { TrelloCardAnatomy } from "../_components/trello-card-anatomy";
+import { TrelloCardTrail } from "../_components/trello-card-trail.client";
 
 const cardContents = [
   {
@@ -42,29 +42,7 @@ export function TrelloCardSection() {
           writes the context a developer needs into the card itself.
         </p>
 
-        <div className="mt-12 grid grid-cols-1 items-start gap-12 lg:grid-cols-[5fr_6fr] lg:gap-16">
-          <TrelloCardAnatomy className="aspect-[4/3] lg:sticky lg:top-24 lg:aspect-[4/5]" />
-
-          <ul className="flex flex-col border-t">
-            {cardContents.map((item, index) => (
-              <li key={item.title} className="flex gap-4 border-b py-6 md:py-7">
-                {/* Matches the numbered marker on the card illustration */}
-                <span
-                  aria-hidden
-                  className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-[11px] leading-none font-semibold text-white tabular-nums"
-                >
-                  {index + 1}
-                </span>
-                <div>
-                  <h3 className="text-lg font-medium">{item.title}</h3>
-                  <SectionBody className="mt-2 text-base">
-                    <p>{item.body}</p>
-                  </SectionBody>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <TrelloCardTrail items={cardContents} />
 
         <div className="mt-12 flex max-w-3xl gap-4">
           <VideoIcon

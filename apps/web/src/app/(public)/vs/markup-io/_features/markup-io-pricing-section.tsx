@@ -3,17 +3,27 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatAmount } from "../../../_helpers/format-competitor-price";
+import {
+  markupIoPro,
+  markupIoProBefore2025,
+} from "../_helpers/markup-io-prices";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { pro, business } = COMPETITOR_PRICES.markupIo.plans;
+const usd = (amount: number) => formatAmount(amount, "USD");
+const proYearly = pro.amount * 12;
+
 const rows = [
   {
     label: "Markup.io Pro (50 MarkUps/mo)",
-    value: "$79/mo = $948/year",
+    value: `${markupIoPro}/mo = ${usd(proYearly)}/year`,
   },
   {
     label: "Markup.io Business (200 MarkUps/mo)",
-    value: "$499/mo = $5,988/year",
+    value: `${usd(business.amount)}/mo = ${usd(business.amount * 12)}/year`,
   },
   {
     label: "Markup.io Enterprise",
@@ -43,10 +53,11 @@ export function MarkupIoPricingSection() {
             Pricing that doesn&apos;t change on you
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Markup.io raised Pro from $29 to $79 in January 2025 and removed its
-            free plan. It has no native GitHub, Linear, or Jira sync.
-            FasterFixes includes GitHub, Linear, and Jira sync on the $
-            {proPrice}/mo plan, and the self-hosted version is free.
+            Markup.io raised Pro from {markupIoProBefore2025} to {markupIoPro}{" "}
+            in January 2025 and removed its free plan. It has no native GitHub,
+            Linear, or Jira sync. FasterFixes includes GitHub, Linear, and Jira
+            sync on the ${proPrice}/mo plan, and the self-hosted version is
+            free.
           </p>
         </div>
 
@@ -69,8 +80,9 @@ export function MarkupIoPricingSection() {
         </div>
 
         <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
-          A 5-person agency saves $708/year switching from Markup.io Pro to
-          FasterFixes Pro. Self-hosting saves the full $948.
+          A 5-person agency saves {usd(proYearly - proPrice * 12)}/year
+          switching from Markup.io Pro to FasterFixes Pro. Self-hosting saves
+          the full {usd(proYearly)}.
         </p>
       </div>
     </section>

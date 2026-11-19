@@ -3,18 +3,25 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
+import {
+  type VsComparisonRow,
+  VsComparisonTable,
+} from "../../_features/vs-comparison-table";
+import { VsSection } from "../../_features/vs-section";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-type CellType = "yes" | "no" | "partial";
-type Cell = string | { type: CellType; note?: string };
-
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
-const rows: { label: string; cells: [Cell, Cell] }[] = [
+const { starter, growth, premium } = COMPETITOR_PRICES.usersnap.plans;
+const rows: VsComparisonRow[] = [
   {
     label: "License",
     cells: ["AGPL-3.0 app · MIT widget", "Proprietary"],
@@ -34,14 +41,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Tiered by project count · $59/mo Starter to $549/mo Premium",
+      `Tiered by project count · ${formatPublishedPrice(starter, "/mo")} ${starter.name} to ${formatPublishedPrice(premium, "/mo")} ${premium.name}`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$159/mo Growth ($129/mo billed annually) · Starter has 2 seats",
+      `${formatPublishedPrice(growth, "/mo")} ${growth.name} · ${starter.name} has ${starter.seats} seats`,
     ],
   },
   {
@@ -53,7 +60,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
       },
       {
         type: "partial",
-        note: "Searches feedback, creates opportunities · cannot edit feedback",
+        note: "Searches feedback, creates and updates opportunities · cannot edit feedback",
       },
     ],
   },
@@ -73,7 +80,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   },
   {
     label: "Browser extension",
-    cells: [{ type: "no" }, { type: "yes", note: "Chrome, Firefox, Edge" }],
+    cells: [{ type: "no" }, { type: "yes", note: "All plans" }],
   },
   {
     label: "React component tree capture",
@@ -90,12 +97,15 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "NPS / microsurveys",
-    cells: [{ type: "no" }, { type: "yes" }],
+    label: "In-app surveys",
+    cells: [
+      { type: "no" },
+      { type: "yes", note: "Targeting and logic · all plans" },
+    ],
   },
   {
-    label: "Feature request boards",
-    cells: [{ type: "no" }, { type: "yes" }],
+    label: "Public roadmap and idea voting",
+    cells: [{ type: "no" }, { type: "partial", note: "Professional and up" }],
   },
   {
     label: "Team kanban board",
@@ -133,7 +143,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Trello sync",
     cells: [
       { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "partial", note: "Creates cards only" },
+      { type: "partial", note: "Pushes items · not in its two-way sync list" },
     ],
   },
   {
@@ -164,105 +174,24 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
         type: "yes",
         note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
       },
-      { type: "partial", note: "Free trial only" },
+      { type: "partial", note: "Free trial, plus a free month of Premium" },
     ],
   },
 ];
 
-const headers = ["FasterFixes", "Usersnap"] as const;
-
-type CellIconProps = { type: CellType };
-
-function CellIcon({ type }: CellIconProps) {
-  if (type === "yes") {
-    return <CheckIcon className="size-5 text-success" aria-label="Yes" />;
-  }
-
-  if (type === "no") {
-    return <XIcon className="size-5 text-destructive" aria-label="No" />;
-  }
-
-  return (
-    <MinusIcon className="size-5 text-muted-foreground" aria-label="Partial" />
-  );
-}
-
-function renderCell(cell: Cell) {
-  if (typeof cell === "string") {
-    return <span className="text-sm text-muted-foreground">{cell}</span>;
-  }
-  return (
-    <div className="flex flex-col gap-1">
-      <CellIcon type={cell.type} />
-      {cell.note && (
-        <span className="text-xs text-muted-foreground">{cell.note}</span>
-      )}
-    </div>
-  );
-}
-
 export function UsersnapComparisonSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Compare
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            FasterFixes vs Usersnap: full feature comparison
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Side-by-side comparison based on each product&apos;s public
-            documentation and pricing page.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-4xl overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="p-4 text-left text-sm font-semibold" scope="col">
-                  Feature
-                </th>
-                {headers.map((h, i) => (
-                  <th
-                    key={h}
-                    scope="col"
-                    className={`p-4 text-left text-sm font-semibold ${
-                      i === 0 ? "text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.label} className="border-b last:border-b-0">
-                  <th
-                    scope="row"
-                    className="p-4 text-left align-top text-sm font-medium"
-                  >
-                    {row.label}
-                  </th>
-                  {row.cells.map((cell, i) => (
-                    <td key={i} className="p-4 align-top">
-                      {renderCell(cell)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
-          Pricing and feature availability as publicly listed on each
-          vendor&apos;s website. Last updated Nov 12, 2026.
-        </p>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Compare"
+      title="FasterFixes vs Usersnap: full feature comparison"
+      intro="Side-by-side comparison based on each product's public documentation and pricing page."
+      tone="muted"
+    >
+      <VsComparisonTable
+        competitorName="Usersnap"
+        rows={rows}
+        footnote={`Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 19, 2026. ${EXCHANGE_RATE_NOTE}`}
+      />
+    </VsSection>
   );
 }

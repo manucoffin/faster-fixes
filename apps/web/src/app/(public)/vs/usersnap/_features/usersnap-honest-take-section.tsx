@@ -3,124 +3,160 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
+import { VsHonestTake } from "../../_features/vs-honest-take";
+import { VsSection } from "../../_features/vs-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
+const { starter, growth } = COMPETITOR_PRICES.usersnap.plans;
+
 export function UsersnapHonestTakeSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Honest take
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Usersnap is the better choice for some teams
-          </h2>
-        </div>
-
-        <div className="mt-10 space-y-5 text-lg leading-relaxed">
-          <p>
-            This is a direct comparison, not a sales pitch. Usersnap has a
-            significantly richer feature set for non-developer use cases.
-            FasterFixes and Usersnap solve overlapping problems in meaningfully
-            different ways.
-          </p>
-          <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
-            <li>
-              <strong className="text-foreground">
-                NPS surveys and microsurveys
-              </strong>
-              : Usersnap supports NPS, CSAT, and in-app microsurveys out of the
-              box. FasterFixes has no survey tooling.
-            </li>
-            <li>
-              <strong className="text-foreground">
-                Feature request boards
-              </strong>
-              : built-in public roadmap and voting for product teams.
-              FasterFixes does not support this.
-            </li>
-            <li>
-              <strong className="text-foreground">AI feedback analysis</strong>:
-              topic classification, sentiment analysis, and an AI chat over your
-              feedback, plus an MCP server that brings it into Claude or
-              ChatGPT. Scope varies by plan.
-            </li>
-            <li>
-              <strong className="text-foreground">Browser extension</strong>:
-              lets non-technical reporters submit feedback on any site without
-              installing a widget. FasterFixes needs its script tag or React
-              package installed on the site.
-            </li>
-            <li>
-              <strong className="text-foreground">Integration breadth</strong>:
-              Jira, Slack, Zendesk, Azure DevOps, and 50+ other tools.
-              FasterFixes ships GitHub, Linear, and Jira two-way sync; more
-              integrations are in progress.
-            </li>
-            <li>
-              <strong className="text-foreground">Enterprise polish</strong>:
-              custom branding, SSO, and dedicated account management on
-              enterprise plans.
-            </li>
-          </ul>
-          <p>
-            If your workflow centers on product feedback, customer satisfaction,
-            NPS tracking, or non-technical client reporting, Usersnap is the
-            more complete tool today. FasterFixes is built for a narrower brief,
-            and we think it is the right brief for most developer teams shipping
-            client websites:
-          </p>
-          <ul className="list-disc space-y-3 pl-6 text-muted-foreground">
-            <li>
-              <strong className="text-foreground">
-                Self-host on your own stack
-              </strong>
-              : full deployment on Next.js, Postgres, Inngest, R2/S3. Usersnap
-              has no self-hosted option.
-            </li>
-            <li>
-              <strong className="text-foreground">
-                Open-source under AGPL-3.0
-              </strong>
-              : the widget packages are MIT. Audit, fork, or modify the code.
-            </li>
-            <li>
-              <strong className="text-foreground">
-                Bring your own AI agent via MCP
-              </strong>
-              : Claude Code, Cursor, Codex, or any MCP-compatible client. You
-              pick the model.
-            </li>
-            <li>
-              <strong className="text-foreground">
-                React component tree capture
-              </strong>
-              : on React sites, every report ships with the DOM selector and the
-              React component path. The agent knows which file owns the bug.
-            </li>
-            <li>
-              <strong className="text-foreground">Flat pricing</strong>: $
-              {proPrice}/month for a 5-person team versus $159/month on Usersnap
-              Growth ($129/month billed annually), since Starter includes 2
-              seats. The free plan covers {freePlan.projects} project,{" "}
-              {freeFeedbackLimit} feedback items, and {freePlan.seats} member at
-              no cost, with no time limit. Usersnap offers a free trial, not a
-              permanent free tier.
-            </li>
-          </ul>
+    <VsSection
+      eyebrow="Honest take"
+      title="Usersnap is the better choice for some teams"
+    >
+      <VsHonestTake
+        competitor={{
+          lead: "This is a direct comparison, not a sales pitch. Usersnap has a significantly richer feature set for non-developer use cases. FasterFixes and Usersnap solve overlapping problems in meaningfully different ways.",
+          items: [
+            {
+              key: "surveys",
+              content: (
+                <>
+                  <strong>In-app surveys</strong>: Usersnap runs targeted
+                  surveys and logic-based forms on every plan. FasterFixes has
+                  no survey tooling.
+                </>
+              ),
+            },
+            {
+              key: "feature-boards",
+              content: (
+                <>
+                  <strong>Public roadmaps and idea voting</strong>: from the
+                  Professional plan, a guest portal where users track tickets
+                  and upvote ideas. FasterFixes does not support this.
+                </>
+              ),
+            },
+            {
+              key: "ai",
+              content: (
+                <>
+                  <strong>AI feedback analysis</strong>: topic classification,
+                  sentiment analysis, and an AI chat over your feedback, plus an
+                  MCP server that brings it into Claude or ChatGPT. Scope varies
+                  by plan.
+                </>
+              ),
+            },
+            {
+              key: "browser-extension",
+              content: (
+                <>
+                  <strong>Browser extension</strong>: lets non-technical
+                  reporters submit feedback on any site without installing a
+                  widget. FasterFixes needs its script tag or React package
+                  installed on the site.
+                </>
+              ),
+            },
+            {
+              key: "integrations",
+              content: (
+                <>
+                  <strong>Integration breadth</strong>: Jira, Slack, Zendesk,
+                  Azure DevOps, and 50+ other tools, with two-way status sync
+                  for Jira, Azure DevOps, Asana and Linear on every plan.
+                  FasterFixes ships GitHub, Linear, Jira and Trello two-way
+                  sync; more integrations are in progress.
+                </>
+              ),
+            },
+            {
+              key: "enterprise",
+              content: (
+                <>
+                  <strong>Enterprise polish</strong>: custom branding on Premium
+                  and Enterprise, SSO and SAML on Enterprise.
+                </>
+              ),
+            },
+          ],
+        }}
+        fasterFixes={{
+          lead: "If your workflow centers on product feedback, customer satisfaction surveys, public roadmaps, or non-technical client reporting, Usersnap is the more complete tool today. FasterFixes is built for a narrower brief, and we think it is the right brief for most developer teams shipping client websites:",
+          items: [
+            {
+              key: "self-host",
+              content: (
+                <>
+                  <strong>Self-host on your own stack</strong>: full deployment
+                  on Next.js, Postgres, Inngest, R2/S3. Usersnap has no
+                  self-hosted option.
+                </>
+              ),
+            },
+            {
+              key: "open-source",
+              content: (
+                <>
+                  <strong>Open-source under AGPL-3.0</strong>: the widget
+                  packages are MIT. Audit, fork, or modify the code.
+                </>
+              ),
+            },
+            {
+              key: "agent",
+              content: (
+                <>
+                  <strong>Bring your own AI agent via MCP</strong>: Claude Code,
+                  Cursor, Codex, or any MCP-compatible client. You pick the
+                  model.
+                </>
+              ),
+            },
+            {
+              key: "component-tree",
+              content: (
+                <>
+                  <strong>React component tree capture</strong>: on React sites,
+                  every report ships with the DOM selector and the React
+                  component path. The agent knows which file owns the bug.
+                </>
+              ),
+            },
+            {
+              key: "pricing",
+              content: (
+                <>
+                  <strong>Flat pricing</strong>: ${proPrice}/month for a
+                  5-person team versus {formatPrice(growth)}/month on Usersnap{" "}
+                  {growth.name}, since {starter.name} includes {starter.seats}{" "}
+                  seats. The free plan covers {freePlan.projects} project,{" "}
+                  {freeFeedbackLimit} feedback items, and {freePlan.seats}{" "}
+                  member at no cost, with no time limit. Usersnap offers a free
+                  trial and a free month of Premium, not a permanent free tier.
+                </>
+              ),
+            },
+          ],
+        }}
+        verdict={
           <p>
             FasterFixes is a younger product. It does not match Usersnap&apos;s
             survey tooling, integration breadth, or enterprise features. What it
             offers instead is full code ownership, a self-hosted deployment
             path, and a developer workflow no closed-source SaaS can replicate.
           </p>
-        </div>
-      </div>
-    </section>
+        }
+      />
+    </VsSection>
   );
 }

@@ -1,6 +1,5 @@
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
@@ -8,6 +7,8 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
+import { COMPETITOR_PRICES } from "../../_helpers/competitor-prices";
+import { formatPrice } from "../../_helpers/format-competitor-price";
 import { AtarimAlternativesSection } from "./_features/atarim-alternatives-section";
 import { AtarimBreadcrumb } from "./_features/atarim-breadcrumb";
 import { AtarimCalculatorSection } from "./_features/atarim-calculator-section";
@@ -28,12 +29,13 @@ import { AtarimWhySwitchSection } from "./_features/atarim-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
 
 const pageUrl = `${APP_URL}/vs/atarim`;
-const title = `Atarim Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
-const description = `Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents, from $${proPrice}/month hosted or $0 self-hosted, with no vendor lock-in.`;
+const title = "Atarim alternatives: 9 tools compared (2026)";
+const description = `Nine Atarim alternatives compared on price, free plans and self-hosting. Atarim ${atarimPro.name} is ${formatPrice(atarimPro)}/mo. FasterFixes is $${proPrice}/mo, or $0 self-hosted.`;
 const datePublished = "2026-04-30T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-17T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +43,7 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
+    "Atarim alternatives",
     "Atarim alternative",
     "Atarim open source alternative",
     "Atarim free alternative",
@@ -67,12 +70,12 @@ export default function Page() {
     <div>
       <AtarimBreadcrumb />
       <AtarimHero />
+      <AtarimAlternativesSection />
       <AtarimWhatIsSection />
       <AtarimWhySwitchSection />
       <AtarimHonestTakeSection />
       <AtarimFitSection />
       <AtarimCalculatorSection />
-      <AtarimAlternativesSection />
       <AtarimDeveloperFirstSection />
       <AtarimComparisonSection />
       <AtarimPricingSection />
@@ -94,7 +97,7 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Atarim alternative", url: pageUrl },
+          { name: "Atarim alternatives", url: pageUrl },
         ]}
       />
       <HowToSchema

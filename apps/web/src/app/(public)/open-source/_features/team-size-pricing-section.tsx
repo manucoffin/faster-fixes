@@ -3,11 +3,19 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import type { Currency } from "@/app/(public)/_helpers/competitor-prices";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatAmount,
+  formatUsdEquivalent,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import Link from "next/link";
 
 type PricedPlan = {
   name: string;
-  price: number;
+  amount: number;
+  currency: Currency;
   seats: number;
 };
 
@@ -17,44 +25,40 @@ const TEAM_SIZES = [3, 5, 10, 15] as const;
 const hostedPlans: PricedPlan[] = [
   {
     name: "Free",
-    price: PLAN_PRICES[SubscriptionPlanName.Free],
+    amount: PLAN_PRICES[SubscriptionPlanName.Free],
+    currency: "USD",
     seats: PLAN_LIMITS[SubscriptionPlanName.Free].seats,
   },
   {
     name: "Pro",
-    price: PLAN_PRICES[SubscriptionPlanName.Pro],
+    amount: PLAN_PRICES[SubscriptionPlanName.Pro],
+    currency: "USD",
     seats: PLAN_LIMITS[SubscriptionPlanName.Pro].seats,
   },
   {
     name: "Agency",
-    price: PLAN_PRICES[SubscriptionPlanName.Agency],
+    amount: PLAN_PRICES[SubscriptionPlanName.Agency],
+    currency: "USD",
     seats: PLAN_LIMITS[SubscriptionPlanName.Agency].seats,
   },
 ];
 
-// Monthly list prices and included seats, as published on the /vs pages.
+const { bugherd, markerIo, usersnap } = COMPETITOR_PRICES;
+
+// Monthly list prices and included seats, each in the vendor's own currency.
 const competitors: { vendor: string; plans: PricedPlan[] }[] = [
   {
     vendor: "BugHerd",
     plans: [
-      { name: "Standard", price: 50, seats: 5 },
-      { name: "Studio", price: 80, seats: 10 },
-      { name: "Premium", price: 150, seats: 25 },
+      bugherd.plans.standard,
+      bugherd.plans.studio,
+      bugherd.plans.premium,
     ],
   },
-  {
-    vendor: "Marker.io",
-    plans: [
-      { name: "Starter", price: 59, seats: 3 },
-      { name: "Team", price: 199, seats: 15 },
-    ],
-  },
+  { vendor: "Marker.io", plans: [markerIo.plans.starter, markerIo.plans.team] },
   {
     vendor: "Usersnap",
-    plans: [
-      { name: "Starter", price: 59, seats: 2 },
-      { name: "Growth", price: 159, seats: Infinity },
-    ],
+    plans: [usersnap.plans.starter, usersnap.plans.growth],
   },
 ];
 
@@ -70,9 +74,17 @@ function PriceCell({ plan }: PriceCellProps) {
   if (!plan) {
     return <span className="text-sm text-muted-foreground">Custom</span>;
   }
+  const equivalent = formatUsdEquivalent(plan);
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-semibold">${plan.price}</span>
+      <span className="text-sm font-semibold">
+        {formatAmount(plan.amount, plan.currency)}
+      </span>
+      {equivalent && (
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {equivalent}
+        </span>
+      )}
       <span className="text-xs text-muted-foreground">{plan.name}</span>
     </div>
   );
@@ -134,7 +146,12 @@ export function TeamSizePricingSection() {
                   </th>
                   <td className="p-4 align-top">
                     <PriceCell
-                      plan={{ name: "Open source", price: 0, seats: teamSize }}
+                      plan={{
+                        name: "Open source",
+                        amount: 0,
+                        currency: "USD",
+                        seats: teamSize,
+                      }}
                     />
                   </td>
                   <td className="p-4 align-top">
@@ -153,10 +170,20 @@ export function TeamSizePricingSection() {
 
         <ul className="mx-auto mt-8 flex max-w-2xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Monthly billing in USD, at list prices published at time of writing.
-            Annual billing lowers several competitor prices: Marker.io Starter
-            drops to $39 per month, Usersnap Growth to $129, BugHerd Standard to
-            $42.
+            Monthly billing at list prices published at time of writing, in USD
+            except Usersnap, which lists EUR prices only. Annual billing lowers
+            several competitor prices: Marker.io Starter drops to{" "}
+            {formatAmount(
+              markerIo.plans.starter.billedYearlyAmount,
+              markerIo.plans.starter.currency,
+            )}{" "}
+            per month and BugHerd Standard to{" "}
+            {formatAmount(
+              bugherd.plans.standard.billedYearlyAmount,
+              bugherd.plans.standard.currency,
+            )}
+            . Usersnap says yearly billing saves up to{" "}
+            {usersnap.yearlySavesUpToMonths} months. {EXCHANGE_RATE_NOTE}
           </li>
           <li>
             Seat counts only. Project, page view and feedback limits differ by
@@ -165,10 +192,15 @@ export function TeamSizePricingSection() {
             Agency has no limit on projects, feedback or members.
           </li>
           <li>
-            BugHerd sells extra members at $8 per month on top of a plan, which
-            can lower some totals. Marker.io Starter includes 3 seats and
-            excludes Jira sync and developer tools, so larger teams are priced
-            on Team, which includes 15 seats.
+            BugHerd sells extra members at{" "}
+            {formatAmount(
+              bugherd.otherPrices.extraSeat.amount,
+              bugherd.otherPrices.extraSeat.currency,
+            )}{" "}
+            per month on top of a plan, which can lower some totals. Marker.io
+            Starter includes {markerIo.plans.starter.seats} seats and excludes
+            Jira sync and developer tools, so larger teams are priced on Team,
+            which includes {markerIo.plans.team.seats} seats.
           </li>
           <li>
             The self-hosted column excludes your own hosting, database, storage

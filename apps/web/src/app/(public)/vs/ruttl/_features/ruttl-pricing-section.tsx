@@ -3,13 +3,25 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const ruttlPro = COMPETITOR_PRICES.ruttl.plans.pro;
+const teamSize = 5;
+const ruttlTeamMonthly = ruttlPro.amount * teamSize;
+const usd = (amount: number) => formatAmount(amount, "USD");
+const ruttlTeamYearly = ruttlTeamMonthly * 12;
+const proSavings = usd(ruttlTeamYearly - proPrice * 12);
+
 const rows = [
   {
-    label: "Ruttl Pro (5 people)",
-    value: "$90/mo = $1,080/year",
+    label: `Ruttl Pro (${teamSize} people)`,
+    value: `${usd(ruttlTeamMonthly)}/mo = ${usd(ruttlTeamYearly)}/year`,
   },
   {
     label: "Ruttl Business",
@@ -39,9 +51,9 @@ export function RuttlPricingSection() {
             Free if you self-host. Flat rate if you don&apos;t.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Ruttl Pro is $18 per user per month. Every new teammate adds $18.
-            FasterFixes is flat: one price for up to {proPlan.seats} members, or
-            $0 if you self-host.
+            Ruttl Pro is {formatPrice(ruttlPro)} per user per month. Every new
+            teammate adds {formatPrice(ruttlPro)}. FasterFixes is flat: one
+            price for up to {proPlan.seats} members, or $0 if you self-host.
           </p>
         </div>
 
@@ -64,8 +76,9 @@ export function RuttlPricingSection() {
         </div>
 
         <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
-          A 5-person team saves $840/year switching from Ruttl Pro to
-          FasterFixes Pro. Self-hosting saves the full $1,080.
+          A {teamSize}-person team saves {proSavings}/year switching from Ruttl
+          Pro to FasterFixes Pro. Self-hosting saves the full{" "}
+          {usd(ruttlTeamYearly)}.
         </p>
       </div>
     </section>

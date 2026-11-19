@@ -1,174 +1,111 @@
-import { CheckIcon, XIcon } from "lucide-react";
 import type { Route } from "next";
-import Link from "next/link";
 
-type Alternative = {
-  name: string;
-  bestFor: string;
-  startingPrice: string;
-  openSource: { type: "yes"; note: string } | { type: "no" };
-  href?: Route;
-  highlight?: boolean;
-};
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
+import {
+  type VsAlternative,
+  VsAlternativesTable,
+} from "../../_features/vs-alternatives-table";
+import {
+  ALTERNATIVES_CLOSING_NOTE,
+  COMPETITOR_STARTING_PRICES as prices,
+  SELF_HOSTED_NOTE,
+} from "../../_features/vs-competitor-prices";
+import { VsSection } from "../../_features/vs-section";
 
-const alternatives: Alternative[] = [
+const bugherdStandard = COMPETITOR_PRICES.bugherd.plans.standard;
+
+const alternatives: VsAlternative[] = [
   {
     name: "FasterFixes",
+    verdict:
+      "The only self-hosted tool here. Every Feedback carries the DOM selector, React component tree, console logs, and network requests.",
     bestFor: "Dev teams wanting self-hosted, AI-ready feedback",
-    startingPrice: "Free (self-hosted)",
-    openSource: { type: "yes", note: "AGPL-3.0" },
+    startingPrice: prices.fasterFixes,
+    selfHosted: { type: "yes", note: SELF_HOSTED_NOTE },
     highlight: true,
   },
   {
     name: "BugHerd",
+    verdict: `The safest pick for non-technical clients. No free plan, ${formatPrice(bugherdStandard)}/mo for ${bugherdStandard.seats} members.`,
     bestFor: "Agencies managing client QA visually",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.bugherd,
+    selfHosted: { type: "no" },
     href: "/vs/bugherd" as Route,
   },
   {
     name: "Marker.io",
+    verdict:
+      "Best tracker sync in the list. Jira, replay, and console logs wait for the Team plan.",
     bestFor: "Teams already using Jira, Linear, or Asana",
-    startingPrice: "$49/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.markerIo,
+    selfHosted: { type: "no" },
     href: "/vs/marker-io" as Route,
   },
   {
     name: "Userback",
+    verdict: "A real free tier, but feedback expires after 7 days.",
     bestFor: "Product teams needing session replay with feedback",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.userback,
+    selfHosted: { type: "no" },
     href: "/vs/userback" as Route,
   },
   {
     name: "Atarim",
+    verdict:
+      "One flat plan for up to 100 seats. Priced around AI agents, not bug reports.",
     bestFor: "Web agencies running WordPress client review cycles",
-    startingPrice: "$67/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.atarim,
+    selfHosted: { type: "no" },
     href: "/vs/atarim" as Route,
   },
   {
     name: "Gleap",
+    verdict:
+      "Chat, chatbot, and ticketing on the same bill. Hobby covers a single seat.",
     bestFor: "SaaS products combining in-app support and feedback",
-    startingPrice: "$39/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.gleap,
+    selfHosted: { type: "no" },
     href: "/vs/gleap" as Route,
   },
   {
     name: "Ruttl",
+    verdict:
+      "Live CSS edits instead of descriptions. Charged per user, cloud only.",
     bestFor: "Designers reviewing live web pages with on-page annotations",
-    startingPrice: "$18/user/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.ruttl,
+    selfHosted: { type: "no" },
     href: "/vs/ruttl" as Route,
   },
   {
     name: "Markup.io",
+    verdict: "Flat rate, unlimited users. No free plan since January 2025.",
     bestFor: "Design review across PDFs, images, and live URLs",
-    startingPrice: "$79/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.markupIo,
+    selfHosted: { type: "no" },
     href: "/vs/markup-io" as Route,
   },
   {
     name: "Feedbucket",
+    verdict: "Cheapest entry in the list. No self-hosting, no MCP server.",
     bestFor: "Small agencies wanting a simple hosted widget",
-    startingPrice: "$29/mo",
-    openSource: { type: "no" },
+    startingPrice: prices.feedbucket,
+    selfHosted: { type: "no" },
   },
 ];
 
 export function UsersnapAlternativesSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Alternatives
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Best Usersnap alternatives in 2026
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Not every team needs the same thing. Here is how the main
-            alternatives stack up.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-5xl overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Tool
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Best for
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Starting price
-                </th>
-                <th scope="col" className="p-4 text-left text-sm font-semibold">
-                  Open source
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {alternatives.map((row) => (
-                <tr
-                  key={row.name}
-                  className={`border-b last:border-b-0 ${
-                    row.highlight ? "bg-muted/30" : ""
-                  }`}
-                >
-                  <th
-                    scope="row"
-                    className="p-4 text-left align-top text-sm font-semibold"
-                  >
-                    {row.href ? (
-                      <Link
-                        href={row.href}
-                        className="text-foreground underline underline-offset-4 hover:no-underline"
-                      >
-                        {row.name}
-                      </Link>
-                    ) : (
-                      row.name
-                    )}
-                  </th>
-                  <td className="p-4 align-top text-sm text-muted-foreground">
-                    {row.bestFor}
-                  </td>
-                  <td className="p-4 align-top text-sm text-muted-foreground">
-                    {row.startingPrice}
-                  </td>
-                  <td className="p-4 align-top">
-                    {row.openSource.type === "yes" ? (
-                      <div className="flex flex-col gap-1">
-                        <CheckIcon
-                          className="size-5 text-success"
-                          aria-label="Yes"
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {row.openSource.note}
-                        </span>
-                      </div>
-                    ) : (
-                      <XIcon
-                        className="size-5 text-destructive"
-                        aria-label="No"
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-muted-foreground">
-          FasterFixes is the only tool in this list with a permanent free tier,
-          self-hosting support, and an MCP server for AI coding agents.
-        </p>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Alternatives"
+      title="Usersnap alternatives compared"
+      intro="The verdict sits under each tool name. Pricing is each vendor's monthly rate, with the annual rate in parentheses."
+      tone="muted"
+    >
+      <VsAlternativesTable
+        alternatives={alternatives}
+        closingNote={ALTERNATIVES_CLOSING_NOTE}
+      />
+    </VsSection>
   );
 }

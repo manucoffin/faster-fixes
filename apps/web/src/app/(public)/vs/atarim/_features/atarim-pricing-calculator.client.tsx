@@ -8,15 +8,20 @@ import {
 import { Slider } from "@workspace/ui/components/slider";
 import { useState } from "react";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice as formatCompetitorPrice } from "../../../_helpers/format-competitor-price";
+
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
-// Atarim Pro is flat up to 100 seats and 1,000 projects, beyond both sliders.
-const ATARIM_PRO_MONTHLY_PRICE = 67;
-const ATARIM_PRO_ANNUAL_PRICE = 643.2;
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
+// Atarim Pro is flat up to its seat and project caps, beyond both sliders.
+const ATARIM_PRO_MONTHLY_PRICE = atarimPro.amount;
+const ATARIM_PRO_ANNUAL_PRICE =
+  Math.round(atarimPro.billedYearlyAmount * 12 * 100) / 100;
 
 type PlanResult = {
   planLabel: string;
@@ -29,14 +34,18 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
   if (team <= 1 && projects <= 1) {
     return { planLabel: "Free", monthly: 0, annual: 0 };
   }
-  if (team <= 5 && projects <= 5) {
-    return { planLabel: "Pro", monthly: 20, annual: 240 };
+  if (team <= proPlan.seats && projects <= proPlan.projects) {
+    return { planLabel: "Pro", monthly: proPrice, annual: proPrice * 12 };
   }
-  return { planLabel: "Agency", monthly: 99, annual: 1188 };
+  return {
+    planLabel: "Agency",
+    monthly: agencyPrice,
+    annual: agencyPrice * 12,
+  };
 }
 
 const atarim: PlanResult = {
-  planLabel: "Pro · up to 100 seats",
+  planLabel: `${atarimPro.name} · up to ${atarimPro.seats} seats`,
   monthly: ATARIM_PRO_MONTHLY_PRICE,
   annual: ATARIM_PRO_ANNUAL_PRICE,
 };
@@ -188,9 +197,12 @@ export function AtarimPricingCalculator() {
       </div>
 
       <p className="mt-6 text-xs text-muted-foreground">
-        Comparison based on Atarim Pro at $67/month, or $643.20/year billed
-        yearly, flat for up to 100 seats and 1,000 projects, vs FasterFixes Pro
-        (${proPrice}/month for up to {proPlan.seats} members and{" "}
+        Comparison based on Atarim {atarimPro.name} at{" "}
+        {formatCompetitorPrice(atarimPro)}/month, or{" "}
+        {formatAmount(ATARIM_PRO_ANNUAL_PRICE)}/year billed yearly, flat for up
+        to {atarimPro.seats} seats and{" "}
+        {atarimPro.projects.toLocaleString("en-US")} projects, vs FasterFixes
+        Pro (${proPrice}/month for up to {proPlan.seats} members and{" "}
         {proPlan.projects} projects) and Agency (${agencyPrice}/month,
         unlimited). Atarim AI credits beyond the 5,000 included each month are
         not counted. Check atarim.io/pricing for current rates.

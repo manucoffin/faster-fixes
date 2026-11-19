@@ -89,8 +89,8 @@ export const OG_CARDS: Record<string, OgCardContent> = {
   },
   "/vs/atarim": {
     eyebrow: "Comparison",
-    title: "The open-source Atarim alternative",
-    highlight: "open-source",
+    title: "Atarim alternatives: 9 tools compared",
+    highlight: "9 tools compared",
     tags: ["Self-hosted", "Flat pricing", "MCP server"],
   },
   "/vs/bugherd": {
@@ -101,8 +101,8 @@ export const OG_CARDS: Record<string, OgCardContent> = {
   },
   "/vs/gleap": {
     eyebrow: "Comparison",
-    title: "The open-source Gleap alternative",
-    highlight: "open-source",
+    title: "Gleap alternatives: 8 tools compared",
+    highlight: "8 tools compared",
     tags: ["Self-hosted", "Flat $20/mo", "MCP server"],
   },
   "/vs/marker-io": {
@@ -119,8 +119,8 @@ export const OG_CARDS: Record<string, OgCardContent> = {
   },
   "/vs/ruttl": {
     eyebrow: "Comparison",
-    title: "The Ruttl alternative without per-seat pricing",
-    highlight: "without per-seat pricing",
+    title: "Ruttl alternatives: 8 tools compared",
+    highlight: "8 tools compared",
     tags: ["Open source", "Self-hosted", "MCP server"],
   },
   "/vs/userback": {
@@ -131,8 +131,8 @@ export const OG_CARDS: Record<string, OgCardContent> = {
   },
   "/vs/usersnap": {
     eyebrow: "Comparison",
-    title: "The open-source Usersnap alternative",
-    highlight: "open-source",
+    title: "Usersnap alternatives: 9 tools compared",
+    highlight: "9 tools compared",
     tags: ["Self-hosted", "No per-seat pricing", "Free to start"],
   },
 };

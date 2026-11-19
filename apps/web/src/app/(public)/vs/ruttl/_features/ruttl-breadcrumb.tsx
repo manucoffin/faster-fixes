@@ -24,7 +24,7 @@ export function RuttlBreadcrumb() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Ruttl alternative</BreadcrumbPage>
+            <BreadcrumbPage>Ruttl alternatives</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

@@ -1,3 +1,20 @@
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
+const atarimProBilledYearly = formatAmount(
+  atarimPro.billedYearlyAmount,
+  atarimPro.currency,
+);
+const atarimProYearlyTotal = formatAmount(
+  Math.round(atarimPro.billedYearlyAmount * 12 * 100) / 100,
+  atarimPro.currency,
+);
+const aiCredits = COMPETITOR_PRICES.atarim.otherPrices.aiCreditsPerThousand;
+
 export function AtarimWhatIsSection() {
   return (
     <section className="w-full py-16 md:py-20">
@@ -30,11 +47,16 @@ export function AtarimWhatIsSection() {
           </p>
           <p>
             Atarim is proprietary and cloud-only. There is no self-hosting
-            option and no public source code. It sells one paid plan: Pro at
-            $67/month, or $53.60/month billed yearly ($643.20/year), for up to
-            100 seats and 1,000 projects, with 5,000 AI credits a month. Extra
-            credits cost $6 to $10 per 1,000. The free plan covers 1 project
-            with 200 credits, one time, and Enterprise is priced on request.
+            option and no public source code. It sells one paid plan:{" "}
+            {atarimPro.name} at {formatPrice(atarimPro)}/month, or{" "}
+            {atarimProBilledYearly}/month billed yearly ({atarimProYearlyTotal}
+            /year), for up to {atarimPro.seats} seats and{" "}
+            {atarimPro.projects.toLocaleString("en-US")} projects, with 5,000 AI
+            credits a month. Extra credits cost{" "}
+            {formatAmount(aiCredits.amount, aiCredits.currency)} to{" "}
+            {formatAmount(aiCredits.maxAmount, aiCredits.currency)} per 1,000.
+            The free plan covers 1 project with 200 credits, one time, and
+            Enterprise is priced on request.
           </p>
         </div>
       </div>
