@@ -1,7 +1,9 @@
 import { cn } from "@workspace/ui/lib/utils";
-import { CheckIcon, XIcon } from "lucide-react";
+import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
-export type VsComparisonCell = string | { type: "yes" | "no"; note?: string };
+export type VsComparisonCell =
+  | string
+  | { type: "yes" | "no" | "partial"; note?: string };
 
 export type VsComparisonRow = {
   label: string;
@@ -18,17 +20,29 @@ type ComparisonCellProps = {
   cell: VsComparisonCell;
 };
 
+type ComparisonIconProps = {
+  type: "yes" | "no" | "partial";
+};
+
+function ComparisonIcon({ type }: ComparisonIconProps) {
+  if (type === "yes") {
+    return <CheckIcon className="size-5 text-success" aria-label="Yes" />;
+  }
+  if (type === "no") {
+    return <XIcon className="size-5 text-destructive" aria-label="No" />;
+  }
+  return (
+    <MinusIcon className="size-5 text-muted-foreground" aria-label="Partial" />
+  );
+}
+
 function ComparisonCell({ cell }: ComparisonCellProps) {
   if (typeof cell === "string") {
     return <span className="text-sm text-muted-foreground">{cell}</span>;
   }
   return (
     <div className="flex flex-col gap-1">
-      {cell.type === "yes" ? (
-        <CheckIcon className="size-5 text-success" aria-label="Yes" />
-      ) : (
-        <XIcon className="size-5 text-destructive" aria-label="No" />
-      )}
+      <ComparisonIcon type={cell.type} />
       {cell.note && (
         <span className="text-xs text-muted-foreground">{cell.note}</span>
       )}

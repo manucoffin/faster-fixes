@@ -3,11 +3,15 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { MarkerIoTierGatingIllustration } from "../_components/illustrations/marker-io-tier-gating-illustration";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
+import { VsSection } from "../../_features/vs-section";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-const limitations = [
+
+const limitations: VsPoint[] = [
   {
     title: "The bill grows every time you hire",
     body: `Marker.io charges per seat: Starter covers 3 members, Team covers 15, and every additional member is $4–$6/month on top with annual billing ($6–$9 monthly). A 5-person dev team that needs Jira and devtools already starts at $149/month annual before adding anyone. FasterFixes charges per workspace: $${proPrice}/month flat for up to ${proPlan.seats} members, $${agencyPrice}/month for unlimited. Headcount stops being a pricing variable.`,
@@ -28,28 +32,17 @@ const limitations = [
 
 export function MarkerIoWhySwitchSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Where Marker.io falls short
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Why teams switch from Marker.io
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {limitations.map((item) => (
-            <div key={item.title} className="rounded-xl border bg-muted/30 p-7">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                {item.body}
-              </p>
-            </div>
-          ))}
+    <VsSection
+      eyebrow="Where Marker.io falls short"
+      title="Why teams switch from Marker.io"
+      className="border-t"
+    >
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <VsPointGrid points={limitations} columns={1} />
+        <div className="rounded-2xl bg-muted/50 p-4 sm:p-8 lg:sticky lg:top-24">
+          <MarkerIoTierGatingIllustration />
         </div>
       </div>
-    </section>
+    </VsSection>
   );
 }

@@ -7,14 +7,10 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
-import { MarkerIoBreadcrumb } from "./_features/marker-io-breadcrumb";
 import { MarkerIoComparisonSection } from "./_features/marker-io-comparison-section";
 import { MarkerIoCtaSection } from "./_features/marker-io-cta-section";
 import { MarkerIoDeveloperFirstSection } from "./_features/marker-io-developer-first-section";
-import {
-  MarkerIoFaqSection,
-  markerIoFaqs,
-} from "./_features/marker-io-faq-section";
+import { markerIoFaqs } from "./_features/marker-io-faqs";
 import { MarkerIoHero } from "./_features/marker-io-hero";
 import { MarkerIoHonestTakeSection } from "./_features/marker-io-honest-take-section";
 import {
@@ -24,6 +20,7 @@ import {
 import { MarkerIoPricingSection } from "./_features/marker-io-pricing-section";
 import { MarkerIoWhySwitchSection } from "./_features/marker-io-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const pageUrl = `${APP_URL}/vs/marker-io`;
 const title = `Marker.io alternative · Open-source feedback widget · ${SITE_NAME}`;
@@ -62,7 +59,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <MarkerIoBreadcrumb />
       <MarkerIoHero />
       <MarkerIoWhySwitchSection />
       <MarkerIoHonestTakeSection />
@@ -70,7 +66,7 @@ export default function Page() {
       <MarkerIoComparisonSection />
       <MarkerIoPricingSection />
       <MarkerIoMigrationSection />
-      <MarkerIoFaqSection />
+      <VsFaqSection faqs={markerIoFaqs} />
       <MarkerIoCtaSection />
       <VsCrossLinks currentSlug="marker-io" />
 

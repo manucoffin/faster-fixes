@@ -1,24 +1,16 @@
-import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   PLAN_LIMITS,
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@workspace/ui/components/accordion";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-
-type RichFaqItem = FaqItem & { content?: ReactNode };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -28,22 +20,15 @@ type DocLinkProps = {
 };
 
 function DocLink({ href, children }: DocLinkProps) {
-  return (
-    <Link
-      href={href}
-      className="text-foreground underline underline-offset-4 hover:no-underline"
-    >
-      {children}
-    </Link>
-  );
+  return <Link href={href}>{children}</Link>;
 }
 
-export const markerIoFaqs: RichFaqItem[] = [
+export const markerIoFaqs: VsFaqItem[] = [
   {
     question: "Is FasterFixes free to use?",
     answer: `Yes. The hosted Free plan is permanent: ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, ${freePlan.seats} member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The hosted Free plan is permanent: {freePlan.projects} project,{" "}
         {freeFeedbackLimit} feedback items, {freePlan.seats} member, no time
         limit, no credit card. The dashboard is open source under AGPL-3.0 and
@@ -51,7 +36,7 @@ export const markerIoFaqs: RichFaqItem[] = [
         <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
         also free regardless of team size. Paid hosted plans are ${proPrice}
         /month for Pro and ${agencyPrice}/month for Agency.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -59,7 +44,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Marker.io has no self-hosted option. Deploy on your own infrastructure and run FasterFixes without a hosted account. The dashboard is AGPL-3.0; the widget packages are MIT.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
         storage. Marker.io has no self-hosted option. Deploy on your own
         infrastructure and run FasterFixes without a hosted account. The
@@ -69,7 +54,7 @@ export const markerIoFaqs: RichFaqItem[] = [
           self-hosting guide
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -77,7 +62,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "FasterFixes is open-source and self-hostable; Marker.io is closed-source and cloud-only. FasterFixes ships an MCP server so AI coding agents (Claude Code, Cursor, Codex) can fetch and resolve feedback from the terminal. Marker.io has no MCP support. Marker.io has the broader feature set today: Figma/PDF annotation, deep PM integrations, and a client Guest Portal. FasterFixes does not currently match those features. Both replay the moments before a report: Marker.io bundles session replay from the Team plan, and FasterFixes attaches a Recording of the last minute on the page to each feedback on every plan.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         FasterFixes is open-source and self-hostable; Marker.io is closed-source
         and cloud-only. FasterFixes ships an{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> so AI
@@ -89,7 +74,7 @@ export const markerIoFaqs: RichFaqItem[] = [
         bundles session replay from the Team plan, and FasterFixes attaches a{" "}
         <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
         the last minute on the page to each feedback on every plan.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -102,7 +87,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Marker.io has no equivalent.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context (URL, DOM selector, React component path when available,
@@ -110,7 +95,7 @@ export const markerIoFaqs: RichFaqItem[] = [
         the terminal. Marker.io has no equivalent. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -118,7 +103,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context. On React sites, every report also carries the component path.',
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         On any site, paste one script tag with your Project ID, or run npm
         install @fasterfixes/widget and call init({"{ projectId }"}). In a React
         or Next.js app, you can instead run npm install @fasterfixes/react and
@@ -137,7 +122,7 @@ export const markerIoFaqs: RichFaqItem[] = [
           quickstart
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -145,7 +130,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. The widget does need to be installed on the site. If reviewers must leave feedback on sites you cannot edit, Marker.io's browser extension is a better fit.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The script embed installs the widget with one script tag on any
         website: WordPress, Webflow, static HTML, or an app built with Vue,
         Angular, Svelte, or no framework at all. It needs no framework runtime
@@ -157,7 +142,7 @@ export const markerIoFaqs: RichFaqItem[] = [
           script embed docs
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -165,14 +150,14 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "Yes. The MCP server is model-agnostic. Pick the agent you already use, whether Claude Code, Cursor, Codex, or any other MCP-compatible client, and the agent runs whichever model you have configured. Marker.io's AI features are bundled inside the dashboard and do not let you bring your own model.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink>{" "}
         is model-agnostic. Pick the agent you already use, whether Claude Code,
         Cursor, Codex, or any other MCP-compatible client, and the agent runs
         whichever model you have configured. Marker.io&apos;s AI features (Title
         Generation, Magic Rewrite, Translation) are bundled inside the dashboard
         and do not let you bring your own model.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -186,7 +171,7 @@ export const markerIoFaqs: RichFaqItem[] = [
     answer:
       "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
         every paid plan, included by default. A single feedback item can mirror
         to all three at once, and Jira sync maps by status category rather than
@@ -203,40 +188,7 @@ export const markerIoFaqs: RichFaqItem[] = [
           Jira integration docs
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
 ];
-
-export function MarkerIoFaqSection() {
-  return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Frequently asked questions
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-2xl">
-          <Accordion type="single" collapsible>
-            {markerIoFaqs.map((faq) => (
-              <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {faq.content ?? (
-                    <p className="text-lg text-muted-foreground md:text-xl">
-                      {faq.answer}
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </div>
-    </section>
-  );
-}
