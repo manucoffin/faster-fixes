@@ -5,8 +5,8 @@ import {
 } from "@/app/_domains/subscription";
 import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
 import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
-import { CheckIcon } from "lucide-react";
 import { UsersnapMcpContrastAnimation } from "../_components/illustrations/usersnap-mcp-contrast-animation";
+import { VsFitList } from "../../_features/vs-fit-list";
 import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
 import { VsSection } from "../../_features/vs-section";
 
@@ -61,18 +61,7 @@ export function UsersnapFitSection() {
         <h3 className="text-xl font-medium tracking-tight">
           FasterFixes is the right fit if
         </h3>
-        <ul className="mt-6 border-t">
-          {fitPoints.map((point) => (
-            <li key={point} className="flex items-start gap-4 border-b py-5">
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-success/10">
-                <CheckIcon aria-hidden className="size-3.5 text-success" />
-              </span>
-              <span className="text-lg leading-relaxed text-pretty text-foreground">
-                {point}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <VsFitList points={fitPoints} className="mt-6" />
       </div>
     </VsSection>
   );

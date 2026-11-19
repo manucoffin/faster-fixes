@@ -1,3 +1,4 @@
+import { cn } from "@workspace/ui/lib/utils";
 import type { ReactNode } from "react";
 import { SectionBody } from "../../features/_components/section-body";
 
@@ -8,8 +9,9 @@ type VsHonestTakeSide = {
 
 type VsHonestTakeProps = {
   competitor: VsHonestTakeSide;
-  fasterFixes: VsHonestTakeSide;
-  verdict: ReactNode;
+  // Omitted when the page only lists where the competitor wins.
+  fasterFixes?: VsHonestTakeSide;
+  verdict?: ReactNode;
 };
 
 function HonestTakeColumn({ lead, items }: VsHonestTakeSide) {
@@ -34,6 +36,7 @@ function HonestTakeColumn({ lead, items }: VsHonestTakeSide) {
 }
 
 // Competitor strengths and our brief side by side, the verdict under both.
+// With competitor strengths only, it renders as a single column.
 export function VsHonestTake({
   competitor,
   fasterFixes,
@@ -41,13 +44,20 @@ export function VsHonestTake({
 }: VsHonestTakeProps) {
   return (
     <div className="overflow-hidden rounded-2xl border bg-background">
-      <div className="grid grid-cols-1 divide-y lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+      <div
+        className={cn(
+          "grid grid-cols-1",
+          fasterFixes && "divide-y lg:grid-cols-2 lg:divide-x lg:divide-y-0",
+        )}
+      >
         <HonestTakeColumn {...competitor} />
-        <HonestTakeColumn {...fasterFixes} />
+        {fasterFixes && <HonestTakeColumn {...fasterFixes} />}
       </div>
-      <SectionBody className="border-t bg-muted/50 p-6 md:p-8 [&>p]:max-w-4xl">
-        {verdict}
-      </SectionBody>
+      {verdict && (
+        <SectionBody className="border-t bg-muted/50 p-6 md:p-8 [&>p]:max-w-4xl">
+          {verdict}
+        </SectionBody>
+      )}
     </div>
   );
 }
