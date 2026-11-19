@@ -1,4 +1,3 @@
-import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
@@ -7,21 +6,22 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { GleapAlternativesSection } from "./_features/gleap-alternatives-section";
 import { GleapBreadcrumb } from "./_features/gleap-breadcrumb";
 import { GleapComparisonSection } from "./_features/gleap-comparison-section";
 import { GleapCtaSection } from "./_features/gleap-cta-section";
 import { GleapFaqSection, gleapFaqs } from "./_features/gleap-faq-section";
 import { GleapFeatureCardsSection } from "./_features/gleap-feature-cards-section";
 import { GleapHero } from "./_features/gleap-hero";
+import { GleapHonestTakeSection } from "./_features/gleap-honest-take-section";
 import { GleapPricingSection } from "./_features/gleap-pricing-section";
 
-const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-
 const pageUrl = `${APP_URL}/vs/gleap`;
-const title = "Gleap Alternative: Open-Source, Self-Hosted, No Per-Seat Fee";
-const description = `FasterFixes is the open-source gleap alternative for dev teams. Self-hostable, MCP server for Claude Code and Cursor, flat $${proPrice}/mo pricing.`;
+const title = "Gleap alternatives: 8 tools compared (2026)";
+const description =
+  "Gleap now sells AI support. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.";
 const datePublished = "2026-05-03T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-17T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
+    "gleap alternatives",
     "gleap alternative",
     "open source gleap alternative",
     "gleap free alternative",
@@ -55,9 +56,11 @@ export default function Page() {
     <div>
       <GleapBreadcrumb />
       <GleapHero />
+      <GleapAlternativesSection />
       <GleapComparisonSection />
       <GleapFeatureCardsSection />
       <GleapPricingSection />
+      <GleapHonestTakeSection />
       <GleapFaqSection />
       <GleapCtaSection />
       <VsCrossLinks currentSlug="gleap" />
@@ -75,7 +78,7 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Gleap alternative", url: pageUrl },
+          { name: "Gleap alternatives", url: pageUrl },
         ]}
       />
       <FaqSchema faqs={gleapFaqs} />

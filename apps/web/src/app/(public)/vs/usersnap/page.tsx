@@ -1,5 +1,5 @@
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
@@ -28,12 +28,13 @@ import { UsersnapPricingSection } from "./_features/usersnap-pricing-section";
 import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
 const pageUrl = `${APP_URL}/vs/usersnap`;
-const title = `Usersnap Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
-const description =
-  "Open-source, self-hosted, and free to start. FasterFixes gives dev teams visual bug reports with full technical context, no per-seat pricing, no vendor lock-in. Compare features and pricing.";
+const title = "Usersnap alternatives: 9 tools compared (2026)";
+const description = `Nine Usersnap alternatives compared on price, free plans and self-hosting. Usersnap starts at $59/mo for 2 seats. FasterFixes is $${proPrice}/mo.`;
 const datePublished = "2026-04-27T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-17T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +42,7 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
+    "Usersnap alternatives",
     "Usersnap alternative",
     "Usersnap open source alternative",
     "Usersnap free alternative",
@@ -67,11 +69,11 @@ export default function Page() {
     <div>
       <UsersnapBreadcrumb />
       <UsersnapHero />
+      <UsersnapAlternativesSection />
       <UsersnapWhySwitchSection />
       <UsersnapFitSection />
       <UsersnapCalculatorSection />
       <UsersnapHonestTakeSection />
-      <UsersnapAlternativesSection />
       <UsersnapDeveloperFirstSection />
       <UsersnapComparisonSection />
       <UsersnapPricingSection />
@@ -93,7 +95,7 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Usersnap alternative", url: pageUrl },
+          { name: "Usersnap alternatives", url: pageUrl },
         ]}
       />
       <HowToSchema

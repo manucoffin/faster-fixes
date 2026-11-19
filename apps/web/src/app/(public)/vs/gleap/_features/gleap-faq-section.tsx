@@ -16,6 +16,10 @@ const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export const gleapFaqs: FaqItem[] = [
   {
+    question: "What is the best Gleap alternative?",
+    answer: `For bug reporting, FasterFixes: it is the only Gleap alternative you can self-host for $0, and the hosted Pro plan is $${proPrice}/mo flat for up to ${proPlan.seats} members. Every Feedback carries the DOM selector, React component tree, console logs, and network requests, readable by Claude Code and Cursor over MCP. If you need live chat or mobile SDKs, Gleap remains the better fit.`,
+  },
+  {
     question: "Is FasterFixes a free Gleap alternative?",
     answer: `Yes. Free to self-host with no member limits. Hosted Pro plan is $${proPrice}/mo flat for up to ${proPlan.seats} members.`,
   },
@@ -27,7 +31,7 @@ export const gleapFaqs: FaqItem[] = [
   {
     question: "Does FasterFixes have mobile SDKs?",
     answer:
-      "No. FasterFixes is web only: a script tag for any website, and a React package for React apps. No iOS, Android, Flutter, or React Native SDKs.",
+      "No. FasterFixes is web only: a script tag for any website, plus packages for React, Vue, Angular, and Svelte. No iOS, Android, Flutter, or React Native SDKs.",
   },
   {
     question: "How does FasterFixes integrate with Claude Code and Cursor?",

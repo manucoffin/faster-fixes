@@ -1,5 +1,4 @@
 import { APP_URL } from "@/app/_constants/app";
-import { SITE_NAME } from "@/app/_constants/seo";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
@@ -7,6 +6,7 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { RuttlAlternativesSection } from "./_features/ruttl-alternatives-section";
 import { RuttlBreadcrumb } from "./_features/ruttl-breadcrumb";
 import { RuttlComparisonSection } from "./_features/ruttl-comparison-section";
 import { RuttlCtaSection } from "./_features/ruttl-cta-section";
@@ -18,11 +18,11 @@ import { RuttlPricingSection } from "./_features/ruttl-pricing-section";
 import { RuttlWhySwitchSection } from "./_features/ruttl-why-switch-section";
 
 const pageUrl = `${APP_URL}/vs/ruttl`;
-const title = `Ruttl Alternative: Open-Source, No Per-Seat Pricing | ${SITE_NAME}`;
+const title = "Ruttl alternatives: 8 tools compared (2026)";
 const description =
-  "Ruttl charges $18/user/month, or $90/mo for a 5-person team. FasterFixes is open-source, self-hostable, flat-rate, with an MCP server for AI coding agents.";
+  "Ruttl charges $18 per user per month. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.";
 const datePublished = "2026-05-12T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-17T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
-    "ruttl alternative",
     "ruttl alternatives",
+    "ruttl alternative",
     "ruttl free alternative",
     "ruttl open source alternative",
     "open source visual feedback tool",
@@ -56,6 +56,7 @@ export default function Page() {
     <div>
       <RuttlBreadcrumb />
       <RuttlHero />
+      <RuttlAlternativesSection />
       <RuttlWhySwitchSection />
       <RuttlComparisonSection />
       <RuttlFeatureCardsSection />
@@ -78,7 +79,7 @@ export default function Page() {
       <BreadcrumbSchema
         items={[
           { name: "Home", url: APP_URL },
-          { name: "Ruttl alternative", url: pageUrl },
+          { name: "Ruttl alternatives", url: pageUrl },
         ]}
       />
       <FaqSchema faqs={ruttlFaqs} />

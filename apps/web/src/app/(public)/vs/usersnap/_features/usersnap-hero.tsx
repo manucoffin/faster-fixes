@@ -1,8 +1,3 @@
-import {
-  PLAN_LIMITS,
-  PLAN_PRICES,
-  SubscriptionPlanName,
-} from "@/app/_domains/subscription";
 import { GITHUB_REPO_URL } from "@/app/_constants/app";
 import { signupUrl } from "@/app/_constants/routes";
 import { Button } from "@workspace/ui/components/button";
@@ -11,27 +6,21 @@ import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
 
-const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
-const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-
 export function UsersnapHero() {
   return (
     <HeroDotBackground>
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
           <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Usersnap alternative
+            Usersnap alternatives
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            The open-source Usersnap alternative
+            Usersnap alternatives: 9 tools compared for developer teams
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Usersnap is closed-source and tiered by project count. FasterFixes
-            is the open-source alternative: AGPL-3.0, self-hostable for free, or
-            ${proPrice} a month flat for up to {proPlan.seats} members, built
-            around structured bug reports rather than a product feedback widget.
-            Reports sync to GitHub, Linear, or Jira, and an MCP server makes
-            them readable by Claude Code and Cursor.
+            Usersnap charges $59/mo for 2 seats, then tiers everything by
+            project count up to $549/mo. Here are nine alternatives, what each
+            one charges, and which of them keeps your data on your own server.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

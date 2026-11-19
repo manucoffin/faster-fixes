@@ -12,25 +12,21 @@ export function GleapHero() {
       <section className="w-full py-20 md:py-24">
         <div className="container mx-auto max-w-3xl px-4 text-center">
           <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Gleap alternative
+            Gleap alternatives
           </p>
           <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            The open-source Gleap alternative built for developer teams
+            Gleap alternatives: 8 tools compared for developer teams
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Gleap has pivoted to AI customer support: chatbot, ticketing, shared
-            inbox. FasterFixes is an{" "}
+            Gleap now sells AI customer support. Here are eight alternatives,
+            what each one charges, and the{" "}
             <Link
               href="/open-source"
               className="text-foreground underline underline-offset-4 hover:no-underline"
             >
-              open-source feedback widget
+              open-source one
             </Link>{" "}
-            built for the opposite workflow: structured bug reports carrying
-            screenshot, DOM selector, React component tree, console logs, and
-            network requests, routed to GitHub, Linear, or Jira and readable by
-            Claude Code or Cursor over MCP. Open-source under AGPL-3.0,
-            self-hostable, and flat-rate.
+            you can run on your own server for $0.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

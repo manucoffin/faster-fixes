@@ -24,7 +24,7 @@ export function UsersnapBreadcrumb() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Usersnap alternative</BreadcrumbPage>
+            <BreadcrumbPage>Usersnap alternatives</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
