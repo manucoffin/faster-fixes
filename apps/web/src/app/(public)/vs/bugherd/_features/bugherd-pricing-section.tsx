@@ -3,25 +3,20 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
+import { SeatPricingChart } from "../../_components/illustrations/seat-pricing-chart";
+import { VsActions } from "../../_features/vs-actions";
+import {
+  type VsPricingCard,
+  VsPricingCards,
+} from "../../_features/vs-pricing-cards";
+import { VsSection } from "../../_features/vs-section";
+import { SectionBody } from "../../../features/_components/section-body";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-const cards: {
-  vendor: string;
-  plan: string;
-  price: string;
-  suffix?: string;
-  note: string;
-  highlight?: boolean;
-}[] = [
+const cards: VsPricingCard[] = [
   {
     vendor: "FasterFixes · Self-hosted",
     plan: "Open source under AGPL-3.0",
@@ -46,73 +41,53 @@ const cards: {
   },
 ];
 
+// BugHerd's public tiers, monthly billing: the chart reads the same numbers as the cards.
+const bugherdTiers = [
+  { name: "Standard", seats: 5, monthlyPrice: 50 },
+  { name: "Studio", seats: 10, monthlyPrice: 80 },
+  { name: "Premium", seats: 25, monthlyPrice: 150 },
+];
+
 export function BugherdPricingSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Pricing
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Free if you self-host. Flat rate if you don&apos;t.
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+    <VsSection
+      eyebrow="Pricing"
+      title="Free if you self-host. Flat rate if you don't."
+    >
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <SectionBody>
+          <p>
             FasterFixes is open source. The lowest plan in any honest comparison
             is &quot;free, forever, on your own server.&quot; If you would
             rather not run it yourself, the hosted plans are flat-rate, not
             per-seat. BugHerd uses tiered per-seat pricing with extra users
             billed at $8/month each on top of the plan.
           </p>
-        </div>
+        </SectionBody>
 
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
-          {cards.map((card) => (
-            <div
-              key={card.vendor}
-              className={`rounded-xl border p-7 ${
-                card.highlight ? "border-foreground bg-muted/30" : ""
-              }`}
-            >
-              <p className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                {card.vendor}
-              </p>
-              <p className="mt-2 text-sm">{card.plan}</p>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-4xl font-bold">{card.price}</span>
-                {card.suffix && (
-                  <span className="text-sm text-muted-foreground">
-                    {card.suffix}
-                  </span>
-                )}
-              </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {card.note}
-              </p>
-            </div>
-          ))}
+        <div className="rounded-2xl bg-muted/50 p-4 sm:p-8">
+          <SeatPricingChart
+            competitorName="BugHerd"
+            tiers={bugherdTiers}
+            extraSeatPrice={8}
+          />
         </div>
+      </div>
 
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button asChild size="lg">
-            <Link href={signupUrl}>
-              Start hosted, free
-              <ArrowRightIcon />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-              <GithubIcon className="size-5" />
-              Self-host from GitHub
-            </a>
-          </Button>
-        </div>
+      <div className="mt-12 md:mt-16">
+        <VsPricingCards cards={cards} />
+      </div>
 
-        <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
+      <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <VsActions
+          signupLabel="Start hosted, free"
+          githubLabel="Self-host from GitHub"
+        />
+        <p className="text-sm text-muted-foreground">
           Prices reflect each vendor&apos;s public pricing page at time of
           writing.
         </p>
       </div>
-    </section>
+    </VsSection>
   );
 }

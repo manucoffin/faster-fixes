@@ -6,14 +6,10 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
-import { BugherdBreadcrumb } from "./_features/bugherd-breadcrumb";
 import { BugherdComparisonSection } from "./_features/bugherd-comparison-section";
 import { BugherdCtaSection } from "./_features/bugherd-cta-section";
 import { BugherdDeveloperFirstSection } from "./_features/bugherd-developer-first-section";
-import {
-  BugherdFaqSection,
-  bugherdFaqs,
-} from "./_features/bugherd-faq-section";
+import { bugherdFaqs } from "./_features/bugherd-faqs";
 import { BugherdHero } from "./_features/bugherd-hero";
 import { BugherdHonestTakeSection } from "./_features/bugherd-honest-take-section";
 import {
@@ -23,6 +19,7 @@ import {
 import { BugherdPricingSection } from "./_features/bugherd-pricing-section";
 import { BugherdWhySwitchSection } from "./_features/bugherd-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const pageUrl = `${APP_URL}/vs/bugherd`;
 const title = "BugHerd Alternative: Open-Source, Self-Hosted, No Seat Fees";
@@ -59,7 +56,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <BugherdBreadcrumb />
       <BugherdHero />
       <BugherdWhySwitchSection />
       <BugherdHonestTakeSection />
@@ -67,7 +63,7 @@ export default function Page() {
       <BugherdComparisonSection />
       <BugherdPricingSection />
       <BugherdMigrationSection />
-      <BugherdFaqSection />
+      <VsFaqSection faqs={bugherdFaqs} />
       <BugherdCtaSection />
       <VsCrossLinks currentSlug="bugherd" />
 

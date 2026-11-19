@@ -276,7 +276,7 @@ describe("the public pages", () => {
     expect(files.map(relative)).toEqual(
       expect.arrayContaining([
         "app/(public)/pricing/page.tsx",
-        "app/(public)/vs/bugherd/_features/bugherd-faq-section.tsx",
+        "app/(public)/vs/bugherd/_features/bugherd-faqs.tsx",
       ]),
     );
   });

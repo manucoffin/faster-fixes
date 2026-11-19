@@ -3,63 +3,43 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+import { BugherdRoutingAnimation } from "../_components/illustrations/bugherd-routing-animation";
+import { VsActions } from "../../_features/vs-actions";
+import { VsHero } from "../../_features/vs-hero";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function BugherdHero() {
   return (
-    <HeroDotBackground>
-      <section className="w-full py-20 md:py-24">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            BugHerd alternative
-          </p>
-          <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            The open-source BugHerd alternative built for developer teams
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            FasterFixes is an{" "}
-            <Link
-              href="/open-source"
-              className="text-foreground underline underline-offset-4 hover:no-underline"
-            >
-              open-source feedback widget
-            </Link>{" "}
-            and the self-hostable alternative to BugHerd: flat-rate at $
-            {proPrice} a month for up to {proPlan.seats} members, or free if you
-            self-host. Where BugHerd routes feedback to a Kanban board,
-            FasterFixes routes it to GitHub, Linear, or Jira with a full repro
-            bundle, and exposes every report to Claude Code and Cursor over MCP.
-          </p>
-
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href={signupUrl}>
-                Start for free
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GithubIcon className="size-5" />
-                View source on GitHub
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </HeroDotBackground>
+    <VsHero
+      breadcrumbLabel="BugHerd alternative"
+      eyebrow="BugHerd alternative"
+      title={
+        <>
+          The <span className="whitespace-nowrap">open-source</span> BugHerd
+          alternative built for developer teams
+        </>
+      }
+      description={
+        <>
+          FasterFixes is an{" "}
+          <Link href="/open-source">open-source feedback widget</Link> and the
+          self-hostable alternative to BugHerd: flat-rate at ${proPrice} a month
+          for up to {proPlan.seats} members, or free if you self-host. Where
+          BugHerd routes feedback to a Kanban board, FasterFixes routes it to
+          GitHub, Linear, or Jira with a full repro bundle, and exposes every
+          report to Claude Code and Cursor over MCP.
+        </>
+      }
+      actions={
+        <VsActions
+          signupLabel="Start for free"
+          githubLabel="View source on GitHub"
+        />
+      }
+      illustration={<BugherdRoutingAnimation />}
+    />
   );
 }
