@@ -105,7 +105,7 @@ export const usersnapFaqs: VsFaqItem[] = [
   },
   {
     question: "How much does Usersnap cost for a five-person team?",
-    answer: `${formatPublishedPrice(growth, " per month")} on Usersnap ${growth.name}. ${starter.name}, at ${formatPrice(starter)} per month, covers only ${starter.seats} seats and ${starter.projects} projects, and every higher tier has unlimited seats and is sized by projects: ${growth.name} covers ${growth.projects}, ${professional.name} ${professional.projects} at ${formatPrice(professional)}, ${premium.name} ${premium.projects} at ${formatPrice(premium)}. Usersnap lists its prices in EUR, and yearly billing saves up to ${COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. FasterFixes is $0 self-hosted, $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
+    answer: `${formatPublishedPrice(growth, " per month")} on Usersnap ${growth.name}. ${starter.name}, at ${formatPrice(starter)} per month, covers only ${starter.seats} seats and ${starter.projects} projects, and every higher tier has unlimited seats and is sized by projects: ${growth.name} covers ${growth.projects}, ${professional.name} ${professional.projects} at ${formatPrice(professional)}, ${premium.name} ${premium.projects} at ${formatPrice(premium)}. Usersnap lists its prices in EUR, and billed yearly ${growth.name} drops to ${formatPrice({ amount: growth.billedYearlyAmount, currency: growth.currency })} per month. FasterFixes is $0 self-hosted, $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
   },
   {
     question: "Does Usersnap have a free plan?",

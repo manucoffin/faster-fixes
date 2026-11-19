@@ -15,7 +15,7 @@ export const COMPETITOR_STARTING_PRICES = {
   fasterFixes: `$0 self-hosted / $${PLAN_PRICES[SubscriptionPlanName.Pro]}/mo Pro`,
   bugherd: `${formatPublishedPrice(bugherd.plans.standard, "/mo")} for ${bugherd.plans.standard.seats} members (${yearly(bugherd.plans.standard.billedYearlyAmount)}/mo annual)`,
   markerIo: `${formatPublishedPrice(markerIo.plans.starter, "/mo")} Starter, ${markerIo.plans.starter.seats} seats (${yearly(markerIo.plans.starter.billedYearlyAmount)}/mo annual)`,
-  usersnap: `${formatPublishedPrice(usersnap.plans.starter, "/mo")} Starter, ${usersnap.plans.starter.seats} seats`,
+  usersnap: `${formatPublishedPrice(usersnap.plans.starter, "/mo")} Starter, ${usersnap.plans.starter.seats} seats (${formatAmount(usersnap.plans.starter.billedYearlyAmount, usersnap.plans.starter.currency)}/mo annual)`,
   userback: `${formatPublishedPrice(userback.plans.team, "/mo")} Team, ${userback.plans.team.seats} seats (${yearly(userback.plans.team.billedYearlyAmount)}/mo annual)`,
   atarim: `${formatPublishedPrice(atarim.plans.pro, "/mo")} Pro (${yearly(atarim.plans.pro.billedYearlyAmount)}/mo annual)`,
   gleap: `${formatPublishedPrice(gleap.plans.hobby, "/mo")} Hobby, ${gleap.plans.hobby.seats} seat (${yearly(gleap.plans.hobby.billedYearlyAmount)}/mo annual)`,

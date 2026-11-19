@@ -9,6 +9,7 @@ import {
 } from "@/app/(public)/_helpers/competitor-prices";
 import {
   EXCHANGE_RATE_NOTE,
+  formatAmount,
   formatPrice,
   formatPublishedPrice,
 } from "@/app/(public)/_helpers/format-competitor-price";
@@ -29,8 +30,10 @@ const { starter, growth, professional, premium } =
 const fasterFixesPro = `Pro · $${proPrice}/mo`;
 const fasterFixesAgency = `Agency · $${agencyPrice}/mo`;
 
-function formatUsersnapPlan(plan: CompetitorPlan) {
-  return `${plan.name} · ${formatPublishedPrice(plan, "/mo")}`;
+function formatUsersnapPlan(
+  plan: CompetitorPlan & { readonly billedYearlyAmount: number },
+) {
+  return `${plan.name} · ${formatPublishedPrice(plan, "/mo")}, ${formatAmount(plan.billedYearlyAmount, plan.currency)}/mo yearly`;
 }
 
 // Each row pairs the cheapest plan of each tool that covers the same team.
@@ -78,9 +81,12 @@ export function UsersnapPricingSection() {
           {professional.projects} projects) and {premium.name}{" "}
           {formatPrice(premium)}/mo ({premium.projects} projects). A five-person
           team pays {formatPublishedPrice(growth, "/mo")} on {growth.name}.
-          Usersnap lists its prices in EUR, and yearly billing saves up to{" "}
-          {COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. There is no
-          free plan, only a free trial.
+          Usersnap lists its prices in EUR. Billed yearly, they drop to{" "}
+          {formatAmount(starter.billedYearlyAmount, starter.currency)},{" "}
+          {formatAmount(growth.billedYearlyAmount, growth.currency)},{" "}
+          {formatAmount(professional.billedYearlyAmount, professional.currency)}{" "}
+          and {formatAmount(premium.billedYearlyAmount, premium.currency)} per
+          month. There is no free plan, only a free trial.
         </p>
         <p>
           FasterFixes is open source, so the lowest plan in any honest
@@ -105,7 +111,7 @@ export function UsersnapPricingSection() {
             competitorName="Usersnap"
             labelHeader="Your team"
             rows={planMatchRows}
-            footnote={`Each row is the cheapest plan of each tool that covers the team. Monthly list prices, Usersnap's checked on usersnap.com/pricing on November 19, 2026. Usersnap bills in EUR and FasterFixes in USD. ${EXCHANGE_RATE_NOTE}`}
+            footnote={`Each row is the cheapest plan of each tool that covers the team. Monthly list prices, then Usersnap's billed-yearly rate, Usersnap's checked on usersnap.com/pricing on November 19, 2026. Usersnap bills in EUR and FasterFixes in USD. ${EXCHANGE_RATE_NOTE}`}
           />
         </div>
       </div>
