@@ -31,7 +31,7 @@ const rows: { label: string; cells: [Cell, Cell, Cell, Cell] }[] = [
       "Free self-hosted · flat hosted plan",
       "$50/mo for 5 members, $8 per extra seat",
       "$59/mo Starter for 3 seats",
-      "$59/mo Starter for 2 seats, then unlimited seats",
+      "€49/mo Starter for 2 seats, then unlimited seats",
     ],
   },
   {

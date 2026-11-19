@@ -32,10 +32,17 @@ const hostedPlans: PricedPlan[] = [
   },
 ];
 
+type Currency = "$" | "€";
+
 // Monthly list prices and included seats, as published on the /vs pages.
-const competitors: { vendor: string; plans: PricedPlan[] }[] = [
+const competitors: {
+  vendor: string;
+  currency: Currency;
+  plans: PricedPlan[];
+}[] = [
   {
     vendor: "BugHerd",
+    currency: "$",
     plans: [
       { name: "Standard", price: 50, seats: 5 },
       { name: "Studio", price: 80, seats: 10 },
@@ -44,6 +51,7 @@ const competitors: { vendor: string; plans: PricedPlan[] }[] = [
   },
   {
     vendor: "Marker.io",
+    currency: "$",
     plans: [
       { name: "Starter", price: 59, seats: 3 },
       { name: "Team", price: 199, seats: 15 },
@@ -51,9 +59,11 @@ const competitors: { vendor: string; plans: PricedPlan[] }[] = [
   },
   {
     vendor: "Usersnap",
+    // Usersnap publishes EUR prices only.
+    currency: "€",
     plans: [
-      { name: "Starter", price: 59, seats: 2 },
-      { name: "Growth", price: 159, seats: Infinity },
+      { name: "Starter", price: 49, seats: 2 },
+      { name: "Growth", price: 129, seats: Infinity },
     ],
   },
 ];
@@ -64,15 +74,19 @@ function findPlan(plans: PricedPlan[], teamSize: number) {
 
 type PriceCellProps = {
   plan: PricedPlan | undefined;
+  currency?: Currency;
 };
 
-function PriceCell({ plan }: PriceCellProps) {
+function PriceCell({ plan, currency = "$" }: PriceCellProps) {
   if (!plan) {
     return <span className="text-sm text-muted-foreground">Custom</span>;
   }
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-semibold">${plan.price}</span>
+      <span className="text-sm font-semibold">
+        {currency}
+        {plan.price}
+      </span>
       <span className="text-xs text-muted-foreground">{plan.name}</span>
     </div>
   );
@@ -142,7 +156,10 @@ export function TeamSizePricingSection() {
                   </td>
                   {competitors.map((competitor) => (
                     <td key={competitor.vendor} className="p-4 align-top">
-                      <PriceCell plan={findPlan(competitor.plans, teamSize)} />
+                      <PriceCell
+                        plan={findPlan(competitor.plans, teamSize)}
+                        currency={competitor.currency}
+                      />
                     </td>
                   ))}
                 </tr>
@@ -153,10 +170,11 @@ export function TeamSizePricingSection() {
 
         <ul className="mx-auto mt-8 flex max-w-2xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Monthly billing in USD, at list prices published at time of writing.
-            Annual billing lowers several competitor prices: Marker.io Starter
-            drops to $39 per month, Usersnap Growth to $129, BugHerd Standard to
-            $42.
+            Monthly billing at list prices published at time of writing, in USD
+            except Usersnap, which lists EUR prices only. Annual billing lowers
+            several competitor prices: Marker.io Starter drops to $39 per month
+            and BugHerd Standard to $42. Usersnap says yearly billing saves up
+            to 3 months.
           </li>
           <li>
             Seat counts only. Project, page view and feedback limits differ by

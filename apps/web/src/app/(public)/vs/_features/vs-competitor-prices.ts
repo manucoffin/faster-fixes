@@ -5,7 +5,7 @@ export const COMPETITOR_STARTING_PRICES = {
   fasterFixes: `$0 self-hosted / $${PLAN_PRICES[SubscriptionPlanName.Pro]}/mo Pro`,
   bugherd: "$50/mo for 5 members ($42/mo annual)",
   markerIo: "$59/mo Starter, 3 seats ($39/mo annual)",
-  usersnap: "$59/mo Starter, 2 seats ($49/mo annual)",
+  usersnap: "€49/mo Starter, 2 seats (EUR only)",
   userback: "$49/mo Team, 5 seats ($39/mo annual)",
   atarim: "$67/mo Pro ($53.60/mo annual)",
   gleap: "$35/mo Hobby, 1 seat ($29/mo annual)",

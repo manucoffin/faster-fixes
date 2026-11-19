@@ -25,17 +25,18 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
 
 function pickUsersnapPlan(team: number, projects: number): PlanResult {
   // Only Starter caps seats; every higher tier has unlimited seats and is sized by projects.
+  // Annual is twelve monthly payments: Usersnap publishes no yearly price.
   if (team <= 2 && projects <= 2) {
-    return { planLabel: "Starter", monthly: 59, annual: 708 };
+    return { planLabel: "Starter", monthly: 49, annual: 588 };
   }
   if (projects <= 10) {
-    return { planLabel: "Growth", monthly: 159, annual: 1908 };
+    return { planLabel: "Growth", monthly: 129, annual: 1548 };
   }
   if (projects <= 20) {
-    return { planLabel: "Professional", monthly: 259, annual: 3108 };
+    return { planLabel: "Professional", monthly: 219, annual: 2628 };
   }
   if (projects <= 50) {
-    return { planLabel: "Premium", monthly: 549, annual: 6588 };
+    return { planLabel: "Premium", monthly: 459, annual: 5508 };
   }
   return {
     planLabel: "Enterprise",
@@ -45,18 +46,11 @@ function pickUsersnapPlan(team: number, projects: number): PlanResult {
   };
 }
 
-function formatPrice(value: number | null): string {
-  if (value === null) return "Custom";
-  return `$${value.toLocaleString("en-US")}`;
-}
+type Currency = "$" | "€";
 
-function formatSavings(usersnap: PlanResult, fasterFixes: PlanResult) {
-  if (usersnap.annual === null || fasterFixes.annual === null) {
-    return "Compare with FasterFixes Agency";
-  }
-  const diff = usersnap.annual - fasterFixes.annual;
-  if (diff <= 0) return null;
-  return `Save $${diff.toLocaleString("en-US")} per year`;
+function formatPrice(value: number | null, currency: Currency = "$"): string {
+  if (value === null) return "Custom";
+  return `${currency}${value.toLocaleString("en-US")}`;
 }
 
 export function UsersnapPricingCalculator() {
@@ -65,10 +59,9 @@ export function UsersnapPricingCalculator() {
 
   const fasterFixesHosted = pickFasterFixesPlan(team, projects);
   const usersnap = pickUsersnapPlan(team, projects);
-  const hostedSavings = formatSavings(usersnap, fasterFixesHosted);
   const selfHostedSavings =
     usersnap.annual !== null
-      ? `Save $${usersnap.annual.toLocaleString("en-US")} per year`
+      ? `Save ${formatPrice(usersnap.annual, "€")} per year`
       : "Save the full Usersnap subscription";
 
   return (
@@ -122,7 +115,7 @@ export function UsersnapPricingCalculator() {
             {usersnap.planLabel}
           </p>
           <p className="mt-6 text-4xl font-semibold tracking-tight tabular-nums">
-            {formatPrice(usersnap.monthly)}
+            {formatPrice(usersnap.monthly, "€")}
             {usersnap.monthly !== null && (
               <span className="ml-1 text-sm font-normal tracking-normal text-muted-foreground">
                 /mo
@@ -131,7 +124,7 @@ export function UsersnapPricingCalculator() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground tabular-nums">
             {usersnap.annual !== null
-              ? `${formatPrice(usersnap.annual)}/year`
+              ? `${formatPrice(usersnap.annual, "€")}/year`
               : usersnap.note}
           </p>
         </div>
@@ -150,11 +143,6 @@ export function UsersnapPricingCalculator() {
           <p className="mt-2 text-sm text-muted-foreground tabular-nums">
             {formatPrice(fasterFixesHosted.annual)}/year
           </p>
-          {hostedSavings && (
-            <p className="mt-4 text-sm font-medium text-success tabular-nums">
-              {hostedSavings}
-            </p>
-          )}
         </div>
 
         <div className="p-6 md:p-8">
@@ -177,9 +165,9 @@ export function UsersnapPricingCalculator() {
       <p className="border-t bg-muted/30 px-6 py-4 text-xs leading-relaxed text-muted-foreground md:px-8">
         Usersnap tiers: Starter (2 seats, 2 projects), then unlimited seats on
         Growth (10 projects), Professional (20) and Premium (50). Beyond 50
-        projects, Usersnap requires an Enterprise contract. Prices are
-        Usersnap&apos;s USD monthly rates; annual billing lowers them to $49,
-        $129, $209 and $449 per month.
+        projects, Usersnap requires an Enterprise contract. Usersnap prices are
+        its monthly EUR list prices, the only currency it publishes; yearly
+        billing saves up to 3 months. FasterFixes prices are in USD.
       </p>
     </div>
   );

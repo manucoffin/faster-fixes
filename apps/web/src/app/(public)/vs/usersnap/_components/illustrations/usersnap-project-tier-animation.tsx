@@ -18,11 +18,12 @@ const PHASE_END = 100;
 // Length of a crossfade or a step, in percentages of the cycle.
 const FADE = 2;
 
+// Usersnap publishes EUR prices only.
 const USERSNAP_TIERS = [
-  { name: "Starter", projects: 2, monthlyPrice: 59 },
-  { name: "Growth", projects: 10, monthlyPrice: 159 },
-  { name: "Professional", projects: 20, monthlyPrice: 259 },
-  { name: "Premium", projects: 50, monthlyPrice: 549 },
+  { name: "Starter", projects: 2, monthlyPrice: 49 },
+  { name: "Growth", projects: 10, monthlyPrice: 129 },
+  { name: "Professional", projects: 20, monthlyPrice: 219 },
+  { name: "Premium", projects: 50, monthlyPrice: 459 },
 ] as const;
 
 const MAX_PROJECTS = Math.max(
@@ -186,7 +187,7 @@ export function UsersnapProjectTierAnimation({
             <Swap align="end">
               {usersnapSegments.map(({ value }, i) => (
                 <span key={value.name} className={`upt-tier-${i}`}>
-                  ${value.monthlyPrice}/mo
+                  €{value.monthlyPrice}/mo
                 </span>
               ))}
             </Swap>
