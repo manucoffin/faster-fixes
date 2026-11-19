@@ -5,7 +5,7 @@ import { type VsStep, VsSteps } from "../../_features/vs-steps";
 export const migrationSteps: VsStep[] = [
   {
     label: "Export your feedback data from Usersnap",
-    body: "Use Usersnap's CSV export or REST API to download your existing feedback items. Keep a local copy before deactivating your account. Note: NPS and survey responses do not have an equivalent in FasterFixes and will not carry over.",
+    body: "Export your existing feedback items from Usersnap and keep a local copy before you cancel. Its REST API is available on Premium and Enterprise only. Survey responses have no equivalent in FasterFixes and will not carry over.",
   },
   {
     label: "Deploy FasterFixes",

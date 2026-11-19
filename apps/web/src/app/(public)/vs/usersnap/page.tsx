@@ -1,4 +1,3 @@
-import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { APP_URL } from "@/app/_constants/app";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
@@ -11,7 +10,7 @@ import { UsersnapAlternativesSection } from "./_features/usersnap-alternatives-s
 import { UsersnapCalculatorSection } from "./_features/usersnap-calculator-section";
 import { UsersnapComparisonSection } from "./_features/usersnap-comparison-section";
 import { UsersnapCtaSection } from "./_features/usersnap-cta-section";
-import { UsersnapDeveloperFirstSection } from "./_features/usersnap-developer-first-section";
+import { UsersnapEditorSection } from "./_features/usersnap-editor-section";
 import { usersnapFaqs } from "./_features/usersnap-faqs";
 import { UsersnapFitSection } from "./_features/usersnap-fit-section";
 import { UsersnapHero } from "./_features/usersnap-hero";
@@ -21,17 +20,15 @@ import {
   migrationSteps,
 } from "./_features/usersnap-migration-section";
 import { UsersnapPricingSection } from "./_features/usersnap-pricing-section";
-import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { VsFaqSection } from "../_features/vs-faq-section";
 
-const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-
 const pageUrl = `${APP_URL}/vs/usersnap`;
 const title = "Usersnap alternatives: 9 tools compared (2026)";
-const description = `Nine Usersnap alternatives compared on price, free plans and self-hosting. Usersnap starts at $59/mo for 2 seats. FasterFixes is $${proPrice}/mo.`;
+const description =
+  "Usersnap alternatives: nine tools compared on price, free plan and self-hosting, including an open-source option you can host yourself for $0.";
 const datePublished = "2026-04-27T00:00:00.000Z";
-const dateModified = "2026-11-17T00:00:00.000Z";
+const dateModified = "2026-11-19T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -66,13 +63,12 @@ export default function Page() {
     <div>
       <UsersnapHero />
       <UsersnapAlternativesSection />
-      <UsersnapWhySwitchSection />
       <UsersnapFitSection />
+      <UsersnapEditorSection />
+      <UsersnapPricingSection />
       <UsersnapCalculatorSection />
       <UsersnapHonestTakeSection />
-      <UsersnapDeveloperFirstSection />
       <UsersnapComparisonSection />
-      <UsersnapPricingSection />
       <UsersnapMigrationSection />
       <VsFaqSection faqs={usersnapFaqs} />
       <UsersnapCtaSection />

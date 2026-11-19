@@ -25,9 +25,9 @@ export function UsersnapHonestTakeSection() {
               key: "surveys",
               content: (
                 <>
-                  <strong>NPS surveys and microsurveys</strong>: Usersnap
-                  supports NPS, CSAT, and in-app microsurveys out of the box.
-                  FasterFixes has no survey tooling.
+                  <strong>In-app surveys</strong>: Usersnap runs targeted
+                  surveys and logic-based forms on every plan. FasterFixes has
+                  no survey tooling.
                 </>
               ),
             },
@@ -35,9 +35,9 @@ export function UsersnapHonestTakeSection() {
               key: "feature-boards",
               content: (
                 <>
-                  <strong>Feature request boards</strong>: built-in public
-                  roadmap and voting for product teams. FasterFixes does not
-                  support this.
+                  <strong>Public roadmaps and idea voting</strong>: from the
+                  Professional plan, a guest portal where users track tickets
+                  and upvote ideas. FasterFixes does not support this.
                 </>
               ),
             },
@@ -68,9 +68,10 @@ export function UsersnapHonestTakeSection() {
               content: (
                 <>
                   <strong>Integration breadth</strong>: Jira, Slack, Zendesk,
-                  Azure DevOps, and 50+ other tools. FasterFixes ships GitHub,
-                  Linear, and Jira two-way sync; more integrations are in
-                  progress.
+                  Azure DevOps, and 50+ other tools, with two-way status sync
+                  for Jira, Azure DevOps, Asana and Linear on every plan.
+                  FasterFixes ships GitHub, Linear, Jira and Trello two-way
+                  sync; more integrations are in progress.
                 </>
               ),
             },
@@ -78,15 +79,15 @@ export function UsersnapHonestTakeSection() {
               key: "enterprise",
               content: (
                 <>
-                  <strong>Enterprise polish</strong>: custom branding, SSO, and
-                  dedicated account management on enterprise plans.
+                  <strong>Enterprise polish</strong>: custom branding on Premium
+                  and Enterprise, SSO and SAML on Enterprise.
                 </>
               ),
             },
           ],
         }}
         fasterFixes={{
-          lead: "If your workflow centers on product feedback, customer satisfaction, NPS tracking, or non-technical client reporting, Usersnap is the more complete tool today. FasterFixes is built for a narrower brief, and we think it is the right brief for most developer teams shipping client websites:",
+          lead: "If your workflow centers on product feedback, customer satisfaction surveys, public roadmaps, or non-technical client reporting, Usersnap is the more complete tool today. FasterFixes is built for a narrower brief, and we think it is the right brief for most developer teams shipping client websites:",
           items: [
             {
               key: "self-host",
@@ -132,12 +133,12 @@ export function UsersnapHonestTakeSection() {
               content: (
                 <>
                   <strong>Flat pricing</strong>: ${proPrice}/month for a
-                  5-person team versus $159/month on Usersnap Growth ($129/month
-                  billed annually), since Starter includes 2 seats. The free
-                  plan covers {freePlan.projects} project, {freeFeedbackLimit}{" "}
-                  feedback items, and {freePlan.seats} member at no cost, with
-                  no time limit. Usersnap offers a free trial, not a permanent
-                  free tier.
+                  5-person team versus €129/month on Usersnap Growth, since
+                  Starter includes 2 seats. The free plan covers{" "}
+                  {freePlan.projects} project, {freeFeedbackLimit} feedback
+                  items, and {freePlan.seats} member at no cost, with no time
+                  limit. Usersnap offers a free trial and a free month of
+                  Premium, not a permanent free tier.
                 </>
               ),
             },

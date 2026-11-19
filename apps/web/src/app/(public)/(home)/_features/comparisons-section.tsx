@@ -22,7 +22,7 @@ const comparisons: Comparison[] = [
   {
     label: "Usersnap alternative",
     href: "/vs/usersnap" as Route,
-    description: "End-user feedback with NPS surveys and feature boards.",
+    description: "End-user feedback with in-app surveys and public roadmaps.",
   },
   {
     label: "Userback alternative",

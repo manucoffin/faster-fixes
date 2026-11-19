@@ -34,29 +34,30 @@ const cards: VsPricingCard[] = [
   {
     vendor: "Usersnap · Professional",
     plan: "Cloud-only, closed source",
-    price: "$259",
+    price: "€219",
     suffix: "/ month",
-    note: "Unlimited seats, 20 projects, 1M page views, surveys, feature boards, Jira/Slack/Linear integrations. $209/mo billed annually. Starter is $59/mo for 2 seats and 2 projects; Premium is $549/mo.",
+    note: "Unlimited seats, 20 projects, 1,000,000 page views (each widget load counts), surveys, public roadmaps, two-way Jira, Linear, Asana and Azure DevOps sync. Starter is €49/mo for 2 seats and 2 projects; Premium is €459/mo.",
   },
 ];
 
 export function UsersnapPricingSection() {
   return (
-    <VsSection
-      eyebrow="Pricing"
-      title="Usersnap pricing vs FasterFixes: what you actually pay"
-    >
+    <VsSection eyebrow="Pricing" title="How much Usersnap really costs">
       <SectionBody className="max-w-3xl">
         <p>
-          FasterFixes is open source. The lowest plan in any honest comparison
-          is &quot;free, forever, on your own server.&quot; If you would rather
-          not run it yourself, the hosted plans are flat-rate, not tiered by
-          team size. Usersnap is tiered by project count: Starter $59/mo (2
-          seats, 2 projects), then unlimited seats on Growth $159/mo (10
-          projects), Professional $259/mo (20 projects), and Premium $549/mo (50
-          projects). Annual billing brings them to $49, $129, $209, and $449/mo.
-          These are Usersnap&apos;s USD prices; outside the US it lists EUR
-          prices.
+          Usersnap does not charge per seat beyond Starter. It charges per
+          project: Starter €49/mo covers 2 seats and 2 projects, then every
+          higher tier has unlimited seats and is sized by projects: Growth
+          €129/mo (10 projects), Professional €219/mo (20 projects) and Premium
+          €459/mo (50 projects). A five-person team pays €129/mo on Growth.
+          Usersnap lists its prices in EUR, and yearly billing saves up to 3
+          months. There is no free plan, only a free trial.
+        </p>
+        <p>
+          FasterFixes is open source, so the lowest plan in any honest
+          comparison is &quot;free, forever, on your own server.&quot; If you
+          would rather not run it yourself, the hosted plans are flat-rate: $
+          {proPrice}/mo for Pro and ${agencyPrice}/mo for Agency.
         </p>
       </SectionBody>
 

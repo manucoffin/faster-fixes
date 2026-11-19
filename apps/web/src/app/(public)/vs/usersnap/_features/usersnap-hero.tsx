@@ -7,8 +7,8 @@ export function UsersnapHero() {
     <VsHero
       breadcrumbLabel="Usersnap alternatives"
       eyebrow="Usersnap alternatives"
-      title="Usersnap alternatives: 9 tools compared for developer teams"
-      description="Usersnap charges $59/mo for 2 seats, then tiers everything by project count up to $549/mo. Here are nine alternatives, what each one charges, and which of them keeps your data on your own server."
+      title="The Usersnap alternatives a small dev team should weigh"
+      description="Nine tools compared on price, free plan and self-hosting, plus the open-source Usersnap alternative you install with one script tag."
       actions={
         <VsActions
           signupLabel="Start for free"

@@ -35,14 +35,14 @@ const rows: VsComparisonRow[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Tiered by project count · $59/mo Starter to $549/mo Premium",
+      "Tiered by project count · €49/mo Starter to €459/mo Premium",
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$159/mo Growth ($129/mo billed annually) · Starter has 2 seats",
+      "€129/mo Growth · Starter has 2 seats",
     ],
   },
   {
@@ -54,7 +54,7 @@ const rows: VsComparisonRow[] = [
       },
       {
         type: "partial",
-        note: "Searches feedback, creates opportunities · cannot edit feedback",
+        note: "Searches feedback, creates and updates opportunities · cannot edit feedback",
       },
     ],
   },
@@ -74,7 +74,7 @@ const rows: VsComparisonRow[] = [
   },
   {
     label: "Browser extension",
-    cells: [{ type: "no" }, { type: "yes", note: "Chrome, Firefox, Edge" }],
+    cells: [{ type: "no" }, { type: "yes", note: "All plans" }],
   },
   {
     label: "React component tree capture",
@@ -91,12 +91,15 @@ const rows: VsComparisonRow[] = [
     ],
   },
   {
-    label: "NPS / microsurveys",
-    cells: [{ type: "no" }, { type: "yes" }],
+    label: "In-app surveys",
+    cells: [
+      { type: "no" },
+      { type: "yes", note: "Targeting and logic · all plans" },
+    ],
   },
   {
-    label: "Feature request boards",
-    cells: [{ type: "no" }, { type: "yes" }],
+    label: "Public roadmap and idea voting",
+    cells: [{ type: "no" }, { type: "partial", note: "Professional and up" }],
   },
   {
     label: "Team kanban board",
@@ -134,7 +137,7 @@ const rows: VsComparisonRow[] = [
     label: "Trello sync",
     cells: [
       { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "partial", note: "Creates cards only" },
+      { type: "partial", note: "Pushes items · not in its two-way sync list" },
     ],
   },
   {
@@ -165,7 +168,7 @@ const rows: VsComparisonRow[] = [
         type: "yes",
         note: `${freeProjectLimit} project · ${freeFeedbackLimit} items · forever`,
       },
-      { type: "partial", note: "Free trial only" },
+      { type: "partial", note: "Free trial, plus a free month of Premium" },
     ],
   },
 ];
@@ -181,7 +184,7 @@ export function UsersnapComparisonSection() {
       <VsComparisonTable
         competitorName="Usersnap"
         rows={rows}
-        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
+        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 19, 2026."
       />
     </VsSection>
   );
