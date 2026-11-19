@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function BugherdHonestTakeSection() {
   return (
     <section className="w-full border-y bg-muted/30 py-16 md:py-24">
@@ -80,6 +82,16 @@ export function BugherdHonestTakeSection() {
             If that matches what you actually need, FasterFixes is faster to
             adopt and cheaper to run. If you need the breadth of BugHerd&apos;s
             project-management surface or a Chrome extension, pick BugHerd.
+          </p>
+          <p>
+            If neither fits, compare the rest: our{" "}
+            <Link
+              href="/blog/bugherd-alternatives"
+              className="text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              9 BugHerd alternatives
+            </Link>{" "}
+            ranks them on real per-team pricing.
           </p>
         </div>
       </div>
