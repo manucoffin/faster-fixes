@@ -61,9 +61,9 @@ export function UsersnapPricingCalculator() {
 
   const fasterFixesHosted = pickFasterFixesPlan(team, projects);
   const usersnap = pickUsersnapPlan(team, projects);
-  // Usersnap publishes no yearly price, so a year is twelve monthly payments.
+  // The cheapest way to pay Usersnap for a year is its billed-yearly rate.
   const usersnapAnnual = usersnap && {
-    amount: usersnap.amount * 12,
+    amount: usersnap.billedYearlyAmount * 12,
     currency: usersnap.currency,
   };
   const usersnapAnnualUsd =
@@ -140,7 +140,7 @@ export function UsersnapPricingCalculator() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground tabular-nums">
             {usersnapAnnual
-              ? `${formatAmount(usersnapAnnual.amount, usersnapAnnual.currency)}/year (${formatUsdEquivalent(usersnapAnnual)})`
+              ? `${formatAmount(usersnapAnnual.amount, usersnapAnnual.currency)}/year billed yearly (${formatUsdEquivalent(usersnapAnnual)})`
               : "Custom pricing"}
           </p>
         </div>
@@ -189,10 +189,9 @@ export function UsersnapPricingCalculator() {
         {growth.projects} projects), {professional.name} (
         {professional.projects}) and {premium.name} ({premium.projects}). Beyond{" "}
         {premium.projects} projects, Usersnap requires an Enterprise contract.
-        Usersnap prices are its monthly EUR list prices, the only currency it
-        publishes; yearly billing saves up to{" "}
-        {COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. FasterFixes
-        prices are in USD. {EXCHANGE_RATE_NOTE}
+        Usersnap prices are its EUR list prices, the only currency it publishes:
+        the monthly rate per month, and its lower billed-yearly rate per year.
+        FasterFixes prices are in USD. {EXCHANGE_RATE_NOTE}
       </p>
     </div>
   );

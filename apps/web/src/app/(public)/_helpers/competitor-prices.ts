@@ -82,11 +82,11 @@ export const COMPETITOR_PRICES = {
   },
   usersnap: {
     verifiedOn: "2026-11-19",
-    yearlySavesUpToMonths: 3,
     plans: {
       starter: {
         name: "Starter",
         amount: 49,
+        billedYearlyAmount: 39,
         currency: "EUR",
         seats: 2,
         projects: 2,
@@ -94,6 +94,7 @@ export const COMPETITOR_PRICES = {
       growth: {
         name: "Growth",
         amount: 129,
+        billedYearlyAmount: 99,
         currency: "EUR",
         seats: Infinity,
         projects: 10,
@@ -101,6 +102,7 @@ export const COMPETITOR_PRICES = {
       professional: {
         name: "Professional",
         amount: 219,
+        billedYearlyAmount: 179,
         currency: "EUR",
         seats: Infinity,
         projects: 20,
@@ -108,6 +110,7 @@ export const COMPETITOR_PRICES = {
       premium: {
         name: "Premium",
         amount: 459,
+        billedYearlyAmount: 389,
         currency: "EUR",
         seats: Infinity,
         projects: 50,

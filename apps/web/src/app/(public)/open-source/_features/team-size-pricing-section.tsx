@@ -182,8 +182,12 @@ export function TeamSizePricingSection() {
               bugherd.plans.standard.billedYearlyAmount,
               bugherd.plans.standard.currency,
             )}
-            . Usersnap says yearly billing saves up to{" "}
-            {usersnap.yearlySavesUpToMonths} months. {EXCHANGE_RATE_NOTE}
+            , and Usersnap Starter to{" "}
+            {formatAmount(
+              usersnap.plans.starter.billedYearlyAmount,
+              usersnap.plans.starter.currency,
+            )}
+            . {EXCHANGE_RATE_NOTE}
           </li>
           <li>
             Seat counts only. Project, page view and feedback limits differ by
