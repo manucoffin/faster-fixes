@@ -3,6 +3,11 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatPrice,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -12,6 +17,8 @@ const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
+const { starter, growth, professional, premium } =
+  COMPETITOR_PRICES.usersnap.plans;
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
 type DocLinkProps = {
@@ -98,11 +105,11 @@ export const usersnapFaqs: VsFaqItem[] = [
   },
   {
     question: "How much does Usersnap cost for a five-person team?",
-    answer: `€129 per month on Usersnap Growth. Starter, at €49 per month, covers only 2 seats and 2 projects, and every higher tier has unlimited seats and is sized by projects: Growth covers 10, Professional 20 at €219, Premium 50 at €459. Usersnap lists its prices in EUR, and yearly billing saves up to 3 months. FasterFixes is $0 self-hosted, $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
+    answer: `${formatPublishedPrice(growth, " per month")} on Usersnap ${growth.name}. ${starter.name}, at ${formatPrice(starter)} per month, covers only ${starter.seats} seats and ${starter.projects} projects, and every higher tier has unlimited seats and is sized by projects: ${growth.name} covers ${growth.projects}, ${professional.name} ${professional.projects} at ${formatPrice(professional)}, ${premium.name} ${premium.projects} at ${formatPrice(premium)}. Usersnap lists its prices in EUR, and yearly billing saves up to ${COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. FasterFixes is $0 self-hosted, $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
   },
   {
     question: "Does Usersnap have a free plan?",
-    answer: `No. Usersnap offers a free trial, and unlocks a free month of Premium once you set up 2 channels and collect your first 20 pieces of feedback. The first paid tier is Starter at €49 per month. FasterFixes has a permanent free plan with ${freePlan.projects} project and ${freeFeedbackLimit} feedback items, and self-hosting it costs $0.`,
+    answer: `No. Usersnap offers a free trial, and unlocks a free month of Premium once you set up 2 channels and collect your first 20 pieces of feedback. The first paid tier is ${starter.name} at ${formatPrice(starter)} per month. FasterFixes has a permanent free plan with ${freePlan.projects} project and ${freeFeedbackLimit} feedback items, and self-hosting it costs $0.`,
   },
   {
     question: "Does it work on a React site?",

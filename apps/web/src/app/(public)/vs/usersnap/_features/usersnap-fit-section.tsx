@@ -3,6 +3,8 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import { CheckIcon } from "lucide-react";
 import { UsersnapMcpContrastAnimation } from "../_components/illustrations/usersnap-mcp-contrast-animation";
 import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
@@ -12,10 +14,12 @@ const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
+const { starter, growth, professional, premium } =
+  COMPETITOR_PRICES.usersnap.plans;
 const tradeoffs: VsPoint[] = [
   {
     title: "Pricing scales with projects",
-    body: `Usersnap is tiered by project count: Starter €49/mo (2 seats, 2 projects), then unlimited seats on Growth €129/mo (10 projects), Professional €219/mo (20 projects) and Premium €459/mo (50 projects). A third team member or project moves you off Starter, and each new batch of projects moves you up a tier. FasterFixes charges a flat $${proPrice}/mo for Pro (up to ${proPlan.seats} members) and $${agencyPrice}/mo for Agency with unlimited members and projects.`,
+    body: `Usersnap is tiered by project count: ${starter.name} ${formatPrice(starter)}/mo (${starter.seats} seats, ${starter.projects} projects), then unlimited seats on ${growth.name} ${formatPrice(growth)}/mo (${growth.projects} projects), ${professional.name} ${formatPrice(professional)}/mo (${professional.projects} projects) and ${premium.name} ${formatPrice(premium)}/mo (${premium.projects} projects). A third team member or project moves you off Starter, and each new batch of projects moves you up a tier. FasterFixes charges a flat $${proPrice}/mo for Pro (up to ${proPlan.seats} members) and $${agencyPrice}/mo for Agency with unlimited members and projects.`,
   },
   {
     title: "No self-hosting option",

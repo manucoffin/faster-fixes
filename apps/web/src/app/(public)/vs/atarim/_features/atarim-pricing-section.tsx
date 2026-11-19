@@ -10,9 +10,29 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
+const atarimProBilledYearly = formatAmount(
+  atarimPro.billedYearlyAmount,
+  atarimPro.currency,
+);
+const atarimProYearlyTotal = formatAmount(
+  Math.round(atarimPro.billedYearlyAmount * 12 * 100) / 100,
+  atarimPro.currency,
+);
+const yearlySavingOnPro = formatAmount(
+  Math.round((atarimPro.billedYearlyAmount - proPrice) * 12 * 100) / 100,
+  atarimPro.currency,
+);
+const aiCredits = COMPETITOR_PRICES.atarim.otherPrices.aiCreditsPerThousand;
 
 const cards: {
   vendor: string;
@@ -38,11 +58,11 @@ const cards: {
     note: `Flat rate. Agency tier unlocks unlimited members at $${agencyPrice}/month. No per-seat charges as your team grows.`,
   },
   {
-    vendor: "Atarim · Pro",
+    vendor: `Atarim · ${atarimPro.name}`,
     plan: "Cloud-only, closed source",
-    price: "$67",
-    suffix: "/ month, up to 100 seats",
-    note: "$53.60/month billed yearly ($643.20/year). Includes 1,000 projects, 5,000 AI credits a month, and your brand on the client dashboard. Extra credits cost $6 to $10 per 1,000. Enterprise adds SSO, SAML, and an SLA at custom pricing.",
+    price: formatPrice(atarimPro),
+    suffix: `/ month, up to ${atarimPro.seats} seats`,
+    note: `${atarimProBilledYearly}/month billed yearly (${atarimProYearlyTotal}/year). Includes ${atarimPro.projects.toLocaleString("en-US")} projects, 5,000 AI credits a month, and your brand on the client dashboard. Extra credits cost ${formatAmount(aiCredits.amount, aiCredits.currency)} to ${formatAmount(aiCredits.maxAmount, aiCredits.currency)} per 1,000. Enterprise adds SSO, SAML, and an SLA at custom pricing.`,
   },
 ];
 
@@ -58,14 +78,16 @@ export function AtarimPricingSection() {
             Atarim pricing vs FasterFixes: what you actually pay
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Atarim sells one paid plan: Pro at $67/month, or $643.20/year billed
-            yearly, for up to 100 seats, with AI credits included and more sold
-            in packs. FasterFixes Pro is ${proPrice}/month flat for up to{" "}
-            {proPlan.seats} members, totaling ${proPrice * 12}/year:
-            $403.20/year less than Atarim billed yearly. Larger teams move to
-            FasterFixes Agency at ${agencyPrice}/month for unlimited members,
-            which costs more than Atarim Pro. If you self-host FasterFixes, the
-            cost is $0 forever.
+            Atarim sells one paid plan: {atarimPro.name} at{" "}
+            {formatPrice(atarimPro)}/month, or {atarimProYearlyTotal}/year
+            billed yearly, for up to {atarimPro.seats} seats, with AI credits
+            included and more sold in packs. FasterFixes Pro is ${proPrice}
+            /month flat for up to {proPlan.seats} members, totaling $
+            {proPrice * 12}/year:
+            {yearlySavingOnPro}/year less than Atarim billed yearly. Larger
+            teams move to FasterFixes Agency at ${agencyPrice}/month for
+            unlimited members, which costs more than Atarim Pro. If you
+            self-host FasterFixes, the cost is $0 forever.
           </p>
         </div>
 

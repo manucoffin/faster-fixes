@@ -1,4 +1,9 @@
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import {
   type VsComparisonRow,
   VsComparisonTable,
@@ -6,6 +11,9 @@ import {
 import { VsSection } from "../../_features/vs-section";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+
+const { standard } = COMPETITOR_PRICES.bugherd.plans;
+const { extraSeat } = COMPETITOR_PRICES.bugherd.otherPrices;
 
 const rows: VsComparisonRow[] = [
   {
@@ -24,14 +32,14 @@ const rows: VsComparisonRow[] = [
     label: "Pricing model",
     cells: [
       "Free self-host · flat hosted plans",
-      "Per-seat tiers · $8/extra user/month (monthly billing)",
+      `Per-seat tiers · ${formatPublishedPrice(extraSeat, "/extra user/month")} (monthly billing)`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$50/mo Standard ($42/mo annual)",
+      `${formatPublishedPrice(standard, "/mo")} Standard (${formatAmount(standard.billedYearlyAmount, standard.currency)}/mo annual)`,
     ],
   },
   {

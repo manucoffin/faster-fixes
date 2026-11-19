@@ -10,6 +10,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import {
+  markupIoPriceRise,
+  markupIoPro,
+  markupIoProBefore2025,
+} from "../_helpers/markup-io-prices";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -21,8 +26,7 @@ export const markupIoFaqs: FaqItem[] = [
   },
   {
     question: "Why did Markup.io raise its prices?",
-    answer:
-      "In January 2025 Markup.io raised Pro from $29 to $79 per month, a 172% increase, and removed the free plan entirely. Customers reported price changes of up to 280% on existing accounts and deletion notices for non-payment.",
+    answer: `In January 2025 Markup.io raised Pro from ${markupIoProBefore2025} to ${markupIoPro} per month, a ${markupIoPriceRise}% increase, and removed the free plan entirely. Customers reported price changes of up to 280% on existing accounts and deletion notices for non-payment.`,
   },
   {
     question: "Does FasterFixes work without a Chrome extension?",

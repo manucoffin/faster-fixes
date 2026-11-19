@@ -5,6 +5,8 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
+import { COMPETITOR_PRICES } from "../../_helpers/competitor-prices";
+import { formatPrice } from "../../_helpers/format-competitor-price";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { RuttlAlternativesSection } from "./_features/ruttl-alternatives-section";
 import { RuttlBreadcrumb } from "./_features/ruttl-breadcrumb";
@@ -17,10 +19,10 @@ import { RuttlHonestTakeSection } from "./_features/ruttl-honest-take-section";
 import { RuttlPricingSection } from "./_features/ruttl-pricing-section";
 import { RuttlWhySwitchSection } from "./_features/ruttl-why-switch-section";
 
+const ruttlPro = formatPrice(COMPETITOR_PRICES.ruttl.plans.pro);
 const pageUrl = `${APP_URL}/vs/ruttl`;
 const title = "Ruttl alternatives: 8 tools compared (2026)";
-const description =
-  "Ruttl charges $18 per user per month. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.";
+const description = `Ruttl charges ${ruttlPro} per user per month. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.`;
 const datePublished = "2026-05-12T00:00:00.000Z";
 const dateModified = "2026-11-17T00:00:00.000Z";
 

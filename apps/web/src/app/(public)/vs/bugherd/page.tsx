@@ -4,6 +4,8 @@ import { FaqSchema } from "@/app/_components/seo/faq-schema";
 import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPublishedPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { BugherdComparisonSection } from "./_features/bugherd-comparison-section";
@@ -21,10 +23,11 @@ import { BugherdWhySwitchSection } from "./_features/bugherd-why-switch-section"
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { VsFaqSection } from "../_features/vs-faq-section";
 
+const { standard } = COMPETITOR_PRICES.bugherd.plans;
+
 const pageUrl = `${APP_URL}/vs/bugherd`;
 const title = "BugHerd Alternative: Open-Source, Self-Hosted, No Seat Fees";
-const description =
-  "BugHerd costs $50/mo for 5 members. FasterFixes is an open-source feedback widget, free to self-host, with MCP for Claude Code and Cursor.";
+const description = `BugHerd costs ${formatPublishedPrice(standard, "/mo")} for ${standard.seats} members. FasterFixes is an open-source feedback widget, free to self-host, with MCP for Claude Code and Cursor.`;
 const datePublished = "2026-04-25T00:00:00.000Z";
 const dateModified = "2026-11-12T00:00:00.000Z";
 

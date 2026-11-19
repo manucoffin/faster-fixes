@@ -1,3 +1,8 @@
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice } from "../../../_helpers/format-competitor-price";
+
+const { team, business, businessPlus } = COMPETITOR_PRICES.userback.plans;
+
 export function UserbackWhatIsSection() {
   return (
     <section className="w-full py-16 md:py-20">
@@ -26,11 +31,13 @@ export function UserbackWhatIsSection() {
           </p>
           <p>
             Userback is closed-source and cloud-only. There is no self-hosted
-            option, and plans include a fixed number of seats (Team $49/month
-            for 5, Business $119/month for 15, Business Plus $199/month for 25,
-            monthly billing). It is built primarily for SaaS product teams
-            collecting end-user feedback at scale, not for developer teams
-            running structured bug-fix workflows.
+            option, and plans include a fixed number of seats ({team.name}{" "}
+            {formatPrice(team)}/month for {team.seats}, {business.name}{" "}
+            {formatPrice(business)}/month for {business.seats},{" "}
+            {businessPlus.name} {formatPrice(businessPlus)}/month for{" "}
+            {businessPlus.seats}, monthly billing). It is built primarily for
+            SaaS product teams collecting end-user feedback at scale, not for
+            developer teams running structured bug-fix workflows.
           </p>
         </div>
       </div>

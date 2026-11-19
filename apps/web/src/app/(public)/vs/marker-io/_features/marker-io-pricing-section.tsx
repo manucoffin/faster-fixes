@@ -3,6 +3,11 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import { SeatPricingChart } from "../../_components/illustrations/seat-pricing-chart";
 import { VsActions } from "../../_features/vs-actions";
 import {
@@ -11,6 +16,14 @@ import {
 } from "../../_features/vs-pricing-cards";
 import { VsSection } from "../../_features/vs-section";
 import { SectionBody } from "../../../features/_components/section-body";
+
+const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const { extraSeatBilledYearly } = COMPETITOR_PRICES.markerIo.otherPrices;
+const starterAnnual = formatAmount(
+  starter.billedYearlyAmount,
+  starter.currency,
+);
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -34,16 +47,18 @@ const cards: VsPricingCard[] = [
   },
   {
     vendor: "Marker.io · Team",
-    plan: "15 seats included (annual billing)",
-    price: "$149",
+    plan: `${team.seats} seats included (annual billing)`,
+    price: teamAnnual,
     suffix: "/ month",
-    note: "Required to unlock Jira, session replay, and developer tools. Extra seats $6/month each. Starter is $39/month annual but excludes Jira and devtools.",
+    note: `Required to unlock Jira, session replay, and developer tools. Extra seats ${formatPrice(extraSeatBilledYearly)}/month each. Starter is ${starterAnnual}/month annual but excludes Jira and devtools.`,
   },
 ];
 
 // Team is the cheapest Marker.io plan with Jira, session replay and devtools,
 // so the chart compares against it rather than the cheaper Starter seats.
-const markerIoTiers = [{ name: "Team", seats: 15, monthlyPrice: 149 }];
+const markerIoTiers = [
+  { name: team.name, seats: team.seats, monthlyPrice: team.billedYearlyAmount },
+];
 
 export function MarkerIoPricingSection() {
   return (
@@ -59,7 +74,7 @@ export function MarkerIoPricingSection() {
             rather not run it yourself, the hosted plans are flat-rate, not
             per-seat. Marker.io uses tiered per-seat pricing where Jira sync,
             session replay, and developer tools are gated behind the Team plan
-            at $149/month annual.
+            at {teamAnnual}/month annual.
           </p>
         </SectionBody>
 
@@ -67,7 +82,7 @@ export function MarkerIoPricingSection() {
           <SeatPricingChart
             competitorName="Marker.io Team"
             tiers={markerIoTiers}
-            extraSeatPrice={6}
+            extraSeatPrice={extraSeatBilledYearly.maxAmount}
           />
         </div>
       </div>

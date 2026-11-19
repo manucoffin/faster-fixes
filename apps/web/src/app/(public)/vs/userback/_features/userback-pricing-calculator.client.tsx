@@ -1,24 +1,46 @@
 "use client";
 
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { Slider } from "@workspace/ui/components/slider";
 import { useState } from "react";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice as formatCompetitorPrice,
+} from "../../../_helpers/format-competitor-price";
+
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
+const {
+  team: teamPlan,
+  business,
+  businessPlus,
+} = COMPETITOR_PRICES.userback.plans;
+const { extraSeat, extraSeatBilledYearly } =
+  COMPETITOR_PRICES.userback.otherPrices;
 // Userback monthly billing: a plan price covers a bundle of seats and sites,
-// extra seats cost $9/month each on Business and Business Plus.
-const USERBACK_EXTRA_SEAT_PRICE = 9;
+// extra seats are charged on Business and Business Plus.
+const USERBACK_EXTRA_SEAT_PRICE = extraSeat.amount;
 const USERBACK_BUSINESS = {
-  label: "Business",
-  price: 119,
-  seats: 15,
-  sites: 25,
+  label: business.name,
+  price: business.amount,
+  seats: business.seats,
+  sites: business.projects,
 };
 const USERBACK_BUSINESS_PLUS = {
-  label: "Business Plus",
-  price: 199,
-  seats: 25,
-  sites: 50,
+  label: businessPlus.name,
+  price: businessPlus.amount,
+  seats: businessPlus.seats,
+  sites: businessPlus.projects,
 };
 
 type PlanResult = {
@@ -32,10 +54,14 @@ function pickFasterFixesPlan(team: number, projects: number): PlanResult {
   if (team <= 1 && projects <= 1) {
     return { planLabel: "Free", monthly: 0, annual: 0 };
   }
-  if (team <= 5 && projects <= 5) {
-    return { planLabel: "Pro", monthly: 20, annual: 240 };
+  if (team <= proPlan.seats && projects <= proPlan.projects) {
+    return { planLabel: "Pro", monthly: proPrice, annual: proPrice * 12 };
   }
-  return { planLabel: "Agency", monthly: 99, annual: 1188 };
+  return {
+    planLabel: "Agency",
+    monthly: agencyPrice,
+    annual: agencyPrice * 12,
+  };
 }
 
 function pickUserbackPlan(team: number, projects: number): PlanResult {
@@ -184,13 +210,19 @@ export function UserbackPricingCalculator() {
 
       <p className="mt-6 text-xs text-muted-foreground">
         Calculation uses Userback Business, the closest equivalent to
-        FasterFixes for structured bug reporting: $119/month for 15 seats and 25
-        sites, plus $9/month per extra seat. Above 25 projects it uses Business
-        Plus: $199/month for 25 seats and 50 sites. The cheaper Team plan
-        ($49/month for 5 seats) omits console logs, network capture, session
+        FasterFixes for structured bug reporting:{" "}
+        {formatCompetitorPrice(business)}/month for {business.seats} seats and{" "}
+        {business.projects} sites, plus {formatCompetitorPrice(extraSeat)}
+        /month per extra seat. Above {business.projects} projects it uses{" "}
+        {businessPlus.name}: {formatCompetitorPrice(businessPlus)}/month for{" "}
+        {businessPlus.seats} seats and {businessPlus.projects} sites. The
+        cheaper {teamPlan.name} plan ({formatCompetitorPrice(teamPlan)}/month
+        for {teamPlan.seats} seats) omits console logs, network capture, session
         replay, and surveys. Annual savings are calculated against Userback
-        monthly billing; annual billing brings Business to $89/month and extra
-        seats to $7/month. Check userback.io/pricing for current rates.
+        monthly billing; annual billing brings {business.name} to{" "}
+        {formatAmount(business.billedYearlyAmount, business.currency)}/month and
+        extra seats to {formatCompetitorPrice(extraSeatBilledYearly)}/month.
+        Check userback.io/pricing for current rates.
       </p>
     </div>
   );

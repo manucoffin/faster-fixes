@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+import { markupIoPriceRise } from "../_helpers/markup-io-prices";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
@@ -26,10 +27,10 @@ export function MarkupIoHero() {
             The open-source Markup.io alternative for developer teams
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Markup.io raised prices 172% in January 2025 and removed its free
-            plan. FasterFixes is the open-source alternative: AGPL-3.0, self-
-            hostable for free, or ${proPrice} a month flat for up to{" "}
-            {proPlan.seats} members. Feedback carries a screenshot, DOM
+            Markup.io raised prices {markupIoPriceRise}% in January 2025 and
+            removed its free plan. FasterFixes is the open-source alternative:
+            AGPL-3.0, self- hostable for free, or ${proPrice} a month flat for
+            up to {proPlan.seats} members. Feedback carries a screenshot, DOM
             selector, React component tree, console logs, and network requests,
             and syncs to GitHub, Linear, or Jira.
           </p>

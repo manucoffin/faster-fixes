@@ -5,8 +5,13 @@ import {
 } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice } from "../../../_helpers/format-competitor-price";
+
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+const { team, business, businessPlus } = COMPETITOR_PRICES.userback.plans;
+const { extraSeat } = COMPETITOR_PRICES.userback.otherPrices;
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
@@ -34,14 +39,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Seat bundles · Team $49 (5 seats), Business $119 (15), Business Plus $199 (25) · extra seats $9/mo",
+      `Seat bundles · ${team.name} ${formatPrice(team)} (${team.seats} seats), ${business.name} ${formatPrice(business)} (${business.seats}), ${businessPlus.name} ${formatPrice(businessPlus)} (${businessPlus.seats}) · extra seats ${formatPrice(extraSeat)}/mo`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$49/mo Team · $119/mo Business · $199/mo Business Plus",
+      `${formatPrice(team)}/mo ${team.name} · ${formatPrice(business)}/mo ${business.name} · ${formatPrice(businessPlus)}/mo ${businessPlus.name}`,
     ],
   },
   {

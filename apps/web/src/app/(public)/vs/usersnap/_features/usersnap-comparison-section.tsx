@@ -3,6 +3,11 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import {
   type VsComparisonRow,
   VsComparisonTable,
@@ -15,6 +20,7 @@ const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
+const { starter, growth, premium } = COMPETITOR_PRICES.usersnap.plans;
 const rows: VsComparisonRow[] = [
   {
     label: "License",
@@ -35,14 +41,14 @@ const rows: VsComparisonRow[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Tiered by project count · €49/mo Starter to €459/mo Premium",
+      `Tiered by project count · ${formatPublishedPrice(starter, "/mo")} ${starter.name} to ${formatPublishedPrice(premium, "/mo")} ${premium.name}`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "€129/mo Growth · Starter has 2 seats",
+      `${formatPublishedPrice(growth, "/mo")} ${growth.name} · ${starter.name} has ${starter.seats} seats`,
     ],
   },
   {
@@ -184,7 +190,7 @@ export function UsersnapComparisonSection() {
       <VsComparisonTable
         competitorName="Usersnap"
         rows={rows}
-        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 19, 2026."
+        footnote={`Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 19, 2026. ${EXCHANGE_RATE_NOTE}`}
       />
     </VsSection>
   );

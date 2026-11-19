@@ -3,6 +3,8 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import { VsHonestTake } from "../../_features/vs-honest-take";
 import { VsSection } from "../../_features/vs-section";
 
@@ -10,6 +12,8 @@ const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+
+const { starter, growth } = COMPETITOR_PRICES.usersnap.plans;
 
 export function UsersnapHonestTakeSection() {
   return (
@@ -133,12 +137,12 @@ export function UsersnapHonestTakeSection() {
               content: (
                 <>
                   <strong>Flat pricing</strong>: ${proPrice}/month for a
-                  5-person team versus €129/month on Usersnap Growth, since
-                  Starter includes 2 seats. The free plan covers{" "}
-                  {freePlan.projects} project, {freeFeedbackLimit} feedback
-                  items, and {freePlan.seats} member at no cost, with no time
-                  limit. Usersnap offers a free trial and a free month of
-                  Premium, not a permanent free tier.
+                  5-person team versus {formatPrice(growth)}/month on Usersnap{" "}
+                  {growth.name}, since {starter.name} includes {starter.seats}{" "}
+                  seats. The free plan covers {freePlan.projects} project,{" "}
+                  {freeFeedbackLimit} feedback items, and {freePlan.seats}{" "}
+                  member at no cost, with no time limit. Usersnap offers a free
+                  trial and a free month of Premium, not a permanent free tier.
                 </>
               ),
             },

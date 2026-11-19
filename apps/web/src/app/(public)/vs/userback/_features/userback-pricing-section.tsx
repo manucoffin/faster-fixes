@@ -10,9 +10,30 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+const { team, business, businessPlus } = COMPETITOR_PRICES.userback.plans;
+const { extraSeat, extraSeatBilledYearly } =
+  COMPETITOR_PRICES.userback.otherPrices;
+const businessBilledYearly = formatAmount(
+  business.billedYearlyAmount,
+  business.currency,
+);
+const businessYearlyOnMonthly = formatAmount(
+  business.amount * 12,
+  business.currency,
+);
+const businessYearlyBilledYearly = formatAmount(
+  business.billedYearlyAmount * 12,
+  business.currency,
+);
 
 const cards: {
   vendor: string;
@@ -38,11 +59,11 @@ const cards: {
     note: `Flat rate. Agency tier unlocks unlimited members at $${agencyPrice}/month. No per-seat charges as your team grows.`,
   },
   {
-    vendor: "Userback · Business",
+    vendor: `Userback · ${business.name}`,
     plan: "Cloud-only, closed source",
-    price: "$119",
-    suffix: "/ month for up to 15 seats",
-    note: "$89/month billed annually. Extra seats are $9/month each ($7 billed annually). Includes session replay, console and network capture, AI Feedback & Insights, surveys, and the Feature Portal. The Team plan is $49/month for 5 seats without these features.",
+    price: formatPrice(business),
+    suffix: `/ month for up to ${business.seats} seats`,
+    note: `${businessBilledYearly}/month billed annually. Extra seats are ${formatPrice(extraSeat)}/month each (${formatPrice(extraSeatBilledYearly)} billed annually). Includes session replay, console and network capture, AI Feedback & Insights, surveys, and the Feature Portal. The ${team.name} plan is ${formatPrice(team)}/month for ${team.seats} seats without these features.`,
   },
 ];
 
@@ -62,11 +83,14 @@ export function UserbackPricingSection() {
             is &quot;free, forever, on your own server.&quot; If you would
             rather not run it yourself, the hosted plans are flat-rate, not
             tiered by team size. Userback sells plans with a fixed number of
-            seats: Team $49/month for 5, Business $119/month for 15, Business
-            Plus $199/month for 25 (monthly billing), with extra seats at
-            $9/month on Business and above. The Business plan is the closest
-            equivalent to FasterFixes for structured bug reporting: $1,428/year
-            on monthly billing, $1,068/year billed annually.
+            seats: {team.name} {formatPrice(team)}/month for {team.seats},{" "}
+            {business.name} {formatPrice(business)}/month for {business.seats},{" "}
+            {businessPlus.name} {formatPrice(businessPlus)}/month for{" "}
+            {businessPlus.seats} (monthly billing), with extra seats at{" "}
+            {formatPrice(extraSeat)}/month on {business.name} and above. The{" "}
+            {business.name} plan is the closest equivalent to FasterFixes for
+            structured bug reporting: {businessYearlyOnMonthly}/year on monthly
+            billing, {businessYearlyBilledYearly}/year billed annually.
           </p>
         </div>
 

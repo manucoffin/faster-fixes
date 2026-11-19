@@ -5,6 +5,10 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice } from "../../../_helpers/format-competitor-price";
+
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
 
 export function AtarimHero() {
   return (
@@ -18,9 +22,10 @@ export function AtarimHero() {
             Atarim alternatives: 9 tools compared for developer teams
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Atarim Pro is $67/mo for up to 100 seats, priced around six AI
-            agents. Here are nine alternatives, what each one charges, and which
-            of them you can run on your own server.
+            Atarim {atarimPro.name} is {formatPrice(atarimPro)}/mo for up to{" "}
+            {atarimPro.seats} seats, priced around six AI agents. Here are nine
+            alternatives, what each one charges, and which of them you can run
+            on your own server.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

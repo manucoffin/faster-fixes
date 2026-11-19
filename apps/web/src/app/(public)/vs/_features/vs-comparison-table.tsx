@@ -14,6 +14,8 @@ type VsComparisonTableProps = {
   competitorName: string;
   rows: VsComparisonRow[];
   footnote: string;
+  // Heading of the row-label column, for a table whose rows are not features.
+  labelHeader?: string;
 };
 
 type ComparisonCellProps = {
@@ -54,6 +56,7 @@ export function VsComparisonTable({
   competitorName,
   rows,
   footnote,
+  labelHeader = "Feature",
 }: VsComparisonTableProps) {
   const headers = ["FasterFixes", competitorName];
 
@@ -68,7 +71,7 @@ export function VsComparisonTable({
                   scope="col"
                   className="sticky left-0 z-10 w-[34%] bg-muted p-4 text-left text-sm font-medium md:static md:bg-transparent md:px-6"
                 >
-                  Feature
+                  {labelHeader}
                 </th>
                 {headers.map((header, index) => (
                   <th

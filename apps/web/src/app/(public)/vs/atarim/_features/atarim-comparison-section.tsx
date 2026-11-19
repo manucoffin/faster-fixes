@@ -5,8 +5,23 @@ import {
 } from "@/app/_domains/subscription";
 import { CheckIcon, MinusIcon, XIcon } from "lucide-react";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
+const atarimProBilledYearly = formatAmount(
+  atarimPro.billedYearlyAmount,
+  atarimPro.currency,
+);
+const atarimProYearlyTotal = formatAmount(
+  Math.round(atarimPro.billedYearlyAmount * 12 * 100) / 100,
+  atarimPro.currency,
+);
 
 type CellType = "yes" | "no" | "partial";
 type Cell = string | { type: CellType; note?: string };
@@ -34,14 +49,14 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Flat per workspace · free, Pro $67/mo or $53.60/mo billed yearly, Enterprise custom · AI credits on top",
+      `Flat per workspace · free, ${atarimPro.name} ${formatPrice(atarimPro)}/mo or ${atarimProBilledYearly}/mo billed yearly, Enterprise custom · AI credits on top`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$67/mo Pro · $643.20/year billed yearly",
+      `${formatPrice(atarimPro)}/mo ${atarimPro.name} · ${atarimProYearlyTotal}/year billed yearly`,
     ],
   },
   {

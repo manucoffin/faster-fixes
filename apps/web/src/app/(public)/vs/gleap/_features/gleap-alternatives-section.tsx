@@ -8,6 +8,20 @@ import {
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPrice,
+  formatPublishedPrice,
+} from "../../../_helpers/format-competitor-price";
+
+const bugherdExtraSeat = formatPrice(
+  COMPETITOR_PRICES.bugherd.otherPrices.extraSeat,
+);
+const usersnapGrowth = formatPublishedPrice(
+  COMPETITOR_PRICES.usersnap.plans.growth,
+  "/mo",
+);
 
 const alternatives: VsAlternative[] = [
   {
@@ -20,8 +34,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "BugHerd",
-    verdict:
-      "Mature and stable. $8/seat for each extra member, and no path to your own servers.",
+    verdict: `Mature and stable. ${bugherdExtraSeat}/seat for each extra member, and no path to your own servers.`,
     startingPrice: prices.bugherd,
     selfHosted: { type: "no" },
     href: "/vs/bugherd" as Route,
@@ -36,8 +49,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Usersnap",
-    verdict:
-      "Built for product teams. A three-person team already pays $159/mo on Growth.",
+    verdict: `Built for product teams. A three-person team already pays ${usersnapGrowth} on Growth.`,
     startingPrice: prices.usersnap,
     selfHosted: { type: "no" },
     href: "/vs/usersnap" as Route,
@@ -82,7 +94,7 @@ export function GleapAlternativesSection() {
       title="Gleap alternatives compared"
       intro="Pricing is each vendor's monthly rate, with the annual rate in parentheses. Self-hosted means you can run the product on infrastructure you control, and FasterFixes is the only tool in this list that qualifies."
       alternatives={alternatives}
-      closingNote={ALTERNATIVES_CLOSING_NOTE}
+      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
     />
   );
 }

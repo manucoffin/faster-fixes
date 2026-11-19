@@ -5,7 +5,15 @@ import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
+const ruttlPro = COMPETITOR_PRICES.ruttl.plans.pro;
+const teamSize = 5;
+const ruttlTeamMonthly = ruttlPro.amount * teamSize;
 export function RuttlHero() {
   return (
     <HeroDotBackground>
@@ -18,9 +26,10 @@ export function RuttlHero() {
             Ruttl alternatives: 8 tools compared for developer teams
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Ruttl charges $18/user/mo, so a five-person team pays $90/mo. Here
-            are eight alternatives, what each one charges, and the one you can
-            run on your own server for $0.
+            Ruttl charges {formatPrice(ruttlPro)}/user/mo, so a five-person team
+            pays {formatAmount(ruttlTeamMonthly, "USD")}/mo. Here are eight
+            alternatives, what each one charges, and the one you can run on your
+            own server for $0.
           </p>
 
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

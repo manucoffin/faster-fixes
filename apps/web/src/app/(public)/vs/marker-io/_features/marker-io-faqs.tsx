@@ -3,10 +3,15 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
+
+const { team } = COMPETITOR_PRICES.markerIo.plans;
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -168,8 +173,7 @@ export const markerIoFaqs: VsFaqItem[] = [
   {
     question:
       "How do the FasterFixes integrations compare to Marker.io's Jira-heavy stack?",
-    answer:
-      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.",
+    answer: `FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at ${teamAnnual}/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.`,
     content: (
       <VsFaqAnswer>
         FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
@@ -177,9 +181,9 @@ export const markerIoFaqs: VsFaqItem[] = [
         to all three at once, and Jira sync maps by status category rather than
         status name, so custom workflows need no configuration. Marker.io
         includes Linear on every plan but gates Jira sync behind the Team plan
-        at $149/month annual. Marker.io still covers a broader roster: Asana,
-        ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives
-        elsewhere. See the{" "}
+        at {teamAnnual}/month annual. Marker.io still covers a broader roster:
+        Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog
+        lives elsewhere. See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
           GitHub integration docs
         </DocLink>{" "}

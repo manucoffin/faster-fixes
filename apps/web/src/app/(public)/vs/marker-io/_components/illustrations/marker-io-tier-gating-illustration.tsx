@@ -3,12 +3,20 @@ import { CheckIcon, LockIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
 
 // Marker.io annual pricing, per month.
-const STARTER_PRICE = 39;
-const TEAM_PRICE = 149;
+const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const STARTER_PRICE = formatAmount(
+  starter.billedYearlyAmount,
+  starter.currency,
+);
+const TEAM_PRICE = formatAmount(team.billedYearlyAmount, team.currency);
 
-const PRICE_JUMP = (TEAM_PRICE / STARTER_PRICE).toFixed(1);
+const PRICE_JUMP = (
+  team.billedYearlyAmount / starter.billedYearlyAmount
+).toFixed(1);
 
 const MARKER_IO_GATED_FEATURES = [
   "Jira sync",
@@ -46,7 +54,7 @@ export function MarkerIoTierGatingIllustration({
       <style dangerouslySetInnerHTML={{ __html: styles }} />
 
       <div className="flex flex-col">
-        <PlanCard name="Marker.io Starter" price={`$${STARTER_PRICE}/mo`}>
+        <PlanCard name="Marker.io Starter" price={`${STARTER_PRICE}/mo`}>
           {MARKER_IO_GATED_FEATURES.map((feature, i) => (
             <FeatureRow key={feature} delay={0.1 + i * ROW_STAGGER} locked>
               {feature}
@@ -56,7 +64,7 @@ export function MarkerIoTierGatingIllustration({
 
         <PriceJump />
 
-        <PlanCard name="Marker.io Team" price={`$${TEAM_PRICE}/mo`}>
+        <PlanCard name="Marker.io Team" price={`${TEAM_PRICE}/mo`}>
           {MARKER_IO_GATED_FEATURES.map((feature, i) => (
             <FeatureRow key={feature} delay={0.5 + i * ROW_STAGGER}>
               {feature}
@@ -181,7 +189,7 @@ function PriceJump() {
       >
         {PRICE_JUMP}× price
         <span className="ml-1.5 text-muted-foreground">
-          ${STARTER_PRICE} to ${TEAM_PRICE}
+          {STARTER_PRICE} to {TEAM_PRICE}
         </span>
       </span>
     </div>

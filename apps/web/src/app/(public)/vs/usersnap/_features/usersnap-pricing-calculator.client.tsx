@@ -3,54 +3,56 @@
 import { Slider } from "@workspace/ui/components/slider";
 import { useState } from "react";
 
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatAmount,
+  formatUsdEquivalent,
+  toUsd,
+} from "@/app/(public)/_helpers/format-competitor-price";
+
 const MAX_TEAM = 50;
 const MAX_PROJECTS = 50;
 
-type PlanResult = {
-  planLabel: string;
-  monthly: number | null;
-  annual: number | null;
-  note?: string;
-};
+const { starter, growth, professional, premium } =
+  COMPETITOR_PRICES.usersnap.plans;
 
-function pickFasterFixesPlan(team: number, projects: number): PlanResult {
-  if (team <= 1 && projects <= 1) {
-    return { planLabel: "Free", monthly: 0, annual: 0 };
-  }
-  if (team <= 5 && projects <= 5) {
-    return { planLabel: "Pro", monthly: 20, annual: 240 };
-  }
-  return { planLabel: "Agency", monthly: 99, annual: 1188 };
+// Ordered by price, so the first tier that fits is the cheapest.
+const USERSNAP_TIERS = [starter, growth, professional, premium];
+
+const HOSTED_PLANS = [
+  { label: "Free", plan: SubscriptionPlanName.Free },
+  { label: "Pro", plan: SubscriptionPlanName.Pro },
+  { label: "Agency", plan: SubscriptionPlanName.Agency },
+] as const;
+
+function pickFasterFixesPlan(team: number, projects: number) {
+  const hosted =
+    HOSTED_PLANS.find(
+      ({ plan }) =>
+        team <= PLAN_LIMITS[plan].seats &&
+        projects <= PLAN_LIMITS[plan].projects,
+    ) ?? HOSTED_PLANS[2];
+  const monthly = PLAN_PRICES[hosted.plan];
+  return { planLabel: hosted.label, monthly, annual: monthly * 12 };
 }
 
-function pickUsersnapPlan(team: number, projects: number): PlanResult {
-  // Only Starter caps seats; every higher tier has unlimited seats and is sized by projects.
-  // Annual is twelve monthly payments: Usersnap publishes no yearly price.
-  if (team <= 2 && projects <= 2) {
-    return { planLabel: "Starter", monthly: 49, annual: 588 };
-  }
-  if (projects <= 10) {
-    return { planLabel: "Growth", monthly: 129, annual: 1548 };
-  }
-  if (projects <= 20) {
-    return { planLabel: "Professional", monthly: 219, annual: 2628 };
-  }
-  if (projects <= 50) {
-    return { planLabel: "Premium", monthly: 459, annual: 5508 };
-  }
-  return {
-    planLabel: "Enterprise",
-    monthly: null,
-    annual: null,
-    note: "Custom pricing",
-  };
+// Only Starter caps seats; every higher tier has unlimited seats and is sized
+// by projects. Beyond Premium, Usersnap requires an Enterprise contract.
+function pickUsersnapPlan(team: number, projects: number) {
+  return USERSNAP_TIERS.find(
+    (tier) => team <= tier.seats && projects <= tier.projects,
+  );
 }
 
-type Currency = "$" | "€";
-
-function formatPrice(value: number | null, currency: Currency = "$"): string {
-  if (value === null) return "Custom";
-  return `${currency}${value.toLocaleString("en-US")}`;
+function formatSaving(usd: number) {
+  return `Save ≈ ${formatAmount(Math.round(usd), "USD")} per year`;
 }
 
 export function UsersnapPricingCalculator() {
@@ -59,9 +61,21 @@ export function UsersnapPricingCalculator() {
 
   const fasterFixesHosted = pickFasterFixesPlan(team, projects);
   const usersnap = pickUsersnapPlan(team, projects);
-  const selfHostedSavings =
-    usersnap.annual !== null
-      ? `Save ${formatPrice(usersnap.annual, "€")} per year`
+  // Usersnap publishes no yearly price, so a year is twelve monthly payments.
+  const usersnapAnnual = usersnap && {
+    amount: usersnap.amount * 12,
+    currency: usersnap.currency,
+  };
+  const usersnapAnnualUsd =
+    usersnapAnnual && toUsd(usersnapAnnual.amount, usersnapAnnual.currency);
+  const hostedSaving =
+    usersnapAnnualUsd !== undefined &&
+    usersnapAnnualUsd > fasterFixesHosted.annual
+      ? formatSaving(usersnapAnnualUsd - fasterFixesHosted.annual)
+      : null;
+  const selfHostedSaving =
+    usersnapAnnualUsd !== undefined
+      ? formatSaving(usersnapAnnualUsd)
       : "Save the full Usersnap subscription";
 
   return (
@@ -112,20 +126,22 @@ export function UsersnapPricingCalculator() {
         <div className="p-6 md:p-8">
           <p className="text-sm font-medium">Usersnap</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {usersnap.planLabel}
+            {usersnap?.name ?? "Enterprise"}
           </p>
           <p className="mt-6 text-4xl font-semibold tracking-tight tabular-nums">
-            {formatPrice(usersnap.monthly, "€")}
-            {usersnap.monthly !== null && (
+            {usersnap
+              ? formatAmount(usersnap.amount, usersnap.currency)
+              : "Custom"}
+            {usersnap && (
               <span className="ml-1 text-sm font-normal tracking-normal text-muted-foreground">
                 /mo
               </span>
             )}
           </p>
           <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-            {usersnap.annual !== null
-              ? `${formatPrice(usersnap.annual, "€")}/year`
-              : usersnap.note}
+            {usersnapAnnual
+              ? `${formatAmount(usersnapAnnual.amount, usersnapAnnual.currency)}/year (${formatUsdEquivalent(usersnapAnnual)})`
+              : "Custom pricing"}
           </p>
         </div>
 
@@ -135,14 +151,19 @@ export function UsersnapPricingCalculator() {
             {fasterFixesHosted.planLabel}
           </p>
           <p className="mt-6 text-4xl font-semibold tracking-tight tabular-nums">
-            {formatPrice(fasterFixesHosted.monthly)}
+            {formatAmount(fasterFixesHosted.monthly, "USD")}
             <span className="ml-1 text-sm font-normal tracking-normal text-muted-foreground">
               /mo
             </span>
           </p>
           <p className="mt-2 text-sm text-muted-foreground tabular-nums">
-            {formatPrice(fasterFixesHosted.annual)}/year
+            {formatAmount(fasterFixesHosted.annual, "USD")}/year
           </p>
+          {hostedSaving && (
+            <p className="mt-4 text-sm font-medium text-success tabular-nums">
+              {hostedSaving}
+            </p>
+          )}
         </div>
 
         <div className="p-6 md:p-8">
@@ -157,17 +178,21 @@ export function UsersnapPricingCalculator() {
             Infrastructure costs only
           </p>
           <p className="mt-4 text-sm font-medium text-success tabular-nums">
-            {selfHostedSavings}
+            {selfHostedSaving}
           </p>
         </div>
       </div>
 
       <p className="border-t bg-muted/30 px-6 py-4 text-xs leading-relaxed text-muted-foreground md:px-8">
-        Usersnap tiers: Starter (2 seats, 2 projects), then unlimited seats on
-        Growth (10 projects), Professional (20) and Premium (50). Beyond 50
-        projects, Usersnap requires an Enterprise contract. Usersnap prices are
-        its monthly EUR list prices, the only currency it publishes; yearly
-        billing saves up to 3 months. FasterFixes prices are in USD.
+        Usersnap tiers: {starter.name} ({starter.seats} seats,{" "}
+        {starter.projects} projects), then unlimited seats on {growth.name} (
+        {growth.projects} projects), {professional.name} (
+        {professional.projects}) and {premium.name} ({premium.projects}). Beyond{" "}
+        {premium.projects} projects, Usersnap requires an Enterprise contract.
+        Usersnap prices are its monthly EUR list prices, the only currency it
+        publishes; yearly billing saves up to{" "}
+        {COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. FasterFixes
+        prices are in USD. {EXCHANGE_RATE_NOTE}
       </p>
     </div>
   );

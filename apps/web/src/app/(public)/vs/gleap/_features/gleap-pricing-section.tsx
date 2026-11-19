@@ -3,17 +3,33 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { plans, otherPrices } = COMPETITOR_PRICES.gleap;
+const { hobby, growth } = plans;
+const usd = (amount: number) => formatAmount(amount, "USD");
+
+const teamSize = 5;
+const extraSeats = teamSize - growth.seats;
+const growthMonthly = growth.amount + extraSeats * otherPrices.extraSeat.amount;
+const growthYearly =
+  growth.billedYearlyAmount * 12 +
+  extraSeats * otherPrices.extraSeatPerYear.amount;
+
 const rows = [
   {
-    label: "Gleap Growth (5 people, monthly)",
-    value: "$144/mo = $1,728/year",
+    label: `Gleap Growth (${teamSize} people, monthly)`,
+    value: `${usd(growthMonthly)}/mo = ${usd(growthMonthly * 12)}/year`,
   },
   {
-    label: "Gleap Growth (5 people, yearly)",
-    value: "$1,438/year (about $120/mo)",
+    label: `Gleap Growth (${teamSize} people, yearly)`,
+    value: `${usd(growthYearly)}/year (about ${usd(Math.round(growthYearly / 12))}/mo)`,
   },
   {
     label: `FasterFixes Pro (up to ${proPlan.seats})`,
@@ -32,10 +48,13 @@ export function GleapPricingSection() {
           </p>
           <h2 className="text-3xl font-bold md:text-4xl">Pricing comparison</h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Gleap&apos;s Hobby plan ($29/mo billed yearly, $35/mo monthly) is
-            limited to 1 seat and 1 project, not viable for any real team. For 5
-            people, the minimum is Growth: 4 seats included, plus 1 extra seat
-            at $25/mo or $250/year.
+            Gleap&apos;s Hobby plan ({usd(hobby.billedYearlyAmount)}/mo billed
+            yearly, {formatPrice(hobby)}/mo monthly) is limited to {hobby.seats}{" "}
+            seat and {hobby.projects} project, not viable for any real team. For{" "}
+            {teamSize} people, the minimum is Growth: {growth.seats} seats
+            included, plus {extraSeats} extra seat at{" "}
+            {formatPrice(otherPrices.extraSeat)}/mo or{" "}
+            {formatPrice(otherPrices.extraSeatPerYear)}/year.
           </p>
         </div>
 
@@ -59,7 +78,8 @@ export function GleapPricingSection() {
 
         <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
           Note: Gleap AI (Kai) is not included in any plan. It is billed from a
-          prepaid balance, at about $0.05 per conversation.
+          prepaid balance, at about {formatPrice(otherPrices.aiConversation)}{" "}
+          per conversation.
         </p>
       </div>
     </section>

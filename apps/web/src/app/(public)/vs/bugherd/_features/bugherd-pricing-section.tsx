@@ -3,6 +3,11 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatPrice,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import { SeatPricingChart } from "../../_components/illustrations/seat-pricing-chart";
 import { VsActions } from "../../_features/vs-actions";
 import {
@@ -11,6 +16,10 @@ import {
 } from "../../_features/vs-pricing-cards";
 import { VsSection } from "../../_features/vs-section";
 import { SectionBody } from "../../../features/_components/section-body";
+
+const { bugherd } = COMPETITOR_PRICES;
+const { standard, studio, premium } = bugherd.plans;
+const { extraSeat } = bugherd.otherPrices;
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -34,19 +43,19 @@ const cards: VsPricingCard[] = [
   },
   {
     vendor: "BugHerd · Standard",
-    plan: "5 members included",
-    price: "$50",
+    plan: `${standard.seats} members included`,
+    price: formatPrice(standard),
     suffix: "/ month",
-    note: "Each extra user is $8/month. Studio (10 members) is $80/month. Premium (25 members, client task board, Jira and Linear) is $150/month. Annual billing saves two months.",
+    note: `Each extra user is ${formatPublishedPrice(extraSeat, "/month")}. Studio (${studio.seats} members) is ${formatPublishedPrice(studio, "/month")}. Premium (${premium.seats} members, client task board, Jira and Linear) is ${formatPublishedPrice(premium, "/month")}. Annual billing saves up to ${bugherd.yearlySavesUpToMonths} months.`,
   },
 ];
 
 // BugHerd's public tiers, monthly billing: the chart reads the same numbers as the cards.
-const bugherdTiers = [
-  { name: "Standard", seats: 5, monthlyPrice: 50 },
-  { name: "Studio", seats: 10, monthlyPrice: 80 },
-  { name: "Premium", seats: 25, monthlyPrice: 150 },
-];
+const bugherdTiers = [standard, studio, premium].map((plan) => ({
+  name: plan.name,
+  seats: plan.seats,
+  monthlyPrice: plan.amount,
+}));
 
 export function BugherdPricingSection() {
   return (
@@ -61,7 +70,8 @@ export function BugherdPricingSection() {
             is &quot;free, forever, on your own server.&quot; If you would
             rather not run it yourself, the hosted plans are flat-rate, not
             per-seat. BugHerd uses tiered per-seat pricing with extra users
-            billed at $8/month each on top of the plan.
+            billed at {formatPublishedPrice(extraSeat, "/month")} each on top of
+            the plan.
           </p>
         </SectionBody>
 
@@ -69,7 +79,7 @@ export function BugherdPricingSection() {
           <SeatPricingChart
             competitorName="BugHerd"
             tiers={bugherdTiers}
-            extraSeatPrice={8}
+            extraSeatPrice={extraSeat.amount}
           />
         </div>
       </div>

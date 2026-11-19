@@ -1,5 +1,10 @@
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPublishedPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import { VsPointGrid } from "../../_features/vs-point-grid";
 import { VsSection } from "../../_features/vs-section";
+
+const { standard, studio, premium } = COMPETITOR_PRICES.bugherd.plans;
+const { extraSeat } = COMPETITOR_PRICES.bugherd.otherPrices;
 
 const limitations = [
   {
@@ -8,7 +13,7 @@ const limitations = [
   },
   {
     title: "Per-seat pricing scales with your team",
-    body: "Standard is $50/month for 5 members and every extra user is $8/month. Studio jumps to $80/month for 10, Premium to $150/month for 25, and Premium is the first plan with Jira and Linear. The bill grows with the team, not with the value delivered.",
+    body: `Standard is ${formatPublishedPrice(standard, "/month")} for ${standard.seats} members and every extra user is ${formatPublishedPrice(extraSeat, "/month")}. Studio jumps to ${formatPublishedPrice(studio, "/month")} for ${studio.seats}, Premium to ${formatPublishedPrice(premium, "/month")} for ${premium.seats}, and Premium is the first plan with Jira and Linear. The bill grows with the team, not with the value delivered.`,
   },
   {
     title: "AI is bundled, not bring-your-own",

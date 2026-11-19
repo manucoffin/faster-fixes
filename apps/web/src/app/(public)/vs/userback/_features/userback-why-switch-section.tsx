@@ -4,12 +4,19 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { business } = COMPETITOR_PRICES.userback.plans;
 const limitations = [
   {
     title: "Developer context starts at Business",
-    body: `Console logs, network requests, and session replay are not on Userback's Team plan. They start on Business at $119/month ($89 billed annually), or $1,428/year on monthly billing, even for a 5-person team. FasterFixes Pro is $${proPrice}/month flat for up to ${proPlan.seats} members, with console and network capture included.`,
+    body: `Console logs, network requests, and session replay are not on Userback's Team plan. They start on ${business.name} at ${formatPrice(business)}/month (${formatAmount(business.billedYearlyAmount, business.currency)} billed annually), or ${formatAmount(business.amount * 12, business.currency)}/year on monthly billing, even for a 5-person team. FasterFixes Pro is $${proPrice}/month flat for up to ${proPlan.seats} members, with console and network capture included.`,
   },
   {
     title: "Cloud-only, no data sovereignty",

@@ -1,4 +1,7 @@
 import type { Route } from "next";
+
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import {
   type VsAlternative,
   VsAlternativesTable,
@@ -9,6 +12,8 @@ import {
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
 import { VsSection } from "../../_features/vs-section";
+
+const bugherdStandard = COMPETITOR_PRICES.bugherd.plans.standard;
 
 const alternatives: VsAlternative[] = [
   {
@@ -22,8 +27,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "BugHerd",
-    verdict:
-      "The safest pick for non-technical clients. No free plan, $50/mo for 5 members.",
+    verdict: `The safest pick for non-technical clients. No free plan, ${formatPrice(bugherdStandard)}/mo for ${bugherdStandard.seats} members.`,
     bestFor: "Agencies managing client QA visually",
     startingPrice: prices.bugherd,
     selfHosted: { type: "no" },

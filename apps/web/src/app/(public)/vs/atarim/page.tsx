@@ -7,6 +7,8 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
+import { COMPETITOR_PRICES } from "../../_helpers/competitor-prices";
+import { formatPrice } from "../../_helpers/format-competitor-price";
 import { AtarimAlternativesSection } from "./_features/atarim-alternatives-section";
 import { AtarimBreadcrumb } from "./_features/atarim-breadcrumb";
 import { AtarimCalculatorSection } from "./_features/atarim-calculator-section";
@@ -27,10 +29,11 @@ import { AtarimWhySwitchSection } from "./_features/atarim-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
 
 const pageUrl = `${APP_URL}/vs/atarim`;
 const title = "Atarim alternatives: 9 tools compared (2026)";
-const description = `Nine Atarim alternatives compared on price, free plans and self-hosting. Atarim Pro is $67/mo. FasterFixes is $${proPrice}/mo, or $0 self-hosted.`;
+const description = `Nine Atarim alternatives compared on price, free plans and self-hosting. Atarim ${atarimPro.name} is ${formatPrice(atarimPro)}/mo. FasterFixes is $${proPrice}/mo, or $0 self-hosted.`;
 const datePublished = "2026-04-30T00:00:00.000Z";
 const dateModified = "2026-11-17T00:00:00.000Z";
 

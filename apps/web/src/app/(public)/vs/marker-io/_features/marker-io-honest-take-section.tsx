@@ -3,8 +3,13 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
 import { VsHonestTake } from "../../_features/vs-honest-take";
 import { VsSection } from "../../_features/vs-section";
+
+const { team } = COMPETITOR_PRICES.markerIo.plans;
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -143,8 +148,8 @@ export function MarkerIoHonestTakeSection() {
               content: (
                 <>
                   <strong>Flat pricing</strong>: ${proPrice}/month for a
-                  5-person team versus $149/month annual on Marker.io Team. The
-                  free plan covers {freePlan.projects} project,{" "}
+                  5-person team versus {teamAnnual}/month annual on Marker.io
+                  Team. The free plan covers {freePlan.projects} project,{" "}
                   {freeFeedbackLimit} feedback items, and {freePlan.seats}{" "}
                   member at no cost.
                 </>

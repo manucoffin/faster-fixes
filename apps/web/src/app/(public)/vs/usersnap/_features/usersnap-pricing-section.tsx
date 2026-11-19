@@ -3,11 +3,20 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import {
+  COMPETITOR_PRICES,
+  type CompetitorPlan,
+} from "@/app/(public)/_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPrice,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import { VsActions } from "../../_features/vs-actions";
 import {
-  type VsPricingCard,
-  VsPricingCards,
-} from "../../_features/vs-pricing-cards";
+  type VsComparisonRow,
+  VsComparisonTable,
+} from "../../_features/vs-comparison-table";
 import { VsSection } from "../../_features/vs-section";
 import { SectionBody } from "../../../features/_components/section-body";
 
@@ -15,28 +24,43 @@ const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-const cards: VsPricingCard[] = [
+const { starter, growth, professional, premium } =
+  COMPETITOR_PRICES.usersnap.plans;
+const fasterFixesPro = `Pro · $${proPrice}/mo`;
+const fasterFixesAgency = `Agency · $${agencyPrice}/mo`;
+
+function formatUsersnapPlan(plan: CompetitorPlan) {
+  return `${plan.name} · ${formatPublishedPrice(plan, "/mo")}`;
+}
+
+// Each row pairs the cheapest plan of each tool that covers the same team.
+const planMatchRows: VsComparisonRow[] = [
   {
-    vendor: "FasterFixes · Self-hosted",
-    plan: "Open source under AGPL-3.0",
-    price: "$0",
-    suffix: "/ month, forever",
-    note: "Clone the repo, deploy on infrastructure you already pay for, and you owe us nothing. Same product as the hosted version.",
-    highlight: true,
+    label: `${starter.seats} people, ${starter.projects} projects`,
+    cells: [fasterFixesPro, formatUsersnapPlan(starter)],
   },
   {
-    vendor: "FasterFixes · Hosted",
-    plan: `Pro plan, up to ${proPlan.seats} members`,
-    price: `$${proPrice}`,
-    suffix: "/ month",
-    note: `Flat rate. Agency tier unlocks unlimited members at $${agencyPrice}/month. No per-seat charges as your team grows.`,
+    label: `${proPlan.seats} people, ${proPlan.projects} projects`,
+    cells: [fasterFixesPro, formatUsersnapPlan(growth)],
   },
   {
-    vendor: "Usersnap · Professional",
-    plan: "Cloud-only, closed source",
-    price: "€219",
-    suffix: "/ month",
-    note: "Unlimited seats, 20 projects, 1,000,000 page views (each widget load counts), surveys, public roadmaps, two-way Jira, Linear, Asana and Azure DevOps sync. Starter is €49/mo for 2 seats and 2 projects; Premium is €459/mo.",
+    label: `Any team, up to ${growth.projects} projects`,
+    cells: [fasterFixesAgency, formatUsersnapPlan(growth)],
+  },
+  {
+    label: `Any team, up to ${professional.projects} projects`,
+    cells: [fasterFixesAgency, formatUsersnapPlan(professional)],
+  },
+  {
+    label: `Any team, up to ${premium.projects} projects`,
+    cells: [fasterFixesAgency, formatUsersnapPlan(premium)],
+  },
+  {
+    label: "On your own server",
+    cells: [
+      { type: "yes", note: "$0 self-hosted" },
+      { type: "no", note: "Cloud-only" },
+    ],
   },
 ];
 
@@ -46,12 +70,17 @@ export function UsersnapPricingSection() {
       <SectionBody className="max-w-3xl">
         <p>
           Usersnap does not charge per seat beyond Starter. It charges per
-          project: Starter €49/mo covers 2 seats and 2 projects, then every
-          higher tier has unlimited seats and is sized by projects: Growth
-          €129/mo (10 projects), Professional €219/mo (20 projects) and Premium
-          €459/mo (50 projects). A five-person team pays €129/mo on Growth.
-          Usersnap lists its prices in EUR, and yearly billing saves up to 3
-          months. There is no free plan, only a free trial.
+          project: {starter.name} {formatPrice(starter)}/mo covers{" "}
+          {starter.seats} seats and {starter.projects} projects, then every
+          higher tier has unlimited seats and is sized by projects:{" "}
+          {growth.name} {formatPrice(growth)}/mo ({growth.projects} projects),{" "}
+          {professional.name} {formatPrice(professional)}/mo (
+          {professional.projects} projects) and {premium.name}{" "}
+          {formatPrice(premium)}/mo ({premium.projects} projects). A five-person
+          team pays {formatPublishedPrice(growth, "/mo")} on {growth.name}.
+          Usersnap lists its prices in EUR, and yearly billing saves up to{" "}
+          {COMPETITOR_PRICES.usersnap.yearlySavesUpToMonths} months. There is no
+          free plan, only a free trial.
         </p>
         <p>
           FasterFixes is open source, so the lowest plan in any honest
@@ -62,7 +91,23 @@ export function UsersnapPricingSection() {
       </SectionBody>
 
       <div className="mt-12 md:mt-16">
-        <VsPricingCards cards={cards} />
+        <h3 className="text-xl font-medium tracking-tight">
+          Plan for plan, by team size
+        </h3>
+        <p className="mt-3 max-w-3xl text-pretty text-muted-foreground">
+          Usersnap is ahead on one line: {growth.name} includes{" "}
+          {growth.projects} projects, so a team with {proPlan.projects + 1} to{" "}
+          {growth.projects} projects needs FasterFixes Agency, which has no
+          member or project limit.
+        </p>
+        <div className="mt-8">
+          <VsComparisonTable
+            competitorName="Usersnap"
+            labelHeader="Your team"
+            rows={planMatchRows}
+            footnote={`Each row is the cheapest plan of each tool that covers the team. Monthly list prices, Usersnap's checked on usersnap.com/pricing on November 19, 2026. Usersnap bills in EUR and FasterFixes in USD. ${EXCHANGE_RATE_NOTE}`}
+          />
+        </div>
       </div>
 
       <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

@@ -13,7 +13,6 @@ import {
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-
 export const gleapFaqs: FaqItem[] = [
   {
     question: "What is the best Gleap alternative?",

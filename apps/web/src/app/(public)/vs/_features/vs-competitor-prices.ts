@@ -1,17 +1,27 @@
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 
+import { COMPETITOR_PRICES as PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
+
+const { bugherd, markerIo, usersnap, userback, atarim, gleap, ruttl } = PRICES;
+
+const yearly = (amount: number) => formatAmount(amount, "USD");
+
 // Monthly rate, annual rate in parentheses. One source so the /vs/ tables stop contradicting each other.
 export const COMPETITOR_STARTING_PRICES = {
   fasterFixes: `$0 self-hosted / $${PLAN_PRICES[SubscriptionPlanName.Pro]}/mo Pro`,
-  bugherd: "$50/mo for 5 members ($42/mo annual)",
-  markerIo: "$59/mo Starter, 3 seats ($39/mo annual)",
-  usersnap: "€49/mo Starter, 2 seats (EUR only)",
-  userback: "$49/mo Team, 5 seats ($39/mo annual)",
-  atarim: "$67/mo Pro ($53.60/mo annual)",
-  gleap: "$35/mo Hobby, 1 seat ($29/mo annual)",
-  ruttl: "$18/user/mo ($90/mo for 5)",
-  markupIo: "$79/mo Pro, 50 MarkUps",
-  feedbucket: "$29/mo",
+  bugherd: `${formatPublishedPrice(bugherd.plans.standard, "/mo")} for ${bugherd.plans.standard.seats} members (${yearly(bugherd.plans.standard.billedYearlyAmount)}/mo annual)`,
+  markerIo: `${formatPublishedPrice(markerIo.plans.starter, "/mo")} Starter, ${markerIo.plans.starter.seats} seats (${yearly(markerIo.plans.starter.billedYearlyAmount)}/mo annual)`,
+  usersnap: `${formatPublishedPrice(usersnap.plans.starter, "/mo")} Starter, ${usersnap.plans.starter.seats} seats`,
+  userback: `${formatPublishedPrice(userback.plans.team, "/mo")} Team, ${userback.plans.team.seats} seats (${yearly(userback.plans.team.billedYearlyAmount)}/mo annual)`,
+  atarim: `${formatPublishedPrice(atarim.plans.pro, "/mo")} Pro (${yearly(atarim.plans.pro.billedYearlyAmount)}/mo annual)`,
+  gleap: `${formatPublishedPrice(gleap.plans.hobby, "/mo")} Hobby, ${gleap.plans.hobby.seats} seat (${yearly(gleap.plans.hobby.billedYearlyAmount)}/mo annual)`,
+  ruttl: `${formatPublishedPrice(ruttl.plans.pro, "/user/mo")} (${formatAmount(ruttl.plans.pro.amount * 5, "USD")}/mo for 5)`,
+  markupIo: `${formatPublishedPrice(PRICES.markupIo.plans.pro, "/mo")} Pro, 50 MarkUps`,
+  feedbucket: `${formatPublishedPrice(PRICES.feedbucket.plans.entry, "/mo")}`,
 } as const;
 
 export const SELF_HOSTED_NOTE = "AGPL-3.0";

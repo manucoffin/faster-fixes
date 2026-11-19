@@ -3,6 +3,8 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
 import {
   type VsComparisonRow,
   VsComparisonTable,
@@ -11,6 +13,13 @@ import { VsSection } from "../../_features/vs-section";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+
+const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const starterAnnual = formatAmount(
+  starter.billedYearlyAmount,
+  starter.currency,
+);
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
@@ -35,14 +44,14 @@ const rows: VsComparisonRow[] = [
     label: "Pricing model",
     cells: [
       `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
-      "Per-seat tiers · $39 Starter, $149 Team (annual)",
+      `Per-seat tiers · ${starterAnnual} Starter, ${teamAnnual} Team (annual)`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
       `$0 self-host · $${proPrice}/mo hosted Pro`,
-      "$149/mo Team (annual · min for Jira & devtools)",
+      `${teamAnnual}/mo Team (annual · min for Jira & devtools)`,
     ],
   },
   {

@@ -7,6 +7,11 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatPublishedPrice,
+  toUsd,
+} from "@/app/(public)/_helpers/format-competitor-price";
 
 const CYCLE = 12;
 
@@ -18,19 +23,21 @@ const PHASE_END = 100;
 // Length of a crossfade or a step, in percentages of the cycle.
 const FADE = 2;
 
-// Usersnap publishes EUR prices only.
-const USERSNAP_TIERS = [
-  { name: "Starter", projects: 2, monthlyPrice: 49 },
-  { name: "Growth", projects: 10, monthlyPrice: 129 },
-  { name: "Professional", projects: 20, monthlyPrice: 219 },
-  { name: "Premium", projects: 50, monthlyPrice: 459 },
-] as const;
+const { starter, growth, professional, premium } =
+  COMPETITOR_PRICES.usersnap.plans;
+
+// Usersnap publishes EUR prices only, so the bars compare USD equivalents
+// against the FasterFixes USD prices.
+const USERSNAP_TIERS = [starter, growth, professional, premium].map((tier) => ({
+  ...tier,
+  monthlyUsd: toUsd(tier.amount, tier.currency),
+}));
 
 const MAX_PROJECTS = Math.max(
   ...USERSNAP_TIERS.map(({ projects }) => projects),
 );
-const MAX_PRICE = Math.max(
-  ...USERSNAP_TIERS.map(({ monthlyPrice }) => monthlyPrice),
+const MAX_PRICE_USD = Math.max(
+  ...USERSNAP_TIERS.map(({ monthlyUsd }) => monthlyUsd),
 );
 
 const HOSTED_PLAN_LABELS = {
@@ -138,12 +145,12 @@ ${stepThrough("upt-slider-fill", projectRatios, scaleX)}
 ${stepThrough("upt-slider-thumb", projectRatios, left)}
 ${stepThrough(
   "upt-usersnap-bar",
-  USERSNAP_TIERS.map(({ monthlyPrice }) => monthlyPrice / MAX_PRICE),
+  USERSNAP_TIERS.map(({ monthlyUsd }) => monthlyUsd / MAX_PRICE_USD),
   scaleX,
 )}
 ${stepThrough(
   "upt-hosted-bar",
-  HOSTED_PLANS.map((plan) => PLAN_PRICES[plan] / MAX_PRICE),
+  HOSTED_PLANS.map((plan) => PLAN_PRICES[plan] / MAX_PRICE_USD),
   scaleX,
 )}
 
@@ -187,7 +194,7 @@ export function UsersnapProjectTierAnimation({
             <Swap align="end">
               {usersnapSegments.map(({ value }, i) => (
                 <span key={value.name} className={`upt-tier-${i}`}>
-                  €{value.monthlyPrice}/mo
+                  {formatPublishedPrice(value, "/mo")}
                 </span>
               ))}
             </Swap>

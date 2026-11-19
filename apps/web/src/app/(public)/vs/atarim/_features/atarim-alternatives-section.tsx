@@ -8,6 +8,15 @@ import {
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import {
+  EXCHANGE_RATE_NOTE,
+  formatPrice,
+} from "../../../_helpers/format-competitor-price";
+
+const bugherdStandard = COMPETITOR_PRICES.bugherd.plans.standard;
+const bugherdExtraSeat = COMPETITOR_PRICES.bugherd.otherPrices.extraSeat;
+const markupIoPro = COMPETITOR_PRICES.markupIo.plans.pro;
 
 const alternatives: VsAlternative[] = [
   {
@@ -22,8 +31,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "BugHerd",
-    verdict:
-      "Battle-tested client review with a Kanban board. $50/mo for 5 members, then $8/seat.",
+    verdict: `Battle-tested client review with a Kanban board. ${formatPrice(bugherdStandard)}/mo for ${bugherdStandard.seats} members, then ${formatPrice(bugherdExtraSeat)}/seat.`,
     bestFor: "Agencies collecting client feedback through sticky-note pins",
     startingPrice: prices.bugherd,
     selfHosted: { type: "no" },
@@ -31,8 +39,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Marker.io",
-    verdict:
-      "Two-way sync with the tracker you already run. Starter stops at 3 seats.",
+    verdict: `Two-way sync with the tracker you already run. ${COMPETITOR_PRICES.markerIo.plans.starter.name} stops at ${COMPETITOR_PRICES.markerIo.plans.starter.seats} seats.`,
     bestFor: "Internal dev QA with screenshot annotation and tracker sync",
     startingPrice: prices.markerIo,
     selfHosted: { type: "no" },
@@ -40,8 +47,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Usersnap",
-    verdict:
-      "Survey and NPS tooling nobody else here has. Starter covers 2 seats and 2 projects.",
+    verdict: `Survey and NPS tooling nobody else here has. ${COMPETITOR_PRICES.usersnap.plans.starter.name} covers ${COMPETITOR_PRICES.usersnap.plans.starter.seats} seats and ${COMPETITOR_PRICES.usersnap.plans.starter.projects} projects.`,
     bestFor: "SaaS product teams collecting end-user feedback and NPS",
     startingPrice: prices.usersnap,
     selfHosted: { type: "no" },
@@ -75,8 +81,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Markup.io",
-    verdict:
-      "Best on PDFs, images, and video stills. $79/mo with no free tier left.",
+    verdict: `Best on PDFs, images, and video stills. ${formatPrice(markupIoPro)}/mo with no free tier left.`,
     bestFor: "Design review across 30+ file types",
     startingPrice: prices.markupIo,
     selfHosted: { type: "no" },
@@ -97,7 +102,7 @@ export function AtarimAlternativesSection() {
       title="Atarim alternatives compared"
       intro="The verdict sits under each tool name. Pricing is each vendor's monthly rate, with the annual rate in parentheses."
       alternatives={alternatives}
-      closingNote={ALTERNATIVES_CLOSING_NOTE}
+      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
     />
   );
 }

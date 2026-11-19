@@ -4,9 +4,12 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { CheckIcon, XIcon } from "lucide-react";
+import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { formatPrice } from "../../../_helpers/format-competitor-price";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { pro: markupIoPro, business } = COMPETITOR_PRICES.markupIo.plans;
 
 type Cell = string | { type: "yes" | "no"; note?: string };
 
@@ -23,7 +26,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     label: "Pricing model",
     cells: [
       `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
-      "$79/mo Pro / $499/mo Business / Enterprise custom",
+      `${formatPrice(markupIoPro)}/mo Pro / ${formatPrice(business)}/mo Business / Enterprise custom`,
     ],
   },
   {

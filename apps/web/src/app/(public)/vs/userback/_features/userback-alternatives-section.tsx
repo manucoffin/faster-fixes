@@ -8,6 +8,7 @@ import {
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
+import { EXCHANGE_RATE_NOTE } from "../../../_helpers/format-competitor-price";
 
 const alternatives: VsAlternative[] = [
   {
@@ -80,7 +81,7 @@ export function UserbackAlternativesSection() {
       title="Best Userback alternatives in 2026"
       intro="Not every team needs the same thing. Here is how the main alternatives stack up."
       alternatives={alternatives}
-      closingNote={ALTERNATIVES_CLOSING_NOTE}
+      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
     />
   );
 }

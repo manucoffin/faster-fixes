@@ -18,8 +18,7 @@ import { GleapPricingSection } from "./_features/gleap-pricing-section";
 
 const pageUrl = `${APP_URL}/vs/gleap`;
 const title = "Gleap alternatives: 8 tools compared (2026)";
-const description =
-  "Gleap now sells AI support. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.";
+const description = `Gleap now sells AI support. Eight alternatives compared on price, free plans and self-hosting, including one you can run for $0.`;
 const datePublished = "2026-05-03T00:00:00.000Z";
 const dateModified = "2026-11-17T00:00:00.000Z";
 
