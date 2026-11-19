@@ -1,3 +1,6 @@
+import { VsHonestTake } from "../../_features/vs-honest-take";
+import { VsSection } from "../../_features/vs-section";
+
 const userbackWins = [
   "You need screen-recorded video feedback or session analytics across whole visits.",
   "You run NPS, CSAT, or in-app microsurveys.",
@@ -8,28 +11,16 @@ const userbackWins = [
 
 export function UserbackHonestTakeSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Honest take
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Userback is the better choice for some teams
-          </h2>
-        </div>
-
-        <p className="mx-auto mt-6 max-w-2xl text-left text-lg text-muted-foreground">
-          FasterFixes is narrower by design. If any of the points below describe
-          your workflow, Userback is the more complete fit today.
-        </p>
-
-        <ul className="mx-auto mt-8 max-w-2xl list-disc space-y-2 pl-6 text-lg leading-relaxed text-muted-foreground">
-          {userbackWins.map((point) => (
-            <li key={point}>{point}</li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Honest take"
+      title="Userback is the better choice for some teams"
+    >
+      <VsHonestTake
+        competitor={{
+          lead: "FasterFixes is narrower by design. If any of the points below describe your workflow, Userback is the more complete fit today.",
+          items: userbackWins.map((point) => ({ key: point, content: point })),
+        }}
+      />
+    </VsSection>
   );
 }

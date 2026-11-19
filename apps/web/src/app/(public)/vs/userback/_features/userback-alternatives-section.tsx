@@ -1,13 +1,14 @@
 import type { Route } from "next";
 import {
   type VsAlternative,
-  VsAlternativesSection,
-} from "../../_features/vs-alternatives-section";
+  VsAlternativesTable,
+} from "../../_features/vs-alternatives-table";
 import {
   ALTERNATIVES_CLOSING_NOTE,
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
+import { VsSection } from "../../_features/vs-section";
 import { EXCHANGE_RATE_NOTE } from "../../../_helpers/format-competitor-price";
 
 const alternatives: VsAlternative[] = [
@@ -77,11 +78,16 @@ const alternatives: VsAlternative[] = [
 
 export function UserbackAlternativesSection() {
   return (
-    <VsAlternativesSection
+    <VsSection
+      eyebrow="Alternatives"
       title="Best Userback alternatives in 2026"
       intro="Not every team needs the same thing. Here is how the main alternatives stack up."
-      alternatives={alternatives}
-      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
-    />
+      tone="muted"
+    >
+      <VsAlternativesTable
+        alternatives={alternatives}
+        closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
+      />
+    </VsSection>
   );
 }

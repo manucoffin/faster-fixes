@@ -8,15 +8,11 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { UserbackAlternativesSection } from "./_features/userback-alternatives-section";
-import { UserbackBreadcrumb } from "./_features/userback-breadcrumb";
 import { UserbackCalculatorSection } from "./_features/userback-calculator-section";
 import { UserbackComparisonSection } from "./_features/userback-comparison-section";
 import { UserbackCtaSection } from "./_features/userback-cta-section";
 import { UserbackDeveloperFirstSection } from "./_features/userback-developer-first-section";
-import {
-  UserbackFaqSection,
-  userbackFaqs,
-} from "./_features/userback-faq-section";
+import { userbackFaqs } from "./_features/userback-faqs";
 import { UserbackFitSection } from "./_features/userback-fit-section";
 import { UserbackHero } from "./_features/userback-hero";
 import { UserbackHonestTakeSection } from "./_features/userback-honest-take-section";
@@ -28,6 +24,7 @@ import { UserbackPricingSection } from "./_features/userback-pricing-section";
 import { UserbackWhatIsSection } from "./_features/userback-what-is-section";
 import { UserbackWhySwitchSection } from "./_features/userback-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const pageUrl = `${APP_URL}/vs/userback`;
 const title = `Userback Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
@@ -66,7 +63,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <UserbackBreadcrumb />
       <UserbackHero />
       <UserbackWhatIsSection />
       <UserbackWhySwitchSection />
@@ -78,7 +74,7 @@ export default function Page() {
       <UserbackComparisonSection />
       <UserbackPricingSection />
       <UserbackMigrationSection />
-      <UserbackFaqSection />
+      <VsFaqSection faqs={userbackFaqs} />
       <UserbackCtaSection />
       <VsCrossLinks currentSlug="userback" />
 

@@ -1,24 +1,14 @@
+import { VsSection } from "../../_features/vs-section";
 import { UserbackPricingCalculator } from "./userback-pricing-calculator.client";
 
 export function UserbackCalculatorSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Cost calculator
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            How much do you save vs Userback?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Drag the sliders to match your team. We pick the right plan on each
-            side and show your annual savings in real time.
-          </p>
-        </div>
-
-        <UserbackPricingCalculator />
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Cost calculator"
+      title="How much do you save vs Userback?"
+      intro="Drag the sliders to match your team. We pick the right plan on each side and show your annual savings in real time."
+    >
+      <UserbackPricingCalculator />
+    </VsSection>
   );
 }
