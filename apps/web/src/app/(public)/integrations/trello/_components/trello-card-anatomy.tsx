@@ -7,13 +7,18 @@ const ARIA_LABEL =
   "An open Trello card titled The Subscribe button does nothing on mobile. The screenshot of acme.com/pricing, with the Subscribe button outlined, is the card cover. The description holds the comment, the page URL and the selector button.cta-primary, a link to the 42 second Recording, the environment Safari 18 on iOS 18 at 390 by 844 submitted by Sarah Chen, the custom metadata userId and build, the diagnostics with a TypeError and a failed POST /api/subscribe returning 500, and a link to the dashboard. Numbers 1 to 6 tie each part to its line in the list.";
 
 type TrelloCardAnatomyProps = {
+  // The number of the list line under the pointer, whose markers stand out.
+  activeNumber?: number;
   className?: string;
 };
 
 // Every size inside is in `em` off one font size set in container units, so the
 // card scales as a whole with its frame and never reflows. The cover takes the
 // height left over, which absorbs the 8px floor on the narrowest frames.
-export function TrelloCardAnatomy({ className }: TrelloCardAnatomyProps) {
+export function TrelloCardAnatomy({
+  activeNumber,
+  className,
+}: TrelloCardAnatomyProps) {
   return (
     <figure
       aria-label={ARIA_LABEL}
@@ -27,10 +32,10 @@ export function TrelloCardAnatomy({ className }: TrelloCardAnatomyProps) {
         className="absolute inset-0 flex p-[0.9em] text-[length:clamp(8px,2.4cqw,13px)] leading-[1.4] text-foreground lg:text-[length:clamp(8px,2.8cqw,13px)]"
       >
         <div className="flex min-h-0 w-full flex-col overflow-hidden rounded-[0.9em] border bg-background shadow-sm">
-          <CardCover />
+          <CardCover activeNumber={activeNumber} />
           <div className="flex shrink-0 flex-col gap-[0.8em] p-[0.9em]">
             <CardHeader />
-            <CardDescription />
+            <CardDescription activeNumber={activeNumber} />
           </div>
         </div>
       </div>
@@ -38,13 +43,17 @@ export function TrelloCardAnatomy({ className }: TrelloCardAnatomyProps) {
   );
 }
 
-function CardCover() {
+type ActiveNumberProps = {
+  activeNumber?: number;
+};
+
+function CardCover({ activeNumber }: ActiveNumberProps) {
   return (
     <div className="relative min-h-[5em] flex-1 border-b bg-muted">
       <PricingScreenshot />
 
       <span className="absolute top-[0.6em] left-[0.6em] rounded-full ring-[0.15em] ring-muted">
-        <Marker number={2} />
+        <Marker number={2} activeNumber={activeNumber} />
       </span>
       <span className="absolute top-[0.6em] right-[0.6em] flex size-[1.8em] items-center justify-center rounded-full bg-background/80 text-muted-foreground">
         <XIcon className="size-[1em]" />
@@ -81,8 +90,8 @@ function PricingScreenshot() {
         <span className="absolute inset-x-[10%] top-[66%] h-[13%] rounded-[0.2em] bg-foreground/80" />
 
         {/* Selection frame and click point */}
-        <span className="absolute inset-x-[5%] top-[61%] h-[23%] rounded-[0.3em] border-[0.12em] border-dashed border-indigo-500 bg-indigo-500/10" />
-        <span className="absolute top-[72.5%] left-[62%] size-[0.9em] -translate-x-1/2 -translate-y-1/2 rounded-full border-[0.15em] border-indigo-500" />
+        <span className="absolute inset-x-[5%] top-[61%] h-[23%] rounded-[0.3em] border-[0.12em] border-dashed border-primary bg-primary/10" />
+        <span className="absolute top-[72.5%] left-[62%] size-[0.9em] -translate-x-1/2 -translate-y-1/2 rounded-full border-[0.15em] border-primary" />
       </div>
     </div>
   );
@@ -110,7 +119,7 @@ function CardHeader() {
 
 // The description in the order the integration writes it. Below `lg` the two
 // columns sit side by side; on the portrait frame they stack.
-function CardDescription() {
+function CardDescription({ activeNumber }: ActiveNumberProps) {
   return (
     <div className="flex flex-col gap-[0.5em]">
       <p className="flex items-center gap-[0.5em] font-semibold">
@@ -120,7 +129,7 @@ function CardDescription() {
 
       <div className="grid grid-cols-2 gap-x-[1.2em] gap-y-[0.7em] lg:grid-cols-1">
         <div className="flex min-w-0 flex-col gap-[0.7em]">
-          <Region number={1}>
+          <Region number={1} activeNumber={activeNumber}>
             <p className="line-clamp-2 border-l-[0.2em] border-foreground/20 pl-[0.5em] text-muted-foreground">
               The Subscribe button does nothing on mobile.
             </p>
@@ -134,7 +143,7 @@ function CardDescription() {
             </Line>
           </Region>
 
-          <Region number={4}>
+          <Region number={4} activeNumber={activeNumber}>
             <p className="line-clamp-2">
               <span className="font-semibold">Recording:</span>{" "}
               <LinkText>Play in Faster Fixes</LinkText>
@@ -142,7 +151,7 @@ function CardDescription() {
             </p>
           </Region>
 
-          <Region number={5}>
+          <Region number={5} activeNumber={activeNumber}>
             <SectionTitle>Environment</SectionTitle>
             <Line muted>Safari 18 · iOS 18</Line>
             <Line muted>Viewport 390 × 844</Line>
@@ -151,7 +160,7 @@ function CardDescription() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-[0.7em]">
-          <Region number={6}>
+          <Region number={6} activeNumber={activeNumber}>
             <SectionTitle>Custom metadata</SectionTitle>
             <Line muted>
               <InlineCode>userId</InlineCode>: usr_8f2k
@@ -161,7 +170,7 @@ function CardDescription() {
             </Line>
           </Region>
 
-          <Region number={3}>
+          <Region number={3} activeNumber={activeNumber}>
             <SectionTitle>Diagnostics (1 console, 1 network)</SectionTitle>
             <div className="mt-[0.2em] flex flex-col rounded-[0.4em] bg-muted px-[0.6em] py-[0.35em] font-mono text-[0.9em]">
               <span className="truncate text-destructive">
@@ -174,7 +183,7 @@ function CardDescription() {
             </div>
           </Region>
 
-          <Region number={6}>
+          <Region number={6} activeNumber={activeNumber}>
             <Line>
               <span className="text-[0.85em]">
                 <LinkText>Faster Fixes</LinkText>
@@ -191,13 +200,14 @@ function CardDescription() {
 
 type RegionProps = {
   number: number;
+  activeNumber?: number;
   children: ReactNode;
 };
 
-function Region({ number, children }: RegionProps) {
+function Region({ number, activeNumber, children }: RegionProps) {
   return (
     <div className="flex gap-[0.5em]">
-      <Marker number={number} />
+      <Marker number={number} activeNumber={activeNumber} />
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>
     </div>
   );
@@ -205,12 +215,22 @@ function Region({ number, children }: RegionProps) {
 
 type MarkerProps = {
   number: number;
+  activeNumber?: number;
 };
 
 // Matches the number of the line in the list beside the card.
-function Marker({ number }: MarkerProps) {
+function Marker({ number, activeNumber }: MarkerProps) {
+  const isActive = activeNumber === number;
+  const isDimmed = activeNumber !== undefined && !isActive;
+
   return (
-    <span className="flex size-[1.4em] shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white">
+    <span
+      className={cn(
+        "flex size-[1.4em] shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-[scale,opacity,box-shadow] duration-200 motion-reduce:transition-none",
+        isActive && "scale-125 ring-[0.3em] ring-primary/25",
+        isDimmed && "opacity-35",
+      )}
+    >
       <span className="text-[0.72em] leading-none font-semibold tabular-nums">
         {number}
       </span>
