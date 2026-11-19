@@ -1,24 +1,16 @@
-import type { FaqItem } from "@/app/_components/seo/faq-schema";
 import {
   PLAN_LIMITS,
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@workspace/ui/components/accordion";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-
-type RichFaqItem = FaqItem & { content?: ReactNode };
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 
@@ -28,22 +20,15 @@ type DocLinkProps = {
 };
 
 function DocLink({ href, children }: DocLinkProps) {
-  return (
-    <Link
-      href={href}
-      className="text-foreground underline underline-offset-4 hover:no-underline"
-    >
-      {children}
-    </Link>
-  );
+  return <Link href={href}>{children}</Link>;
 }
 
-export const usersnapFaqs: RichFaqItem[] = [
+export const usersnapFaqs: VsFaqItem[] = [
   {
     question: "Is FasterFixes free to use?",
     answer: `Yes. The hosted Free plan is permanent: ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, ${freePlan.seats} member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The hosted Free plan is permanent: {freePlan.projects} project,{" "}
         {freeFeedbackLimit} feedback items, {freePlan.seats} member, no time
         limit, no credit card. The dashboard is open source under AGPL-3.0 and
@@ -51,7 +36,7 @@ export const usersnapFaqs: RichFaqItem[] = [
         <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
         also free regardless of team size. Paid hosted plans are ${proPrice}
         /month for Pro and ${agencyPrice}/month for Agency.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -59,7 +44,7 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer:
       "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Usersnap has no self-hosted option. Deploy on your own infrastructure and run FasterFixes without a hosted account. The dashboard is AGPL-3.0; the widget packages are MIT.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
         storage. Usersnap has no self-hosted option. Deploy on your own
         infrastructure and run FasterFixes without a hosted account. The
@@ -69,7 +54,7 @@ export const usersnapFaqs: RichFaqItem[] = [
           self-hosting guide
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -77,7 +62,7 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer:
       "FasterFixes is open-source and self-hostable; Usersnap is closed-source and cloud-only. FasterFixes ships an MCP server so AI coding agents (Claude Code, Cursor, Codex) can fetch and resolve feedback from the terminal. Usersnap is a broader platform focused on NPS surveys, microsurveys, and feature request boards. FasterFixes does not currently offer those features. FasterFixes is built specifically for developer teams who need structured bug reports, not product feedback surveys.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         FasterFixes is open-source and self-hostable; Usersnap is closed-source
         and cloud-only. FasterFixes ships an{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> so AI
@@ -85,7 +70,7 @@ export const usersnapFaqs: RichFaqItem[] = [
         feedback from the terminal. Usersnap is a broader platform focused on
         NPS surveys, microsurveys, and feature request boards. FasterFixes does
         not currently offer those features.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -98,7 +83,7 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer:
       "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Usersnap's MCP server targets product analysis instead: it searches feedback, summarizes topics, and creates opportunities, but cannot edit existing feedback.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
         agent. Your agent can list unresolved feedback, read the full technical
         context (URL, DOM selector, React component path when available,
@@ -108,7 +93,7 @@ export const usersnapFaqs: RichFaqItem[] = [
         opportunities, but cannot edit existing feedback. See{" "}
         <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
         <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -116,7 +101,7 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer:
       'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context. On React sites, every report also carries the component path.',
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         On any site, paste one script tag with your Project ID, or run npm
         install @fasterfixes/widget and call init({"{ projectId }"}). In a React
         or Next.js app, you can instead run npm install @fasterfixes/react and
@@ -135,7 +120,7 @@ export const usersnapFaqs: RichFaqItem[] = [
           quickstart
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -143,7 +128,7 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer:
       "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. Every report carries the screenshot, DOM selector, URL, browser, viewport, and console and network logs. The React component path is added when the site runs React. Unlike Usersnap, FasterFixes has no browser extension, so the widget must be installed on the site.",
     content: (
-      <p className="text-lg text-muted-foreground md:text-xl">
+      <VsFaqAnswer>
         Yes. The script embed installs the widget with one script tag on any
         website: WordPress, Webflow, static HTML, or an app built with Vue,
         Angular, Svelte, or no framework at all. Every report carries the
@@ -155,7 +140,7 @@ export const usersnapFaqs: RichFaqItem[] = [
           script embed docs
         </DocLink>
         .
-      </p>
+      </VsFaqAnswer>
     ),
   },
   {
@@ -173,36 +158,3 @@ export const usersnapFaqs: RichFaqItem[] = [
     answer: `The Agency plan costs $${agencyPrice}/month and includes unlimited members, unlimited projects, MCP server access, GitHub, Linear, and Jira two-way sync, team kanban, and email support. It is designed for agencies managing multiple client sites from a single workspace at a flat monthly rate.`,
   },
 ];
-
-export function UsersnapFaqSection() {
-  return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Frequently asked questions
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-2xl">
-          <Accordion type="single" collapsible>
-            {usersnapFaqs.map((faq) => (
-              <AccordionItem key={faq.question} value={faq.question}>
-                <AccordionTrigger className="text-lg md:text-xl">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {faq.content ?? (
-                    <p className="text-lg text-muted-foreground md:text-xl">
-                      {faq.answer}
-                    </p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </div>
-    </section>
-  );
-}

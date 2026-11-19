@@ -1,13 +1,14 @@
 import type { Route } from "next";
 import {
   type VsAlternative,
-  VsAlternativesSection,
-} from "../../_features/vs-alternatives-section";
+  VsAlternativesTable,
+} from "../../_features/vs-alternatives-table";
 import {
   ALTERNATIVES_CLOSING_NOTE,
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
+import { VsSection } from "../../_features/vs-section";
 
 const alternatives: VsAlternative[] = [
   {
@@ -91,11 +92,16 @@ const alternatives: VsAlternative[] = [
 
 export function UsersnapAlternativesSection() {
   return (
-    <VsAlternativesSection
+    <VsSection
+      eyebrow="Alternatives"
       title="Usersnap alternatives compared"
       intro="The verdict sits under each tool name. Pricing is each vendor's monthly rate, with the annual rate in parentheses."
-      alternatives={alternatives}
-      closingNote={ALTERNATIVES_CLOSING_NOTE}
-    />
+      tone="muted"
+    >
+      <VsAlternativesTable
+        alternatives={alternatives}
+        closingNote={ALTERNATIVES_CLOSING_NOTE}
+      />
+    </VsSection>
   );
 }

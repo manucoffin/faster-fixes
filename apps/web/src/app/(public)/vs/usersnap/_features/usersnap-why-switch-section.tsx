@@ -3,11 +3,14 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { UsersnapMcpContrastAnimation } from "../_components/illustrations/usersnap-mcp-contrast-animation";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
+import { VsSection } from "../../_features/vs-section";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
-const limitations = [
+const limitations: VsPoint[] = [
   {
     title: "Pricing scales with projects",
     body: `Usersnap is tiered by project count: Starter $59/mo (2 seats, 2 projects), Growth $159/mo (10 projects), Professional $259/mo (20 projects), Premium $549/mo (50 projects). A third team member or project moves you off Starter, and each new batch of projects moves you up a tier. FasterFixes charges a flat $${proPrice}/mo for Pro (up to ${proPlan.seats} members) and $${agencyPrice}/mo for Agency with unlimited members and projects.`,
@@ -28,28 +31,16 @@ const limitations = [
 
 export function UsersnapWhySwitchSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Where Usersnap falls short
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Why teams switch from Usersnap
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {limitations.map((item) => (
-            <div key={item.title} className="rounded-xl border bg-muted/30 p-7">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                {item.body}
-              </p>
-            </div>
-          ))}
+    <VsSection
+      eyebrow="Where Usersnap falls short"
+      title="Why teams switch from Usersnap"
+    >
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <VsPointGrid points={limitations} columns={1} />
+        <div className="rounded-2xl bg-muted/50 p-4 sm:p-8 lg:sticky lg:top-24">
+          <UsersnapMcpContrastAnimation />
         </div>
       </div>
-    </section>
+    </VsSection>
   );
 }

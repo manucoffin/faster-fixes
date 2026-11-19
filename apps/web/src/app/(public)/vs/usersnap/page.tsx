@@ -8,15 +8,11 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { UsersnapAlternativesSection } from "./_features/usersnap-alternatives-section";
-import { UsersnapBreadcrumb } from "./_features/usersnap-breadcrumb";
 import { UsersnapCalculatorSection } from "./_features/usersnap-calculator-section";
 import { UsersnapComparisonSection } from "./_features/usersnap-comparison-section";
 import { UsersnapCtaSection } from "./_features/usersnap-cta-section";
 import { UsersnapDeveloperFirstSection } from "./_features/usersnap-developer-first-section";
-import {
-  UsersnapFaqSection,
-  usersnapFaqs,
-} from "./_features/usersnap-faq-section";
+import { usersnapFaqs } from "./_features/usersnap-faqs";
 import { UsersnapFitSection } from "./_features/usersnap-fit-section";
 import { UsersnapHero } from "./_features/usersnap-hero";
 import { UsersnapHonestTakeSection } from "./_features/usersnap-honest-take-section";
@@ -27,6 +23,7 @@ import {
 import { UsersnapPricingSection } from "./_features/usersnap-pricing-section";
 import { UsersnapWhySwitchSection } from "./_features/usersnap-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
@@ -67,7 +64,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <UsersnapBreadcrumb />
       <UsersnapHero />
       <UsersnapAlternativesSection />
       <UsersnapWhySwitchSection />
@@ -78,7 +74,7 @@ export default function Page() {
       <UsersnapComparisonSection />
       <UsersnapPricingSection />
       <UsersnapMigrationSection />
-      <UsersnapFaqSection />
+      <VsFaqSection faqs={usersnapFaqs} />
       <UsersnapCtaSection />
       <VsCrossLinks currentSlug="usersnap" />
 

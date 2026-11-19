@@ -1,4 +1,8 @@
-export const migrationSteps = [
+import { WidgetSwapAnimation } from "../../_components/illustrations/widget-swap-animation";
+import { VsSection } from "../../_features/vs-section";
+import { type VsStep, VsSteps } from "../../_features/vs-steps";
+
+export const migrationSteps: VsStep[] = [
   {
     label: "Export your feedback data from Usersnap",
     body: "Use Usersnap's CSV export or REST API to download your existing feedback items. Keep a local copy before deactivating your account. Note: NPS and survey responses do not have an equivalent in FasterFixes and will not carry over.",
@@ -19,40 +23,21 @@ export const migrationSteps = [
 
 export function UsersnapMigrationSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Migration
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Switching from Usersnap
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            No one-click import. Export your data, replace the widget, and wire
-            up the integrations. The whole process takes under an hour.
-          </p>
-        </div>
-
-        <ol className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {migrationSteps.map((step, i) => (
-            <li
-              key={step.label}
-              className="flex gap-4 rounded-xl border bg-background p-6"
-            >
-              <span className="font-mono text-sm text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="font-semibold">{step.label}</h3>
-                <p className="mt-2 leading-relaxed text-muted-foreground">
-                  {step.body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Migration"
+      title="Switching from Usersnap"
+      intro="No one-click import. Export your data, replace the widget, and wire up the integrations. The whole process takes under an hour."
+      tone="muted"
+    >
+      <VsSteps
+        steps={migrationSteps}
+        illustration={
+          <WidgetSwapAnimation
+            competitorName="Usersnap"
+            competitorScriptSrc="https://widget.usersnap.com/global/load/…"
+          />
+        }
+      />
+    </VsSection>
   );
 }
