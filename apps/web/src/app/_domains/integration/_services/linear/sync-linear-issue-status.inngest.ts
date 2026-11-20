@@ -2,11 +2,9 @@ import { feedbackStatusFromLinearStateType } from "../../_helpers/linear/state-m
 import type { LinearStateType } from "../../_helpers/linear/state-mapping";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  linearWebhookIssueEvent,
-} from "@/server/inngest/events";
+import { linearWebhookIssueEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { updateStatus } from "../update-status";
 
 const SYNC_LOOP_WINDOW_MS = 60_000;
 
@@ -50,31 +48,20 @@ export const syncLinearIssueStatus = inngest.createFunction(
 
     const newStatus = feedbackStatusFromLinearStateType(stateType);
 
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: newStatus },
-      }),
-      prisma.feedbackLinearIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          issueStateId: stateId,
-          issueStateType: stateType,
-          lastSyncSource: "linear",
-          lastSyncAt: new Date(),
+    // Converges the other Trackers (e.g. GitHub) on the Feedback; the Linear
+    // origin stops it echoing back to this issue.
+    await updateStatus(
+      {
+        feedbackIds: [issueLink.feedbackId],
+        status: newStatus,
+        actor: "linear",
+        issueLink: {
+          tracker: "linear",
+          id: issueLink.id,
+          data: { issueStateId: stateId, issueStateType: stateType },
         },
-      }),
-    ]);
-
-    // Propagate to other trackers (e.g. GitHub) so the feedback stays canonical.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus,
-        origin: "linear",
-        // Change originated from the Linear issue webhook syncing back.
-        actor: "tracker",
-      }),
+      },
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
 
     return { feedbackId: issueLink.feedbackId, newStatus };

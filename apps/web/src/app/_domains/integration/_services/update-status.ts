@@ -20,21 +20,43 @@ export type StatusChangedEventData = {
   actor: "user" | "agent" | "tracker";
 };
 
+/** The Issue state a Tracker sync records on its Issue link, per Tracker. */
+export type IssueLinkUpdate = { id: string } & (
+  | { tracker: "github"; data: { issueState: "open" | "closed" } }
+  | {
+      tracker: "linear";
+      data: { issueStateId: string; issueStateType: string };
+    }
+  | {
+      tracker: "jira";
+      data: {
+        issueStatusCategory: string;
+        mirroredStatus: FeedbackStatus;
+        issueKey?: string;
+        issueUrl?: string;
+      };
+    }
+  | { tracker: "trello"; data: { listId: string; archived: boolean } }
+);
+
 export type StatusConvergenceStore = {
   /**
    * Writes `status` to each Feedback whose Status is in `from` (any Status
-   * when omitted), in one guarded write, and returns the ids it wrote.
+   * when omitted), in one guarded write, and returns the ids it wrote. An
+   * `issueLink` is updated in the same transaction, whether or not the
+   * Feedback was written.
    */
   writeStatuses(input: {
     feedbackIds: string[];
     status: FeedbackStatus;
     from?: FeedbackStatus[];
+    issueLink?: IssueLinkUpdate;
   }): Promise<string[]>;
 };
 
 export type StatusConvergence = {
   store: StatusConvergenceStore;
-  sendEvents: (events: StatusChangedEventData[]) => void;
+  sendEvents: (events: StatusChangedEventData[]) => void | Promise<void>;
 };
 
 type UpdateStatusInput = {
@@ -43,11 +65,13 @@ type UpdateStatusInput = {
   /** Writes only Feedbacks still in this Status, as Restore does from Archived. */
   onlyFrom?: FeedbackStatus;
   actor: StatusActor;
+  /** The Issue link of the Tracker that drove the change, recorded atomically with it. */
+  issueLink?: IssueLinkUpdate;
 };
 
 /** Change a Status: writes it, emits one event per Feedback written, and returns their ids. */
 export async function updateStatus(
-  { feedbackIds, status, onlyFrom, actor }: UpdateStatusInput,
+  { feedbackIds, status, onlyFrom, actor, issueLink }: UpdateStatusInput,
   { store, sendEvents }: StatusConvergence,
 ) {
   if (feedbackIds.length === 0) return [];
@@ -62,10 +86,15 @@ export async function updateStatus(
             candidate !== status && (!onlyFrom || candidate === onlyFrom),
         );
 
-  const written = await store.writeStatuses({ feedbackIds, status, from });
+  const written = await store.writeStatuses({
+    feedbackIds,
+    status,
+    from,
+    issueLink,
+  });
 
   if (written.length > 0) {
-    sendEvents(
+    await sendEvents(
       written.map((feedbackId) => ({
         feedbackId,
         newStatus: status,

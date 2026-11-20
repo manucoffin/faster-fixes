@@ -72,6 +72,42 @@ describe("updateStatus", () => {
     ]);
   });
 
+  it("records the driving Tracker's Issue link with the Status it wrote", async () => {
+    const convergence = inMemoryStatusConvergence({ a: "new" });
+    const issueLink = {
+      tracker: "github",
+      id: "link_a",
+      data: { issueState: "closed" },
+    } as const;
+
+    await updateStatus(
+      { feedbackIds: ["a"], status: "resolved", actor: "github", issueLink },
+      convergence,
+    );
+
+    expect(convergence.statuses.get("a")).toBe("resolved");
+    expect(convergence.issueLinks).toEqual([issueLink]);
+  });
+
+  it("still records the Issue link when a Tracker sets the Status a Feedback already has", async () => {
+    const convergence = inMemoryStatusConvergence({ a: "resolved" });
+    const issueLink = {
+      tracker: "github",
+      id: "link_a",
+      data: { issueState: "closed" },
+    } as const;
+
+    await expect(
+      updateStatus(
+        { feedbackIds: ["a"], status: "resolved", actor: "github", issueLink },
+        convergence,
+      ),
+    ).resolves.toEqual([]);
+
+    expect(convergence.issueLinks).toEqual([issueLink]);
+    expect(convergence.events).toEqual([]);
+  });
+
   it("leaves a Feedback no longer in the guarded Status untouched", async () => {
     const convergence = inMemoryStatusConvergence({
       archived: "closed",

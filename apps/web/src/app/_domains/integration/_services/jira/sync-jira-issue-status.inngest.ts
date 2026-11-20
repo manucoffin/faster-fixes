@@ -4,11 +4,9 @@ import { feedbackStatusFromJiraStatusCategory } from "../../_helpers/jira/transi
 import { getValidJiraAccessToken } from "./token-access";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  jiraWebhookIssueEvent,
-} from "@/server/inngest/events";
+import { jiraWebhookIssueEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { updateStatus } from "../update-status";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -121,32 +119,24 @@ export const syncJiraIssueStatus = inngest.createFunction(
       return { skipped: "status_unchanged" };
     }
 
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: newStatus },
-      }),
-      prisma.feedbackJiraIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          issueStatusCategory: issue.statusCategory,
-          mirroredStatus: newStatus,
-          lastSyncSource: "jira",
-          lastSyncAt: new Date(),
-          ...renamedIssueFields(issueLink.issueKey, issue.key, installation),
+    // Converges the other Trackers on the Feedback; the Jira origin stops it
+    // echoing straight back to the issue it came from.
+    await updateStatus(
+      {
+        feedbackIds: [issueLink.feedbackId],
+        status: newStatus,
+        actor: "jira",
+        issueLink: {
+          tracker: "jira",
+          id: issueLink.id,
+          data: {
+            issueStatusCategory: issue.statusCategory,
+            mirroredStatus: newStatus,
+            ...renamedIssueFields(issueLink.issueKey, issue.key, installation),
+          },
         },
-      }),
-    ]);
-
-    // Converge the other Trackers on the Feedback. `origin: "jira"` stops this
-    // from echoing straight back to the issue it came from.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus,
-        origin: "jira",
-        actor: "tracker",
-      }),
+      },
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
 
     return { feedbackId: issueLink.feedbackId, newStatus };

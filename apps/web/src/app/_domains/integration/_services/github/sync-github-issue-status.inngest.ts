@@ -1,11 +1,9 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  githubWebhookIssuesEvent,
-} from "@/server/inngest/events";
+import { githubWebhookIssuesEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { updateStatus } from "../update-status";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -49,30 +47,20 @@ export const syncGitHubIssueStatus = inngest.createFunction(
       return { skipped: "unhandled_action" };
     }
 
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: newStatus },
-      }),
-      prisma.feedbackIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          issueState: action === "closed" ? "closed" : "open",
-          lastSyncSource: "github",
-          lastSyncAt: new Date(),
+    // Converges the other Trackers (e.g. Linear) on the Feedback; the GitHub
+    // origin stops it echoing back to this Issue.
+    await updateStatus(
+      {
+        feedbackIds: [issueLink.feedbackId],
+        status: newStatus,
+        actor: "github",
+        issueLink: {
+          tracker: "github",
+          id: issueLink.id,
+          data: { issueState: action === "closed" ? "closed" : "open" },
         },
-      }),
-    ]);
-
-    // Propagate to other trackers (e.g. Linear) so the feedback stays canonical.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus,
-        origin: "github",
-        // Change originated from the GitHub issue webhook syncing back.
-        actor: "tracker",
-      }),
+      },
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
 
     return { feedbackId: issueLink.feedbackId, newStatus };

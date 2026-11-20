@@ -1,14 +1,8 @@
+import type { FeedbackStatus } from "@/app/_domains/feedback";
+import { inMemoryStatusConvergence } from "@/app/_domains/integration/_services/_in-memory-status-convergence";
 import { NotFoundError } from "@/server/errors/domain-errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-// The Inngest client is built at import time and its send is a side effect the
-// service fires without awaiting, so it is replaced at the module boundary.
-const inngestSendDouble = vi.hoisted(() => vi.fn());
-vi.mock("@/server/inngest", () => ({
-  inngest: { send: inngestSendDouble },
-}));
-
-const { updateFeedbackStatus } = await import("./update-feedback-status");
+import { describe, expect, it, vi } from "vitest";
+import { updateFeedbackStatus } from "./update-feedback-status";
 
 type FakeDb = NonNullable<Parameters<typeof updateFeedbackStatus>[1]>;
 
@@ -19,37 +13,36 @@ const UPDATED_AT = new Date("2026-01-02T03:04:05.000Z");
 /**
  * A database filtered the way the service queries it: the feedback is visible
  * only when its project is one of the token organization's, so a feedback on
- * another organization's project reads as absent.
+ * another organization's project reads as absent. Its Status is the one the
+ * convergence holds, so a write shows in the row read back.
  */
-function fakeDb({
+function setup({
   projectId = "project_1",
   status = "new",
-}: { projectId?: string; status?: string } = {}) {
-  return {
+}: { projectId?: string; status?: FeedbackStatus } = {}) {
+  const convergence = inMemoryStatusConvergence({ [FEEDBACK_ID]: status });
+  const db = {
     feedback: {
       findFirst: vi.fn(
         async ({ where }: { where: { projectId: { in: string[] } } }) =>
           where.projectId.in.includes(projectId)
-            ? { id: FEEDBACK_ID, status }
+            ? { id: FEEDBACK_ID, status: convergence.statuses.get(FEEDBACK_ID) }
             : null,
       ),
-      update: vi.fn(async ({ data }: { data: { status: string } }) => ({
+      findUniqueOrThrow: vi.fn(async () => ({
         id: FEEDBACK_ID,
-        status: data.status,
+        status: convergence.statuses.get(FEEDBACK_ID),
         updatedAt: UPDATED_AT,
       })),
     },
   } as unknown as FakeDb;
-}
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  inngestSendDouble.mockResolvedValue(undefined);
-});
+  return { db, convergence };
+}
 
 describe("updateFeedbackStatus", () => {
   it("reports a feedback outside the token's organization as not found", async () => {
-    const db = fakeDb({ projectId: "someone-elses-project" });
+    const { db, convergence } = setup({ projectId: "someone-elses-project" });
 
     await expect(
       updateFeedbackStatus(
@@ -59,15 +52,16 @@ describe("updateFeedbackStatus", () => {
           organizationProjects: ORGANIZATION_PROJECTS,
         },
         db,
+        convergence,
       ),
     ).rejects.toThrow(new NotFoundError("Feedback not found"));
 
-    expect(db.feedback.update).not.toHaveBeenCalled();
-    expect(inngestSendDouble).not.toHaveBeenCalled();
+    expect(convergence.statuses.get(FEEDBACK_ID)).toBe("new");
+    expect(convergence.events).toEqual([]);
   });
 
   it("stores the new status and reports the transition", async () => {
-    const db = fakeDb({ status: "new" });
+    const { db, convergence } = setup({ status: "new" });
 
     const result = await updateFeedbackStatus(
       {
@@ -76,6 +70,7 @@ describe("updateFeedbackStatus", () => {
         organizationProjects: ORGANIZATION_PROJECTS,
       },
       db,
+      convergence,
     );
 
     expect(result).toEqual({
@@ -84,10 +79,11 @@ describe("updateFeedbackStatus", () => {
       updatedAt: UPDATED_AT,
       previousStatus: "new",
     });
+    expect(convergence.statuses.get(FEEDBACK_ID)).toBe("resolved");
   });
 
   it("fans a real change out to the integrations as the agent actor", async () => {
-    const db = fakeDb({ status: "new" });
+    const { db, convergence } = setup({ status: "new" });
 
     await updateFeedbackStatus(
       {
@@ -96,16 +92,12 @@ describe("updateFeedbackStatus", () => {
         organizationProjects: ORGANIZATION_PROJECTS,
       },
       db,
+      convergence,
     );
 
-    expect(inngestSendDouble).toHaveBeenCalledWith({
-      name: "feedback/status-changed",
-      data: {
-        feedbackId: FEEDBACK_ID,
-        newStatus: "in_progress",
-        actor: "agent",
-      },
-    });
+    expect(convergence.events).toEqual([
+      { feedbackId: FEEDBACK_ID, newStatus: "in_progress", actor: "agent" },
+    ]);
   });
 
   /**
@@ -113,8 +105,8 @@ describe("updateFeedbackStatus", () => {
    * an agent looping over a queue re-sets the status it already read, and the
    * fan-out is the costly half of the write. See ADR-0007.
    */
-  it("writes a no-op status set but sends no event", async () => {
-    const db = fakeDb({ status: "resolved" });
+  it("answers a no-op status set with the row and sends no event", async () => {
+    const { db, convergence } = setup({ status: "resolved" });
 
     const result = await updateFeedbackStatus(
       {
@@ -123,10 +115,15 @@ describe("updateFeedbackStatus", () => {
         organizationProjects: ORGANIZATION_PROJECTS,
       },
       db,
+      convergence,
     );
 
-    expect(result.previousStatus).toBe("resolved");
-    expect(db.feedback.update).toHaveBeenCalledTimes(1);
-    expect(inngestSendDouble).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      id: FEEDBACK_ID,
+      status: "resolved",
+      updatedAt: UPDATED_AT,
+      previousStatus: "resolved",
+    });
+    expect(convergence.events).toEqual([]);
   });
 });

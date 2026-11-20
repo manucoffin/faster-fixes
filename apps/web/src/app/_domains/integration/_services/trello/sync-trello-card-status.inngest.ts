@@ -6,11 +6,9 @@ import { TrelloRequestError } from "./trello-request-error";
 import { withTrelloAccessToken } from "./token-access";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  trelloWebhookCardEvent,
-} from "@/server/inngest/events";
+import { trelloWebhookCardEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { updateStatus } from "../update-status";
 
 const SYNC_LOOP_WINDOW_MS = 30_000;
 
@@ -89,30 +87,16 @@ export const syncTrelloCardStatus = inngest.createFunction(
       return { skipped: "status_unchanged" };
     }
 
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: decision.status },
-      }),
-      prisma.feedbackTrelloIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          ...cardState,
-          lastSyncSource: "trello",
-          lastSyncAt: new Date(),
-        },
-      }),
-    ]);
-
-    // Converge the other Trackers on the Feedback. `origin: "trello"` stops
-    // this from echoing straight back to the card it came from.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus: decision.status,
-        origin: "trello",
-        actor: "tracker",
-      }),
+    // Converges the other Trackers on the Feedback; the Trello origin stops
+    // it echoing straight back to the card it came from.
+    await updateStatus(
+      {
+        feedbackIds: [issueLink.feedbackId],
+        status: decision.status,
+        actor: "trello",
+        issueLink: { tracker: "trello", id: issueLink.id, data: cardState },
+      },
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
 
     return { feedbackId: issueLink.feedbackId, newStatus: decision.status };
