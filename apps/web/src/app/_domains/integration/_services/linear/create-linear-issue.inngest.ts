@@ -13,6 +13,9 @@ import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { linearTrackerAdapter } from "./_linear-tracker-adapter";
 import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -145,6 +148,8 @@ export const createLinearIssue = inngest.createFunction(
     const stateRef = await issue.state;
     const stateType = stateRef?.type ?? resolved.stateType;
 
+    const mirrored = isLinearStateTypeMirroring(stateType, status);
+
     const healthUpdate: { linkHealthIssue?: string } = {};
     if (resolved.fellBack) healthUpdate.linkHealthIssue = "stale_default_state";
     else if (droppedCount > 0) healthUpdate.linkHealthIssue = "stale_label";
@@ -161,9 +166,7 @@ export const createLinearIssue = inngest.createFunction(
           issueStateType: stateType,
           // A Feedback whose state the team cannot express starts pending
           // (ADR-0025).
-          mirroredStatus: isLinearStateTypeMirroring(stateType, status)
-            ? status
-            : null,
+          mirroredStatus: mirrored ? status : null,
           lastSyncSource: "app",
           lastSyncAt: new Date(),
         },
@@ -177,6 +180,14 @@ export const createLinearIssue = inngest.createFunction(
           ]
         : []),
     ]);
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        linearTrackerAdapter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { issueId: issue.id, issueIdentifier: issue.identifier };
   },

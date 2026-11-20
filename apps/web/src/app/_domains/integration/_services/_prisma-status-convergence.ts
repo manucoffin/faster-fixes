@@ -270,8 +270,7 @@ async function findTrelloIssueLink(
 function updateIssueLink(
   db: typeof prisma,
   { tracker, id, data }: IssueLinkUpdate,
-  // The time windows of GitHub, Linear and Trello outbound still read these
-  // until they converge through the module too.
+  // Nothing reads these any more: they go with their columns.
   sync: { lastSyncSource?: string; lastSyncAt?: Date } = {
     lastSyncSource: tracker,
     lastSyncAt: new Date(),

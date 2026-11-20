@@ -10,6 +10,9 @@ import {
   getTrelloCardDescription,
   trelloCardFeedbackInclude,
 } from "./get-trello-card-description";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { trelloTrackerWriter } from "./_trello-tracker-adapter";
 import { refreshTrelloLinkHealth } from "./refresh-trello-link-health";
 import { createCard } from "./trello-client";
 import { withTrelloAccessToken } from "./token-access";
@@ -85,6 +88,11 @@ export const createTrelloCard = inngest.createFunction(
 
     const status = FeedbackStatusEnum.parse(feedback.status);
     const position = { listId: card.idList, archived: card.closed };
+    // A Feedback already past `new` starts pending (ADR-0025), unless its
+    // Status leaves the card where it was created.
+    const mirrored =
+      isTrelloCardMirroring(position, status, link) ||
+      (leavesTrelloCardInPlace(status, link) && !card.closed);
 
     await prisma.feedbackTrelloIssueLink.create({
       data: {
@@ -95,17 +103,19 @@ export const createTrelloCard = inngest.createFunction(
         cardUrl: card.url,
         listId: card.idList,
         archived: card.closed,
-        // A Feedback already past `new` starts pending (ADR-0025), unless its
-        // Status leaves the card where it was created.
-        mirroredStatus:
-          isTrelloCardMirroring(position, status, link) ||
-          (leavesTrelloCardInPlace(status, link) && !card.closed)
-            ? status
-            : null,
+        mirroredStatus: mirrored ? status : null,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },
     });
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        trelloTrackerWriter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { cardId: card.id, cardShortLink: card.shortLink, cover };
   },
