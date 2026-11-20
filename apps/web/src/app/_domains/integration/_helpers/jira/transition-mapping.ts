@@ -8,7 +8,7 @@ import type { JiraTransition } from "../../_services/jira/jira-rest-client";
 
 const CATEGORY_TODO = "new";
 const CATEGORY_IN_PROGRESS = "indeterminate";
-export const CATEGORY_DONE = "done";
+const CATEGORY_DONE = "done";
 
 // Workflows often expose several Done-category transitions (Done, Won't Do,
 // Duplicate, Cannot Reproduce...). Prefer the ones that read as a plain finish
@@ -22,6 +22,29 @@ const ARCHIVED_RESOLUTION_NAMES = [
   "Declined",
   "Cancelled",
 ];
+
+// Jira is mirrored on two states (ADR-0025): Done or not Done. A finer
+// mapping onto the three categories is a later change.
+export type JiraIssueState = "done" | "not_done";
+
+export function resolveJiraStateToWrite(
+  status: FeedbackStatus,
+): JiraIssueState {
+  return status === "resolved" || status === "closed" ? "done" : "not_done";
+}
+
+function jiraIssueStateOf(statusCategory: string): JiraIssueState {
+  return statusCategory === CATEGORY_DONE ? "done" : "not_done";
+}
+
+// One state mirrors several Statuses: Done mirrors Resolved and Archived, not
+// Done mirrors `new` and In progress.
+export function isJiraStatusCategoryMirroring(
+  statusCategory: string,
+  status: FeedbackStatus,
+): boolean {
+  return jiraIssueStateOf(statusCategory) === resolveJiraStateToWrite(status);
+}
 
 export type ResolvedJiraTransition = {
   transitionId: string;
@@ -64,10 +87,7 @@ export function resolveJiraTransition(args: {
   feedbackStatus: FeedbackStatus;
 }): ResolvedJiraTransition | null {
   const { transitions, feedbackStatus } = args;
-  const wantsDone =
-    feedbackStatus === "resolved" || feedbackStatus === "closed";
-
-  if (!wantsDone) {
+  if (resolveJiraStateToWrite(feedbackStatus) === "not_done") {
     // Reopening: In Progress mirrors "someone is on it"; To Do covers workflows
     // whose only way out of Done is back to the backlog.
     const target =
@@ -108,5 +128,7 @@ export function resolveJiraTransition(args: {
 export function feedbackStatusFromJiraStatusCategory(
   statusCategory: string,
 ): FeedbackStatus {
-  return statusCategory === CATEGORY_DONE ? "resolved" : "in_progress";
+  return jiraIssueStateOf(statusCategory) === "done"
+    ? "resolved"
+    : "in_progress";
 }

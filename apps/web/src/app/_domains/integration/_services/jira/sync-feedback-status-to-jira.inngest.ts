@@ -1,7 +1,8 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
 import { listJiraTransitions, transitionJiraIssue } from "./jira-rest-client";
 import {
-  CATEGORY_DONE,
+  isJiraStatusCategoryMirroring,
+  resolveJiraStateToWrite,
   resolveJiraTransition,
 } from "../../_helpers/jira/transition-mapping";
 import { getValidJiraAccessToken } from "./token-access";
@@ -41,13 +42,18 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
       return { skipped: "sync_loop_prevention" };
     }
 
-    const wantsDone = newStatus === "resolved" || newStatus === "closed";
-    const isDone = issueLink.issueStatusCategory === CATEGORY_DONE;
-
     // Reopening only requires the issue to be out of Done — an issue already
     // sitting in To Do or In Progress is a faithful mirror of "not finished", so
     // shuffling it between those two categories would be pure churn in Jira.
-    if (wantsDone === isDone) return { skipped: "status_category_unchanged" };
+    if (
+      isJiraStatusCategoryMirroring(issueLink.issueStatusCategory, newStatus)
+    ) {
+      await prisma.feedbackJiraIssueLink.update({
+        where: { id: issueLink.id },
+        data: { mirroredStatus: newStatus },
+      });
+      return { skipped: "status_category_unchanged" };
+    }
 
     const installation = issueLink.projectJiraLink.jiraInstallation;
     // A disconnected or refused Installation is a fact about the data, so the
@@ -72,7 +78,7 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
       // a broken link: log and move on rather than burning retries or flagging
       // the link unhealthy.
       console.warn(
-        `[jira] no transition to ${wantsDone ? "done" : "open"} for issue ${issueLink.issueKey}`,
+        `[jira] no transition to ${resolveJiraStateToWrite(newStatus)} for issue ${issueLink.issueKey}`,
       );
       return { skipped: "no_transition_available" };
     }
@@ -91,6 +97,7 @@ export const syncFeedbackStatusToJira = inngest.createFunction(
       where: { id: issueLink.id },
       data: {
         issueStatusCategory: resolved.toStatusCategory,
+        mirroredStatus: newStatus,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },

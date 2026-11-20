@@ -130,6 +130,7 @@ export const syncJiraIssueStatus = inngest.createFunction(
         where: { id: issueLink.id },
         data: {
           issueStatusCategory: issue.statusCategory,
+          mirroredStatus: newStatus,
           lastSyncSource: "jira",
           lastSyncAt: new Date(),
           ...renamedIssueFields(issueLink.issueKey, issue.key, installation),
