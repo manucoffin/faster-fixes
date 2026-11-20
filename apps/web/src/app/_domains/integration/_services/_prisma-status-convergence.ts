@@ -5,9 +5,9 @@ import {
 } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import { FeedbackStatusEnum } from "@/app/_domains/feedback";
+import type { Prisma } from "@workspace/db/types";
 import type {
   IssueLinkUpdate,
-  IssueReference,
   MirroredIssueLink,
   StatusConvergence,
 } from "./update-status";
@@ -47,14 +47,51 @@ export function prismaStatusConvergence(
       findIssueLink(reference) {
         switch (reference.tracker) {
           case "jira":
-            return findJiraIssueLink(db, reference);
+            // Scoped to the Installation the delivery token identified, so a
+            // payload naming an issue id of another tenant finds no link.
+            return findJiraIssueLink(db, {
+              issueId: reference.issueId,
+              projectJiraLink: {
+                jiraInstallationId: reference.installationId,
+              },
+            });
           case "github":
-            return findGitHubIssueLink(db, reference);
+            return findGitHubIssueLink(db, {
+              issueNumber: reference.issueNumber,
+              projectGitHubLink: { repoFullName: reference.repoFullName },
+            });
           case "linear":
-            return findLinearIssueLink(db, reference);
+            // Scoped to the Installation the signed delivery named, as Jira's is.
+            return findLinearIssueLink(db, {
+              issueId: reference.issueId,
+              projectLinearLink: {
+                linearInstallationId: reference.installationId,
+              },
+            });
           case "trello":
-            return findTrelloIssueLink(db, reference);
+            // Scoped to the link whose webhook delivered it, so a payload
+            // naming a card of another tenant finds no Issue link.
+            return findTrelloIssueLink(db, {
+              cardId: reference.cardId,
+              projectTrelloLinkId: reference.projectTrelloLinkId,
+            });
         }
+      },
+      findFeedbackIssueLink({ tracker, feedbackId }) {
+        const where = { feedbackId };
+        switch (tracker) {
+          case "jira":
+            return findJiraIssueLink(db, where);
+          case "github":
+            return findGitHubIssueLink(db, where);
+          case "linear":
+            return findLinearIssueLink(db, where);
+          case "trello":
+            return findTrelloIssueLink(db, where);
+        }
+      },
+      async recordConvergence(update) {
+        await updateIssueLink(db, update, {});
       },
       async refreshIssueState(refresh) {
         const where = { id: refresh.id };
@@ -121,15 +158,10 @@ const parseMirroredStatus = FeedbackStatusEnum.nullable().catch(null).parse;
 
 async function findJiraIssueLink(
   db: typeof prisma,
-  { issueId, installationId }: IssueReference<"jira">,
+  where: Prisma.FeedbackJiraIssueLinkWhereInput,
 ): Promise<MirroredIssueLink<"jira"> | null> {
-  // Scoped to the Installation the delivery token identified, so a payload
-  // naming an issue id of another tenant finds no link.
   const link = await db.feedbackJiraIssueLink.findFirst({
-    where: {
-      issueId,
-      projectJiraLink: { jiraInstallationId: installationId },
-    },
+    where,
     select: {
       id: true,
       feedbackId: true,
@@ -152,10 +184,10 @@ async function findJiraIssueLink(
 
 async function findGitHubIssueLink(
   db: typeof prisma,
-  { repoFullName, issueNumber }: IssueReference<"github">,
+  where: Prisma.FeedbackIssueLinkWhereInput,
 ): Promise<MirroredIssueLink<"github"> | null> {
   const link = await db.feedbackIssueLink.findFirst({
-    where: { issueNumber, projectGitHubLink: { repoFullName } },
+    where,
     select: {
       id: true,
       feedbackId: true,
@@ -180,14 +212,10 @@ async function findGitHubIssueLink(
 
 async function findLinearIssueLink(
   db: typeof prisma,
-  { issueId, installationId }: IssueReference<"linear">,
+  where: Prisma.FeedbackLinearIssueLinkWhereInput,
 ): Promise<MirroredIssueLink<"linear"> | null> {
-  // Scoped to the Installation the signed delivery named, as Jira's is.
   const link = await db.feedbackLinearIssueLink.findFirst({
-    where: {
-      issueId,
-      projectLinearLink: { linearInstallationId: installationId },
-    },
+    where,
     select: {
       id: true,
       feedbackId: true,
@@ -214,12 +242,10 @@ async function findLinearIssueLink(
 
 async function findTrelloIssueLink(
   db: typeof prisma,
-  { cardId, projectTrelloLinkId }: IssueReference<"trello">,
+  where: Prisma.FeedbackTrelloIssueLinkWhereInput,
 ): Promise<MirroredIssueLink<"trello"> | null> {
-  // Scoped to the link whose webhook delivered it, so a payload naming a card
-  // of another tenant finds no Issue link.
   const link = await db.feedbackTrelloIssueLink.findFirst({
-    where: { cardId, projectTrelloLinkId },
+    where,
     select: {
       id: true,
       feedbackId: true,
@@ -244,11 +270,13 @@ async function findTrelloIssueLink(
 function updateIssueLink(
   db: typeof prisma,
   { tracker, id, data }: IssueLinkUpdate,
+  // The time windows of GitHub, Linear and Trello outbound still read these
+  // until they converge through the module too.
+  sync: { lastSyncSource?: string; lastSyncAt?: Date } = {
+    lastSyncSource: tracker,
+    lastSyncAt: new Date(),
+  },
 ) {
-  // The time windows still read these until ADR-0025's decisions replace them
-  // for every Tracker and direction.
-  const sync = { lastSyncSource: tracker, lastSyncAt: new Date() };
-
   switch (tracker) {
     case "github":
       return db.feedbackIssueLink.update({

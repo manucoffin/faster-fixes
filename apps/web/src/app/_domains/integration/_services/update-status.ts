@@ -71,6 +71,11 @@ export type IssueStateRefresh = {
   };
 }[MirroringTracker];
 
+/** The Issue link of one Tracker that mirrors a Feedback. */
+export type FeedbackIssueLinkReference<
+  T extends MirroringTracker = MirroringTracker,
+> = { tracker: T; feedbackId: string };
+
 export type StatusConvergenceStore = {
   /**
    * Writes `status` to each Feedback whose Status is in `from` (any Status
@@ -86,6 +91,12 @@ export type StatusConvergenceStore = {
   }): Promise<string[]>;
   /** Answers a link of the reference's Tracker. */
   findIssueLink(reference: IssueReference): Promise<MirroredIssueLink | null>;
+  /** Answers the Feedback's link of that Tracker, with the Feedback's Status read now. */
+  findFeedbackIssueLink(
+    reference: FeedbackIssueLinkReference,
+  ): Promise<MirroredIssueLink | null>;
+  /** Records a convergence: the Mirrored Status and the Issue state it converged on. */
+  recordConvergence(update: IssueLinkUpdate): Promise<void>;
   /** Records the Issue state of a link that is not pending, leaving its Mirrored Status. */
   refreshIssueState(refresh: IssueStateRefresh): Promise<void>;
   /** Deletes the Issue link and leaves its Feedback alone. */

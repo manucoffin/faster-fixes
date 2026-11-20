@@ -108,6 +108,7 @@ const serviceVerbOptions = {
     "apply",
     "claim",
     "complete",
+    "converge",
     "create",
     "decline",
     "delete",

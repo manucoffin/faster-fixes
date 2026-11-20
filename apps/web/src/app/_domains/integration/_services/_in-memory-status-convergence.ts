@@ -26,6 +26,23 @@ export function inMemoryStatusConvergence(
   const issueLinks: IssueLinkUpdate[] = [];
   const events: StatusChangedEventData[] = [];
 
+  function recordIssueLink({ tracker, id, data }: IssueLinkUpdate) {
+    const stored = links.get(id);
+    if (!stored || stored.tracker !== tracker) return;
+    const { mirroredStatus, ...issueState } = data;
+    stored.mirroredStatus = mirroredStatus;
+    stored.issueState = issueState;
+  }
+
+  function withFeedbackStatus(
+    stored: InMemoryIssueLink | undefined,
+  ): MirroredIssueLink | null {
+    const feedbackStatus = stored && statuses.get(stored.feedbackId);
+    if (!stored || !feedbackStatus) return null;
+    const { reference: _reference, ...link } = stored;
+    return { ...link, feedbackStatus };
+  }
+
   const convergence: StatusConvergence = {
     store: {
       writeStatuses({ feedbackIds, status, from, issueLink }) {
@@ -36,24 +53,34 @@ export function inMemoryStatusConvergence(
         for (const id of written) statuses.set(id, status);
         if (issueLink) {
           issueLinks.push(issueLink);
-          const stored = links.get(issueLink.id);
-          if (stored && issueLink.tracker === stored.tracker) {
-            const { mirroredStatus, ...issueState } = issueLink.data;
-            stored.mirroredStatus = mirroredStatus;
-            stored.issueState = issueState;
-          }
+          recordIssueLink(issueLink);
         }
         return Promise.resolve(written);
       },
       findIssueLink(reference) {
-        const stored = [...links.values()].find(
-          (link) =>
-            JSON.stringify(link.reference) === JSON.stringify(reference),
+        return Promise.resolve(
+          withFeedbackStatus(
+            [...links.values()].find(
+              (link) =>
+                JSON.stringify(link.reference) === JSON.stringify(reference),
+            ),
+          ),
         );
-        const feedbackStatus = stored && statuses.get(stored.feedbackId);
-        if (!stored || !feedbackStatus) return Promise.resolve(null);
-        const { reference: _reference, ...link } = stored;
-        return Promise.resolve({ ...link, feedbackStatus });
+      },
+      findFeedbackIssueLink({ tracker, feedbackId }) {
+        return Promise.resolve(
+          withFeedbackStatus(
+            [...links.values()].find(
+              (link) =>
+                link.tracker === tracker && link.feedbackId === feedbackId,
+            ),
+          ),
+        );
+      },
+      recordConvergence(update) {
+        issueLinks.push(update);
+        recordIssueLink(update);
+        return Promise.resolve();
       },
       refreshIssueState({ id, issueState }) {
         const stored = links.get(id);

@@ -11,6 +11,9 @@ import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { jiraTrackerAdapter } from "./_jira-tracker-adapter";
 import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
@@ -134,6 +137,10 @@ export const createJiraIssue = inngest.createFunction(
     }
 
     const status = FeedbackStatusEnum.parse(feedback.status);
+    const mirrored = isJiraStatusCategoryMirroring(
+      issue.statusCategory,
+      status,
+    );
     await prisma.feedbackJiraIssueLink.create({
       data: {
         feedbackId: feedback.id,
@@ -144,16 +151,19 @@ export const createJiraIssue = inngest.createFunction(
         issueStatusCategory: issue.statusCategory,
         // A Feedback already Resolved or Archived gets an open issue, so the
         // link starts pending (ADR-0025).
-        mirroredStatus: isJiraStatusCategoryMirroring(
-          issue.statusCategory,
-          status,
-        )
-          ? status
-          : null,
+        mirroredStatus: mirrored ? status : null,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },
     });
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        jiraTrackerAdapter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { issueId: issue.id, issueKey: issue.key };
   },
