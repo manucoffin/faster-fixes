@@ -30,7 +30,7 @@ export type IssueStateByTracker = {
 
 // The Trackers whose Issue links record a Mirrored Status and go through the
 // inbound decision. The others join as they move to ADR-0025.
-export type MirroringTracker = "jira";
+export type MirroringTracker = "jira" | "github";
 
 /** The Issue state a Tracker sync records on its Issue link, per Tracker. */
 export type IssueLinkUpdate = {
@@ -44,23 +44,32 @@ export type IssueLinkUpdate = {
   };
 }[Tracker];
 
-/** What a delivery names: the Issue, scoped to the Installation that delivered it. */
-export type IssueReference = {
-  tracker: "jira";
-  issueId: string;
-  installationId: string;
-};
+/** What a delivery names: the Issue, scoped to what identified the delivery. */
+export type IssueReference<T extends MirroringTracker = MirroringTracker> = {
+  jira: { tracker: "jira"; issueId: string; installationId: string };
+  // A signed GitHub delivery names its repository; issue numbers are unique in it.
+  github: { tracker: "github"; repoFullName: string; issueNumber: number };
+}[T];
 
 /** An Issue link as the inbound decision reads it, with its Feedback's Status. */
-export type MirroredIssueLink = {
-  tracker: MirroringTracker;
+export type MirroredIssueLink<T extends MirroringTracker = MirroringTracker> = {
+  tracker: T;
   id: string;
   feedbackId: string;
   feedbackStatus: FeedbackStatus;
   /** Null, or a Status other than `feedbackStatus`, means pending. */
   mirroredStatus: FeedbackStatus | null;
-  issueState: IssueStateByTracker[MirroringTracker];
+  issueState: IssueStateByTracker[T];
 };
+
+/** The Issue state a link that is not pending records, per Tracker. */
+export type IssueStateRefresh = {
+  [T in MirroringTracker]: {
+    tracker: T;
+    id: string;
+    issueState: IssueStateByTracker[T];
+  };
+}[MirroringTracker];
 
 export type StatusConvergenceStore = {
   /**
@@ -75,12 +84,10 @@ export type StatusConvergenceStore = {
     from?: FeedbackStatus[];
     issueLink?: IssueLinkUpdate;
   }): Promise<string[]>;
+  /** Answers a link of the reference's Tracker. */
   findIssueLink(reference: IssueReference): Promise<MirroredIssueLink | null>;
   /** Records the Issue state of a link that is not pending, leaving its Mirrored Status. */
-  refreshIssueState(
-    link: MirroredIssueLink,
-    issueState: MirroredIssueLink["issueState"],
-  ): Promise<void>;
+  refreshIssueState(refresh: IssueStateRefresh): Promise<void>;
   /** Deletes the Issue link and leaves its Feedback alone. */
   detachIssueLink(link: MirroredIssueLink): Promise<void>;
 };

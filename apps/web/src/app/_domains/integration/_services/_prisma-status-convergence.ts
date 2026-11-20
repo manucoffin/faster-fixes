@@ -5,7 +5,12 @@ import {
 } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
 import { FeedbackStatusEnum } from "@/app/_domains/feedback";
-import type { IssueLinkUpdate, StatusConvergence } from "./update-status";
+import type {
+  IssueLinkUpdate,
+  IssueReference,
+  MirroredIssueLink,
+  StatusConvergence,
+} from "./update-status";
 
 /**
  * The production dependencies of Status convergence: Prisma and Inngest.
@@ -39,43 +44,30 @@ export function prismaStatusConvergence(
 
         return written.map((feedback) => feedback.id);
       },
-      async findIssueLink({ issueId, installationId }) {
-        // Scoped to the Installation the delivery token identified, so a
-        // payload naming an issue id of another tenant finds no link.
-        const link = await db.feedbackJiraIssueLink.findFirst({
-          where: {
-            issueId,
-            projectJiraLink: { jiraInstallationId: installationId },
-          },
-          select: {
-            id: true,
-            feedbackId: true,
-            mirroredStatus: true,
-            issueStatusCategory: true,
-            feedback: { select: { status: true } },
-          },
-        });
-        if (!link) return null;
-
-        return {
-          tracker: "jira",
-          id: link.id,
-          feedbackId: link.feedbackId,
-          feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
-          mirroredStatus: FeedbackStatusEnum.nullable()
-            .catch(null)
-            .parse(link.mirroredStatus),
-          issueState: { issueStatusCategory: link.issueStatusCategory },
-        };
+      findIssueLink(reference) {
+        return reference.tracker === "jira"
+          ? findJiraIssueLink(db, reference)
+          : findGitHubIssueLink(db, reference);
       },
-      async refreshIssueState({ id }, issueState) {
-        await db.feedbackJiraIssueLink.update({
-          where: { id },
-          data: issueState,
+      async refreshIssueState(refresh) {
+        if (refresh.tracker === "jira") {
+          await db.feedbackJiraIssueLink.update({
+            where: { id: refresh.id },
+            data: refresh.issueState,
+          });
+          return;
+        }
+        await db.feedbackIssueLink.update({
+          where: { id: refresh.id },
+          data: refresh.issueState,
         });
       },
-      async detachIssueLink({ id }) {
-        await db.feedbackJiraIssueLink.delete({ where: { id } });
+      async detachIssueLink({ tracker, id }) {
+        if (tracker === "jira") {
+          await db.feedbackJiraIssueLink.delete({ where: { id } });
+          return;
+        }
+        await db.feedbackIssueLink.delete({ where: { id } });
       },
     },
     async sendEvents(events) {
@@ -89,6 +81,67 @@ export function prismaStatusConvergence(
       }
       // Fire-and-forget: a failed send never fails a User's Status change.
       sent.catch(() => {});
+    },
+  };
+}
+
+const parseMirroredStatus = FeedbackStatusEnum.nullable().catch(null).parse;
+
+async function findJiraIssueLink(
+  db: typeof prisma,
+  { issueId, installationId }: IssueReference<"jira">,
+): Promise<MirroredIssueLink<"jira"> | null> {
+  // Scoped to the Installation the delivery token identified, so a payload
+  // naming an issue id of another tenant finds no link.
+  const link = await db.feedbackJiraIssueLink.findFirst({
+    where: {
+      issueId,
+      projectJiraLink: { jiraInstallationId: installationId },
+    },
+    select: {
+      id: true,
+      feedbackId: true,
+      mirroredStatus: true,
+      issueStatusCategory: true,
+      feedback: { select: { status: true } },
+    },
+  });
+  if (!link) return null;
+
+  return {
+    tracker: "jira",
+    id: link.id,
+    feedbackId: link.feedbackId,
+    feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
+    mirroredStatus: parseMirroredStatus(link.mirroredStatus),
+    issueState: { issueStatusCategory: link.issueStatusCategory },
+  };
+}
+
+async function findGitHubIssueLink(
+  db: typeof prisma,
+  { repoFullName, issueNumber }: IssueReference<"github">,
+): Promise<MirroredIssueLink<"github"> | null> {
+  const link = await db.feedbackIssueLink.findFirst({
+    where: { issueNumber, projectGitHubLink: { repoFullName } },
+    select: {
+      id: true,
+      feedbackId: true,
+      mirroredStatus: true,
+      issueState: true,
+      feedback: { select: { status: true } },
+    },
+  });
+  if (!link) return null;
+
+  return {
+    tracker: "github",
+    id: link.id,
+    feedbackId: link.feedbackId,
+    feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
+    mirroredStatus: parseMirroredStatus(link.mirroredStatus),
+    issueState: {
+      issueState: link.issueState === "closed" ? "closed" : "open",
     },
   };
 }

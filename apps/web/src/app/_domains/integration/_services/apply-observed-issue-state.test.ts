@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import {
+  feedbackStatusFromGitHubIssueState,
+  isGitHubIssueStateMirroring,
+  type GitHubIssueState,
+} from "../_helpers/github/status-mapping";
+import {
   feedbackStatusFromJiraStatusCategory,
   isJiraStatusCategoryMirroring,
 } from "../_helpers/jira/transition-mapping";
@@ -21,7 +26,9 @@ const reference = {
 } as const;
 
 /** A Tracker with Jira's two-state mapping and a scripted re-read. */
-function fakeJiraAdapter(observed: ObservedIssue): TrackerAdapter {
+function fakeJiraAdapter(
+  observed: ObservedIssue<"jira">,
+): TrackerAdapter<"jira"> {
   return {
     tracker: "jira",
     readIssue: () => Promise.resolve(observed),
@@ -52,7 +59,7 @@ function seed({
   return inMemoryStatusConvergence({ feedback_1: status }, [link]);
 }
 
-function found(issueStatusCategory: string): ObservedIssue {
+function found(issueStatusCategory: string): ObservedIssue<"jira"> {
   return { state: { issueStatusCategory } };
 }
 
@@ -262,5 +269,154 @@ describe("applyObservedIssueState", () => {
     ).resolves.toEqual({ skipped: "no_matching_issue_link" });
 
     expect(convergence.links.has("link_1")).toBe(true);
+  });
+});
+
+const gitHubReference = {
+  tracker: "github",
+  repoFullName: "acme/site",
+  issueNumber: 7,
+} as const;
+
+/** A Tracker with GitHub's open or closed mapping and a scripted re-read. */
+function fakeGitHubAdapter(
+  observed: GitHubIssueState | "missing",
+): TrackerAdapter<"github"> {
+  return {
+    tracker: "github",
+    readIssue: () =>
+      Promise.resolve(
+        observed === "missing" ? observed : { state: { issueState: observed } },
+      ),
+    isMirroring: (state, status) =>
+      isGitHubIssueStateMirroring(state.issueState, status),
+    getImpliedStatus: (state) =>
+      feedbackStatusFromGitHubIssueState(state.issueState),
+  };
+}
+
+function seedGitHub({
+  status,
+  mirroredStatus = status,
+  issueState,
+}: {
+  status: FeedbackStatus;
+  mirroredStatus?: FeedbackStatus | null;
+  issueState: GitHubIssueState;
+}) {
+  const link: InMemoryIssueLink = {
+    tracker: "github",
+    id: "link_1",
+    feedbackId: "feedback_1",
+    mirroredStatus,
+    issueState: { issueState },
+    reference: gitHubReference,
+  };
+  return inMemoryStatusConvergence({ feedback_1: status }, [link]);
+}
+
+describe("applyObservedIssueState on GitHub", () => {
+  it("resolves the Feedback when its Issue is closed", async () => {
+    const convergence = seedGitHub({ status: "new", issueState: "open" });
+
+    await applyObservedIssueState(
+      { reference: gitHubReference },
+      fakeGitHubAdapter("closed"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+    expect(convergence.links.get("link_1")).toMatchObject({
+      mirroredStatus: "resolved",
+      issueState: { issueState: "closed" },
+    });
+    expect(convergence.events).toEqual([
+      {
+        feedbackId: "feedback_1",
+        newStatus: "resolved",
+        origin: "github",
+        actor: "tracker",
+      },
+    ]);
+  });
+
+  it("sets the Feedback In progress when its Issue is reopened", async () => {
+    const convergence = seedGitHub({
+      status: "resolved",
+      issueState: "closed",
+    });
+
+    await applyObservedIssueState(
+      { reference: gitHubReference },
+      fakeGitHubAdapter("open"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+  });
+
+  it("keeps an Archived Feedback Archived when the close webhook of its Issue arrives late", async () => {
+    // The team archived the Feedback, the Issue was closed as not planned and
+    // recorded, then GitHub delivered its own close.
+    const convergence = seedGitHub({ status: "closed", issueState: "closed" });
+
+    await applyObservedIssueState(
+      { reference: gitHubReference },
+      fakeGitHubAdapter("closed"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("closed");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("keeps an Archived Feedback Archived when the close webhook arrives before the push is recorded", async () => {
+    const convergence = seedGitHub({
+      status: "closed",
+      mirroredStatus: "new",
+      issueState: "open",
+    });
+
+    await applyObservedIssueState(
+      { reference: gitHubReference },
+      fakeGitHubAdapter("closed"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("closed");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("detaches the link of a deleted Issue and leaves the Feedback alone", async () => {
+    const convergence = seedGitHub({
+      status: "in_progress",
+      issueState: "open",
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: gitHubReference, deleted: true },
+        fakeGitHubAdapter("missing"),
+        convergence,
+      ),
+    ).resolves.toEqual({ feedbackId: "feedback_1", detached: true });
+
+    expect(convergence.links.has("link_1")).toBe(false);
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("finds no link for an Issue of another repository", async () => {
+    const convergence = seedGitHub({ status: "new", issueState: "open" });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: { ...gitHubReference, repoFullName: "acme/other" } },
+        fakeGitHubAdapter("closed"),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "no_matching_issue_link" });
+
+    expect(convergence.statuses.get("feedback_1")).toBe("new");
   });
 });

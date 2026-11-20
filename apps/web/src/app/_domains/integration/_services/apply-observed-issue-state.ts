@@ -1,29 +1,32 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
 import {
   updateStatus,
+  type IssueLinkUpdate,
+  type IssueStateRefresh,
   type IssueReference,
+  type IssueStateByTracker,
   type MirroredIssueLink,
   type MirroringTracker,
   type StatusConvergence,
 } from "./update-status";
 
-type IssueState = MirroredIssueLink["issueState"];
-
 /** What a re-read of the Issue found on the Tracker. */
-export type ObservedIssue = { state: IssueState } | "missing";
+export type ObservedIssue<T extends MirroringTracker = MirroringTracker> =
+  | { state: IssueStateByTracker[T] }
+  | "missing";
 
 /** The per-Tracker half of the inbound decision: its mapping and its re-read. */
-export type TrackerAdapter = {
-  tracker: MirroringTracker;
+export type TrackerAdapter<T extends MirroringTracker = MirroringTracker> = {
+  tracker: T;
   /** Reads the Issue from the Tracker: the payload only names the Issue link. */
-  readIssue(link: MirroredIssueLink): Promise<ObservedIssue>;
+  readIssue(link: MirroredIssueLink<T>): Promise<ObservedIssue<T>>;
   /** One state may mirror several Statuses (Jira Done mirrors Resolved and Archived). */
-  isMirroring(state: IssueState, status: FeedbackStatus): boolean;
-  getImpliedStatus(state: IssueState): FeedbackStatus | null;
+  isMirroring(state: IssueStateByTracker[T], status: FeedbackStatus): boolean;
+  getImpliedStatus(state: IssueStateByTracker[T]): FeedbackStatus | null;
 };
 
-type ApplyObservedIssueStateInput = {
-  reference: IssueReference;
+type ApplyObservedIssueStateInput<T extends MirroringTracker> = {
+  reference: IssueReference<T>;
   /** The delivery claims the Issue is gone; only a re-read confirms it. */
   deleted?: boolean;
 };
@@ -33,13 +36,17 @@ type ApplyObservedIssueStateInput = {
  * its link, changes nothing, or changes the Feedback's Status with the Tracker
  * as actor.
  */
-export async function applyObservedIssueState(
-  { reference, deleted = false }: ApplyObservedIssueStateInput,
-  adapter: TrackerAdapter,
+export async function applyObservedIssueState<T extends MirroringTracker>(
+  { reference, deleted = false }: ApplyObservedIssueStateInput<T>,
+  adapter: TrackerAdapter<T>,
   convergence: StatusConvergence,
 ) {
   const { store } = convergence;
-  const link = await store.findIssueLink(reference);
+  // The store answers a link of the reference's Tracker. The casts below are
+  // there because TypeScript cannot correlate a Tracker with its state via `T`.
+  const link = (await store.findIssueLink(
+    reference,
+  )) as MirroredIssueLink<T> | null;
   if (!link) return { skipped: "no_matching_issue_link" } as const;
 
   const observed = await adapter.readIssue(link);
@@ -72,7 +79,11 @@ export async function applyObservedIssueState(
     : adapter.getImpliedStatus(state);
 
   if (!status) {
-    await store.refreshIssueState(link, state);
+    await store.refreshIssueState({
+      tracker: link.tracker,
+      id: link.id,
+      issueState: state,
+    } as IssueStateRefresh);
     return { skipped: "issue_state_implies_no_change" } as const;
   }
 
@@ -88,7 +99,7 @@ export async function applyObservedIssueState(
         tracker: link.tracker,
         id: link.id,
         data: { ...state, mirroredStatus: status },
-      },
+      } as IssueLinkUpdate,
     },
     convergence,
   );
@@ -96,7 +107,7 @@ export async function applyObservedIssueState(
   return { feedbackId: link.feedbackId, newStatus: status } as const;
 }
 
-function isSameIssueState(a: IssueState, b: IssueState) {
-  const keys = Object.keys(a) as (keyof IssueState)[];
+function isSameIssueState<S extends object>(a: S, b: S) {
+  const keys = Object.keys(a) as (keyof S)[];
   return keys.every((key) => a[key] === b[key]);
 }

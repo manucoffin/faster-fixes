@@ -117,7 +117,9 @@ async function handleIssuesEvent(
 ): Promise<TrackerWebhookOutcome> {
   const { action, issue, repository } = payload;
 
-  if (action !== "closed" && action !== "reopened") {
+  // A deletion is forwarded too, so the sync re-reads the Issue and detaches
+  // its link.
+  if (action !== "closed" && action !== "reopened" && action !== "deleted") {
     return { status: "ignored", reason: `unhandled issues action: ${action}` };
   }
 

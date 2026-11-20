@@ -2,7 +2,9 @@ import {
   formatIssueBody,
   formatIssueTitle,
 } from "../../_helpers/github/format-issue-body";
+import { isGitHubIssueStateMirroring } from "../../_helpers/github/status-mapping";
 import { getInstallationOctokit } from "./github-app";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
@@ -124,6 +126,7 @@ export const createGitHubIssue = inngest.createFunction(
       node_id: string;
     };
 
+    const status = FeedbackStatusEnum.parse(feedback.status);
     await prisma.feedbackIssueLink.create({
       data: {
         feedbackId: feedback.id,
@@ -132,6 +135,11 @@ export const createGitHubIssue = inngest.createFunction(
         issueUrl: issue.html_url,
         issueState: "open",
         issueNodeId: issue.node_id,
+        // A Feedback already Resolved or Archived gets an open Issue, so the
+        // link starts pending (ADR-0025).
+        mirroredStatus: isGitHubIssueStateMirroring("open", status)
+          ? status
+          : null,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },

@@ -77,7 +77,7 @@ describe("updateStatus", () => {
     const issueLink = {
       tracker: "github",
       id: "link_a",
-      data: { issueState: "closed" },
+      data: { issueState: "closed", mirroredStatus: "resolved" },
     } as const;
 
     await updateStatus(
@@ -94,7 +94,7 @@ describe("updateStatus", () => {
     const issueLink = {
       tracker: "github",
       id: "link_a",
-      data: { issueState: "closed" },
+      data: { issueState: "closed", mirroredStatus: "resolved" },
     } as const;
 
     await expect(

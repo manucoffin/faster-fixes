@@ -9,7 +9,9 @@ import { fetchJiraIssueStatus } from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 
 /** Jira behind Status convergence: two states, Done or not Done (ADR-0025). */
-export function jiraTrackerAdapter(db: typeof prisma = prisma): TrackerAdapter {
+export function jiraTrackerAdapter(
+  db: typeof prisma = prisma,
+): TrackerAdapter<"jira"> {
   return {
     tracker: "jira",
     async readIssue({ id }) {

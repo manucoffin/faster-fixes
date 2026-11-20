@@ -1,3 +1,4 @@
+import { resolveGitHubStateToWrite } from "../../_helpers/github/status-mapping";
 import { getInstallationOctokit } from "./github-app";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -42,23 +43,16 @@ export const syncFeedbackStatusToGitHub = inngest.createFunction(
     const { repoOwner, repoName } = issueLink.projectGitHubLink;
     const octokit = getInstallationOctokit(installation.installationId);
 
-    let newIssueState: "open" | "closed";
-    let stateReason: "completed" | "not_planned" | undefined;
+    const { state: newIssueState, stateReason } =
+      resolveGitHubStateToWrite(newStatus);
 
-    if (newStatus === "resolved") {
-      newIssueState = "closed";
-      stateReason = "completed";
-    } else if (newStatus === "closed") {
-      newIssueState = "closed";
-      stateReason = "not_planned";
-    } else {
-      // "new" or "in_progress" → reopen
-      newIssueState = "open";
-      stateReason = undefined;
-    }
-
-    // Only update if the state actually changed
+    // Closed already mirrors Archived as well as Resolved, so the close reason
+    // is left as it was.
     if (issueLink.issueState === newIssueState) {
+      await prisma.feedbackIssueLink.update({
+        where: { id: issueLink.id },
+        data: { mirroredStatus: newStatus },
+      });
       return { skipped: "state_unchanged" };
     }
 
@@ -74,6 +68,7 @@ export const syncFeedbackStatusToGitHub = inngest.createFunction(
       where: { id: issueLink.id },
       data: {
         issueState: newIssueState,
+        mirroredStatus: newStatus,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },
