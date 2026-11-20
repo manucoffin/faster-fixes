@@ -20,24 +20,47 @@ export type StatusChangedEventData = {
   actor: "user" | "agent" | "tracker";
 };
 
+/** The Issue state an Issue link records at its last convergence, per Tracker. */
+export type IssueStateByTracker = {
+  github: { issueState: "open" | "closed" };
+  linear: { issueStateId: string; issueStateType: string };
+  jira: { issueStatusCategory: string };
+  trello: { listId: string; archived: boolean };
+};
+
+// The Trackers whose Issue links record a Mirrored Status and go through the
+// inbound decision. The others join as they move to ADR-0025.
+export type MirroringTracker = "jira";
+
 /** The Issue state a Tracker sync records on its Issue link, per Tracker. */
-export type IssueLinkUpdate = { id: string } & (
-  | { tracker: "github"; data: { issueState: "open" | "closed" } }
-  | {
-      tracker: "linear";
-      data: { issueStateId: string; issueStateType: string };
-    }
-  | {
-      tracker: "jira";
-      data: {
-        issueStatusCategory: string;
-        mirroredStatus: FeedbackStatus;
-        issueKey?: string;
-        issueUrl?: string;
-      };
-    }
-  | { tracker: "trello"; data: { listId: string; archived: boolean } }
-);
+export type IssueLinkUpdate = {
+  [T in Tracker]: {
+    tracker: T;
+    id: string;
+    data: IssueStateByTracker[T] &
+      (T extends MirroringTracker
+        ? { mirroredStatus: FeedbackStatus }
+        : object);
+  };
+}[Tracker];
+
+/** What a delivery names: the Issue, scoped to the Installation that delivered it. */
+export type IssueReference = {
+  tracker: "jira";
+  issueId: string;
+  installationId: string;
+};
+
+/** An Issue link as the inbound decision reads it, with its Feedback's Status. */
+export type MirroredIssueLink = {
+  tracker: MirroringTracker;
+  id: string;
+  feedbackId: string;
+  feedbackStatus: FeedbackStatus;
+  /** Null, or a Status other than `feedbackStatus`, means pending. */
+  mirroredStatus: FeedbackStatus | null;
+  issueState: IssueStateByTracker[MirroringTracker];
+};
 
 export type StatusConvergenceStore = {
   /**
@@ -52,6 +75,14 @@ export type StatusConvergenceStore = {
     from?: FeedbackStatus[];
     issueLink?: IssueLinkUpdate;
   }): Promise<string[]>;
+  findIssueLink(reference: IssueReference): Promise<MirroredIssueLink | null>;
+  /** Records the Issue state of a link that is not pending, leaving its Mirrored Status. */
+  refreshIssueState(
+    link: MirroredIssueLink,
+    issueState: MirroredIssueLink["issueState"],
+  ): Promise<void>;
+  /** Deletes the Issue link and leaves its Feedback alone. */
+  detachIssueLink(link: MirroredIssueLink): Promise<void>;
 };
 
 export type StatusConvergence = {

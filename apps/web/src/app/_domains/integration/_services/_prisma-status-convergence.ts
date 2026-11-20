@@ -4,6 +4,7 @@ import {
   feedbackStatusChangedEvent,
 } from "@/server/inngest/events";
 import { prisma } from "@workspace/db";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import type { IssueLinkUpdate, StatusConvergence } from "./update-status";
 
 /**
@@ -38,6 +39,44 @@ export function prismaStatusConvergence(
 
         return written.map((feedback) => feedback.id);
       },
+      async findIssueLink({ issueId, installationId }) {
+        // Scoped to the Installation the delivery token identified, so a
+        // payload naming an issue id of another tenant finds no link.
+        const link = await db.feedbackJiraIssueLink.findFirst({
+          where: {
+            issueId,
+            projectJiraLink: { jiraInstallationId: installationId },
+          },
+          select: {
+            id: true,
+            feedbackId: true,
+            mirroredStatus: true,
+            issueStatusCategory: true,
+            feedback: { select: { status: true } },
+          },
+        });
+        if (!link) return null;
+
+        return {
+          tracker: "jira",
+          id: link.id,
+          feedbackId: link.feedbackId,
+          feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
+          mirroredStatus: FeedbackStatusEnum.nullable()
+            .catch(null)
+            .parse(link.mirroredStatus),
+          issueState: { issueStatusCategory: link.issueStatusCategory },
+        };
+      },
+      async refreshIssueState({ id }, issueState) {
+        await db.feedbackJiraIssueLink.update({
+          where: { id },
+          data: issueState,
+        });
+      },
+      async detachIssueLink({ id }) {
+        await db.feedbackJiraIssueLink.delete({ where: { id } });
+      },
     },
     async sendEvents(events) {
       // One event per Feedback so each Tracker sync gets its own retries.
@@ -58,8 +97,8 @@ function updateIssueLink(
   db: typeof prisma,
   { tracker, id, data }: IssueLinkUpdate,
 ) {
-  // The time window of the inbound syncs reads these until ADR-0025's inbound
-  // decision replaces it.
+  // The time windows still read these until ADR-0025's decisions replace them
+  // for every Tracker and direction.
   const sync = { lastSyncSource: tracker, lastSyncAt: new Date() };
 
   switch (tracker) {

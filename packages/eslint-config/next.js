@@ -105,6 +105,7 @@ const serviceVerbOptions = {
   writeVerbs: [
     "accept",
     "add",
+    "apply",
     "claim",
     "complete",
     "create",

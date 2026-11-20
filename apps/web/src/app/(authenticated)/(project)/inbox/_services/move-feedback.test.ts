@@ -58,7 +58,7 @@ function fakeDb({
 function fakeConvergence() {
   const convergence = inMemoryStatusConvergence({ moved: "new" });
   const writeStatuses = vi.fn(convergence.store.writeStatuses);
-  return { ...convergence, store: { writeStatuses } };
+  return { ...convergence, store: { ...convergence.store, writeStatuses } };
 }
 
 // The keys written, in the order they sort.
