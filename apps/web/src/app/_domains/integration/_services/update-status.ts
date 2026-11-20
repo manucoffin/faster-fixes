@@ -30,7 +30,7 @@ export type IssueStateByTracker = {
 
 // The Trackers whose Issue links record a Mirrored Status and go through the
 // inbound decision. The others join as they move to ADR-0025.
-export type MirroringTracker = "jira" | "github";
+export type MirroringTracker = "jira" | "github" | "linear";
 
 /** The Issue state a Tracker sync records on its Issue link, per Tracker. */
 export type IssueLinkUpdate = {
@@ -49,6 +49,7 @@ export type IssueReference<T extends MirroringTracker = MirroringTracker> = {
   jira: { tracker: "jira"; issueId: string; installationId: string };
   // A signed GitHub delivery names its repository; issue numbers are unique in it.
   github: { tracker: "github"; repoFullName: string; issueNumber: number };
+  linear: { tracker: "linear"; issueId: string; installationId: string };
 }[T];
 
 /** An Issue link as the inbound decision reads it, with its Feedback's Status. */

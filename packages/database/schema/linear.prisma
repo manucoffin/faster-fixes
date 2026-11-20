@@ -70,6 +70,11 @@ model FeedbackLinearIssueLink {
   issueStateId    String
   issueStateType  String
 
+  // The Status this link last converged on (ADR-0025), typed like
+  // `Feedback.status`. Null, or a value other than the Feedback's Status, means
+  // pending: the Feedback wins until Linear has converged to it.
+  mirroredStatus String?
+
   lastSyncSource String?
   lastSyncAt     DateTime?
 

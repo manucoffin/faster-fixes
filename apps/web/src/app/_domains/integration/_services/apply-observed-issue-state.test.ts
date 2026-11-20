@@ -10,6 +10,11 @@ import {
   isJiraStatusCategoryMirroring,
 } from "../_helpers/jira/transition-mapping";
 import {
+  feedbackStatusFromLinearStateType,
+  isLinearStateTypeMirroring,
+  type LinearStateType,
+} from "../_helpers/linear/state-mapping";
+import {
   inMemoryStatusConvergence,
   type InMemoryIssueLink,
 } from "./_in-memory-status-convergence";
@@ -413,6 +418,199 @@ describe("applyObservedIssueState on GitHub", () => {
       applyObservedIssueState(
         { reference: { ...gitHubReference, repoFullName: "acme/other" } },
         fakeGitHubAdapter("closed"),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "no_matching_issue_link" });
+
+    expect(convergence.statuses.get("feedback_1")).toBe("new");
+  });
+});
+
+const linearReference = {
+  tracker: "linear",
+  issueId: "issue_1",
+  installationId: "installation_1",
+} as const;
+
+// One workflow state per type, named after it.
+function linearState(issueStateType: LinearStateType) {
+  return { issueStateId: `state_${issueStateType}`, issueStateType };
+}
+
+/** A Tracker with Linear's state-type mapping and a scripted re-read. */
+function fakeLinearAdapter(
+  observed: LinearStateType | "missing",
+): TrackerAdapter<"linear"> {
+  return {
+    tracker: "linear",
+    readIssue: () =>
+      Promise.resolve(
+        observed === "missing" ? observed : { state: linearState(observed) },
+      ),
+    isMirroring: (state, status) =>
+      isLinearStateTypeMirroring(state.issueStateType, status),
+    getImpliedStatus: (state) =>
+      feedbackStatusFromLinearStateType(state.issueStateType),
+  };
+}
+
+function seedLinear({
+  status,
+  mirroredStatus = status,
+  issueStateType,
+}: {
+  status: FeedbackStatus;
+  mirroredStatus?: FeedbackStatus | null;
+  issueStateType: LinearStateType;
+}) {
+  const link: InMemoryIssueLink = {
+    tracker: "linear",
+    id: "link_1",
+    feedbackId: "feedback_1",
+    mirroredStatus,
+    issueState: linearState(issueStateType),
+    reference: linearReference,
+  };
+  return inMemoryStatusConvergence({ feedback_1: status }, [link]);
+}
+
+describe("applyObservedIssueState on Linear", () => {
+  it.each([
+    { from: "unstarted", to: "started", status: "in_progress" },
+    { from: "started", to: "completed", status: "resolved" },
+    { from: "started", to: "canceled", status: "closed" },
+    { from: "completed", to: "backlog", status: "new" },
+  ] as const)(
+    "sets the Feedback $status when its issue moves from $from to $to",
+    async ({ from, to, status }) => {
+      const convergence = seedLinear({
+        status: feedbackStatusFromLinearStateType(from),
+        issueStateType: from,
+      });
+
+      await applyObservedIssueState(
+        { reference: linearReference },
+        fakeLinearAdapter(to),
+        convergence,
+      );
+
+      expect(convergence.statuses.get("feedback_1")).toBe(status);
+      expect(convergence.links.get("link_1")).toMatchObject({
+        mirroredStatus: status,
+        issueState: linearState(to),
+      });
+      expect(convergence.events).toEqual([
+        {
+          feedbackId: "feedback_1",
+          newStatus: status,
+          origin: "linear",
+          actor: "tracker",
+        },
+      ]);
+    },
+  );
+
+  it("changes nothing on an edit that leaves the state as it was", async () => {
+    const convergence = seedLinear({
+      status: "in_progress",
+      issueStateType: "started",
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: linearReference },
+        fakeLinearAdapter("started"),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "issue_state_unchanged" });
+
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("leaves a new Feedback new when its issue moves between not-started states", async () => {
+    const convergence = seedLinear({ status: "new", issueStateType: "triage" });
+
+    await applyObservedIssueState(
+      { reference: linearReference },
+      fakeLinearAdapter("backlog"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("new");
+    expect(convergence.links.get("link_1")).toMatchObject({
+      mirroredStatus: "new",
+      issueState: linearState("backlog"),
+    });
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("keeps a Status the team just set while its push to Linear is pending", async () => {
+    // The team resolved the Feedback; the webhook of an earlier move arrives first.
+    const convergence = seedLinear({
+      status: "resolved",
+      mirroredStatus: "new",
+      issueStateType: "unstarted",
+    });
+
+    await applyObservedIssueState(
+      { reference: linearReference },
+      fakeLinearAdapter("started"),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("detaches the link of a deleted issue and leaves the Feedback alone", async () => {
+    const convergence = seedLinear({
+      status: "in_progress",
+      issueStateType: "started",
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: linearReference, deleted: true },
+        fakeLinearAdapter("missing"),
+        convergence,
+      ),
+    ).resolves.toEqual({ feedbackId: "feedback_1", detached: true });
+
+    expect(convergence.links.has("link_1")).toBe(false);
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("keeps the link when Linear still has an issue the delivery says was removed", async () => {
+    const convergence = seedLinear({
+      status: "in_progress",
+      issueStateType: "started",
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: linearReference, deleted: true },
+        fakeLinearAdapter("started"),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "deletion_not_confirmed" });
+
+    expect(convergence.links.has("link_1")).toBe(true);
+  });
+
+  it("finds no link for an issue of another Installation", async () => {
+    const convergence = seedLinear({
+      status: "new",
+      issueStateType: "unstarted",
+    });
+
+    await expect(
+      applyObservedIssueState(
+        {
+          reference: { ...linearReference, installationId: "installation_2" },
+        },
+        fakeLinearAdapter("completed"),
         convergence,
       ),
     ).resolves.toEqual({ skipped: "no_matching_issue_link" });

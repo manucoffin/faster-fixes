@@ -50,6 +50,10 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
 
     if (!resolved) return { skipped: "no_team_states_available" };
     if (resolved.stateId === issueLink.issueStateId) {
+      await prisma.feedbackLinearIssueLink.update({
+        where: { id: issueLink.id },
+        data: { mirroredStatus: newStatus },
+      });
       return { skipped: "state_unchanged" };
     }
 
@@ -60,6 +64,8 @@ export const syncFeedbackStatusToLinear = inngest.createFunction(
         where: { id: issueLink.id },
         data: {
           issueStateId: resolved.stateId,
+          issueStateType: resolved.stateType,
+          mirroredStatus: newStatus,
           lastSyncSource: "app",
           lastSyncAt: new Date(),
         },

@@ -45,29 +45,50 @@ export function prismaStatusConvergence(
         return written.map((feedback) => feedback.id);
       },
       findIssueLink(reference) {
-        return reference.tracker === "jira"
-          ? findJiraIssueLink(db, reference)
-          : findGitHubIssueLink(db, reference);
+        switch (reference.tracker) {
+          case "jira":
+            return findJiraIssueLink(db, reference);
+          case "github":
+            return findGitHubIssueLink(db, reference);
+          case "linear":
+            return findLinearIssueLink(db, reference);
+        }
       },
       async refreshIssueState(refresh) {
-        if (refresh.tracker === "jira") {
-          await db.feedbackJiraIssueLink.update({
-            where: { id: refresh.id },
-            data: refresh.issueState,
-          });
-          return;
+        const where = { id: refresh.id };
+        switch (refresh.tracker) {
+          case "jira":
+            await db.feedbackJiraIssueLink.update({
+              where,
+              data: refresh.issueState,
+            });
+            return;
+          case "github":
+            await db.feedbackIssueLink.update({
+              where,
+              data: refresh.issueState,
+            });
+            return;
+          case "linear":
+            await db.feedbackLinearIssueLink.update({
+              where,
+              data: refresh.issueState,
+            });
+            return;
         }
-        await db.feedbackIssueLink.update({
-          where: { id: refresh.id },
-          data: refresh.issueState,
-        });
       },
       async detachIssueLink({ tracker, id }) {
-        if (tracker === "jira") {
-          await db.feedbackJiraIssueLink.delete({ where: { id } });
-          return;
+        switch (tracker) {
+          case "jira":
+            await db.feedbackJiraIssueLink.delete({ where: { id } });
+            return;
+          case "github":
+            await db.feedbackIssueLink.delete({ where: { id } });
+            return;
+          case "linear":
+            await db.feedbackLinearIssueLink.delete({ where: { id } });
+            return;
         }
-        await db.feedbackIssueLink.delete({ where: { id } });
       },
     },
     async sendEvents(events) {
@@ -142,6 +163,40 @@ async function findGitHubIssueLink(
     mirroredStatus: parseMirroredStatus(link.mirroredStatus),
     issueState: {
       issueState: link.issueState === "closed" ? "closed" : "open",
+    },
+  };
+}
+
+async function findLinearIssueLink(
+  db: typeof prisma,
+  { issueId, installationId }: IssueReference<"linear">,
+): Promise<MirroredIssueLink<"linear"> | null> {
+  // Scoped to the Installation the signed delivery named, as Jira's is.
+  const link = await db.feedbackLinearIssueLink.findFirst({
+    where: {
+      issueId,
+      projectLinearLink: { linearInstallationId: installationId },
+    },
+    select: {
+      id: true,
+      feedbackId: true,
+      mirroredStatus: true,
+      issueStateId: true,
+      issueStateType: true,
+      feedback: { select: { status: true } },
+    },
+  });
+  if (!link) return null;
+
+  return {
+    tracker: "linear",
+    id: link.id,
+    feedbackId: link.feedbackId,
+    feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
+    mirroredStatus: parseMirroredStatus(link.mirroredStatus),
+    issueState: {
+      issueStateId: link.issueStateId,
+      issueStateType: link.issueStateType,
     },
   };
 }
