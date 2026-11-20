@@ -66,6 +66,8 @@ export const syncFeedbackStatusToTrello = inngest.createFunction(
       data: {
         listId: card.idList,
         archived: card.closed,
+        // Every Status writes the card, so the write is the convergence.
+        mirroredStatus: newStatus,
         lastSyncSource: "app",
         lastSyncAt: new Date(),
       },

@@ -29,18 +29,15 @@ export type IssueStateByTracker = {
 };
 
 // The Trackers whose Issue links record a Mirrored Status and go through the
-// inbound decision. The others join as they move to ADR-0025.
-export type MirroringTracker = "jira" | "github" | "linear";
+// inbound decision (ADR-0025).
+export type MirroringTracker = Tracker;
 
 /** The Issue state a Tracker sync records on its Issue link, per Tracker. */
 export type IssueLinkUpdate = {
   [T in Tracker]: {
     tracker: T;
     id: string;
-    data: IssueStateByTracker[T] &
-      (T extends MirroringTracker
-        ? { mirroredStatus: FeedbackStatus }
-        : object);
+    data: IssueStateByTracker[T] & { mirroredStatus: FeedbackStatus };
   };
 }[Tracker];
 
@@ -50,6 +47,8 @@ export type IssueReference<T extends MirroringTracker = MirroringTracker> = {
   // A signed GitHub delivery names its repository; issue numbers are unique in it.
   github: { tracker: "github"; repoFullName: string; issueNumber: number };
   linear: { tracker: "linear"; issueId: string; installationId: string };
+  // Scoped to the Project link whose board webhook delivered it.
+  trello: { tracker: "trello"; cardId: string; projectTrelloLinkId: string };
 }[T];
 
 /** An Issue link as the inbound decision reads it, with its Feedback's Status. */

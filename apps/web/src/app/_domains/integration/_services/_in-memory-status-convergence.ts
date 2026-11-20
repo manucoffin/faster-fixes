@@ -37,11 +37,7 @@ export function inMemoryStatusConvergence(
         if (issueLink) {
           issueLinks.push(issueLink);
           const stored = links.get(issueLink.id);
-          if (
-            stored &&
-            issueLink.tracker === stored.tracker &&
-            "mirroredStatus" in issueLink.data
-          ) {
+          if (stored && issueLink.tracker === stored.tracker) {
             const { mirroredStatus, ...issueState } = issueLink.data;
             stored.mirroredStatus = mirroredStatus;
             stored.issueState = issueState;

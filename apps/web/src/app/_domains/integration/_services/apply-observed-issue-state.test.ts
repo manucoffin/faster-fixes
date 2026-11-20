@@ -15,6 +15,12 @@ import {
   type LinearStateType,
 } from "../_helpers/linear/state-mapping";
 import {
+  feedbackStatusFromTrelloCard,
+  isTrelloCardMirroring,
+  type TrelloCardState,
+  type TrelloListMapping,
+} from "../_helpers/trello/status-mapping";
+import {
   inMemoryStatusConvergence,
   type InMemoryIssueLink,
 } from "./_in-memory-status-convergence";
@@ -611,6 +617,230 @@ describe("applyObservedIssueState on Linear", () => {
           reference: { ...linearReference, installationId: "installation_2" },
         },
         fakeLinearAdapter("completed"),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "no_matching_issue_link" });
+
+    expect(convergence.statuses.get("feedback_1")).toBe("new");
+  });
+});
+
+const trelloReference = {
+  tracker: "trello",
+  cardId: "card_1",
+  projectTrelloLinkId: "project_link_1",
+} as const;
+
+const trelloLists: TrelloListMapping = {
+  newListId: "list_new",
+  inProgressListId: "list_in_progress",
+  resolvedListId: "list_resolved",
+};
+
+const openIn = (listId: string): TrelloCardState => ({
+  listId,
+  archived: false,
+});
+const archivedIn = (listId: string): TrelloCardState => ({
+  listId,
+  archived: true,
+});
+
+/** A Tracker with a Project link's list mapping and a scripted re-read. */
+function fakeTrelloAdapter(
+  observed: TrelloCardState | "missing",
+  mapping: TrelloListMapping = trelloLists,
+): TrackerAdapter<"trello"> {
+  return {
+    tracker: "trello",
+    readIssue: () =>
+      Promise.resolve(observed === "missing" ? observed : { state: observed }),
+    isMirroring: (state, status) =>
+      isTrelloCardMirroring(state, status, mapping),
+    getImpliedStatus: (state) => feedbackStatusFromTrelloCard(state, mapping),
+  };
+}
+
+function seedTrello({
+  status,
+  mirroredStatus = status,
+  card,
+}: {
+  status: FeedbackStatus;
+  mirroredStatus?: FeedbackStatus | null;
+  card: TrelloCardState;
+}) {
+  const link: InMemoryIssueLink = {
+    tracker: "trello",
+    id: "link_1",
+    feedbackId: "feedback_1",
+    mirroredStatus,
+    issueState: card,
+    reference: trelloReference,
+  };
+  return inMemoryStatusConvergence({ feedback_1: status }, [link]);
+}
+
+describe("applyObservedIssueState on Trello", () => {
+  it.each([
+    { from: "new", to: openIn("list_in_progress"), status: "in_progress" },
+    { from: "in_progress", to: openIn("list_resolved"), status: "resolved" },
+    { from: "resolved", to: openIn("list_new"), status: "new" },
+    {
+      from: "in_progress",
+      to: archivedIn("list_in_progress"),
+      status: "closed",
+    },
+  ] as const)(
+    "sets the Feedback $status when its card moves to $to.listId",
+    async ({ from, to, status }) => {
+      const convergence = seedTrello({
+        status: from,
+        card: openIn(`list_${from}`),
+      });
+
+      await applyObservedIssueState(
+        { reference: trelloReference },
+        fakeTrelloAdapter(to),
+        convergence,
+      );
+
+      expect(convergence.statuses.get("feedback_1")).toBe(status);
+      expect(convergence.links.get("link_1")).toMatchObject({
+        mirroredStatus: status,
+        issueState: to,
+      });
+      expect(convergence.events).toEqual([
+        {
+          feedbackId: "feedback_1",
+          newStatus: status,
+          origin: "trello",
+          actor: "tracker",
+        },
+      ]);
+    },
+  );
+
+  it("changes nothing for a card moved to an unmapped list, and records where it is", async () => {
+    const convergence = seedTrello({
+      status: "in_progress",
+      card: openIn("list_in_progress"),
+    });
+
+    await applyObservedIssueState(
+      { reference: trelloReference },
+      fakeTrelloAdapter(openIn("list_qa")),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+    expect(convergence.links.get("link_1")).toMatchObject({
+      mirroredStatus: "in_progress",
+      issueState: openIn("list_qa"),
+    });
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("changes nothing for a card edited in place", async () => {
+    const convergence = seedTrello({
+      status: "new",
+      card: openIn("list_new"),
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: trelloReference },
+        fakeTrelloAdapter(openIn("list_new")),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "issue_state_unchanged" });
+
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("keeps a resolved Feedback resolved when its card is archived from the resolved list", async () => {
+    const convergence = seedTrello({
+      status: "resolved",
+      card: openIn("list_resolved"),
+    });
+
+    await applyObservedIssueState(
+      { reference: trelloReference },
+      fakeTrelloAdapter(archivedIn("list_resolved")),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("applies a move to a mapped list after a card stayed put for In progress on a board with no In progress list", async () => {
+    const withoutInProgress = { ...trelloLists, inProgressListId: null };
+    // Outbound left the card in the new list and recorded the convergence.
+    const convergence = seedTrello({
+      status: "in_progress",
+      card: openIn("list_new"),
+    });
+
+    await applyObservedIssueState(
+      { reference: trelloReference },
+      fakeTrelloAdapter(openIn("list_resolved"), withoutInProgress),
+      convergence,
+    );
+
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+  });
+
+  it("keeps a Status the team just set while its push to Trello is pending", async () => {
+    const convergence = seedTrello({
+      status: "resolved",
+      mirroredStatus: "new",
+      card: openIn("list_new"),
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: trelloReference },
+        fakeTrelloAdapter(openIn("list_in_progress")),
+        convergence,
+      ),
+    ).resolves.toEqual({ skipped: "issue_link_pending" });
+
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("detaches the link of a card that is gone or left the board, and leaves the Feedback alone", async () => {
+    const convergence = seedTrello({
+      status: "in_progress",
+      card: openIn("list_in_progress"),
+    });
+
+    await expect(
+      applyObservedIssueState(
+        { reference: trelloReference },
+        fakeTrelloAdapter("missing"),
+        convergence,
+      ),
+    ).resolves.toEqual({ feedbackId: "feedback_1", detached: true });
+
+    expect(convergence.links.has("link_1")).toBe(false);
+    expect(convergence.statuses.get("feedback_1")).toBe("in_progress");
+    expect(convergence.events).toEqual([]);
+  });
+
+  it("finds no link for a card of another Project link", async () => {
+    const convergence = seedTrello({ status: "new", card: openIn("list_new") });
+
+    await expect(
+      applyObservedIssueState(
+        {
+          reference: {
+            ...trelloReference,
+            projectTrelloLinkId: "project_link_2",
+          },
+        },
+        fakeTrelloAdapter(openIn("list_resolved")),
         convergence,
       ),
     ).resolves.toEqual({ skipped: "no_matching_issue_link" });

@@ -52,6 +52,8 @@ export function prismaStatusConvergence(
             return findGitHubIssueLink(db, reference);
           case "linear":
             return findLinearIssueLink(db, reference);
+          case "trello":
+            return findTrelloIssueLink(db, reference);
         }
       },
       async refreshIssueState(refresh) {
@@ -75,6 +77,12 @@ export function prismaStatusConvergence(
               data: refresh.issueState,
             });
             return;
+          case "trello":
+            await db.feedbackTrelloIssueLink.update({
+              where,
+              data: refresh.issueState,
+            });
+            return;
         }
       },
       async detachIssueLink({ tracker, id }) {
@@ -87,6 +95,9 @@ export function prismaStatusConvergence(
             return;
           case "linear":
             await db.feedbackLinearIssueLink.delete({ where: { id } });
+            return;
+          case "trello":
+            await db.feedbackTrelloIssueLink.delete({ where: { id } });
             return;
         }
       },
@@ -198,6 +209,35 @@ async function findLinearIssueLink(
       issueStateId: link.issueStateId,
       issueStateType: link.issueStateType,
     },
+  };
+}
+
+async function findTrelloIssueLink(
+  db: typeof prisma,
+  { cardId, projectTrelloLinkId }: IssueReference<"trello">,
+): Promise<MirroredIssueLink<"trello"> | null> {
+  // Scoped to the link whose webhook delivered it, so a payload naming a card
+  // of another tenant finds no Issue link.
+  const link = await db.feedbackTrelloIssueLink.findFirst({
+    where: { cardId, projectTrelloLinkId },
+    select: {
+      id: true,
+      feedbackId: true,
+      mirroredStatus: true,
+      listId: true,
+      archived: true,
+      feedback: { select: { status: true } },
+    },
+  });
+  if (!link) return null;
+
+  return {
+    tracker: "trello",
+    id: link.id,
+    feedbackId: link.feedbackId,
+    feedbackStatus: FeedbackStatusEnum.parse(link.feedback.status),
+    mirroredStatus: parseMirroredStatus(link.mirroredStatus),
+    issueState: { listId: link.listId, archived: link.archived },
   };
 }
 
