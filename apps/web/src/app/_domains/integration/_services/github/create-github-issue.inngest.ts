@@ -142,8 +142,6 @@ export const createGitHubIssue = inngest.createFunction(
         // A Feedback already Resolved or Archived gets an open Issue, so the
         // link starts pending (ADR-0025).
         mirroredStatus: mirrored ? status : null,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
       },
     });
 

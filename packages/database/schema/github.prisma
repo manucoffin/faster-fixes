@@ -67,9 +67,6 @@ model FeedbackIssueLink {
   // pending: the Feedback wins until GitHub has converged to it.
   mirroredStatus String?
 
-  lastSyncSource String?
-  lastSyncAt     DateTime?
-
   @@index([projectGitHubLinkId])
   @@map("feedback_issue_link")
 }

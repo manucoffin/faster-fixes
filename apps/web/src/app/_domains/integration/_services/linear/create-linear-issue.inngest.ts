@@ -167,8 +167,6 @@ export const createLinearIssue = inngest.createFunction(
           // A Feedback whose state the team cannot express starts pending
           // (ADR-0025).
           mirroredStatus: mirrored ? status : null,
-          lastSyncSource: "app",
-          lastSyncAt: new Date(),
         },
       }),
       ...(healthUpdate.linkHealthIssue

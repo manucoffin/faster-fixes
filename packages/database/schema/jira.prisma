@@ -117,9 +117,6 @@ model FeedbackJiraIssueLink {
   // pending: the Feedback wins until Jira has converged to it.
   mirroredStatus String?
 
-  lastSyncSource String?
-  lastSyncAt     DateTime?
-
   @@index([projectJiraLinkId])
   @@index([issueId])
   @@map("feedback_jira_issue_link")

@@ -152,8 +152,6 @@ export const createJiraIssue = inngest.createFunction(
         // A Feedback already Resolved or Archived gets an open issue, so the
         // link starts pending (ADR-0025).
         mirroredStatus: mirrored ? status : null,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
       },
     });
 

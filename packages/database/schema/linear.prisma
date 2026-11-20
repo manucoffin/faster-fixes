@@ -75,9 +75,6 @@ model FeedbackLinearIssueLink {
   // pending: the Feedback wins until Linear has converged to it.
   mirroredStatus String?
 
-  lastSyncSource String?
-  lastSyncAt     DateTime?
-
   @@index([projectLinearLinkId])
   @@index([issueId])
   @@map("feedback_linear_issue_link")

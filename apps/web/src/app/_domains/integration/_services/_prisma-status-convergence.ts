@@ -91,7 +91,7 @@ export function prismaStatusConvergence(
         }
       },
       async recordConvergence(update) {
-        await updateIssueLink(db, update, {});
+        await updateIssueLink(db, update);
       },
       async refreshIssueState(refresh) {
         const where = { id: refresh.id };
@@ -270,32 +270,15 @@ async function findTrelloIssueLink(
 function updateIssueLink(
   db: typeof prisma,
   { tracker, id, data }: IssueLinkUpdate,
-  // Nothing reads these any more: they go with their columns.
-  sync: { lastSyncSource?: string; lastSyncAt?: Date } = {
-    lastSyncSource: tracker,
-    lastSyncAt: new Date(),
-  },
 ) {
   switch (tracker) {
     case "github":
-      return db.feedbackIssueLink.update({
-        where: { id },
-        data: { ...data, ...sync },
-      });
+      return db.feedbackIssueLink.update({ where: { id }, data });
     case "linear":
-      return db.feedbackLinearIssueLink.update({
-        where: { id },
-        data: { ...data, ...sync },
-      });
+      return db.feedbackLinearIssueLink.update({ where: { id }, data });
     case "jira":
-      return db.feedbackJiraIssueLink.update({
-        where: { id },
-        data: { ...data, ...sync },
-      });
+      return db.feedbackJiraIssueLink.update({ where: { id }, data });
     case "trello":
-      return db.feedbackTrelloIssueLink.update({
-        where: { id },
-        data: { ...data, ...sync },
-      });
+      return db.feedbackTrelloIssueLink.update({ where: { id }, data });
   }
 }

@@ -104,8 +104,6 @@ export const createTrelloCard = inngest.createFunction(
         listId: card.idList,
         archived: card.closed,
         mirroredStatus: mirrored ? status : null,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
       },
     });
 

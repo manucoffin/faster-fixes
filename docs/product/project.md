@@ -84,7 +84,7 @@ Feedback can be connected to external issue trackers so it lives where teams alr
 - **Auth**: GitHub App (installation-based), org-level.
 - **Faster Fixes → GitHub**: `resolved` closes the issue (`completed`), `closed` closes it (`not_planned`), `new`/`in_progress` reopens it.
 - **GitHub → Faster Fixes**: issue closed → `resolved`, issue reopened → `in_progress`.
-- Webhooks are HMAC-SHA256 verified; a short sync window (`lastSyncSource`/`lastSyncAt`) prevents echo loops.
+- Webhooks are HMAC-SHA256 verified; each Issue link records its Mirrored Status, so an echo or a stale delivery never reverts a Status (ADR-0025).
 
 ### Linear
 

@@ -100,9 +100,6 @@ model FeedbackTrelloIssueLink {
   // pending: the Feedback wins until Trello has converged to it.
   mirroredStatus String?
 
-  lastSyncSource String?
-  lastSyncAt     DateTime?
-
   @@index([projectTrelloLinkId])
   @@index([cardId])
   @@map("feedback_trello_issue_link")
