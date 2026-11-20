@@ -1,9 +1,9 @@
-import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { inngest } from "@/server/inngest";
+import { prismaStatusConvergence } from "@/app/_domains/integration/_services/_prisma-status-convergence";
 import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-} from "@/server/inngest/events";
+  updateStatus,
+  type StatusConvergence,
+} from "@/app/_domains/integration/_services/update-status";
+import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import type { UpdateFeedbacksStatusInput } from "./update-feedbacks-status.schema";
 
@@ -15,6 +15,7 @@ export async function updateFeedbacksStatus(
     userId,
   }: UpdateFeedbacksStatusInput & { userId: string },
   db: typeof prisma = prisma,
+  convergence: StatusConvergence = prismaStatusConvergence(db),
 ) {
   const project = await db.project.findUnique({
     where: { id: projectId },
@@ -47,22 +48,11 @@ export async function updateFeedbacksStatus(
     return { count: 0 };
   }
 
-  await db.feedback.updateMany({
-    where: { id: { in: targetIds }, projectId },
-    data: { status },
-  });
-
-  // Fan-out: one event per feedback so each gets independent retries and
-  // fault isolation — a single failing GitHub sync won't block the others.
-  const events = targetIds.map((feedbackId) =>
-    // Dashboard bulk edits are always a human in the inbox.
-    buildEvent(feedbackStatusChangedEvent, {
-      feedbackId,
-      newStatus: status,
-      actor: "user",
-    }),
+  // Dashboard bulk edits are always a human in the inbox.
+  const updated = await updateStatus(
+    { feedbackIds: targetIds, status, actor: "user" },
+    convergence,
   );
-  inngest.send(events).catch(() => {});
 
-  return { count: targetIds.length };
+  return { count: updated.length };
 }

@@ -1,14 +1,7 @@
+import { inMemoryStatusConvergence } from "@/app/_domains/integration/_services/_in-memory-status-convergence";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { updateFeedbacksStatus } from "./update-feedbacks-status";
-
-const send = vi
-  .fn<(payload: unknown) => Promise<void>>()
-  .mockResolvedValue(undefined);
-
-vi.mock("@/server/inngest", () => ({
-  inngest: { send: (payload: unknown) => send(payload) },
-}));
 
 type FakeDb = NonNullable<Parameters<typeof updateFeedbacksStatus>[1]>;
 
@@ -22,7 +15,6 @@ function fakeDb(
     member: { findFirst: vi.fn().mockResolvedValue(membership) },
     feedback: {
       findMany: vi.fn().mockResolvedValue(targets),
-      updateMany: vi.fn().mockResolvedValue({ count: targets.length }),
     },
   } as unknown as FakeDb;
 }
@@ -38,10 +30,6 @@ const input = {
 };
 
 describe("updateFeedbacksStatus", () => {
-  beforeEach(() => {
-    send.mockClear();
-  });
-
   it("reports an unknown project as not found", async () => {
     await expect(
       updateFeedbacksStatus(input, fakeDb(null, null)),
@@ -49,46 +37,45 @@ describe("updateFeedbacksStatus", () => {
   });
 
   it("refuses a caller who is not a member of the project's organization", async () => {
-    const db = fakeDb(project, null);
+    const convergence = inMemoryStatusConvergence({ feedback_1: "new" });
 
-    await expect(updateFeedbacksStatus(input, db)).rejects.toThrow(
-      new ForbiddenError("Access denied."),
-    );
-    expect(db.feedback.updateMany).not.toHaveBeenCalled();
+    await expect(
+      updateFeedbacksStatus(input, fakeDb(project, null), convergence),
+    ).rejects.toThrow(new ForbiddenError("Access denied."));
+    expect(convergence.statuses.get("feedback_1")).toBe("new");
+    expect(convergence.events).toEqual([]);
   });
 
   it("updates only feedback of the project and announces each one", async () => {
     const db = fakeDb(project, member, [{ id: "feedback_1" }]);
-
-    await expect(updateFeedbacksStatus(input, db)).resolves.toEqual({
-      count: 1,
+    const convergence = inMemoryStatusConvergence({
+      feedback_1: "new",
+      feedback_foreign: "new",
     });
+
+    await expect(
+      updateFeedbacksStatus(input, db, convergence),
+    ).resolves.toEqual({ count: 1 });
     expect(db.feedback.findMany).toHaveBeenCalledWith({
       where: { id: { in: input.feedbackIds }, projectId: "project_1" },
       select: { id: true },
     });
-    expect(db.feedback.updateMany).toHaveBeenCalledWith({
-      where: { id: { in: ["feedback_1"] }, projectId: "project_1" },
-      data: { status: "resolved" },
+    expect(Object.fromEntries(convergence.statuses)).toEqual({
+      feedback_1: "resolved",
+      feedback_foreign: "new",
     });
-    expect(send).toHaveBeenCalledWith([
-      expect.objectContaining({
-        data: {
-          feedbackId: "feedback_1",
-          newStatus: "resolved",
-          actor: "user",
-        },
-      }),
+    expect(convergence.events).toEqual([
+      { feedbackId: "feedback_1", newStatus: "resolved", actor: "user" },
     ]);
   });
 
   it("changes nothing and announces nothing when no id belongs to the project", async () => {
-    const db = fakeDb(project, member);
+    const convergence = inMemoryStatusConvergence({ feedback_foreign: "new" });
 
-    await expect(updateFeedbacksStatus(input, db)).resolves.toEqual({
-      count: 0,
-    });
-    expect(db.feedback.updateMany).not.toHaveBeenCalled();
-    expect(send).not.toHaveBeenCalled();
+    await expect(
+      updateFeedbacksStatus(input, fakeDb(project, member), convergence),
+    ).resolves.toEqual({ count: 0 });
+    expect(convergence.statuses.get("feedback_foreign")).toBe("new");
+    expect(convergence.events).toEqual([]);
   });
 });

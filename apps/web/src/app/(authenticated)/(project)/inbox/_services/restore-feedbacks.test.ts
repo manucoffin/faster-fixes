@@ -1,14 +1,7 @@
+import { inMemoryStatusConvergence } from "@/app/_domains/integration/_services/_in-memory-status-convergence";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { restoreFeedbacks } from "./restore-feedbacks";
-
-const send = vi
-  .fn<(payload: unknown) => Promise<void>>()
-  .mockResolvedValue(undefined);
-
-vi.mock("@/server/inngest", () => ({
-  inngest: { send: (payload: unknown) => send(payload) },
-}));
 
 type FakeDb = NonNullable<Parameters<typeof restoreFeedbacks>[1]>;
 
@@ -22,7 +15,6 @@ function fakeDb(
     member: { findFirst: vi.fn().mockResolvedValue(membership) },
     feedback: {
       findMany: vi.fn().mockResolvedValue(targets),
-      updateMany: vi.fn().mockResolvedValue({ count: targets.length }),
     },
   } as unknown as FakeDb;
 }
@@ -37,10 +29,6 @@ const input = {
 };
 
 describe("restoreFeedbacks", () => {
-  beforeEach(() => {
-    send.mockClear();
-  });
-
   it("reports an unknown project as not found", async () => {
     await expect(restoreFeedbacks(input, fakeDb(null, null))).rejects.toThrow(
       new NotFoundError("Project not found."),
@@ -48,12 +36,12 @@ describe("restoreFeedbacks", () => {
   });
 
   it("refuses a caller who is not a member of the project's organization", async () => {
-    const db = fakeDb(project, null);
+    const convergence = inMemoryStatusConvergence({ feedback_1: "closed" });
 
-    await expect(restoreFeedbacks(input, db)).rejects.toThrow(
-      new ForbiddenError("Access denied."),
-    );
-    expect(db.feedback.updateMany).not.toHaveBeenCalled();
+    await expect(
+      restoreFeedbacks(input, fakeDb(project, null), convergence),
+    ).rejects.toThrow(new ForbiddenError("Access denied."));
+    expect(convergence.statuses.get("feedback_1")).toBe("closed");
   });
 
   it("restores only archived feedback of the project to new and announces each one", async () => {
@@ -61,8 +49,13 @@ describe("restoreFeedbacks", () => {
       { id: "feedback_1" },
       { id: "feedback_2" },
     ]);
+    const convergence = inMemoryStatusConvergence({
+      feedback_1: "closed",
+      feedback_2: "closed",
+      feedback_3: "resolved",
+    });
 
-    await expect(restoreFeedbacks(input, db)).resolves.toEqual({
+    await expect(restoreFeedbacks(input, db, convergence)).resolves.toEqual({
       restored: 2,
       requested: 3,
     });
@@ -74,21 +67,34 @@ describe("restoreFeedbacks", () => {
       },
       select: { id: true },
     });
-    expect(db.feedback.updateMany).toHaveBeenCalledWith({
-      where: {
-        id: { in: ["feedback_1", "feedback_2"] },
-        projectId: "project_1",
-        status: "closed",
-      },
-      data: { status: "new" },
+    expect(Object.fromEntries(convergence.statuses)).toEqual({
+      feedback_1: "new",
+      feedback_2: "new",
+      feedback_3: "resolved",
     });
-    expect(send).toHaveBeenCalledWith([
-      expect.objectContaining({
-        data: { feedbackId: "feedback_1", newStatus: "new", actor: "user" },
-      }),
-      expect.objectContaining({
-        data: { feedbackId: "feedback_2", newStatus: "new", actor: "user" },
-      }),
+    expect(convergence.events).toEqual([
+      { feedbackId: "feedback_1", newStatus: "new", actor: "user" },
+      { feedbackId: "feedback_2", newStatus: "new", actor: "user" },
+    ]);
+  });
+
+  it("leaves untouched a Feedback another actor moved out of Archived after it was read", async () => {
+    const db = fakeDb(project, member, [
+      { id: "feedback_1" },
+      { id: "feedback_2" },
+    ]);
+    const convergence = inMemoryStatusConvergence({
+      feedback_1: "closed",
+      feedback_2: "in_progress",
+    });
+
+    await expect(restoreFeedbacks(input, db, convergence)).resolves.toEqual({
+      restored: 1,
+      requested: 3,
+    });
+    expect(convergence.statuses.get("feedback_2")).toBe("in_progress");
+    expect(convergence.events).toEqual([
+      { feedbackId: "feedback_1", newStatus: "new", actor: "user" },
     ]);
   });
 
@@ -99,18 +105,18 @@ describe("restoreFeedbacks", () => {
       restoreFeedbacks(
         { ...input, feedbackIds: ["feedback_1", "feedback_1"] },
         db,
+        inMemoryStatusConvergence(),
       ),
     ).resolves.toEqual({ restored: 0, requested: 1 });
   });
 
   it("changes nothing and announces nothing when no id is still archived in the project", async () => {
-    const db = fakeDb(project, member);
+    const convergence = inMemoryStatusConvergence({ feedback_1: "resolved" });
 
-    await expect(restoreFeedbacks(input, db)).resolves.toEqual({
-      restored: 0,
-      requested: 3,
-    });
-    expect(db.feedback.updateMany).not.toHaveBeenCalled();
-    expect(send).not.toHaveBeenCalled();
+    await expect(
+      restoreFeedbacks(input, fakeDb(project, member), convergence),
+    ).resolves.toEqual({ restored: 0, requested: 3 });
+    expect(convergence.statuses.get("feedback_1")).toBe("resolved");
+    expect(convergence.events).toEqual([]);
   });
 });

@@ -1,9 +1,9 @@
-import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { inngest } from "@/server/inngest";
+import { prismaStatusConvergence } from "@/app/_domains/integration/_services/_prisma-status-convergence";
 import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-} from "@/server/inngest/events";
+  updateStatus,
+  type StatusConvergence,
+} from "@/app/_domains/integration/_services/update-status";
+import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import type { UpdateFeedbackStatusInput } from "./update-feedback-status.schema";
 
@@ -14,6 +14,7 @@ export async function updateFeedbackStatus(
     userId,
   }: UpdateFeedbackStatusInput & { userId: string },
   db: typeof prisma = prisma,
+  convergence: StatusConvergence = prismaStatusConvergence(db),
 ) {
   const feedback = await db.feedback.findUnique({
     where: { id: feedbackId },
@@ -34,24 +35,12 @@ export async function updateFeedbackStatus(
     throw new ForbiddenError("Access denied.");
   }
 
-  await db.feedback.update({
-    where: { id: feedbackId },
-    data: { status },
-  });
-
-  // Fire-and-forget: sync status to the linked tracker if there is one. Fans
-  // out even on a no-op, unlike the agent API's service, which skips it: a
-  // human in the inbox does not re-set the same status in a loop. The asymmetry
-  // is deliberate; see ADR-0007.
-  inngest
-    .send(
-      buildEvent(
-        feedbackStatusChangedEvent,
-        // Dashboard edits are always a human in the inbox.
-        { feedbackId, newStatus: status, actor: "user" },
-      ),
-    )
-    .catch(() => {});
+  // Dashboard edits are always a human in the inbox, so a no-op still
+  // converges the Trackers (ADR-0007).
+  await updateStatus(
+    { feedbackIds: [feedbackId], status, actor: "user" },
+    convergence,
+  );
 
   return { id: feedbackId };
 }

@@ -1,14 +1,7 @@
+import { inMemoryStatusConvergence } from "@/app/_domains/integration/_services/_in-memory-status-convergence";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { moveFeedback } from "./move-feedback";
-
-const send = vi
-  .fn<(payload: unknown) => Promise<void>>()
-  .mockResolvedValue(undefined);
-
-vi.mock("@/server/inngest", () => ({
-  inngest: { send: (payload: unknown) => send(payload) },
-}));
 
 type FakeDb = NonNullable<Parameters<typeof moveFeedback>[1]>;
 
@@ -43,7 +36,6 @@ function fakeDb({
       key: args.update.key,
     }),
   );
-  const update = vi.fn().mockResolvedValue(target);
   return {
     project: { findUnique: vi.fn().mockResolvedValue(project) },
     member: { findFirst: vi.fn().mockResolvedValue(membership) },
@@ -56,15 +48,17 @@ function fakeDb({
           target && { ...target, project: { organizationId: "org_1" } },
         ),
       findMany: vi.fn().mockResolvedValue(column),
-      update,
-      updateMany: vi.fn(),
     },
     feedbackRank: { upsert },
     $transaction: vi.fn((ops: unknown[]) => Promise.resolve(ops)),
-  } as unknown as Omit<FakeDb, "feedback"> & {
-    feedback: Omit<FakeDb["feedback"], "update"> & { update: typeof update };
-    feedbackRank: { upsert: typeof upsert };
-  };
+  } as unknown as FakeDb & { feedbackRank: { upsert: typeof upsert } };
+}
+
+// The moved card starts in `new`; `writeStatuses` is spied for the call order.
+function fakeConvergence() {
+  const convergence = inMemoryStatusConvergence({ moved: "new" });
+  const writeStatuses = vi.fn(convergence.store.writeStatuses);
+  return { ...convergence, store: { writeStatuses } };
 }
 
 // The keys written, in the order they sort.
@@ -92,10 +86,6 @@ const input = {
 };
 
 describe("moveFeedback", () => {
-  beforeEach(() => {
-    send.mockClear();
-  });
-
   it("reports an unknown project as not found", async () => {
     await expect(
       moveFeedback(input, fakeDb({ project: null })),
@@ -190,48 +180,35 @@ describe("moveFeedback", () => {
 
   it("never updates the Feedback row and announces nothing", async () => {
     const db = fakeDb({ column: [row("a", "a0"), row("moved", "a1")] });
+    const convergence = fakeConvergence();
 
-    await moveFeedback({ ...input, afterId: "a" }, db);
+    await moveFeedback({ ...input, afterId: "a" }, db, convergence);
 
-    expect(db.feedback.update).not.toHaveBeenCalled();
-    expect(db.feedback.updateMany).not.toHaveBeenCalled();
-    expect(send).not.toHaveBeenCalled();
+    expect(convergence.store.writeStatuses).not.toHaveBeenCalled();
+    expect(convergence.events).toEqual([]);
   });
 
   describe("to another column", () => {
     const crossColumn = { ...input, status: "in_progress" as const };
 
-    // Events sent, without the fire-and-forget metadata `buildEvent` adds.
-    function sentEvents() {
-      return send.mock.calls.map(([payload]) => {
-        const { name, data } = payload as { name: string; data: unknown };
-        return { name, data };
-      });
-    }
-
     it("changes the Status once, then ranks the card between its neighbours", async () => {
       const db = fakeDb({
         column: [row("a", "a0"), row("b", "a1"), row("moved", null)],
       });
+      const convergence = fakeConvergence();
 
       await expect(
-        moveFeedback({ ...crossColumn, beforeId: "a", afterId: "b" }, db),
+        moveFeedback(
+          { ...crossColumn, beforeId: "a", afterId: "b" },
+          db,
+          convergence,
+        ),
       ).resolves.toEqual({ moved: true });
 
-      expect(db.feedback.update).toHaveBeenCalledTimes(1);
-      expect(db.feedback.update).toHaveBeenCalledWith({
-        where: { id: "moved" },
-        data: { status: "in_progress" },
-      });
-      expect(sentEvents()).toEqual([
-        {
-          name: "feedback/status-changed",
-          data: {
-            feedbackId: "moved",
-            newStatus: "in_progress",
-            actor: "user",
-          },
-        },
+      expect(convergence.store.writeStatuses).toHaveBeenCalledTimes(1);
+      expect(convergence.statuses.get("moved")).toBe("in_progress");
+      expect(convergence.events).toEqual([
+        { feedbackId: "moved", newStatus: "in_progress", actor: "user" },
       ]);
       expect(db.feedback.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -246,21 +223,24 @@ describe("moveFeedback", () => {
     // written first would be lost.
     it("writes the Rank after the Status change", async () => {
       const db = fakeDb({ column: [row("a", "a0"), row("moved", null)] });
+      const convergence = fakeConvergence();
 
-      await moveFeedback({ ...crossColumn, beforeId: "a" }, db);
+      await moveFeedback({ ...crossColumn, beforeId: "a" }, db, convergence);
 
-      const statusOrder = db.feedback.update.mock.invocationCallOrder[0]!;
+      const statusOrder =
+        convergence.store.writeStatuses.mock.invocationCallOrder[0]!;
       const rankOrder = db.feedbackRank.upsert.mock.invocationCallOrder[0]!;
       expect(statusOrder).toBeLessThan(rankOrder);
     });
 
     it("ranks the card in an empty column", async () => {
       const db = fakeDb({ column: [row("moved", null)] });
+      const convergence = fakeConvergence();
 
-      await moveFeedback(crossColumn, db);
+      await moveFeedback(crossColumn, db, convergence);
 
       expect(writtenOrder(db)).toEqual(["moved"]);
-      expect(send).toHaveBeenCalledTimes(1);
+      expect(convergence.events).toHaveLength(1);
     });
 
     it("keeps the displayed order when dropped among unranked cards", async () => {
@@ -273,27 +253,31 @@ describe("moveFeedback", () => {
         ],
       });
 
+      const convergence = fakeConvergence();
+
       // The target column shows recent, old, ranked; the card lands after recent.
       await moveFeedback(
         { ...crossColumn, beforeId: "recent", afterId: "old" },
         db,
+        convergence,
       );
 
       expect(writtenOrder(db)).toEqual(["recent", "moved", "old"]);
       for (const id of ["recent", "moved", "old"]) {
         expect(keyOf(db, id)! < "a0").toBe(true);
       }
-      expect(send).toHaveBeenCalledTimes(1);
+      expect(convergence.events).toHaveLength(1);
     });
 
     it("refuses a caller who is not a member before changing anything", async () => {
       const db = fakeDb({ membership: null });
+      const convergence = fakeConvergence();
 
-      await expect(moveFeedback(crossColumn, db)).rejects.toThrow(
+      await expect(moveFeedback(crossColumn, db, convergence)).rejects.toThrow(
         new ForbiddenError("Access denied."),
       );
-      expect(db.feedback.update).not.toHaveBeenCalled();
-      expect(send).not.toHaveBeenCalled();
+      expect(convergence.statuses.get("moved")).toBe("new");
+      expect(convergence.events).toEqual([]);
     });
   });
 });

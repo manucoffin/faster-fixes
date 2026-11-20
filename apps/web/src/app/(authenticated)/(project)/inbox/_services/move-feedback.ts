@@ -1,3 +1,5 @@
+import { prismaStatusConvergence } from "@/app/_domains/integration/_services/_prisma-status-convergence";
+import type { StatusConvergence } from "@/app/_domains/integration/_services/update-status";
 import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import { planRankPlacement } from "../_helpers/feedback-rank-placement";
@@ -17,6 +19,7 @@ export async function moveFeedback(
     userId,
   }: MoveFeedbackInput & { userId: string },
   db: typeof prisma = prisma,
+  convergence: StatusConvergence = prismaStatusConvergence(db),
 ) {
   const project = await db.project.findUnique({
     where: { id: projectId },
@@ -52,7 +55,7 @@ export async function moveFeedback(
   // so a same-column move must never reach it. It runs before the Rank write
   // because the trigger clears the Rank on a Status change.
   if (feedback.status !== status) {
-    await updateFeedbackStatus({ feedbackId, status, userId }, db);
+    await updateFeedbackStatus({ feedbackId, status, userId }, db, convergence);
   }
 
   // The server reads the column itself: the board's copy can be stale, so the
