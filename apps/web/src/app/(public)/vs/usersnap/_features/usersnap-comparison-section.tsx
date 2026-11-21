@@ -59,7 +59,7 @@ const rows: VsComparisonRow[] = [
         note: "Selector, Screenshot, Recording, console, network · sets Status",
       },
       {
-        type: "partial",
+        type: "yes",
         note: "Searches feedback, creates and updates opportunities · cannot edit feedback",
       },
     ],
@@ -91,7 +91,7 @@ const rows: VsComparisonRow[] = [
     cells: [
       { type: "yes" },
       {
-        type: "partial",
+        type: "yes",
         note: "URL, browser, device, console · no DOM selector",
       },
     ],
@@ -105,7 +105,7 @@ const rows: VsComparisonRow[] = [
   },
   {
     label: "Public roadmap and idea voting",
-    cells: [{ type: "no" }, { type: "partial", note: "Professional and up" }],
+    cells: [{ type: "no" }, { type: "yes", note: "Professional and up" }],
   },
   {
     label: "Team kanban board",
@@ -143,7 +143,7 @@ const rows: VsComparisonRow[] = [
     label: "Trello sync",
     cells: [
       { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "partial", note: "Pushes items · not in its two-way sync list" },
+      { type: "yes", note: "Pushes items · not in its two-way sync list" },
     ],
   },
   {
@@ -157,14 +157,14 @@ const rows: VsComparisonRow[] = [
     label: "Custom branding",
     cells: [
       { type: "partial", note: "Roadmap" },
-      { type: "partial", note: "Premium and Enterprise" },
+      { type: "yes", note: "Premium and Enterprise" },
     ],
   },
   {
     label: "SSO",
     cells: [
       { type: "partial", note: "Roadmap" },
-      { type: "partial", note: "Enterprise plan only" },
+      { type: "yes", note: "Enterprise plan only" },
     ],
   },
   {
