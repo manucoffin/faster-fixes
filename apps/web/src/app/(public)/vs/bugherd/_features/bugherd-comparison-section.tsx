@@ -1,4 +1,8 @@
-import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
 import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
 import {
   formatAmount,
@@ -8,12 +12,29 @@ import {
   type VsComparisonRow,
   VsComparisonTable,
 } from "../../_features/vs-comparison-table";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
 import { VsSection } from "../../_features/vs-section";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 const { standard } = COMPETITOR_PRICES.bugherd.plans;
 const { extraSeat } = COMPETITOR_PRICES.bugherd.otherPrices;
+
+const keyDifferences: VsPoint[] = [
+  {
+    title: "Open source and self-hostable",
+    body: "FasterFixes is open source under AGPL-3.0 and runs on your own infrastructure, so client feedback never leaves it. BugHerd is closed-source and cloud-only.",
+  },
+  {
+    title: "Flat price, not per seat",
+    body: `FasterFixes is $0 self-hosted, or $${proPrice}/month hosted for ${proPlan.seats} members. BugHerd ${standard.name} is ${formatPublishedPrice(standard, "/month")} for ${standard.seats} members, plus ${formatPublishedPrice(extraSeat, "/month")} per extra user.`,
+  },
+  {
+    title: "Feedback reaches your coding agent",
+    body: "The MCP server lets Claude Code, Cursor, and Codex read and resolve each report with the model you choose. BugHerd AI stays inside the BugHerd dashboard.",
+  },
+];
 
 const rows: VsComparisonRow[] = [
   {
@@ -163,14 +184,19 @@ export function BugherdComparisonSection() {
   return (
     <VsSection
       eyebrow="Compare"
-      title="FasterFixes vs. BugHerd"
-      intro="Side-by-side comparison based on each product's public documentation and pricing page."
+      title="FasterFixes vs BugHerd: feature comparison"
+      intro="Three differences decide most switches. The table covers the rest, based on each product's public documentation and pricing page."
+      tone="muted"
+      className="border-t"
     >
-      <VsComparisonTable
-        competitorName="BugHerd"
-        rows={rows}
-        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
-      />
+      <VsPointGrid points={keyDifferences} className="md:grid-cols-3" />
+      <div className="mt-16">
+        <VsComparisonTable
+          competitorName="BugHerd"
+          rows={rows}
+          footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
+        />
+      </div>
     </VsSection>
   );
 }

@@ -5,6 +5,7 @@ import {
 } from "@/app/_domains/subscription";
 import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
 import {
+  formatAmount,
   formatPrice,
   formatPublishedPrice,
 } from "@/app/(public)/_helpers/format-competitor-price";
@@ -46,7 +47,7 @@ const cards: VsPricingCard[] = [
     plan: `${standard.seats} members included`,
     price: formatPrice(standard),
     suffix: "/ month",
-    note: `Each extra user is ${formatPublishedPrice(extraSeat, "/month")}. Studio (${studio.seats} members) is ${formatPublishedPrice(studio, "/month")}. Premium (${premium.seats} members, client task board, Jira and Linear) is ${formatPublishedPrice(premium, "/month")}. Annual billing saves up to ${bugherd.yearlySavesUpToMonths} months.`,
+    note: `Each extra user is ${formatPublishedPrice(extraSeat, "/month")}. Annual billing saves up to ${bugherd.yearlySavesUpToMonths} months.`,
   },
 ];
 
@@ -61,17 +62,26 @@ export function BugherdPricingSection() {
   return (
     <VsSection
       eyebrow="Pricing"
-      title="Free if you self-host. Flat rate if you don't."
+      title="BugHerd pricing vs FasterFixes: what you actually pay"
     >
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <SectionBody>
           <p>
-            FasterFixes is open source. The lowest plan in any honest comparison
-            is &quot;free, forever, on your own server.&quot; If you would
-            rather not run it yourself, the hosted plans are flat-rate, not
-            per-seat. BugHerd uses tiered per-seat pricing with extra users
-            billed at {formatPublishedPrice(extraSeat, "/month")} each on top of
-            the plan.
+            BugHerd charges per seat. {standard.name} is{" "}
+            {formatPublishedPrice(standard, "/month")} for {standard.seats}{" "}
+            members, or{" "}
+            {formatAmount(standard.billedYearlyAmount, standard.currency)}
+            /month billed yearly, and each extra user adds{" "}
+            {formatPublishedPrice(extraSeat, "/month")}. {studio.name} covers{" "}
+            {studio.seats} members at {formatPublishedPrice(studio, "/month")}.{" "}
+            {premium.name}, the first plan with Jira and Linear, covers{" "}
+            {premium.seats} at {formatPublishedPrice(premium, "/month")}. There
+            is no free plan, only a 7-day trial.
+          </p>
+          <p>
+            FasterFixes is free to self-host under AGPL-3.0. Hosted plans are
+            flat: Pro is ${proPrice}/month for {proPlan.seats} members, and
+            Agency covers unlimited members at ${agencyPrice}/month.
           </p>
         </SectionBody>
 

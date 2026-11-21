@@ -3,13 +3,15 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPublishedPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import Link from "next/link";
-import { BugherdRoutingAnimation } from "../_components/illustrations/bugherd-routing-animation";
 import { VsActions } from "../../_features/vs-actions";
 import { VsHero } from "../../_features/vs-hero";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
+const { standard } = COMPETITOR_PRICES.bugherd.plans;
 
 export function BugherdHero() {
   return (
@@ -25,12 +27,11 @@ export function BugherdHero() {
       description={
         <>
           FasterFixes is an{" "}
-          <Link href="/open-source">open-source feedback widget</Link> and the
-          self-hostable alternative to BugHerd: flat-rate at ${proPrice} a month
-          for up to {proPlan.seats} members, or free if you self-host. Where
-          BugHerd routes feedback to a Kanban board, FasterFixes routes it to
-          GitHub, Linear, or Jira with a full repro bundle, and exposes every
-          report to Claude Code and Cursor over MCP.
+          <Link href="/open-source">open-source feedback widget</Link> you can
+          self-host for free. Each report reaches GitHub, Linear, Jira, or
+          Trello, and your coding agent over MCP. Hosted, it is ${proPrice} a
+          month for up to {proPlan.seats} members, where BugHerd {standard.name}{" "}
+          is {formatPublishedPrice(standard, "/month")} for {standard.seats}.
         </>
       }
       actions={
@@ -39,7 +40,6 @@ export function BugherdHero() {
           githubLabel="View source on GitHub"
         />
       }
-      illustration={<BugherdRoutingAnimation />}
     />
   );
 }

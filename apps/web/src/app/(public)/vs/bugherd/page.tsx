@@ -10,16 +10,15 @@ import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metada
 import type { Metadata } from "next";
 import { BugherdComparisonSection } from "./_features/bugherd-comparison-section";
 import { BugherdCtaSection } from "./_features/bugherd-cta-section";
-import { BugherdDeveloperFirstSection } from "./_features/bugherd-developer-first-section";
 import { bugherdFaqs } from "./_features/bugherd-faqs";
+import { BugherdFitSection } from "./_features/bugherd-fit-section";
 import { BugherdHero } from "./_features/bugherd-hero";
-import { BugherdHonestTakeSection } from "./_features/bugherd-honest-take-section";
 import {
   BugherdMigrationSection,
   migrationSteps,
 } from "./_features/bugherd-migration-section";
 import { BugherdPricingSection } from "./_features/bugherd-pricing-section";
-import { BugherdWhySwitchSection } from "./_features/bugherd-why-switch-section";
+import { BugherdWhatIsSection } from "./_features/bugherd-what-is-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { VsFaqSection } from "../_features/vs-faq-section";
 
@@ -29,7 +28,7 @@ const pageUrl = `${APP_URL}/vs/bugherd`;
 const title = "BugHerd Alternative: Open-Source, Self-Hosted, No Seat Fees";
 const description = `BugHerd costs ${formatPublishedPrice(standard, "/mo")} for ${standard.seats} members. FasterFixes is an open-source feedback widget, free to self-host, with MCP for Claude Code and Cursor.`;
 const datePublished = "2026-04-25T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-21T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -60,11 +59,10 @@ export default function Page() {
   return (
     <div>
       <BugherdHero />
-      <BugherdWhySwitchSection />
-      <BugherdHonestTakeSection />
-      <BugherdDeveloperFirstSection />
       <BugherdComparisonSection />
       <BugherdPricingSection />
+      <BugherdWhatIsSection />
+      <BugherdFitSection />
       <BugherdMigrationSection />
       <VsFaqSection faqs={bugherdFaqs} />
       <BugherdCtaSection />
