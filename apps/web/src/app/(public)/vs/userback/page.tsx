@@ -1,14 +1,15 @@
 import { APP_URL } from "@/app/_constants/app";
 import { SITE_NAME } from "@/app/_constants/seo";
+import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
 import { BreadcrumbSchema } from "@/app/_components/seo/breadcrumb-schema";
 import { FaqSchema } from "@/app/_components/seo/faq-schema";
-import { HowToSchema } from "@/app/_components/seo/how-to-schema";
 import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/software-application-schema";
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
+import { COMPETITOR_PRICES } from "../../_helpers/competitor-prices";
+import { formatPrice } from "../../_helpers/format-competitor-price";
 import { UserbackAlternativesSection } from "./_features/userback-alternatives-section";
-import { UserbackCalculatorSection } from "./_features/userback-calculator-section";
 import { UserbackComparisonSection } from "./_features/userback-comparison-section";
 import { UserbackCtaSection } from "./_features/userback-cta-section";
 import { UserbackDeveloperFirstSection } from "./_features/userback-developer-first-section";
@@ -16,22 +17,19 @@ import { userbackFaqs } from "./_features/userback-faqs";
 import { UserbackFitSection } from "./_features/userback-fit-section";
 import { UserbackHero } from "./_features/userback-hero";
 import { UserbackHonestTakeSection } from "./_features/userback-honest-take-section";
-import {
-  UserbackMigrationSection,
-  migrationSteps,
-} from "./_features/userback-migration-section";
+import { UserbackMigrationSection } from "./_features/userback-migration-section";
 import { UserbackPricingSection } from "./_features/userback-pricing-section";
 import { UserbackWhatIsSection } from "./_features/userback-what-is-section";
-import { UserbackWhySwitchSection } from "./_features/userback-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
 import { VsFaqSection } from "../_features/vs-faq-section";
 
 const pageUrl = `${APP_URL}/vs/userback`;
 const title = `Userback Alternative: Open-Source & Self-Hosted | ${SITE_NAME}`;
-const description =
-  "Open-source, self-hostable, and flat-priced. FasterFixes gives dev teams structured bug reports with React component tree capture and an MCP server for AI coding agents, without per-seat pricing or vendor lock-in.";
+const { business } = COMPETITOR_PRICES.userback.plans;
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
+const description = `Userback ${business.name} is ${formatPrice(business)}/mo for ${business.seats} seats. FasterFixes is $0 self-hosted or $${agencyPrice}/mo for unlimited members. Compare features and costs.`;
 const datePublished = "2026-04-29T00:00:00.000Z";
-const dateModified = "2026-11-12T00:00:00.000Z";
+const dateModified = "2026-11-21T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -65,14 +63,12 @@ export default function Page() {
     <div>
       <UserbackHero />
       <UserbackWhatIsSection />
-      <UserbackWhySwitchSection />
-      <UserbackHonestTakeSection />
-      <UserbackFitSection />
-      <UserbackCalculatorSection />
-      <UserbackAlternativesSection />
-      <UserbackDeveloperFirstSection />
       <UserbackComparisonSection />
+      <UserbackDeveloperFirstSection />
+      <UserbackFitSection />
       <UserbackPricingSection />
+      <UserbackHonestTakeSection />
+      <UserbackAlternativesSection />
       <UserbackMigrationSection />
       <VsFaqSection faqs={userbackFaqs} />
       <UserbackCtaSection />
@@ -93,14 +89,6 @@ export default function Page() {
           { name: "Home", url: APP_URL },
           { name: "Userback alternative", url: pageUrl },
         ]}
-      />
-      <HowToSchema
-        name="How to switch from Userback to FasterFixes"
-        description="Migrate client feedback from Userback to FasterFixes in four steps."
-        steps={migrationSteps.map((step) => ({
-          name: step.label,
-          text: step.body,
-        }))}
       />
       <FaqSchema faqs={userbackFaqs} />
     </div>

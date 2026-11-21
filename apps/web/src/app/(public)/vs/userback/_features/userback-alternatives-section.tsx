@@ -80,9 +80,8 @@ export function UserbackAlternativesSection() {
   return (
     <VsSection
       eyebrow="Alternatives"
-      title="Best Userback alternatives in 2026"
-      intro="Not every team needs the same thing. Here is how the main alternatives stack up."
-      tone="muted"
+      title="Other Userback alternatives in 2026"
+      intro="If FasterFixes is not the right fit, here is how the other Userback alternatives compare."
     >
       <VsAlternativesTable
         alternatives={alternatives}

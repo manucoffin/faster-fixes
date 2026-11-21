@@ -1,23 +1,22 @@
-import { WidgetSwapAnimation } from "../../_components/illustrations/widget-swap-animation";
 import { VsSection } from "../../_features/vs-section";
 import { type VsStep, VsSteps } from "../../_features/vs-steps";
 
 export const migrationSteps: VsStep[] = [
   {
-    label: "Export your feedback data from Usersnap",
-    body: "Export your existing feedback items from Usersnap and keep a local copy before you cancel. Its REST API is available on Premium and Enterprise only. Survey responses have no equivalent in FasterFixes and will not carry over.",
+    label: "Export your Usersnap feedback",
+    body: "Keep a local copy before you cancel. Its REST API is on Premium and Enterprise only, and survey responses do not carry over.",
   },
   {
     label: "Deploy FasterFixes",
-    body: "Choose self-hosted (Next.js, Postgres, Inngest, R2/S3) or sign up for the hosted Pro plan. The self-hosted path takes roughly 30 minutes with the provided setup docs. No account required for clients submitting feedback.",
+    body: "Sign up for the hosted version, or self-host it on Next.js, Postgres, Inngest and R2/S3 in about 30 minutes.",
   },
   {
-    label: "Replace the Usersnap widget",
-    body: "Remove the Usersnap script from your codebase. Paste the FasterFixes script tag in its place, or in a React app run npm install @fasterfixes/react and wrap your app in FeedbackProvider. Generate a shareable link for each client, no client account required.",
+    label: "Swap the widget",
+    body: "Replace the Usersnap script with the FasterFixes script tag, or install @fasterfixes/react in a React app. Clients need no account.",
   },
   {
-    label: "Invite your team and connect your issue tracker",
-    body: "Add team members from the dashboard and connect your GitHub repository, your Linear workspace, your Jira Cloud site, or any combination, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
+    label: "Connect your tracker and your agent",
+    body: "Connect GitHub, Linear, Jira or Trello for two-way sync, and add @fasterfixes/mcp to your editor.",
   },
 ];
 
@@ -26,18 +25,9 @@ export function UsersnapMigrationSection() {
     <VsSection
       eyebrow="Migration"
       title="Switching from Usersnap"
-      intro="No one-click import. Export your data, replace the widget, and wire up the integrations. The whole process takes under an hour."
-      tone="muted"
+      intro="There is no one-click import. Export your data, swap the widget, and connect your tools in under an hour."
     >
-      <VsSteps
-        steps={migrationSteps}
-        illustration={
-          <WidgetSwapAnimation
-            competitorName="Usersnap"
-            competitorScriptSrc="https://widget.usersnap.com/global/load/…"
-          />
-        }
-      />
+      <VsSteps steps={migrationSteps} />
     </VsSection>
   );
 }
