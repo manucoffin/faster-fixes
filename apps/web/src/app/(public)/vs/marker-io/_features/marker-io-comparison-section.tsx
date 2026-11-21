@@ -144,7 +144,7 @@ const rows: VsComparisonRow[] = [
     label: "Jira sync",
     cells: [
       { type: "yes", note: "Bidirectional · status-category aware" },
-      { type: "partial", note: "Team plan and above" },
+      { type: "yes", note: "Team plan and above" },
     ],
   },
   {
@@ -162,7 +162,7 @@ const rows: VsComparisonRow[] = [
     label: "Trello sync",
     cells: [
       { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "partial", note: "Resolves when the card is Done in Trello" },
+      { type: "yes", note: "Resolves when the card is Done in Trello" },
     ],
   },
   {
@@ -183,14 +183,14 @@ const rows: VsComparisonRow[] = [
     label: "Custom branding",
     cells: [
       "Self-host: full · hosted: planned",
-      { type: "partial", note: "Team plan and above" },
+      { type: "yes", note: "Team plan and above" },
     ],
   },
   {
     label: "SSO",
     cells: [
       "Self-host: bring your own",
-      { type: "partial", note: "Business plan only" },
+      { type: "yes", note: "Business plan only" },
     ],
   },
   {
