@@ -22,6 +22,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { GitHubStarsHeaderLink } from "../_features/github-stars/github-stars-header-link.client";
+import { QuickStartDialog } from "../_features/quick-start-dialog.client";
 import { featureLinks } from "./feature-links";
 import { MobileNav } from "./mobile-nav.client";
 import { ThemeToggle } from "@/app/_components/theme-toggle.client";
@@ -219,6 +220,13 @@ export async function Header() {
           <ThemeToggle size="icon" variant="ghost" />
 
           <GitHubStarsHeaderLink />
+
+          {/* Below lg the centered nav leaves no room; the prompt is for a desktop coding agent anyway. */}
+          {isCloud() && (
+            <div className="hidden lg:block">
+              <QuickStartDialog />
+            </div>
+          )}
 
           {session ? (
             <Button asChild>
