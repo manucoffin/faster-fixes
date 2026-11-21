@@ -18,7 +18,8 @@ import { VsSection } from "../../_features/vs-section";
 import { SectionBody } from "../../../features/_components/section-body";
 
 const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
-const { extraSeatBilledYearly } = COMPETITOR_PRICES.markerIo.otherPrices;
+const { extraSeat, extraSeatBilledYearly } =
+  COMPETITOR_PRICES.markerIo.otherPrices;
 const starterAnnual = formatAmount(
   starter.billedYearlyAmount,
   starter.currency,
@@ -64,17 +65,26 @@ export function MarkerIoPricingSection() {
   return (
     <VsSection
       eyebrow="Pricing"
-      title="Free if you self-host. Flat rate if you don't."
+      title="Marker.io pricing vs FasterFixes: what you actually pay"
     >
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <SectionBody>
           <p>
-            FasterFixes is open source. The lowest plan in any honest comparison
-            is &quot;free, forever, on your own server.&quot; If you would
-            rather not run it yourself, the hosted plans are flat-rate, not
-            per-seat. Marker.io uses tiered per-seat pricing where Jira sync,
-            session replay, and developer tools are gated behind the Team plan
-            at {teamAnnual}/month annual.
+            Marker.io charges per seat. {starter.name} is {formatPrice(starter)}
+            /month for {starter.seats} seats, or {starterAnnual}/month billed
+            yearly. {team.name} covers {team.seats} seats at {formatPrice(team)}
+            /month, or {teamAnnual}/month billed yearly. Extra seats cost{" "}
+            {formatPrice(extraSeat)}/month, or{" "}
+            {formatPrice(extraSeatBilledYearly)}/month billed yearly. Jira sync,
+            session replay, console and network logs are {team.name} only, so a
+            team that needs them pays {teamAnnual}/month, not {starterAnnual}.
+            There is no free plan, only a 15-day trial.
+          </p>
+          <p>
+            FasterFixes is free to self-host under AGPL-3.0. Hosted plans are
+            flat: Pro is ${proPrice}/month for {proPlan.seats} members, and
+            Agency covers unlimited members at ${agencyPrice}/month. The
+            Recording and the MCP server are on every plan, Free included.
           </p>
         </SectionBody>
 

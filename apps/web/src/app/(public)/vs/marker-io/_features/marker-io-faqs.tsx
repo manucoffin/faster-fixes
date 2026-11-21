@@ -4,20 +4,29 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
-import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
+import {
+  formatAmount,
+  formatPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
-const { team } = COMPETITOR_PRICES.markerIo.plans;
-const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
-
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const { extraSeat, extraSeatBilledYearly } =
+  COMPETITOR_PRICES.markerIo.otherPrices;
+
+const starterAnnual = formatAmount(
+  starter.billedYearlyAmount,
+  starter.currency,
+);
+const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
+const freePlanSummary = `${freePlan.projects} project, up to ${freePlan.feedbacks} feedback items, ${freePlan.seats} team member`;
 
 type DocLinkProps = {
   href: Route;
@@ -30,31 +39,34 @@ function DocLink({ href, children }: DocLinkProps) {
 
 export const markerIoFaqs: VsFaqItem[] = [
   {
-    question: "Is FasterFixes free to use?",
-    answer: `Yes. The hosted Free plan is permanent: ${freePlan.projects} project, ${freeFeedbackLimit} feedback items, ${freePlan.seats} member, no time limit, no credit card. The dashboard is open source under AGPL-3.0 and the widget is MIT, so self-hosting is also free regardless of team size. Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
+    question: "Is there a free, open-source alternative to Marker.io?",
+    answer: `Yes. FasterFixes is open source: the dashboard under AGPL-3.0 and the widget packages under MIT. Self-host it for free, or use the hosted Free plan (${freePlanSummary}).`,
     content: (
       <VsFaqAnswer>
-        Yes. The hosted Free plan is permanent: {freePlan.projects} project,{" "}
-        {freeFeedbackLimit} feedback items, {freePlan.seats} member, no time
-        limit, no credit card. The dashboard is open source under AGPL-3.0 and
-        the widget is MIT, so{" "}
-        <DocLink href={"/docs/self-hosting" as Route}>self-hosting</DocLink> is
-        also free regardless of team size. Paid hosted plans are ${proPrice}
-        /month for Pro and ${agencyPrice}/month for Agency.
+        Yes. FasterFixes is open source: the dashboard under AGPL-3.0 and the
+        widget packages under MIT. Self-host it for free, or use the hosted Free
+        plan ({freePlanSummary}).
       </VsFaqAnswer>
     ),
   },
   {
+    question: "How much does Marker.io cost for a team of five?",
+    answer: `Marker.io ${starter.name} is ${formatPrice(starter)}/month for ${starter.seats} seats, or ${starterAnnual}/month billed yearly, and extra seats cost ${formatPrice(extraSeat)}/month (${formatPrice(extraSeatBilledYearly)} billed yearly). Jira sync, session replay and console logs need ${team.name}: ${formatPrice(team)}/month for ${team.seats} seats, or ${teamAnnual}/month billed yearly. FasterFixes is $0 self-hosted, or $${proPrice}/month hosted for up to ${proPlan.seats} members.`,
+  },
+  {
+    question: "Does Marker.io have a free plan?",
+    answer: `No. Marker.io offers a 15-day trial, then paid plans from ${starterAnnual}/month billed yearly. FasterFixes is free to self-host and has a permanent hosted Free plan (${freePlanSummary}).`,
+  },
+  {
     question: "Can I self-host FasterFixes?",
     answer:
-      "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Marker.io has no self-hosted option. Deploy on your own infrastructure and run FasterFixes without a hosted account. The dashboard is AGPL-3.0; the widget packages are MIT.",
+      "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Deploy on your own infrastructure and run it without a FasterFixes hosted account. Marker.io has no self-hosted option.",
     content: (
       <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
-        storage. Marker.io has no self-hosted option. Deploy on your own
-        infrastructure and run FasterFixes without a hosted account. The
-        dashboard is AGPL-3.0; the widget packages are MIT. Full instructions in
-        the{" "}
+        storage. Deploy on your own infrastructure and run it without a
+        FasterFixes hosted account. Marker.io has no self-hosted option. Full
+        instructions in the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
@@ -63,133 +75,57 @@ export const markerIoFaqs: VsFaqItem[] = [
     ),
   },
   {
-    question: "How is FasterFixes different from Marker.io?",
-    answer:
-      "FasterFixes is open-source and self-hostable; Marker.io is closed-source and cloud-only. FasterFixes ships an MCP server so AI coding agents (Claude Code, Cursor, Codex) can fetch and resolve feedback from the terminal. Marker.io has no MCP support. Marker.io has the broader feature set today: Figma/PDF annotation, deep PM integrations, and a client Guest Portal. FasterFixes does not currently match those features. Both replay the moments before a report: Marker.io bundles session replay from the Team plan, and FasterFixes attaches a Recording of the last minute on the page to each feedback on every plan.",
-    content: (
-      <VsFaqAnswer>
-        FasterFixes is open-source and self-hostable; Marker.io is closed-source
-        and cloud-only. FasterFixes ships an{" "}
-        <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> so AI
-        coding agents (Claude Code, Cursor, Codex) can fetch and resolve
-        feedback from the terminal. Marker.io has no MCP support. Marker.io has
-        the broader feature set today: Figma/PDF annotation, deep PM
-        integrations, and a client Guest Portal. FasterFixes does not currently
-        match those features. Both replay the moments before a report: Marker.io
-        bundles session replay from the Team plan, and FasterFixes attaches a{" "}
-        <DocLink href={"/docs/widget/recording" as Route}>Recording</DocLink> of
-        the last minute on the page to each feedback on every plan.
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "Does FasterFixes have a kanban board?",
-    answer:
-      "Yes. The team dashboard includes a drag-and-drop kanban view. What FasterFixes does not have today is a client-facing board. Marker.io's Guest Portal covers that. The team kanban is available on every plan, including the free tier.",
-  },
-  {
     question: "What does the MCP integration do?",
     answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal. Marker.io has no equivalent.",
+      "@fasterfixes/mcp exposes your open feedback to Claude Code, Cursor, Codex, or any MCP-compatible agent, with the model you choose. The agent lists unresolved feedback, reads its technical context (URL, DOM selector, React component path, browser, viewport), applies a fix, and marks the item resolved. Marker.io's AI features stay inside its dashboard.",
     content: (
       <VsFaqAnswer>
-        @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
-        agent. Your agent can list unresolved feedback, read the full technical
-        context (URL, DOM selector, React component path when available,
-        browser, viewport), apply a fix, and mark the item resolved, all from
-        the terminal. Marker.io has no equivalent. See{" "}
-        <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
-        <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
+        @fasterfixes/mcp exposes your open feedback to Claude Code, Cursor,
+        Codex, or any MCP-compatible agent, with the model you choose. The agent
+        lists unresolved feedback, reads its technical context (URL, DOM
+        selector, React component path, browser, viewport), applies a fix, and
+        marks the item resolved. Marker.io&apos;s AI features stay inside its
+        dashboard. See{" "}
+        <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink>.
       </VsFaqAnswer>
     ),
   },
   {
-    question: "How do I install the widget on my site?",
+    question: "Does FasterFixes need a browser extension?",
     answer:
-      'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context. On React sites, every report also carries the component path.',
+      "No. Reviewers use the widget on the site itself: a script tag on any stack, or a package for React, Vue, Angular and Svelte. The widget does need to be installed on the site. If reviewers must comment on sites you cannot edit, Marker.io's browser extension is a better fit.",
     content: (
       <VsFaqAnswer>
-        On any site, paste one script tag with your Project ID, or run npm
-        install @fasterfixes/widget and call init({"{ projectId }"}). In a React
-        or Next.js app, you can instead run npm install @fasterfixes/react and
-        wrap your app in {"<FeedbackProvider>"}. Both embeds share the same
-        widget, options, and captured context. On React sites, every report also
-        carries the component path. See the{" "}
-        <DocLink href={"/docs/widget/install/script-embed" as Route}>
-          script embed docs
-        </DocLink>
-        , the{" "}
-        <DocLink href={"/docs/widget/install/react" as Route}>
-          React embed docs
-        </DocLink>
-        , and the{" "}
-        <DocLink href={"/docs/getting-started/quickstart" as Route}>
-          quickstart
-        </DocLink>
-        .
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "Does FasterFixes work on non-React stacks?",
-    answer:
-      "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. The widget does need to be installed on the site. If reviewers must leave feedback on sites you cannot edit, Marker.io's browser extension is a better fit.",
-    content: (
-      <VsFaqAnswer>
-        Yes. The script embed installs the widget with one script tag on any
-        website: WordPress, Webflow, static HTML, or an app built with Vue,
-        Angular, Svelte, or no framework at all. It needs no framework runtime
-        and renders in a Shadow DOM, so page styles do not affect it. The widget
-        does need to be installed on the site. If reviewers must leave feedback
-        on sites you cannot edit, Marker.io&apos;s browser extension is a better
-        fit. See the{" "}
+        No. Reviewers use the widget on the site itself: a script tag on any
+        stack, or a package for React, Vue, Angular and Svelte. The widget does
+        need to be installed on the site. If reviewers must comment on sites you
+        cannot edit, Marker.io&apos;s browser extension is a better fit. See the{" "}
         <DocLink href={"/docs/widget/install/script-embed" as Route}>
           script embed docs
         </DocLink>
         .
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "Can I use Claude, GPT, or any other model with FasterFixes?",
-    answer:
-      "Yes. The MCP server is model-agnostic. Pick the agent you already use, whether Claude Code, Cursor, Codex, or any other MCP-compatible client, and the agent runs whichever model you have configured. Marker.io's AI features are bundled inside the dashboard and do not let you bring your own model.",
-    content: (
-      <VsFaqAnswer>
-        Yes. The <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink>{" "}
-        is model-agnostic. Pick the agent you already use, whether Claude Code,
-        Cursor, Codex, or any other MCP-compatible client, and the agent runs
-        whichever model you have configured. Marker.io&apos;s AI features (Title
-        Generation, Magic Rewrite, Translation) are bundled inside the dashboard
-        and do not let you bring your own model.
       </VsFaqAnswer>
     ),
   },
   {
     question: "How do I move my Marker.io data over?",
     answer:
-      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the widget on your site, and reconnect your GitHub, Linear, and Jira integrations. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
+      "Marker.io exports feedback as CSV. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
   },
   {
     question:
-      "How do the FasterFixes integrations compare to Marker.io's Jira-heavy stack?",
-    answer: `FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io includes Linear on every plan but gates Jira sync behind the Team plan at ${teamAnnual}/month annual. Marker.io still covers a broader roster: Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog lives elsewhere.`,
+      "Does FasterFixes integrate with GitHub, Linear, Jira, and Trello like Marker.io does?",
+    answer: `Yes. Each feedback item becomes a GitHub issue, Linear issue, Jira issue, or Trello card with the screenshot, component path, selector, and environment. Status syncs both ways, and a feedback can be linked to all four at once. Marker.io reserves Jira for ${team.name} at ${teamAnnual}/month billed yearly, and also covers Asana, ClickUp and Monday.com.`,
     content: (
       <VsFaqAnswer>
-        FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
-        every paid plan, included by default. A single feedback item can mirror
-        to all three at once, and Jira sync maps by status category rather than
-        status name, so custom workflows need no configuration. Marker.io
-        includes Linear on every plan but gates Jira sync behind the Team plan
-        at {teamAnnual}/month annual. Marker.io still covers a broader roster:
-        Asana, ClickUp, Trello, Monday.com and more. Weigh that if your backlog
-        lives elsewhere. See the{" "}
+        Yes. Each feedback item becomes a GitHub issue, Linear issue, Jira
+        issue, or Trello card with the screenshot, component path, selector, and
+        environment. Status syncs both ways, and a feedback can be linked to all
+        four at once. Marker.io reserves Jira for {team.name} at {teamAnnual}
+        /month billed yearly, and also covers Asana, ClickUp and Monday.com. See
+        the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
-          GitHub integration docs
-        </DocLink>{" "}
-        and{" "}
-        <DocLink href={"/docs/integrations/jira" as Route}>
-          Jira integration docs
+          integration docs
         </DocLink>
         .
       </VsFaqAnswer>
