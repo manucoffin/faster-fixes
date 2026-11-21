@@ -10,7 +10,6 @@ import {
 import {
   EXCHANGE_RATE_NOTE,
   formatAmount,
-  formatPrice,
   formatPublishedPrice,
 } from "@/app/(public)/_helpers/format-competitor-price";
 import { VsActions } from "../../_features/vs-actions";
@@ -19,7 +18,6 @@ import {
   VsComparisonTable,
 } from "../../_features/vs-comparison-table";
 import { VsSection } from "../../_features/vs-section";
-import { SectionBody } from "../../../features/_components/section-body";
 
 const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
@@ -69,62 +67,23 @@ const planMatchRows: VsComparisonRow[] = [
 
 export function UsersnapPricingSection() {
   return (
-    <VsSection eyebrow="Pricing" title="How much Usersnap really costs">
-      <SectionBody className="max-w-3xl">
-        <p>
-          Usersnap does not charge per seat beyond Starter. It charges per
-          project: {starter.name} {formatPrice(starter)}/mo covers{" "}
-          {starter.seats} seats and {starter.projects} projects, then every
-          higher tier has unlimited seats and is sized by projects:{" "}
-          {growth.name} {formatPrice(growth)}/mo ({growth.projects} projects),{" "}
-          {professional.name} {formatPrice(professional)}/mo (
-          {professional.projects} projects) and {premium.name}{" "}
-          {formatPrice(premium)}/mo ({premium.projects} projects). A five-person
-          team pays {formatPublishedPrice(growth, "/mo")} on {growth.name}.
-          Usersnap lists its prices in EUR. Billed yearly, they drop to{" "}
-          {formatAmount(starter.billedYearlyAmount, starter.currency)},{" "}
-          {formatAmount(growth.billedYearlyAmount, growth.currency)},{" "}
-          {formatAmount(professional.billedYearlyAmount, professional.currency)}{" "}
-          and {formatAmount(premium.billedYearlyAmount, premium.currency)} per
-          month. There is no free plan, only a free trial.
-        </p>
-        <p>
-          FasterFixes is open source, so the lowest plan in any honest
-          comparison is &quot;free, forever, on your own server.&quot; If you
-          would rather not run it yourself, the hosted plans are flat-rate: $
-          {proPrice}/mo for Pro and ${agencyPrice}/mo for Agency.
-        </p>
-      </SectionBody>
+    <VsSection
+      eyebrow="Pricing"
+      title="FasterFixes vs Usersnap: what each plan costs"
+      intro={`Usersnap ${starter.name} covers ${starter.seats} seats, then every tier has unlimited seats and is sized by projects. FasterFixes is flat: $${proPrice}/mo for Pro, $${agencyPrice}/mo for Agency, or $0 self-hosted. Usersnap has no free plan, only a trial.`}
+    >
+      <VsComparisonTable
+        competitorName="Usersnap"
+        labelHeader="Your team"
+        rows={planMatchRows}
+        footnote={`Each row is the cheapest plan of each tool that covers the team. Usersnap ${growth.name} includes ${growth.projects} projects, so a team with ${proPlan.projects + 1} to ${growth.projects} projects needs FasterFixes Agency. Monthly list prices, then Usersnap's billed-yearly rate, checked on usersnap.com/pricing on November 19, 2026. Usersnap bills in EUR and FasterFixes in USD. ${EXCHANGE_RATE_NOTE}`}
+      />
 
-      <div className="mt-12 md:mt-16">
-        <h3 className="text-xl font-medium tracking-tight">
-          Plan for plan, by team size
-        </h3>
-        <p className="mt-3 max-w-3xl text-pretty text-muted-foreground">
-          Usersnap is ahead on one line: {growth.name} includes{" "}
-          {growth.projects} projects, so a team with {proPlan.projects + 1} to{" "}
-          {growth.projects} projects needs FasterFixes Agency, which has no
-          member or project limit.
-        </p>
-        <div className="mt-8">
-          <VsComparisonTable
-            competitorName="Usersnap"
-            labelHeader="Your team"
-            rows={planMatchRows}
-            footnote={`Each row is the cheapest plan of each tool that covers the team. Monthly list prices, then Usersnap's billed-yearly rate, Usersnap's checked on usersnap.com/pricing on November 19, 2026. Usersnap bills in EUR and FasterFixes in USD. ${EXCHANGE_RATE_NOTE}`}
-          />
-        </div>
-      </div>
-
-      <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <div className="mt-10">
         <VsActions
           signupLabel="Start hosted, free"
           githubLabel="Self-host from GitHub"
         />
-        <p className="max-w-md text-sm text-muted-foreground md:text-right">
-          Usersnap pricing is based on publicly available information and may
-          change. Check their site for current rates.
-        </p>
       </div>
     </VsSection>
   );

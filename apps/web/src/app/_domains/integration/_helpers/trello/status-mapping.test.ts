@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  resolveFeedbackDecisionFromCard,
+  feedbackStatusFromTrelloCard,
+  isTrelloCardMirroring,
+  leavesTrelloCardInPlace,
   resolveTrelloCardWrites,
   type TrelloCardState,
   type TrelloCardWrites,
-  type TrelloInboundDecision,
   type TrelloListMapping,
 } from "./status-mapping";
 import type { FeedbackStatus } from "@/app/_domains/feedback";
@@ -71,118 +72,155 @@ describe("resolveTrelloCardWrites", () => {
   });
 });
 
-describe("resolveFeedbackDecisionFromCard", () => {
-  const link = { ...mapping, boardId: "board" };
-  const linkWithoutInProgress = { ...withoutInProgress, boardId: "board" };
+const openIn = (listId: string): TrelloCardState => ({
+  listId,
+  archived: false,
+});
+const archivedIn = (listId: string): TrelloCardState => ({
+  listId,
+  archived: true,
+});
 
-  const openIn = (listId: string): TrelloCardState => ({
-    boardId: "board",
-    listId,
-    closed: false,
-  });
-  const archivedIn = (listId: string): TrelloCardState => ({
-    boardId: "board",
-    listId,
-    closed: true,
-  });
-
+describe("isTrelloCardMirroring", () => {
   const rows: Array<{
     name: string;
     card: TrelloCardState;
-    link?: typeof link;
-    currentStatus: FeedbackStatus;
-    decision: TrelloInboundDecision;
+    mapping?: TrelloListMapping;
+    mirrors: FeedbackStatus[];
   }> = [
     {
-      name: "detaches the Issue link of a card Trello no longer has",
-      card: null,
-      currentStatus: "in_progress",
-      decision: { type: "detach" },
-    },
-    {
-      name: "detaches the Issue link of a card moved to another board",
-      card: { boardId: "other_board", listId: "list_new", closed: false },
-      currentStatus: "in_progress",
-      decision: { type: "detach" },
-    },
-    {
-      name: "leaves a Feedback resolved when its card is archived from the resolved list",
-      card: archivedIn("list_resolved"),
-      currentStatus: "resolved",
-      decision: { type: "none" },
-    },
-    {
-      name: "changes nothing for a card archived from the resolved list, whatever the Status",
-      card: archivedIn("list_resolved"),
-      currentStatus: "new",
-      decision: { type: "none" },
-    },
-    {
-      name: "archives the Feedback of a card archived from the new list",
-      card: archivedIn("list_new"),
-      currentStatus: "new",
-      decision: { type: "set_status", status: "closed" },
-    },
-    {
-      name: "archives the Feedback of a card archived from an unmapped list",
-      card: archivedIn("list_qa"),
-      currentStatus: "in_progress",
-      decision: { type: "set_status", status: "closed" },
-    },
-    {
-      name: "changes nothing for an archived card whose Feedback is already Archived",
-      card: archivedIn("list_new"),
-      currentStatus: "closed",
-      decision: { type: "none" },
-    },
-    {
-      name: "sets new for a card moved back into the new list",
+      name: "an open card in the new list mirrors new",
       card: openIn("list_new"),
-      currentStatus: "resolved",
-      decision: { type: "set_status", status: "new" },
+      mirrors: ["new"],
     },
     {
-      name: "sets in_progress for a card moved into the in_progress list",
+      name: "an open card in the in_progress list mirrors in_progress",
       card: openIn("list_in_progress"),
-      currentStatus: "new",
-      decision: { type: "set_status", status: "in_progress" },
+      mirrors: ["in_progress"],
     },
     {
-      name: "sets resolved for a card moved into the resolved list",
+      name: "an open card in the resolved list mirrors resolved",
       card: openIn("list_resolved"),
-      currentStatus: "in_progress",
-      decision: { type: "set_status", status: "resolved" },
+      mirrors: ["resolved"],
     },
     {
-      name: "gives an unarchived card's Feedback the Status of its mapped list",
-      card: openIn("list_in_progress"),
-      currentStatus: "closed",
-      decision: { type: "set_status", status: "in_progress" },
-    },
-    {
-      name: "changes nothing for a card already in the list of its Status",
-      card: openIn("list_resolved"),
-      currentStatus: "resolved",
-      decision: { type: "none" },
-    },
-    {
-      name: "changes nothing for a card moved into an unmapped list",
+      name: "an open card in an unmapped list mirrors every open Status",
       card: openIn("list_qa"),
-      currentStatus: "new",
-      decision: { type: "none" },
+      mirrors: ["new", "in_progress", "resolved"],
     },
     {
-      name: "treats the in_progress list as unmapped when the link maps none",
-      card: openIn("list_in_progress"),
-      link: linkWithoutInProgress,
-      currentStatus: "new",
-      decision: { type: "none" },
+      name: "an open card left in an unmapped list mirrors in_progress on a board with no in_progress list",
+      card: openIn("list_qa"),
+      mapping: withoutInProgress,
+      mirrors: ["new", "in_progress", "resolved"],
+    },
+    {
+      name: "the new list keeps naming new on a board with no in_progress list, so a move there applies",
+      card: openIn("list_new"),
+      mapping: withoutInProgress,
+      mirrors: ["new"],
+    },
+    {
+      name: "a card archived from the resolved list mirrors resolved and Archived",
+      card: archivedIn("list_resolved"),
+      mirrors: ["resolved", "closed"],
+    },
+    {
+      name: "a card archived from any other list mirrors Archived only",
+      card: archivedIn("list_new"),
+      mirrors: ["closed"],
+    },
+    {
+      name: "a card archived from an unmapped list mirrors Archived only",
+      card: archivedIn("list_qa"),
+      mirrors: ["closed"],
     },
   ];
 
-  it.each(rows)("$name", ({ card, link: rowLink, currentStatus, decision }) => {
-    expect(
-      resolveFeedbackDecisionFromCard(card, rowLink ?? link, currentStatus),
-    ).toEqual(decision);
+  const statuses: FeedbackStatus[] = [
+    "new",
+    "in_progress",
+    "resolved",
+    "closed",
+  ];
+
+  it.each(rows)("$name", ({ card, mapping: rowMapping, mirrors }) => {
+    const mirrored = statuses.filter((status) =>
+      isTrelloCardMirroring(card, status, rowMapping ?? mapping),
+    );
+    expect(mirrored).toEqual(mirrors);
+  });
+});
+
+describe("feedbackStatusFromTrelloCard", () => {
+  const rows: Array<{
+    name: string;
+    card: TrelloCardState;
+    mapping?: TrelloListMapping;
+    status: FeedbackStatus | null;
+  }> = [
+    {
+      name: "the new list implies new",
+      card: openIn("list_new"),
+      status: "new",
+    },
+    {
+      name: "the in_progress list implies in_progress",
+      card: openIn("list_in_progress"),
+      status: "in_progress",
+    },
+    {
+      name: "the resolved list implies resolved",
+      card: openIn("list_resolved"),
+      status: "resolved",
+    },
+    {
+      name: "an unmapped list implies no Status",
+      card: openIn("list_qa"),
+      status: null,
+    },
+    {
+      name: "the old in_progress list is unmapped when the link maps none",
+      card: openIn("list_in_progress"),
+      mapping: withoutInProgress,
+      status: null,
+    },
+    {
+      name: "a card archived from the resolved list implies no Status",
+      card: archivedIn("list_resolved"),
+      status: null,
+    },
+    {
+      name: "a card archived from the new list implies Archived",
+      card: archivedIn("list_new"),
+      status: "closed",
+    },
+    {
+      name: "a card archived from an unmapped list implies Archived",
+      card: archivedIn("list_qa"),
+      status: "closed",
+    },
+  ];
+
+  it.each(rows)("$name", ({ card, mapping: rowMapping, status }) => {
+    expect(feedbackStatusFromTrelloCard(card, rowMapping ?? mapping)).toBe(
+      status,
+    );
+  });
+});
+
+describe("leavesTrelloCardInPlace", () => {
+  it("leaves the card in place for in_progress on a board with no in_progress list", () => {
+    expect(leavesTrelloCardInPlace("in_progress", withoutInProgress)).toBe(
+      true,
+    );
+  });
+
+  it("moves the card for in_progress when the board maps a list", () => {
+    expect(leavesTrelloCardInPlace("in_progress", mapping)).toBe(false);
+  });
+
+  it("moves the card for every other Status", () => {
+    expect(leavesTrelloCardInPlace("new", withoutInProgress)).toBe(false);
   });
 });

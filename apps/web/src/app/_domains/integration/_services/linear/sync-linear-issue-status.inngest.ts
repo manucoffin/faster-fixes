@@ -1,20 +1,9 @@
-import { feedbackStatusFromLinearStateType } from "../../_helpers/linear/state-mapping";
-import type { LinearStateType } from "../../_helpers/linear/state-mapping";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  linearWebhookIssueEvent,
-} from "@/server/inngest/events";
-
-const SYNC_LOOP_WINDOW_MS = 60_000;
-
-type IssueWebhookData = {
-  id: string;
-  state?: { id: string; type: string; name?: string };
-  stateId?: string;
-};
+import { linearWebhookIssueEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { applyObservedIssueState } from "../apply-observed-issue-state";
+import { linearTrackerAdapter } from "./_linear-tracker-adapter";
 
 export const syncLinearIssueStatus = inngest.createFunction(
   {
@@ -24,59 +13,17 @@ export const syncLinearIssueStatus = inngest.createFunction(
     triggers: [{ event: linearWebhookIssueEvent }],
   },
   async ({ event }) => {
-    const issueData = event.data.issue as IssueWebhookData | undefined;
-    if (!issueData?.id) return { skipped: "no_issue_data" };
+    const { action, installationId, issue } = event.data;
+    const issueId = issue?.id;
+    if (typeof issueId !== "string") return { skipped: "no_issue_data" };
 
-    const issueLink = await prisma.feedbackLinearIssueLink.findFirst({
-      where: { issueId: issueData.id },
-    });
-
-    if (!issueLink) return { skipped: "no_matching_issue_link" };
-
-    // Loop prevention: if the app just pushed to Linear within the window, skip
-    if (
-      issueLink.lastSyncSource === "app" &&
-      issueLink.lastSyncAt &&
-      Date.now() - issueLink.lastSyncAt.getTime() < SYNC_LOOP_WINDOW_MS
-    ) {
-      return { skipped: "sync_loop_prevention" };
-    }
-
-    const stateType = issueData.state?.type as LinearStateType | undefined;
-    const stateId = issueData.state?.id ?? issueData.stateId;
-    if (!stateType || !stateId) {
-      return { skipped: "no_state_in_payload" };
-    }
-
-    const newStatus = feedbackStatusFromLinearStateType(stateType);
-
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: newStatus },
-      }),
-      prisma.feedbackLinearIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          issueStateId: stateId,
-          issueStateType: stateType,
-          lastSyncSource: "linear",
-          lastSyncAt: new Date(),
-        },
-      }),
-    ]);
-
-    // Propagate to other trackers (e.g. GitHub) so the feedback stays canonical.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus,
-        origin: "linear",
-        // Change originated from the Linear issue webhook syncing back.
-        actor: "tracker",
-      }),
+    return applyObservedIssueState(
+      {
+        reference: { tracker: "linear", issueId, installationId },
+        deleted: action === "remove",
+      },
+      linearTrackerAdapter(prisma),
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
-
-    return { feedbackId: issueLink.feedbackId, newStatus };
   },
 );

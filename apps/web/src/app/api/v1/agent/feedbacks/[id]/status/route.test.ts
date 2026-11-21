@@ -48,25 +48,38 @@ function statusRequest(body: unknown, url = STATUS_URL) {
  * Stands in for the row the handler reads, filtered the way the query is: the
  * feedback is only visible when its project is one of the token organization's.
  * A feedback on another organization's project therefore reads as absent, which
- * is what the 404 case asserts.
+ * is what the 404 case asserts. The guarded Status write keeps the row's
+ * Status, so the row read back after it shows what was written.
  */
 function seedFeedback({
   projectId = PROJECT_ID,
   status = "new",
 }: { projectId?: string; status?: string } = {}) {
+  let stored = status;
   agentApiPrisma.feedback.findFirst.mockImplementation(
     async ({ where }: { where: { projectId: { in: string[] } } }) =>
       where.projectId.in.includes(projectId)
-        ? { id: FEEDBACK_ID, status }
+        ? { id: FEEDBACK_ID, status: stored }
         : null,
   );
-  agentApiPrisma.feedback.update.mockImplementation(
-    async ({ data }: { data: { status: string } }) => ({
-      id: FEEDBACK_ID,
-      status: data.status,
-      updatedAt: UPDATED_AT,
-    }),
+  agentApiPrisma.feedback.updateManyAndReturn.mockImplementation(
+    async ({
+      where,
+      data,
+    }: {
+      where: { status?: { in: string[] } };
+      data: { status: string };
+    }) => {
+      if (where.status && !where.status.in.includes(stored)) return [];
+      stored = data.status;
+      return [{ id: FEEDBACK_ID }];
+    },
   );
+  agentApiPrisma.feedback.findUniqueOrThrow.mockImplementation(async () => ({
+    id: FEEDBACK_ID,
+    status: stored,
+    updatedAt: UPDATED_AT,
+  }));
 }
 
 beforeEach(() => {
@@ -200,7 +213,7 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
       error: "Feedback not found",
       code: "NOT_FOUND",
     });
-    expect(agentApiPrisma.feedback.update).not.toHaveBeenCalled();
+    expect(agentApiPrisma.feedback.updateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it("updates the status and reports the stored row", async () => {
@@ -220,14 +233,16 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
   it("fans the change out to the integrations as the agent actor", async () => {
     await POST(statusRequest({ status: "in_progress" }), routeContext());
 
-    expect(inngestSendDouble).toHaveBeenCalledWith({
-      name: "feedback/status-changed",
-      data: {
-        feedbackId: FEEDBACK_ID,
-        newStatus: "in_progress",
-        actor: "agent",
+    expect(inngestSendDouble).toHaveBeenCalledWith([
+      {
+        name: "feedback/status-changed",
+        data: {
+          feedbackId: FEEDBACK_ID,
+          newStatus: "in_progress",
+          actor: "agent",
+        },
       },
-    });
+    ]);
   });
 
   /**
@@ -237,7 +252,7 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
    * ADR-0007. The fan-out is not visible in the response, so this one assertion
    * looks past it.
    */
-  it("answers a no-op status set with the row and sends no event", async () => {
+  it("answers a no-op status set with the row, writes nothing and sends no event", async () => {
     seedFeedback({ status: "resolved" });
 
     const response = await POST(
@@ -251,12 +266,11 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
       status: "resolved",
       updatedAt: "2026-01-02T03:04:05.000Z",
     });
-    expect(agentApiPrisma.feedback.update).toHaveBeenCalledTimes(1);
     expect(inngestSendDouble).not.toHaveBeenCalled();
   });
 
   it("updates the Status of a video Feedback as for a page Feedback", async () => {
-    agentApiPrisma.feedback.findFirst.mockResolvedValue({
+    agentApiPrisma.feedback.findFirst.mockResolvedValueOnce({
       id: FEEDBACK_ID,
       status: "new",
       videoId: "d4f0a2c1-7e3b-4b7a-9a1e-2c5f8e9d1b23",
@@ -274,9 +288,15 @@ describe("POST /api/v1/agent/feedbacks/[id]/status", () => {
       status: "resolved",
       updatedAt: "2026-01-02T03:04:05.000Z",
     });
-    expect(inngestSendDouble).toHaveBeenCalledWith({
-      name: "feedback/status-changed",
-      data: { feedbackId: FEEDBACK_ID, newStatus: "resolved", actor: "agent" },
-    });
+    expect(inngestSendDouble).toHaveBeenCalledWith([
+      {
+        name: "feedback/status-changed",
+        data: {
+          feedbackId: FEEDBACK_ID,
+          newStatus: "resolved",
+          actor: "agent",
+        },
+      },
+    ]);
   });
 });

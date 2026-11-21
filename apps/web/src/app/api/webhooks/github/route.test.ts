@@ -225,7 +225,25 @@ describe("POST /api/webhooks/github", () => {
     });
   });
 
-  it("ignores an issue action other than closed or reopened", async () => {
+  it("mirrors a deleted issue to the status sync job", async () => {
+    const response = await POST(
+      webhookRequest({ rawBody: issuesPayload("deleted") }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ ok: true });
+    expect(inngestSendDouble).toHaveBeenCalledWith({
+      name: "github/webhook.issues",
+      data: {
+        action: "deleted",
+        issueNumber: 7,
+        issueState: "open",
+        repoFullName: "acme/site",
+      },
+    });
+  });
+
+  it("ignores an issue action other than closed, reopened or deleted", async () => {
     const response = await POST(
       webhookRequest({ rawBody: issuesPayload("edited") }),
     );

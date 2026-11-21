@@ -10,8 +10,10 @@ import {
   type VsComparisonRow,
   VsComparisonTable,
 } from "../../_features/vs-comparison-table";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
 import { VsSection } from "../../_features/vs-section";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 const { team, business, businessPlus } = COMPETITOR_PRICES.userback.plans;
@@ -20,14 +22,25 @@ const { extraSeat } = COMPETITOR_PRICES.userback.otherPrices;
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
 
+const keyDifferences: VsPoint[] = [
+  {
+    title: "Flat price, developer context on every plan",
+    body: `FasterFixes Pro is $${proPrice}/month for ${proPlan.seats} members, with console logs, network requests, and session replay included. On Userback they start on ${business.name} at ${formatPrice(business)}/month.`,
+  },
+  {
+    title: "Self-hosted or cloud",
+    body: "FasterFixes is open source under AGPL-3.0 and runs on your own infrastructure, so client feedback never leaves it. Userback is closed-source and cloud-only.",
+  },
+  {
+    title: "Built for the codebase",
+    body: "Every report carries the DOM selector and React component tree, and reaches your coding agent through MCP. Userback is built for product teams, with surveys, a feature portal, and sentiment analysis.",
+  },
+];
+
 const rows: VsComparisonRow[] = [
   {
     label: "License",
-    cells: ["AGPL-3.0 app · MIT widget", "Proprietary"],
-  },
-  {
-    label: "Public source code",
-    cells: [{ type: "yes" }, { type: "no" }],
+    cells: ["Open source · AGPL-3.0 app, MIT widget", "Proprietary"],
   },
   {
     label: "Self-hostable",
@@ -39,126 +52,15 @@ const rows: VsComparisonRow[] = [
   {
     label: "Pricing model",
     cells: [
-      `Flat per-workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
+      `Flat per workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
       `Seat bundles · ${team.name} ${formatPrice(team)} (${team.seats} seats), ${business.name} ${formatPrice(business)} (${business.seats}), ${businessPlus.name} ${formatPrice(businessPlus)} (${businessPlus.seats}) · extra seats ${formatPrice(extraSeat)}/mo`,
     ],
   },
   {
     label: "Cost for a 5-person team",
     cells: [
-      `$0 self-host · $${proPrice}/mo hosted Pro`,
-      `${formatPrice(team)}/mo ${team.name} · ${formatPrice(business)}/mo ${business.name} · ${formatPrice(businessPlus)}/mo ${businessPlus.name}`,
-    ],
-  },
-  {
-    label: "Bring your own AI agent (MCP)",
-    cells: [
-      { type: "yes", note: "Claude Code, Cursor, Codex · any model" },
-      { type: "yes", note: "Claude, ChatGPT, Cursor · Team+" },
-    ],
-  },
-  {
-    label: "In-dashboard AI",
-    cells: [
-      { type: "partial", note: "Roadmap" },
-      { type: "yes", note: "AI Feedback & Insights (Business+)" },
-    ],
-  },
-  {
-    label: "Stack support",
-    cells: [
-      "Any stack · script tag or React package",
-      "Framework-agnostic JS snippet",
-    ],
-  },
-  {
-    label: "Browser extension",
-    cells: [{ type: "no" }, { type: "yes" }],
-  },
-  {
-    label: "React component tree capture",
-    cells: [{ type: "yes", note: "On React sites" }, { type: "no" }],
-  },
-  {
-    label: "Auto context (URL, DOM, browser, viewport)",
-    cells: [
-      { type: "yes" },
-      { type: "partial", note: "Console logs, network (Business+)" },
-    ],
-  },
-  {
-    label: "Screen recording",
-    cells: [{ type: "no" }, { type: "yes", note: "Annotated · all plans" }],
-  },
-  {
-    label: "Video review (uploaded videos)",
-    cells: [
-      { type: "yes", note: "Timestamped · area on the frame" },
-      { type: "no" },
-    ],
-  },
-  {
-    label: "Session replay",
-    cells: [
-      { type: "yes", note: "Last minute before each feedback · all plans" },
-      { type: "yes", note: "Last 3 min before each report · Business+" },
-    ],
-  },
-  {
-    label: "NPS / microsurveys",
-    cells: [{ type: "no" }, { type: "yes", note: "Business+" }],
-  },
-  {
-    label: "Feature request portal",
-    cells: [
-      { type: "no" },
-      { type: "yes", note: "Team add-on · included on Business+" },
-    ],
-  },
-  {
-    label: "Team kanban board",
-    cells: [{ type: "yes" }, { type: "no" }],
-  },
-  {
-    label: "Project management integrations",
-    cells: [
-      "GitHub, Linear, Jira, Trello · more coming",
-      "Jira, ClickUp (2-way sync), Zapier, +",
-    ],
-  },
-  {
-    label: "Trello sync",
-    cells: [
-      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "yes", note: "Sends feedback as cards" },
-    ],
-  },
-  {
-    label: "Linear two-way sync",
-    cells: [
-      { type: "yes", note: "Bidirectional · workflow-state aware" },
-      { type: "no" },
-    ],
-  },
-  {
-    label: "Slack notifications",
-    cells: [
-      { type: "yes", note: "New feedback + live status, per project" },
-      { type: "yes", note: "Two-way · assign and resolve from Slack" },
-    ],
-  },
-  {
-    label: "Custom branding",
-    cells: [
-      { type: "partial", note: "Roadmap" },
-      { type: "yes", note: "Business+" },
-    ],
-  },
-  {
-    label: "SSO",
-    cells: [
-      { type: "partial", note: "Roadmap" },
-      { type: "partial", note: "Enterprise, custom pricing" },
+      `$0 self-hosted · $${proPrice}/mo hosted`,
+      `${formatPrice(team)}/mo ${team.name} · ${formatPrice(business)}/mo with developer context`,
     ],
   },
   {
@@ -171,6 +73,59 @@ const rows: VsComparisonRow[] = [
       { type: "yes", note: "2 seats · 2 sites · 7-day history" },
     ],
   },
+  {
+    label: "Console logs and network requests",
+    cells: [
+      { type: "yes", note: "All plans" },
+      { type: "yes", note: `${business.name} and above` },
+    ],
+  },
+  {
+    label: "React component tree capture",
+    cells: [{ type: "yes", note: "On React sites" }, { type: "no" }],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each feedback · all plans" },
+      {
+        type: "yes",
+        note: `Last 3 min before each report · ${business.name}+`,
+      },
+    ],
+  },
+  {
+    label: "Screen recording",
+    cells: [{ type: "no" }, { type: "yes", note: "Annotated · all plans" }],
+  },
+  {
+    label: "MCP server for AI coding agents",
+    cells: [
+      { type: "yes", note: "Claude Code, Cursor, Codex · any model" },
+      { type: "yes", note: `Claude, ChatGPT, Cursor · ${team.name}+` },
+    ],
+  },
+  {
+    label: "Issue tracker sync",
+    cells: [
+      "Two-way with GitHub, Linear, Jira, Trello",
+      "Jira, ClickUp (two-way), Zapier, and more",
+    ],
+  },
+  {
+    label: "NPS and microsurveys",
+    cells: [{ type: "no" }, { type: "yes", note: `${business.name}+` }],
+  },
+  {
+    label: "Feature request portal",
+    cells: [
+      { type: "no" },
+      {
+        type: "yes",
+        note: `${team.name} add-on · included on ${business.name}+`,
+      },
+    ],
+  },
 ];
 
 export function UserbackComparisonSection() {
@@ -178,14 +133,17 @@ export function UserbackComparisonSection() {
     <VsSection
       eyebrow="Compare"
       title="FasterFixes vs Userback: full feature comparison"
-      intro="Side-by-side comparison based on each product's public documentation and pricing page."
+      intro="Three differences decide most switches. The table below covers the rest, based on each product's public documentation and pricing page."
       tone="muted"
     >
-      <VsComparisonTable
-        competitorName="Userback"
-        rows={rows}
-        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
-      />
+      <VsPointGrid points={keyDifferences} className="md:grid-cols-3" />
+      <div className="mt-16">
+        <VsComparisonTable
+          competitorName="Userback"
+          rows={rows}
+          footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
+        />
+      </div>
     </VsSection>
   );
 }

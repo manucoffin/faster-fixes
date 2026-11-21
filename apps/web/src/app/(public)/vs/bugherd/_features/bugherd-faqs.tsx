@@ -3,16 +3,32 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPublishedPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { VsFaqAnswer, type VsFaqItem } from "../../_features/vs-faq-section";
 
 const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
+const { standard, studio, premium } = COMPETITOR_PRICES.bugherd.plans;
+const { extraSeat } = COMPETITOR_PRICES.bugherd.otherPrices;
+
+const standardMonthly = formatPublishedPrice(standard, "/month");
+const standardYearly = formatAmount(
+  standard.billedYearlyAmount,
+  standard.currency,
+);
+const extraSeatMonthly = formatPublishedPrice(extraSeat, "/month");
+const studioMonthly = formatPublishedPrice(studio, "/month");
+const premiumMonthly = formatPublishedPrice(premium, "/month");
+const freePlanSummary = `${freePlan.projects} project, up to ${freePlan.feedbacks} feedback items, ${freePlan.seats} team member`;
 
 type DocLinkProps = {
   href: Route;
@@ -25,55 +41,53 @@ function DocLink({ href, children }: DocLinkProps) {
 
 export const bugherdFaqs: VsFaqItem[] = [
   {
-    question: "Is FasterFixes really free?",
-    answer: `Yes. The dashboard is open source under AGPL-3.0 and the widget under MIT. Clone the repo and self-host for free. The hosted Free plan is also permanently free (${freePlan.projects} project, up to ${freeFeedbackLimit} feedback items, ${freePlan.seats} team member). Paid hosted plans are $${proPrice}/month for Pro and $${agencyPrice}/month for Agency.`,
+    question: "Is there an open-source alternative to BugHerd?",
+    answer: `Yes. FasterFixes is open source: the dashboard under AGPL-3.0 and the widget packages under MIT. Self-host it for free, or use the hosted Free plan (${freePlanSummary}).`,
     content: (
       <VsFaqAnswer>
-        Yes. The dashboard is open source under AGPL-3.0 and the widget under
-        MIT. Clone the repo and self-host for free. See the{" "}
-        <DocLink href={"/docs/self-hosting" as Route}>
-          self-hosting guide
-        </DocLink>
-        . The hosted Free plan is also permanently free ({freePlan.projects}{" "}
-        project, up to {freeFeedbackLimit} feedback items, {freePlan.seats} team
-        member). Paid hosted plans are ${proPrice}/month for Pro and $
-        {agencyPrice}/month for Agency.
+        Yes. FasterFixes is open source: the dashboard under AGPL-3.0 and the
+        widget packages under MIT. Self-host it for free, or use the hosted Free
+        plan ({freePlanSummary}).
       </VsFaqAnswer>
     ),
   },
   {
-    question: "How is FasterFixes different from BugHerd?",
-    answer:
-      "Three differences matter most. FasterFixes is open source and self-hostable. Pricing is flat-rate, not per-seat. And the MCP server lets AI coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback directly from the terminal. BugHerd is a more mature SaaS with screen-recorded video feedback, Figma/PDF/image feedback, custom branding, SSO, and 20+ project-management integrations. FasterFixes does not currently have those features. On video, FasterFixes takes a different approach: clients review an uploaded video and leave timestamped feedback.",
-    content: (
-      <VsFaqAnswer>
-        Three differences matter most. FasterFixes is open source and
-        self-hostable. Pricing is flat-rate, not per-seat. And the{" "}
-        <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink> lets AI
-        coding agents (Claude Code, Cursor, Codex) fetch and resolve feedback
-        directly from the terminal. BugHerd is a more mature SaaS with
-        screen-recorded video feedback, Figma/PDF/image feedback, custom
-        branding, SSO, and 20+ project-management integrations. FasterFixes does
-        not currently have those features. On video, FasterFixes takes a
-        different approach: clients review an uploaded video and leave
-        timestamped feedback.
-      </VsFaqAnswer>
-    ),
+    question: "How much does BugHerd cost for a team of five?",
+    answer: `BugHerd ${standard.name} covers ${standard.seats} members at ${standardMonthly}, or ${standardYearly}/month billed yearly. Each extra user adds ${extraSeatMonthly}. ${studio.name} covers ${studio.seats} members at ${studioMonthly} and ${premium.name} ${premium.seats} at ${premiumMonthly}. FasterFixes is $0 self-hosted, or $${proPrice}/month hosted for up to ${proPlan.seats} members.`,
+  },
+  {
+    question: "Does BugHerd have a free plan?",
+    answer: `No. BugHerd offers a 7-day trial, then paid plans from ${standardMonthly}. FasterFixes is free to self-host and has a permanent hosted Free plan (${freePlanSummary}).`,
   },
   {
     question: "Can I self-host FasterFixes?",
     answer:
-      "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Deploy on your own infrastructure and run it without a FasterFixes hosted account. The dashboard is AGPL-3.0; the widget packages are MIT.",
+      "Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible storage. Deploy on your own infrastructure and run it without a FasterFixes hosted account.",
     content: (
       <VsFaqAnswer>
         Yes. The stack is Next.js, Postgres, Inngest, and R2 or S3-compatible
         storage. Deploy on your own infrastructure and run it without a
-        FasterFixes hosted account. The dashboard is AGPL-3.0; the widget
-        packages are MIT. Full instructions in the{" "}
+        FasterFixes hosted account. Full instructions in the{" "}
         <DocLink href={"/docs/self-hosting" as Route}>
           self-hosting guide
         </DocLink>
         .
+      </VsFaqAnswer>
+    ),
+  },
+  {
+    question: "What does the MCP integration do?",
+    answer:
+      "@fasterfixes/mcp exposes your open feedback to Claude Code, Cursor, Codex, or any MCP-compatible agent, with the model you choose. The agent lists unresolved feedback, reads its technical context (URL, DOM selector, React component path, browser, viewport), applies a fix, and marks the item resolved. BugHerd AI, by contrast, is bundled into the BugHerd dashboard.",
+    content: (
+      <VsFaqAnswer>
+        @fasterfixes/mcp exposes your open feedback to Claude Code, Cursor,
+        Codex, or any MCP-compatible agent, with the model you choose. The agent
+        lists unresolved feedback, reads its technical context (URL, DOM
+        selector, React component path, browser, viewport), applies a fix, and
+        marks the item resolved. BugHerd AI, by contrast, is bundled into the
+        BugHerd dashboard. See{" "}
+        <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink>.
       </VsFaqAnswer>
     ),
   },
@@ -81,82 +95,6 @@ export const bugherdFaqs: VsFaqItem[] = [
     question: "Does FasterFixes have a kanban board?",
     answer:
       "Yes. The team dashboard includes a drag-and-drop kanban view. What FasterFixes does not have today is a client-facing task board (BugHerd's Premium plan does). It is on the roadmap.",
-  },
-  {
-    question: "What does the MCP integration do?",
-    answer:
-      "@fasterfixes/mcp exposes your open feedback to any MCP-compatible coding agent. Your agent can list unresolved feedback, read the full technical context for each item (URL, DOM selector, React component path when available, browser, viewport), apply a fix, and mark the item resolved, all from the terminal, without leaving the editor.",
-    content: (
-      <VsFaqAnswer>
-        @fasterfixes/mcp exposes your open feedback to any MCP-compatible coding
-        agent. Your agent can list unresolved feedback, read the full technical
-        context for each item (URL, DOM selector, React component path when
-        available, browser, viewport), apply a fix, and mark the item resolved,
-        all from the terminal, without leaving the editor. See{" "}
-        <DocLink href={"/docs/mcp/setup" as Route}>MCP setup</DocLink> and the{" "}
-        <DocLink href={"/docs/mcp/tools" as Route}>tool reference</DocLink>.
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "How do I install the widget on my site?",
-    answer:
-      'On any site, paste one script tag with your Project ID, or run npm install @fasterfixes/widget and call init({ projectId }). In a React or Next.js app, you can instead run npm install @fasterfixes/react and wrap your app in <FeedbackProvider projectId="proj_...">. Both embeds share the same widget, options, and captured context.',
-    content: (
-      <VsFaqAnswer>
-        On any site, paste one script tag with your Project ID, or run npm
-        install @fasterfixes/widget and call init({"{ projectId }"}). In a React
-        or Next.js app, you can instead run npm install @fasterfixes/react and
-        wrap your app in {"<FeedbackProvider>"}. Both embeds share the same
-        widget, options, and captured context. See the{" "}
-        <DocLink href={"/docs/widget/install/script-embed" as Route}>
-          script embed docs
-        </DocLink>
-        , the{" "}
-        <DocLink href={"/docs/widget/install/react" as Route}>
-          React embed docs
-        </DocLink>
-        , and the{" "}
-        <DocLink href={"/docs/getting-started/quickstart" as Route}>
-          quickstart
-        </DocLink>
-        .
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "Does FasterFixes work on non-React websites?",
-    answer:
-      "Yes. The script embed installs the widget with one script tag on any website: WordPress, Webflow, static HTML, or an app built with Vue, Angular, Svelte, or no framework at all. It needs no framework runtime and renders in a Shadow DOM, so page styles do not affect it. Every report carries the screenshot, DOM selector, URL, browser, viewport, and console and network logs. The React component path is added when the site runs React.",
-    content: (
-      <VsFaqAnswer>
-        Yes. The script embed installs the widget with one script tag on any
-        website: WordPress, Webflow, static HTML, or an app built with Vue,
-        Angular, Svelte, or no framework at all. It needs no framework runtime
-        and renders in a Shadow DOM, so page styles do not affect it. Every
-        report carries the screenshot, DOM selector, URL, browser, viewport, and
-        console and network logs. The React component path is added when the
-        site runs React. See the{" "}
-        <DocLink href={"/docs/widget/install/script-embed" as Route}>
-          script embed docs
-        </DocLink>
-        .
-      </VsFaqAnswer>
-    ),
-  },
-  {
-    question: "Can I use Claude, GPT, or any other model with FasterFixes?",
-    answer:
-      "Yes. The MCP server is model-agnostic. Pick the agent you already use, whether Claude Code, Cursor, Codex, or any other MCP-compatible client, and the agent runs whichever model you have configured. BugHerd AI, by contrast, is bundled into the BugHerd dashboard and does not let you bring your own model.",
-    content: (
-      <VsFaqAnswer>
-        Yes. The <DocLink href={"/docs/mcp/setup" as Route}>MCP server</DocLink>{" "}
-        is model-agnostic. Pick the agent you already use, whether Claude Code,
-        Cursor, Codex, or any other MCP-compatible client, and the agent runs
-        whichever model you have configured. BugHerd AI, by contrast, is bundled
-        into the BugHerd dashboard and does not let you bring your own model.
-      </VsFaqAnswer>
-    ),
   },
   {
     question: "How do I move my BugHerd data over?",
@@ -167,31 +105,15 @@ export const bugherdFaqs: VsFaqItem[] = [
     question:
       "Does FasterFixes integrate with GitHub, Linear, Jira, and Trello like BugHerd does?",
     answer:
-      "Yes. The GitHub, Linear, and Jira Cloud integrations each create an issue from a feedback item with the full structured report: screenshot, component path, selector, environment. The Trello integration creates a card with the screenshot as its cover. Status syncs both ways. Closing the issue on GitHub, moving it to Done in Linear, transitioning it to a Done-category status in Jira, or moving the card to your Resolved list in Trello resolves the feedback in FasterFixes, and vice versa. A feedback can be linked to all four at once.",
+      "Yes. Each feedback item becomes a GitHub issue, Linear issue, Jira issue, or Trello card with the screenshot, component path, selector, and environment. Status syncs both ways: resolving it on one side resolves it on the other. A feedback can be linked to all four at once.",
     content: (
       <VsFaqAnswer>
-        Yes. The GitHub, Linear, and Jira Cloud integrations each create an
-        issue from a feedback item with the full structured report: screenshot,
-        component path, selector, environment. The Trello integration creates a
-        card with the screenshot as its cover. Status syncs both ways. Closing
-        the issue on GitHub, moving it to Done in Linear, transitioning it to a
-        Done-category status in Jira, or moving the card to your Resolved list
-        in Trello resolves the feedback in FasterFixes, and vice versa. A
-        feedback can be linked to all four at once. See the{" "}
+        Yes. Each feedback item becomes a GitHub issue, Linear issue, Jira
+        issue, or Trello card with the screenshot, component path, selector, and
+        environment. Status syncs both ways: resolving it on one side resolves
+        it on the other. A feedback can be linked to all four at once. See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
-          GitHub integration docs
-        </DocLink>
-        ,{" "}
-        <DocLink href={"/docs/integrations/linear" as Route}>
-          Linear integration docs
-        </DocLink>
-        ,{" "}
-        <DocLink href={"/docs/integrations/jira" as Route}>
-          Jira integration docs
-        </DocLink>
-        , and the{" "}
-        <DocLink href={"/integrations/trello" as Route}>
-          Trello integration
+          integration docs
         </DocLink>
         .
       </VsFaqAnswer>

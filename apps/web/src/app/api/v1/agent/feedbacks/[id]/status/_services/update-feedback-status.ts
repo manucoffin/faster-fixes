@@ -1,10 +1,10 @@
 import type { FeedbackStatus } from "@/app/_domains/feedback";
-import { NotFoundError } from "@/server/errors/domain-errors";
-import { inngest } from "@/server/inngest";
+import { prismaStatusConvergence } from "@/app/_domains/integration/_services/_prisma-status-convergence";
 import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-} from "@/server/inngest/events";
+  updateStatus,
+  type StatusConvergence,
+} from "@/app/_domains/integration/_services/update-status";
+import { NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 
 type UpdateFeedbackStatusInput = {
@@ -23,6 +23,7 @@ type UpdateFeedbackStatusInput = {
 export async function updateFeedbackStatus(
   { feedbackId, status, organizationProjects }: UpdateFeedbackStatusInput,
   db: typeof prisma = prisma,
+  convergence: StatusConvergence = prismaStatusConvergence(db),
 ) {
   const feedback = await db.feedback.findFirst({
     where: {
@@ -38,27 +39,18 @@ export async function updateFeedbackStatus(
   }
 
   const previousStatus = feedback.status;
-  const updated = await db.feedback.update({
+
+  // An `agent` actor writes and converges the Trackers only on a real change:
+  // an agent looping over a queue re-sets the Status it already read (ADR-0007).
+  await updateStatus(
+    { feedbackIds: [feedback.id], status, actor: "agent" },
+    convergence,
+  );
+
+  const updated = await db.feedback.findUniqueOrThrow({
     where: { id: feedback.id },
-    data: { status },
     select: { id: true, status: true, updatedAt: true },
   });
-
-  // Fire-and-forget: sync status to the linked tracker if there is one. Skip on
-  // no-op — a redundant status set (common when an agent loops over a queue)
-  // shouldn't re-fan-out to external trackers, which is the costly part of a
-  // write. The dashboard service does fan out on a no-op; see ADR-0007.
-  if (status !== previousStatus) {
-    inngest
-      .send(
-        buildEvent(
-          feedbackStatusChangedEvent,
-          // actor "agent": this service is only reachable with an agent token.
-          { feedbackId: feedback.id, newStatus: status, actor: "agent" },
-        ),
-      )
-      .catch(() => {});
-  }
 
   // `previousStatus` travels back so the boundary can name the transition in
   // its access log without reading the row a second time.

@@ -2,12 +2,17 @@ import {
   formatIssueBody,
   formatIssueTitle,
 } from "../../_helpers/github/format-issue-body";
+import { isGitHubIssueStateMirroring } from "../../_helpers/github/status-mapping";
 import { getInstallationOctokit } from "./github-app";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { gitHubTrackerAdapter } from "./_github-tracker-adapter";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import {
@@ -124,6 +129,8 @@ export const createGitHubIssue = inngest.createFunction(
       node_id: string;
     };
 
+    const status = FeedbackStatusEnum.parse(feedback.status);
+    const mirrored = isGitHubIssueStateMirroring("open", status);
     await prisma.feedbackIssueLink.create({
       data: {
         feedbackId: feedback.id,
@@ -132,10 +139,19 @@ export const createGitHubIssue = inngest.createFunction(
         issueUrl: issue.html_url,
         issueState: "open",
         issueNodeId: issue.node_id,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
+        // A Feedback already Resolved or Archived gets an open Issue, so the
+        // link starts pending (ADR-0025).
+        mirroredStatus: mirrored ? status : null,
       },
     });
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        gitHubTrackerAdapter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { issueNumber: issue.number, issueUrl: issue.html_url };
   },

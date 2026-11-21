@@ -62,8 +62,10 @@ model FeedbackIssueLink {
 
   issueNodeId String?
 
-  lastSyncSource String?
-  lastSyncAt     DateTime?
+  // The Status this link last converged on (ADR-0025), typed like
+  // `Feedback.status`. Null, or a value other than the Feedback's Status, means
+  // pending: the Feedback wins until GitHub has converged to it.
+  mirroredStatus String?
 
   @@index([projectGitHubLinkId])
   @@map("feedback_issue_link")

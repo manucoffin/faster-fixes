@@ -1,10 +1,18 @@
 import { rethrowDomainErrorsAsNonRetriable } from "@/server/errors/non-retriable";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import { formatTrelloCardName } from "../../_helpers/trello/format-card-description";
+import {
+  isTrelloCardMirroring,
+  leavesTrelloCardInPlace,
+} from "../../_helpers/trello/status-mapping";
 import { createTrelloCardCover } from "./create-trello-card-cover";
 import {
   getTrelloCardDescription,
   trelloCardFeedbackInclude,
 } from "./get-trello-card-description";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { trelloTrackerWriter } from "./_trello-tracker-adapter";
 import { refreshTrelloLinkHealth } from "./refresh-trello-link-health";
 import { createCard } from "./trello-client";
 import { withTrelloAccessToken } from "./token-access";
@@ -78,6 +86,14 @@ export const createTrelloCard = inngest.createFunction(
       return { card, cover };
     });
 
+    const status = FeedbackStatusEnum.parse(feedback.status);
+    const position = { listId: card.idList, archived: card.closed };
+    // A Feedback already past `new` starts pending (ADR-0025), unless its
+    // Status leaves the card where it was created.
+    const mirrored =
+      isTrelloCardMirroring(position, status, link) ||
+      (leavesTrelloCardInPlace(status, link) && !card.closed);
+
     await prisma.feedbackTrelloIssueLink.create({
       data: {
         feedbackId: feedback.id,
@@ -87,10 +103,17 @@ export const createTrelloCard = inngest.createFunction(
         cardUrl: card.url,
         listId: card.idList,
         archived: card.closed,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
+        mirroredStatus: mirrored ? status : null,
       },
     });
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        trelloTrackerWriter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { cardId: card.id, cardShortLink: card.shortLink, cover };
   },

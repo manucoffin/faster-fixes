@@ -4,17 +4,23 @@ import {
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
 import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
-import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
+import {
+  formatAmount,
+  formatPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
 import {
   type VsComparisonRow,
   VsComparisonTable,
 } from "../../_features/vs-comparison-table";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
 import { VsSection } from "../../_features/vs-section";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
 const { starter, team } = COMPETITOR_PRICES.markerIo.plans;
+const { extraSeatBilledYearly } = COMPETITOR_PRICES.markerIo.otherPrices;
 const starterAnnual = formatAmount(
   starter.billedYearlyAmount,
   starter.currency,
@@ -23,6 +29,21 @@ const teamAnnual = formatAmount(team.billedYearlyAmount, team.currency);
 
 const freeFeedbackLimit = PLAN_LIMITS[SubscriptionPlanName.Free].feedbacks;
 const freeProjectLimit = PLAN_LIMITS[SubscriptionPlanName.Free].projects;
+
+const keyDifferences: VsPoint[] = [
+  {
+    title: "Open source and self-hostable",
+    body: "FasterFixes is open source under AGPL-3.0 and runs on your own infrastructure, so client feedback never leaves it. Marker.io is closed-source and cloud-only.",
+  },
+  {
+    title: "Flat price, not per seat",
+    body: `FasterFixes is $0 self-hosted, or $${proPrice}/month hosted for ${proPlan.seats} members. Marker.io ${starter.name} is ${starterAnnual}/month for ${starter.seats} seats billed yearly, ${team.name} is ${teamAnnual}/month, and each extra seat adds ${formatPrice(extraSeatBilledYearly)}/month.`,
+  },
+  {
+    title: "Feedback reaches your coding agent",
+    body: "The MCP server lets Claude Code, Cursor, and Codex read and resolve each report with the model you choose. Marker.io's AI features stay inside its dashboard.",
+  },
+];
 
 const rows: VsComparisonRow[] = [
   {
@@ -188,14 +209,19 @@ export function MarkerIoComparisonSection() {
   return (
     <VsSection
       eyebrow="Compare"
-      title="FasterFixes vs. Marker.io"
-      intro="Side-by-side comparison based on each product's public documentation and pricing page."
+      title="FasterFixes vs Marker.io: feature comparison"
+      intro="Three differences decide most switches. The table covers the rest, based on each product's public documentation and pricing page."
+      tone="muted"
+      className="border-t"
     >
-      <VsComparisonTable
-        competitorName="Marker.io"
-        rows={rows}
-        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
-      />
+      <VsPointGrid points={keyDifferences} className="md:grid-cols-3" />
+      <div className="mt-16">
+        <VsComparisonTable
+          competitorName="Marker.io"
+          rows={rows}
+          footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 12, 2026."
+        />
+      </div>
     </VsSection>
   );
 }

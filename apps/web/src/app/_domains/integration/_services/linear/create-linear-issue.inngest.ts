@@ -6,13 +6,17 @@ import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { decryptToken } from "./token-crypto";
 import { getLinearClient } from "./linear-client";
 import { getFeedbackStateId } from "./get-feedback-state-id";
+import { isLinearStateTypeMirroring } from "../../_helpers/linear/state-mapping";
 import { getValidLabelIds } from "./get-valid-label-ids";
 import { LinearRequestError } from "./linear-request-error";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
-import type { FeedbackStatus } from "@/app/_domains/feedback";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { linearTrackerAdapter } from "./_linear-tracker-adapter";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
 import {
@@ -69,10 +73,11 @@ export const createLinearIssue = inngest.createFunction(
     const accessToken = decryptToken(link.linearInstallation.accessToken);
     const client = getLinearClient(accessToken);
 
+    const status = FeedbackStatusEnum.parse(feedback.status);
     const resolved = await getFeedbackStateId({
       client,
       link,
-      feedbackStatus: feedback.status as FeedbackStatus,
+      feedbackStatus: status,
     });
 
     if (!resolved) {
@@ -141,7 +146,9 @@ export const createLinearIssue = inngest.createFunction(
     }
 
     const stateRef = await issue.state;
-    const stateType = stateRef?.type ?? "unstarted";
+    const stateType = stateRef?.type ?? resolved.stateType;
+
+    const mirrored = isLinearStateTypeMirroring(stateType, status);
 
     const healthUpdate: { linkHealthIssue?: string } = {};
     if (resolved.fellBack) healthUpdate.linkHealthIssue = "stale_default_state";
@@ -155,10 +162,11 @@ export const createLinearIssue = inngest.createFunction(
           issueId: issue.id,
           issueIdentifier: issue.identifier,
           issueUrl: issue.url,
-          issueStateId: resolved.stateId,
+          issueStateId: stateRef?.id ?? resolved.stateId,
           issueStateType: stateType,
-          lastSyncSource: "app",
-          lastSyncAt: new Date(),
+          // A Feedback whose state the team cannot express starts pending
+          // (ADR-0025).
+          mirroredStatus: mirrored ? status : null,
         },
       }),
       ...(healthUpdate.linkHealthIssue
@@ -170,6 +178,14 @@ export const createLinearIssue = inngest.createFunction(
           ]
         : []),
     ]);
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        linearTrackerAdapter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { issueId: issue.id, issueIdentifier: issue.identifier };
   },

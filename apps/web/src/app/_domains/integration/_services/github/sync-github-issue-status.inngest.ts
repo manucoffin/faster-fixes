@@ -1,13 +1,9 @@
-import type { FeedbackStatus } from "@/app/_domains/feedback";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
-import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-  githubWebhookIssuesEvent,
-} from "@/server/inngest/events";
-
-const SYNC_LOOP_WINDOW_MS = 30_000;
+import { githubWebhookIssuesEvent } from "@/server/inngest/events";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { applyObservedIssueState } from "../apply-observed-issue-state";
+import { gitHubTrackerAdapter } from "./_github-tracker-adapter";
 
 export const syncGitHubIssueStatus = inngest.createFunction(
   {
@@ -22,59 +18,13 @@ export const syncGitHubIssueStatus = inngest.createFunction(
   async ({ event }) => {
     const { action, issueNumber, repoFullName } = event.data;
 
-    const issueLink = await prisma.feedbackIssueLink.findFirst({
-      where: {
-        issueNumber,
-        projectGitHubLink: { repoFullName },
+    return applyObservedIssueState(
+      {
+        reference: { tracker: "github", repoFullName, issueNumber },
+        deleted: action === "deleted",
       },
-    });
-
-    if (!issueLink) return { skipped: "no_matching_issue_link" };
-
-    // Prevent sync loop: skip if we triggered this change from the app
-    if (
-      issueLink.lastSyncSource === "app" &&
-      issueLink.lastSyncAt &&
-      Date.now() - issueLink.lastSyncAt.getTime() < SYNC_LOOP_WINDOW_MS
-    ) {
-      return { skipped: "sync_loop_prevention" };
-    }
-
-    let newStatus: FeedbackStatus;
-    if (action === "closed") {
-      newStatus = "resolved";
-    } else if (action === "reopened") {
-      newStatus = "in_progress";
-    } else {
-      return { skipped: "unhandled_action" };
-    }
-
-    await prisma.$transaction([
-      prisma.feedback.update({
-        where: { id: issueLink.feedbackId },
-        data: { status: newStatus },
-      }),
-      prisma.feedbackIssueLink.update({
-        where: { id: issueLink.id },
-        data: {
-          issueState: action === "closed" ? "closed" : "open",
-          lastSyncSource: "github",
-          lastSyncAt: new Date(),
-        },
-      }),
-    ]);
-
-    // Propagate to other trackers (e.g. Linear) so the feedback stays canonical.
-    await inngest.send(
-      buildEvent(feedbackStatusChangedEvent, {
-        feedbackId: issueLink.feedbackId,
-        newStatus,
-        origin: "github",
-        // Change originated from the GitHub issue webhook syncing back.
-        actor: "tracker",
-      }),
+      gitHubTrackerAdapter(prisma),
+      prismaStatusConvergence(prisma, { awaitEvents: true }),
     );
-
-    return { feedbackId: issueLink.feedbackId, newStatus };
   },
 );

@@ -5,11 +5,16 @@ import {
   formatJiraSummary,
 } from "../../_helpers/jira/format-issue-adf";
 import { createJiraIssue as createIssue } from "./jira-rest-client";
+import { isJiraStatusCategoryMirroring } from "../../_helpers/jira/transition-mapping";
 import { getValidJiraAccessToken } from "./token-access";
 import { getSignedAssetUrl } from "@/server/storage/get-signed-asset-url";
 import { buildFeedbackDashboardUrl } from "../../_helpers/build-feedback-dashboard-url";
 import { findFeedbackWithAwaitedRecording } from "../find-feedback-with-awaited-recording";
 import { refreshIssueRecording } from "../refresh-issue-recording";
+import { prismaStatusConvergence } from "../_prisma-status-convergence";
+import { convergeTracker } from "../converge-tracker";
+import { jiraTrackerAdapter } from "./_jira-tracker-adapter";
+import { FeedbackStatusEnum } from "@/app/_domains/feedback";
 import type { CustomMetadata, DiagnosticTrail } from "@fasterfixes/core";
 import { prisma } from "@workspace/db";
 import { inngest } from "@/server/inngest";
@@ -131,6 +136,11 @@ export const createJiraIssue = inngest.createFunction(
       throw error;
     }
 
+    const status = FeedbackStatusEnum.parse(feedback.status);
+    const mirrored = isJiraStatusCategoryMirroring(
+      issue.statusCategory,
+      status,
+    );
     await prisma.feedbackJiraIssueLink.create({
       data: {
         feedbackId: feedback.id,
@@ -139,10 +149,19 @@ export const createJiraIssue = inngest.createFunction(
         issueKey: issue.key,
         issueUrl: `${installation.siteUrl}/browse/${issue.key}`,
         issueStatusCategory: issue.statusCategory,
-        lastSyncSource: "app",
-        lastSyncAt: new Date(),
+        // A Feedback already Resolved or Archived gets an open issue, so the
+        // link starts pending (ADR-0025).
+        mirroredStatus: mirrored ? status : null,
       },
     });
+
+    if (!mirrored) {
+      await convergeTracker(
+        { feedbackId: feedback.id },
+        jiraTrackerAdapter(prisma),
+        prismaStatusConvergence(prisma, { awaitEvents: true }),
+      );
+    }
 
     return { issueId: issue.id, issueKey: issue.key };
   },

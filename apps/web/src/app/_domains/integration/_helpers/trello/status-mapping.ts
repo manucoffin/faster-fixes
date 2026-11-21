@@ -42,35 +42,51 @@ export function resolveTrelloCardWrites(
   }
 }
 
-// The card as re-read from Trello, never from the webhook payload: only the
-// card itself knows the list it was archived from. Null when Trello has no
-// such card.
-export type TrelloCardState = {
-  boardId: string;
-  listId: string;
-  closed: boolean;
-} | null;
+// The card position an Issue link records at its last convergence: the list
+// it sits in and whether it is archived. Only the card itself knows the list it
+// was archived from, so inbound reads it back from Trello.
+export type TrelloCardState = { listId: string; archived: boolean };
 
-export type TrelloInboundDecision =
-  | { type: "detach" }
-  | { type: "none" }
-  | { type: "set_status"; status: FeedbackStatus };
-
-// The complete mark is never read: the list is the only inbound signal.
-export function resolveFeedbackDecisionFromCard(
+// One position may mirror several Statuses (ADR-0025). The complete mark is
+// never read: the list is the only inbound signal.
+export function isTrelloCardMirroring(
   card: TrelloCardState,
-  link: TrelloListMapping & { boardId: string },
-  currentStatus: FeedbackStatus,
-): TrelloInboundDecision {
-  // Faster Fixes never follows a card outside the linked board.
-  if (!card || card.boardId !== link.boardId) return { type: "detach" };
+  status: FeedbackStatus,
+  mapping: TrelloListMapping,
+): boolean {
+  if (card.archived) {
+    // Archiving a resolved card tidies the board, so it still mirrors resolved.
+    return (
+      status === "closed" ||
+      (status === "resolved" && card.listId === mapping.resolvedListId)
+    );
+  }
+  if (status === "closed") return false;
 
-  const status = card.closed
-    ? archivedCardStatus(card.listId, link)
-    : mappedListStatus(card.listId, link);
+  // An unmapped list ("QA", "Blocked") says nothing, so it contradicts no open
+  // Status.
+  const listStatus = mappedListStatus(card.listId, mapping);
+  return !listStatus || listStatus === status;
+}
 
-  if (!status || status === currentStatus) return { type: "none" };
-  return { type: "set_status", status };
+// Null when the position names no Status: an unmapped list, or a card
+// archived from the resolved list.
+export function feedbackStatusFromTrelloCard(
+  card: TrelloCardState,
+  mapping: TrelloListMapping,
+): FeedbackStatus | null {
+  return card.archived
+    ? archivedCardStatus(card.listId, mapping)
+    : mappedListStatus(card.listId, mapping);
+}
+
+// In progress on a board with no In progress list leaves the card where it
+// is, and that position counts as converged (ADR-0024).
+export function leavesTrelloCardInPlace(
+  status: FeedbackStatus,
+  mapping: TrelloListMapping,
+) {
+  return status === "in_progress" && !mapping.inProgressListId;
 }
 
 // Trello teams archive finished cards to tidy the board, so archiving from the

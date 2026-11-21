@@ -6,18 +6,19 @@ const userbackWins = [
   "You run NPS, CSAT, or in-app microsurveys.",
   "You want a public feature request portal with voting.",
   "You need SOC 2 Type II compliance or SSO available today.",
-  "You want a mature integration roster (ClickUp 2-way sync, Zapier).",
+  "You rely on ClickUp two-way sync or Zapier.",
 ];
 
 export function UserbackHonestTakeSection() {
   return (
     <VsSection
       eyebrow="Honest take"
-      title="Userback is the better choice for some teams"
+      title="When to stay on Userback"
+      tone="muted"
     >
       <VsHonestTake
         competitor={{
-          lead: "FasterFixes is narrower by design. If any of the points below describe your workflow, Userback is the more complete fit today.",
+          lead: "FasterFixes is narrower by design. If any of these describe your team, Userback is the better fit today.",
           items: userbackWins.map((point) => ({ key: point, content: point })),
         }}
       />

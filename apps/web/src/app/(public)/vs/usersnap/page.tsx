@@ -7,14 +7,12 @@ import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
 import { UsersnapAlternativesSection } from "./_features/usersnap-alternatives-section";
-import { UsersnapCalculatorSection } from "./_features/usersnap-calculator-section";
 import { UsersnapComparisonSection } from "./_features/usersnap-comparison-section";
 import { UsersnapCtaSection } from "./_features/usersnap-cta-section";
-import { UsersnapEditorSection } from "./_features/usersnap-editor-section";
+import { UsersnapWhatIsSection } from "./_features/usersnap-what-is-section";
 import { usersnapFaqs } from "./_features/usersnap-faqs";
 import { UsersnapFitSection } from "./_features/usersnap-fit-section";
 import { UsersnapHero } from "./_features/usersnap-hero";
-import { UsersnapHonestTakeSection } from "./_features/usersnap-honest-take-section";
 import {
   UsersnapMigrationSection,
   migrationSteps,
@@ -28,7 +26,7 @@ const title = "Usersnap alternatives: 9 tools compared (2026)";
 const description =
   "Usersnap alternatives: nine tools compared on price, free plan and self-hosting, including an open-source option you can host yourself for $0.";
 const datePublished = "2026-04-27T00:00:00.000Z";
-const dateModified = "2026-11-19T00:00:00.000Z";
+const dateModified = "2026-11-21T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -64,10 +62,8 @@ export default function Page() {
       <UsersnapHero />
       <UsersnapAlternativesSection />
       <UsersnapFitSection />
-      <UsersnapEditorSection />
+      <UsersnapWhatIsSection />
       <UsersnapPricingSection />
-      <UsersnapCalculatorSection />
-      <UsersnapHonestTakeSection />
       <UsersnapComparisonSection />
       <UsersnapMigrationSection />
       <VsFaqSection faqs={usersnapFaqs} />

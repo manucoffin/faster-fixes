@@ -1,9 +1,9 @@
-import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
-import { inngest } from "@/server/inngest";
+import { prismaStatusConvergence } from "@/app/_domains/integration/_services/_prisma-status-convergence";
 import {
-  buildEvent,
-  feedbackStatusChangedEvent,
-} from "@/server/inngest/events";
+  updateStatus,
+  type StatusConvergence,
+} from "@/app/_domains/integration/_services/update-status";
+import { ForbiddenError, NotFoundError } from "@/server/errors/domain-errors";
 import { prisma } from "@workspace/db";
 import type { RestoreFeedbacksInput } from "./restore-feedbacks.schema";
 
@@ -15,6 +15,7 @@ export async function restoreFeedbacks(
     userId,
   }: RestoreFeedbacksInput & { userId: string },
   db: typeof prisma = prisma,
+  convergence: StatusConvergence = prismaStatusConvergence(db),
 ) {
   const project = await db.project.findUnique({
     where: { id: projectId },
@@ -50,21 +51,18 @@ export async function restoreFeedbacks(
     return { restored: 0, requested };
   }
 
-  const { count: restored } = await db.feedback.updateMany({
-    where: { id: { in: targetIds }, projectId, status: "closed" },
-    data: { status: "new" },
-  });
-
-  // Fan-out: one event per feedback so each gets independent retries and
-  // fault isolation. Trackers reopen their Issue from it (ADR-0007).
-  const events = targetIds.map((feedbackId) =>
-    buildEvent(feedbackStatusChangedEvent, {
-      feedbackId,
-      newStatus: "new",
+  // The guard repeats the read's filter on the write itself, so a Feedback
+  // moved on between the two stays where it is. Trackers reopen their Issue
+  // from the event (ADR-0007).
+  const restored = await updateStatus(
+    {
+      feedbackIds: targetIds,
+      status: "new",
+      onlyFrom: "closed",
       actor: "user",
-    }),
+    },
+    convergence,
   );
-  inngest.send(events).catch(() => {});
 
-  return { restored, requested };
+  return { restored: restored.length, requested };
 }
