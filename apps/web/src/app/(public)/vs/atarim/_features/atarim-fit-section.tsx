@@ -1,38 +1,41 @@
-import { CheckIcon } from "lucide-react";
+import { VsFitList } from "../../_features/vs-fit-list";
+import { VsSection } from "../../_features/vs-section";
 
-const fitPoints = [
-  "You're a dev agency or product team and need feedback that maps directly to DOM selectors and, on React apps, component trees.",
-  "You want AI coding agents such as Claude Code, Cursor, and Codex to read and act on feedback directly from the terminal or IDE, without context-switching to a browser dashboard.",
-  "You need to self-host: client feedback must stay in your own infrastructure, not a third-party cloud.",
-  "You want a fixed price with no usage meter: one plan covers your team at a set monthly rate, with no AI credits to buy or top up.",
-  "You don't need whitelabel or a client portal. You need structured, code-mapped feedback that goes straight into GitHub issues, Linear tickets, Jira issues, and your AI agent's context.",
+const atarimFitPoints = [
+  "Whitelabel: your brand replaces Atarim's on the client dashboard. FasterFixes has no whitelabel.",
+  "Client portal: clients log in or follow a guest link to their own projects. FasterFixes has no portal.",
+  "WordPress: you want the dedicated plugin rather than a script tag you maintain.",
+  "AI agents: six agents cover project management, design, content, SEO, accessibility and functionality inside the dashboard.",
+  "Tracker breadth: Jira, Asana, ClickUp, Monday.com, Trello, Basecamp and Figma are listed connections.",
+];
+
+const lookElsewherePoints = [
+  "Your developers fix the bugs: a screenshot and a URL do not say which component broke.",
+  "You need code context: Atarim captures the page, not the DOM selector, the console logs or the component tree.",
+  "Client data stays on your infrastructure: Atarim is cloud-only, with no self-hosted build.",
+  "Your own agent does the work: the Atarim MCP reaches tasks and sites, not the code behind a Feedback.",
+  "You want a flat bill: AI work draws on credits billed over the plan.",
 ];
 
 export function AtarimFitSection() {
   return (
-    <section className="w-full py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Right fit
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            FasterFixes is the right fit if
-          </h2>
+    <VsSection
+      eyebrow="Fit"
+      title="Is Atarim the right fit for your team?"
+      intro="Atarim reviews tend to agree on one thing: the platform is solid, and the bill is built around AI work you may not use. It is worth it if you want a client portal and your brand on the dashboard, not if your developers fix the bugs themselves."
+    >
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <h3 className="text-xl font-medium tracking-tight">Atarim fits if</h3>
+          <VsFitList points={atarimFitPoints} className="mt-6" />
         </div>
-
-        <ul className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-4">
-          {fitPoints.map((point) => (
-            <li
-              key={point}
-              className="flex items-start gap-3 rounded-xl border bg-muted/30 p-5"
-            >
-              <CheckIcon className="mt-1 size-5 shrink-0 text-success" />
-              <span className="leading-relaxed text-foreground">{point}</span>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <h3 className="text-xl font-medium tracking-tight">
+            Look elsewhere if
+          </h3>
+          <VsFitList points={lookElsewherePoints} className="mt-6" />
+        </div>
       </div>
-    </section>
+    </VsSection>
   );
 }
