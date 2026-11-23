@@ -1,46 +1,25 @@
-import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
+import {
+  PLAN_LIMITS,
+  PLAN_PRICES,
+  SubscriptionPlanName,
+} from "@/app/_domains/subscription";
+import { VsActions } from "../../_features/vs-actions";
+import { VsCtaSection } from "../../_features/vs-cta-section";
 
+const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 
 export function AtarimCtaSection() {
   return (
-    <section className="w-full bg-muted/50 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Ready to switch from Atarim?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-            Try FasterFixes free: self-host for $0 or use hosted Pro at $
-            {proPrice}/month flat. No per-seat pricing, no vendor lock-in.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href={signupUrl}>
-                Try FasterFixes free
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GithubIcon className="size-5" />
-                View source on GitHub
-              </a>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
+    <VsCtaSection
+      title="Ready to switch from Atarim?"
+      body={`Self-host for $0, or run hosted Pro at $${proPrice}/mo for up to ${proPlan.seats} members and ${proPlan.projects} projects.`}
+      actions={
+        <VsActions
+          signupLabel="Try FasterFixes free"
+          githubLabel="View source on GitHub"
+        />
+      }
+    />
   );
 }

@@ -1,61 +1,37 @@
 import { PLAN_PRICES, SubscriptionPlanName } from "@/app/_domains/subscription";
+import { VsSection } from "../../_features/vs-section";
+import { type VsStep, VsSteps } from "../../_features/vs-steps";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-export const migrationSteps = [
+
+export const migrationSteps: VsStep[] = [
   {
-    label: "Export your feedback from Atarim",
-    body: "From your Atarim dashboard, export existing tasks via CSV or by syncing to a connected PM tool (Jira, ClickUp, Asana) before switching. Capture any active project URLs, annotated screenshots, and task statuses you want to preserve. Atarim does not provide a bulk media export, so download attached screenshots manually if needed.",
+    label: "Export open tasks",
+    body: "Atarim exports tasks as CSV or through a connected tracker, while screenshots come down one at a time.",
   },
   {
     label: "Deploy FasterFixes",
-    body: `Choose self-hosted (Next.js, Postgres, Inngest, R2/S3-compatible storage) or sign up for the hosted Pro plan at $${proPrice}/month. The self-hosted path takes roughly 30 minutes with the provided setup docs. No account required for clients submitting feedback.`,
+    body: `Self-host on Next.js, Postgres, Inngest and R2 or S3, or start hosted on Pro at $${proPrice}/mo.`,
   },
   {
-    label: "Replace the Atarim widget",
-    body: "Add the FasterFixes script tag to your site, or in a React app install @fasterfixes/react and wrap the app in FeedbackProvider. Remove the Atarim JS snippet from your site, deactivate the WordPress plugin, or stop using the Chrome extension for new feedback. The widget captures DOM selector, URL, browser, and viewport automatically, plus the component tree on React sites.",
+    label: "Replace the snippet",
+    body: "Add the FasterFixes script tag or install @fasterfixes/react, then remove the Atarim plugin, extension and snippet.",
   },
   {
-    label: "Invite your team and connect your issue tracker",
-    body: "Add team members from the dashboard. Your plan covers the full team at a flat rate. Connect your GitHub repository, your Linear workspace, your Jira Cloud site, or any combination, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
+    label: "Connect the tracker and the agent",
+    body: "Wire GitHub, Linear, Jira or Trello for two-way sync, then add @fasterfixes/mcp to Claude Code or Cursor.",
   },
 ];
 
 export function AtarimMigrationSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Migration
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Switching from Atarim
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            No one-click import. Export your data, replace the widget, and wire
-            up the integrations. The whole process takes under a day.
-          </p>
-        </div>
-
-        <ol className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {migrationSteps.map((step, i) => (
-            <li
-              key={step.label}
-              className="flex gap-4 rounded-xl border bg-background p-6"
-            >
-              <span className="font-mono text-sm text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="font-semibold">{step.label}</h3>
-                <p className="mt-2 leading-relaxed text-muted-foreground">
-                  {step.body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Migration"
+      title="Switching from Atarim"
+      intro="There is no one-click import: export what is open, swap the widget, connect the tracker."
+      tone="muted"
+    >
+      <VsSteps steps={migrationSteps} />
+    </VsSection>
   );
 }

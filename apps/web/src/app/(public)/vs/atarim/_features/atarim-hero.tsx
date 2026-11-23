@@ -1,53 +1,26 @@
-import { GITHUB_REPO_URL } from "@/app/_constants/app";
-import { signupUrl } from "@/app/_constants/routes";
-import { Button } from "@workspace/ui/components/button";
-import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
-import { ArrowRightIcon } from "lucide-react";
-import Link from "next/link";
-import { HeroDotBackground } from "../../../(home)/_features/hero/hero-dot-background.client";
-import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
-import { formatPrice } from "../../../_helpers/format-competitor-price";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import {
+  formatAmount,
+  formatPrice,
+} from "@/app/(public)/_helpers/format-competitor-price";
+import { VsActions } from "../../_features/vs-actions";
+import { VsHero } from "../../_features/vs-hero";
 
-const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
+const { pro } = COMPETITOR_PRICES.atarim.plans;
 
 export function AtarimHero() {
   return (
-    <HeroDotBackground>
-      <section className="w-full py-20 md:py-24">
-        <div className="container mx-auto max-w-3xl px-4 text-center">
-          <p className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Atarim alternatives
-          </p>
-          <h1 className="text-4xl leading-tight font-normal md:text-5xl lg:text-6xl">
-            Atarim alternatives: 9 tools compared for developer teams
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Atarim {atarimPro.name} is {formatPrice(atarimPro)}/mo for up to{" "}
-            {atarimPro.seats} seats, priced around six AI agents. Here are nine
-            alternatives, what each one charges, and which of them you can run
-            on your own server.
-          </p>
-
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href={signupUrl}>
-                Start for free
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <GithubIcon className="size-5" />
-                View source on GitHub
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-    </HeroDotBackground>
+    <VsHero
+      breadcrumbLabel="Atarim alternatives"
+      eyebrow="Atarim alternatives"
+      title="The Atarim alternatives a small dev team should weigh"
+      description={`Atarim ${pro.name} is ${formatPrice(pro)}/mo, or ${formatAmount(pro.billedYearlyAmount, pro.currency)}/mo billed yearly, with AI credits on top. Here are nine tools, what each one charges, and where a developer-first Atarim alternative fits: open source, $0 on your own server.`}
+      actions={
+        <VsActions
+          signupLabel="Start for free"
+          githubLabel="View source on GitHub"
+        />
+      }
+    />
   );
 }

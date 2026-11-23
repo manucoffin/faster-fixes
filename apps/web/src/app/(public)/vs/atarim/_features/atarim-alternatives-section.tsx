@@ -1,18 +1,19 @@
 import type { Route } from "next";
 import {
   type VsAlternative,
-  VsAlternativesSection,
-} from "../../_features/vs-alternatives-section";
+  VsAlternativesTable,
+} from "../../_features/vs-alternatives-table";
 import {
   ALTERNATIVES_CLOSING_NOTE,
   COMPETITOR_STARTING_PRICES as prices,
   SELF_HOSTED_NOTE,
 } from "../../_features/vs-competitor-prices";
-import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
+import { VsSection } from "../../_features/vs-section";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
 import {
   EXCHANGE_RATE_NOTE,
   formatPrice,
-} from "../../../_helpers/format-competitor-price";
+} from "@/app/(public)/_helpers/format-competitor-price";
 
 const bugherdStandard = COMPETITOR_PRICES.bugherd.plans.standard;
 const bugherdExtraSeat = COMPETITOR_PRICES.bugherd.otherPrices.extraSeat;
@@ -72,8 +73,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Ruttl",
-    verdict:
-      "Fast reviews on live pages. Its integrations link back instead of syncing data.",
+    verdict: "Live CSS edits on the page, billed per user.",
     bestFor: "Designers and clients reviewing live web pages",
     startingPrice: prices.ruttl,
     selfHosted: { type: "no" },
@@ -89,7 +89,7 @@ const alternatives: VsAlternative[] = [
   },
   {
     name: "Feedbucket",
-    verdict: "Low-friction widget, nothing to run on your own server.",
+    verdict: "Cheapest hosted widget here, with no self-hosting path.",
     bestFor: "Web agencies managing client website reviews",
     startingPrice: prices.feedbucket,
     selfHosted: { type: "no" },
@@ -98,11 +98,16 @@ const alternatives: VsAlternative[] = [
 
 export function AtarimAlternativesSection() {
   return (
-    <VsAlternativesSection
+    <VsSection
+      eyebrow="Alternatives"
       title="Atarim alternatives compared"
-      intro="The verdict sits under each tool name. Pricing is each vendor's monthly rate, with the annual rate in parentheses."
-      alternatives={alternatives}
-      closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
-    />
+      intro="Nine tools, what each one is best at, and what it charges. The self-hosted column decides most of this for a developer team."
+      tone="muted"
+    >
+      <VsAlternativesTable
+        alternatives={alternatives}
+        closingNote={`${ALTERNATIVES_CLOSING_NOTE} ${EXCHANGE_RATE_NOTE}`}
+      />
+    </VsSection>
   );
 }

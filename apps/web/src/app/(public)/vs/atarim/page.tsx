@@ -7,35 +7,32 @@ import { SoftwareApplicationSchema } from "@/app/(public)/_components/seo/softwa
 import { WebPageSchema } from "@/app/_components/seo/web-page-schema";
 import { buildSocialMetadata } from "@/app/(public)/_helpers/build-social-metadata";
 import type { Metadata } from "next";
-import { COMPETITOR_PRICES } from "../../_helpers/competitor-prices";
-import { formatPrice } from "../../_helpers/format-competitor-price";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatPrice } from "@/app/(public)/_helpers/format-competitor-price";
 import { AtarimAlternativesSection } from "./_features/atarim-alternatives-section";
-import { AtarimBreadcrumb } from "./_features/atarim-breadcrumb";
-import { AtarimCalculatorSection } from "./_features/atarim-calculator-section";
 import { AtarimComparisonSection } from "./_features/atarim-comparison-section";
 import { AtarimCtaSection } from "./_features/atarim-cta-section";
-import { AtarimDeveloperFirstSection } from "./_features/atarim-developer-first-section";
-import { AtarimFaqSection, atarimFaqs } from "./_features/atarim-faq-section";
+import { atarimFaqs } from "./_features/atarim-faqs";
 import { AtarimFitSection } from "./_features/atarim-fit-section";
 import { AtarimHero } from "./_features/atarim-hero";
-import { AtarimHonestTakeSection } from "./_features/atarim-honest-take-section";
+import { AtarimIntegrationsSection } from "./_features/atarim-integrations-section";
 import {
   AtarimMigrationSection,
   migrationSteps,
 } from "./_features/atarim-migration-section";
 import { AtarimPricingSection } from "./_features/atarim-pricing-section";
 import { AtarimWhatIsSection } from "./_features/atarim-what-is-section";
-import { AtarimWhySwitchSection } from "./_features/atarim-why-switch-section";
 import { VsCrossLinks } from "../_features/vs-cross-links";
+import { VsFaqSection } from "../_features/vs-faq-section";
 
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
 const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
 
 const pageUrl = `${APP_URL}/vs/atarim`;
-const title = "Atarim alternatives: 9 tools compared (2026)";
-const description = `Nine Atarim alternatives compared on price, free plans and self-hosting. Atarim ${atarimPro.name} is ${formatPrice(atarimPro)}/mo. FasterFixes is $${proPrice}/mo, or $0 self-hosted.`;
+const title = "Atarim alternatives: 9 tools compared, one self-hosted for $0";
+const description = `Atarim alternatives: nine tools compared on price, free plan and self-hosting. Atarim ${atarimPro.name} is ${formatPrice(atarimPro)}/mo flat. FasterFixes is $${proPrice}/mo, or $0 to self-host.`;
 const datePublished = "2026-04-30T00:00:00.000Z";
-const dateModified = "2026-11-17T00:00:00.000Z";
+const dateModified = "2026-11-23T00:00:00.000Z";
 
 export const metadata: Metadata = {
   title: {
@@ -68,19 +65,15 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div>
-      <AtarimBreadcrumb />
       <AtarimHero />
       <AtarimAlternativesSection />
-      <AtarimWhatIsSection />
-      <AtarimWhySwitchSection />
-      <AtarimHonestTakeSection />
       <AtarimFitSection />
-      <AtarimCalculatorSection />
-      <AtarimDeveloperFirstSection />
-      <AtarimComparisonSection />
+      <AtarimIntegrationsSection />
+      <AtarimWhatIsSection />
       <AtarimPricingSection />
+      <AtarimComparisonSection />
       <AtarimMigrationSection />
-      <AtarimFaqSection />
+      <VsFaqSection faqs={atarimFaqs} />
       <AtarimCtaSection />
       <VsCrossLinks currentSlug="atarim" />
 

@@ -1,65 +1,57 @@
-import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
-import {
-  formatAmount,
-  formatPrice,
-} from "../../../_helpers/format-competitor-price";
+import type { Route } from "next";
+import { SectionBody } from "../../../features/_components/section-body";
+import { ReportFlowIllustration } from "../../_components/illustrations/report-flow-illustration";
+import { type VsPoint, VsPointGrid } from "../../_features/vs-point-grid";
+import { VsSection } from "../../_features/vs-section";
 
-const atarimPro = COMPETITOR_PRICES.atarim.plans.pro;
-const atarimProBilledYearly = formatAmount(
-  atarimPro.billedYearlyAmount,
-  atarimPro.currency,
-);
-const atarimProYearlyTotal = formatAmount(
-  Math.round(atarimPro.billedYearlyAmount * 12 * 100) / 100,
-  atarimPro.currency,
-);
-const aiCredits = COMPETITOR_PRICES.atarim.otherPrices.aiCreditsPerThousand;
+const points: VsPoint[] = [
+  {
+    title: "One widget, any stack",
+    body: "A script tag covers any site, including WordPress and Webflow, with packages for React, Vue, Angular and Svelte.",
+    link: {
+      href: "/docs/widget/install/script-embed" as Route,
+      label: "Script embed guide",
+    },
+  },
+  {
+    title: "Context captured, not typed",
+    body: "Every Feedback carries a screenshot, a replay of the last minute, the URL and DOM selector, browser, viewport, console logs, network requests and, on React sites, the component tree.",
+    link: {
+      href: "/features/actionable-bug-reports" as Route,
+      label: "What a report contains",
+    },
+  },
+  {
+    title: "Two-way sync with your tracker",
+    body: "Each Feedback becomes a GitHub, Linear, Jira or Trello item, and closing one side resolves the other.",
+    link: {
+      href: "/integrations/github" as Route,
+      label: "GitHub integration",
+    },
+  },
+  {
+    title: "Your agent fixes it",
+    body: "@fasterfixes/mcp lets Claude Code, Cursor and Codex read a Feedback, find the code, propose a fix and set the Status.",
+    link: { href: "/docs/mcp/setup" as Route, label: "MCP setup" },
+  },
+];
 
 export function AtarimWhatIsSection() {
   return (
-    <section className="w-full py-16 md:py-20">
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Background
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">What is Atarim?</h2>
-        </div>
-
-        <div className="mt-8 space-y-4 text-lg leading-relaxed">
-          <p>
-            Atarim (formerly WP Feedback) was founded in 2019 by Vito Peleg in
-            London. It is a cloud-based visual collaboration platform used by
-            72,000+ teams and 1.7 million users, primarily web design agencies,
-            freelancers, and WordPress professionals managing client review
-            cycles.
-          </p>
-          <p>
-            The platform centers on point-and-click visual feedback on live
-            websites, with a suite of six AI agents called InnerCircle built
-            into the dashboard: Claro (project management), Pixel (design), Lexi
-            (content), Index (SEO and performance), Navi (UX and accessibility),
-            and Glitch (functionality). It supports client portals with guest
-            access, whitelabeling, integrations with Jira, Asana, ClickUp,
-            Monday.com, Slack, Trello, Basecamp, Teamwork, Figma, Zapier, and
-            more, and a free MCP server that connects Claude, Codex, and other
-            AI clients to Atarim tasks and sites.
-          </p>
-          <p>
-            Atarim is proprietary and cloud-only. There is no self-hosting
-            option and no public source code. It sells one paid plan:{" "}
-            {atarimPro.name} at {formatPrice(atarimPro)}/month, or{" "}
-            {atarimProBilledYearly}/month billed yearly ({atarimProYearlyTotal}
-            /year), for up to {atarimPro.seats} seats and{" "}
-            {atarimPro.projects.toLocaleString("en-US")} projects, with 5,000 AI
-            credits a month. Extra credits cost{" "}
-            {formatAmount(aiCredits.amount, aiCredits.currency)} to{" "}
-            {formatAmount(aiCredits.maxAmount, aiCredits.currency)} per 1,000.
-            The free plan covers 1 project with 200 credits, one time, and
-            Enterprise is priced on request.
-          </p>
-        </div>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="The open-source alternative"
+      title="If Atarim is not the right fit, FasterFixes might be"
+      intro="FasterFixes is an open-source feedback widget for teams that fix their own client sites. A client clicks what looks wrong and writes one sentence, with no account and no extension. What arrives is a markdown report your tracker and your coding agent can both read."
+    >
+      <ReportFlowIllustration />
+      {/* Points follow the diagram from left to right. */}
+      <VsPointGrid points={points} className="mt-16" />
+      <SectionBody className="mt-10 max-w-2xl text-base">
+        <p>
+          FasterFixes has no whitelabel, no client portal, no WordPress plugin
+          and no browser extension.
+        </p>
+      </SectionBody>
+    </VsSection>
   );
 }
