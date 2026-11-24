@@ -165,7 +165,8 @@ export const COMPETITOR_PRICES = {
     },
   },
   gleap: {
-    verifiedOn: null,
+    verifiedOn: "2026-11-24",
+    yearlySavesUpToMonths: 2,
     plans: {
       hobby: {
         name: "Hobby",
@@ -181,13 +182,23 @@ export const COMPETITOR_PRICES = {
         billedYearlyAmount: 99,
         currency: "USD",
         seats: 4,
+        projects: Infinity,
       },
       pro: {
         name: "Pro",
-        amount: 299,
-        billedYearlyOnly: true,
+        amount: 359,
+        billedYearlyAmount: 299,
         currency: "USD",
         seats: Infinity,
+        projects: Infinity,
+      },
+      enterprise: {
+        name: "Enterprise",
+        amount: 1199,
+        billedYearlyAmount: 999,
+        currency: "USD",
+        seats: Infinity,
+        projects: Infinity,
       },
     },
     otherPrices: {
