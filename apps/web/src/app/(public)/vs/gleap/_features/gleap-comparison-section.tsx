@@ -3,51 +3,119 @@ import {
   PLAN_PRICES,
   SubscriptionPlanName,
 } from "@/app/_domains/subscription";
-import { CheckIcon, XIcon } from "lucide-react";
-import { COMPETITOR_PRICES } from "../../../_helpers/competitor-prices";
-import { formatAmount } from "../../../_helpers/format-competitor-price";
+import { COMPETITOR_PRICES } from "@/app/(public)/_helpers/competitor-prices";
+import { formatAmount } from "@/app/(public)/_helpers/format-competitor-price";
+import {
+  type VsComparisonRow,
+  VsComparisonTable,
+} from "../../_features/vs-comparison-table";
+import { VsSection } from "../../_features/vs-section";
 
-const proPlan = PLAN_LIMITS[SubscriptionPlanName.Pro];
+const freePlan = PLAN_LIMITS[SubscriptionPlanName.Free];
 const proPrice = PLAN_PRICES[SubscriptionPlanName.Pro];
-const { hobby, growth, pro: gleapPro } = COMPETITOR_PRICES.gleap.plans;
-const billedYearly = (amount: number) => `${formatAmount(amount, "USD")}/mo`;
+const agencyPrice = PLAN_PRICES[SubscriptionPlanName.Agency];
 
-type Cell = string | { type: "yes" | "no"; note?: string };
+const { plans, otherPrices } = COMPETITOR_PRICES.gleap;
+const { hobby, growth } = plans;
+const usd = (amount: number) => formatAmount(amount, "USD");
 
-const rows: { label: string; cells: [Cell, Cell] }[] = [
+const fiveSeatYearly =
+  growth.billedYearlyAmount * 12 +
+  (5 - growth.seats) * otherPrices.extraSeatPerYear.amount;
+
+const rows: VsComparisonRow[] = [
   {
-    label: "Open-source",
-    cells: ["AGPL-3.0 / MIT", { type: "no" }],
+    label: "License",
+    cells: ["AGPL-3.0 app · MIT widget", "Proprietary · MIT SDKs"],
   },
   {
-    label: "Self-hosting",
-    cells: [{ type: "yes" }, { type: "no", note: "Cloud-only" }],
+    label: "Self-hostable",
+    cells: [
+      { type: "yes", note: "Next.js, Postgres, Inngest, R2/S3" },
+      { type: "no", note: "Cloud-only, EU or US hosting" },
+    ],
   },
   {
     label: "Pricing model",
     cells: [
-      `$0 self-hosted / $${proPrice}/mo Pro (up to ${proPlan.seats} members)`,
-      `From ${billedYearly(hobby.billedYearlyAmount)} Hobby (${hobby.seats} seat) / ${billedYearly(growth.billedYearlyAmount)} Growth (${growth.seats} seats) / ${billedYearly(gleapPro.amount)} Pro (unlimited seats), billed yearly`,
+      `Flat per workspace · free, $${proPrice}/mo, $${agencyPrice}/mo`,
+      `Seats included per plan · ${hobby.name} ${usd(hobby.billedYearlyAmount)}/mo to ${growth.name} ${usd(growth.billedYearlyAmount)}/mo billed yearly, then ${usd(otherPrices.extraSeat.amount)}/seat · AI on top`,
     ],
   },
   {
-    label: "MCP server (Claude Code / Cursor)",
-    cells: [{ type: "yes" }, { type: "no" }],
+    label: "Cost for a 5-person team",
+    cells: [
+      `$0 self-host · $${proPrice}/mo hosted Pro`,
+      `${usd(growth.amount + (5 - growth.seats) * otherPrices.extraSeat.amount)}/mo ${growth.name} · ${usd(fiveSeatYearly)}/year billed yearly`,
+    ],
+  },
+  {
+    label: "Free plan",
+    cells: [
+      {
+        type: "yes",
+        note: `${freePlan.projects} project · ${freePlan.feedbacks} items · forever`,
+      },
+      { type: "no", note: "7-day trial" },
+    ],
+  },
+  {
+    label: "MCP server",
+    cells: [
+      { type: "yes", note: "Feedback with its context · every plan" },
+      { type: "yes", note: "Support tickets · Growth and up" },
+    ],
+  },
+  {
+    label: "AI coding agent",
+    cells: [
+      { type: "yes", note: "Your own: Claude Code, Cursor, Codex" },
+      { type: "yes", note: "Kai Code, hosted · Growth and up, usage-billed" },
+    ],
+  },
+  {
+    label: "AI support chatbot",
+    cells: [{ type: "no" }, { type: "yes", note: "Kai · prepaid balance" }],
+  },
+  {
+    label: "Live chat and ticketing",
+    cells: [{ type: "no" }, { type: "yes" }],
+  },
+  {
+    label: "Help center",
+    cells: [{ type: "no" }, { type: "yes" }],
   },
   {
     label: "Web install",
     cells: [
-      "Script tag or React package · component tree on React sites",
-      "JavaScript SDK (no component tree)",
+      "Script tag · React, Vue, Angular, Svelte packages",
+      "JavaScript SDK",
     ],
   },
   {
-    label: "AI chatbot",
-    cells: [{ type: "no" }, { type: "yes", note: "Kai: agent mode + copilot" }],
+    label: "Mobile SDKs",
+    cells: [
+      { type: "no", note: "Web only" },
+      { type: "yes", note: "iOS, Android, React Native, Flutter, Ionic" },
+    ],
   },
   {
-    label: "Ticketing / shared inbox",
-    cells: [{ type: "no" }, { type: "yes" }],
+    label: "React component tree capture",
+    cells: [{ type: "yes", note: "On React sites" }, { type: "no" }],
+  },
+  {
+    label: "Console logs and network requests",
+    cells: [
+      { type: "yes", note: "Every plan" },
+      { type: "yes", note: "Every plan" },
+    ],
+  },
+  {
+    label: "Session replay",
+    cells: [
+      { type: "yes", note: "Last minute before each Feedback · every plan" },
+      { type: "yes", note: "Last 10 to 15 minutes · Growth and up" },
+    ],
   },
   {
     label: "Video review (uploaded videos)",
@@ -57,129 +125,39 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
     ],
   },
   {
-    label: "Session replay",
-    cells: [
-      { type: "yes", note: "Last minute before each feedback · all plans" },
-      { type: "yes", note: "Last 10 to 15 min before each report · Growth+" },
-    ],
-  },
-  {
-    label: "Mobile SDKs",
-    cells: [
-      { type: "no", note: "Web only" },
-      { type: "yes", note: "iOS, Android, Flutter, React Native" },
-    ],
-  },
-  {
-    label: "Knowledge base",
-    cells: [{ type: "no" }, { type: "yes" }],
-  },
-  {
-    label: "IDE integration",
-    cells: [
-      { type: "yes", note: "MCP: Claude Code / Cursor / Codex" },
-      { type: "no" },
-    ],
-  },
-  {
     label: "Issue tracker sync",
     cells: [
       {
         type: "yes",
-        note: "GitHub, Linear, Jira, Trello · two-way, workflow-state aware",
+        note: "GitHub, Linear, Jira, Trello · two-way, every paid plan",
       },
-      { type: "yes", note: "Jira, Linear, GitHub, Asana, ClickUp, +" },
-    ],
-  },
-  {
-    label: "Trello sync",
-    cells: [
-      { type: "yes", note: "Bidirectional · status follows the mapped lists" },
-      { type: "yes", note: "Creates cards" },
+      {
+        type: "yes",
+        note: `Jira, Linear, GitHub, Asana, ClickUp, + · none on ${hobby.name}`,
+      },
     ],
   },
   {
     label: "Slack notifications",
     cells: [
       { type: "yes", note: "New feedback + live status, per project" },
-      { type: "yes", note: "Notifications only" },
+      { type: "yes", note: "Notifications" },
     ],
   },
 ];
 
-const headers = ["FasterFixes", "Gleap"] as const;
-
-function renderCell(cell: Cell) {
-  if (typeof cell === "string") {
-    return <span className="text-sm text-muted-foreground">{cell}</span>;
-  }
-  return (
-    <div className="flex flex-col gap-1">
-      {cell.type === "yes" ? (
-        <CheckIcon className="size-5 text-success" aria-label="Yes" />
-      ) : (
-        <XIcon className="size-5 text-destructive" aria-label="No" />
-      )}
-      {cell.note && (
-        <span className="text-xs text-muted-foreground">{cell.note}</span>
-      )}
-    </div>
-  );
-}
-
 export function GleapComparisonSection() {
   return (
-    <section className="w-full border-y bg-muted/30 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Compare
-          </p>
-          <h2 className="text-3xl font-bold md:text-4xl">
-            FasterFixes vs Gleap
-          </h2>
-        </div>
-
-        <div className="mx-auto mt-12 max-w-4xl overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="p-4 text-left text-sm font-semibold" scope="col">
-                  Feature
-                </th>
-                {headers.map((h, i) => (
-                  <th
-                    key={h}
-                    scope="col"
-                    className={`p-4 text-left text-sm font-semibold ${
-                      i === 0 ? "text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.label} className="border-b last:border-b-0">
-                  <th
-                    scope="row"
-                    className="p-4 text-left align-top text-sm font-medium"
-                  >
-                    {row.label}
-                  </th>
-                  {row.cells.map((cell, i) => (
-                    <td key={i} className="p-4 align-top">
-                      {renderCell(cell)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+    <VsSection
+      eyebrow="Compare"
+      title="Feature comparison: FasterFixes vs Gleap"
+      intro="Side by side, from each product's public documentation. Gleap wins every support row, FasterFixes wins on self-hosting, price and the code context attached to a report."
+    >
+      <VsComparisonTable
+        competitorName="Gleap"
+        rows={rows}
+        footnote="Pricing and feature availability as publicly listed on each vendor's website. Last updated Nov 24, 2026."
+      />
+    </VsSection>
   );
 }

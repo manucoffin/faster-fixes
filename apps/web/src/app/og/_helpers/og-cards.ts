@@ -101,8 +101,8 @@ export const OG_CARDS: Record<string, OgCardContent> = {
   },
   "/vs/gleap": {
     eyebrow: "Comparison",
-    title: "Gleap alternatives: 8 tools compared",
-    highlight: "8 tools compared",
+    title: "Gleap alternatives: 9 tools compared",
+    highlight: "9 tools compared",
     tags: ["Self-hosted", "Flat $20/mo", "MCP server"],
   },
   "/vs/marker-io": {
