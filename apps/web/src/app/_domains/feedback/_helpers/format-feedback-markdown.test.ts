@@ -122,6 +122,79 @@ describe("formatFeedbackAsMarkdown", () => {
   });
 });
 
+describe("formatFeedbackAsMarkdown on an area Selection", () => {
+  const areaFeedback: FeedbackForMarkdown = {
+    ...feedback,
+    selector: "main > section.pricing",
+    metadata: {
+      elementDescription: "section.pricing",
+      reactComponentPath: "App > PricingSection",
+      sourceFile: "src/pricing-section.tsx:12",
+      selection: {
+        viewport: { width: 1280, height: 720 },
+        area: { left: 40.4, top: 120, width: 320, height: 180.6 },
+      },
+    },
+  };
+
+  it("says Area and Inside in Where to look, with no element lines", () => {
+    const markdown = formatFeedbackAsMarkdown(areaFeedback);
+
+    expect(markdown).toContain(
+      [
+        "## Where to look",
+        "",
+        "**Page URL:** https://example.com/settings",
+        "**Area:** 320 × 181 at (40, 120) in a 1280 × 720 viewport",
+        "**Inside:** `App > PricingSection` · `src/pricing-section.tsx:12` · `main > section.pricing`",
+        "",
+        "## What's wrong",
+      ].join("\n"),
+    );
+    expect(markdown).not.toContain("**DOM selector:**");
+    expect(markdown).not.toContain("**Component tree:**");
+    expect(markdown).not.toContain("**Element:**");
+  });
+
+  it("drops the Inside line when nothing is known about the container", () => {
+    const markdown = formatFeedbackAsMarkdown({
+      ...areaFeedback,
+      selector: null,
+      metadata: { selection: areaFeedback.metadata?.selection },
+    });
+
+    expect(markdown).toContain("**Area:** 320 × 181");
+    expect(markdown).not.toContain("**Inside:**");
+  });
+
+  it("keeps the element lines for an element Selection", () => {
+    const markdown = formatFeedbackAsMarkdown({
+      ...feedback,
+      metadata: {
+        elementDescription: "button#save",
+        reactComponentPath: "App > SaveButton",
+        sourceFile: "src/save-button.tsx:4",
+        selection: {
+          viewport: { width: 1280, height: 720 },
+          element: { left: 10, top: 20, width: 80, height: 32 },
+          click: { x: 12, y: 24 },
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      [
+        "**Page URL:** https://example.com/settings",
+        "**Component tree:** `App > SaveButton`",
+        "**Source file:** `src/save-button.tsx:4`",
+        "**DOM selector:** `#save`",
+        "**Element:** button#save",
+      ].join("\n"),
+    );
+    expect(markdown).not.toContain("**Area:**");
+  });
+});
+
 describe("formatFeedbackAsMarkdown with a Recording", () => {
   const SELECTION_AT = 1_794_400_060_000;
   const recording = {

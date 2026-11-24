@@ -100,6 +100,36 @@ GET /feedbacks?project=proj_xxx
 
 The listing never carries the timeline or a link to the Recording file. [Get a feedback](#get-a-feedback) returns both.
 
+### Page Selection
+
+A page item's Selection is either an element, which the Reviewer clicked, or an area, a rectangle of the viewport they dragged. The Widget stores its geometry under `metadata.selection`, in viewport CSS pixels:
+
+| Form    | `metadata.selection`                                                   | `selector`                | `clickX`, `clickY` |
+| ------- | ---------------------------------------------------------------------- | ------------------------- | ------------------ |
+| Element | `{ viewport, element: { left, top, width, height }, click: { x, y } }` | The clicked element       | The click point    |
+| Area    | `{ viewport, area: { left, top, width, height } }`                     | The container of the area | `null`             |
+
+The container is the smallest element holding the whole area. For an area, `selector`, `metadata.elementDescription`, `metadata.reactComponentPath` and `metadata.sourceFile` describe that container: read them as where the area sits in the code, not as the element the comment is about. An item from an earlier Widget has no `metadata.selection`.
+
+```json
+{
+  "selector": "main > section.pricing",
+  "clickX": null,
+  "clickY": null,
+  "metadata": {
+    "elementDescription": "section.pricing",
+    "reactComponentPath": "App > PricingSection",
+    "sourceFile": "src/pricing-section.tsx:12",
+    "selection": {
+      "viewport": { "width": 1280, "height": 720 },
+      "area": { "left": 40, "top": 120, "width": 320, "height": 180 }
+    }
+  }
+}
+```
+
+The top-level `selection` key belongs to Video feedback and stays `null` on a page item.
+
 ### Video feedback
 
 Every item has the same keys, whether it was left on a page or on a Video. Without a filter, the listing mixes both, and `videoId` lets you group items by Video.
@@ -205,6 +235,18 @@ Agents never receive the video file itself: no field carries a link to it.
 ### Markdown response
 
 When `format=markdown`, the response is a structured markdown document with sections for each feedback item, ready for AI agent consumption. It works with or without the `video` filter.
+
+For an area, the "Where to look" section gives the area's size and position in a line of its own, then the container in an **Inside** line, with no click point:
+
+```md
+## Where to look
+
+**Page URL:** https://myapp.com/pricing
+**Area:** 320 × 180 at (40, 120) in a 1280 × 720 viewport
+**Inside:** `App > PricingSection` · `src/pricing-section.tsx:12` · `main > section.pricing`
+```
+
+The **Inside** line is omitted when nothing is known about the container. An element keeps its **Component tree**, **Source file**, **DOM selector** and **Element** lines.
 
 For a video item, the "Where to look" section reads:
 
@@ -328,6 +370,8 @@ With `format=markdown`, the response is the Feedback's document, with the same s
 - -11.0 s `error` Save failed
 - 0.0 s selection button "Save changes" (#save), the element the comment is about
 ```
+
+For an area, the last step has the type `selection`, the label `Area selected` and a `null` selector, so the container is never named as the thing selected. Its Timeline line reads `0.0 s  Area selected`.
 
 A long Timeline keeps the entries closest to the Selection, console errors and failed network responses first. A line above the entries says how many earlier entries were omitted, and another how many console logs and network requests came after the Selection, while the Reviewer wrote the comment. The markdown never carries the link to the Recording file.
 

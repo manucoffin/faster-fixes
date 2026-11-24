@@ -16,6 +16,10 @@ import {
   RECORDING_TIMELINE_MAX_ENTRIES,
 } from "./merge-recording-timeline";
 import type { FeedbackSelection } from "./read-feedback-selection";
+import {
+  describeSelectionArea,
+  readPageSelection,
+} from "./read-page-selection";
 import type { RecordingStep } from "./read-recording-steps";
 
 export type FeedbackForMarkdown = {
@@ -105,16 +109,7 @@ function renderFeedbackMarkdown(
   // Where to look — most actionable info first
   const locationLines: string[] = f.videoId ? videoLocationLines(f) : [];
   if (f.pageUrl) locationLines.push(`**Page URL:** ${f.pageUrl}`);
-  if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
-    locationLines.push(`**Component tree:** \`${md.reactComponentPath}\``);
-  }
-  if (typeof md?.sourceFile === "string" && md.sourceFile) {
-    locationLines.push(`**Source file:** \`${md.sourceFile}\``);
-  }
-  if (f.selector) locationLines.push(`**DOM selector:** \`${f.selector}\``);
-  if (typeof md?.elementDescription === "string" && md.elementDescription) {
-    locationLines.push(`**Element:** ${md.elementDescription}`);
-  }
+  locationLines.push(...selectionLocationLines(f));
 
   if (locationLines.length > 0) {
     lines.push("");
@@ -212,6 +207,35 @@ function diagnosticsOrTimelineLines({
       "**Recording:** the file could not be read, so this Feedback has no timeline.",
     );
   }
+  return lines;
+}
+
+// An area names its container as "Inside", never as the selected element, and
+// has no click point (ADR-0026).
+function selectionLocationLines(
+  f: Pick<FeedbackForMarkdown, "selector" | "metadata">,
+): string[] {
+  const selection = readPageSelection(f);
+  if (selection.form === "area") {
+    const { componentPath, sourceFile, selector } = selection.inside;
+    const insideParts = [componentPath, sourceFile, selector]
+      .filter((part): part is string => !!part)
+      .map((part) => `\`${part}\``);
+    return [
+      `**Area:** ${describeSelectionArea(selection)}`,
+      ...(insideParts.length > 0
+        ? [`**Inside:** ${insideParts.join(" \u00b7 ")}`]
+        : []),
+    ];
+  }
+
+  const { componentPath, sourceFile, selector, description } =
+    selection.element;
+  const lines: string[] = [];
+  if (componentPath) lines.push(`**Component tree:** \`${componentPath}\``);
+  if (sourceFile) lines.push(`**Source file:** \`${sourceFile}\``);
+  if (selector) lines.push(`**DOM selector:** \`${selector}\``);
+  if (description) lines.push(`**Element:** ${description}`);
   return lines;
 }
 
