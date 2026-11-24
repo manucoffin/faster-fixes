@@ -1,7 +1,8 @@
-import type { FeedbackItem } from "@fasterfixes/core";
+import type { AreaSelectionGeometry, FeedbackItem } from "@fasterfixes/core";
 import { expect, test } from "@playwright/test";
 import type { Locator } from "@playwright/test";
 
+import { dragAcross } from "./area-drag";
 import {
   selectOutsideDismissableDrawer,
   submitInsideFocusTrap,
@@ -158,6 +159,112 @@ for (const fixture of WIDGET_FIXTURES) {
           created?.selector ?? "",
         ),
       ).toBe("H1");
+    });
+
+    test("selects an area by dragging and submits Feedback", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      // Whole pixels, so the sent area can be compared exactly.
+      const from = { x: Math.ceil(box.x) + 4, y: Math.ceil(box.y) + 4 };
+      const to = {
+        x: from.x + Math.min(Math.floor(box.width) - 10, 80),
+        y: Math.floor(box.y + box.height) - 4,
+      };
+
+      const area = page.locator('[part="area"]');
+      await page.mouse.move(from.x, from.y);
+      await expect(page.locator('[part="overlay"]')).toBeVisible();
+      await page.mouse.down();
+      await page.mouse.move(to.x, to.y, { steps: 8 });
+      await expect(area).toBeVisible();
+      await expect(page.locator('[part="overlay"]')).toBeHidden();
+      await page.mouse.up();
+
+      const comment = page.getByPlaceholder("Describe the issue...");
+      await expect(comment).toBeFocused();
+      // Kept drawn while the Reviewer writes, with the form anchored to it.
+      await expect(area).toBeVisible();
+      const areaBox = await area.boundingBox();
+      const formBox = await page.locator('[part="popover"]').boundingBox();
+      expect(areaBox).not.toBeNull();
+      expect(formBox).not.toBeNull();
+      if (!areaBox || !formBox) return;
+      expect(formBox.y).toBeGreaterThanOrEqual(areaBox.y + areaBox.height);
+      await comment.fill("The heading is too close to the text");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      await expect(comment).toBeHidden();
+      await expect(area).toBeHidden();
+      await expect.poll(() => api.createdFeedback().length).toBe(1);
+      const [created] = api.createdFeedback();
+      expect(created).not.toHaveProperty("clickX");
+      expect(created).not.toHaveProperty("clickY");
+      expect(created?.metadata).not.toHaveProperty("nearbyText");
+      expect(created?.metadata).toMatchObject({
+        elementDescription: expect.any(String),
+        selectors: expect.any(Object),
+        pinAnchor: { x: expect.any(Number), y: expect.any(Number) },
+        pinPlacement: { mode: "document", targetKind: "normal" },
+      });
+      const selection = created?.metadata?.selection as AreaSelectionGeometry;
+      expect(selection.viewport).toEqual({
+        width: page.viewportSize()?.width,
+        height: page.viewportSize()?.height,
+      });
+      expect(selection.area.left).toBeCloseTo(from.x, 0);
+      expect(selection.area.top).toBeCloseTo(from.y, 0);
+      expect(selection.area.width).toBeCloseTo(to.x - from.x, 0);
+      expect(selection.area.height).toBeCloseTo(to.y - from.y, 0);
+      expect(selection).not.toHaveProperty("click");
+      // The selector names the container, whose box holds the whole area.
+      const container = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        if (!element) return null;
+        const { left, top, right, bottom } = element.getBoundingClientRect();
+        return { left, top, right, bottom };
+      }, created?.selector ?? "");
+      expect(container).not.toBeNull();
+      if (!container) return;
+      expect(container.left).toBeLessThanOrEqual(from.x + 1);
+      expect(container.top).toBeLessThanOrEqual(from.y + 1);
+      expect(container.right).toBeGreaterThanOrEqual(to.x - 1);
+      expect(container.bottom).toBeGreaterThanOrEqual(to.y - 1);
+    });
+
+    test("treats a press that travels less than 6 pixels as a click", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 10, y: box.y + box.height / 2 };
+      await dragAcross(page, from, { x: from.x + 3, y: from.y + 3 });
+
+      await page.getByPlaceholder("Describe the issue...").fill("Small move");
+      await expect(page.locator('[part="area"]')).toBeHidden();
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      await expect.poll(() => api.createdFeedback().length).toBe(1);
+      const [created] = api.createdFeedback();
+      expect(created).toMatchObject({
+        clickX: expect.any(Number),
+        clickY: expect.any(Number),
+        metadata: { elementDescription: expect.stringContaining("h1") },
+      });
+      expect(created?.metadata?.selection).toHaveProperty("click");
     });
 
     test("sends Custom metadata read at submission, not at init", async ({

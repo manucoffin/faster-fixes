@@ -1,5 +1,9 @@
-import type { ElementSelectionGeometry } from "@fasterfixes/core";
+import type {
+  AreaSelectionGeometry,
+  ElementSelectionGeometry,
+} from "@fasterfixes/core";
 
+import type { AreaRect } from "./area-gesture.js";
 import type { PinPoint } from "./pin-placement.js";
 
 type Viewport = Pick<Window, "innerWidth" | "innerHeight">;
@@ -19,5 +23,16 @@ export function measureSelectionGeometry(
     viewport: { width: view.innerWidth, height: view.innerHeight },
     element: { left, top, width, height },
     click: { x: click.x, y: click.y },
+  };
+}
+
+/** The geometry of an area Selection, read in the same tick as its release. */
+export function measureAreaGeometry(
+  area: AreaRect,
+  view: Viewport = window,
+): AreaSelectionGeometry {
+  return {
+    viewport: { width: view.innerWidth, height: view.innerHeight },
+    area: { ...area },
   };
 }

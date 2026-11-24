@@ -6,7 +6,10 @@ import { buildFeedbackPayload } from "./feedback-payload.js";
 // The core helpers read a real DOM and navigator, which the node environment lacks.
 vi.mock("@fasterfixes/core", () => ({
   generateSelectors: () => ({ best: "#target", strategies: {} }),
-  captureElementContext: () => ({ elementDescription: "<h1>" }),
+  captureElementContext: () => ({
+    elementDescription: "<h1>",
+    nearbyText: "Pricing",
+  }),
   getBrowserInfo: () => ({ browserName: "Chrome" }),
 }));
 
@@ -48,7 +51,7 @@ describe("buildFeedbackPayload", () => {
     const payload = buildFeedbackPayload({
       comment: "Misaligned",
       element: scrolledElement(),
-      click: { x: 90, y: 120 },
+      pinPoint: { x: 90, y: 120 },
       selection: geometry,
       diagnosticTrail: undefined,
       customMetadata: undefined,
@@ -57,6 +60,32 @@ describe("buildFeedbackPayload", () => {
     expect(payload.metadata?.selection).toEqual(geometry);
     expect(payload.metadata).toMatchObject({
       elementDescription: "<h1>",
+      pinAnchor: expect.any(Object),
+      pinPlacement: expect.any(Object),
+    });
+  });
+
+  it("sends an area with its container's context, without click coordinates or nearby text", () => {
+    const area: SelectionGeometry = {
+      viewport: { width: 1280, height: 720 },
+      area: { left: 60, top: 110, width: 120, height: 20 },
+    };
+    const payload = buildFeedbackPayload({
+      comment: "Gap too wide",
+      element: scrolledElement(),
+      pinPoint: { x: 60, y: 110 },
+      selection: area,
+      diagnosticTrail: undefined,
+      customMetadata: undefined,
+    });
+
+    expect(payload.selector).toBe("#target");
+    expect(payload).not.toHaveProperty("clickX");
+    expect(payload).not.toHaveProperty("clickY");
+    expect(payload.metadata).not.toHaveProperty("nearbyText");
+    expect(payload.metadata).toMatchObject({
+      elementDescription: "<h1>",
+      selection: area,
       pinAnchor: expect.any(Object),
       pinPlacement: expect.any(Object),
     });

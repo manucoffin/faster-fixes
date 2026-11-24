@@ -158,6 +158,17 @@ export const WIDGET_CSS = `
     transition: all 0.1s ease;
   }
 
+  /* No transition: the rectangle tracks the pointer while dragging. */
+  .area {
+    position: fixed;
+    z-index: calc(var(--ff-z-index) - 2);
+    box-sizing: border-box;
+    border: 2px solid var(--ff-accent);
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--ff-accent) 10%, transparent);
+    pointer-events: none;
+  }
+
   .highlight {
     position: fixed;
     z-index: calc(var(--ff-z-index) - 2);

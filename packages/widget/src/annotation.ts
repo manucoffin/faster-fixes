@@ -1,8 +1,21 @@
+import type { AreaFrame } from "./area-frame.js";
+import { isDrag, readAreaRect } from "./area-gesture.js";
+import type { AreaRect } from "./area-gesture.js";
 import type { PinPoint } from "./pin-placement.js";
 
 type AnnotationActions = {
   onSelect: (element: Element, click: PinPoint) => void;
+  onSelectArea: (area: AreaRect) => void;
   onCancel: () => void;
+};
+
+type Press = {
+  pointerId: number;
+  target: Element;
+  point: PinPoint;
+  /** Touch keeps scrolling the page, so only a mouse or pen press can drag. */
+  canDrag: boolean;
+  dragging: boolean;
 };
 
 export type AnnotationMode = {
@@ -25,24 +38,45 @@ function blockEvent(event: Event) {
   event.stopImmediatePropagation();
 }
 
+// The click that ends a drag lands after annotation mode has stopped, on the
+// common ancestor of the press and release targets: it must not reach the page.
+function swallowNextClick(view: Window) {
+  const swallowing = new AbortController();
+  const options = { capture: true, signal: swallowing.signal };
+  view.addEventListener(
+    "click",
+    (event) => {
+      blockEvent(event);
+      swallowing.abort();
+    },
+    options,
+  );
+  // A browser that sends no click must not cost the Reviewer their next one.
+  view.addEventListener("pointerdown", () => swallowing.abort(), options);
+}
+
 /**
  * While started, highlights the page element under the pointer in `overlay`
- * and turns the next click on the page into a selection instead of reaching
- * the page. Escape cancels.
+ * and turns the next press on the page into a selection instead of reaching
+ * the page: a click selects the element under the press, a drag draws an area
+ * in `areaFrame`. Escape cancels.
  */
 export function createAnnotationMode(
   document: Document,
-  overlay: HTMLElement,
-  { onSelect, onCancel }: AnnotationActions,
+  { overlay, areaFrame }: { overlay: HTMLElement; areaFrame: AreaFrame },
+  { onSelect, onSelectArea, onCancel }: AnnotationActions,
 ): AnnotationMode {
+  const view = document.defaultView ?? window;
   let listening: AbortController | null = null;
   let previousCursor = "";
+  let press: Press | null = null;
 
   function hideOverlay() {
     overlay.hidden = true;
   }
 
   function handleMouseMove(event: MouseEvent) {
+    if (press?.dragging) return;
     if (isWidgetEvent(event) || !(event.target instanceof Element)) {
       hideOverlay();
       return;
@@ -57,10 +91,21 @@ export function createAnnotationMode(
     overlay.hidden = false;
   }
 
+  function readArea(event: PointerEvent, from: Press) {
+    return readAreaRect(
+      from.point,
+      { x: event.clientX, y: event.clientY },
+      { width: view.innerWidth, height: view.innerHeight },
+    );
+  }
+
   function handleClick(event: MouseEvent) {
     if (isWidgetEvent(event) || !(event.target instanceof Element)) return;
     blockEvent(event);
-    onSelect(event.target, { x: event.clientX, y: event.clientY });
+    // The element under the press, which a small travel may have left.
+    const target = press?.target ?? event.target;
+    press = null;
+    onSelect(target, { x: event.clientX, y: event.clientY });
   }
 
   // Without this, a pointer press on the page could close a host dialog or
@@ -68,6 +113,44 @@ export function createAnnotationMode(
   function handlePress(event: Event) {
     if (isWidgetEvent(event)) return;
     blockEvent(event);
+  }
+
+  function handlePointerDown(event: PointerEvent) {
+    if (isWidgetEvent(event)) return;
+    blockEvent(event);
+    if (!(event.target instanceof Element) || event.button !== 0) return;
+    press = {
+      pointerId: event.pointerId,
+      target: event.target,
+      point: { x: event.clientX, y: event.clientY },
+      canDrag: event.pointerType !== "touch",
+      dragging: false,
+    };
+  }
+
+  function handlePointerMove(event: PointerEvent) {
+    if (!press?.canDrag || event.pointerId !== press.pointerId) return;
+    if (!press.dragging) {
+      if (!isDrag(press.point, { x: event.clientX, y: event.clientY })) return;
+      press.dragging = true;
+      hideOverlay();
+    }
+    areaFrame.draw(readArea(event, press));
+  }
+
+  function handlePointerUp(event: PointerEvent) {
+    if (!press?.dragging || event.pointerId !== press.pointerId) return;
+    blockEvent(event);
+    const area = readArea(event, press);
+    press = null;
+    swallowNextClick(view);
+    onSelectArea(area);
+  }
+
+  function handlePointerCancel(event: PointerEvent) {
+    if (event.pointerId !== press?.pointerId) return;
+    if (press.dragging) areaFrame.hide();
+    press = null;
   }
 
   function handleKeyDown(event: KeyboardEvent) {
@@ -81,11 +164,13 @@ export function createAnnotationMode(
       const options = { capture: true, signal: listening.signal };
       // Captured on the window so they run before any document-level
       // outside-click handler a host dialog or drawer registered first.
-      const view = document.defaultView ?? window;
       document.addEventListener("mousemove", handleMouseMove, options);
       view.addEventListener("click", handleClick, options);
       view.addEventListener("mousedown", handlePress, options);
-      view.addEventListener("pointerdown", handlePress, options);
+      view.addEventListener("pointerdown", handlePointerDown, options);
+      view.addEventListener("pointermove", handlePointerMove, options);
+      view.addEventListener("pointerup", handlePointerUp, options);
+      view.addEventListener("pointercancel", handlePointerCancel, options);
       document.addEventListener("keydown", handleKeyDown, options);
       previousCursor = document.body.style.cursor;
       document.body.style.cursor = "crosshair";
@@ -94,6 +179,8 @@ export function createAnnotationMode(
       if (!listening) return;
       listening.abort();
       listening = null;
+      if (press?.dragging) areaFrame.hide();
+      press = null;
       document.body.style.cursor = previousCursor;
       hideOverlay();
     },
