@@ -149,6 +149,16 @@ describe("formatTimelineLines", () => {
     ]);
   });
 
+  it("ends with an area selected, as its wording alone", () => {
+    const lines = formatTimelineLines({
+      entries: [stepEntry(0, { type: "selection", label: "Area selected" })],
+      droppedCount: 0,
+      afterSelectionCount: 0,
+    });
+
+    expect(lines).toEqual(["- 0.0 s  Area selected"]);
+  });
+
   it("opens with how many entries were left out", () => {
     const lines = formatTimelineLines({
       entries: [selection],

@@ -2,10 +2,11 @@
 
 import { CopyButton } from "@workspace/ui/components/copy-button";
 import { cn } from "@workspace/ui/lib/utils";
-import { Code2 } from "lucide-react";
+import { Code2, SquareDashed } from "lucide-react";
 import { useState } from "react";
 import {
   type ElementContext,
+  formatAreaSize,
   formatElementForCopy,
 } from "../../_helpers/feedback-detail";
 
@@ -17,12 +18,29 @@ type ElementContextCardProps = {
 };
 
 export function ElementContextCard({ element }: ElementContextCardProps) {
+  const { area } = element;
+  const hasContainer = !!(
+    element.description ??
+    element.componentPath ??
+    element.sourceFile ??
+    element.selector
+  );
+
   return (
     <div className="overflow-hidden rounded-lg border">
       <div className="flex items-center gap-2 border-b bg-muted/50 px-3 py-2">
-        <Code2 className="size-4 shrink-0 text-muted-foreground" />
-        <span className="text-sm font-medium">Element</span>
-        {element.sourceFile && (
+        {area ? (
+          <SquareDashed className="size-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <Code2 className="size-4 shrink-0 text-muted-foreground" />
+        )}
+        <span className="text-sm font-medium">{area ? "Area" : "Element"}</span>
+        {area && (
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">
+            {formatAreaSize(area)}
+          </span>
+        )}
+        {!area && element.sourceFile && (
           <code
             className="min-w-0 truncate text-xs text-muted-foreground"
             title={element.sourceFile}
@@ -39,20 +57,27 @@ export function ElementContextCard({ element }: ElementContextCardProps) {
           Copy
         </CopyButton>
       </div>
-      <div className="flex flex-col gap-3 p-3">
-        {element.description && (
-          <p className="text-sm">{element.description}</p>
-        )}
-        {element.components.length > 0 && (
-          <ComponentTrail components={element.components} />
-        )}
-        {element.sourceFile && (
-          <CopyableCode value={element.sourceFile} label="Copy source file" />
-        )}
-        {element.selector && (
-          <CopyableCode value={element.selector} label="Copy selector" />
-        )}
-      </div>
+      {(!area || hasContainer) && (
+        <div className="flex flex-col gap-3 p-3">
+          {area && (
+            <span className="text-xs font-medium text-muted-foreground">
+              Inside
+            </span>
+          )}
+          {element.description && (
+            <p className="text-sm">{element.description}</p>
+          )}
+          {element.components.length > 0 && (
+            <ComponentTrail components={element.components} />
+          )}
+          {element.sourceFile && (
+            <CopyableCode value={element.sourceFile} label="Copy source file" />
+          )}
+          {element.selector && (
+            <CopyableCode value={element.selector} label="Copy selector" />
+          )}
+        </div>
+      )}
     </div>
   );
 }
