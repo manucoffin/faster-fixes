@@ -16,6 +16,8 @@ type Press = {
   /** Touch keeps scrolling the page, so only a mouse or pen press can drag. */
   canDrag: boolean;
   dragging: boolean;
+  /** Escape threw the rectangle away: the rest of the press selects nothing. */
+  discarded: boolean;
 };
 
 export type AnnotationMode = {
@@ -59,7 +61,8 @@ function swallowNextClick(view: Window) {
  * While started, highlights the page element under the pointer in `overlay`
  * and turns the next press on the page into a selection instead of reaching
  * the page: a click selects the element under the press, a drag draws an area
- * in `areaFrame`. Escape cancels.
+ * in `areaFrame`. Escape during a drag discards the rectangle; otherwise it
+ * cancels.
  */
 export function createAnnotationMode(
   document: Document,
@@ -70,6 +73,9 @@ export function createAnnotationMode(
   let listening: AbortController | null = null;
   let previousCursor = "";
   let press: Press | null = null;
+  // A press on the Widget's own interface released on the page ends in a click
+  // on their common ancestor, which must not select it.
+  let pressedWidget = false;
 
   function hideOverlay() {
     overlay.hidden = true;
@@ -100,8 +106,15 @@ export function createAnnotationMode(
   }
 
   function handleClick(event: MouseEvent) {
+    const fromWidget = pressedWidget;
+    pressedWidget = false;
     if (isWidgetEvent(event) || !(event.target instanceof Element)) return;
     blockEvent(event);
+    if (fromWidget) return;
+    if (press?.discarded) {
+      press = null;
+      return;
+    }
     // The element under the press, which a small travel may have left.
     const target = press?.target ?? event.target;
     press = null;
@@ -116,7 +129,11 @@ export function createAnnotationMode(
   }
 
   function handlePointerDown(event: PointerEvent) {
-    if (isWidgetEvent(event)) return;
+    pressedWidget = isWidgetEvent(event);
+    if (pressedWidget) {
+      press = null;
+      return;
+    }
     blockEvent(event);
     if (!(event.target instanceof Element) || event.button !== 0) return;
     press = {
@@ -125,11 +142,13 @@ export function createAnnotationMode(
       point: { x: event.clientX, y: event.clientY },
       canDrag: event.pointerType !== "touch",
       dragging: false,
+      discarded: false,
     };
   }
 
   function handlePointerMove(event: PointerEvent) {
     if (!press?.canDrag || event.pointerId !== press.pointerId) return;
+    if (press.discarded) return;
     if (!press.dragging) {
       if (!isDrag(press.point, { x: event.clientX, y: event.clientY })) return;
       press.dragging = true;
@@ -139,7 +158,13 @@ export function createAnnotationMode(
   }
 
   function handlePointerUp(event: PointerEvent) {
-    if (!press?.dragging || event.pointerId !== press.pointerId) return;
+    if (event.pointerId !== press?.pointerId) return;
+    if (press.discarded) {
+      // Kept until the click that ends the press, which handleClick swallows.
+      blockEvent(event);
+      return;
+    }
+    if (!press.dragging) return;
     blockEvent(event);
     const area = readArea(event, press);
     press = null;
@@ -154,7 +179,24 @@ export function createAnnotationMode(
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Escape") onCancel();
+    if (event.key !== "Escape") return;
+    if (!press?.dragging) {
+      onCancel();
+      return;
+    }
+    // Swallowed so a host dialog under the drag does not close either.
+    blockEvent(event);
+    areaFrame.hide();
+    press.dragging = false;
+    press.discarded = true;
+  }
+
+  // Keeps the page as the Reviewer is outlining it: no text selection, no
+  // native drag of an image or link, no wheel scroll under the rectangle.
+  function handleDragGuard(event: Event) {
+    if (isWidgetEvent(event)) return;
+    if (event.type === "wheel" && !press?.dragging) return;
+    event.preventDefault();
   }
 
   return {
@@ -171,6 +213,12 @@ export function createAnnotationMode(
       view.addEventListener("pointermove", handlePointerMove, options);
       view.addEventListener("pointerup", handlePointerUp, options);
       view.addEventListener("pointercancel", handlePointerCancel, options);
+      document.addEventListener("selectstart", handleDragGuard, options);
+      document.addEventListener("dragstart", handleDragGuard, options);
+      view.addEventListener("wheel", handleDragGuard, {
+        ...options,
+        passive: false,
+      });
       document.addEventListener("keydown", handleKeyDown, options);
       previousCursor = document.body.style.cursor;
       document.body.style.cursor = "crosshair";
@@ -181,6 +229,7 @@ export function createAnnotationMode(
       listening = null;
       if (press?.dragging) areaFrame.hide();
       press = null;
+      pressedWidget = false;
       document.body.style.cursor = previousCursor;
       hideOverlay();
     },

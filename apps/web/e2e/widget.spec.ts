@@ -267,6 +267,150 @@ for (const fixture of WIDGET_FIXTURES) {
       expect(created?.metadata?.selection).toHaveProperty("click");
     });
 
+    test("discards a drag on Escape and stays in annotation mode", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const area = page.locator('[part="area"]');
+      await page.mouse.move(box.x + 2, box.y + 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 60, box.y + 30, { steps: 8 });
+      await expect(area).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(area).toBeHidden();
+      await page.mouse.move(box.x + 90, box.y + 40, { steps: 4 });
+      await page.mouse.up();
+
+      const comment = page.getByPlaceholder("Describe the issue...");
+      await expect(area).toBeHidden();
+      await expect(comment).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Exit feedback mode" }),
+      ).toBeVisible();
+      // Still annotating: the next click selects.
+      await page.locator("h1").click();
+      await expect(comment).toBeVisible();
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.mouse.move(box.x + 2, box.y + 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 60, box.y + 30, { steps: 8 });
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await expect(
+        page.getByRole("button", { name: "Start feedback" }),
+      ).toBeVisible();
+      await expect(comment).toHaveCount(0);
+    });
+
+    test("selects no text while dragging", async ({ page }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      await page.mouse.move(box.x + 1, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, {
+        steps: 8,
+      });
+      expect(
+        await page.evaluate(() => window.getSelection()?.toString() ?? ""),
+      ).toBe("");
+      await page.mouse.up();
+      await expect(
+        page.getByPlaceholder("Describe the issue..."),
+      ).toBeVisible();
+    });
+
+    test("ignores a drag that starts on the Widget's own interface", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const exit = page.getByRole("button", { name: "Exit feedback mode" });
+      // Waits for the toolbar to settle, so the press lands on the control.
+      await exit.hover();
+      const box = await exit.boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      await dragAcross(page, from, { x: from.x - 120, y: from.y - 120 });
+
+      await expect(page.locator('[part="area"]')).toBeHidden();
+      await expect(page.getByPlaceholder("Describe the issue...")).toHaveCount(
+        0,
+      );
+    });
+
+    test.describe("on a touch screen", () => {
+      test.use({ hasTouch: true });
+
+      test("scrolls on a drag and selects an element on a tap", async ({
+        page,
+        browserName,
+      }) => {
+        test.skip(
+          browserName !== "chromium",
+          "Touch input is dispatched through the Chrome DevTools Protocol.",
+        );
+        await stubWidgetApi(page);
+        await seedReviewerToken(page);
+        await page.goto(fixture.path);
+        await page.evaluate(() => {
+          document.body.style.minHeight = "4000px";
+        });
+
+        await page.getByRole("button", { name: "Start feedback" }).click();
+        const client = await page.context().newCDPSession(page);
+        const x = 200;
+        await client.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x, y: 400 }],
+        });
+        for (let y = 380; y >= 100; y -= 20) {
+          await client.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x, y }],
+          });
+        }
+        await client.send("Input.dispatchTouchEvent", {
+          type: "touchEnd",
+          touchPoints: [],
+        });
+
+        await expect
+          .poll(() => page.evaluate(() => window.scrollY))
+          .toBeGreaterThan(0);
+        await expect(page.locator('[part="area"]')).toBeHidden();
+        await expect(
+          page.getByPlaceholder("Describe the issue..."),
+        ).toHaveCount(0);
+
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.locator("h1").tap();
+        await expect(
+          page.getByPlaceholder("Describe the issue..."),
+        ).toBeVisible();
+        await expect(page.locator('[part="area"]')).toBeHidden();
+      });
+    });
+
     test("sends Custom metadata read at submission, not at init", async ({
       page,
     }) => {
@@ -755,6 +899,23 @@ for (const fixture of WIDGET_FIXTURES) {
       page,
     }) => {
       await selectOutsideDismissableDrawer(page, fixture.path, "bubble");
+    });
+
+    test("keeps focus in the comment popover after a drag inside a focus-trapping dialog", async ({
+      page,
+    }) => {
+      await submitInsideFocusTrap(page, fixture.path, "bubble", "drag");
+    });
+
+    test("a drag does not close a drawer that closes on outside presses", async ({
+      page,
+    }) => {
+      await selectOutsideDismissableDrawer(
+        page,
+        fixture.path,
+        "bubble",
+        "drag",
+      );
     });
   });
 }
