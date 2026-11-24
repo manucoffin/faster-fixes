@@ -550,6 +550,128 @@ for (const fixture of WIDGET_FIXTURES) {
       ).toHaveCount(1);
     });
 
+    test("places the pin of a dragged area at its top-left corner", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 20, y: box.y + 4 };
+      await dragAcross(page, from, {
+        x: from.x + Math.min(box.width - 30, 80),
+        y: box.y + box.height - 4,
+      });
+      await page
+        .getByPlaceholder("Describe the issue...")
+        .fill("The heading is too close to the text");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      const dot = page
+        .getByRole("button", {
+          name: "Feedback: The heading is too close to the text",
+        })
+        .locator(".pin-dot");
+      await expect(dot).toBeVisible();
+      const dotBox = await dot.boundingBox();
+      expect(dotBox).not.toBeNull();
+      if (!dotBox) return;
+      expect(dotBox.x + dotBox.width / 2).toBeCloseTo(from.x, -1);
+      expect(dotBox.y + dotBox.height / 2).toBeCloseTo(from.y, -1);
+    });
+
+    test("redraws the area of an area Feedback from its pin", async ({
+      page,
+      baseURL,
+    }) => {
+      const pageUrl = new URL(fixture.path, baseURL).href;
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(pageUrl, {
+            id: "fb_area",
+            comment: "The gap is too wide",
+            clickX: null,
+            clickY: null,
+            metadata: {
+              pinAnchor: { x: 0.1, y: 0.2 },
+              pinPlacement: { mode: "document", targetKind: "normal" },
+              selection: {
+                viewport: { width: 1280, height: 720 },
+                area: { left: 0, top: 0, width: 60, height: 20 },
+              },
+            },
+          }),
+          stubbedItem(pageUrl, { id: "fb_element" }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+      // Room to scroll, so the area can be seen following its container.
+      await page.addStyleTag({
+        content: "body { padding-bottom: 200vh !important; }",
+      });
+
+      const area = page.locator('[part~="pin-area"]');
+      const highlight = page.locator(".highlight");
+      // Drawn at the stored anchor in the heading's current box, at its stored size.
+      const expectAreaAtAnchor = () =>
+        expect
+          .poll(async () => {
+            const [areaBox, headingBox] = await Promise.all([
+              area.boundingBox(),
+              page.locator("h1").boundingBox(),
+            ]);
+            if (!areaBox || !headingBox) return null;
+            return {
+              // `abs` keeps a rounded -0 equal to 0.
+              left: Math.abs(
+                Math.round(areaBox.x - (headingBox.x + headingBox.width * 0.1)),
+              ),
+              top: Math.abs(
+                Math.round(
+                  areaBox.y - (headingBox.y + headingBox.height * 0.2),
+                ),
+              ),
+              width: Math.round(areaBox.width),
+              height: Math.round(areaBox.height),
+            };
+          })
+          .toEqual({ left: 0, top: 0, width: 60, height: 20 });
+
+      const areaPin = page.getByRole("button", {
+        name: "Feedback: The gap is too wide",
+      });
+      await expect(areaPin).toBeVisible();
+      await expect(area).toBeHidden();
+
+      await areaPin.hover();
+      await expect(area).toBeVisible();
+      await expect(highlight).toBeHidden();
+      await expectAreaAtAnchor();
+
+      // An element pin still outlines its element.
+      await page
+        .getByRole("button", { name: "Feedback: The heading is misaligned" })
+        .hover();
+      await expect(highlight).toBeVisible();
+      await expect(area).toBeHidden();
+
+      await areaPin.click();
+      await expect(page.locator('[part="popover"]')).toBeVisible();
+      await page.mouse.move(1, 1);
+      await expect(area).toBeVisible();
+      await expectAreaAtAnchor();
+
+      await page.evaluate(() => window.scrollBy(0, 40));
+      await expectAreaAtAnchor();
+      await page.setViewportSize({ width: 900, height: 700 });
+      await expectAreaAtAnchor();
+    });
+
     test("hides and shows the pins with the markers control", async ({
       page,
       baseURL,

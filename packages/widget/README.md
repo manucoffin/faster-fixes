@@ -157,7 +157,7 @@ Theme the Widget with CSS custom properties on its `[data-ff-widget]` host:
 | `--ff-font-family` | `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` |
 | `--ff-z-index`     | `2147483647`                                                        |
 
-`--ff-accent` is set inline from the `color` option, so prefer `color` to change it. Reach deeper elements with `::part()`: `button`, `overlay`, `area`, `popover`, `textarea`, `pin`, `list` and `list-item`.
+`--ff-accent` is set inline from the `color` option, so prefer `color` to change it. Reach deeper elements with `::part()`: `button`, `overlay`, `area`, `pin-area`, `popover`, `textarea`, `pin`, `list` and `list-item`. `pin-area` is the area redrawn when its pin is hovered or open, and `area` styles it too.
 
 ```css
 [data-ff-widget]::part(button) {

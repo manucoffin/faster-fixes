@@ -12,17 +12,23 @@ export type AreaFrame = {
    * page on scroll, resize and layout changes.
    */
   follow: (container: Element, area: AreaRect) => void;
+  /** Keeps the area `place` reads from `container`'s current box drawn. */
+  track: (container: Element, place: (box: DOMRect) => AreaRect) => void;
   hide: () => void;
 };
 
-/** The rectangle of an area Selection, drawn in `root` above the page. */
+/**
+ * The rectangle of an area Selection, drawn in `root` above the page. `part`
+ * names the styling parts it exposes.
+ */
 export function createAreaFrame(
   document: Document,
   root: ShadowRoot,
+  part = "area",
 ): AreaFrame {
   const element = document.createElement("div");
   element.className = "area";
-  element.setAttribute("part", "area");
+  element.setAttribute("part", part);
   element.hidden = true;
   root.appendChild(element);
 
@@ -43,6 +49,13 @@ export function createAreaFrame(
     stopFollowing = null;
   }
 
+  function track(container: Element, place: (box: DOMRect) => AreaRect) {
+    stop();
+    stopFollowing = autoUpdate(container, element, () => {
+      draw(place(container.getBoundingClientRect()));
+    });
+  }
+
   return {
     element,
     draw(area) {
@@ -50,20 +63,17 @@ export function createAreaFrame(
       draw(area);
     },
     follow(container, area) {
-      stop();
       const box = container.getBoundingClientRect();
       const offsetX = area.left - box.left;
       const offsetY = area.top - box.top;
-      stopFollowing = autoUpdate(container, element, () => {
-        const current = container.getBoundingClientRect();
-        draw({
-          left: current.left + offsetX,
-          top: current.top + offsetY,
-          width: area.width,
-          height: area.height,
-        });
-      });
+      track(container, (current) => ({
+        left: current.left + offsetX,
+        top: current.top + offsetY,
+        width: area.width,
+        height: area.height,
+      }));
     },
+    track,
     hide() {
       stop();
       element.hidden = true;

@@ -171,6 +171,7 @@ export function mountWidget({
     shadow,
     options.labels,
     highlight,
+    createAreaFrame(document, shadow, "area pin-area"),
     (item, pin) => {
       if (pinPopover.itemId === item.id) {
         pinPopover.dismiss();
