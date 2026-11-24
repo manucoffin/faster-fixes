@@ -29,11 +29,11 @@ _Avoid_: Integration (reserved for external systems), Adapter, Wrapper (implemen
 ### Capture
 
 **Selection**:
-What a Feedback is about. On a page: the element a Reviewer clicked in annotation mode, together with the click point inside it. On a **Video**: the instant or time range the Reviewer marked, with an optional point or area on the frame.
-_Avoid_: Target, Highlighted element, Annotation (the mode, not its result), Timecode (the instant alone, not the Selection), Marker.
+What a Feedback is about. On a page it takes one of two forms, chosen by the Reviewer's gesture in annotation mode: an **element Selection**, the element they clicked together with the click point inside it, or an **area Selection**, a rectangle of the viewport they dragged. An area Selection is about the rectangle, not about any element: the smallest element containing the whole rectangle is kept as its **container**, which locates the area on the page and is never presented as the thing selected. On a **Video**: the instant or time range the Reviewer marked, with an optional point or area on the frame.
+_Avoid_: Target, Highlighted element, Annotation (the mode, not its result), Timecode (the instant alone, not the Selection), Marker, Region, Zone, Box.
 
 **Pin**:
-The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot.
+The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot. The Pin of an area Selection sits at the area's top-left corner and follows the area's container; the area itself shows only while the Pin is hovered or open.
 _Avoid_: Marker, Dot, Annotation.
 
 **Screenshot**:
@@ -45,7 +45,7 @@ A demonstration over time of what happened on the page, attached to a Feedback. 
 _Avoid_: Video (a file uploaded for review), Screen recording, Session replay (a Recording exists only attached to a Feedback), Replay.
 
 **Selection frame**:
-The outline of the Selection and its click point drawn in the inbox over the Screenshot, and over the last instant of the Recording. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
+The outline of the Selection drawn in the inbox over the Screenshot, and over the last instant of the Recording: the element and its click point for an element Selection, the rectangle alone for an area Selection. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
 _Avoid_: Highlight, Overlay, Annotation.
 
 ### Video review
