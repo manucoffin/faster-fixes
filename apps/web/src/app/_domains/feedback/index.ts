@@ -25,7 +25,10 @@ export {
   readCachedRecordingSteps,
 } from "./_helpers/read-cached-recording-steps";
 export { RECORDING_MAX_DECOMPRESSED_BYTES } from "./_helpers/recording-format";
-export { readPageSelection } from "./_helpers/read-page-selection";
+export {
+  describeSelectionArea,
+  readPageSelection,
+} from "./_helpers/read-page-selection";
 export {
   RECORDING_STEPS_VERSION,
   readRecordingSteps,

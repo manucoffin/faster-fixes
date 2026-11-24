@@ -357,3 +357,71 @@ describe("formatIssueBody with a Recording", () => {
     );
   });
 });
+
+describe("formatIssueBody for an area Selection", () => {
+  const container = {
+    reactComponentPath: "App > Hero",
+    sourceFile: "src/hero.tsx:12",
+    elementDescription: "section.hero",
+  };
+  const areaFeedback = {
+    ...feedback,
+    selector: "#hero",
+    metadata: {
+      ...container,
+      selection: {
+        viewport: { width: 1280, height: 720 },
+        area: { left: 40.4, top: 120, width: 320, height: 180.6 },
+      },
+    },
+  };
+
+  it("renders an Area line, then the container on an Inside line, with no click point", () => {
+    expect(formatIssueBody(areaFeedback)).toBe(
+      todaysOutput.replace(
+        "**Element:** `#save`",
+        [
+          "**Area:** 320 × 181 at (40, 120) in a 1280 × 720 viewport",
+          "**Inside:** `App > Hero` · `src/hero.tsx:12` · `#hero`",
+        ].join("\n"),
+      ),
+    );
+  });
+
+  it("drops the Inside line when nothing is known about the container", () => {
+    const body = formatIssueBody({
+      ...areaFeedback,
+      selector: null,
+      metadata: { selection: areaFeedback.metadata.selection },
+    });
+
+    expect(body).toContain(
+      "**Area:** 320 × 181 at (40, 120) in a 1280 × 720 viewport",
+    );
+    expect(body).not.toContain("**Inside:**");
+    expect(body).not.toContain("**Element:**");
+  });
+
+  it("renders an element Selection with its click point as today", () => {
+    expect(
+      formatIssueBody({
+        ...feedback,
+        clickX: 12,
+        clickY: 34,
+        metadata: {
+          ...container,
+          selection: {
+            viewport: { width: 1280, height: 720 },
+            element: { left: 0, top: 0, width: 80, height: 32 },
+            click: { x: 12, y: 34 },
+          },
+        },
+      }),
+    ).toBe(
+      todaysOutput.replace(
+        "**Element:** `#save`",
+        "**Element:** `App > Hero` · `src/hero.tsx:12` · `#save` · at (12, 34)",
+      ),
+    );
+  });
+});

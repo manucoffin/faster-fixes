@@ -97,3 +97,17 @@ export function readPageSelection({
   }
   return { form: "element", element, geometry };
 }
+
+/** The text of an area: its size and position in viewport CSS pixels, then the viewport. */
+export function describeSelectionArea({
+  area,
+  viewport,
+}: Pick<Extract<PageSelection, { form: "area" }>, "area" | "viewport">) {
+  const [left, top, width, height] = [
+    area.left,
+    area.top,
+    area.width,
+    area.height,
+  ].map(Math.round);
+  return `${width} × ${height} at (${left}, ${top}) in a ${Math.round(viewport.width)} × ${Math.round(viewport.height)} viewport`;
+}

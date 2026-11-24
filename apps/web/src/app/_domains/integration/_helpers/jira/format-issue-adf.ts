@@ -4,9 +4,11 @@
 // two cannot share a renderer. Keep the section order in sync when either side changes.
 
 import {
+  describeSelectionArea,
   formatTimelineNotes,
   formatTimelineOffset,
   formatTimelineStep,
+  readPageSelection,
   type RecordingTimeline,
   type RecordingTimelineEntry,
 } from "@/app/_domains/feedback";
@@ -122,12 +124,7 @@ export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {
     );
   }
 
-  const elementParts = collectElementParts(feedback);
-  if (elementParts.length > 0) {
-    content.push(
-      paragraph([text("Element: ", [{ type: "strong" }]), ...elementParts]),
-    );
-  }
+  content.push(...selectionParagraphs(feedback));
 
   if (feedback.recording) {
     content.push(recordingParagraph(feedback.recording));
@@ -234,27 +231,49 @@ function dashboardFooter(dashboardUrl: string): AdfNode {
   ]);
 }
 
-function collectElementParts(feedback: FeedbackForJiraIssue): AdfNode[] {
-  const md = feedback.metadata;
-  const codeParts: string[] = [];
-
-  if (typeof md?.reactComponentPath === "string") {
-    codeParts.push(md.reactComponentPath);
+// An area names its container as "Inside", never as the selected element, and
+// has no click point (ADR-0026).
+function selectionParagraphs(feedback: FeedbackForJiraIssue): AdfNode[] {
+  const selection = readPageSelection(feedback);
+  if (selection.form === "area") {
+    const insideNodes = codeNodes(selection.inside);
+    return [
+      paragraph([
+        text("Area: ", [{ type: "strong" }]),
+        text(describeSelectionArea(selection)),
+      ]),
+      ...(insideNodes.length > 0
+        ? [paragraph([text("Inside: ", [{ type: "strong" }]), ...insideNodes])]
+        : []),
+    ];
   }
-  if (typeof md?.sourceFile === "string") codeParts.push(md.sourceFile);
-  if (feedback.selector) codeParts.push(feedback.selector);
 
-  const nodes: AdfNode[] = [];
-  codeParts.forEach((part, index) => {
-    if (index > 0) nodes.push(text(SEPARATOR));
-    nodes.push(text(part, [{ type: "code" }]));
-  });
-
+  const nodes = codeNodes(selection.element);
   if (feedback.clickX != null && feedback.clickY != null) {
     if (nodes.length > 0) nodes.push(text(SEPARATOR));
     nodes.push(text(`at (${feedback.clickX}, ${feedback.clickY})`));
   }
+  return nodes.length > 0
+    ? [paragraph([text("Element: ", [{ type: "strong" }]), ...nodes])]
+    : [];
+}
 
+function codeNodes({
+  componentPath,
+  sourceFile,
+  selector,
+}: {
+  componentPath: string | null;
+  sourceFile: string | null;
+  selector: string | null;
+}): AdfNode[] {
+  const nodes: AdfNode[] = [];
+  [componentPath, sourceFile, selector]
+    .filter((part): part is string => !!part)
+    .forEach((part, index) => {
+      if (index > 0) nodes.push(text(SEPARATOR));
+      nodes.push(text(part, [{ type: "code" }]));
+    });
   return nodes;
 }
 
