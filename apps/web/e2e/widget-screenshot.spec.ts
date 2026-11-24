@@ -1,4 +1,4 @@
-import type { SelectionGeometry } from "@fasterfixes/core";
+import type { ElementSelectionGeometry } from "@fasterfixes/core";
 import { expect, test } from "@playwright/test";
 import { PNG } from "pngjs";
 
@@ -100,7 +100,7 @@ test.describe("screenshot capture", () => {
 
     await expect.poll(() => api.createdFeedback().length).toBe(1);
     const selection = api.createdFeedback()[0]?.metadata?.selection as
-      | SelectionGeometry
+      | ElementSelectionGeometry
       | undefined;
     expect(selection).toBeDefined();
     if (!selection) return;

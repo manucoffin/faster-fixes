@@ -1,4 +1,4 @@
-import type { SelectionGeometry } from "@fasterfixes/core";
+import type { ElementSelectionGeometry } from "@fasterfixes/core";
 
 import type { PinPoint } from "./pin-placement.js";
 
@@ -12,7 +12,7 @@ export function measureSelectionGeometry(
   element: Element,
   click: PinPoint,
   view: Viewport = window,
-): SelectionGeometry {
+): ElementSelectionGeometry {
   const { left, top, width, height } = element.getBoundingClientRect();
   return {
     // Matches the size `captureViewportScreenshot` renders.

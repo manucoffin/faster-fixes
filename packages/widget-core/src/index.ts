@@ -22,6 +22,8 @@ export type {
   CustomMetadata,
   CustomMetadataValue,
   SelectionGeometry,
+  ElementSelectionGeometry,
+  AreaSelectionGeometry,
 } from "./types.js";
 
 export {
