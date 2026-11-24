@@ -161,6 +161,13 @@ export function mountWidget({
 
   const areaFrame = createAreaFrame(document, shadow);
 
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.setAttribute("part", "hint");
+  hint.setAttribute("aria-hidden", "true");
+  hint.textContent = options.labels.annotationHint;
+  hint.hidden = true;
+
   const highlight = document.createElement("div");
   highlight.className = "highlight";
   highlight.hidden = true;
@@ -346,7 +353,7 @@ export function mountWidget({
 
   const annotation = createAnnotationMode(
     document,
-    { overlay, areaFrame },
+    { overlay, areaFrame, hint },
     {
       onSelect(element, click) {
         select(
@@ -435,7 +442,7 @@ export function mountWidget({
   stack.className = "stack";
   applyStackLayout(stack, options.position);
   stack.append(toolbar.element, list.element);
-  shadow.append(overlay, stack);
+  shadow.append(overlay, hint, stack);
 
   // A client-side route change shows the new page's pins and drops the active item.
   const stopWatchingLocation = watchLocation(() => {

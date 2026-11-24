@@ -52,6 +52,8 @@ export type Labels = {
   hideFeedbackList: string;
   showMarkers: string;
   hideMarkers: string;
+  // Follows the cursor in feedback mode, naming both ways to make a Selection.
+  annotationHint: string;
   // Text of the link to the product site shown when the Project has branding.
   brandingLink: string;
   // Receives the excerpt of the Feedback comment the pin stands for.
@@ -83,6 +85,7 @@ export const DEFAULT_LABELS: Labels = {
   hideFeedbackList: "Hide feedback list",
   showMarkers: "Show markers",
   hideMarkers: "Hide markers",
+  annotationHint: "Click an element, or drag to select an area.",
   brandingLink: "Powered by FasterFixes",
   pinAriaLabel: (commentExcerpt) => `Feedback: ${commentExcerpt}`,
   // A warm buffer holds 30 to 60 seconds; a shorter one states its real length.

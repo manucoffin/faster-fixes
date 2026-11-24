@@ -196,6 +196,38 @@ test.describe("screenshot capture", () => {
     expect(isUniformColour(image)).toBe(false);
   });
 
+  test("leaves the cursor hint out of the Screenshot", async ({ page }) => {
+    const api = await stubWidgetApi(page);
+    await seedReviewerToken(page);
+    await page.goto(TALL_PAGE_PATH);
+    await page.addStyleTag({
+      content:
+        "[data-ff-widget]::part(hint) { background: rgb(255, 0, 255); box-shadow: none; }",
+    });
+
+    await page.getByRole("button", { name: "Start feedback" }).click();
+    const target = page.locator("#below-fold-target");
+    await target.scrollIntoViewIfNeeded();
+    await target.hover();
+    await expect(page.locator('[part="hint"]')).toBeVisible();
+    await target.click();
+    await page.getByPlaceholder("Describe the issue...").fill("No hint");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect
+      .poll(() => api.requestsTo("PUT", SCREENSHOT_PATH).length, {
+        timeout: 20_000,
+      })
+      .toBe(1);
+    const [attach] = api.requestsTo("PUT", SCREENSHOT_PATH);
+    const image = readUploadedPng(
+      attach?.body ?? Buffer.alloc(0),
+      attach?.headers["content-type"] ?? "",
+    );
+    expect(isUniformColour(image)).toBe(false);
+    expect(countPixels(image, [255, 0, 255])).toBe(0);
+  });
+
   test("leaves out an element under data-ff-block", async ({ page }) => {
     const api = await stubWidgetApi(page);
     await seedReviewerToken(page);

@@ -57,16 +57,25 @@ function swallowNextClick(view: Window) {
   view.addEventListener("pointerdown", () => swallowing.abort(), options);
 }
 
+// Gap between the pointer and the hint, which flips to the pointer's other side
+// near the viewport's right or bottom edge.
+const HINT_OFFSET_PX = 16;
+
 /**
- * While started, highlights the page element under the pointer in `overlay`
- * and turns the next press on the page into a selection instead of reaching
- * the page: a click selects the element under the press, a drag draws an area
- * in `areaFrame`. Escape during a drag discards the rectangle; otherwise it
+ * While started, highlights the page element under the pointer in `overlay`,
+ * keeps `hint` next to a mouse or pen pointer outside a drag, and turns the
+ * next press on the page into a selection instead of reaching the page: a
+ * click selects the element under the press, a drag draws an area in
+ * `areaFrame`. Escape during a drag discards the rectangle; otherwise it
  * cancels.
  */
 export function createAnnotationMode(
   document: Document,
-  { overlay, areaFrame }: { overlay: HTMLElement; areaFrame: AreaFrame },
+  {
+    overlay,
+    areaFrame,
+    hint,
+  }: { overlay: HTMLElement; areaFrame: AreaFrame; hint: HTMLElement },
   { onSelect, onSelectArea, onCancel }: AnnotationActions,
 ): AnnotationMode {
   const view = document.defaultView ?? window;
@@ -79,6 +88,34 @@ export function createAnnotationMode(
 
   function hideOverlay() {
     overlay.hidden = true;
+  }
+
+  function hideHint() {
+    hint.hidden = true;
+  }
+
+  function moveHint(event: PointerEvent) {
+    if (
+      event.pointerType === "touch" ||
+      press?.dragging ||
+      isWidgetEvent(event)
+    ) {
+      hideHint();
+      return;
+    }
+    hint.hidden = false;
+    const { width, height } = hint.getBoundingClientRect();
+    const left = event.clientX + HINT_OFFSET_PX;
+    const top = event.clientY + HINT_OFFSET_PX;
+    Object.assign(hint.style, {
+      left: `${left + width > view.innerWidth ? event.clientX - HINT_OFFSET_PX - width : left}px`,
+      top: `${top + height > view.innerHeight ? event.clientY - HINT_OFFSET_PX - height : top}px`,
+    });
+  }
+
+  function handlePointerOut(event: PointerEvent) {
+    // Null when the pointer leaves the page for the browser's own interface.
+    if (event.relatedTarget === null) hideHint();
   }
 
   function handleMouseMove(event: MouseEvent) {
@@ -135,6 +172,8 @@ export function createAnnotationMode(
       return;
     }
     blockEvent(event);
+    // A touch on a device that also has a mouse leaves no pointer to follow.
+    if (event.pointerType === "touch") hideHint();
     if (!(event.target instanceof Element) || event.button !== 0) return;
     press = {
       pointerId: event.pointerId,
@@ -147,12 +186,14 @@ export function createAnnotationMode(
   }
 
   function handlePointerMove(event: PointerEvent) {
+    moveHint(event);
     if (!press?.canDrag || event.pointerId !== press.pointerId) return;
     if (press.discarded) return;
     if (!press.dragging) {
       if (!isDrag(press.point, { x: event.clientX, y: event.clientY })) return;
       press.dragging = true;
       hideOverlay();
+      hideHint();
     }
     areaFrame.draw(readArea(event, press));
   }
@@ -173,6 +214,7 @@ export function createAnnotationMode(
   }
 
   function handlePointerCancel(event: PointerEvent) {
+    hideHint();
     if (event.pointerId !== press?.pointerId) return;
     if (press.dragging) areaFrame.hide();
     press = null;
@@ -213,6 +255,7 @@ export function createAnnotationMode(
       view.addEventListener("pointermove", handlePointerMove, options);
       view.addEventListener("pointerup", handlePointerUp, options);
       view.addEventListener("pointercancel", handlePointerCancel, options);
+      document.addEventListener("pointerout", handlePointerOut, options);
       document.addEventListener("selectstart", handleDragGuard, options);
       document.addEventListener("dragstart", handleDragGuard, options);
       view.addEventListener("wheel", handleDragGuard, {
@@ -232,6 +275,7 @@ export function createAnnotationMode(
       pressedWidget = false;
       document.body.style.cursor = previousCursor;
       hideOverlay();
+      hideHint();
     },
   };
 }

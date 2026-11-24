@@ -312,6 +312,56 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(comment).toHaveCount(0);
     });
 
+    test("shows the hint by the cursor and hides it while dragging", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const hint = page.locator('[part="hint"]');
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 2, y: box.y + 2 };
+      await page.mouse.move(from.x, from.y);
+      await expect(hint).toBeHidden();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.mouse.move(from.x, from.y, { steps: 4 });
+      await expect(hint).toBeVisible();
+      await expect(hint).toHaveText(
+        "Click an element, or drag to select an area.",
+      );
+      const hintBox = await hint.boundingBox();
+      expect(hintBox).not.toBeNull();
+      if (!hintBox) return;
+      expect(Math.abs(hintBox.x - from.x)).toBeLessThan(40);
+      expect(Math.abs(hintBox.y - from.y)).toBeLessThan(40);
+      // A hit test through the hint reaches the page, not the Widget.
+      const hit = await page.evaluate(
+        ({ x, y }) =>
+          document.elementFromPoint(x, y)?.hasAttribute("data-ff-widget"),
+        { x: hintBox.x + hintBox.width / 2, y: hintBox.y + hintBox.height / 2 },
+      );
+      expect(hit).toBe(false);
+
+      await page.mouse.down();
+      await page.mouse.move(from.x + 80, from.y + 30, { steps: 8 });
+      await expect(page.locator('[part="area"]')).toBeVisible();
+      await expect(hint).toBeHidden();
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await page.mouse.move(from.x + 90, from.y + 40, { steps: 4 });
+      await expect(hint).toBeVisible();
+
+      await page.locator("h1").click();
+      await expect(
+        page.getByPlaceholder("Describe the issue..."),
+      ).toBeVisible();
+      await expect(hint).toBeHidden();
+    });
+
     test("selects no text while dragging", async ({ page }) => {
       await stubWidgetApi(page);
       await seedReviewerToken(page);
@@ -402,12 +452,14 @@ for (const fixture of WIDGET_FIXTURES) {
           page.getByPlaceholder("Describe the issue..."),
         ).toHaveCount(0);
 
+        await expect(page.locator('[part="hint"]')).toBeHidden();
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.locator("h1").tap();
         await expect(
           page.getByPlaceholder("Describe the issue..."),
         ).toBeVisible();
         await expect(page.locator('[part="area"]')).toBeHidden();
+        await expect(page.locator('[part="hint"]')).toBeHidden();
       });
     });
 

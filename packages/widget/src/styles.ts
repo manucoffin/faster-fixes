@@ -169,6 +169,20 @@ export const WIDGET_CSS = `
     pointer-events: none;
   }
 
+  /* Above the rectangles, below the toolbar and popovers. Placed by script. */
+  .hint {
+    position: fixed;
+    z-index: calc(var(--ff-z-index) - 1);
+    max-width: 240px;
+    padding: 6px 8px;
+    border-radius: calc(var(--ff-radius) - 2px);
+    background: var(--ff-background);
+    color: var(--ff-foreground);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+    font: 500 12px/1.3 var(--ff-font-family);
+    pointer-events: none;
+  }
+
   .highlight {
     position: fixed;
     z-index: calc(var(--ff-z-index) - 2);
