@@ -63,16 +63,35 @@ export type CustomMetadataValue = string | number | boolean | null;
 // the limits the Widget and the server both apply.
 export type CustomMetadata = Record<string, CustomMetadataValue>;
 
+type ViewportRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+/** The clicked element's box and the click point inside it. */
+export type ElementSelectionGeometry = {
+  viewport: { width: number; height: number };
+  element: ViewportRect;
+  click: { x: number; y: number };
+};
+
+/** The rectangle the Reviewer dragged; its container is kept in the element fields. */
+export type AreaSelectionGeometry = {
+  viewport: { width: number; height: number };
+  area: ViewportRect;
+};
+
 /**
  * Where the Selection sat in the Reviewer's viewport when they made it, in
  * viewport CSS pixels. Stored under the `selection` key of the Feedback
  * metadata so the inbox can draw the Selection frame over the Screenshot.
+ * The form is told apart by its content: `element` and `click`, or `area`.
  */
-export type SelectionGeometry = {
-  viewport: { width: number; height: number };
-  element: { left: number; top: number; width: number; height: number };
-  click: { x: number; y: number };
-};
+export type SelectionGeometry =
+  | ElementSelectionGeometry
+  | AreaSelectionGeometry;
 
 export type CreateFeedbackData = {
   comment: string;

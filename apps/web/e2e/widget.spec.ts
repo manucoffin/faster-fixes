@@ -1,7 +1,8 @@
-import type { FeedbackItem } from "@fasterfixes/core";
+import type { AreaSelectionGeometry, FeedbackItem } from "@fasterfixes/core";
 import { expect, test } from "@playwright/test";
 import type { Locator } from "@playwright/test";
 
+import { dragAcross } from "./area-drag";
 import {
   selectOutsideDismissableDrawer,
   submitInsideFocusTrap,
@@ -160,6 +161,308 @@ for (const fixture of WIDGET_FIXTURES) {
       ).toBe("H1");
     });
 
+    test("selects an area by dragging and submits Feedback", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      // Whole pixels, so the sent area can be compared exactly.
+      const from = { x: Math.ceil(box.x) + 4, y: Math.ceil(box.y) + 4 };
+      const to = {
+        x: from.x + Math.min(Math.floor(box.width) - 10, 80),
+        y: Math.floor(box.y + box.height) - 4,
+      };
+
+      const area = page.locator('[part="area"]');
+      await page.mouse.move(from.x, from.y);
+      await expect(page.locator('[part="overlay"]')).toBeVisible();
+      await page.mouse.down();
+      await page.mouse.move(to.x, to.y, { steps: 8 });
+      await expect(area).toBeVisible();
+      await expect(page.locator('[part="overlay"]')).toBeHidden();
+      await page.mouse.up();
+
+      const comment = page.getByPlaceholder("Describe the issue...");
+      await expect(comment).toBeFocused();
+      // Kept drawn while the Reviewer writes, with the form anchored to it.
+      await expect(area).toBeVisible();
+      const areaBox = await area.boundingBox();
+      const formBox = await page.locator('[part="popover"]').boundingBox();
+      expect(areaBox).not.toBeNull();
+      expect(formBox).not.toBeNull();
+      if (!areaBox || !formBox) return;
+      expect(formBox.y).toBeGreaterThanOrEqual(areaBox.y + areaBox.height);
+      await comment.fill("The heading is too close to the text");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      await expect(comment).toBeHidden();
+      await expect(area).toBeHidden();
+      await expect.poll(() => api.createdFeedback().length).toBe(1);
+      const [created] = api.createdFeedback();
+      expect(created).not.toHaveProperty("clickX");
+      expect(created).not.toHaveProperty("clickY");
+      expect(created?.metadata).not.toHaveProperty("nearbyText");
+      expect(created?.metadata).toMatchObject({
+        elementDescription: expect.any(String),
+        selectors: expect.any(Object),
+        pinAnchor: { x: expect.any(Number), y: expect.any(Number) },
+        pinPlacement: { mode: "document", targetKind: "normal" },
+      });
+      const selection = created?.metadata?.selection as AreaSelectionGeometry;
+      expect(selection.viewport).toEqual({
+        width: page.viewportSize()?.width,
+        height: page.viewportSize()?.height,
+      });
+      expect(selection.area.left).toBeCloseTo(from.x, 0);
+      expect(selection.area.top).toBeCloseTo(from.y, 0);
+      expect(selection.area.width).toBeCloseTo(to.x - from.x, 0);
+      expect(selection.area.height).toBeCloseTo(to.y - from.y, 0);
+      expect(selection).not.toHaveProperty("click");
+      // The selector names the container, whose box holds the whole area.
+      const container = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        if (!element) return null;
+        const { left, top, right, bottom } = element.getBoundingClientRect();
+        return { left, top, right, bottom };
+      }, created?.selector ?? "");
+      expect(container).not.toBeNull();
+      if (!container) return;
+      expect(container.left).toBeLessThanOrEqual(from.x + 1);
+      expect(container.top).toBeLessThanOrEqual(from.y + 1);
+      expect(container.right).toBeGreaterThanOrEqual(to.x - 1);
+      expect(container.bottom).toBeGreaterThanOrEqual(to.y - 1);
+    });
+
+    test("treats a press that travels less than 6 pixels as a click", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 10, y: box.y + box.height / 2 };
+      await dragAcross(page, from, { x: from.x + 3, y: from.y + 3 });
+
+      await page.getByPlaceholder("Describe the issue...").fill("Small move");
+      await expect(page.locator('[part="area"]')).toBeHidden();
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      await expect.poll(() => api.createdFeedback().length).toBe(1);
+      const [created] = api.createdFeedback();
+      expect(created).toMatchObject({
+        clickX: expect.any(Number),
+        clickY: expect.any(Number),
+        metadata: { elementDescription: expect.stringContaining("h1") },
+      });
+      expect(created?.metadata?.selection).toHaveProperty("click");
+    });
+
+    test("discards a drag on Escape and stays in annotation mode", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const area = page.locator('[part="area"]');
+      await page.mouse.move(box.x + 2, box.y + 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 60, box.y + 30, { steps: 8 });
+      await expect(area).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(area).toBeHidden();
+      await page.mouse.move(box.x + 90, box.y + 40, { steps: 4 });
+      await page.mouse.up();
+
+      const comment = page.getByPlaceholder("Describe the issue...");
+      await expect(area).toBeHidden();
+      await expect(comment).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Exit feedback mode" }),
+      ).toBeVisible();
+      // Still annotating: the next click selects.
+      await page.locator("h1").click();
+      await expect(comment).toBeVisible();
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.mouse.move(box.x + 2, box.y + 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 60, box.y + 30, { steps: 8 });
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await expect(
+        page.getByRole("button", { name: "Start feedback" }),
+      ).toBeVisible();
+      await expect(comment).toHaveCount(0);
+    });
+
+    test("shows the hint by the cursor and hides it while dragging", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      const hint = page.locator('[part="hint"]');
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 2, y: box.y + 2 };
+      await page.mouse.move(from.x, from.y);
+      await expect(hint).toBeHidden();
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await page.mouse.move(from.x, from.y, { steps: 4 });
+      await expect(hint).toBeVisible();
+      await expect(hint).toHaveText(
+        "Click an element, or drag to select an area.",
+      );
+      const hintBox = await hint.boundingBox();
+      expect(hintBox).not.toBeNull();
+      if (!hintBox) return;
+      expect(Math.abs(hintBox.x - from.x)).toBeLessThan(40);
+      expect(Math.abs(hintBox.y - from.y)).toBeLessThan(40);
+      // A hit test through the hint reaches the page, not the Widget.
+      const hit = await page.evaluate(
+        ({ x, y }) =>
+          document.elementFromPoint(x, y)?.hasAttribute("data-ff-widget"),
+        { x: hintBox.x + hintBox.width / 2, y: hintBox.y + hintBox.height / 2 },
+      );
+      expect(hit).toBe(false);
+
+      await page.mouse.down();
+      await page.mouse.move(from.x + 80, from.y + 30, { steps: 8 });
+      await expect(page.locator('[part="area"]')).toBeVisible();
+      await expect(hint).toBeHidden();
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await page.mouse.move(from.x + 90, from.y + 40, { steps: 4 });
+      await expect(hint).toBeVisible();
+
+      await page.locator("h1").click();
+      await expect(
+        page.getByPlaceholder("Describe the issue..."),
+      ).toBeVisible();
+      await expect(hint).toBeHidden();
+    });
+
+    test("selects no text while dragging", async ({ page }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      await page.mouse.move(box.x + 1, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, {
+        steps: 8,
+      });
+      expect(
+        await page.evaluate(() => window.getSelection()?.toString() ?? ""),
+      ).toBe("");
+      await page.mouse.up();
+      await expect(
+        page.getByPlaceholder("Describe the issue..."),
+      ).toBeVisible();
+    });
+
+    test("ignores a drag that starts on the Widget's own interface", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const exit = page.getByRole("button", { name: "Exit feedback mode" });
+      // Waits for the toolbar to settle, so the press lands on the control.
+      await exit.hover();
+      const box = await exit.boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      await dragAcross(page, from, { x: from.x - 120, y: from.y - 120 });
+
+      await expect(page.locator('[part="area"]')).toBeHidden();
+      await expect(page.getByPlaceholder("Describe the issue...")).toHaveCount(
+        0,
+      );
+    });
+
+    test.describe("on a touch screen", () => {
+      test.use({ hasTouch: true });
+
+      test("scrolls on a drag and selects an element on a tap", async ({
+        page,
+        browserName,
+      }) => {
+        test.skip(
+          browserName !== "chromium",
+          "Touch input is dispatched through the Chrome DevTools Protocol.",
+        );
+        await stubWidgetApi(page);
+        await seedReviewerToken(page);
+        await page.goto(fixture.path);
+        await page.evaluate(() => {
+          document.body.style.minHeight = "4000px";
+        });
+
+        await page.getByRole("button", { name: "Start feedback" }).click();
+        const client = await page.context().newCDPSession(page);
+        const x = 200;
+        await client.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x, y: 400 }],
+        });
+        for (let y = 380; y >= 100; y -= 20) {
+          await client.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x, y }],
+          });
+        }
+        await client.send("Input.dispatchTouchEvent", {
+          type: "touchEnd",
+          touchPoints: [],
+        });
+
+        await expect
+          .poll(() => page.evaluate(() => window.scrollY))
+          .toBeGreaterThan(0);
+        await expect(page.locator('[part="area"]')).toBeHidden();
+        await expect(
+          page.getByPlaceholder("Describe the issue..."),
+        ).toHaveCount(0);
+
+        await expect(page.locator('[part="hint"]')).toBeHidden();
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.locator("h1").tap();
+        await expect(
+          page.getByPlaceholder("Describe the issue..."),
+        ).toBeVisible();
+        await expect(page.locator('[part="area"]')).toBeHidden();
+        await expect(page.locator('[part="hint"]')).toBeHidden();
+      });
+    });
+
     test("sends Custom metadata read at submission, not at init", async ({
       page,
     }) => {
@@ -297,6 +600,128 @@ for (const fixture of WIDGET_FIXTURES) {
       await expect(
         page.getByRole("button", { name: /^Feedback: / }),
       ).toHaveCount(1);
+    });
+
+    test("places the pin of a dragged area at its top-left corner", async ({
+      page,
+    }) => {
+      await stubWidgetApi(page);
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      const box = await page.locator("h1").boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      const from = { x: box.x + 20, y: box.y + 4 };
+      await dragAcross(page, from, {
+        x: from.x + Math.min(box.width - 30, 80),
+        y: box.y + box.height - 4,
+      });
+      await page
+        .getByPlaceholder("Describe the issue...")
+        .fill("The heading is too close to the text");
+      await page.getByRole("button", { name: "Submit" }).click();
+
+      const dot = page
+        .getByRole("button", {
+          name: "Feedback: The heading is too close to the text",
+        })
+        .locator(".pin-dot");
+      await expect(dot).toBeVisible();
+      const dotBox = await dot.boundingBox();
+      expect(dotBox).not.toBeNull();
+      if (!dotBox) return;
+      expect(dotBox.x + dotBox.width / 2).toBeCloseTo(from.x, -1);
+      expect(dotBox.y + dotBox.height / 2).toBeCloseTo(from.y, -1);
+    });
+
+    test("redraws the area of an area Feedback from its pin", async ({
+      page,
+      baseURL,
+    }) => {
+      const pageUrl = new URL(fixture.path, baseURL).href;
+      await stubWidgetApi(page, {
+        feedback: [
+          stubbedItem(pageUrl, {
+            id: "fb_area",
+            comment: "The gap is too wide",
+            clickX: null,
+            clickY: null,
+            metadata: {
+              pinAnchor: { x: 0.1, y: 0.2 },
+              pinPlacement: { mode: "document", targetKind: "normal" },
+              selection: {
+                viewport: { width: 1280, height: 720 },
+                area: { left: 0, top: 0, width: 60, height: 20 },
+              },
+            },
+          }),
+          stubbedItem(pageUrl, { id: "fb_element" }),
+        ],
+      });
+      await seedReviewerToken(page);
+      await page.goto(fixture.path);
+      // Room to scroll, so the area can be seen following its container.
+      await page.addStyleTag({
+        content: "body { padding-bottom: 200vh !important; }",
+      });
+
+      const area = page.locator('[part~="pin-area"]');
+      const highlight = page.locator(".highlight");
+      // Drawn at the stored anchor in the heading's current box, at its stored size.
+      const expectAreaAtAnchor = () =>
+        expect
+          .poll(async () => {
+            const [areaBox, headingBox] = await Promise.all([
+              area.boundingBox(),
+              page.locator("h1").boundingBox(),
+            ]);
+            if (!areaBox || !headingBox) return null;
+            return {
+              // `abs` keeps a rounded -0 equal to 0.
+              left: Math.abs(
+                Math.round(areaBox.x - (headingBox.x + headingBox.width * 0.1)),
+              ),
+              top: Math.abs(
+                Math.round(
+                  areaBox.y - (headingBox.y + headingBox.height * 0.2),
+                ),
+              ),
+              width: Math.round(areaBox.width),
+              height: Math.round(areaBox.height),
+            };
+          })
+          .toEqual({ left: 0, top: 0, width: 60, height: 20 });
+
+      const areaPin = page.getByRole("button", {
+        name: "Feedback: The gap is too wide",
+      });
+      await expect(areaPin).toBeVisible();
+      await expect(area).toBeHidden();
+
+      await areaPin.hover();
+      await expect(area).toBeVisible();
+      await expect(highlight).toBeHidden();
+      await expectAreaAtAnchor();
+
+      // An element pin still outlines its element.
+      await page
+        .getByRole("button", { name: "Feedback: The heading is misaligned" })
+        .hover();
+      await expect(highlight).toBeVisible();
+      await expect(area).toBeHidden();
+
+      await areaPin.click();
+      await expect(page.locator('[part="popover"]')).toBeVisible();
+      await page.mouse.move(1, 1);
+      await expect(area).toBeVisible();
+      await expectAreaAtAnchor();
+
+      await page.evaluate(() => window.scrollBy(0, 40));
+      await expectAreaAtAnchor();
+      await page.setViewportSize({ width: 900, height: 700 });
+      await expectAreaAtAnchor();
     });
 
     test("hides and shows the pins with the markers control", async ({
@@ -648,6 +1073,23 @@ for (const fixture of WIDGET_FIXTURES) {
       page,
     }) => {
       await selectOutsideDismissableDrawer(page, fixture.path, "bubble");
+    });
+
+    test("keeps focus in the comment popover after a drag inside a focus-trapping dialog", async ({
+      page,
+    }) => {
+      await submitInsideFocusTrap(page, fixture.path, "bubble", "drag");
+    });
+
+    test("a drag does not close a drawer that closes on outside presses", async ({
+      page,
+    }) => {
+      await selectOutsideDismissableDrawer(
+        page,
+        fixture.path,
+        "bubble",
+        "drag",
+      );
     });
   });
 }

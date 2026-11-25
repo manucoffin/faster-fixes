@@ -164,6 +164,55 @@ describe("createFeedbacks", () => {
     );
   });
 
+  it("drops an area geometry so an agent only creates an element Selection", async () => {
+    const db = fakeDb();
+    const elementSelection = {
+      viewport: { width: 1280, height: 720 },
+      element: { left: 10, top: 20, width: 80, height: 32 },
+      click: { x: 12, y: 24 },
+    };
+
+    await createFeedbacks(
+      {
+        project: "proj_public_1",
+        organizationId: ORGANIZATION_ID,
+        organizationProjects: ORGANIZATION_PROJECTS,
+        feedbacks: [
+          {
+            ...feedbackItem,
+            selector: "main",
+            metadata: {
+              elementDescription: "main",
+              selection: {
+                viewport: { width: 1280, height: 720 },
+                area: { left: 40, top: 120, width: 320, height: 180 },
+              },
+            },
+          },
+          { ...feedbackItem, metadata: { selection: elementSelection } },
+        ],
+      },
+      db,
+    );
+
+    expect(db.feedback.create).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          metadata: { elementDescription: "main" },
+        }),
+      }),
+    );
+    expect(db.feedback.create).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          metadata: { selection: elementSelection },
+        }),
+      }),
+    );
+  });
+
   it("reports the caller as at the cap once the batch fills the plan", async () => {
     const db = fakeDb({
       feedbackCount: [FREE_PLAN_FEEDBACK_LIMIT - 1, FREE_PLAN_FEEDBACK_LIMIT],

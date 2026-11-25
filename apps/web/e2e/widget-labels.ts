@@ -30,6 +30,7 @@ export const LABEL_OVERRIDES: TextLabels = {
   hideFeedbackList: "Masquer la liste",
   showMarkers: "Afficher les repères",
   hideMarkers: "Masquer les repères",
+  annotationHint: "Cliquez sur un élément, ou glissez pour choisir une zone.",
   brandingLink: "Propulsé par FasterFixes",
 };
 export const PIN_LABEL_PREFIX = "Retour : ";
@@ -88,6 +89,10 @@ export async function expectLabelsEverywhere(page: Page) {
   await expect(
     page.getByRole("button", { name: LABEL_OVERRIDES.exitFeedbackMode }),
   ).toBeVisible();
+  await page.locator("h1").hover();
+  await expect(page.locator('[part="hint"]')).toHaveText(
+    LABEL_OVERRIDES.annotationHint,
+  );
   await expectNoDefaultLabel(page);
 
   await page.locator("h1").click();

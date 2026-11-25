@@ -87,11 +87,8 @@ describe("getSelectionFrame", () => {
       },
     });
 
-    expect(frame?.element).toEqual({
-      left: 0,
-      top: 50,
-      width: 100,
-      height: 50,
+    expect(frame).toMatchObject({
+      element: { left: 0, top: 50, width: 100, height: 50 },
     });
   });
 
@@ -106,5 +103,76 @@ describe("getSelectionFrame", () => {
     expect(getSelectionFrame({ selection: retina })).toEqual(
       getSelectionFrame({ selection }),
     );
+  });
+
+  describe("an area Selection", () => {
+    const area = {
+      viewport: { width: 1000, height: 500 },
+      area: { left: 100, top: 50, width: 200, height: 100 },
+    };
+
+    it("returns the rectangle as percentages of the viewport, with no click point", () => {
+      expect(getSelectionFrame({ selection: area })).toEqual({
+        aspectRatio: 2,
+        area: { left: 10, top: 10, width: 20, height: 20 },
+      });
+    });
+
+    it("reads the area even when a click key sits beside it", () => {
+      const frame = getSelectionFrame({
+        selection: { ...area, click: { x: 1, y: 1 } },
+      });
+
+      expect(frame).not.toHaveProperty("click");
+    });
+
+    it("returns nothing when an area value is not a number", () => {
+      expect(
+        getSelectionFrame({
+          selection: { ...area, area: { ...area.area, width: "200" } },
+        }),
+      ).toBeNull();
+    });
+
+    it("returns nothing when the area has no size", () => {
+      expect(
+        getSelectionFrame({
+          selection: { ...area, area: { ...area.area, height: 0 } },
+        }),
+      ).toBeNull();
+    });
+
+    it("returns nothing when the viewport has zero size", () => {
+      expect(
+        getSelectionFrame({
+          selection: { ...area, viewport: { width: 1000, height: 0 } },
+        }),
+      ).toBeNull();
+    });
+
+    it("returns nothing when the area lies outside the viewport", () => {
+      expect(
+        getSelectionFrame({
+          selection: {
+            ...area,
+            area: { left: 1100, top: 50, width: 200, height: 100 },
+          },
+        }),
+      ).toBeNull();
+    });
+
+    it("clips an area overflowing the viewport to the visible part", () => {
+      const frame = getSelectionFrame({
+        selection: {
+          ...area,
+          area: { left: 900, top: -50, width: 200, height: 100 },
+        },
+      });
+
+      expect(frame).toEqual({
+        aspectRatio: 2,
+        area: { left: 90, top: 0, width: 10, height: 10 },
+      });
+    });
   });
 });

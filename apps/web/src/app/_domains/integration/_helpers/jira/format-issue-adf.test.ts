@@ -526,3 +526,79 @@ describe("formatIssueAdf with a Recording", () => {
     expect(json).toContain(", the element the comment is about");
   });
 });
+
+describe("formatIssueAdf for an area Selection", () => {
+  const container = {
+    reactComponentPath: "App > Hero",
+    sourceFile: "src/hero.tsx:12",
+  };
+  const selection = {
+    viewport: { width: 1280, height: 720 },
+    area: { left: 40, top: 120, width: 320, height: 180 },
+  };
+
+  it("replaces the Element paragraph with an Area and an Inside paragraph, with no click point", () => {
+    const doc = formatIssueAdf({
+      ...feedback,
+      selector: "#hero",
+      metadata: { ...container, selection },
+    });
+
+    expect(doc.content.slice(2, 4)).toEqual([
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Area: ", marks: [{ type: "strong" }] },
+          {
+            type: "text",
+            text: "320 × 180 at (40, 120) in a 1280 × 720 viewport",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Inside: ", marks: [{ type: "strong" }] },
+          { type: "text", text: "App > Hero", marks: [{ type: "code" }] },
+          { type: "text", text: " · " },
+          { type: "text", text: "src/hero.tsx:12", marks: [{ type: "code" }] },
+          { type: "text", text: " · " },
+          { type: "text", text: "#hero", marks: [{ type: "code" }] },
+        ],
+      },
+    ]);
+    expect(JSON.stringify(doc)).not.toContain("Element: ");
+  });
+
+  it("drops the Inside paragraph when nothing is known about the container", () => {
+    const json = JSON.stringify(
+      formatIssueAdf({ ...feedback, selector: null, metadata: { selection } }),
+    );
+
+    expect(json).toContain("Area: ");
+    expect(json).not.toContain("Inside: ");
+  });
+
+  it("renders an element Selection with its click point as today", () => {
+    const doc = formatIssueAdf({
+      ...feedback,
+      clickX: 12,
+      clickY: 34,
+      metadata: container,
+    });
+
+    expect(doc.content[2]).toEqual({
+      type: "paragraph",
+      content: [
+        { type: "text", text: "Element: ", marks: [{ type: "strong" }] },
+        { type: "text", text: "App > Hero", marks: [{ type: "code" }] },
+        { type: "text", text: " · " },
+        { type: "text", text: "src/hero.tsx:12", marks: [{ type: "code" }] },
+        { type: "text", text: " · " },
+        { type: "text", text: "#save", marks: [{ type: "code" }] },
+        { type: "text", text: " · " },
+        { type: "text", text: "at (12, 34)" },
+      ],
+    });
+  });
+});

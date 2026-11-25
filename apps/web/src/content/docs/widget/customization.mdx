@@ -110,6 +110,7 @@ window.FasterFixes.init({
 | `showMarkers`         | `"Show markers"`                                                                  | Accessible name of the pins control, pins hidden                                                               |
 | `hideMarkers`         | `"Hide markers"`                                                                  | Accessible name of the pins control, pins shown                                                                |
 | `brandingLink`        | `"Powered by FasterFixes"`                                                        | Branding link, when the Project shows branding                                                                 |
+| `annotationHint`      | `"Click an element, or drag to select an area."`                                  | Hint next to the cursor in feedback mode, hidden while dragging and on touch screens                           |
 | `pinAriaLabel`        | `` (comment) => `Feedback: ${comment}` ``                                         | Accessible name of a pin. A function that receives an excerpt of the comment.                                  |
 | `recordingIncluded`   | `"Includes the last minute on this page."`, or the real duration below 30 seconds | Muted line of the comment form when a Recording is attached. A function that receives its duration in seconds. |
 | `successMessage`      | `"Feedback sent"`                                                                 | Not displayed. Kept so existing `labels` objects remain valid.                                                 |
@@ -169,12 +170,15 @@ To style an element further, target it with `::part()`:
 }
 ```
 
-| Part        | Element                                 |
-| ----------- | --------------------------------------- |
-| `button`    | The floating action button              |
-| `overlay`   | The annotation overlay                  |
-| `popover`   | The comment popover and the pin popover |
-| `textarea`  | The comment field                       |
-| `pin`       | Each Feedback pin on the page           |
-| `list`      | The Feedback list panel                 |
-| `list-item` | Each item of the Feedback list          |
+| Part        | Element                                                               |
+| ----------- | --------------------------------------------------------------------- |
+| `button`    | The floating action button                                            |
+| `overlay`   | The annotation overlay                                                |
+| `hint`      | The hint next to the cursor in feedback mode                          |
+| `area`      | The rectangle of a dragged area, also drawn when its pin is hovered   |
+| `pin-area`  | The area drawn when its pin is hovered or open, also styled by `area` |
+| `popover`   | The comment popover and the pin popover                               |
+| `textarea`  | The comment field                                                     |
+| `pin`       | Each Feedback pin on the page                                         |
+| `list`      | The Feedback list panel                                               |
+| `list-item` | Each item of the Feedback list                                        |

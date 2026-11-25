@@ -38,7 +38,7 @@ A card contains:
 
 - Feedback comment
 - Page URL
-- DOM selector
+- The selected element: its component path, source file, DOM selector and click position, or an [area](#area-feedback) and the element it sits inside
 - Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
 - Browser info, viewport and the reviewer's name
 - Custom metadata, when the widget sends it
@@ -48,6 +48,10 @@ A card contains:
 The screenshot is attached as the card's cover. When the console logs and network requests exceed Trello's description limit, the description is cut and keeps the dashboard link.
 
 An automatic card waits up to 30 seconds for the Recording to upload, a manual card is created at once, and a Recording that arrives later is added to the card. The Recording link requires a Faster Fixes login, and the share link of a Video never appears on a card.
+
+## Area feedback
+
+When the reviewer drags to select an area instead of clicking an element, the card shows an **Area** line with the area's size and position in the viewport, then an **Inside** line with the component path, source file and DOM selector of the element that contains the whole area. That element is context, not what was selected, and the card has no click coordinates. The cover is the full viewport screenshot, without the area drawn on it.
 
 ## Status sync
 

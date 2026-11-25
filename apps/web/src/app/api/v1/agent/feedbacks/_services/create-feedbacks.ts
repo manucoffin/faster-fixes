@@ -1,3 +1,4 @@
+import { readPageSelection } from "@/app/_domains/feedback";
 import {
   checkResourceLimit,
   resolveOrganizationPlan,
@@ -77,7 +78,7 @@ export async function createFeedbacks(
 
   const created = await db.$transaction(
     feedbacks.map((f) => {
-      const baseMetadata = f.metadata ?? {};
+      const baseMetadata = withoutAreaSelection(f);
       const metadata: Prisma.InputJsonObject = source
         ? { ...baseMetadata, source }
         : baseMetadata;
@@ -128,3 +129,19 @@ export async function createFeedbacks(
 }
 
 export type CreateFeedbacksOutput = Awaited<ReturnType<typeof createFeedbacks>>;
+
+// Agents cannot create an area Feedback: an area geometry would make the
+// selector read as a container (ADR-0026), so it is dropped.
+function withoutAreaSelection({
+  selector,
+  metadata,
+}: CreateFeedbackItemInput): NonNullable<CreateFeedbackItemInput["metadata"]> {
+  if (!metadata) return {};
+  if (
+    readPageSelection({ selector: selector ?? null, metadata }).form !== "area"
+  ) {
+    return metadata;
+  }
+  const { selection: _area, ...rest } = metadata;
+  return rest;
+}

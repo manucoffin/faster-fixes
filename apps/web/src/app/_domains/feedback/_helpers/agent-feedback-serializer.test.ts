@@ -84,6 +84,32 @@ describe("toAgentFeedbackItem", () => {
     });
   });
 
+  it("passes the geometry of an area Selection through unchanged", () => {
+    const selection = {
+      viewport: { width: 1280, height: 800 },
+      area: { left: 40, top: 120, width: 320, height: 180 },
+    };
+    const item = toAgentFeedbackItem(
+      {
+        ...pageRow,
+        selector: "main > section.pricing",
+        clickX: null,
+        clickY: null,
+        metadata: { elementDescription: "section.pricing", selection },
+      },
+      SCREENSHOT_URL,
+    );
+
+    expect(item.metadata).toEqual({
+      elementDescription: "section.pricing",
+      selection,
+    });
+    expect(item.selector).toBe("main > section.pricing");
+    expect(item.clickX).toBeNull();
+    expect(item.clickY).toBeNull();
+    expect(item.selection).toBeNull();
+  });
+
   it("reads an instant with a point from the flat columns", () => {
     const item = toAgentFeedbackItem(
       videoRow({ frameX: 0.42, frameY: 0.61 }),

@@ -40,7 +40,7 @@ Content-Type: multipart/form-data
 | ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | `comment`         | `string` | Yes      | Feedback comment                                                                                            |
 | `pageUrl`         | `string` | Yes      | Page URL where feedback was left                                                                            |
-| `selector`        | `string` | No       | DOM selector of the annotated element                                                                       |
+| `selector`        | `string` | No       | DOM selector of the annotated element, or of the container of an area                                       |
 | `clickX`          | `number` | No       | Click X coordinate                                                                                          |
 | `clickY`          | `number` | No       | Click Y coordinate                                                                                          |
 | `browserName`     | `string` | No       | Browser name                                                                                                |
@@ -51,6 +51,8 @@ Content-Type: multipart/form-data
 | `metadata`        | `object` | No       | Element context and pin placement, set by the Widget. Returned to every Reviewer of the project             |
 | `diagnosticTrail` | `object` | No       | Captured console logs and network requests: `{ console: [...], network: [...] }`                            |
 | `customMetadata`  | `object` | No       | Key/value pairs declared by your site. Never returned to Reviewers. See [Custom metadata](#custom-metadata) |
+
+The Widget stores the Selection's geometry under `metadata.selection`, in viewport CSS pixels. A click sends `{ viewport, element, click }` with `clickX` and `clickY`. A drag sends `{ viewport, area }` with no click coordinates, and `selector` names the area's container, the smallest element holding the whole area. See the [Agent API](/docs/api-reference/agent-api#page-selection) for both shapes.
 
 ### Custom metadata
 

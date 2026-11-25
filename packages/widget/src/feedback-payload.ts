@@ -20,8 +20,10 @@ import type { PinPoint } from "./pin-placement.js";
 
 type FeedbackPayloadInput = {
   comment: string;
+  /** The clicked element, or the container of an area (ADR-0026). */
   element: Element;
-  click: PinPoint;
+  /** Where the Pin goes: the click, or the area's top-left corner. */
+  pinPoint: PinPoint;
   /** Measured at Selection, unlike the rest of the payload. */
   selection: SelectionGeometry;
   diagnosticTrail: DiagnosticTrail | undefined;
@@ -32,23 +34,30 @@ type FeedbackPayloadInput = {
 export function buildFeedbackPayload({
   comment,
   element,
-  click,
+  pinPoint,
   selection,
   diagnosticTrail,
   customMetadata,
 }: FeedbackPayloadInput): CreateFeedbackData {
+  const isArea = "area" in selection;
   const selectors = generateSelectors(element);
+  const { nearbyText, ...context } = captureElementContext(
+    element,
+    selectors.strategies,
+  );
   const metadata: Record<string, unknown> = {
-    ...captureElementContext(element, selectors.strategies),
+    ...context,
+    // A container's text is not what an area is about.
+    ...(!isArea && { nearbyText }),
     selection,
   };
 
-  const pinAnchor = computePinAnchor(element.getBoundingClientRect(), click);
+  const pinAnchor = computePinAnchor(element.getBoundingClientRect(), pinPoint);
   if (pinAnchor) {
     metadata.pinAnchor = pinAnchor;
     metadata.pinPlacement = createPinPlacementMetadata(
       getViewportAnchoringKind(element),
-      click,
+      pinPoint,
       { x: window.scrollX, y: window.scrollY },
     );
   }
@@ -59,8 +68,7 @@ export function buildFeedbackPayload({
     comment,
     pageUrl: window.location.href,
     selector: selectors.best,
-    clickX: click.x,
-    clickY: click.y,
+    ...(!isArea && { clickX: pinPoint.x, clickY: pinPoint.y }),
     metadata,
     diagnosticTrail,
     ...getBrowserInfo(),

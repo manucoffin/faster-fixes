@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
+import { dragAcross } from "./area-drag";
 import { seedReviewerToken } from "./reviewer-token";
 import { stubWidgetApi } from "./widget-api-stub";
 
@@ -9,6 +10,21 @@ import { stubWidgetApi } from "./widget-api-stub";
  * listen; `capture` is how focus-trap and Headless UI do.
  */
 type ListenerPhase = "bubble" | "capture";
+
+/** How the Reviewer selects: a click on an element, or a drag over an area. */
+type Gesture = "click" | "drag";
+
+async function selectWith(page: Page, target: Locator, gesture: Gesture) {
+  if (gesture === "click") {
+    await target.click();
+    return;
+  }
+  const box = await target.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) return;
+  const from = { x: box.x + 2, y: box.y + 2 };
+  await dragAcross(page, from, { x: from.x + 40, y: from.y + 20 });
+}
 
 /**
  * Opens a modal dialog the way dialog libraries do: every other child of the
@@ -83,12 +99,14 @@ export function openDismissableDrawer(page: Page, phase: ListenerPhase) {
 
 /**
  * With a focus-trapping modal open over the page, a Reviewer selects an
- * element inside it, types and submits without the dialog taking focus back.
+ * element or an area inside it, types and submits without the dialog taking
+ * focus back.
  */
 export async function submitInsideFocusTrap(
   page: Page,
   path: string,
   phase: ListenerPhase,
+  gesture: Gesture = "click",
 ) {
   const api = await stubWidgetApi(page);
   await seedReviewerToken(page);
@@ -104,7 +122,11 @@ export async function submitInsideFocusTrap(
   // Found by role only because the host is back in the accessibility tree.
   await start.click();
   const dialog = page.getByRole("dialog", { name: "Host dialog" });
-  await dialog.getByRole("heading", { name: "Dialog heading" }).click();
+  await selectWith(
+    page,
+    dialog.getByRole("heading", { name: "Dialog heading" }),
+    gesture,
+  );
 
   const comment = page.getByPlaceholder("Describe the issue...");
   await expect(comment).toBeFocused();
@@ -120,12 +142,13 @@ export async function submitInsideFocusTrap(
 
 /**
  * With a drawer open that closes on outside presses, starting annotation and
- * selecting an element outside the drawer leave it open.
+ * selecting an element or an area outside the drawer leave it open.
  */
 export async function selectOutsideDismissableDrawer(
   page: Page,
   path: string,
   phase: ListenerPhase,
+  gesture: Gesture = "click",
 ) {
   await stubWidgetApi(page);
   await seedReviewerToken(page);
@@ -138,7 +161,7 @@ export async function selectOutsideDismissableDrawer(
   await expect(drawer).toBeVisible();
 
   await start.click();
-  await page.locator("h1").click();
+  await selectWith(page, page.locator("h1"), gesture);
 
   await expect(page.getByPlaceholder("Describe the issue...")).toBeVisible();
   await expect(drawer).toBeVisible();
