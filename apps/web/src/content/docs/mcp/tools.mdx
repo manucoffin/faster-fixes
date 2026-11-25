@@ -30,7 +30,7 @@ Lists feedback items for your project with optional filtering.
 The agent calls `list_feedbacks` with `status: "new"` and receives structured feedback including:
 
 - Feedback comment and page URL
-- DOM selector and click coordinates
+- DOM selector and click coordinates, or for an area Selection, the area and the container it sits inside
 - React component tree and source file (on React sites)
 - Browser info and viewport size
 - Screenshot URL
@@ -43,6 +43,8 @@ The listing never carries a Recording's timeline. A Feedback with a Recording ca
 ```md
 **Recording:** 42.3 s, 18 steps. Call `get_feedback` with id `0b6c1f52-3d8e-4a9b-8c7d-1e2f3a4b5c6d` to read its timeline.
 ```
+
+A page Selection is an element the Reviewer clicked or an area they dragged. For an area, the Markdown output has an **Area** line with its size, position and viewport, then an **Inside** line with the component path, source file and selector of its container, the smallest element holding the whole area. The container tells the agent where to look in the code, not which element the comment is about. See the [Agent API](/docs/api-reference/agent-api#page-selection) for the JSON shape.
 
 Feedback left on a Video carries its `videoId` and a `selection` instead of the page fields: the marked time in milliseconds and, when the Reviewer marked one, a point or area in coordinates normalized from 0 to 1 of the frame. With `video_id`, the JSON output starts with a `video` block holding the Video's title, filename, duration and pixel size. The Markdown output names the Video, the time and the position on the frame. See the [Agent API](/docs/api-reference/agent-api#video-feedback) for the full item shape.
 
@@ -72,7 +74,7 @@ When the Feedback has a Recording, a **Timeline** section takes the place of **D
 - 0.0 s selection button "Save changes" (#save), the element the comment is about
 ```
 
-A long Timeline keeps the entries closest to the Selection. Typed values are never captured, so a typing step names the field and not what was typed. When the Recording file cannot be read, the Feedback keeps its **Diagnostics** section and a line says it has no timeline. See the [Agent API](/docs/api-reference/agent-api#get-a-feedback) for the full shape.
+For an area, the last line reads `0.0 s  Area selected`. A long Timeline keeps the entries closest to the Selection. Typed values are never captured, so a typing step names the field and not what was typed. When the Recording file cannot be read, the Feedback keeps its **Diagnostics** section and a line says it has no timeline. See the [Agent API](/docs/api-reference/agent-api#get-a-feedback) for the full shape.
 
 ### Example usage (in an AI agent)
 

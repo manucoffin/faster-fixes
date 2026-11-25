@@ -37,7 +37,7 @@ An issue contains:
 
 - Feedback comment
 - Page URL
-- DOM selector
+- The selected element: its component path, source file, DOM selector and click position, or an [area](#area-feedback) and the element it sits inside
 - Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
 - Link to the screenshot
 - Browser info and the reviewer's name, collapsed
@@ -48,6 +48,10 @@ An issue contains:
 When the feedback has a Recording, **Diagnostics** is replaced by a collapsed **Timeline** that lists the reviewer's steps, console logs and network requests on one clock. When the timeline is too long, its earliest entries are left out and the Timeline says how many. If the Recording cannot be read, the issue shows Diagnostics instead. The **Play in Faster Fixes** link requires a Faster Fixes login.
 
 An automatic issue waits up to 30 seconds for the Recording to upload, and a manual issue is created at once. An issue is never rewritten: a Recording that arrives later is not added, and removing a Recording in the dashboard leaves the Timeline in the issue.
+
+## Area feedback
+
+When the reviewer drags to select an area instead of clicking an element, the issue shows an **Area** line with the area's size and position in the viewport, then an **Inside** line with the component path, source file and DOM selector of the element that contains the whole area. That element is context, not what was selected, and the issue has no click coordinates. The screenshot is the full viewport, without the area drawn on it.
 
 ## Status sync
 

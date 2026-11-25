@@ -5,7 +5,13 @@ import type {
   SelectorStrategies,
 } from "@fasterfixes/core";
 
-import { getViewportAnchoringKind, placePin } from "./pin-placement.js";
+import type { AreaRect } from "./area-gesture.js";
+import type { AreaFrame } from "./area-frame.js";
+import {
+  getPinAnchor,
+  getViewportAnchoringKind,
+  placePin,
+} from "./pin-placement.js";
 
 // Hydration and lazy rendering on the host page settle at unknown times.
 const RETRY_DELAYS = [100, 300, 600, 1200, 2500];
@@ -17,7 +23,10 @@ export type PinLayer = {
   setShown: (shown: boolean) => void;
   /** The pin on screen for an item, or null when the item has none. */
   pinOf: (id: string) => HTMLElement | null;
-  /** Keeps the active item's element outlined and its pin expanded, if it has one. */
+  /**
+   * Keeps the active item's element outlined, or its area drawn, and its pin
+   * expanded, if it has one.
+   */
   setActive: (item: FeedbackItem | null) => void;
   destroy: () => void;
 };
@@ -42,6 +51,37 @@ export function resolveTarget(item: FeedbackItem) {
   return resolveElement(item.selector, strategies);
 }
 
+/**
+ * Where an area Feedback's area sits now, from its container's current box:
+ * the pin anchor is the area's top-left corner inside the container (ADR-0026).
+ * `null` for an element Feedback.
+ */
+export function readPinArea(
+  metadata: unknown,
+  containerRect: Pick<DOMRect, "left" | "top" | "width" | "height">,
+): AreaRect | null {
+  const record =
+    metadata && typeof metadata === "object"
+      ? (metadata as Record<string, unknown>)
+      : null;
+  const selection = record?.selection as { area?: unknown } | undefined;
+  const area = selection?.area as Partial<AreaRect> | undefined;
+  const anchor = getPinAnchor(metadata);
+  if (
+    !anchor ||
+    typeof area?.width !== "number" ||
+    typeof area.height !== "number"
+  ) {
+    return null;
+  }
+  return {
+    left: containerRect.left + containerRect.width * anchor.x,
+    top: containerRect.top + containerRect.height * anchor.y,
+    width: area.width,
+    height: area.height,
+  };
+}
+
 function showHighlight(highlight: HTMLElement, element: Element | null) {
   if (!element) {
     highlight.hidden = true;
@@ -60,13 +100,14 @@ function showHighlight(highlight: HTMLElement, element: Element | null) {
 /**
  * Pins for Feedback items, each on the element it was left on, kept in place
  * as the page resizes, loads and changes. Hovering a pin outlines its element
- * in `highlight`.
+ * in `highlight`, or draws its area in `areaFrame` for an area Feedback.
  */
 export function createPinLayer(
   document: Document,
   container: ShadowRoot,
   labels: Labels,
   highlight: HTMLElement,
+  areaFrame: AreaFrame,
   onPinClick: (item: FeedbackItem, pin: HTMLElement) => void,
 ): PinLayer {
   const layer = document.createElement("div");
@@ -117,9 +158,29 @@ export function createPinLayer(
     return pins.find(({ element }) => element === pin)?.item ?? null;
   }
 
+  let areaShown = false;
+
+  function outline(item: FeedbackItem | null) {
+    const target = item ? resolveTarget(item) : null;
+    const area =
+      item && target
+        ? readPinArea(item.metadata, target.getBoundingClientRect())
+        : null;
+    areaShown = area !== null;
+    if (item && target && area) {
+      showHighlight(highlight, null);
+      // Read from the anchor on every update, so the area stays on its pin
+      // when the container resizes.
+      areaFrame.track(target, (box) => readPinArea(item.metadata, box) ?? area);
+      return;
+    }
+    areaFrame.hide();
+    showHighlight(highlight, target);
+  }
+
   // Hovering outlines the hovered pin's element, leaving restores the active one's.
   function highlightActive() {
-    showHighlight(highlight, active ? resolveTarget(active) : null);
+    outline(active);
   }
 
   function createPin() {
@@ -139,7 +200,7 @@ export function createPinLayer(
     pin.append(dot, label);
     pin.addEventListener("mouseenter", () => {
       const item = itemOf(pin);
-      if (item) showHighlight(highlight, resolveTarget(item));
+      if (item) outline(item);
     });
     pin.addEventListener("mouseleave", highlightActive);
     pin.addEventListener("click", () => {
@@ -172,11 +233,12 @@ export function createPinLayer(
     signal: listening.signal,
   });
   window.addEventListener("load", update, { signal: listening.signal });
-  // The highlight is fixed, so the active element's outline follows the scroll.
+  // The highlight is fixed, so the active element's outline follows the
+  // scroll. The area frame follows its container on its own.
   window.addEventListener(
     "scroll",
     () => {
-      if (active) highlightActive();
+      if (active && !areaShown) highlightActive();
     },
     { passive: true, signal: listening.signal },
   );
@@ -211,7 +273,7 @@ export function createPinLayer(
     },
     setShown(shown) {
       layer.hidden = !shown;
-      if (!shown) showHighlight(highlight, null);
+      if (!shown) outline(null);
     },
     setActive(item) {
       active = item;
@@ -224,6 +286,7 @@ export function createPinLayer(
       clearSchedule();
       listening.abort();
       observer.disconnect();
+      areaFrame.hide();
       layer.remove();
     },
   };

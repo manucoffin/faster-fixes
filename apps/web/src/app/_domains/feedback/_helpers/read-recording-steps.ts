@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { RecordingEvent } from "@/server/recording/get-recording-events";
+import type { PageSelection } from "./read-page-selection";
 import {
   createRecordingTree,
   MASKED_ONLY,
@@ -18,7 +19,10 @@ import {
 
 // Bump on any change to what the derivation returns: a cached result from an
 // older version is derived again on its next read.
-export const RECORDING_STEPS_VERSION = 2;
+export const RECORDING_STEPS_VERSION = 3;
+
+/** The label of the last step when the Selection is an area. */
+export const AREA_SELECTION_LABEL = "Area selected";
 
 // Keeps the cached value small; the steps closest to the Selection are kept.
 export const RECORDING_STEPS_MAX = 200;
@@ -96,8 +100,9 @@ const PageSessionSchema = z.looseObject({
 });
 
 /**
- * The steps of a Recording, ending with the Selection. `selection` names the
- * Feedback's selected element; the Recording itself stops before it.
+ * The steps of a Recording, ending with the Selection: the Feedback's selected
+ * element, or an area, never named after its container. The Recording itself
+ * stops before it.
  */
 export function readRecordingSteps({
   formatVersion,
@@ -106,7 +111,7 @@ export function readRecordingSteps({
 }: {
   formatVersion: number;
   events: readonly RecordingEvent[];
-  selection: { label: string | null; selector: string | null };
+  selection: PageSelection;
 }):
   | {
       readable: true;
@@ -228,7 +233,7 @@ export function readRecordingSteps({
     {
       type: "selection" as const,
       timestamp: endedAt,
-      ...selection,
+      ...describeSelection(selection),
       detail: null,
     },
   ].map(({ type, timestamp, label, selector, detail }) => ({
@@ -240,6 +245,14 @@ export function readRecordingSteps({
     detail,
   }));
   return { readable: true, startedAt, endedAt, steps };
+}
+
+function describeSelection(selection: PageSelection) {
+  if (selection.form === "area") {
+    return { label: AREA_SELECTION_LABEL, selector: null };
+  }
+  const { description, selector } = selection.element;
+  return { label: description, selector };
 }
 
 // The Widget records a same-origin path only; refuse anything else the file holds.

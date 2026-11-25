@@ -6,7 +6,10 @@ import type {
   RecordingTimeline,
   RecordingTimelineEntry,
 } from "./merge-recording-timeline";
-import type { RecordingStep } from "./read-recording-steps";
+import {
+  AREA_SELECTION_LABEL,
+  type RecordingStep,
+} from "./read-recording-steps";
 
 /**
  * Render a merged timeline as markdown lines: what was left out first, then
@@ -56,6 +59,10 @@ export function formatTimelineStep({
 }: RecordingStep): string {
   // The label of the opening step is its wording; the detail is where from.
   if (type === "load") return detail ? `${label}, from ${detail}` : `${label}`;
+  // An area has no element to name: its label is the wording.
+  if (type === "selection" && label === AREA_SELECTION_LABEL && !selector) {
+    return label;
+  }
   const parts = [type, label, selector ? `(${selector})` : null, detail].filter(
     (part) => part !== null,
   );

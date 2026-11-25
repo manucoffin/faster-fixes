@@ -1,4 +1,5 @@
 import type { CustomMetadata } from "@fasterfixes/core";
+import { readPageSelection } from "@/app/_domains/feedback/_helpers/read-page-selection";
 
 type ElementSource = {
   selector: string | null;
@@ -13,17 +14,21 @@ type EnvironmentSource = {
   viewportHeight: number | null;
 };
 
-// Metadata is untyped JSON written by the widget, so only non-empty strings count.
-function readString(value: unknown) {
-  return typeof value === "string" && value ? value : null;
-}
-
+/**
+ * What the context card shows of a page Selection: the selected element, or
+ * an area with its size and the container it sits inside.
+ */
 export function getElementContext({ selector, metadata }: ElementSource) {
-  const description = readString(metadata?.elementDescription);
-  const componentPath = readString(metadata?.reactComponentPath);
-  const sourceFile = readString(metadata?.sourceFile);
+  const selection = readPageSelection({ selector, metadata });
+  const { description, componentPath, sourceFile } =
+    selection.form === "area" ? selection.inside : selection.element;
 
   return {
+    // For an area, the fields below describe its container, never the thing selected.
+    area:
+      selection.form === "area"
+        ? { width: selection.area.width, height: selection.area.height }
+        : null,
     description,
     componentPath,
     // The widget writes the path as "<App> <Layout> <Button>".
@@ -35,15 +40,30 @@ export function getElementContext({ selector, metadata }: ElementSource) {
       : [],
     sourceFile,
     selector,
-    hasContext: !!(description ?? componentPath ?? sourceFile),
+    hasContext:
+      selection.form === "area" ||
+      !!(description ?? componentPath ?? sourceFile),
   };
 }
 
 export type ElementContext = ReturnType<typeof getElementContext>;
 
+export function formatAreaSize({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) {
+  return `${Math.round(width)}×${Math.round(height)}`;
+}
+
 export function formatElementForCopy(element: ElementContext) {
+  const { area } = element;
   return [
-    element.description && `Element: ${element.description}`,
+    area && `Area: ${formatAreaSize(area)}`,
+    element.description &&
+      `${area ? "Inside" : "Element"}: ${element.description}`,
     element.sourceFile && `Source file: ${element.sourceFile}`,
     element.componentPath && `Component tree: ${element.componentPath}`,
     element.selector && `DOM selector: ${element.selector}`,

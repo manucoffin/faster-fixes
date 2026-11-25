@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
+import { dragAcross } from "./area-drag";
 import { RECORDING_PATH, readUploadedRecording } from "./recording-upload";
 import type { UploadedRecording } from "./recording-upload";
 import { seedReviewerToken } from "./reviewer-token";
@@ -149,6 +150,32 @@ for (const embed of EMBEDS) {
       expect(recording.json).toContain("Reproduced before the Selection");
       const lastEvent = recording.events.at(-1);
       expect(lastEvent?.timestamp).toBeLessThanOrEqual(selectedBy);
+    });
+
+    test("sends a Recording that ends at an area Selection", async ({
+      page,
+    }) => {
+      const api = await stubWidgetApi(page);
+      await page.goto(embed.path);
+      await page.getByRole("button", { name: "Start feedback" }).click();
+      await dragAcross(page, { x: 40, y: 40 }, { x: 240, y: 160 });
+      const selectedBy = await page.evaluate(() => Date.now());
+      await submit(page, "The gap is too wide");
+
+      await expect
+        .poll(() => api.requestsTo("PUT", RECORDING_PATH))
+        .toHaveLength(1);
+      expect(api.createdFeedback()[0]?.recordingFollows).toBe(true);
+      expect(api.createdFeedback()[0]?.metadata?.selection).toHaveProperty(
+        "area",
+      );
+      const [upload] = api.requestsTo("PUT", RECORDING_PATH);
+      const recording = readUploadedRecording(
+        upload ?? { headers: {}, body: null },
+      );
+      expect(recording.events.at(-1)?.timestamp).toBeLessThanOrEqual(
+        selectedBy,
+      );
     });
 
     test("states in the comment form that the Recording is included, with its real duration", async ({

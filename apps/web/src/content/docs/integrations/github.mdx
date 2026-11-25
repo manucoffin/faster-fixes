@@ -18,7 +18,7 @@ With auto-create on, the default, each new feedback creates an issue in the link
 
 - Feedback comment
 - Page URL
-- DOM selector
+- The selected element: its component path, source file, DOM selector and click position, or an [area](#area-feedback) and the element it sits inside
 - Link to play the [Recording](/docs/widget/recording) and its duration, when the feedback has one
 - Browser info
 - Link to the screenshot
@@ -28,11 +28,15 @@ With auto-create on, the default, each new feedback creates an issue in the link
 
 The **Recording** line links to the player in the dashboard. The link requires a Faster Fixes login, so an issue in a public repository exposes nothing of the Recording.
 
-With a Recording, the collapsed **Diagnostics** section becomes a collapsed **Timeline**: the Reviewer's steps, console logs and network requests on one clock, ending with the element selection. A timeline too long for the issue drops its earliest entries and states how many. If the Recording cannot be read, the issue shows Diagnostics instead.
+With a Recording, the collapsed **Diagnostics** section becomes a collapsed **Timeline**: the Reviewer's steps, console logs and network requests on one clock, ending with the selection. A timeline too long for the issue drops its earliest entries and states how many. If the Recording cannot be read, the issue shows Diagnostics instead.
 
 An automatic issue waits up to 30 seconds for the Recording to upload. A manual issue is created at once.
 
 An issue is written once. A Recording that arrives later is not added, and removing a Recording in the dashboard leaves the timeline already written in the issue.
+
+## Area feedback
+
+When the reviewer drags to select an area instead of clicking an element, the issue shows an **Area** line with the area's size and position in the viewport, then an **Inside** line with the component path, source file and DOM selector of the element that contains the whole area. That element is context, not what was selected, and the issue has no click coordinates. The screenshot is the full viewport, without the area drawn on it.
 
 ## Default labels
 

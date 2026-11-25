@@ -158,6 +158,31 @@ export const WIDGET_CSS = `
     transition: all 0.1s ease;
   }
 
+  /* No transition: the rectangle tracks the pointer while dragging. */
+  .area {
+    position: fixed;
+    z-index: calc(var(--ff-z-index) - 2);
+    box-sizing: border-box;
+    border: 2px solid var(--ff-accent);
+    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--ff-accent) 10%, transparent);
+    pointer-events: none;
+  }
+
+  /* Above the rectangles, below the toolbar and popovers. Placed by script. */
+  .hint {
+    position: fixed;
+    z-index: calc(var(--ff-z-index) - 1);
+    max-width: 240px;
+    padding: 6px 8px;
+    border-radius: calc(var(--ff-radius) - 2px);
+    background: var(--ff-background);
+    color: var(--ff-foreground);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+    font: 500 12px/1.3 var(--ff-font-family);
+    pointer-events: none;
+  }
+
   .highlight {
     position: fixed;
     z-index: calc(var(--ff-z-index) - 2);

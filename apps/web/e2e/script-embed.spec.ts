@@ -230,6 +230,12 @@ test.describe("script embed", () => {
   }) => {
     await selectOutsideDismissableDrawer(page, FIXTURE_PATH, "capture");
   });
+
+  test("a drag does not close a drawer listening in the capture phase", async ({
+    page,
+  }) => {
+    await selectOutsideDismissableDrawer(page, FIXTURE_PATH, "capture", "drag");
+  });
 });
 
 declare global {

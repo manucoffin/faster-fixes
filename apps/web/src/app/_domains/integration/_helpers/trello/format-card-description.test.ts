@@ -49,6 +49,27 @@ describe("formatTrelloCardDescription", () => {
     );
   });
 
+  it("describes an area Selection with an Area and an Inside line, with no click point", () => {
+    const description = formatTrelloCardDescription({
+      ...feedback,
+      selector: "#hero",
+      clickX: null,
+      clickY: null,
+      metadata: {
+        reactComponentPath: "App > Hero",
+        selection: {
+          viewport: { width: 1280, height: 720 },
+          area: { left: 40, top: 120, width: 320, height: 180 },
+        },
+      },
+    });
+
+    expect(description).toContain(
+      "**Area:** 320 × 180 at (40, 120) in a 1280 × 720 viewport\n**Inside:** `App > Hero` · `#hero`",
+    );
+    expect(description).not.toContain("**Element:**");
+  });
+
   it("never embeds a Screenshot URL", () => {
     expect(formatTrelloCardDescription(feedback)).not.toContain("![");
   });

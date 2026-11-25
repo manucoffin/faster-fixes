@@ -1,7 +1,9 @@
 import {
+  describeSelectionArea,
   formatCustomMetadataLines,
   formatDiagnosticTrailLines,
   formatTimelineLines,
+  readPageSelection,
   type RecordingTimeline,
 } from "@/app/_domains/feedback";
 import {
@@ -88,24 +90,7 @@ export function formatIssueBodyContent(feedback: FeedbackForIssue): string {
     lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
   }
 
-  // Component path + selector
-  const locationParts: string[] = [];
-  const md = feedback.metadata;
-  if (typeof md?.reactComponentPath === "string" && md.reactComponentPath) {
-    locationParts.push(`\`${md.reactComponentPath}\``);
-  }
-  if (typeof md?.sourceFile === "string" && md.sourceFile) {
-    locationParts.push(`\`${md.sourceFile}\``);
-  }
-  if (feedback.selector) {
-    locationParts.push(`\`${feedback.selector}\``);
-  }
-  if (feedback.clickX != null && feedback.clickY != null) {
-    locationParts.push(`at (${feedback.clickX}, ${feedback.clickY})`);
-  }
-  if (locationParts.length > 0) {
-    lines.push(`**Element:** ${locationParts.join(" \u00b7 ")}`);
-  }
+  lines.push(...selectionLines(feedback));
 
   if (feedback.recording) {
     lines.push(formatRecordingLine(feedback.recording));
@@ -184,6 +169,43 @@ function diagnosticsOrTimelineLines(feedback: FeedbackForIssue): string[] {
     lines.push("</details>");
   }
   return lines;
+}
+
+// An area names its container as "Inside", never as the selected element, and
+// has no click point (ADR-0026).
+function selectionLines(feedback: FeedbackForIssue): string[] {
+  const selection = readPageSelection(feedback);
+  if (selection.form === "area") {
+    const insideParts = codeParts(selection.inside);
+    return [
+      `**Area:** ${describeSelectionArea(selection)}`,
+      ...(insideParts.length > 0
+        ? [`**Inside:** ${insideParts.join(" \u00b7 ")}`]
+        : []),
+    ];
+  }
+
+  const locationParts = codeParts(selection.element);
+  if (feedback.clickX != null && feedback.clickY != null) {
+    locationParts.push(`at (${feedback.clickX}, ${feedback.clickY})`);
+  }
+  return locationParts.length > 0
+    ? [`**Element:** ${locationParts.join(" \u00b7 ")}`]
+    : [];
+}
+
+function codeParts({
+  componentPath,
+  sourceFile,
+  selector,
+}: {
+  componentPath: string | null;
+  sourceFile: string | null;
+  selector: string | null;
+}) {
+  return [componentPath, sourceFile, selector]
+    .filter((part): part is string => !!part)
+    .map((part) => `\`${part}\``);
 }
 
 function formatRecordingLine({ playerUrl, durationMs }: IssueRecording) {

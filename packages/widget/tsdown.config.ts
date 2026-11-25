@@ -12,8 +12,10 @@ import packageJson from "./package.json" with { type: "json" };
 // ordinary fixes fit. Raise it deliberately, in its own commit, when a
 // feature justifies the weight. Raised to 100,000 when the script gained the
 // loader of the recorder file, at 95,256 bytes, with room for the rest of
-// Recording (compression, upload and the comment form's line).
-const IIFE_MAX_BYTES = 100_000;
+// Recording (compression, upload and the comment form's line). Raised to
+// 105,000 for area Selection, at 100,346 bytes with the Pin redrawing the
+// area, with room for the cursor hint.
+const IIFE_MAX_BYTES = 105_000;
 
 // The same rule for the recorder file the script loads for Reviewers only. Set
 // from its first measured build, 74,581 bytes, plus a margin of about 10%.

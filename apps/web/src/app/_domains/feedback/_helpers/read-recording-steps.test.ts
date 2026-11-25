@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { PageSelection } from "./read-page-selection";
 import realRecording from "./read-recording-steps.real-recording.json";
 import {
   RECORDING_STEPS_MAX,
@@ -8,6 +9,27 @@ import {
 
 const START = 1_794_400_000_000;
 const SELECTION = { label: 'button "Save changes"', selector: "#save" };
+const ELEMENT_SELECTION: PageSelection = {
+  form: "element",
+  element: {
+    selector: SELECTION.selector,
+    description: SELECTION.label,
+    componentPath: null,
+    sourceFile: null,
+  },
+  geometry: null,
+};
+const AREA_SELECTION: PageSelection = {
+  form: "area",
+  area: { left: 320, top: 180, width: 640, height: 360 },
+  viewport: { width: 1280, height: 720 },
+  inside: {
+    selector: "main > section.hero",
+    description: "section.hero",
+    componentPath: "<App> <Hero>",
+    sourceFile: "src/hero.tsx",
+  },
+};
 
 type Node = {
   id: number;
@@ -139,7 +161,7 @@ function steps(events: { type: number; timestamp: number }[]) {
   const result = readRecordingSteps({
     formatVersion: 1,
     events,
-    selection: SELECTION,
+    selection: ELEMENT_SELECTION,
   });
   if (!result.readable) throw new Error(result.reason);
   return result.steps;
@@ -151,7 +173,7 @@ describe("readRecordingSteps", () => {
       readRecordingSteps({
         formatVersion: 2,
         events: [fullSnapshot(0)],
-        selection: SELECTION,
+        selection: ELEMENT_SELECTION,
       }),
     ).toEqual({ readable: false, reason: "unknown-format-version" });
   });
@@ -195,7 +217,7 @@ describe("readRecordingSteps", () => {
     const result = readRecordingSteps({
       formatVersion: 1,
       events: [fullSnapshot(0), click(2_000, 10), click(5_000, 11)],
-      selection: SELECTION,
+      selection: ELEMENT_SELECTION,
     });
     expect(result).toMatchObject({
       readable: true,
@@ -224,6 +246,23 @@ describe("readRecordingSteps", () => {
       offsetMs: 0,
       label: 'button "Save changes"',
       selector: "#save",
+      detail: null,
+    });
+  });
+
+  it("ends with an area selected, never naming its container", () => {
+    const result = readRecordingSteps({
+      formatVersion: 1,
+      events: [fullSnapshot(0), click(1_000, 10)],
+      selection: AREA_SELECTION,
+    });
+    if (!result.readable) throw new Error(result.reason);
+    expect(result.steps.at(-1)).toEqual({
+      type: "selection",
+      timestamp: START + 1_000,
+      offsetMs: 0,
+      label: "Area selected",
+      selector: null,
       detail: null,
     });
   });

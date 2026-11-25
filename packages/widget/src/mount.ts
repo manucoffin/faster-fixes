@@ -8,6 +8,8 @@ import type {
 } from "@fasterfixes/core";
 
 import { createAnnotationMode } from "./annotation.js";
+import { resolveAreaContainer } from "./area-container.js";
+import { createAreaFrame } from "./area-frame.js";
 import { createCommentPopover } from "./comment-popover.js";
 import { createFeedbackList } from "./feedback-list.js";
 import { buildFeedbackPayload } from "./feedback-payload.js";
@@ -33,7 +35,10 @@ import { uploadRecording } from "./recording-upload.js";
 import { getPositionStyle } from "./position.js";
 import { captureViewportScreenshot } from "./screenshot.js";
 import { settleScreenshot } from "./screenshot-fallback.js";
-import { measureSelectionGeometry } from "./selection-geometry.js";
+import {
+  measureAreaGeometry,
+  measureSelectionGeometry,
+} from "./selection-geometry.js";
 import { createWidgetState } from "./state.js";
 import { accentRule, WIDGET_CSS } from "./styles.js";
 import { createToolbar } from "./toolbar.js";
@@ -125,8 +130,9 @@ export function mountWidget({
 
   let mode: WidgetMode = "idle";
   let selection: {
+    /** The clicked element, or the container of an area. */
     element: Element;
-    click: PinPoint;
+    pinPoint: PinPoint;
     geometry: SelectionGeometry;
     screenshot: Promise<Blob | null>;
     recording: Promise<RecordingFile | null> | null;
@@ -143,6 +149,7 @@ export function mountWidget({
     if (next !== "selected") {
       selection = null;
       popover.close();
+      areaFrame.hide();
       recording?.resume();
     }
   }
@@ -151,6 +158,15 @@ export function mountWidget({
   overlay.className = "overlay";
   overlay.setAttribute("part", "overlay");
   overlay.hidden = true;
+
+  const areaFrame = createAreaFrame(document, shadow);
+
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.setAttribute("part", "hint");
+  hint.setAttribute("aria-hidden", "true");
+  hint.textContent = options.labels.annotationHint;
+  hint.hidden = true;
 
   const highlight = document.createElement("div");
   highlight.className = "highlight";
@@ -162,6 +178,7 @@ export function mountWidget({
     shadow,
     options.labels,
     highlight,
+    createAreaFrame(document, shadow, "area pin-area"),
     (item, pin) => {
       if (pinPopover.itemId === item.id) {
         pinPopover.dismiss();
@@ -304,32 +321,62 @@ export function mountWidget({
     );
   }
 
-  const annotation = createAnnotationMode(document, overlay, {
-    onSelect(element, click) {
-      // Taken first, so it ends at the Selection, before the Widget reacts to it.
-      // Recording stays suspended until the comment form closes.
-      const pendingRecording = client.attachRecording
-        ? (recording?.take() ?? null)
-        : null;
-      setMode("selected");
-      // Started before the popover opens; the host is excluded from the capture either way.
-      selection = {
-        element,
-        click,
-        geometry: measureSelectionGeometry(element, click),
-        screenshot: captureViewportScreenshot(),
-        recording: pendingRecording,
-      };
-      popover.open(element);
-      // Compression settles while the Reviewer types; a later Selection owns the form.
-      void pendingRecording?.then((file) => {
-        if (file && selection?.recording === pendingRecording) {
-          popover.showRecordingIncluded(file.durationMs);
-        }
-      });
+  // Geometry, Recording and Screenshot are all read in the tick of the Selection.
+  function select(
+    element: Element,
+    pinPoint: PinPoint,
+    geometry: SelectionGeometry,
+    reference: Element,
+  ) {
+    // Taken first, so it ends at the Selection, before the Widget reacts to it.
+    // Recording stays suspended until the comment form closes.
+    const pendingRecording = client.attachRecording
+      ? (recording?.take() ?? null)
+      : null;
+    setMode("selected");
+    // Started before the popover opens; the host is excluded from the capture either way.
+    selection = {
+      element,
+      pinPoint,
+      geometry,
+      screenshot: captureViewportScreenshot(),
+      recording: pendingRecording,
+    };
+    popover.open(reference);
+    // Compression settles while the Reviewer types; a later Selection owns the form.
+    void pendingRecording?.then((file) => {
+      if (file && selection?.recording === pendingRecording) {
+        popover.showRecordingIncluded(file.durationMs);
+      }
+    });
+  }
+
+  const annotation = createAnnotationMode(
+    document,
+    { overlay, areaFrame, hint },
+    {
+      onSelect(element, click) {
+        select(
+          element,
+          click,
+          measureSelectionGeometry(element, click),
+          element,
+        );
+      },
+      onSelectArea(area) {
+        const container = resolveAreaContainer(document, area);
+        const geometry = measureAreaGeometry(area);
+        select(
+          container,
+          { x: area.left, y: area.top },
+          geometry,
+          areaFrame.element,
+        );
+        areaFrame.follow(container, area);
+      },
+      onCancel: () => setMode("idle"),
     },
-    onCancel: () => setMode("idle"),
-  });
+  );
 
   const popover = createCommentPopover(document, shadow, options.labels, {
     async onSubmit(comment) {
@@ -338,7 +385,7 @@ export function mountWidget({
       const payload = buildFeedbackPayload({
         comment,
         element: selection.element,
-        click: selection.click,
+        pinPoint: selection.pinPoint,
         selection: selection.geometry,
         diagnosticTrail: recorder?.snapshot(),
         customMetadata: options.customMetadata,
@@ -395,7 +442,7 @@ export function mountWidget({
   stack.className = "stack";
   applyStackLayout(stack, options.position);
   stack.append(toolbar.element, list.element);
-  shadow.append(overlay, stack);
+  shadow.append(overlay, hint, stack);
 
   // A client-side route change shows the new page's pins and drops the active item.
   const stopWatchingLocation = watchLocation(() => {

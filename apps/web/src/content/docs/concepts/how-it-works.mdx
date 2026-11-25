@@ -7,13 +7,15 @@ Faster Fixes has three main components: the widget, the API, and the consumption
 
 ## 1. Widget (client-side)
 
-The widget runs in the reviewer's browser. When they click an element:
+The widget runs in the reviewer's browser. In feedback mode, a hint next to the cursor names the two ways to make a Selection: click an element, or drag a rectangle over an area of the page. A drag selects an area that is not a single element, such as a gap between elements, part of a large image or chart, or whitespace. A tiny movement during a click still counts as a click, and touch screens keep tapping to select an element.
 
-- A full-page screenshot is captured (excluding widget UI)
-- A smart DOM selector is generated with fallback strategies
+When they make a Selection:
+
+- A screenshot of the viewport is captured (excluding widget UI)
+- A smart DOM selector is generated with fallback strategies. For an area, it targets the area's container: the smallest element that holds the whole rectangle.
 - On React sites, the React component tree is extracted (dev builds)
 - Browser metadata is collected (name, version, OS, viewport)
-- Click coordinates are recorded
+- Where the Selection sat on screen is recorded: the element and the click point, or the rectangle of the area
 - Recent console logs and network requests are captured (the Diagnostic Trail)
 - Custom metadata declared by your site, such as a user ID or a release version, is attached. See [Custom metadata](/docs/widget/custom-metadata).
 - A Recording of the last minute on the page is attached: the page's content as it changed and the Reviewer's interactions, without typed values. See [Recording](/docs/widget/recording).
@@ -36,7 +38,7 @@ Feedback can be consumed two ways:
 ## Data flow
 
 ```
-Reviewer clicks element on website
+Reviewer clicks an element or drags over an area
         ↓
 Widget captures context (screenshot, selector, component tree, browser info, console & network logs, Custom metadata, Recording)
         ↓

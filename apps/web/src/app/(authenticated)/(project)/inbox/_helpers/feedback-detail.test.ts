@@ -52,6 +52,58 @@ describe("getElementContext", () => {
   });
 });
 
+describe("getElementContext for an area Selection", () => {
+  const areaFeedback = {
+    ...baseFeedback,
+    selector: "main > section.hero",
+    metadata: {
+      elementDescription: "section.hero",
+      reactComponentPath: "<App> <Hero>",
+      sourceFile: "src/hero.tsx",
+      selection: {
+        viewport: { width: 1280, height: 720 },
+        area: { left: 320, top: 180, width: 640, height: 360 },
+      },
+    },
+  };
+
+  it("reads the area's size and its container as the element fields", () => {
+    expect(getElementContext(areaFeedback)).toMatchObject({
+      area: { width: 640, height: 360 },
+      description: "section.hero",
+      components: ["App", "Hero"],
+      sourceFile: "src/hero.tsx",
+      selector: "main > section.hero",
+      hasContext: true,
+    });
+  });
+
+  it("has context with no container details known", () => {
+    const element = getElementContext({
+      ...baseFeedback,
+      metadata: { selection: areaFeedback.metadata.selection },
+    });
+
+    expect(element.hasContext).toBe(true);
+  });
+
+  it("copies the container labelled as inside, never as the element", () => {
+    expect(formatElementForCopy(getElementContext(areaFeedback))).toBe(
+      [
+        "Area: 640×360",
+        "Inside: section.hero",
+        "Source file: src/hero.tsx",
+        "Component tree: <App> <Hero>",
+        "DOM selector: main > section.hero",
+      ].join("\n"),
+    );
+  });
+
+  it("has no area for an element Selection", () => {
+    expect(getElementContext(baseFeedback).area).toBeNull();
+  });
+});
+
 describe("formatElementForCopy", () => {
   it("lists only the known fields, one per line", () => {
     const element = getElementContext({

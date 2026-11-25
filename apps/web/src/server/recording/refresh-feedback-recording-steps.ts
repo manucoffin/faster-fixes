@@ -3,6 +3,7 @@ import {
   type CachedRecordingSteps,
   RECORDING_STEPS_VERSION,
   readCachedRecordingSteps,
+  readPageSelection,
   readRecordingSteps,
 } from "@/app/_domains/feedback";
 import { getRecordingEvents } from "./get-recording-events";
@@ -62,16 +63,13 @@ async function deriveAndCache(
   const file = await getRecordingEvents(recording);
   if (!file.readable) return null;
 
-  const elementDescription = (
-    feedback.metadata as Record<string, unknown> | null
-  )?.elementDescription;
   const result = readRecordingSteps({
     formatVersion,
     events: file.events,
-    selection: {
-      label: typeof elementDescription === "string" ? elementDescription : null,
+    selection: readPageSelection({
       selector: feedback.selector,
-    },
+      metadata: feedback.metadata as Record<string, unknown> | null,
+    }),
   });
   if (!result.readable) return null;
 
