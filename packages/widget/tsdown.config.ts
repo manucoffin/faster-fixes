@@ -15,7 +15,8 @@ import packageJson from "./package.json" with { type: "json" };
 // Recording (compression, upload and the comment form's line). Raised to
 // 105,000 for area Selection, at 100,346 bytes with the Pin redrawing the
 // area, with room for the cursor hint.
-const IIFE_MAX_BYTES = 105_000;
+// PROTOTYPE: raised for the narrated Recording prototype, revert with it.
+const IIFE_MAX_BYTES = 140_000;
 
 // The same rule for the recorder file the script loads for Reviewers only. Set
 // from its first measured build, 74,581 bytes, plus a margin of about 10%.

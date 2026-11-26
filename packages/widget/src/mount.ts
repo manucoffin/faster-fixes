@@ -7,6 +7,7 @@ import type {
   WidgetPosition,
 } from "@fasterfixes/core";
 
+import { mountNarratedPrototype } from "./_prototype-narrated-recording.js";
 import { createAnnotationMode } from "./annotation.js";
 import { resolveAreaContainer } from "./area-container.js";
 import { createAreaFrame } from "./area-frame.js";
@@ -444,6 +445,24 @@ export function mountWidget({
   stack.append(toolbar.element, list.element);
   shadow.append(overlay, hint, stack);
 
+  // PROTOTYPE (issue 491): narrated Recording flow variants, on its own page only.
+  const narratedPrototype = mountNarratedPrototype({
+    document,
+    shadow,
+    stack,
+    toolbar: toolbar.element,
+    position: options.position,
+    startAnnotation: () => setMode("annotating"),
+    exitFeedbackMode: () => setMode("idle"),
+    async addFeedback(comment) {
+      const created = await client.createFeedback(
+        { comment, pageUrl: window.location.href },
+        reviewerToken,
+      );
+      setFeedbackItems([...state.current.feedbackItems, created]);
+    },
+  });
+
   // A client-side route change shows the new page's pins and drops the active item.
   const stopWatchingLocation = watchLocation(() => {
     closePinPopover();
@@ -512,6 +531,7 @@ export function mountWidget({
       stopWatchingLocation();
       pendingTimers.forEach(clearTimeout);
       pinLayer.destroy();
+      narratedPrototype.destroy(); // PROTOTYPE
       unguardHost();
       host.remove();
     },
