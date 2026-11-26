@@ -29,20 +29,20 @@ _Avoid_: Integration (reserved for external systems), Adapter, Wrapper (implemen
 ### Capture
 
 **Selection**:
-What a Feedback is about. On a page it takes one of two forms, chosen by the Reviewer's gesture in annotation mode: an **element Selection**, the element they clicked together with the click point inside it, or an **area Selection**, a rectangle of the viewport they dragged. An area Selection is about the rectangle, not about any element: the smallest element containing the whole rectangle is kept as its **container**, which locates the area on the page and is never presented as the thing selected. On a **Video**: the instant or time range the Reviewer marked, with an optional point or area on the frame.
+What a Feedback is about, unless it is about a **narrated Recording**: that Feedback has no Selection. On a page it takes one of two forms, chosen by the Reviewer's gesture in annotation mode: an **element Selection**, the element they clicked together with the click point inside it, or an **area Selection**, a rectangle of the viewport they dragged. An area Selection is about the rectangle, not about any element: the smallest element containing the whole rectangle is kept as its **container**, which locates the area on the page and is never presented as the thing selected. On a **Video**: the instant or time range the Reviewer marked, with an optional point or area on the frame.
 _Avoid_: Target, Highlighted element, Annotation (the mode, not its result), Timecode (the instant alone, not the Selection), Marker, Region, Zone, Box.
 
 **Pin**:
-The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot. The Pin of an area Selection sits at the area's top-left corner and follows the area's container; the area itself shows only while the Pin is hovered or open.
+The marker the Widget shows on the live page at the location of an existing Feedback. Lives on the page, never on a Screenshot. The Pin of an area Selection sits at the area's top-left corner and follows the area's container; the area itself shows only while the Pin is hovered or open. A Feedback with a narrated Recording has no Selection and so no Pin: the Widget shows it only in its list of Feedback, on the page where it was started.
 _Avoid_: Marker, Dot, Annotation.
 
 **Screenshot**:
-The capture of the Reviewer's viewport taken at the moment of Selection and attached to the Feedback. Best-effort: a Feedback may have none, and a late capture may be of lower fidelity.
+The capture of the Reviewer's viewport taken at the moment of Selection, or at the moment the Reviewer stops a narrated Recording, and attached to the Feedback. Best-effort: a Feedback may have none, and a late capture may be of lower fidelity.
 _Avoid_: Capture (the act of taking it), Image, Attachment.
 
 **Recording**:
-A demonstration over time of what happened on the page, attached to a Feedback. Today it has one form: the replay of the moments leading up to the Feedback, the page's content as it changed and the Reviewer's interactions with it, taken with no step for the Reviewer. That form is a reconstruction of the page, not a film of the screen, and carries no voice. It ends at the Selection and never shows the Widget's own interface. It never holds what the Reviewer typed, nor what the customer's site marked as sensitive. Fixed when the Feedback is created: never added or changed afterwards, though the team can remove it and keep the Feedback. Best-effort: a Feedback may have none. A film of the screen that a Reviewer makes on purpose, with or without their voice, would be another form of Recording, never a Video.
-_Avoid_: Video (a file uploaded for review), Screen recording, Session replay (a Recording exists only attached to a Feedback), Replay.
+A demonstration over time of what happened on the page, attached to a Feedback. In both its forms it is a reconstruction of the page, not a film of the screen: it shows nothing outside the page. It takes one of two forms, told apart by whether the Reviewer made it on purpose. The **automatic Recording** is the replay of the moments leading up to the Feedback, the page's content as it changed and the Reviewer's interactions with it, taken with no step for the Reviewer. It carries no voice. It ends at the Selection and never shows the Widget's own interface. It never holds what the Reviewer typed, nor what the customer's site marked as sensitive. Fixed when the Feedback is created: never added or changed afterwards, though the team can remove it and keep the Feedback. Best-effort: a Feedback may have none. The **narrated Recording** is the one a Reviewer makes on purpose: they start it, show the problem while speaking, and stop it. It always carries their voice: without the microphone there is no narrated Recording. It is what its Feedback is about, not a complement to a Selection: that Feedback has no Selection, and its written note is optional. It belongs to the page where it was started; the pages crossed while recording, with or without a full page load, are steps of the Recording, and a full page load leaves a short gap in it. Starting a narrated Recording replaces the automatic one, so a Feedback never carries both. Like the automatic form it is fixed when the Feedback is created, never added to an existing Feedback, replaced or trimmed, and the team can remove it and keep the Feedback. Neither form is ever a Video.
+_Avoid_: Video (a file uploaded for review), Video feedback (a Feedback with a narrated Recording), Filmed Recording (nothing is filmed), Screen recording, Session replay (a Recording exists only attached to a Feedback), Replay.
 
 **Selection frame**:
 The outline of the Selection drawn in the inbox over the Screenshot, and over the last instant of the Recording: the element and its click point for an element Selection, the rectangle alone for an area Selection. Derived from the Selection's geometry at capture time, never baked into the Screenshot; the viewer can hide it.
@@ -213,23 +213,23 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - An **Organization** has many **Members**, owns many **Projects**, and has zero or one active **Subscription**
 - A **User** may be a **Member** of several **Organizations**, with one **Role** in each
 - A **Feedback** has zero or one **Diagnostic Trail**
-- A **Feedback** has zero or one **Recording**, only when it is about a page; the Recording ends at the Feedback's **Selection** and complements it, never replaces it; two Feedbacks never share a Recording, though their Recordings may cover the same moments
+- A **Feedback** has zero or one **Recording**, only when it is about a page, in one form only: a narrated Recording replaces the automatic one. An automatic Recording ends at the Feedback's **Selection** and complements it, never replaces it; a narrated Recording stands in place of the Selection. Two Feedbacks never share a Recording, though their Recordings may cover the same moments
 - A **Testimonial** is given by one **User** on behalf of one **Organization**; it is the outcome of at most one **Testimonial request**
 - A **Testimonial** is deleted with its **User**; it outlives its **Organization**, whose name it carries as a snapshot
 - A **Feedback** has zero or one set of **Custom metadata**, declared by the customer's site at submission; it is never returned to a **Reviewer**
-- A **Feedback** has exactly one **Selection** and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has the Selection's geometry and a Screenshot or a Recording to draw it on
-- A **Feedback** belongs to one **Project** and is about either a page of its website or one of its **Videos**, never both; its **Selection** takes the shape of that subject
+- A **Feedback** has exactly one **Selection**, or none when it is about a narrated Recording, and zero or one **Screenshot**; a **Selection frame** exists only when the Feedback has the Selection's geometry and a Screenshot or a Recording to draw it on
+- A **Feedback** belongs to one **Project** and is about either a page of its website or one of its **Videos**, never both; its **Selection** takes the shape of that subject. A Feedback about a page is about either a Selection or a narrated Recording, never both; with a narrated Recording, the page is the one where it was started
 - A **Project** holds many **Videos**; a **Video** belongs to exactly one **Project** and is deleted with it
 - A **Video** has zero or one **Poster**
 - A **Video** has exactly one **Share link** at a time; a **Reviewer** who gives Feedback on a Video does so through that link
 - A **Reviewer** belongs to exactly one **Project**; a Reviewer who came through a **Share link** is also bound to that **Video**, where their name is unique
 - A **Tracker** mirrors and a **Notification channel** announces every Feedback of a **Project** through its **Project links**, page and video alike
 - A video Feedback's **Screenshot** is the frame captured at its **Selection**
-- A **Pin** marks a Feedback on the live page; a **Selection frame** marks the same Selection on its Screenshot and at the end of its Recording
+- A **Pin** marks a Feedback that has a Selection on the live page, so a Feedback with a narrated Recording has none; a **Selection frame** marks the same Selection on its Screenshot and at the end of its Recording
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
-- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. A **Recording** and a **Diagnostic Trail** never reach back before the start of their page session
+- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. An automatic **Recording** and a **Diagnostic Trail** never reach back before the start of their page session; a narrated Recording may span several page sessions
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
