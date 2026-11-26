@@ -1,0 +1,434 @@
+{
+  "session": "1795707029556",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "origin": "http://localhost:4477",
+  "bitrate": 32000,
+  "totalSeconds": 79.8,
+  "promptedAgain": false,
+  "note": "chrome cette fois",
+  "pass": "chrome cette fois",
+  "segments": [
+    {
+      "segment": 0,
+      "audioChunks": 45,
+      "events": 91,
+      "firstEventTypes": [4, 2],
+      "mimeType": "audio/webm;codecs=opus",
+      "bytes": 176212,
+      "wallSeconds": 45.9,
+      "decodedSeconds": 45.78,
+      "kilobytesPerMinute": 230,
+      "kbitPerSecond": 30.7
+    },
+    {
+      "segment": 1,
+      "audioChunks": 5,
+      "events": 41,
+      "firstEventTypes": [0, 1],
+      "mimeType": "audio/webm;codecs=opus",
+      "bytes": 19237,
+      "wallSeconds": 5.1,
+      "decodedSeconds": 4.98,
+      "kilobytesPerMinute": 227,
+      "kbitPerSecond": 30.3
+    },
+    {
+      "segment": 2,
+      "audioChunks": 6,
+      "events": 41,
+      "firstEventTypes": [0, 1],
+      "mimeType": "audio/webm;codecs=opus",
+      "bytes": 23488,
+      "wallSeconds": 6.1,
+      "decodedSeconds": 6.06,
+      "kilobytesPerMinute": 231,
+      "kbitPerSecond": 30.8
+    },
+    {
+      "segment": 3,
+      "audioChunks": 7,
+      "events": 39,
+      "firstEventTypes": [0, 1],
+      "mimeType": "audio/webm;codecs=opus",
+      "bytes": 27177,
+      "wallSeconds": 7.1,
+      "decodedSeconds": 7.08,
+      "kilobytesPerMinute": 229,
+      "kbitPerSecond": 30.5
+    },
+    {
+      "segment": 4,
+      "audioChunks": 9,
+      "events": 51,
+      "firstEventTypes": [0, 1],
+      "mimeType": "audio/webm;codecs=opus",
+      "bytes": 31584,
+      "wallSeconds": 8.2,
+      "decodedSeconds": 8.22,
+      "kilobytesPerMinute": 231,
+      "kbitPerSecond": 30.8
+    }
+  ],
+  "eventsTotal": 263,
+  "replay": {
+    "ok": true,
+    "totalMs": 79258
+  },
+  "log": [
+    {
+      "t": 1795707029556,
+      "page": "/two",
+      "kind": "start",
+      "bitrate": 32000
+    },
+    {
+      "t": 1795707029557,
+      "page": "/two",
+      "kind": "first-event",
+      "sinceLoad": 30694,
+      "sinceUnload": null
+    },
+    {
+      "t": 1795707029573,
+      "page": "/two",
+      "kind": "gum-call",
+      "viaGesture": true,
+      "permission": "prompt",
+      "activation": true,
+      "segment": 0
+    },
+    {
+      "t": 1795707033818,
+      "page": "/two",
+      "kind": "gum-ok",
+      "waited": 4245,
+      "sinceLoad": 34955,
+      "sinceUnload": null,
+      "permissionAfter": "granted",
+      "settings": {
+        "autoGainControl": true,
+        "channelCount": 1,
+        "echoCancellation": true,
+        "latency": 0.01,
+        "noiseSuppression": true,
+        "sampleRate": 48000,
+        "sampleSize": 16,
+        "voiceIsolation": false
+      }
+    },
+    {
+      "t": 1795707033924,
+      "page": "/two",
+      "kind": "recorder-start",
+      "mimeType": "audio/webm;codecs=opus",
+      "reportedBits": 32000,
+      "sinceLoad": 35061,
+      "sinceUnload": null
+    },
+    {
+      "t": 1795707034826,
+      "page": "/two",
+      "kind": "first-audio",
+      "size": 3418,
+      "sinceLoad": 35963,
+      "sinceUnload": null
+    },
+    {
+      "t": 1795707080100,
+      "page": "/two",
+      "kind": "pagehide",
+      "persisted": false,
+      "recorder": "recording"
+    },
+    {
+      "t": 1795707080100,
+      "page": "/two",
+      "kind": "visibility",
+      "state": "hidden"
+    },
+    {
+      "t": 1795707080156,
+      "page": "/two",
+      "kind": "load",
+      "segment": 1,
+      "navigationType": "reload",
+      "sinceUnload": 56
+    },
+    {
+      "t": 1795707080156,
+      "page": "/two",
+      "kind": "first-event",
+      "sinceLoad": 0,
+      "sinceUnload": 56
+    },
+    {
+      "t": 1795707080170,
+      "page": "/two",
+      "kind": "gum-call",
+      "viaGesture": false,
+      "permission": "granted",
+      "activation": false,
+      "segment": 1
+    },
+    {
+      "t": 1795707080563,
+      "page": "/two",
+      "kind": "gum-ok",
+      "waited": 393,
+      "sinceLoad": 407,
+      "sinceUnload": 463,
+      "permissionAfter": "granted",
+      "settings": {
+        "autoGainControl": true,
+        "channelCount": 1,
+        "echoCancellation": true,
+        "latency": 0.01,
+        "noiseSuppression": true,
+        "sampleRate": 48000,
+        "sampleSize": 16,
+        "voiceIsolation": false
+      }
+    },
+    {
+      "t": 1795707080664,
+      "page": "/two",
+      "kind": "recorder-start",
+      "mimeType": "audio/webm;codecs=opus",
+      "reportedBits": 32000,
+      "sinceLoad": 508,
+      "sinceUnload": 564
+    },
+    {
+      "t": 1795707081566,
+      "page": "/two",
+      "kind": "first-audio",
+      "size": 3412,
+      "sinceLoad": 1410,
+      "sinceUnload": 1466
+    },
+    {
+      "t": 1795707086451,
+      "page": "/two",
+      "kind": "pagehide",
+      "persisted": false,
+      "recorder": "recording"
+    },
+    {
+      "t": 1795707086452,
+      "page": "/two",
+      "kind": "visibility",
+      "state": "hidden"
+    },
+    {
+      "t": 1795707086504,
+      "page": "/",
+      "kind": "load",
+      "segment": 2,
+      "navigationType": "navigate",
+      "sinceUnload": 52
+    },
+    {
+      "t": 1795707086504,
+      "page": "/",
+      "kind": "first-event",
+      "sinceLoad": 1,
+      "sinceUnload": 53
+    },
+    {
+      "t": 1795707086510,
+      "page": "/",
+      "kind": "gum-call",
+      "viaGesture": false,
+      "permission": "granted",
+      "activation": false,
+      "segment": 2
+    },
+    {
+      "t": 1795707086653,
+      "page": "/",
+      "kind": "gum-ok",
+      "waited": 143,
+      "sinceLoad": 150,
+      "sinceUnload": 202,
+      "permissionAfter": "granted",
+      "settings": {
+        "autoGainControl": true,
+        "channelCount": 1,
+        "echoCancellation": true,
+        "latency": 0.01,
+        "noiseSuppression": true,
+        "sampleRate": 48000,
+        "sampleSize": 16,
+        "voiceIsolation": false
+      }
+    },
+    {
+      "t": 1795707086750,
+      "page": "/",
+      "kind": "recorder-start",
+      "mimeType": "audio/webm;codecs=opus",
+      "reportedBits": 32000,
+      "sinceLoad": 247,
+      "sinceUnload": 299
+    },
+    {
+      "t": 1795707087711,
+      "page": "/",
+      "kind": "first-audio",
+      "size": 3715,
+      "sinceLoad": 1208,
+      "sinceUnload": 1260
+    },
+    {
+      "t": 1795707092818,
+      "page": "/",
+      "kind": "pagehide",
+      "persisted": false,
+      "recorder": "recording"
+    },
+    {
+      "t": 1795707092818,
+      "page": "/",
+      "kind": "visibility",
+      "state": "hidden"
+    },
+    {
+      "t": 1795707092871,
+      "page": "/two",
+      "kind": "load",
+      "segment": 3,
+      "navigationType": "back_forward",
+      "sinceUnload": 52
+    },
+    {
+      "t": 1795707092871,
+      "page": "/two",
+      "kind": "first-event",
+      "sinceLoad": 1,
+      "sinceUnload": 53
+    },
+    {
+      "t": 1795707092876,
+      "page": "/two",
+      "kind": "gum-call",
+      "viaGesture": false,
+      "permission": "granted",
+      "activation": false,
+      "segment": 3
+    },
+    {
+      "t": 1795707093023,
+      "page": "/two",
+      "kind": "gum-ok",
+      "waited": 147,
+      "sinceLoad": 153,
+      "sinceUnload": 205,
+      "permissionAfter": "granted",
+      "settings": {
+        "autoGainControl": true,
+        "channelCount": 1,
+        "echoCancellation": true,
+        "latency": 0.01,
+        "noiseSuppression": true,
+        "sampleRate": 48000,
+        "sampleSize": 16,
+        "voiceIsolation": false
+      }
+    },
+    {
+      "t": 1795707093119,
+      "page": "/two",
+      "kind": "recorder-start",
+      "mimeType": "audio/webm;codecs=opus",
+      "reportedBits": 32000,
+      "sinceLoad": 249,
+      "sinceUnload": 301
+    },
+    {
+      "t": 1795707094080,
+      "page": "/two",
+      "kind": "first-audio",
+      "size": 3645,
+      "sinceLoad": 1210,
+      "sinceUnload": 1262
+    },
+    {
+      "t": 1795707100351,
+      "page": "/two",
+      "kind": "pagehide",
+      "persisted": false,
+      "recorder": "recording"
+    },
+    {
+      "t": 1795707100351,
+      "page": "/two",
+      "kind": "visibility",
+      "state": "hidden"
+    },
+    {
+      "t": 1795707100402,
+      "page": "/",
+      "kind": "load",
+      "segment": 4,
+      "navigationType": "back_forward",
+      "sinceUnload": 51
+    },
+    {
+      "t": 1795707100402,
+      "page": "/",
+      "kind": "first-event",
+      "sinceLoad": 0,
+      "sinceUnload": 51
+    },
+    {
+      "t": 1795707100405,
+      "page": "/",
+      "kind": "gum-call",
+      "viaGesture": false,
+      "permission": "granted",
+      "activation": false,
+      "segment": 4
+    },
+    {
+      "t": 1795707100544,
+      "page": "/",
+      "kind": "gum-ok",
+      "waited": 139,
+      "sinceLoad": 142,
+      "sinceUnload": 193,
+      "permissionAfter": "granted",
+      "settings": {
+        "autoGainControl": true,
+        "channelCount": 1,
+        "echoCancellation": true,
+        "latency": 0.01,
+        "noiseSuppression": true,
+        "sampleRate": 48000,
+        "sampleSize": 16,
+        "voiceIsolation": false
+      }
+    },
+    {
+      "t": 1795707100642,
+      "page": "/",
+      "kind": "recorder-start",
+      "mimeType": "audio/webm;codecs=opus",
+      "reportedBits": 32000,
+      "sinceLoad": 240,
+      "sinceUnload": 291
+    },
+    {
+      "t": 1795707101603,
+      "page": "/",
+      "kind": "first-audio",
+      "size": 3634,
+      "sinceLoad": 1201,
+      "sinceUnload": 1252
+    },
+    {
+      "t": 1795707109120,
+      "page": "/",
+      "kind": "stop"
+    }
+  ]
+}

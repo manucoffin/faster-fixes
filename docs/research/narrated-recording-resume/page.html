@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Narrated Recording resume test</title>
+    <link rel="stylesheet" href="/rrweb.css" />
+    <style>
+      body {
+        font:
+          15px/1.4 system-ui,
+          sans-serif;
+        margin: 16px;
+      }
+      #layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+        gap: 24px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        #layout {
+          grid-template-columns: 1fr;
+        }
+      }
+      #guide {
+        position: sticky;
+        top: 8px;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        padding: 12px 16px;
+        background: #fbfbfb;
+        max-height: calc(100vh - 16px);
+        overflow: auto;
+        box-sizing: border-box;
+      }
+      #guide h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+      #guide select {
+        font: inherit;
+        padding: 6px;
+        width: 100%;
+      }
+      #guide ol {
+        padding-left: 0;
+        list-style: none;
+        margin: 12px 0;
+      }
+      #guide li {
+        padding: 6px 8px;
+        border-radius: 6px;
+        margin: 2px 0;
+        color: #555;
+      }
+      #guide li::before {
+        content: "\25CB  ";
+      }
+      #guide li.done {
+        color: #2a7a2a;
+      }
+      #guide li.done::before {
+        content: "\2713  ";
+      }
+      #guide li.current {
+        background: #fff3c4;
+        color: #000;
+        font-weight: 600;
+      }
+      #guide li.current::before {
+        content: "\25B6  ";
+      }
+      #script {
+        border-left: 3px solid #888;
+        padding: 4px 12px;
+        margin: 8px 0;
+        background: #fff;
+      }
+      button.pick {
+        outline: 3px solid #e0a800;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      button,
+      a.nav {
+        font: inherit;
+        padding: 10px 14px;
+        margin: 4px 4px 4px 0;
+        display: inline-block;
+      }
+      a.nav {
+        border: 1px solid #888;
+        border-radius: 6px;
+        text-decoration: none;
+        color: inherit;
+      }
+      #status {
+        font-weight: 600;
+        padding: 8px;
+        border-radius: 6px;
+        background: #eee;
+      }
+      #status.on {
+        background: #c8f0c8;
+      }
+      #status.blocked {
+        background: #f5c8c8;
+      }
+      pre {
+        background: #f6f6f6;
+        padding: 8px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+      }
+      fieldset {
+        margin: 12px 0;
+      }
+      audio {
+        display: block;
+        margin: 4px 0;
+        width: 100%;
+      }
+      #replay {
+        border: 1px solid #ccc;
+        overflow: hidden;
+        height: 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="layout">
+      <main>
+        <h1>Resume test: <span id="where"></span></h1>
+        <p id="status">Idle.</p>
+
+        <fieldset>
+          <legend>1. Start (speak while it records)</legend>
+          <button data-start="32000">Start at 32 kbit/s</button>
+          <button data-start="24000">Start at 24 kbit/s</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>2. Load pages while it records</legend>
+          <button id="reload">Reload</button>
+          <a class="nav" id="other" href="#">Other page</a>
+          <a class="nav" id="alt" href="#" hidden>Other subdomain</a>
+          <p>Then also try the browser's back and forward buttons.</p>
+          <button id="resume" hidden>Tap to resume (gesture)</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Stop</legend>
+          <label
+            ><input type="checkbox" id="prompted" /> A microphone prompt
+            appeared again after a page load</label
+          ><br />
+          <label
+            >Note:
+            <input
+              id="note"
+              size="30"
+              placeholder="e.g. allowed 'this time' on first prompt" /></label
+          ><br />
+          <button id="stop">Stop and send report</button>
+          <button id="discard">Discard</button>
+        </fieldset>
+
+        <p><input placeholder="type here to make rrweb events" /></p>
+        <div id="result"></div>
+        <div id="replay" hidden></div>
+        <pre id="log"></pre>
+      </main>
+      <aside id="guide">
+        <h2>What to do</h2>
+        <select id="pass"></select>
+        <p id="passes-done"></p>
+        <ol id="steps"></ol>
+        <p><strong>Text to read aloud (about one minute):</strong></p>
+        <blockquote id="script" lang="fr">
+          Bonjour, je suis en train de tester la page d'accueil du site. Je
+          commence par le haut de la page. Le titre principal est bien lisible,
+          mais le bouton juste en dessous me para&icirc;t trop petit sur mon
+          &eacute;cran. Quand je passe la souris dessus, la couleur change
+          &agrave; peine, et je ne suis pas s&ucirc;r qu'il soit cliquable. Je
+          descends un peu. Ici, les trois colonnes ne sont pas align&eacute;es :
+          celle de droite est plus basse que les deux autres d'environ dix
+          pixels. L'image du milieu met aussi plusieurs secondes &agrave;
+          s'afficher. Je continue vers le formulaire de contact. Je saisis mon
+          adresse, puis mon message, et je clique sur envoyer. Rien ne se passe
+          pendant quatre ou cinq secondes, puis un message d'erreur
+          appara&icirc;t en rouge, sans expliquer ce qui ne va pas. Je recharge
+          la page pour voir si le probl&egrave;me se reproduit. Voil&agrave;,
+          c'est tout pour cette page.
+        </blockquote>
+      </aside>
+    </div>
+
+    <script src="/rrweb.js"></script>
+    <script>
+      const loadedAt = Date.now();
+      addEventListener("error", (event) => {
+        document.querySelector("#status").textContent =
+          "Script error: " + event.message;
+        document.querySelector("#status").className = "blocked";
+        navigator.sendBeacon(
+          "/client-error",
+          JSON.stringify({
+            message: event.message,
+            line: event.lineno,
+            agent: navigator.userAgent,
+          }),
+        );
+      });
+      addEventListener("unhandledrejection", (event) => {
+        document.querySelector("#status").textContent =
+          "Script error: " + event.reason;
+        document.querySelector("#status").className = "blocked";
+        navigator.sendBeacon(
+          "/client-error",
+          JSON.stringify({
+            message: String(event.reason),
+            agent: navigator.userAgent,
+          }),
+        );
+      });
+      const KEY = "nr-resume-state";
+      const params = new URLSearchParams(location.search);
+      const $ = (selector) => document.querySelector(selector);
+      $("#where").textContent = location.host + location.pathname;
+      $("#other").href = location.pathname === "/two" ? "/" : "/two";
+      const alt = window.ALT_ORIGIN;
+      if (alt) {
+        $("#alt").hidden = false;
+        $("#alt").href = alt + "/";
+      }
+
+      const readState = () => JSON.parse(localStorage.getItem(KEY) || "null");
+      const writeState = (state) =>
+        localStorage.setItem(KEY, JSON.stringify(state));
+      let state = readState();
+      let recorder = null;
+      let stream = null;
+      let stopRrweb = null;
+      let pendingEvents = [];
+      let sequence = 0;
+
+      function log(kind, detail = {}) {
+        const entry = {
+          t: Date.now(),
+          page: location.pathname,
+          kind,
+          ...detail,
+        };
+        $("#log").textContent += JSON.stringify(entry) + "\n";
+        const current = readState();
+        if (current) {
+          current.log.push(entry);
+          writeState(current);
+          state = current;
+        }
+        return entry;
+      }
+
+      function setStatus(text, className = "") {
+        $("#status").textContent = text;
+        $("#status").className = className;
+      }
+
+      // A fresh connection per operation: Safari leaves a connection unusable
+      // once the page has been through the back/forward cache.
+      const openDatabase = () =>
+        new Promise((resolve, reject) => {
+          const request = indexedDB.open("nr-resume", 1);
+          request.onupgradeneeded = () =>
+            request.result.createObjectStore("chunks", { autoIncrement: true });
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      const withTimeout = (promise, label) =>
+        Promise.race([
+          promise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(label + " timed out")), 5000),
+          ),
+        ]);
+      // Writes in flight, so pagehide can abort them: a write frozen with its
+      // page in Safari's back/forward cache keeps the store locked for every
+      // later page.
+      const writes = new Set();
+      let hiding = false;
+      async function put(value) {
+        if (hiding) return;
+        const db = await openDatabase();
+        if (hiding) return db.close();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction("chunks", "readwrite");
+          const entry = { tx, db };
+          writes.add(entry);
+          const settle = (action) => () => {
+            writes.delete(entry);
+            db.close();
+            action();
+          };
+          tx.objectStore("chunks").add(value);
+          tx.oncomplete = settle(resolve);
+          tx.onerror = settle(() => reject(tx.error));
+          tx.onabort = settle(() => reject(new Error("write aborted")));
+        });
+      }
+      function abortWrites() {
+        for (const { tx, db } of writes) {
+          try {
+            tx.abort();
+          } catch (error) {}
+          db.close();
+        }
+        writes.clear();
+      }
+      async function all() {
+        const db = await withTimeout(openDatabase(), "indexedDB open");
+        return withTimeout(
+          new Promise((resolve, reject) => {
+            const request = db
+              .transaction("chunks")
+              .objectStore("chunks")
+              .getAll();
+            request.onsuccess = () => (db.close(), resolve(request.result));
+            request.onerror = () => (db.close(), reject(request.error));
+          }),
+          "indexedDB read",
+        );
+      }
+      async function clear() {
+        const db = await openDatabase();
+        return new Promise((resolve) => {
+          const tx = db.transaction("chunks", "readwrite");
+          tx.objectStore("chunks").clear();
+          tx.oncomplete = () => (db.close(), resolve());
+        });
+      }
+
+      async function permissionState() {
+        try {
+          return (await navigator.permissions.query({ name: "microphone" }))
+            .state;
+        } catch (error) {
+          return "unsupported: " + error.name;
+        }
+      }
+
+      function flushEvents() {
+        if (!pendingEvents.length || !state) return;
+        const batch = pendingEvents;
+        pendingEvents = [];
+        put({
+          session: state.session,
+          segment: state.segment,
+          kind: "events",
+          events: batch,
+        }).catch((error) => log("put-error", { name: error && error.name }));
+      }
+
+      function startRrweb() {
+        let first = true;
+        stopRrweb = rrweb.record({
+          emit(event) {
+            if (first) {
+              first = false;
+              log("first-event", {
+                sinceLoad: Date.now() - loadedAt,
+                sinceUnload: state.unloadAt
+                  ? Date.now() - state.unloadAt
+                  : null,
+              });
+            }
+            pendingEvents.push(event);
+          },
+        });
+        setInterval(flushEvents, 500);
+      }
+
+      // viaGesture tells a silent resume from one the Reviewer had to tap for.
+      async function acquire(viaGesture) {
+        const before = await permissionState();
+        const activation = navigator.userActivation
+          ? navigator.userActivation.isActive
+          : "unsupported";
+        const asked = Date.now();
+        log("gum-call", {
+          viaGesture,
+          permission: before,
+          activation,
+          segment: state.segment,
+        });
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: { channelCount: 1 },
+          });
+        } catch (error) {
+          log("gum-error", {
+            name: error.name,
+            message: error.message,
+            waited: Date.now() - asked,
+          });
+          setStatus(
+            "Microphone refused: " + error.name + ". Tap to resume.",
+            "blocked",
+          );
+          $("#resume").hidden = false;
+          return false;
+        }
+        const track = stream.getAudioTracks()[0];
+        log("gum-ok", {
+          waited: Date.now() - asked,
+          sinceLoad: Date.now() - loadedAt,
+          sinceUnload: state.unloadAt ? Date.now() - state.unloadAt : null,
+          permissionAfter: await permissionState(),
+          settings: track.getSettings(),
+          label: track.label,
+        });
+        track.onended = () => log("track-ended");
+        track.onmute = () => log("track-mute");
+        track.onunmute = () => log("track-unmute");
+        recorder = new MediaRecorder(stream, {
+          audioBitsPerSecond: state.bitrate,
+        });
+        let firstChunk = true;
+        recorder.onstart = () =>
+          log("recorder-start", {
+            mimeType: recorder.mimeType,
+            reportedBits: recorder.audioBitsPerSecond,
+            sinceLoad: Date.now() - loadedAt,
+            sinceUnload: state.unloadAt ? Date.now() - state.unloadAt : null,
+          });
+        recorder.onerror = (event) =>
+          log("recorder-error", { name: event.error && event.error.name });
+        recorder.ondataavailable = (event) => {
+          if (!event.data.size) return;
+          if (firstChunk) {
+            firstChunk = false;
+            log("first-audio", {
+              size: event.data.size,
+              sinceLoad: Date.now() - loadedAt,
+              sinceUnload: state.unloadAt ? Date.now() - state.unloadAt : null,
+            });
+          }
+          // Stored as bytes: WebKit rejects a Blob in IndexedDB in an ephemeral session.
+          const row = {
+            session: state.session,
+            segment: state.segment,
+            kind: "audio",
+            seq: sequence++,
+            mimeType: recorder.mimeType,
+            t: Date.now(),
+          };
+          event.data
+            .arrayBuffer()
+            .then((bytes) => put({ ...row, blob: bytes }))
+            .catch((error) => log("put-error", { name: error && error.name }));
+        };
+        recorder.start(1000);
+        $("#resume").hidden = true;
+        setStatus(
+          "Recording, segment " +
+            state.segment +
+            " at " +
+            state.bitrate / 1000 +
+            " kbit/s. Speak.",
+          "on",
+        );
+        return true;
+      }
+
+      async function begin(bitrate) {
+        const cleared = await Promise.race([
+          clear().then(() => true),
+          new Promise((resolve) => setTimeout(() => resolve(false), 3000)),
+        ]);
+        if (!cleared) {
+          setStatus(
+            "Storage is locked by an earlier page. Close this tab, open a new one and start again.",
+            "blocked",
+          );
+          return;
+        }
+        state = {
+          session: String(Date.now()),
+          bitrate,
+          segment: 0,
+          startedAt: Date.now(),
+          unloadAt: null,
+          userAgent: navigator.userAgent,
+          origin: location.origin,
+          log: [],
+        };
+        writeState(state);
+        log("start", { bitrate });
+        startRrweb();
+        await acquire(true);
+      }
+
+      async function resumeAfterLoad() {
+        state.segment += 1;
+        writeState(state);
+        const navigation = performance.getEntriesByType("navigation")[0];
+        adoptTail();
+        log("load", {
+          segment: state.segment,
+          navigationType: navigation && navigation.type,
+          sinceUnload: state.unloadAt ? loadedAt - state.unloadAt : null,
+        });
+        startRrweb();
+        await acquire(false);
+      }
+
+      addEventListener("pagehide", (event) => {
+        if (!readState()) return;
+        // The last events go to localStorage, which is synchronous; the next
+        // page moves them into IndexedDB.
+        const current = readState();
+        if (pendingEvents.length) {
+          try {
+            localStorage.setItem(
+              "nr-tail",
+              JSON.stringify({
+                session: current.session,
+                segment: current.segment,
+                events: pendingEvents,
+              }),
+            );
+          } catch (error) {}
+          pendingEvents = [];
+        }
+        const open = writes.size;
+        hiding = true;
+        abortWrites();
+        current.unloadAt = Date.now();
+        current.log.push({
+          t: Date.now(),
+          page: location.pathname,
+          kind: "pagehide",
+          persisted: event.persisted,
+          recorder: recorder && recorder.state,
+          abortedWrites: open,
+        });
+        writeState(current);
+      });
+      function adoptTail() {
+        const tail = JSON.parse(localStorage.getItem("nr-tail") || "null");
+        localStorage.removeItem("nr-tail");
+        if (tail)
+          put({ ...tail, kind: "events" }).catch((error) =>
+            log("put-error", { name: error && error.name, tail: true }),
+          );
+      }
+      addEventListener("pageshow", async (event) => {
+        if (!event.persisted || !readState()) return;
+        // Restored from the back/forward cache: the old page's script is alive again.
+        hiding = false;
+        state = readState();
+        adoptTail();
+        const track = stream && stream.getAudioTracks()[0];
+        log("bfcache-restore", {
+          recorder: recorder && recorder.state,
+          track: track && track.readyState,
+          muted: track && track.muted,
+        });
+        if (
+          !track ||
+          track.readyState !== "live" ||
+          !recorder ||
+          recorder.state !== "recording"
+        ) {
+          state.segment += 1;
+          writeState(state);
+          await acquire(false);
+        }
+      });
+      document.addEventListener(
+        "visibilitychange",
+        () =>
+          readState() && log("visibility", { state: document.visibilityState }),
+      );
+
+      function decodeDuration(blob) {
+        return Promise.race([
+          decodeAudio(blob),
+          new Promise((resolve) =>
+            setTimeout(() => resolve("decode timed out"), 5000),
+          ),
+        ]);
+      }
+      async function decodeAudio(blob) {
+        try {
+          const context = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const buffer = await context.decodeAudioData(
+            await blob.arrayBuffer(),
+          );
+          context.close();
+          return +buffer.duration.toFixed(2);
+        } catch (error) {
+          return "decode failed: " + error.name;
+        }
+      }
+
+      async function finish() {
+        if (!state) return;
+        setStatus("Stopping.");
+        flushEvents();
+        if (recorder && recorder.state !== "inactive") {
+          await new Promise((resolve) => {
+            recorder.onstop = resolve;
+            setTimeout(resolve, 3000);
+            try {
+              recorder.stop();
+            } catch (error) {
+              log("stop-error", { name: error.name });
+              resolve();
+            }
+          });
+        }
+        if (stream) stream.getTracks().forEach((track) => track.stop());
+        if (stopRrweb) stopRrweb();
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        log("stop");
+        // The log goes first, so a failure further down still leaves a trace.
+        fetch("/report", {
+          method: "POST",
+          body: JSON.stringify({
+            session: state.session + "-early",
+            userAgent: state.userAgent,
+            pass: select.value,
+            promptedAgain: $("#prompted").checked,
+            log: readState().log,
+          }),
+        }).catch(() => {});
+        let rows = [];
+        try {
+          rows = (await all()).filter((row) => row.session === state.session);
+        } catch (error) {
+          log("read-error", { message: String(error) });
+        }
+        const segments = [];
+        const events = [];
+        const result = $("#result");
+        result.innerHTML = "<h2>Result</h2>";
+        for (let segment = 0; segment <= state.segment; segment++) {
+          const audio = rows
+            .filter((row) => row.kind === "audio" && row.segment === segment)
+            .sort((a, b) => a.seq - b.seq);
+          const segmentEvents = rows
+            .filter((row) => row.kind === "events" && row.segment === segment)
+            .flatMap((row) => row.events);
+          events.push(...segmentEvents);
+          const summary = {
+            segment,
+            audioChunks: audio.length,
+            events: segmentEvents.length,
+            firstEventTypes: segmentEvents
+              .slice(0, 2)
+              .map((event) => event.type),
+          };
+          if (audio.length) {
+            const blob = new Blob(
+              audio.map((row) => row.blob),
+              { type: audio[0].mimeType },
+            );
+            const wall = (audio[audio.length - 1].t - audio[0].t + 1000) / 1000;
+            Object.assign(summary, {
+              mimeType: audio[0].mimeType,
+              bytes: blob.size,
+              wallSeconds: +wall.toFixed(1),
+              decodedSeconds: await decodeDuration(blob),
+              kilobytesPerMinute: Math.round(((blob.size / wall) * 60) / 1000),
+              kbitPerSecond: +((blob.size * 8) / wall / 1000).toFixed(1),
+            });
+            const player = document.createElement("audio");
+            player.controls = true;
+            player.src = URL.createObjectURL(blob);
+            result.append(
+              "Segment " +
+                segment +
+                ": " +
+                summary.kilobytesPerMinute +
+                " KB/min",
+              player,
+            );
+            const extension = audio[0].mimeType.includes("mp4")
+              ? "mp4"
+              : audio[0].mimeType.includes("ogg")
+                ? "ogg"
+                : "webm";
+            fetch(
+              "/audio?session=" +
+                state.session +
+                "&segment=" +
+                segment +
+                "&ext=" +
+                extension,
+              { method: "POST", body: blob },
+            ).catch(() => {});
+          }
+          segments.push(summary);
+        }
+        let replay = "not tried";
+        try {
+          $("#replay").hidden = false;
+          const replayer = new rrweb.Replayer(events, {
+            root: $("#replay"),
+            mouseTail: false,
+          });
+          replayer.pause(
+            Math.max(
+              0,
+              events[events.length - 1].timestamp - events[0].timestamp - 100,
+            ),
+          );
+          replay = { ok: true, totalMs: replayer.getMetaData().totalTime };
+        } catch (error) {
+          replay = { ok: false, error: String(error) };
+        }
+        const report = {
+          session: state.session,
+          userAgent: state.userAgent,
+          origin: state.origin,
+          bitrate: state.bitrate,
+          totalSeconds: +((Date.now() - state.startedAt) / 1000).toFixed(1),
+          promptedAgain: $("#prompted").checked,
+          note: $("#note").value,
+          pass: select.value,
+          segments,
+          eventsTotal: events.length,
+          replay,
+          log: readState().log,
+        };
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(
+          { ...report, log: undefined },
+          null,
+          2,
+        );
+        result.append(pre);
+        try {
+          await fetch("/report", {
+            method: "POST",
+            body: JSON.stringify(report),
+          });
+          setStatus("Stopped. Report sent.");
+          localStorage.setItem(
+            "nr-done",
+            JSON.stringify([...new Set([...doneList(), select.value])]),
+          );
+          sessionStorage.setItem("nr-just-done", select.value);
+        } catch (error) {
+          setStatus("Stopped. Report NOT sent: " + error.message, "blocked");
+        }
+        localStorage.removeItem(KEY);
+        state = null;
+        window.lastReport = report;
+      }
+
+      document
+        .querySelectorAll("[data-start]")
+        .forEach((button) =>
+          button.addEventListener("click", () =>
+            begin(Number(button.dataset.start)),
+          ),
+        );
+      $("#reload").addEventListener("click", () => location.reload());
+      $("#resume").addEventListener("click", () => acquire(true));
+      $("#stop").addEventListener("click", finish);
+      $("#discard").addEventListener("click", async () => {
+        localStorage.removeItem(KEY);
+        localStorage.removeItem("nr-tail");
+        await Promise.race([
+          clear(),
+          new Promise((resolve) => setTimeout(resolve, 3000)),
+        ]);
+        location.reload();
+      });
+
+      // The guide: which pass is being run, and how far along it is.
+      const PASSES = [
+        {
+          id: "firefox autoriser",
+          browser: "Firefox",
+          reset:
+            "Click the icon left of the URL and remove the microphone permission.",
+          answer:
+            'At the prompt: "Autoriser", with "M\u00e9moriser cette d\u00e9cision" unchecked.',
+          bitrate: 32000,
+        },
+        {
+          id: "firefox memoriser",
+          browser: "Firefox",
+          reset:
+            "Click the icon left of the URL and remove the microphone permission.",
+          answer:
+            'At the prompt: check "M\u00e9moriser cette d\u00e9cision", then "Autoriser".',
+          bitrate: 32000,
+        },
+        {
+          id: "chrome visite",
+          browser: "Chrome",
+          reset:
+            'Click the icon left of the URL, then "R\u00e9initialiser l\'autorisation".',
+          answer: 'At the prompt: "Autoriser pendant la visite du site".',
+          bitrate: 32000,
+        },
+        {
+          id: "chrome cette fois",
+          browser: "Chrome",
+          reset:
+            'Click the icon left of the URL, then "R\u00e9initialiser l\'autorisation".',
+          answer: 'At the prompt: "Autoriser cette fois".',
+          bitrate: 32000,
+        },
+        {
+          id: "safari defaut",
+          browser: "Safari",
+          reset:
+            'Safari > R\u00e9glages > Sites web > Microphone: set localhost to "Demander".',
+          answer: 'At the prompt: "Autoriser".',
+          bitrate: 32000,
+        },
+        {
+          id: "safari autoriser",
+          browser: "Safari",
+          reset:
+            'Safari > R\u00e9glages > Sites web > Microphone: set localhost to "Autoriser".',
+          answer: "No prompt is expected.",
+          bitrate: 32000,
+        },
+        {
+          id: "safari 24",
+          browser: "Safari",
+          reset: 'Leave the microphone on "Autoriser" for localhost.',
+          answer: "No prompt is expected.",
+          bitrate: 24000,
+        },
+      ];
+      const agent = navigator.userAgent;
+      const thisBrowser = agent.includes("Firefox")
+        ? "Firefox"
+        : agent.includes("Chrome")
+          ? "Chrome"
+          : "Safari";
+      const mine = PASSES.filter((pass) => pass.browser === thisBrowser);
+      const doneList = () =>
+        JSON.parse(localStorage.getItem("nr-done") || "[]");
+      const select = $("#pass");
+      for (const pass of mine)
+        select.add(new Option("Pass: " + pass.id, pass.id));
+      select.value =
+        localStorage.getItem("nr-pass") ||
+        (mine.find((pass) => !doneList().includes(pass.id)) || mine[0]).id;
+      localStorage.setItem("nr-pass", select.value);
+      select.addEventListener("change", () => {
+        localStorage.setItem("nr-pass", select.value);
+        renderGuide();
+      });
+
+      function renderGuide() {
+        const pass =
+          mine.find((candidate) => candidate.id === select.value) || mine[0];
+        const current = readState();
+        const entries = current ? current.log : [];
+        const loads = entries
+          .filter((entry) => entry.kind === "load")
+          .map((entry) => entry.navigationType);
+        const history = loads.filter((type) => type === "back_forward").length;
+        const started = entries.some((entry) => entry.kind === "start");
+        const finished =
+          !current &&
+          doneList().includes(pass.id) &&
+          sessionStorage.getItem("nr-just-done") === pass.id;
+        const kbit = pass.bitrate / 1000;
+        const steps = [
+          [pass.reset + " Then reload this page.", started || finished],
+          [
+            'Click "Start at ' + kbit + ' kbit/s". ' + pass.answer,
+            started || finished,
+          ],
+          [
+            "Read the text below aloud, all of it.",
+            loads.length > 0 || finished,
+          ],
+          [
+            'Click "Reload". Say a few words for 5 seconds.',
+            loads.includes("reload") || finished,
+          ],
+          [
+            'Click "Other page". Say a few words for 5 seconds.',
+            loads.includes("navigate") || finished,
+          ],
+          [
+            "Press the browser's Back button. Wait 5 seconds.",
+            history >= 1 || finished,
+          ],
+          [
+            "Press the browser's Forward button. Wait 5 seconds.",
+            history >= 2 || finished,
+          ],
+          [
+            'If a microphone prompt came back at any page load, check the box in section 3. Then click "Stop and send report".',
+            finished,
+          ],
+        ];
+        const list = $("#steps");
+        list.innerHTML = "";
+        let marked = false;
+        for (const [text, done] of steps) {
+          const item = document.createElement("li");
+          item.textContent = text;
+          if (done) item.className = "done";
+          else if (!marked) {
+            item.className = "current";
+            marked = true;
+          }
+          list.append(item);
+        }
+        if (finished) {
+          const item = document.createElement("li");
+          item.className = "current";
+          item.textContent =
+            thisBrowser === "Safari"
+              ? "Sent. Listen to the audio players on the left: is your voice clear? Then pick the next pass above."
+              : "Sent. Pick the next pass above.";
+          list.append(item);
+        }
+        $("#passes-done").textContent =
+          "Done in " +
+          thisBrowser +
+          ": " +
+          (doneList()
+            .filter((id) => mine.some((candidate) => candidate.id === id))
+            .join(", ") || "none yet") +
+          ".";
+        document
+          .querySelectorAll("[data-start]")
+          .forEach((button) =>
+            button.classList.toggle(
+              "pick",
+              !started && Number(button.dataset.start) === pass.bitrate,
+            ),
+          );
+        if (!$("#note").value) $("#note").value = pass.id;
+      }
+      renderGuide();
+      setInterval(renderGuide, 1000);
+
+      if (state) resumeAfterLoad();
+    </script>
+  </body>
+</html>
