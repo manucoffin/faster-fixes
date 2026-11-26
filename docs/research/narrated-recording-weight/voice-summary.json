@@ -1,0 +1,134 @@
+[
+  {
+    "browser": "chromium",
+    "label": "24k-1min",
+    "seconds": 60,
+    "mimeType": "audio/webm;codecs=opus",
+    "reportedBits": 24000,
+    "file": "chromium-24k-1min.webm",
+    "bytes": 168055,
+    "kbitPerSecond": 22.4,
+    "kilobytesPerMinute": 168
+  },
+  {
+    "browser": "chromium",
+    "label": "32k-1min",
+    "seconds": 60,
+    "mimeType": "audio/webm;codecs=opus",
+    "reportedBits": 32000,
+    "file": "chromium-32k-1min.webm",
+    "bytes": 222024,
+    "kbitPerSecond": 29.6,
+    "kilobytesPerMinute": 222
+  },
+  {
+    "browser": "chromium",
+    "label": "default-1min",
+    "seconds": 60,
+    "mimeType": "audio/webm;codecs=opus",
+    "reportedBits": 128000,
+    "file": "chromium-default-1min.webm",
+    "bytes": 966123,
+    "kbitPerSecond": 128.8,
+    "kilobytesPerMinute": 966
+  },
+  {
+    "browser": "chromium",
+    "label": "32k-5min",
+    "seconds": 300,
+    "mimeType": "audio/webm;codecs=opus",
+    "reportedBits": 32000,
+    "file": "chromium-32k-5min.webm",
+    "bytes": 1110498,
+    "kbitPerSecond": 29.6,
+    "kilobytesPerMinute": 222
+  },
+  {
+    "browser": "firefox",
+    "label": "24k-1min",
+    "seconds": 60,
+    "mimeType": "",
+    "reportedBits": 24000,
+    "file": "firefox-24k-1min.webm",
+    "bytes": 177320,
+    "kbitPerSecond": 23.6,
+    "kilobytesPerMinute": 177
+  },
+  {
+    "browser": "firefox",
+    "label": "32k-1min",
+    "seconds": 60,
+    "mimeType": "",
+    "reportedBits": 32000,
+    "file": "firefox-32k-1min.webm",
+    "bytes": 233522,
+    "kbitPerSecond": 31.1,
+    "kilobytesPerMinute": 234
+  },
+  {
+    "browser": "firefox",
+    "label": "default-1min",
+    "seconds": 60,
+    "mimeType": "",
+    "reportedBits": 128000,
+    "file": "firefox-default-1min.webm",
+    "bytes": 975908,
+    "kbitPerSecond": 130.1,
+    "kilobytesPerMinute": 976
+  },
+  {
+    "browser": "firefox",
+    "label": "32k-5min",
+    "seconds": 300,
+    "mimeType": "",
+    "reportedBits": 32000,
+    "file": "firefox-32k-5min.webm",
+    "bytes": 1171948,
+    "kbitPerSecond": 31.3,
+    "kilobytesPerMinute": 234
+  },
+  {
+    "browser": "webkit",
+    "label": "24k-1min",
+    "seconds": 60,
+    "mimeType": "audio/mp4; codecs=mp4a.40.2",
+    "reportedBits": 24000,
+    "file": "webkit-24k-1min.mp4",
+    "bytes": 1475182,
+    "kbitPerSecond": 196.7,
+    "kilobytesPerMinute": 1475
+  },
+  {
+    "browser": "webkit",
+    "label": "32k-1min",
+    "seconds": 60,
+    "mimeType": "audio/mp4; codecs=mp4a.40.2",
+    "reportedBits": 32000,
+    "file": "webkit-32k-1min.mp4",
+    "bytes": 264519,
+    "kbitPerSecond": 35.3,
+    "kilobytesPerMinute": 265
+  },
+  {
+    "browser": "webkit",
+    "label": "default-1min",
+    "seconds": 60,
+    "mimeType": "audio/mp4; codecs=mp4a.40.2",
+    "reportedBits": 192000,
+    "file": "webkit-default-1min.mp4",
+    "bytes": 1475202,
+    "kbitPerSecond": 196.7,
+    "kilobytesPerMinute": 1475
+  },
+  {
+    "browser": "webkit",
+    "label": "32k-5min",
+    "seconds": 300,
+    "mimeType": "audio/mp4; codecs=mp4a.40.2",
+    "reportedBits": 32000,
+    "file": "webkit-32k-5min.mp4",
+    "bytes": 1319078,
+    "kbitPerSecond": 35.2,
+    "kilobytesPerMinute": 264
+  }
+]
