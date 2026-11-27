@@ -45,3 +45,9 @@ to recover events from _before_ mount, so the Trail is the recent tail, not the 
   simpler and avoids a Project schema field plus settings UI.
 - **A `<head>` early-init snippet** to capture pre-mount events — rejected for v1: adds install
   friction; most reproduction-relevant activity happens after mount.
+
+## Amendment 2026-11-27: the Trail of a narrated Recording
+
+The bounds above hold for a Feedback with a Selection. With a narrated Recording (ADR-0027, issue #505) the Trail is the ring as it stands when the Recording starts (50 + 50), then every entry until the stop, pauses and full page loads included, within 256 KB before compression, then a ring of 50 + 50 until the Reviewer sends. It is persisted locally with the Recording so that it survives a full page load. Past the 256 KB, consecutive identical console entries are already collapsed into one with a count, and entries are left out by priority: successful requests and `log`, `info`, `debug` first, oldest first, errors, warnings and failed requests last. The Trail carries the number left out per stream.
+
+It stays in the `Feedback.diagnosticTrail` column, with a cap in bytes in place of the cap of 200 entries: the column is read on demand only, and one read path serves the inbox and the agent surface. The Asset blob rejected above stays rejected at this size.

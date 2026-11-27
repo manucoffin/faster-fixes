@@ -192,7 +192,7 @@ _Avoid_: Synced status, Last sync source.
 ### Diagnostics
 
 **Diagnostic Trail**:
-The console and network history captured leading up to a Feedback submission, attached to that Feedback to aid reproduction.
+The console and network history captured leading up to a Feedback submission, attached to that Feedback to aid reproduction. With a narrated Recording it covers more: the recent history before the Recording started, everything during it, pauses and full page loads included, and what followed the stop until the Reviewer sent the Feedback. It stays bounded: when it is full, the least useful entries go first, successful requests and plain messages before errors and failed requests, and the Trail says how many were left out. The team can remove a Recording and keep the Trail.
 _Avoid_: Session, Logs, Recording (the Recording replays the page; the Trail is the console and network history).
 
 **Console Entry**:
@@ -202,7 +202,7 @@ One captured `console.*` call: level (`log`/`info`/`warn`/`error`/`debug`), mess
 One captured `fetch`/`XHR` call: method, URL, status, duration, timestamp. Metadata only — request/response bodies are not captured in v1.
 
 **Ring Buffer**:
-The fixed-size in-memory store the Widget fills from page load; oldest entries drop when full. A Diagnostic Trail is a snapshot of this buffer at submission time.
+The fixed-size in-memory store the Widget fills from page load; oldest entries drop when full. A Diagnostic Trail is a snapshot of this buffer at submission time, except with a narrated Recording, where the buffer supplies only the history before the start and after the stop.
 
 **Custom metadata**:
 Key/value pairs the customer's site declares in its Widget configuration and that travel with every Feedback submitted from it: a user ID in the customer's system, a release version, a tenant, a feature flag. Declared by the developer, never captured by the Widget; one flat set per Feedback, fixed at submission; shown to the team in the inbox, in mirrored Issues and on the agent surface, never to a Reviewer. Distinct from the **Diagnostic Trail** (what the Widget observed) and unaffected by turning capture off.
@@ -229,7 +229,7 @@ _Avoid_: Metadata (the Widget's own element-context and pin-placement bag, which
 - A **Feedback** has zero or one **Rank**, valid only within its current **Status**; the Rank is internal to the team and never shown to a **Reviewer**
 - A **Diagnostic Trail** contains many **Console Entries** and many **Network Entries**
 - The **Widget** maintains one **Ring Buffer** per page session; submitting Feedback snapshots it into a **Diagnostic Trail**
-- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. An automatic **Recording** and a **Diagnostic Trail** never reach back before the start of their page session; a narrated Recording may span several page sessions
+- A page session starts at a full page load and at a return to the page through the browser's back or forward; a change of route without a load continues it. An automatic **Recording** and a **Diagnostic Trail** never reach back before the start of their page session; a narrated Recording may span several page sessions, and so does its Diagnostic Trail, which still never reaches back before the page session the Recording started in
 - An **Integration** is either a **Tracker** or a **Notification channel**
 - A **Project** has zero or one **Project link** per **Integration**
 - A **Feedback** has zero or one **Issue link** per **Tracker**
