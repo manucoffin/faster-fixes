@@ -24,7 +24,7 @@ export function getBrowserInfo(): BrowserInfo {
 
   const browserName = detectBrowserName(ua);
   const browserVersion = detectBrowserVersion(ua, browserName);
-  const os = detectOS(ua);
+  const os = detectOS(ua, navigator.maxTouchPoints);
 
   return {
     browserName,
@@ -60,11 +60,15 @@ function detectBrowserVersion(ua: string, browser: string): string {
   return match?.[1] ?? "0";
 }
 
-function detectOS(ua: string): string {
+function detectOS(ua: string, maxTouchPoints: number): string {
   if (ua.includes("Windows")) return "Windows";
+  // Android user agents also contain "Linux"
+  if (ua.includes("Android")) return "Android";
+  // iOS user agents also contain "like Mac OS X"
+  if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
+  // iPadOS Safari in desktop mode sends a Mac user agent; no Mac has a touchscreen
+  if (ua.includes("Macintosh") && maxTouchPoints > 1) return "iOS";
   if (ua.includes("Mac OS")) return "macOS";
   if (ua.includes("Linux")) return "Linux";
-  if (ua.includes("Android")) return "Android";
-  if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
   return "Unknown";
 }
